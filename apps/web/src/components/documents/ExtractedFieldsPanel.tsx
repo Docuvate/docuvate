@@ -41,6 +41,8 @@ interface ExtractedFieldsPanelProps {
   onDiscardField?: (key: string) => void;
   onConfirmField?: (field: ExtractedField) => void;
   onSave: () => void;
+  /** When the correction bottom sheet is open, the sheet replaces this list. */
+  replacedBySheet?: boolean;
 }
 
 export function ExtractedFieldsPanel({
@@ -58,6 +60,7 @@ export function ExtractedFieldsPanel({
   onDiscardField,
   onConfirmField,
   onSave,
+  replacedBySheet = false,
 }: ExtractedFieldsPanelProps) {
   const { t, i18n } = useTranslation();
   const [editOpen, setEditOpen] = useState(false);
@@ -75,6 +78,7 @@ export function ExtractedFieldsPanel({
   const pendingSuggestions = heuristicSuggestions.filter(
     (s) => !visibleFields.some((f) => f.key === s.key)
   );
+  if (replacedBySheet) return null;
   if (visibleFields.length === 0 && pendingSuggestions.length === 0) return null;
 
   function rowKey(field: ExtractedField): string {

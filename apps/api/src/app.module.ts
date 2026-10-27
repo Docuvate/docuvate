@@ -8,6 +8,7 @@ import { AuthPublicModule } from './modules/auth/auth-public.module.js';
 import { ChatModule } from './modules/chat/chat.module.js';
 import { ConnectorsModule } from './modules/connectors/connectors.module.js';
 import { DocumentPipelineModule } from './modules/document-pipeline/document-pipeline.module.js';
+import { DocumentRegionsModule } from './modules/document-regions/document-regions.module.js';
 import { DocumentsModule } from './modules/documents/documents.module.js';
 import { DuplicatesModule } from './modules/duplicates/duplicates.module.js';
 import { ExactFactsModule } from './modules/exact-facts/exact-facts.module.js';
@@ -38,6 +39,7 @@ import { ExtensionHostModule } from './shared/infrastructure/extensions/extensio
     OpenapiModule,
     HealthModule,
     DocumentsModule,
+    DocumentRegionsModule,
     TaxonomyModule,
     LabelsModule,
     FoldersModule,

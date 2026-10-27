@@ -46,6 +46,15 @@ export function presentExtractionFailure(
       technicalDetail: null,
     };
   }
+  if (
+    trimmed === 'documents.extractionFailedTimeout' ||
+    trimmed.includes('Worker extraction timeout')
+  ) {
+    return {
+      userMessage: i18n.t('documents.extractionFailedTimeout'),
+      technicalDetail: 'Worker extraction timeout',
+    };
+  }
   if (looksLikeInternalError(trimmed)) {
     return {
       userMessage: i18n.t('documents.extractionFailedWorker'),

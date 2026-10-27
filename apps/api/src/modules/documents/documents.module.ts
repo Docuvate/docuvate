@@ -63,6 +63,7 @@ import { HeuristicFieldSuggestionsBackfillService } from './infrastructure/heuri
 import { PgDocumentReviewQueueRepository } from './infrastructure/pg-document-review-queue.repository.js';
 import { PgInstallationUserCountReader } from './infrastructure/pg-installation-user-count.reader.js';
 import { StaleChatGenerationReconcileService } from './infrastructure/stale-chat-generation-reconcile.service.js';
+import { StaleDocumentExtractionReconcileService } from './infrastructure/stale-document-extraction-reconcile.service.js';
 import { DocumentsController } from './presentation/documents.controller.js';
 import { ReviewQueueController } from './presentation/review-queue.controller.js';
 
@@ -116,6 +117,7 @@ import { ReviewQueueController } from './presentation/review-queue.controller.js
     RunDocumentChatGenerationUseCase,
     DocumentChatGenerationQueueService,
     FailedDocumentExtractionReconcileService,
+    StaleDocumentExtractionReconcileService,
     StaleChatGenerationReconcileService,
     DocumentChatGenerationActiveRegistry,
     DocumentChatGenerationCancelRegistry,

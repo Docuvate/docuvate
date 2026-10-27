@@ -11,7 +11,7 @@ import type {
   LayoutIrPage,
   RepresentationUnitDto,
 } from '@docuvate/contracts';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 
 import type {
   ExtractionCompareItem,
@@ -24,9 +24,11 @@ import { workerApiUrl } from '../../../shared/infrastructure/worker/worker-api-p
 import {
   fetchWorkerJson,
   workerCompareTimeoutMs,
+  workerExtractTimeoutMs,
 } from '../../../shared/infrastructure/worker/worker-fetch.js';
 import { workerRequestHeaders } from '../../../shared/infrastructure/worker/worker-request-headers.js';
 import { parseExtractedFacts } from '../../exact-facts/infrastructure/parse-extracted-facts.js';
+import { EXTRACTION_TIMEOUT_FAILURE_MESSAGE } from '../domain/extraction-queue-failures.js';
 
 function isExtractedField(value: unknown): value is ExtractedField {
   if (!isRecord(value)) {
@@ -351,6 +353,8 @@ function parseCompareResponse(
 
 @Injectable()
 export class HttpExtractionAdapter implements ExtractionPort {
+  private readonly logger = new Logger(HttpExtractionAdapter.name);
+
   private workerHeaders(): Record<string, string> {
     return workerRequestHeaders();
   }
@@ -372,6 +376,7 @@ export class HttpExtractionAdapter implements ExtractionPort {
       embeddingDensityState: options?.embeddingDensityState,
       buildExactFactIndex: options?.buildExactFactIndex === true,
     });
+    const timeoutMs = workerExtractTimeoutMs();
     const maxAttempts = 5;
     let lastError: Error | null = null;
     for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
@@ -380,6 +385,7 @@ export class HttpExtractionAdapter implements ExtractionPort {
           method: 'POST',
           headers: this.workerHeaders(),
           body,
+          signal: AbortSignal.timeout(timeoutMs),
         });
         if (response.status === 502 || response.status === 503 || response.status === 504) {
           throw new Error(`Worker extraction unavailable: ${String(response.status)}`);
@@ -393,6 +399,12 @@ export class HttpExtractionAdapter implements ExtractionPort {
           previewPdf: parsePreviewPdfBase64(data),
         };
       } catch (error: unknown) {
+        if (error instanceof Error && (error.name === 'TimeoutError' || error.name === 'AbortError')) {
+          this.logger.warn(
+            `Worker /extract aborted after ${String(timeoutMs)}ms (attempt ${String(attempt)})`
+          );
+          throw new Error(EXTRACTION_TIMEOUT_FAILURE_MESSAGE);
+        }
         const message = error instanceof Error ? error.message : String(error);
         const retryable =
           message.includes('fetch failed') ||

@@ -48,14 +48,8 @@ const rowChipEllipsisRoutes = [
   { path: '/filesystem/unassigned', slug: 'filesystem' },
 ] as const;
 
-/** German compound-style names (each ≥ 60 characters). */
-const WS_B_LONG_GERMAN_LABEL_STEMS = [
-  'Bundesfinanzministeriumsverwaltungsarchivierungsbestimmungsdokumentenregisterführung',
-  'VerkehrsinfrastrukturfinanzierungsgesellschaftsjahresabrechnungsunterlagenOriginal',
-  'LandwirtschaftlicheBetriebshaftungsvertragsnachweisdokumentationGesamtbestand',
-  'Universitätsverwaltungsstudienabgabenbescheinigungsarchivierungssachbearbeitung',
-  'EnergieversorgungsnetzwerkstrompreisregulierungsbehördlicheMeldungsdokumentation',
-] as const;
+/** Long unique names (each ≥ 60 characters) that cannot collide with seeded German stems. */
+const WS_B_LONG_LABEL_COUNT = 5;
 
 const fixturePdf = path.join(process.cwd(), 'fixtures/synthetic-upload.pdf');
 
@@ -67,48 +61,35 @@ function md5File(filePath: string): string {
   return crypto.createHash('md5').update(fs.readFileSync(filePath)).digest('hex');
 }
 
-function assertLongGermanLabelStems(): void {
-  for (const stem of WS_B_LONG_GERMAN_LABEL_STEMS) {
-    expect(stem.length).toBeGreaterThanOrEqual(60);
-  }
-}
-
-async function waitForDocumentReady(
-  request: import('@playwright/test').APIRequestContext,
-  documentId: string
-): Promise<void> {
-  await expect
-    .poll(
-      async () => {
-        const res = await request.get(`${apiBase}/v1/documents/${documentId}`, {
-          headers: { origin: webOrigin },
-        });
-        if (!res.ok()) {
-          return 'pending';
-        }
-        const doc = (await res.json()) as { status: string };
-        return doc.status;
-      },
-      { timeout: 280_000, intervals: [2000, 3000, 5000] }
-    )
-    .toBe('ready');
+function uniqueLongLabelName(runToken: string, index: number): string {
+  const unique = randomUUID().replace(/-/g, '');
+  return `wsb${runToken}${unique}${unique}${String(index).padStart(2, '0')}`;
 }
 
 async function provisionLongLabelRowFixture(
   request: import('@playwright/test').APIRequestContext
 ): Promise<string> {
-  assertLongGermanLabelStems();
   const tagIds: string[] = [];
   const runToken = randomUUID().slice(0, 8);
-  for (let index = 0; index < WS_B_LONG_GERMAN_LABEL_STEMS.length; index += 1) {
-    const name = `ws-b-lang-${runToken}-${String(index)}-${WS_B_LONG_GERMAN_LABEL_STEMS[index]}`;
+  for (let index = 0; index < WS_B_LONG_LABEL_COUNT; index += 1) {
+    const name = uniqueLongLabelName(runToken, index);
+    expect(name.length).toBeGreaterThanOrEqual(60);
     const response = await request.post(`${apiBase}/v1/tags`, {
       headers: { origin: webOrigin },
       data: { name, color: '#7c3aed', matchingAlgorithm: 'none', match: '' },
     });
-    expect(response.ok()).toBeTruthy();
-    const body = (await response.json()) as { id: string };
-    tagIds.push(body.id);
+    if (!response.ok()) {
+      throw new Error(`create tag failed: ${String(response.status())} ${await response.text()}`);
+    }
+    const body: unknown = await response.json();
+    const tagId =
+      typeof body === 'object' && body !== null && 'id' in body && typeof body.id === 'string'
+        ? body.id
+        : '';
+    if (!tagId) {
+      throw new Error('create tag response missing id');
+    }
+    tagIds.push(tagId);
   }
 
   const uploadName = `ws-b-ellipsis-fixture-${runToken}.pdf`;
@@ -136,7 +117,8 @@ async function provisionLongLabelRowFixture(
     expect(assign.ok()).toBeTruthy();
   }
 
-  await waitForDocumentReady(request, created.id);
+  // Chip-row tests only need the library row and tags. Waiting for extract-ready
+  // turns a worker 422 into a 5-minute poll of a permanently failed document.
   return uploadName;
 }
 

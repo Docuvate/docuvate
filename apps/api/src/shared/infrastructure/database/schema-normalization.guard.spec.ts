@@ -63,6 +63,7 @@ const FORWARD_SQL_ORDER = [
   'repair-bin-document-filenames-up.sql',
   'search-vocabulary-maintain-up.sql',
   'search-vocabulary-document-terms-up.sql',
+  'document-regions-up.sql',
 ];
 
 function loadForwardMigrationSql(): string {

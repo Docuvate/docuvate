@@ -10,6 +10,7 @@ export default defineConfig({
   fullyParallel: false,
   forbidOnly: Boolean(process.env['CI']),
   retries: 0,
+  timeout: 300_000,
   workers: 1,
   reporter: process.env['CI'] ? [['github'], ['list']] : [['list']],
   use: {

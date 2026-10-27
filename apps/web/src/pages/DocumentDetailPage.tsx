@@ -132,6 +132,7 @@ export function DocumentDetailPage() {
   >('idle');
   const [activeTab, setActiveTab] = useState<DetailTab | null>(null);
   const [layoutSideTab, setLayoutSideTab] = useState<LayoutSideTab>('fields');
+  const [correctionSheetOpen, setCorrectionSheetOpen] = useState(false);
   const [viewerPage, setViewerPage] = useState(1);
   const [activeBlockIndex, setActiveBlockIndex] = useState<number | null>(null);
   const [title, setTitle] = useState('');
@@ -607,7 +608,11 @@ export function DocumentDetailPage() {
   const layoutWorkspace = isPdf && doc.extraction?.layoutIrAvailable === true;
 
   return (
-    <div className="page document-detail-page page--with-save-bar" data-ux="page">
+    <div
+      className="page document-detail-page page--with-save-bar"
+      data-ux="page"
+      data-correction-sheet-open={correctionSheetOpen ? '1' : '0'}
+    >
       <p className="document-detail-back">
         <Link to={routes.documents} className="document-detail-back-link">
           <ArrowLeft size={16} strokeWidth={2} aria-hidden />
@@ -675,6 +680,7 @@ export function DocumentDetailPage() {
               fieldsDirty={fieldsDirty}
               baselineFields={baselineFields}
               fieldFeedback={fieldFeedback}
+              replacedBySheet={correctionSheetOpen}
               onFieldsChange={(next) => {
                 setFieldFeedback(null);
                 setFields(next);
@@ -764,6 +770,7 @@ export function DocumentDetailPage() {
           fields={recognizedFields}
           recognizedCatalog={recognizedCatalog}
           onFieldValueChange={onFieldValueChange}
+          onFieldsChange={setFields}
           heuristicSuggestions={heuristicSuggestions}
           highlightBlocks={highlightBlocks}
           viewerPage={viewerPage}
@@ -784,6 +791,7 @@ export function DocumentDetailPage() {
           blocksDirty={blocksDirty}
           saving={saving}
           onSaveBlocks={() => void persist({ extractionBlocks: blocks })}
+          onCorrectionSheetOpenChange={setCorrectionSheetOpen}
         />
       ) : (
         <div className="detail-workspace">

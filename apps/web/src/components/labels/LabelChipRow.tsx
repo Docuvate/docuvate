@@ -1,10 +1,12 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { useId, useRef, useState } from 'react';
+import { useId, useLayoutEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { useViewportMaxWidth } from '../../lib/useViewportMaxWidth';
 import { useFittingChipCount } from '../library/useFittingChipCount';
 import { Chip, type ChipProps } from '../ui/Chip';
+import { BottomSheet } from '../ui/overlay/BottomSheet';
 import { Popover } from '../ui/overlay/Popover';
 
 export interface LabelChipItem {
@@ -22,24 +24,67 @@ interface LabelChipRowProps {
   overflowAriaLabel?: (overflow: LabelChipItem[]) => string;
 }
 
+const OVERFLOW_SHEET_MAX_WIDTH_PX = 639;
+
 export function LabelChipRow({ items, className, overflowAriaLabel }: LabelChipRowProps) {
   const { t } = useTranslation();
   const rowRef = useRef<HTMLDivElement>(null);
   const measureRef = useRef<HTMLDivElement>(null);
   const overflowButtonRef = useRef<HTMLButtonElement>(null);
+  const overflowChipsRef = useRef<HTMLDivElement>(null);
   const [overflowOpen, setOverflowOpen] = useState(false);
+  const [chipsFade, setChipsFade] = useState(false);
   const popoverId = useId();
+  const sheetOverflow = useViewportMaxWidth(OVERFLOW_SHEET_MAX_WIDTH_PX);
   const visibleCount = useFittingChipCount(rowRef, measureRef, items.length);
   const visible = items.slice(0, visibleCount);
   const overflow = items.slice(visibleCount);
   const singleTruncatedChip = visibleCount === 1 && overflow.length > 0;
   const truncateVisibleLabels = true;
 
+  useLayoutEffect(() => {
+    const node = overflowChipsRef.current;
+    if (!node || !overflowOpen) {
+      setChipsFade(false);
+      return;
+    }
+    const sync = () => {
+      const canScroll = node.scrollHeight > node.clientHeight + 1;
+      const atEnd = node.scrollTop + node.clientHeight >= node.scrollHeight - 2;
+      setChipsFade(canScroll && !atEnd);
+    };
+    sync();
+    node.addEventListener('scroll', sync);
+    return () => {
+      node.removeEventListener('scroll', sync);
+    };
+  }, [overflowOpen, overflow.length]);
+
   if (items.length === 0) {
     return null;
   }
 
   const overflowNames = overflow.map((item) => item.label).join(', ');
+  const overflowList = (
+    <div
+      ref={overflowChipsRef}
+      className={
+        chipsFade
+          ? 'label-chip-row-overflow-chips label-chip-row-overflow-chips--fade'
+          : 'label-chip-row-overflow-chips'
+      }
+    >
+      {overflow.map((item) => (
+        <Chip
+          key={item.id}
+          label={item.label}
+          variant={item.variant ?? 'assigned'}
+          color={item.color}
+          onRemove={item.onRemove}
+        />
+      ))}
+    </div>
+  );
 
   return (
     <div className={className ?? 'label-chip-row'}>
@@ -79,30 +124,37 @@ export function LabelChipRow({ items, className, overflowAriaLabel }: LabelChipR
             >
               <span className="chip-label">+{overflow.length}</span>
             </button>
-            <Popover
-              open={overflowOpen}
-              onOpenChange={setOverflowOpen}
-              referenceRef={overflowButtonRef}
-              returnFocusRef={overflowButtonRef}
-              portalLayer="popover"
-              className="label-chip-row-overflow-popover popover-surface"
-              id={popoverId}
-              role="region"
-              aria-label={t('labelPicker.overflowPopoverAria')}
-              onEscape={() => { setOverflowOpen(false); }}
-            >
-              <div className="label-chip-row-overflow-chips">
-                {overflow.map((item) => (
-                  <Chip
-                    key={item.id}
-                    label={item.label}
-                    variant={item.variant ?? 'assigned'}
-                    color={item.color}
-                    onRemove={item.onRemove}
-                  />
-                ))}
-              </div>
-            </Popover>
+            {sheetOverflow ? (
+              <BottomSheet
+                open={overflowOpen}
+                onClose={() => { setOverflowOpen(false); }}
+                title={t('labelPicker.overflowPopoverAria')}
+                className="label-chip-row-overflow-popover"
+                id={popoverId}
+                testId="label-overflow-sheet"
+                returnFocusRef={overflowButtonRef}
+              >
+                {overflowList}
+              </BottomSheet>
+            ) : (
+              <Popover
+                open={overflowOpen}
+                onOpenChange={setOverflowOpen}
+                referenceRef={overflowButtonRef}
+                returnFocusRef={overflowButtonRef}
+                portalLayer="popover"
+                className="label-chip-row-overflow-popover popover-surface"
+                id={popoverId}
+                role="region"
+                aria-label={t('labelPicker.overflowPopoverAria')}
+                placement="bottom-end"
+                maxHeightPx={320}
+                flipEnabled={false}
+                onEscape={() => { setOverflowOpen(false); }}
+              >
+                {overflowList}
+              </Popover>
+            )}
           </>
         ) : null}
       </div>

@@ -1,9 +1,10 @@
+import { randomUUID } from 'node:crypto';
+
 import { expect } from '@playwright/test';
-import fs from 'node:fs';
 import type { APIRequestContext, Page } from '@playwright/test';
 
-import { deliveryNoteTablePdfPath } from './layout-table-pdf';
-import { waitForDocumentLayoutIrReady } from './wait-for-layout-ir';
+import { deliveryNoteTablePdf } from './layout-table-pdf';
+import { waitForDocumentLayoutIrReady, waitForSmokeApiReady } from './wait-for-layout-ir';
 
 const DOC_CHAT_QUESTION = 'Wie viele Widget A sind in der Lieferung?';
 
@@ -60,28 +61,62 @@ export async function verifyDocumentChatRespondsWithin5s(
 
 export { DOC_CHAT_QUESTION };
 
+function readUploadedDocumentId(body: unknown): string {
+  if (typeof body === 'object' && body !== null && 'id' in body && typeof body.id === 'string') {
+    return body.id;
+  }
+  throw new Error('layout fixture upload response missing id');
+}
+
+async function sleep(ms: number): Promise<void> {
+  await new Promise<void>((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+
+/**
+ * Unique filename + unique trailer on the known-good synthetic PDF (same
+ * pattern as Workstream B). Do not rewrite the content stream.
+ */
 export async function uploadLayoutTableDocument(
   request: APIRequestContext,
   apiBase: string,
   webOrigin: string
 ): Promise<string> {
-  const pdfPath = deliveryNoteTablePdfPath();
-  const upload = await request.post(`${apiBase}/v1/documents`, {
-    headers: { origin: webOrigin },
-    multipart: {
-      file: {
-        name: 'delivery-note-table.pdf',
-        mimeType: 'application/pdf',
-        buffer: fs.readFileSync(pdfPath),
+  await waitForSmokeApiReady(request, apiBase);
+  let lastError: Error | undefined;
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    const token = randomUUID().replace(/-/g, '').slice(0, 12);
+    const upload = await request.post(`${apiBase}/v1/documents`, {
+      headers: { origin: webOrigin },
+      multipart: {
+        file: {
+          name: `delivery-note-table-${token}.pdf`,
+          mimeType: 'application/pdf',
+          buffer: await deliveryNoteTablePdf(token),
+        },
       },
-    },
-  });
-  if (!upload.ok()) {
-    throw new Error(`layout fixture upload failed: ${upload.status()} ${await upload.text()}`);
+    });
+    if (!upload.ok()) {
+      lastError = new Error(
+        `layout fixture upload failed (${String(attempt)}/3): ${String(upload.status())} ${await upload.text()}`
+      );
+      await sleep(2000 * attempt);
+      continue;
+    }
+    const docId = readUploadedDocumentId(await upload.json());
+    try {
+      await waitForDocumentLayoutIrReady(request, apiBase, webOrigin, docId);
+      return docId;
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error));
+      await request.delete(`${apiBase}/v1/documents/${docId}`, {
+        headers: { origin: webOrigin },
+      });
+      await sleep(2000 * attempt);
+    }
   }
-  const docId = String(((await upload.json()) as { id: string }).id);
-  await waitForDocumentLayoutIrReady(request, apiBase, webOrigin, docId);
-  return docId;
+  throw lastError ?? new Error('layout fixture upload failed');
 }
 
 export async function openLayoutDocumentPage(page: Page, docId: string): Promise<void> {

@@ -267,7 +267,7 @@ export function LabelPanel({ document, onUpdated }: LabelPanelProps) {
         <p className="muted">{t('documents.labelPanelNoneAssigned')}</p>
       ) : (
         <LabelChipRow
-          className="chip-row"
+          className="chip-row overflow-chip-list"
           items={document.tags.map((tag) => ({
             id: tag.id,
             label: tag.name,

@@ -20,6 +20,9 @@ import {
   requireRecord,
 } from '../../../shared/infrastructure/database/row-parse.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
+import { hashLayoutIrHex } from '../../document-regions/domain/ir-hash.js';
+import { layoutTokensFromIr } from '../../document-regions/domain/layout-tokens.js';
+import { remapActiveRegionsOnClient } from '../../document-regions/infrastructure/pg-document-region.repository.js';
 import { hashNormalizedExtractedText } from '../../duplicates/domain/normalized-extracted-text-hash.js';
 import { globalFieldStorageKey } from '../../recognized-fields/domain/recognized-field.entity.js';
 import { upsertDocumentFieldValue } from '../../search/infrastructure/document-field-value-index.js';
@@ -450,9 +453,17 @@ export class PgDocumentRepository implements DocumentRepository {
         if (version !== 1) {
           this.logger.warn(`Skipping layout IR for document ${id}: version must be 1`);
         } else {
+          const irSha256Hex = hashLayoutIrHex(result.layoutIr);
           await client.query(
-            `INSERT INTO document_layout_ir (document_id, version, ir) VALUES ($1, $2, $3::jsonb)`,
-            [id, version, JSON.stringify(result.layoutIr)]
+            `INSERT INTO document_layout_ir (document_id, version, ir, ir_sha256)
+             VALUES ($1, $2, $3::jsonb, decode($4, 'hex'))`,
+            [id, version, JSON.stringify(result.layoutIr), irSha256Hex]
+          );
+          await remapActiveRegionsOnClient(
+            client,
+            id,
+            layoutTokensFromIr(result.layoutIr),
+            irSha256Hex
           );
           const pages = parseLayoutIrPagesJson(result.layoutIr.pages);
           if (pages.length > 0) {

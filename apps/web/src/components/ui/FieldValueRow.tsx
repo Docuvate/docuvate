@@ -1,11 +1,12 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { Check, Ellipsis } from 'lucide-react';
+import { Check } from 'lucide-react';
+import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { useElementOverflowTitle } from '../../lib/useElementOverflowTitle';
 import { Button } from './Button';
 import { Confidence } from './Confidence';
-import { IconButton } from './IconButton';
 import { SourceChip } from './SourceChip';
 
 export type FieldValueRowState = 'confirmed' | 'suggested' | 'corrected';
@@ -19,6 +20,9 @@ export interface FieldValueRowProps {
   sourceLabel?: string;
   onConfirm?: () => void;
   onCorrect?: () => void;
+  onDismiss?: () => void;
+  onSourceClick?: () => void;
+  onSelect?: () => void;
 }
 
 export function FieldValueRow({
@@ -30,42 +34,112 @@ export function FieldValueRow({
   sourceLabel,
   onConfirm,
   onCorrect,
+  onDismiss,
+  onSourceClick,
+  onSelect,
 }: FieldValueRowProps) {
   const { t } = useTranslation();
+  const showSuggestedActions = state === 'suggested';
   return (
     <article className="field-value-row">
-      <div className="field-value-row-head">
-        <p className="field-value-row-name">{fieldName}</p>
-        {state === 'suggested' && confidencePercent != null ? <Confidence value={confidencePercent} /> : null}
+      {onSelect ? (
+        <button
+          type="button"
+          className="field-value-row-select"
+          data-testid="field-value-row-select"
+          onClick={onSelect}
+        >
+          <OverflowText className="field-value-row-name" text={fieldName} />
+          <span className="field-value-row-value" title={value}>
+            {value}
+          </span>
+        </button>
+      ) : (
+        <div className="field-value-row-primary">
+          <OverflowText className="field-value-row-name" text={fieldName} />
+          <p className="field-value-row-value" title={value}>
+            {value}
+          </p>
+        </div>
+      )}
+      <div className="field-value-row-meta">
+        {state === 'suggested' && confidencePercent != null ? (
+          <Confidence value={confidencePercent} />
+        ) : null}
         {state === 'confirmed' ? (
           <span className="field-value-row-confirmed">
             <Check size={14} aria-hidden /> {t('ui.fieldValue.confirmed')}
           </span>
         ) : null}
         {state === 'corrected' && originalValue ? (
-          <span className="field-value-row-original">{originalValue}</span>
+          <span className="field-value-row-original" title={originalValue}>
+            {originalValue}
+          </span>
+        ) : null}
+        {sourceLabel ? (
+          <SourceChip
+            kind="page"
+            label={sourceLabel}
+            onClick={(event) => {
+              event.stopPropagation();
+              onSourceClick?.();
+            }}
+          />
         ) : null}
       </div>
-      <div className="field-value-row-value-line">
-        <p className="field-value-row-value">{value}</p>
-        {state === 'suggested' ? (
-          <>
-            {onConfirm ? (
-              <Button type="button" size="sm" variant="primary" onClick={onConfirm}>
-                {t('common.confirm')}
-              </Button>
-            ) : null}
-            {onCorrect ? (
-              <Button type="button" size="sm" variant="secondary" onClick={onCorrect}>
-                {t('ui.fieldValue.correct')}
-              </Button>
-            ) : null}
-          </>
-        ) : (
-          <IconButton icon={Ellipsis} label={t('ui.fieldValue.moreActions')} size="sm" />
-        )}
-      </div>
-      {sourceLabel ? <SourceChip kind="page" label={sourceLabel} /> : null}
+      {showSuggestedActions || onCorrect || onDismiss ? (
+        <div className="field-value-row-actions">
+          {showSuggestedActions && onConfirm ? (
+            <Button
+              type="button"
+              size="sm"
+              variant="primary"
+              onClick={(event) => {
+                event.stopPropagation();
+                onConfirm();
+              }}
+            >
+              {t('common.confirm')}
+            </Button>
+          ) : null}
+          {onCorrect ? (
+            <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              onClick={(event) => {
+                event.stopPropagation();
+                onCorrect();
+              }}
+            >
+              {t('ui.fieldValue.correct')}
+            </Button>
+          ) : null}
+          {showSuggestedActions && onDismiss ? (
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              onClick={(event) => {
+                event.stopPropagation();
+                onDismiss();
+              }}
+            >
+              {t('documents.layoutSuggestionDismiss')}
+            </Button>
+          ) : null}
+        </div>
+      ) : null}
     </article>
+  );
+}
+
+function OverflowText({ className, text }: { className: string; text: string }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const title = useElementOverflowTitle(ref, text);
+  return (
+    <span ref={ref} className={className} title={title}>
+      {text}
+    </span>
   );
 }

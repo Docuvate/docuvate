@@ -17,4 +17,11 @@ describe('presentExtractionFailure', () => {
     expect(result.technicalDetail).toBeNull();
     expect(result.userMessage.length).toBeGreaterThan(10);
   });
+
+  it('maps extract-deadline timeout to a user-facing message', () => {
+    const result = presentExtractionFailure('documents.extractionFailedTimeout');
+    expect(result.userMessage).not.toBe('documents.extractionFailedTimeout');
+    expect(result.userMessage.toLowerCase()).toMatch(/zeitlimit|time limit/);
+    expect(result.technicalDetail).toBe('Worker extraction timeout');
+  });
 });

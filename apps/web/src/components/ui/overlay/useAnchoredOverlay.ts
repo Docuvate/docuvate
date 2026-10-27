@@ -13,6 +13,15 @@ import { useMemo } from 'react';
 
 const VIEWPORT_PADDING_PX = 8;
 const DEFAULT_OFFSET_PX = 4;
+/** Keep floating surfaces below the sticky app header (`--app-topbar-height` + slack). */
+const HEADER_COLLISION_PADDING_PX = 64;
+
+const COLLISION_PADDING = {
+  top: HEADER_COLLISION_PADDING_PX,
+  right: VIEWPORT_PADDING_PX,
+  bottom: VIEWPORT_PADDING_PX,
+  left: VIEWPORT_PADDING_PX,
+};
 
 export interface UseAnchoredOverlayOptions {
   open: boolean;
@@ -21,6 +30,8 @@ export interface UseAnchoredOverlayOptions {
   matchReferenceWidth?: boolean;
   /** Cap list height (rem); viewport collision still applies via `size` middleware. */
   maxHeightPx?: number;
+  /** When false, the overlay stays on the requested placement and shrinks instead of flipping. */
+  flipEnabled?: boolean;
 }
 
 export function useAnchoredOverlay({
@@ -28,14 +39,15 @@ export function useAnchoredOverlay({
   placement = 'bottom-start',
   matchReferenceWidth = false,
   maxHeightPx,
+  flipEnabled = true,
 }: UseAnchoredOverlayOptions) {
   const middleware = useMemo(
     () => [
       offset(DEFAULT_OFFSET_PX),
-      flip({ padding: VIEWPORT_PADDING_PX }),
-      shift({ padding: VIEWPORT_PADDING_PX }),
+      ...(flipEnabled ? [flip({ padding: COLLISION_PADDING })] : []),
+      shift({ padding: COLLISION_PADDING }),
       size({
-        padding: VIEWPORT_PADDING_PX,
+        padding: COLLISION_PADDING,
         apply({ availableHeight, rects, elements }) {
           const cap =
             maxHeightPx !== undefined
@@ -50,7 +62,7 @@ export function useAnchoredOverlay({
         },
       }),
     ],
-    [matchReferenceWidth, maxHeightPx]
+    [flipEnabled, matchReferenceWidth, maxHeightPx]
   );
 
   return useFloating({

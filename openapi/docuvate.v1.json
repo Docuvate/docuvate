@@ -6709,6 +6709,182 @@
         ]
       }
     },
+    "/documents/{id}/corrections": {
+      "post": {
+        "operationId": "applyDocumentFieldCorrection",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApplyFieldCorrectionRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApplyFieldCorrectionResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Create or update a field region correction",
+        "tags": [
+          "Documents"
+        ]
+      }
+    },
+    "/documents/{id}/corrections/{correctionId}/withdraw": {
+      "post": {
+        "operationId": "withdrawDocumentFieldCorrection",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "correctionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Withdraw a field correction",
+        "tags": [
+          "Documents"
+        ]
+      }
+    },
     "/documents/{id}/duplicate-candidates": {
       "get": {
         "operationId": "duplicateCandidates",
@@ -7612,6 +7788,95 @@
         ]
       }
     },
+    "/documents/{id}/field-confirmations": {
+      "post": {
+        "operationId": "confirmDocumentField",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfirmDocumentFieldRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfirmDocumentFieldResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Confirm a field value without recording a correction",
+        "tags": [
+          "Documents"
+        ]
+      }
+    },
     "/documents/{id}/layout-compare/metrics": {
       "get": {
         "operationId": "getDocumentLayoutCompareMetrics",
@@ -8124,6 +8389,94 @@
         ]
       }
     },
+    "/documents/{id}/layout/tokens": {
+      "get": {
+        "operationId": "listDocumentLayoutTokens",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentLayoutTokensResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Layout IR tokens for a document page",
+        "tags": [
+          "Documents"
+        ]
+      }
+    },
     "/documents/{id}/preview": {
       "get": {
         "operationId": "documentPreview",
@@ -8191,6 +8544,99 @@
           }
         ],
         "summary": "PDF preview for office uploads",
+        "tags": [
+          "Documents"
+        ]
+      }
+    },
+    "/documents/{id}/regions": {
+      "get": {
+        "operationId": "listDocumentRegions",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "role",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "field",
+                "table",
+                "block",
+                "ignore"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentRegionListResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Active document regions",
         "tags": [
           "Documents"
         ]
@@ -13497,6 +13943,122 @@
           "createdAt"
         ]
       },
+      "ApplyFieldCorrectionRequestDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "op": {
+            "enum": [
+              "create",
+              "reanchor",
+              "edit_value",
+              "remove"
+            ],
+            "type": "string"
+          },
+          "fieldKey": {
+            "type": "string"
+          },
+          "page": {
+            "type": "number",
+            "minimum": 1
+          },
+          "shape": {
+            "enum": [
+              "rect",
+              "polygon"
+            ],
+            "type": "string"
+          },
+          "x0": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "y0": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "x1": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "y1": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "blockIndexes": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "valueOverride": {
+            "type": "string",
+            "nullable": true
+          },
+          "scope": {
+            "enum": [
+              "document",
+              "label",
+              "always"
+            ],
+            "type": "string"
+          },
+          "tagId": {
+            "type": "string",
+            "nullable": true,
+            "format": "uuid"
+          },
+          "beforeRegionId": {
+            "type": "string",
+            "nullable": true,
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "id",
+          "op",
+          "fieldKey"
+        ]
+      },
+      "ApplyFieldCorrectionResponseDto": {
+        "type": "object",
+        "properties": {
+          "noChange": {
+            "type": "boolean"
+          },
+          "correction": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DocumentCorrectionDto"
+              }
+            ]
+          },
+          "region": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DocumentRegionDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "noChange",
+          "correction",
+          "region"
+        ]
+      },
       "ApplyLabelCorrectionRequestDto": {
         "type": "object",
         "properties": {
@@ -13644,6 +14206,40 @@
           "role",
           "content",
           "createdAt"
+        ]
+      },
+      "ConfirmDocumentFieldRequestDto": {
+        "type": "object",
+        "properties": {
+          "fieldKey": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "fieldKey",
+          "value"
+        ]
+      },
+      "ConfirmDocumentFieldResponseDto": {
+        "type": "object",
+        "properties": {
+          "confirmed": {
+            "type": "boolean"
+          },
+          "fieldKey": {
+            "type": "string"
+          },
+          "valueSha256": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "confirmed",
+          "fieldKey",
+          "valueSha256"
         ]
       },
       "ConfirmLabelRecommendationBlocklistPatternRequestDto": {
@@ -14385,6 +14981,71 @@
           "setupHint"
         ]
       },
+      "DocumentCorrectionDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "documentId": {
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "label",
+              "field",
+              "table",
+              "block"
+            ],
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "active",
+              "withdrawn"
+            ],
+            "type": "string"
+          },
+          "op": {
+            "type": "string"
+          },
+          "fieldKey": {
+            "type": "string"
+          },
+          "beforeRegionId": {
+            "type": "string",
+            "nullable": true
+          },
+          "afterRegionId": {
+            "type": "string",
+            "nullable": true
+          },
+          "oldValue": {
+            "type": "string",
+            "nullable": true
+          },
+          "newValue": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "documentId",
+          "kind",
+          "status",
+          "op",
+          "fieldKey",
+          "beforeRegionId",
+          "afterRegionId",
+          "oldValue",
+          "newValue",
+          "createdAt"
+        ]
+      },
       "DocumentDuplicateStackSummaryDtoClass": {
         "type": "object",
         "properties": {
@@ -14503,6 +15164,29 @@
           "fields"
         ]
       },
+      "DocumentLayoutTokensResponseDto": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "number",
+            "nullable": true
+          },
+          "irSha256": {
+            "type": "string"
+          },
+          "tokens": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LayoutTokenDto"
+            }
+          }
+        },
+        "required": [
+          "page",
+          "irSha256",
+          "tokens"
+        ]
+      },
       "DocumentListLibraryUiDto": {
         "type": "object",
         "properties": {
@@ -14586,6 +15270,116 @@
         },
         "required": [
           "modules"
+        ]
+      },
+      "DocumentRegionDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "documentId": {
+            "type": "string"
+          },
+          "page": {
+            "type": "number"
+          },
+          "shape": {
+            "enum": [
+              "rect",
+              "polygon"
+            ],
+            "type": "string"
+          },
+          "role": {
+            "enum": [
+              "field",
+              "table",
+              "block",
+              "ignore"
+            ],
+            "type": "string"
+          },
+          "x0": {
+            "type": "number"
+          },
+          "y0": {
+            "type": "number"
+          },
+          "x1": {
+            "type": "number"
+          },
+          "y1": {
+            "type": "number"
+          },
+          "irSha256": {
+            "type": "string"
+          },
+          "needsReview": {
+            "type": "boolean"
+          },
+          "blockIndexes": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "field": {
+            "$ref": "#/components/schemas/DocumentRegionFieldDto"
+          },
+          "createdAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "documentId",
+          "page",
+          "shape",
+          "role",
+          "x0",
+          "y0",
+          "x1",
+          "y1",
+          "irSha256",
+          "needsReview",
+          "blockIndexes",
+          "createdAt"
+        ]
+      },
+      "DocumentRegionFieldDto": {
+        "type": "object",
+        "properties": {
+          "fieldKey": {
+            "type": "string"
+          },
+          "valueOverride": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "fieldKey",
+          "valueOverride"
+        ]
+      },
+      "DocumentRegionListResponseDto": {
+        "type": "object",
+        "properties": {
+          "irSha256": {
+            "type": "string",
+            "nullable": true
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DocumentRegionDto"
+            }
+          }
+        },
+        "required": [
+          "irSha256",
+          "items"
         ]
       },
       "DocumentResponseDto": {
@@ -15833,6 +16627,41 @@
           "y",
           "width",
           "height"
+        ]
+      },
+      "LayoutTokenDto": {
+        "type": "object",
+        "properties": {
+          "blockIndex": {
+            "type": "number"
+          },
+          "page": {
+            "type": "number"
+          },
+          "x0": {
+            "type": "number"
+          },
+          "y0": {
+            "type": "number"
+          },
+          "x1": {
+            "type": "number"
+          },
+          "y1": {
+            "type": "number"
+          },
+          "text": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "blockIndex",
+          "page",
+          "x0",
+          "y0",
+          "x1",
+          "y1",
+          "text"
         ]
       },
       "LayoutTypstResponseDto": {
