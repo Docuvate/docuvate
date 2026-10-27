@@ -101,11 +101,7 @@ async function provisionLongLabelRowFixture(
   const tagIds: string[] = [];
   const runToken = randomUUID().slice(0, 8);
   for (let index = 0; index < WS_B_LONG_GERMAN_LABEL_STEMS.length; index += 1) {
-    const stem = WS_B_LONG_GERMAN_LABEL_STEMS[index];
-    const prefix = `${runToken}-${String(index)}-`;
-    const tagNameMax = 50;
-    const name = `${prefix}${stem.slice(0, Math.max(0, tagNameMax - prefix.length))}`;
-    expect(name.length).toBeLessThanOrEqual(tagNameMax);
+    const name = `${runToken}-${String(index)}-${WS_B_LONG_GERMAN_LABEL_STEMS[index]}`;
     const response = await request.post(`${apiBase}/v1/tags`, {
       headers: { origin: webOrigin },
       data: { name, color: '#7c3aed' },
@@ -113,7 +109,7 @@ async function provisionLongLabelRowFixture(
     const responseBody = await response.text();
     expect(
       response.ok(),
-      `create tag failed index=${String(index)} nameLen=${String(name.length)} status=${response.status()} body=${responseBody}`
+      `create tag failed status=${response.status()} body=${responseBody}`
     ).toBeTruthy();
     const parsed: unknown = JSON.parse(responseBody);
     if (
