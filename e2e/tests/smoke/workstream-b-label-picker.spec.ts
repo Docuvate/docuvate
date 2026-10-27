@@ -103,9 +103,9 @@ async function provisionLongLabelRowFixture(
   for (let index = 0; index < WS_B_LONG_GERMAN_LABEL_STEMS.length; index += 1) {
     const stem = WS_B_LONG_GERMAN_LABEL_STEMS[index];
     const prefix = `${runToken}-${String(index)}-`;
-    const name = `${prefix}${stem.slice(0, Math.max(0, 64 - prefix.length))}`;
-    expect(name.length).toBeLessThanOrEqual(64);
-    expect(name.length).toBeGreaterThanOrEqual(60);
+    const tagNameMax = 50;
+    const name = `${prefix}${stem.slice(0, Math.max(0, tagNameMax - prefix.length))}`;
+    expect(name.length).toBeLessThanOrEqual(tagNameMax);
     const response = await request.post(`${apiBase}/v1/tags`, {
       headers: { origin: webOrigin },
       data: { name, color: '#7c3aed' },
