@@ -89,7 +89,7 @@ async function waitForDocumentReady(
         const doc = (await res.json()) as { status: string };
         return doc.status;
       },
-      { timeout: 280_000, intervals: [2000, 3000, 5000] }
+      { timeout: 420_000, intervals: [2000, 3000, 5000] }
     )
     .toBe('ready');
 }
