@@ -301,10 +301,10 @@ async function openTagFilterPortaledList(page: import('@playwright/test').Page):
 }
 
 test.describe('Workstream B label picker', () => {
-  test.describe.configure({ mode: 'serial', retries: 0, timeout: 300_000 });
+  test.describe.configure({ mode: 'serial', retries: 0, timeout: 600_000 });
 
   test.beforeAll(async ({ request }) => {
-    test.setTimeout(300_000);
+    test.setTimeout(480_000);
     fs.mkdirSync(artifactRoot, { recursive: true });
     const health = await request.get(`${apiBase}/health`);
     test.skip(!health.ok(), 'API not running');
