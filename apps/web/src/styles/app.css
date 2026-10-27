@@ -2801,6 +2801,9 @@ mark.global-search-mark {
 
 .layout-advanced-panel {
   margin: 0;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
   border: 1px solid var(--dv-color-border);
   border-radius: var(--dv-radius-md);
   padding: var(--dv-space-xs) var(--dv-space-sm);
@@ -2823,6 +2826,13 @@ mark.global-search-mark {
   flex-direction: column;
   gap: var(--dv-space-sm);
   margin-top: var(--dv-space-xs);
+  min-width: 0;
+  max-width: 100%;
+}
+
+.layout-advanced-export {
+  min-width: 0;
+  max-width: 100%;
 }
 
 .layout-quality-badge {
@@ -3396,6 +3406,8 @@ mark.global-search-mark {
 .layout-export-format-grid {
   display: grid;
   gap: var(--dv-space-sm);
+  min-width: 0;
+  max-width: 100%;
 }
 
 .layout-export-format-card {

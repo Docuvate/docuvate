@@ -52,12 +52,12 @@ import { DocumentFieldCorrectionSheet } from './DocumentFieldCorrectionSheet';
 import { DocumentLayoutCompareView } from './DocumentLayoutCompareView';
 import { DocumentLayoutExportTab } from './DocumentLayoutExportTab';
 import { DocumentLayoutSidePanel, type LayoutSideTab, overlayRegionById } from './DocumentLayoutSidePanel';
-import { DocumentTableCorrectionSheet } from './DocumentTableCorrectionSheet';
 import {
   type DocumentSelectionDraft,
   DocumentSelectionLayer,
 } from './DocumentSelectionLayer';
 import { type DocumentSelectionTool, DocumentSelectionTools } from './DocumentSelectionTools';
+import { DocumentTableCorrectionSheet } from './DocumentTableCorrectionSheet';
 import { ExtractedLayoutHtmlFrame, LAYOUT_IR_ZOOM_STEPS, type LayoutIrZoomStep } from './ExtractedLayoutHtmlFrame';
 import { ExtractedTextPanel } from './ExtractedTextPanel';
 import { type PdfLayoutOverlay, PdfViewer } from './PdfViewer';
@@ -260,7 +260,7 @@ export function DocumentLayoutWorkspace({
   );
 
   const tableSheetOpen = Boolean(correctionSheetViewport && selectedTableId);
-  const correctionSheetOpen = Boolean(correctionSheetViewport && (selectedFieldKey || selectedTableId));
+  const correctionSheetOpen = Boolean(correctionSheetViewport && (selectedFieldKey ?? selectedTableId));
   useEffect(() => {
     onCorrectionSheetOpenChange?.(correctionSheetOpen);
     return () => {
@@ -913,12 +913,9 @@ export function DocumentLayoutWorkspace({
           activeTab={layoutSideTab}
           onTabChange={(tab) => {
             onLayoutSideTabChange(tab);
-            if (tab === 'tables' && correctionSheetViewport) {
-              const first = tableRegions[0];
-              if (first && !selectedTableId) {
-                setSelectedTableId(first.id);
-                setSelectedFieldKey(null);
-              }
+            if (tab === 'tables' && correctionSheetViewport && tableRegions.length > 0 && !selectedTableId) {
+              setSelectedTableId(tableRegions[0].id);
+              setSelectedFieldKey(null);
             }
           }}
           activeOverlayId={activeOverlayId}
