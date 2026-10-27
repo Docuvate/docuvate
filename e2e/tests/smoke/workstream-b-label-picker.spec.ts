@@ -326,7 +326,6 @@ test.describe('Workstream B label picker', () => {
     fs.mkdirSync(artifactRoot, { recursive: true });
     const health = await request.get(`${apiBase}/health`);
     test.skip(!health.ok(), 'API not running');
-    await seedLabels(request, 500);
     let lastError: unknown;
     for (let attempt = 0; attempt < 2; attempt += 1) {
       try {
@@ -337,6 +336,7 @@ test.describe('Workstream B label picker', () => {
         lastError = error;
       }
     }
+    await seedLabels(request, 500);
     if (lastError !== undefined) {
       throw lastError;
     }
