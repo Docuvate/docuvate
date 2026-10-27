@@ -55,7 +55,9 @@ async function setLabelsTabOpen(page: Page, open: boolean): Promise<void> {
 }
 
 async function startRectangle(page: Page): Promise<void> {
-  const word = page.locator('.pdf-page-wrap .textLayer span').filter({ hasText: /Widget/i }).first();
+  const word = page.locator('.pdf-page-wrap .textLayer span').filter({
+    hasText: /Widget|Alex|Testmann|FIXTURE|Compose/i,
+  }).first();
   if ((await word.count()) > 0) {
     await expect(word).toBeVisible({ timeout: 60_000 });
     const box = await word.boundingBox();
