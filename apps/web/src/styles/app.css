@@ -2801,9 +2801,9 @@ mark.global-search-mark {
 
 .layout-advanced-panel {
   margin: 0;
+  box-sizing: border-box;
   min-width: 0;
   max-width: 100%;
-  overflow-x: auto;
   border: 1px solid var(--dv-color-border);
   border-radius: var(--dv-radius-md);
   padding: var(--dv-space-xs) var(--dv-space-sm);
@@ -2826,6 +2826,8 @@ mark.global-search-mark {
   flex-direction: column;
   gap: var(--dv-space-sm);
   margin-top: var(--dv-space-xs);
+  box-sizing: border-box;
+  width: 100%;
   min-width: 0;
   max-width: 100%;
 }
@@ -3303,6 +3305,8 @@ mark.global-search-mark {
   margin-bottom: var(--dv-space-md);
   border: 1px solid var(--dv-color-border);
   border-radius: var(--dv-radius-sm);
+  min-width: 0;
+  max-width: 100%;
 }
 
 .layout-table-card-active {

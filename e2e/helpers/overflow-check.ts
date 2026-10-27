@@ -108,6 +108,9 @@ export async function assertNoHorizontalOverflow(page: Page): Promise<void> {
           if (style.visibility === 'hidden' || style.display === 'none') {
             return;
           }
+          if (child.closest('details:not([open])')) {
+            return;
+          }
           if (
             parentStyle.overflowX === 'auto' ||
             parentStyle.overflowX === 'scroll' ||

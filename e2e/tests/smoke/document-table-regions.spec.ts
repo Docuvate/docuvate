@@ -133,17 +133,21 @@ test.describe('document table regions', () => {
         .getByRole('tab', { name: /Tabellen|Tables/i })
         .click({ force: true });
       if (viewport.width < 1024) {
+        await expect(page.getByTestId('table-correction-sheet')).toBeVisible({ timeout: 15_000 });
+      } else {
+        await expect(page.getByTestId('corrected-table-card')).toBeVisible({ timeout: 15_000 });
+      }
+      await captureViewportScreenshot(page, testInfo, `table-regions-${viewport.name}-light.png`);
+      if (viewport.width < 1024) {
         await assertTableCorrectionSheet(page);
         await assertToastMissesSheetActions(
           page,
           '[data-testid="table-correction-sheet"] .layout-table-header-controls'
         );
       } else {
-        await expect(page.getByTestId('corrected-table-card')).toBeVisible({ timeout: 15_000 });
         await expect(page.locator('[data-testid="table-correction-sheet"]')).toHaveCount(0);
       }
       await assertNoHorizontalOverflow(page);
-      await captureViewportScreenshot(page, testInfo, `table-regions-${viewport.name}-light.png`);
     }
   });
 });
