@@ -5,8 +5,14 @@ import type pg from 'pg';
 
 import { parseString } from '../../../shared/infrastructure/database/row-parse.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
+import { extractionFailureReasonKey } from '../../extraction/domain/extraction-failure.js';
 import type { DocumentExtractionEnqueuePort } from '../domain/document-extraction-enqueue.port.js';
 import { DOCUMENT_EXTRACTION_ENQUEUE } from '../domain/document-extraction-enqueue.token.js';
+import {
+  maxOrphanExtractionRequeues,
+  orphanExtractionBatchSize,
+  planOrphanRequeue,
+} from '../domain/orphan-extraction-requeue.config.js';
 
 const RECONCILE_INTERVAL_MS = 60_000;
 
@@ -50,6 +56,11 @@ export class OrphanDocumentExtractionReconcileService implements OnModuleInit, O
           continue;
         }
         try {
+          const requeueCount = await this.extractionQueue.recordOrphanRequeue(row.id);
+          if (planOrphanRequeue(requeueCount, maxOrphanExtractionRequeues()) === 'fail') {
+            await this.markOrphanFailed(row.id);
+            continue;
+          }
           await this.extractionQueue.enqueue(row.id, row.userId);
           requeued += 1;
         } catch (error: unknown) {
@@ -70,11 +81,24 @@ export class OrphanDocumentExtractionReconcileService implements OnModuleInit, O
     }
   }
 
+  private async markOrphanFailed(documentId: string): Promise<void> {
+    await this.pool.query(
+      `UPDATE documents
+       SET status = 'failed', extraction_failure_reason = $2, updated_at = now()
+       WHERE id = $1 AND status IN ('queued', 'extracting')`,
+      [documentId, extractionFailureReasonKey('orphan_requeue_exhausted')]
+    );
+    this.logger.warn(`Document ${documentId} exceeded the orphan re-enqueue bound; marked failed`);
+  }
+
   private async listOrphanCandidates(): Promise<OrphanRow[]> {
     const result = await this.pool.query<{ id: string; user_id: string }>(
       `SELECT id, user_id
        FROM documents
-       WHERE status IN ('queued', 'extracting')`
+       WHERE status IN ('queued', 'extracting')
+       ORDER BY updated_at ASC
+       LIMIT $1`,
+      [orphanExtractionBatchSize()]
     );
     const out: OrphanRow[] = [];
     for (const row of result.rows) {

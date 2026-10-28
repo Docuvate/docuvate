@@ -10,6 +10,7 @@ export function createDocumentExtractionEnqueueStub(
   return {
     isJobQueuedOrActive: vi.fn(() => Promise.resolve(false)),
     enqueue: vi.fn(() => Promise.resolve()),
+    recordOrphanRequeue: vi.fn(() => Promise.resolve(1)),
     ...overrides,
   };
 }

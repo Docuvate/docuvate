@@ -71,6 +71,12 @@ function isLiveExtractionJobState(state: string): boolean {
   }
 }
 
+const ORPHAN_REQUEUE_COUNTER_TTL_SECONDS = 7 * 24 * 60 * 60;
+
+function orphanRequeueKey(documentId: string): string {
+  return `docuvate:extraction:orphan-requeues:${documentId}`;
+}
+
 @Injectable()
 export class ExtractionQueueService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(ExtractionQueueService.name);
@@ -124,6 +130,7 @@ export class ExtractionQueueService implements OnModuleInit, OnModuleDestroy {
             }
             throw failure;
           }
+          await this.connection.del(orphanRequeueKey(documentId));
           await this.maybeEnqueueArenaSample(documentId, userId);
         } finally {
           this.extractCapacity.releaseSlot();
@@ -217,6 +224,13 @@ export class ExtractionQueueService implements OnModuleInit, OnModuleDestroy {
     }
     const state = await job.getState();
     return isBullJobQueuedState(state);
+  }
+
+  async recordOrphanRequeue(documentId: string): Promise<number> {
+    const key = orphanRequeueKey(documentId);
+    const count = await this.connection.incr(key);
+    await this.connection.expire(key, ORPHAN_REQUEUE_COUNTER_TTL_SECONDS);
+    return count;
   }
 
   private async persistFinalJobFailure(job: Job, error: Error): Promise<void> {

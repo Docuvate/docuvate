@@ -5,4 +5,6 @@
 export interface DocumentExtractionEnqueuePort {
   isJobQueuedOrActive(documentId: string): Promise<boolean>;
   enqueue(documentId: string, userId: string): Promise<void>;
+  /** Count one orphan re-enqueue for the document; returns the new total (bounded TTL). */
+  recordOrphanRequeue(documentId: string): Promise<number>;
 }
