@@ -16,8 +16,12 @@ import {
 import { RunDocumentPostOcrPipelineUseCase } from '../../document-pipeline/application/run-document-post-ocr-pipeline.use-case.js';
 import { ScheduleDuplicateDetectionUseCase } from '../../duplicates/application/schedule-duplicate-detection.use-case.js';
 import { PersistDocumentFactsUseCase } from '../../exact-facts/application/persist-document-facts.use-case.js';
+import {
+  ExtractionFailure,
+  extractionFailureReasonKey,
+  toExtractionFailure,
+} from '../../extraction/domain/extraction-failure.js';
 import { extractionStaleClaimSeconds } from '../../extraction/domain/extraction-queue.config.js';
-import { isRetryableExtractionFailureMessage } from '../../extraction/domain/extraction-queue-failures.js';
 import { ResolveFeatureFlagsUseCase } from '../../feature-flags/application/resolve-feature-flags.use-case.js';
 import { PgEmbeddingDensityRepository } from '../../labels/infrastructure/pg-embedding-density.repository.js';
 import { PersistDocumentRepresentationUseCase } from '../../representation/application/persist-document-representation.use-case.js';
@@ -61,7 +65,7 @@ export class RunExtractionUseCase {
       return;
     }
     if (claim === 'busy') {
-      throw new Error('document extraction already in progress');
+      throw new ExtractionFailure('claim_busy', 'document extraction already in progress');
     }
     try {
       const buffer = await this.storage.getObject(doc.storageKey);
@@ -118,15 +122,19 @@ export class RunExtractionUseCase {
       );
       await this.documents.updateStatus(documentId, 'ready');
     } catch (error: unknown) {
-      const failureReason = error instanceof Error ? error.message : String(error);
-      const retryable = isRetryableExtractionFailureMessage(failureReason);
-      if (!retryable) {
+      const failure = toExtractionFailure(error);
+      if (failure.retryable) {
+        // Release the claim so the next BullMQ attempt can claim it again.
+        await this.documents.updateStatus(documentId, 'queued');
+      } else {
         const contentHash =
           (await this.documents.findById(documentId))?.contentHash ?? doc.contentHash ?? null;
         await this.scheduleDuplicateDetection.execute(documentId, doc.userId, contentHash);
-        await this.documents.updateStatus(documentId, 'failed', { failureReason });
+        await this.documents.updateStatus(documentId, 'failed', {
+          failureReason: extractionFailureReasonKey(failure.code),
+        });
       }
-      throw error;
+      throw failure;
     }
   }
 }

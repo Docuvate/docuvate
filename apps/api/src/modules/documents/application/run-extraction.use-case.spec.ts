@@ -19,6 +19,7 @@ import { createTaxonomyRepositoryStub } from '../../../test-support/taxonomy-rep
 import { RunDocumentPostOcrPipelineUseCase } from '../../document-pipeline/application/run-document-post-ocr-pipeline.use-case.js';
 import { ScheduleDuplicateDetectionUseCase } from '../../duplicates/application/schedule-duplicate-detection.use-case.js';
 import { PersistDocumentFactsUseCase } from '../../exact-facts/application/persist-document-facts.use-case.js';
+import { ExtractionFailure } from '../../extraction/domain/extraction-failure.js';
 import { ResolveFeatureFlagsUseCase } from '../../feature-flags/application/resolve-feature-flags.use-case.js';
 import { PgEmbeddingDensityRepository } from '../../labels/infrastructure/pg-embedding-density.repository.js';
 import { PersistDocumentRepresentationUseCase } from '../../representation/application/persist-document-representation.use-case.js';
@@ -202,10 +203,23 @@ describe('RunExtractionUseCase', () => {
   it('does not mark failed on worker 503 pressure', async () => {
     const updateStatus = vi.fn<DocumentRepository['updateStatus']>();
     const useCase = await buildUseCase({
-      extractError: new Error('Worker extraction unavailable: 503'),
+      extractError: new ExtractionFailure('worker_busy', 'worker HTTP 503'),
       updateStatus,
     });
     await expect(useCase.execute('doc-1')).rejects.toThrow('503');
     expect(updateStatus).not.toHaveBeenCalledWith('doc-1', 'failed', expect.anything());
+    expect(updateStatus).toHaveBeenCalledWith('doc-1', 'queued');
+  });
+
+  it('stores the typed failure reason for permanent worker failures', async () => {
+    const updateStatus = vi.fn<DocumentRepository['updateStatus']>();
+    const useCase = await buildUseCase({
+      extractError: new ExtractionFailure('resource_exhausted', 'worker HTTP 422'),
+      updateStatus,
+    });
+    await expect(useCase.execute('doc-1')).rejects.toThrow('422');
+    expect(updateStatus).toHaveBeenCalledWith('doc-1', 'failed', {
+      failureReason: 'documents.extractionFailureCode.resource_exhausted',
+    });
   });
 });

@@ -2,22 +2,15 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 
 import { isRecord, parseString } from '../../../shared/infrastructure/database/row-parse.js';
+import { ExtractionFailure, type ExtractionFailureCode } from './extraction-failure.js';
 
-export const WORKER_EXTRACT_DEADLINE_ERROR_TYPE = 'ExtractDeadlineExceeded';
-export const WORKER_EXTRACT_CLIENT_DISCONNECTED_ERROR_TYPE = 'ExtractClientDisconnected';
-
-export class WorkerExtractDeadlineError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'WorkerExtractDeadlineError';
-  }
-}
-
-export function parseWorkerExtractErrorBody(raw: unknown): {
+export interface WorkerExtractErrorBody {
   errorCode: string;
   errorType: string;
   reason: string;
-} | null {
+}
+
+export function parseWorkerExtractErrorBody(raw: unknown): WorkerExtractErrorBody | null {
   if (!isRecord(raw)) {
     return null;
   }
@@ -31,27 +24,40 @@ export function parseWorkerExtractErrorBody(raw: unknown): {
   return { errorCode, errorType, reason };
 }
 
-export function isWorkerExtractDeadlineResponse(
+function codeForWorkerResponse(
   status: number,
-  body: { errorCode: string; errorType: string; reason: string } | null
-): boolean {
-  if (status !== 503 || !body) {
-    return false;
+  body: WorkerExtractErrorBody | null
+): ExtractionFailureCode {
+  if (status === 503) {
+    const errorCode = body?.errorCode ?? '';
+    if (errorCode === 'extract_resource_busy') {
+      return 'worker_busy';
+    }
+    if (errorCode === 'extract_deadline_exceeded' || errorCode === 'extract_client_disconnected') {
+      return 'worker_deadline';
+    }
+    return 'worker_unavailable';
   }
-  return (
-    body.errorType === WORKER_EXTRACT_DEADLINE_ERROR_TYPE ||
-    body.errorCode === 'extract_deadline_exceeded' ||
-    body.errorCode === 'extract_client_disconnected'
-  );
+  if (status === 502 || status === 504) {
+    return 'worker_unavailable';
+  }
+  if (status === 422 && body?.errorCode === 'extract_permanent_failure') {
+    return body.errorType === 'ExtractResourceExhausted'
+      ? 'resource_exhausted'
+      : 'document_unprocessable';
+  }
+  if (status === 422) {
+    return 'document_unprocessable';
+  }
+  return 'worker_error';
 }
 
-export function workerExtractDeadlineFailureMessage(body: {
-  errorType: string;
-  reason: string;
-}): string {
-  return `Worker extraction deadline: 503 ${body.errorType} ${body.reason}`;
-}
-
-export function isWorkerExtractDeadlineFailureMessage(message: string): boolean {
-  return message.includes('Worker extraction deadline: 503');
+/** Classify a non-2xx worker /v1/extract response by HTTP status and the worker's typed errorCode. */
+export function extractionFailureFromWorkerResponse(
+  status: number,
+  body: WorkerExtractErrorBody | null
+): ExtractionFailure {
+  const code = codeForWorkerResponse(status, body);
+  const typed = body ? ` ${body.errorCode} ${body.errorType}` : '';
+  return new ExtractionFailure(code, `worker HTTP ${String(status)}${typed}`);
 }

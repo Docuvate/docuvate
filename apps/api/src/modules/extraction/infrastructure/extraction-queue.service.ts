@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
-import { Queue, UnrecoverableError, Worker } from 'bullmq';
+import { type Job, Queue, UnrecoverableError, Worker } from 'bullmq';
 import type IORedis from 'ioredis';
 
 import { DOCUMENT_REPOSITORY, type DocumentRepository } from '../../../shared/domain/ports.js';
@@ -20,7 +20,8 @@ import {
 import { RunArenaSampleCompareUseCase } from '../../documents/application/run-arena-sample-compare.use-case.js';
 import { RunExtractionUseCase } from '../../documents/application/run-extraction.use-case.js';
 import { ResolveFeatureFlagsUseCase } from '../../feature-flags/application/resolve-feature-flags.use-case.js';
-import { EXTRACTION_DEADLINE_FAILURE_I18N_KEY, extractionDeadlineMaxRetries } from '../domain/extraction-deadline.config.js';
+import { extractionDeadlineMaxRetries } from '../domain/extraction-deadline.config.js';
+import { toExtractionFailure } from '../domain/extraction-failure.js';
 import {
   documentExtractionConcurrency,
   extractionJobId,
@@ -28,8 +29,10 @@ import {
   extractionQueueMaxStalledCount,
   extractionQueueStalledIntervalMs,
 } from '../domain/extraction-queue.config.js';
-import { isPermanentExtractionFailureMessage } from '../domain/extraction-queue-failures.js';
-import { isWorkerExtractDeadlineFailureMessage } from '../domain/extraction-worker-errors.js';
+import {
+  planExtractionJobFailed,
+  planProcessorFailure,
+} from '../domain/plan-extraction-job-failure.js';
 import type { ExtractionReconcileJob } from '../domain/plan-extraction-reconcile.js';
 import { WorkerExtractCapacityCoordinator } from './worker-extract-capacity.coordinator.js';
 
@@ -105,20 +108,21 @@ export class ExtractionQueueService implements OnModuleInit, OnModuleDestroy {
             await this.recordExtractionStart(documentId);
             await this.runExtraction.execute(documentId);
           } catch (error: unknown) {
-            const message = error instanceof Error ? error.message : String(error);
-            if (isPermanentExtractionFailureMessage(message)) {
-              throw new UnrecoverableError(message);
-            }
-            if (
-              isWorkerExtractDeadlineFailureMessage(message) &&
-              job.attemptsMade + 1 >= extractionDeadlineMaxRetries()
-            ) {
+            const failure = toExtractionFailure(error);
+            const plan = planProcessorFailure({
+              failure,
+              attemptsMade: job.attemptsMade,
+              deadlineMaxRetries: extractionDeadlineMaxRetries(),
+            });
+            if (plan.kind === 'fail_document') {
               await this.documents.updateStatus(documentId, 'failed', {
-                failureReason: EXTRACTION_DEADLINE_FAILURE_I18N_KEY,
+                failureReason: plan.failureReason,
               });
-              throw new UnrecoverableError(message);
             }
-            throw error;
+            if (plan.kind !== 'retry') {
+              throw new UnrecoverableError(failure.message);
+            }
+            throw failure;
           }
           await this.maybeEnqueueArenaSample(documentId, userId);
         } finally {
@@ -133,6 +137,15 @@ export class ExtractionQueueService implements OnModuleInit, OnModuleDestroy {
         maxStalledCount: extractionQueueMaxStalledCount(),
       }
     );
+    this.worker.on('failed', (job, error) => {
+      if (!job) {
+        return;
+      }
+      void this.persistFinalJobFailure(job, error).catch((persistError: unknown) => {
+        const detail = persistError instanceof Error ? persistError.message : String(persistError);
+        this.logger.warn(`Could not persist final extraction failure: ${detail}`);
+      });
+    });
     this.extractCapacity.onSlotsChanged((slots) => {
       this.worker.concurrency = documentExtractionConcurrency(slots);
     });
@@ -204,6 +217,23 @@ export class ExtractionQueueService implements OnModuleInit, OnModuleDestroy {
     }
     const state = await job.getState();
     return isBullJobQueuedState(state);
+  }
+
+  private async persistFinalJobFailure(job: Job, error: Error): Promise<void> {
+    const documentId = parseExtractionJobDocumentId(job.data);
+    const state = await job.getState();
+    const document = await this.documents.findById(documentId);
+    const failureReason = planExtractionJobFailed({
+      jobName: job.name,
+      jobFinallyFailed: state === 'failed',
+      documentStatus: document?.status ?? null,
+      error,
+    });
+    if (failureReason === null) {
+      return;
+    }
+    this.logger.warn(`Extraction job for ${documentId} finally failed: ${error.message}`);
+    await this.documents.updateStatus(documentId, 'failed', { failureReason });
   }
 
   async enqueue(documentId: string, _userId: string): Promise<void> {

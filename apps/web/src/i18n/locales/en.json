@@ -1046,7 +1046,20 @@
     "extractedMarkdownViewAria": "Markdown view",
     "ingestSourceScanner": "Scanner ingress",
     "previewLoading": "Loading preview…",
-    "previewTextEmpty": "No text has been recognised for this document yet."
+    "previewTextEmpty": "No text has been recognised for this document yet.",
+    "extractionFailureCode": {
+      "worker_unreachable": "The extraction service could not be reached. Please retry.",
+      "worker_unavailable": "The extraction service was temporarily unavailable. Please retry.",
+      "worker_busy": "The extraction service stayed busy after several attempts. Please retry later.",
+      "worker_deadline": "Text recognition exceeded the time limit.",
+      "worker_timeout": "Text recognition exceeded the time limit.",
+      "document_unprocessable": "This document could not be processed.",
+      "resource_exhausted": "This document is too large to process with the available memory.",
+      "worker_error": "The extraction service reported an error.",
+      "claim_busy": "Extraction for this document was already in progress.",
+      "internal_error": "Extraction failed due to an internal error.",
+      "orphan_requeue_exhausted": "Extraction was restarted too often without finishing and was stopped."
+    }
   },
   "settings": {
     "title": "Settings",
