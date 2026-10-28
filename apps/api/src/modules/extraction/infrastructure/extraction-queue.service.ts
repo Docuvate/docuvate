@@ -127,12 +127,15 @@ export class ExtractionQueueService implements OnModuleInit, OnModuleDestroy {
       },
       {
         connection: this.connection,
-        concurrency: documentExtractionConcurrency(),
+        concurrency: documentExtractionConcurrency(this.extractCapacity.recommendedSlots()),
         lockDuration: extractionQueueLockDurationMs(),
         stalledInterval: extractionQueueStalledIntervalMs(),
         maxStalledCount: extractionQueueMaxStalledCount(),
       }
     );
+    this.extractCapacity.onSlotsChanged((slots) => {
+      this.worker.concurrency = documentExtractionConcurrency(slots);
+    });
     this.ready = true;
   }
 

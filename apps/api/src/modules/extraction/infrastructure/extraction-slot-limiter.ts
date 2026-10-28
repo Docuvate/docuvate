@@ -1,7 +1,8 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 
-const MAX_API_EXTRACTION_SLOTS = 4;
+import { clampExtractionSlots } from '../domain/extraction-slots.js';
+
 
 export class ExtractionSlotLimiter {
   private maxSlots: number;
@@ -9,7 +10,7 @@ export class ExtractionSlotLimiter {
   private readonly waiters: (() => void)[] = [];
 
   constructor(initialSlots: number) {
-    this.maxSlots = clampSlots(initialSlots);
+    this.maxSlots = clampExtractionSlots(initialSlots);
   }
 
   currentMaxSlots(): number {
@@ -17,7 +18,7 @@ export class ExtractionSlotLimiter {
   }
 
   setMaxSlots(slots: number): void {
-    this.maxSlots = clampSlots(slots);
+    this.maxSlots = clampExtractionSlots(slots);
     this.wakeWaiters();
   }
 
@@ -51,23 +52,4 @@ export class ExtractionSlotLimiter {
       next?.();
     }
   }
-}
-
-function clampSlots(slots: number): number {
-  if (!Number.isFinite(slots) || slots < 1) {
-    return 1;
-  }
-  return Math.min(MAX_API_EXTRACTION_SLOTS, Math.floor(slots));
-}
-
-/** Upper bound for BullMQ handlers when env is unset (effective parallelism is slot-limited). */
-export function extractionWorkerMaxConcurrency(): number {
-  const raw = process.env['DOCUMENT_EXTRACTION_CONCURRENCY'];
-  if (raw) {
-    const parsed = Number.parseInt(raw, 10);
-    if (Number.isFinite(parsed) && parsed > 0) {
-      return Math.min(MAX_API_EXTRACTION_SLOTS, parsed);
-    }
-  }
-  return MAX_API_EXTRACTION_SLOTS;
 }

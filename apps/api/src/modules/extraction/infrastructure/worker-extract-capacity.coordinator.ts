@@ -18,6 +18,7 @@ export class WorkerExtractCapacityCoordinator implements OnModuleInit, OnModuleD
   private refreshTimer: ReturnType<typeof setInterval> | null = null;
   private lastCapacity: WorkerExtractCapacity | null = null;
   private workerUrl = process.env['WORKER_URL'] ?? 'http://localhost:8000';
+  private readonly slotListeners: ((slots: number) => void)[] = [];
 
   onModuleInit(): void {
     this.start(this.workerUrl);
@@ -48,6 +49,7 @@ export class WorkerExtractCapacityCoordinator implements OnModuleInit, OnModuleD
     this.lastCapacity = capacity;
     const slots = capacity?.recommendedConcurrentExtractions ?? 1;
     this.limiter.setMaxSlots(slots);
+    this.notifySlots();
     this.logger.debug(
       `Worker extract capacity slots=${String(slots)} free=${String(capacity?.extractSlotsFree ?? 'unknown')}`
     );
@@ -55,6 +57,19 @@ export class WorkerExtractCapacityCoordinator implements OnModuleInit, OnModuleD
 
   lastReport(): WorkerExtractCapacity | null {
     return this.lastCapacity;
+  }
+
+  /** Called with the current slot count now and whenever it changes. */
+  onSlotsChanged(listener: (slots: number) => void): void {
+    this.slotListeners.push(listener);
+    listener(this.limiter.currentMaxSlots());
+  }
+
+  private notifySlots(): void {
+    const slots = this.limiter.currentMaxSlots();
+    for (const listener of this.slotListeners) {
+      listener(slots);
+    }
   }
 
   recommendedSlots(): number {
@@ -71,6 +86,7 @@ export class WorkerExtractCapacityCoordinator implements OnModuleInit, OnModuleD
 
   onWorkerPressure503(retryAfterSeconds: number): void {
     this.limiter.reduceOnPressure();
+    this.notifySlots();
     this.logger.warn(
       `Worker returned 503; reduced API extraction slots to ${String(this.limiter.currentMaxSlots())} (retry after ${String(retryAfterSeconds)}s)`
     );
