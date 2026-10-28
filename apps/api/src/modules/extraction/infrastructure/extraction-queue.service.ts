@@ -29,8 +29,8 @@ import {
   extractionQueueStalledIntervalMs,
 } from '../domain/extraction-queue.config.js';
 import { isPermanentExtractionFailureMessage } from '../domain/extraction-queue-failures.js';
-import type { ExtractionReconcileJob } from '../domain/plan-extraction-reconcile.js';
 import { isWorkerExtractDeadlineFailureMessage } from '../domain/extraction-worker-errors.js';
+import type { ExtractionReconcileJob } from '../domain/plan-extraction-reconcile.js';
 import { WorkerExtractCapacityCoordinator } from './worker-extract-capacity.coordinator.js';
 
 function parseExtractionJobDocumentId(data: unknown): string {

@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { EXTRACTION_TIMEOUT_FAILURE_MESSAGE } from '../domain/extraction-queue-failures.js';
 import { HttpExtractionAdapter } from './http-extraction.adapter.js';
+import { WorkerExtractCapacityCoordinator } from './worker-extract-capacity.coordinator.js';
 
 describe('HttpExtractionAdapter.extract deadline', () => {
   afterEach(() => {
@@ -15,7 +16,7 @@ describe('HttpExtractionAdapter.extract deadline', () => {
     timeout.name = 'TimeoutError';
     const fetchMock = vi.fn<typeof fetch>().mockRejectedValue(timeout);
     vi.stubGlobal('fetch', fetchMock);
-    const adapter = new HttpExtractionAdapter();
+    const adapter = new HttpExtractionAdapter(new WorkerExtractCapacityCoordinator());
 
     await expect(adapter.extract(Buffer.from('x'), 'application/pdf')).rejects.toThrow(
       EXTRACTION_TIMEOUT_FAILURE_MESSAGE
