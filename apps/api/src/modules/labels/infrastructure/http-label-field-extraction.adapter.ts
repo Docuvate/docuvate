@@ -14,7 +14,6 @@ import {
   parseString,
 } from '../../../shared/infrastructure/database/row-parse.js';
 import { workerApiUrl } from '../../../shared/infrastructure/worker/worker-api-path.js';
-import { withWorkerExtractSlot } from '../../extraction/infrastructure/with-worker-extract-slot.js';
 import {
   parseWorkerRetryAfterSeconds,
   WorkerExtractCapacityCoordinator,
@@ -63,7 +62,7 @@ export class HttpLabelFieldExtractionAdapter implements LabelFieldExtractionPort
     options?: { examples?: LabelFieldExtractionExample[] }
   ): Promise<ExtractedField[]> {
     const examples = options?.examples ?? [];
-    return withWorkerExtractSlot(this.extractCapacity, async () => {
+    return this.extractCapacity.runWithSlot(async () => {
       const response = await fetch(workerApiUrl(this.workerUrl(), '/extract/label-fields'), {
         method: 'POST',
         headers: this.workerHeaders(),

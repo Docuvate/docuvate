@@ -48,3 +48,37 @@ describe('WorkerExtractCapacityCoordinator slot listeners', () => {
     expect(seen).toEqual([1, 3]);
   });
 });
+
+describe('WorkerExtractCapacityCoordinator.runWithSlot', () => {
+  it('lets a nested worker call inside a job reuse the held slot', async () => {
+    const coordinator = new WorkerExtractCapacityCoordinator();
+    expect(coordinator.recommendedSlots()).toBe(1);
+    const result = await coordinator.runWithSlot(() =>
+      coordinator.runWithSlot(() => Promise.resolve('nested-done'))
+    );
+    expect(result).toBe('nested-done');
+  });
+
+  it('still serialises independent callers on one slot', async () => {
+    const coordinator = new WorkerExtractCapacityCoordinator();
+    const order: string[] = [];
+    let releaseFirst: () => void = () => undefined;
+    const firstGate = new Promise<void>((resolve) => {
+      releaseFirst = resolve;
+    });
+    const first = coordinator.runWithSlot(async () => {
+      order.push('first-start');
+      await firstGate;
+      order.push('first-end');
+    });
+    const second = coordinator.runWithSlot(() => {
+      order.push('second-start');
+      return Promise.resolve();
+    });
+    await Promise.resolve();
+    expect(order).toEqual(['first-start']);
+    releaseFirst();
+    await Promise.all([first, second]);
+    expect(order).toEqual(['first-start', 'first-end', 'second-start']);
+  });
+});

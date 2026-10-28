@@ -1,8 +1,11 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 
+import { AsyncLocalStorage } from 'node:async_hooks';
+
 import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 
+import type { WorkerExtractSlotPort } from '../domain/worker-extract-slot.port.js';
 import { ExtractionSlotLimiter } from './extraction-slot-limiter.js';
 import {
   fetchWorkerExtractCapacity,
@@ -12,13 +15,16 @@ import {
 const REFRESH_INTERVAL_MS = 30_000;
 
 @Injectable()
-export class WorkerExtractCapacityCoordinator implements OnModuleInit, OnModuleDestroy {
+export class WorkerExtractCapacityCoordinator
+  implements OnModuleInit, OnModuleDestroy, WorkerExtractSlotPort
+{
   private readonly logger = new Logger(WorkerExtractCapacityCoordinator.name);
   private readonly limiter = new ExtractionSlotLimiter(1);
   private refreshTimer: ReturnType<typeof setInterval> | null = null;
   private lastCapacity: WorkerExtractCapacity | null = null;
   private workerUrl = process.env['WORKER_URL'] ?? 'http://localhost:8000';
   private readonly slotListeners: ((slots: number) => void)[] = [];
+  private readonly heldSlot = new AsyncLocalStorage<true>();
 
   onModuleInit(): void {
     this.start(this.workerUrl);
@@ -76,12 +82,16 @@ export class WorkerExtractCapacityCoordinator implements OnModuleInit, OnModuleD
     return this.limiter.currentMaxSlots();
   }
 
-  async acquireSlot(): Promise<void> {
+  async runWithSlot<T>(run: () => Promise<T>): Promise<T> {
+    if (this.heldSlot.getStore() === true) {
+      return run();
+    }
     await this.limiter.acquire();
-  }
-
-  releaseSlot(): void {
-    this.limiter.release();
+    try {
+      return await this.heldSlot.run(true, run);
+    } finally {
+      this.limiter.release();
+    }
   }
 
   onWorkerPressure503(retryAfterSeconds: number): void {

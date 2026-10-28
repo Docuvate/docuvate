@@ -108,8 +108,7 @@ export class ExtractionQueueService implements OnModuleInit, OnModuleDestroy {
           return;
         }
         const userId = parseString(requireRecord(job.data).userId).trim();
-        await this.extractCapacity.acquireSlot();
-        try {
+        await this.extractCapacity.runWithSlot(async () => {
           try {
             await this.recordExtractionStart(documentId);
             await this.runExtraction.execute(documentId);
@@ -132,9 +131,7 @@ export class ExtractionQueueService implements OnModuleInit, OnModuleDestroy {
           }
           await this.connection.del(orphanRequeueKey(documentId));
           await this.maybeEnqueueArenaSample(documentId, userId);
-        } finally {
-          this.extractCapacity.releaseSlot();
-        }
+        });
       },
       {
         connection: this.connection,
@@ -173,7 +170,11 @@ export class ExtractionQueueService implements OnModuleInit, OnModuleDestroy {
     if (job) {
       const state = await job.getState();
       live = isLiveExtractionJobState(state);
-      if (typeof job.processedOn === 'number' && Number.isFinite(job.processedOn) && job.processedOn > 0) {
+      if (
+        typeof job.processedOn === 'number' &&
+        Number.isFinite(job.processedOn) &&
+        job.processedOn > 0
+      ) {
         startedAtMs = job.processedOn;
       }
     }

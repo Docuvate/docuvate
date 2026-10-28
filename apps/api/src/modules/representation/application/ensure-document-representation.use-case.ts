@@ -11,7 +11,6 @@ import {
   workerCompareTimeoutMs,
 } from '../../../shared/infrastructure/worker/worker-fetch.js';
 import { workerRequestHeaders } from '../../../shared/infrastructure/worker/worker-request-headers.js';
-import { withWorkerExtractSlot } from '../../extraction/infrastructure/with-worker-extract-slot.js';
 import { WorkerExtractCapacityCoordinator } from '../../extraction/infrastructure/worker-extract-capacity.coordinator.js';
 import { PgDocumentRepresentationRepository } from '../infrastructure/pg-document-representation.repository.js';
 import { PersistDocumentRepresentationUseCase } from './persist-document-representation.use-case.js';
@@ -110,7 +109,7 @@ export class EnsureDocumentRepresentationUseCase {
     const workerUrl = process.env['WORKER_URL'] ?? 'http://localhost:8000';
     let payload: unknown;
     try {
-      payload = await withWorkerExtractSlot(this.extractCapacity, async () => {
+      payload = await this.extractCapacity.runWithSlot(async () => {
         try {
           return await fetchWorkerJson(
             workerApiUrl(workerUrl, '/representation/from-text'),
