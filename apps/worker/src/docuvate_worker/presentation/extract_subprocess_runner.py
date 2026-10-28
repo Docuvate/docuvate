@@ -290,7 +290,11 @@ def _run_subprocess_once(payload: dict[str, Any], *, timeout: float) -> dict[str
             return {
                 "ok": False,
                 "error": message,
-                "error_type": "RuntimeError",
+                "error_type": (
+                    CHILD_KILLED_ERROR_TYPE
+                    if proc.returncode == -signal.SIGKILL
+                    else "ExtractChildExited"
+                ),
                 "permanent": proc.returncode == -signal.SIGKILL,
             }
         parsed = json.loads(raw_out)
@@ -299,11 +303,13 @@ def _run_subprocess_once(payload: dict[str, Any], *, timeout: float) -> dict[str
         return parsed
 
 
+CHILD_KILLED_ERROR_TYPE = "ExtractChildKilled"
+
+
 def _sigkill_envelope(envelope: dict[str, Any]) -> bool:
     if envelope.get("ok") is not False:
         return False
-    error_text = str(envelope.get("error") or "")
-    return "SIGKILL" in error_text
+    return envelope.get("error_type") == CHILD_KILLED_ERROR_TYPE
 
 
 def _resource_exhausted_message() -> str:
