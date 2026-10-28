@@ -13,13 +13,11 @@ from docuvate_worker.infrastructure.extract_memory.cgroup import (
     read_cgroup_memory_snapshot,
 )
 from docuvate_worker.infrastructure.extract_memory.extract_concurrency import (
+    extract_job_footprint_bytes,
     resolve_extract_concurrency,
 )
 from docuvate_worker.infrastructure.extract_memory.model_residency import (
     evictable_pool_model_bytes,
-)
-from docuvate_worker.infrastructure.extract_memory.pool_memory import (
-    pool_resident_bytes_per_child,
 )
 from docuvate_worker.presentation.extract_http_concurrency import http_extract_slots_in_use
 
@@ -49,7 +47,7 @@ def build_extract_capacity_report() -> ExtractCapacityReport:
             count_active_file=False,
         )
     effective = (available or 0) + evictable
-    per_job = max(pool_resident_bytes_per_child(), 1)
+    per_job = max(extract_job_footprint_bytes(), 1)
     pool_cap = resolve_extract_concurrency()
     if snapshot is None or snapshot.limit_bytes is None:
         recommended = 1
