@@ -163,6 +163,7 @@ class AdmissionDecision:
     admit: bool
     available_bytes: int | None
     reason: str
+    ticket: int | None = None
 
 
 def document_exceeds_cgroup_even_without_models(
@@ -254,7 +255,9 @@ def decide_extract_admission(
 
 @dataclass
 class _AdmissionSlot:
+    ticket: int
     estimate_bytes: int
+    started: bool = False
 
 
 class ExtractAdmissionController:
@@ -263,6 +266,7 @@ class ExtractAdmissionController:
     def __init__(self) -> None:
         self._lock = threading.Lock()
         self._active: list[_AdmissionSlot] = []
+        self._next_ticket = 1
 
     def _headroom_bytes(self) -> int:
         return _env_int(_ENV_HEADROOM, _DEFAULT_HEADROOM)
@@ -274,7 +278,12 @@ class ExtractAdmissionController:
         return _env_bool(_ENV_COUNT_ACTIVE_FILE, False)
 
     def _reserved_bytes(self) -> int:
-        return sum(slot.estimate_bytes for slot in self._active)
+        """Estimates for admitted jobs whose memory is not yet visible in cgroup usage.
+
+        Running jobs are already part of measured cgroup usage; counting their estimate
+        again would double count and deny capacity that is actually free.
+        """
+        return sum(slot.estimate_bytes for slot in self._active if not slot.started)
 
     def try_acquire(
         self,
@@ -300,7 +309,15 @@ class ExtractAdmissionController:
             if decision.admit:
                 if decision.reason == "idle_evictable_models":
                     reclaim_model_memory_for_admission()
-                self._active.append(_AdmissionSlot(estimate_bytes=estimate_bytes))
+                ticket = self._next_ticket
+                self._next_ticket += 1
+                self._active.append(_AdmissionSlot(ticket=ticket, estimate_bytes=estimate_bytes))
+                decision = AdmissionDecision(
+                    admit=True,
+                    available_bytes=decision.available_bytes,
+                    reason=decision.reason,
+                    ticket=ticket,
+                )
             else:
                 logger.warning(
                     "extract_admission_denied estimate_bytes=%s pool_reserved=%s available=%s "
@@ -313,18 +330,19 @@ class ExtractAdmissionController:
                 )
             return decision
 
-    def release(self, estimate_bytes: int) -> None:
+    def mark_started(self, ticket: int) -> None:
+        """The admitted job is running; from now on its memory shows up in cgroup usage."""
+        with self._lock:
+            for slot in self._active:
+                if slot.ticket == ticket:
+                    slot.started = True
+                    return
+
+    def release(self, ticket: int) -> None:
         idle_after_release = False
         with self._lock:
-            for index, slot in enumerate(self._active):
-                if slot.estimate_bytes == estimate_bytes:
-                    del self._active[index]
-                    idle_after_release = len(self._active) == 0
-                    break
-            else:
-                if self._active:
-                    self._active.pop()
-                idle_after_release = len(self._active) == 0
+            self._active = [slot for slot in self._active if slot.ticket != ticket]
+            idle_after_release = len(self._active) == 0
         if idle_after_release and cgroup_should_reclaim_idle_models():
             reclaim_model_memory_for_admission()
 
@@ -391,10 +409,15 @@ def extract_admission_slot(content: bytes, mime_type: str) -> Iterator[None]:
             ),
             error_type="ExtractResourceBusy",
         )
+    ticket = decision.ticket
+    if ticket is None:
+        yield
+        return
+    controller.mark_started(ticket)
     try:
         yield
     finally:
-        controller.release(estimate)
+        controller.release(ticket)
 
 
 # Backwards-compatible alias for tests and metrics.
