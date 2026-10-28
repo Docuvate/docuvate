@@ -6,6 +6,8 @@ import { applyDocuvateLocale, applyDocuvateThemePreference } from './docuvate-th
 import { parseDocumentListBody } from './json-body';
 
 const THEME_ATTRIBUTE = 'data-docuvate-theme';
+/** The smoke seed runs concurrently with Playwright setup; its pipeline timeout is 360 s. */
+const SMOKE_READY_DOCUMENT_TIMEOUT_MS = 360_000;
 
 export type ContrastLocale = 'de' | 'en';
 export type ContrastTheme = 'light' | 'dark';
@@ -15,13 +17,29 @@ export async function resolveSmokeReadyDocumentPath(
   apiBase: string,
   webOrigin: string
 ): Promise<string> {
-  const documentsRes = await request.get(`${apiBase}/v1/documents?status=ready`, {
-    headers: { origin: webOrigin },
-  });
-  expect(documentsRes.ok()).toBeTruthy();
-  const documents = parseDocumentListBody(await documentsRes.json());
-  expect(documents.length).toBeGreaterThan(0);
-  return `/documents/${documents[0].id}`;
+  let readyDocumentId: string | undefined;
+  await expect
+    .poll(
+      async () => {
+        const documentsRes = await request.get(`${apiBase}/v1/documents?status=ready`, {
+          headers: { origin: webOrigin },
+        });
+        expect(documentsRes.ok()).toBeTruthy();
+        const [firstReady] = parseDocumentListBody(await documentsRes.json());
+        readyDocumentId = firstReady?.id;
+        return readyDocumentId !== undefined;
+      },
+      {
+        message: 'smoke seed has no ready document yet',
+        timeout: SMOKE_READY_DOCUMENT_TIMEOUT_MS,
+        intervals: [2_000, 5_000],
+      }
+    )
+    .toBe(true);
+  if (readyDocumentId === undefined) {
+    throw new Error('smoke seed produced no ready document');
+  }
+  return `/documents/${readyDocumentId}`;
 }
 
 export async function applyContrastLocale(page: Page, locale: ContrastLocale): Promise<void> {
@@ -50,7 +68,9 @@ export async function waitForContrastPageReady(
   webOrigin: string
 ): Promise<void> {
   if (slug === 'documents' || slug === 'documents-de') {
-    await page.getByTestId('library-doc-virtual-scroll').waitFor({ state: 'visible', timeout: 60_000 });
+    await page
+      .getByTestId('library-doc-virtual-scroll')
+      .waitFor({ state: 'visible', timeout: 60_000 });
     return;
   }
 
@@ -71,7 +91,9 @@ export async function waitForContrastPageReady(
   }
 
   if (slug === 'filesystem') {
-    await page.locator('.dateisystem-content-header').waitFor({ state: 'visible', timeout: 60_000 });
+    await page
+      .locator('.dateisystem-content-header')
+      .waitFor({ state: 'visible', timeout: 60_000 });
     return;
   }
 
@@ -87,10 +109,7 @@ export async function waitForContrastPageReady(
   await page.locator('#root').waitFor({ state: 'attached', timeout: 60_000 });
 }
 
-export function routePathForSlug(
-  slug: string,
-  documentDetailPath: string
-): string {
+export function routePathForSlug(slug: string, documentDetailPath: string): string {
   if (slug === 'documents' || slug === 'documents-de') {
     return '/documents';
   }
