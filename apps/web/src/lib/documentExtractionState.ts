@@ -38,7 +38,7 @@ export function presentExtractionFailure(
       technicalDetail: null,
     };
   }
-  // Untyped (legacy) reasons are shown as technical detail behind a generic message.
+  // Reasons without a known i18n key are shown as technical detail behind a generic message.
   return {
     userMessage: i18n.t('documents.extractionFailedWorker'),
     technicalDetail: trimmed,
