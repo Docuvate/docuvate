@@ -22,13 +22,13 @@ fi
 
 RESTARTS_BEFORE="$(docker inspect -f '{{.RestartCount}}' "${WORKER_CID}")"
 
-echo "=== worker 2GiB compose soak (HTTP /v1/extract, default env) ==="
+echo "=== worker 2GiB compose soak (count-based, HTTP /v1/extract, default env) ==="
 set +e
 SOAK_JSON="$("${COMPOSE[@]}" exec -T worker \
   python tests/scripts/worker_compose_2g_soak.py \
   --base-url "http://127.0.0.1:8000" \
-  --minutes "${WORKER_SOAK_MINUTES:-15}" \
-  --min-successes "${WORKER_SOAK_MIN_DOCS:-50}")"
+  --passes "${WORKER_SOAK_PASSES:-3}" \
+  --overall-timeout-minutes "${WORKER_SOAK_TIMEOUT_MINUTES:-90}")"
 SOAK_RC=$?
 set -e
 echo "${SOAK_JSON}"
@@ -39,17 +39,13 @@ if [ "${RESTARTS_AFTER}" != "${RESTARTS_BEFORE}" ]; then
   exit 5
 fi
 
-OOM_KILLED_LOG_LINES="$(docker logs "${WORKER_CID}" 2>&1 | grep -c 'likely_oom_kill=True' || true)"
-if [ -z "${OOM_KILLED_LOG_LINES}" ]; then
-  OOM_KILLED_LOG_LINES=0
-fi
-echo "worker_soak_oom_killed_log_lines=${OOM_KILLED_LOG_LINES}"
-
-if [ "${SOAK_RC}" -ne 0 ]; then
-  exit "${SOAK_RC}"
-fi
-
-if [ "${OOM_KILLED_LOG_LINES}" -gt 0 ]; then
-  echo "worker logged oom_killed child exits during soak" >&2
+OOM_KILLED_STATE="$(docker inspect -f '{{.State.OOMKilled}}' "${WORKER_CID}")"
+echo "worker_soak_restarts=$((RESTARTS_AFTER - RESTARTS_BEFORE)) worker_container_oom_killed=${OOM_KILLED_STATE}"
+if [ "${OOM_KILLED_STATE}" != "false" ]; then
+  echo "worker container was OOM-killed" >&2
   exit 6
 fi
+
+# Exit codes from the soak: 3 not all docs attempted in time, 4 untyped failure,
+# 6 cgroup OOM kill, 7 peak memory reached the cgroup limit.
+exit "${SOAK_RC}"

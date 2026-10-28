@@ -280,9 +280,11 @@ jobs:
           path: extract-stack-logs/
           retention-days: 14
           if-no-files-found: warn
-      - name: Worker 2GiB compose soak (HTTP /v1/extract, after web e2e)
+      - name: Worker 2GiB compose soak (13 docs x 3 passes, HTTP /v1/extract, after web e2e)
+        timeout-minutes: 100
         env:
-          WORKER_SOAK_MIN_DOCS: '20'
+          WORKER_SOAK_PASSES: '3'
+          WORKER_SOAK_TIMEOUT_MINUTES: '90'
         run: bash apps/worker/tests/scripts/worker_compose_2g_soak.sh
 
   db-migrate-fresh:
