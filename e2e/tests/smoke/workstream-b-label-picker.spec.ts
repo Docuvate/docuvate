@@ -8,6 +8,7 @@ import {
   assertDocumentRowChipsMinReadable,
   assertTagFilterPopoverChipInset,
 } from '../../helpers/label-picker-geometry';
+import { parseJsonItemsArray, parseJsonStringField } from '../../helpers/json-body';
 import { smokeFixtureStoragePath } from '../../helpers/smoke-fixture-auth';
 
 const webOrigin = process.env['E2E_WEB_URL'] ?? 'http://localhost:5173';
@@ -86,8 +87,7 @@ async function waitForDocumentReady(
         if (!res.ok()) {
           return 'pending';
         }
-        const doc = (await res.json()) as { status: string };
-        return doc.status;
+        return parseJsonStringField(await res.json(), 'status');
       },
       { timeout: 420_000, intervals: [2000, 3000, 5000] }
     )
@@ -111,8 +111,7 @@ async function provisionLongLabelRowFixture(
       response.ok(),
       `create tag failed status=${response.status()} body=${responseBody}`
     ).toBeTruthy();
-    const body = JSON.parse(responseBody) as { id: string };
-    tagIds.push(body.id);
+    tagIds.push(parseJsonStringField(JSON.parse(responseBody), 'id'));
   }
 
   const uploadName = `ws-b-ellipsis-fixture-${runToken}.pdf`;
@@ -131,7 +130,7 @@ async function provisionLongLabelRowFixture(
     },
   });
   expect(upload.ok()).toBeTruthy();
-  const created = (await upload.json()) as { id: string };
+  const created = { id: parseJsonStringField(await upload.json(), 'id') };
 
   for (const tagId of tagIds) {
     const assign = await request.post(`${apiBase}/v1/documents/${created.id}/tags/${tagId}`, {
@@ -233,8 +232,7 @@ async function seedLabels(request: import('@playwright/test').APIRequestContext,
     { headers: { origin: webOrigin } }
   );
   expect(search.ok()).toBeTruthy();
-  const page = (await search.json()) as { items: unknown[] };
-  expect(page.items.length).toBeGreaterThan(0);
+  expect(parseJsonItemsArray(await search.json()).length).toBeGreaterThan(0);
 }
 
 async function assertFullyInViewport(

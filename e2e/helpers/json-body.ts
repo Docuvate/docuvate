@@ -115,3 +115,21 @@ export function parseLabelRecommendationListBody(value: unknown): LabelRecommend
   }
   return items;
 }
+
+export function parseJsonStringField(value: unknown, field: string): string {
+  const root = requireRecord(value, field);
+  const parsed = parseString(root[field]);
+  if (!parsed) {
+    throw new Error(`Expected non-empty string field: ${field}`);
+  }
+  return parsed;
+}
+
+export function parseJsonItemsArray(value: unknown): unknown[] {
+  const root = requireRecord(value, 'items page');
+  const items: unknown = root.items;
+  if (!Array.isArray(items)) {
+    throw new Error('Expected items array');
+  }
+  return items;
+}
