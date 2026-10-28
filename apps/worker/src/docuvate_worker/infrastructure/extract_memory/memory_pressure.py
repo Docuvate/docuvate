@@ -57,11 +57,6 @@ def cgroup_under_memory_pressure() -> bool:
     return used >= int(snapshot.limit_bytes * _pressure_ratio())
 
 
-def should_defer_pool_recycle() -> bool:
-    """Skip planned pool child recycle while the cgroup is under pressure."""
-    return cgroup_under_memory_pressure()
-
-
 def cgroup_should_reclaim_idle_models() -> bool:
     """True when cgroup non-reclaimable usage exceeds the idle model reclaim threshold."""
     snapshot = read_cgroup_memory_snapshot()

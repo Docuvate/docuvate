@@ -25,7 +25,6 @@ from docuvate_worker.infrastructure.extract_memory.extract_concurrency import (
     onnx_intra_op_threads_for_concurrency,
     resolve_extract_concurrency,
 )
-from docuvate_worker.infrastructure.extract_memory.memory_pressure import should_defer_pool_recycle
 from docuvate_worker.infrastructure.extract_memory.pool_memory import (
     pool_memory_registry,
     pool_resident_bytes_per_child,
@@ -189,15 +188,10 @@ class PooledExtractChild:
             if self._proc is None:
                 self._proc = self._spawn()
             if self._jobs_served >= self._recycle_after:
-                if should_defer_pool_recycle():
-                    logger.info(
-                        "extract_pool_recycle_deferred jobs_served=%s memory_pressure=1",
-                        self._jobs_served,
-                    )
-                else:
-                    logger.info("extract_pool_recycle jobs_served=%s", self._jobs_served)
-                    self._close(reason="planned_recycle")
-                    self._proc = self._spawn()
+                # Recycle is how fragmented child RSS is returned; never postpone it under pressure.
+                logger.info("extract_pool_recycle jobs_served=%s", self._jobs_served)
+                self._close(reason="planned_recycle")
+                self._proc = self._spawn()
             proc = self._proc
             stdin = proc.stdin
             stdout = proc.stdout
