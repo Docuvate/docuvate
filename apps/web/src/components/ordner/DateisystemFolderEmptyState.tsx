@@ -71,16 +71,11 @@ export function DateisystemFolderEmptyState({
           {t('filesystem.addExistingButton')}
         </Button>
         {onCreateFolder ? (
-          <>
-            <DateisystemNewFolderButton
-              onCreate={onCreateFolder}
-              open={newFolderOpen}
-              onOpenChange={setNewFolderOpen}
-            />
-            <Button type="button" variant="ghost" onClick={() => { setNewFolderOpen(true); }}>
-              {t('filesystem.newRootButton')}
-            </Button>
-          </>
+          <DateisystemNewFolderButton
+            onCreate={onCreateFolder}
+            open={newFolderOpen}
+            onOpenChange={setNewFolderOpen}
+          />
         ) : null}
       </div>
     </div>
