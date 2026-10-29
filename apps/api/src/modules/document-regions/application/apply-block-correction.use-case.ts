@@ -35,6 +35,7 @@ import {
 import { layoutTokensFromIr } from '../domain/layout-tokens.js';
 import { isUuid } from '../domain/parse-uuid.js';
 
+const MAX_SUPERSEDE_HOPS = 64;
 const BLOCK_OPS = new Set<BlockCorrectionOp>(['create', 'set_type', 'set_rank', 'ignore', 'remove']);
 const BLOCK_TYPES = new Set<DocumentRegionBlockType>([
   'heading',
@@ -144,7 +145,7 @@ export class ApplyBlockCorrectionUseCase {
     const snapshot = await this.regions.findLayoutIrSnapshot(documentId, userId);
     const tokens = snapshot ? layoutTokensFromIr(snapshot.ir) : [];
     const existing = body.beforeRegionId
-      ? await this.regions.findRegionById(documentId, body.beforeRegionId)
+      ? await this.findLiveRegion(documentId, body.beforeRegionId)
       : null;
     if (existing && existing.role !== 'block' && existing.role !== 'ignore') {
       throw new ValidationError('documents.blockRegionRequired');
@@ -277,6 +278,19 @@ export class ApplyBlockCorrectionUseCase {
       ),
       region,
     };
+  }
+
+  /**
+   * Follows the supersede chain so an edit sent with a stale region id (e.g. a rank change
+   * issued before the client refreshed after a type change) applies to the current version
+   * instead of forking a second live block from the superseded one.
+   */
+  private async findLiveRegion(documentId: string, regionId: string): Promise<DocumentRegionRecord | null> {
+    let region = await this.regions.findRegionById(documentId, regionId);
+    for (let hops = 0; region?.supersededBy && hops < MAX_SUPERSEDE_HOPS; hops += 1) {
+      region = await this.regions.findRegionById(documentId, region.supersededBy);
+    }
+    return region;
   }
 
   private resolveSelection(
