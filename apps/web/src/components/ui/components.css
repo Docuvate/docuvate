@@ -600,11 +600,18 @@ a.btn:hover {
   :root,
   [data-docuvate-theme='light'],
   [data-docuvate-theme='dark'] {
+    --dv-control-height: var(--dv-touch-target-min);
     --dv-icon-btn-sm: var(--dv-touch-target-min);
     --dv-icon-btn-md: var(--dv-touch-target-min);
     --dv-header-control-height: var(--dv-touch-target-min);
   }
 
+  .btn,
+  .btn-sm,
+  .input,
+  .custom-select-trigger,
+  .segmented-control__option,
+  .view-switcher-btn,
   .topbar-icon-btn,
   .icon-btn-sm,
   .icon-btn-md,
@@ -612,13 +619,14 @@ a.btn:hover {
   .bulk-bar-select-all-matching,
   .dateisystem-tree-chevron,
   .dateisystem-tree-row .sidebar-row-action,
-  .library-table-header .checkbox-field,
-  .library-doc-row .checkbox-field,
   .global-chat-composer textarea,
   .layout-quality-badge-technical,
   .overflow-chip-more,
   .source-chip,
-  .document-field-context-bar-actions .btn {
+  .document-field-context-bar-actions .btn,
+  .global-search-mobile-trigger,
+  .library-filter-toggle,
+  .breadcrumb-ellipsis-trigger {
     min-width: var(--dv-touch-target-min);
     min-height: var(--dv-touch-target-min);
   }

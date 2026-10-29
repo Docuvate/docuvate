@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
 
 import { DateisystemNewFolderButton } from '../../components/ordner/DateisystemNewFolderButton';
+import { Breadcrumb } from '../../components/ui/Breadcrumb';
 import { Button } from '../../components/ui/Button';
 import { UploadFileTrigger } from '../../components/upload/UploadFileTrigger';
 import type { OrdnerBreadcrumbSegment } from '../../lib/ordnerTree';
@@ -71,24 +71,16 @@ export function DateisystemContentHeader({
   return (
     <header className="dateisystem-content-header">
       <div className="dateisystem-content-heading">
-        <nav className="dateisystem-breadcrumb" aria-label={t('filesystem.pathAria')}>
-          <ol>
-            {breadcrumbs.map((seg, i) => (
-              <li key={seg.to}>
-                {i > 0 ? (
-                  <span className="dateisystem-breadcrumb-sep" aria-hidden>
-                    ›
-                  </span>
-                ) : null}
-                {i === breadcrumbs.length - 1 ? (
-                  <span className="dateisystem-breadcrumb-current">{seg.label}</span>
-                ) : (
-                  <Link to={seg.to}>{seg.label}</Link>
-                )}
-              </li>
-            ))}
-          </ol>
-        </nav>
+        <Breadcrumb
+          className="dateisystem-breadcrumb"
+          ariaLabel={t('filesystem.pathAria')}
+          trailEndsWithLink={breadcrumbs.length > 1}
+          items={
+            breadcrumbs.length > 1
+              ? breadcrumbs.slice(0, -1).map((seg) => ({ label: seg.label, to: seg.to }))
+              : breadcrumbs.map((seg) => ({ label: seg.label, to: seg.to }))
+          }
+        />
         {breadcrumbs.length > 1 ? (
           <h1 className="dateisystem-page-title" data-ux="page-title">
             {pageTitle}

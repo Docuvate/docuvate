@@ -8,6 +8,11 @@ import { expect, request as playwrightRequest, test } from '@playwright/test';
 import { domRectToRect, rectsOverlap } from '../../helpers/geometry';
 import { parseDocumentListBody } from '../../helpers/json-body';
 import { smokeFixtureStoragePath } from '../../helpers/smoke-fixture-auth';
+import { collectUndersizedTouchTargetsInPage } from '../helpers/browser-layout-scans';
+import {
+  collectBreadcrumbTextOverflowViolations,
+  collectFilesystemTreeLabelViolations,
+} from '../helpers/filesystem-layout-scans';
 import { ensureWorkstreamEFilesystemTree } from '../../helpers/workstream-e-filesystem-fixture';
 
 const webOrigin = process.env['E2E_WEB_URL'] ?? 'http://localhost:5173';
@@ -20,9 +25,6 @@ const VIEWPORTS = [
   { label: '1024', width: 1024, height: 900 },
   { label: '390', width: 390, height: 844 },
 ] as const;
-
-const TOUCH_MIN_PX = 44;
-const TOUCH_TOLERANCE_PX = 1;
 
 test.use({ storageState: smokeFixtureStoragePath() });
 
@@ -136,6 +138,17 @@ test.describe('Workstream E — layout, mobile, a11y', () => {
         return { ok: !intersects, linkRight: lr.right, actionLeft: ar.left };
       });
       expect(overlap.ok, JSON.stringify(overlap)).toBe(true);
+
+      const breadcrumbViolations = await page
+        .locator('.dateisystem-content-header')
+        .evaluate(collectBreadcrumbTextOverflowViolations);
+      expect(breadcrumbViolations, JSON.stringify(breadcrumbViolations, null, 2)).toEqual([]);
+
+      const treeViolations = await page
+        .locator('.dateisystem-sidebar')
+        .evaluate(collectFilesystemTreeLabelViolations);
+      expect(treeViolations, JSON.stringify(treeViolations, null, 2)).toEqual([]);
+
       await screenshotLoaded(page, 'f13-filesystem-tree', viewport.label);
     });
   }
@@ -163,8 +176,9 @@ test.describe('Workstream E — layout, mobile, a11y', () => {
     await requireApi(page);
     await page.setViewportSize({ width: 1024, height: 900 });
     await page.goto(`${webOrigin}/documents`);
-    const searchRow = page.locator('.library-list-search.library-search-row').first();
-    await searchRow.waitFor({ state: 'visible', timeout: 60_000 });
+    await page.locator('.library-list-toolbar').waitFor({ state: 'visible', timeout: 90_000 });
+    const searchRow = page.locator('.library-list-toolbar .library-list-search').first();
+    await searchRow.waitFor({ state: 'visible', timeout: 90_000 });
     const boxes = await searchRow.evaluate((row) => {
       const input = row.querySelector('input');
       const filter = row.querySelector('.library-filter-toggle');
@@ -231,31 +245,8 @@ test.describe('Workstream E — layout, mobile, a11y', () => {
       state: 'visible',
       timeout: 60_000,
     });
-    const undersized = await page.evaluate(
-      ({ minPx, tolerance }) => {
-        const selectors = [
-          '.topbar-menu-trigger',
-          '.icon-btn-sm',
-          '.icon-btn-md',
-          '.library-table-header .checkbox-field',
-          '.library-doc-row .checkbox-field',
-          '.bulk-bar-select-all-matching',
-          '.password-input-toggle',
-        ];
-        const hits: string[] = [];
-        for (const selector of selectors) {
-          for (const el of document.querySelectorAll(selector)) {
-            const rect = el.getBoundingClientRect();
-            if (rect.width < minPx - tolerance || rect.height < minPx - tolerance) {
-              hits.push(`${selector} ${rect.width}x${rect.height}`);
-            }
-          }
-        }
-        return hits;
-      },
-      { minPx: TOUCH_MIN_PX, tolerance: TOUCH_TOLERANCE_PX }
-    );
-    expect(undersized, undersized.join('; ')).toEqual([]);
+    const undersized = await page.locator('.library-page').evaluate(collectUndersizedTouchTargetsInPage);
+    expect(undersized, JSON.stringify(undersized, null, 2)).toEqual([]);
     await screenshotLoaded(page, 'f22-touch-targets', '390');
   });
 

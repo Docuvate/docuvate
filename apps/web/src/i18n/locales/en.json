@@ -2303,7 +2303,9 @@
       "shortcut": "⌘K"
     },
     "breadcrumb": {
-      "label": "Breadcrumb"
+      "label": "Breadcrumb",
+      "collapsedSegments": "Collapsed path segments",
+      "collapsedSegmentsMenu": "Show hidden breadcrumb segments"
     }
   },
   "designSystem": {

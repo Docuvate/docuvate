@@ -1,27 +1,12 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
 
-interface Crumb {
-  label: string;
-  to?: string;
-}
+import { Breadcrumb, type BreadcrumbItem } from '../ui/Breadcrumb';
 
-export function SettingsBreadcrumb({ items }: { items: Crumb[] }) {
+export function SettingsBreadcrumb({ items }: { items: BreadcrumbItem[] }) {
   const { t } = useTranslation();
   return (
-    <nav className="settings-breadcrumb" aria-label={t('settings.breadcrumbAria')}>
-      <ol>
-        {items.map((item) => {
-          const key = item.to ? `${item.to}:${item.label}` : item.label;
-          return (
-            <li key={key}>
-              {item.to ? <Link to={item.to}>{item.label}</Link> : <span>{item.label}</span>}
-            </li>
-          );
-        })}
-      </ol>
-    </nav>
+    <Breadcrumb items={items} className="settings-breadcrumb" ariaLabel={t('settings.breadcrumbAria')} />
   );
 }

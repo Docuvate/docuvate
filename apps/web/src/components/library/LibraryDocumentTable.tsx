@@ -37,6 +37,7 @@ import {
   showLegacyDuplicateHint,
 } from './duplicateStackLabel';
 import { DuplicateStackQuickReview } from './DuplicateStackQuickReview';
+import { LibraryCheckTouch } from './LibraryCheckTouch';
 import { documentDisplayDateParts } from './libraryDocumentUtils';
 import { useLibraryDocumentVirtualizer } from './useLibraryDocumentVirtualizer';
 
@@ -443,8 +444,7 @@ export function LibraryDocumentTable({
           >
             <ul className="library-doc-stack-list" data-testid="library-doc-stack-list">
               <li className="library-doc-stack-select-all">
-                <input
-                  type="checkbox"
+                <LibraryCheckTouch
                   checked={selected.size === items.length && items.length > 0}
                   onChange={onToggleSelectAll}
                   aria-label={t('library.selectAll')}
@@ -489,8 +489,7 @@ export function LibraryDocumentTable({
                   >
                     <article className="library-doc-stack-item-inner">
                     <div className="library-doc-stack-primary">
-                      <input
-                        type="checkbox"
+                      <LibraryCheckTouch
                         checked={selected.has(doc.id)}
                         onChange={() => { onToggleSelect(doc.id); }}
                         onKeyDown={(event) => {
@@ -502,7 +501,10 @@ export function LibraryDocumentTable({
                       />
                       <div className="library-doc-stack-text">
                         <div className="library-doc-stack-title">
-                          <Link to={`/documents/${doc.id}`} className="library-title-link">
+                          <Link
+                            to={`/documents/${doc.id}`}
+                            className="library-title-link dv-touch-hit-expand--block"
+                          >
                             {doc.title}
                           </Link>
                           {stackLabel ? (
@@ -639,8 +641,7 @@ export function LibraryDocumentTable({
             <tr className="library-table-virtual-header-row" style={virtualGridStyle}>
               <th className="library-col-expand" aria-hidden="true" />
               <th className="library-col-check">
-                <input
-                  type="checkbox"
+                <LibraryCheckTouch
                   checked={selected.size === items.length && items.length > 0}
                   onChange={onToggleSelectAll}
                   aria-label={t('library.selectAll')}
@@ -739,8 +740,7 @@ export function LibraryDocumentTable({
                       ) : null}
                     </td>
                     <td className="library-col-check">
-                      <input
-                        type="checkbox"
+                      <LibraryCheckTouch
                         checked={selected.has(doc.id)}
                         onChange={() => { onToggleSelect(doc.id); }}
                         aria-label={`${doc.title} auswählen`}
@@ -751,7 +751,7 @@ export function LibraryDocumentTable({
                         <div className="cell-title-row">
                           <Link
                             to={`/documents/${doc.id}`}
-                            className="library-title-link cell-title-text"
+                            className="library-title-link cell-title-text dv-touch-hit-expand--block"
                             title={doc.title}
                           >
                             {doc.title}

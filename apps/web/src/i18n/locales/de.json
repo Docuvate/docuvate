@@ -2303,7 +2303,9 @@
       "shortcut": "⌘K"
     },
     "breadcrumb": {
-      "label": "Brotkrumen"
+      "label": "Brotkrumen",
+      "collapsedSegments": "Eingeklappte Pfadsegmente",
+      "collapsedSegmentsMenu": "Ausgeblendete Brotkrumen anzeigen"
     }
   },
   "designSystem": {
