@@ -11,7 +11,7 @@ import type {
   LayoutToken,
   RecognizedFieldDefinitionDto,
 } from '@docuvate/contracts';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -369,7 +369,10 @@ export function DocumentLayoutWorkspace({
     [doc.id, onLayoutSideTabChange, refreshRegions, toast]
   );
 
-  const runBlockCorrection = useCallback(
+  // Block edits on one card (type, then rank) can fire before the first response lands; run them
+  // one after another so each request sees the region its predecessor produced.
+  const blockCorrectionQueue = useRef<Promise<void>>(Promise.resolve());
+  const applyBlockCorrectionNow = useCallback(
     async (body: ApplyBlockCorrectionRequest, successMessage: string) => {
       const result = await applyDocumentBlockCorrection(doc.id, body);
       await refreshRegions();
@@ -396,6 +399,16 @@ export function DocumentLayoutWorkspace({
       setSelectionTool('none');
     },
     [doc.id, onLayoutSideTabChange, refreshRegions, toast]
+  );
+  const runBlockCorrection = useCallback(
+    (body: ApplyBlockCorrectionRequest, successMessage: string): Promise<void> => {
+      const run = blockCorrectionQueue.current
+        .catch(() => undefined)
+        .then(() => applyBlockCorrectionNow(body, successMessage));
+      blockCorrectionQueue.current = run;
+      return run;
+    },
+    [applyBlockCorrectionNow]
   );
 
   const layoutPageCount = layoutIr?.pages.length ?? layoutIrPages?.length ?? 1;
