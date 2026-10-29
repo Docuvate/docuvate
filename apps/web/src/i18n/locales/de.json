@@ -930,6 +930,9 @@
     "extractionFailedWorker": "Der Verarbeitungsdienst konnte den Text nicht extrahieren. Sie können es erneut versuchen oder in den Einstellungen ein anderes Verfahren wählen.",
     "extractionFailedTimeout": "Die Texterkennung hat das Zeitlimit überschritten. Sie können es erneut versuchen oder in den Einstellungen ein anderes Verfahren wählen.",
     "extractionFailedTechnicalToggle": "Technische Details",
+    "errors": {
+      "extractionDeadlineExceeded": "Die Texterkennung hat zu lange gedauert und wurde abgebrochen. Sie können es erneut versuchen; sehr große Dokumente benötigen eventuell ein höheres Zeitlimit auf dem Worker."
+    },
     "extractionPleaseWait": "Bitte kurz warten…",
     "extractionSettingsLink": "Texterkennung in Einstellungen",
     "reprocess": "Erneut verarbeiten",
@@ -1043,7 +1046,20 @@
     "extractedMarkdownViewAria": "Markdown-Ansicht",
     "ingestSourceScanner": "Scanner-Eingang",
     "previewLoading": "Vorschau wird geladen…",
-    "previewTextEmpty": "Für dieses Dokument wurde noch kein Text erkannt."
+    "previewTextEmpty": "Für dieses Dokument wurde noch kein Text erkannt.",
+    "extractionFailureCode": {
+      "worker_unreachable": "Der Extraktionsdienst war nicht erreichbar. Bitte erneut versuchen.",
+      "worker_unavailable": "Der Extraktionsdienst war vorübergehend nicht verfügbar. Bitte erneut versuchen.",
+      "worker_busy": "Der Extraktionsdienst war auch nach mehreren Versuchen ausgelastet. Bitte später erneut versuchen.",
+      "worker_deadline": "Die Texterkennung hat das Zeitlimit überschritten.",
+      "worker_timeout": "Die Texterkennung hat das Zeitlimit überschritten.",
+      "document_unprocessable": "Dieses Dokument konnte nicht verarbeitet werden.",
+      "resource_exhausted": "Dieses Dokument ist für den verfügbaren Speicher zu groß.",
+      "worker_error": "Der Extraktionsdienst hat einen Fehler gemeldet.",
+      "claim_busy": "Die Extraktion für dieses Dokument lief bereits.",
+      "internal_error": "Die Extraktion ist wegen eines internen Fehlers fehlgeschlagen.",
+      "orphan_requeue_exhausted": "Die Extraktion wurde zu oft neu gestartet, ohne abzuschließen, und wurde beendet."
+    }
   },
   "settings": {
     "title": "Einstellungen",

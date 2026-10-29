@@ -275,6 +275,23 @@ class HealthResponse(BaseModel):
     status: str
 
 
+class ExtractCapacityResponse(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
+    recommended_concurrent_extractions: int = Field(
+        serialization_alias="recommendedConcurrentExtractions", ge=1
+    )
+    active_extract_jobs: int = Field(serialization_alias="activeExtractJobs", ge=0)
+    extract_slots_free: int = Field(serialization_alias="extractSlotsFree", ge=0)
+    memory_available_bytes: int | None = Field(
+        serialization_alias="memoryAvailableBytes", ge=0, default=None
+    )
+    evictable_model_bytes: int = Field(serialization_alias="evictableModelBytes", ge=0)
+    cgroup_limit_bytes: int | None = Field(
+        serialization_alias="cgroupLimitBytes", ge=0, default=None
+    )
+
+
 class HardwareCapabilitiesResponse(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 

@@ -9,24 +9,35 @@ import os
 
 from docuvate_worker.infrastructure.extract_memory.cgroup import (
     cgroup_memory_available_bytes,
+    cgroup_non_reclaimable_bytes,
     read_cgroup_memory_snapshot,
 )
 
 _ENV_PRESSURE_RATIO = "DOCUVATE_EXTRACT_MEM_PRESSURE_RATIO"
-_DEFAULT_PRESSURE_RATIO = 0.88
+_ENV_RECLAIM_RATIO = "DOCUVATE_EXTRACT_MEM_IDLE_RECLAIM_RATIO"
+_DEFAULT_PRESSURE_RATIO = 0.90
+_DEFAULT_IDLE_RECLAIM_RATIO = 0.90
 
 
-def _pressure_ratio() -> float:
-    raw = os.environ.get(_ENV_PRESSURE_RATIO, "").strip()
+def _ratio_from_env(name: str, default: float) -> float:
+    raw = os.environ.get(name, "").strip()
     if not raw:
-        return _DEFAULT_PRESSURE_RATIO
+        return default
     try:
         parsed = float(raw)
     except ValueError:
-        return _DEFAULT_PRESSURE_RATIO
+        return default
     if parsed <= 0 or parsed > 1:
-        return _DEFAULT_PRESSURE_RATIO
+        return default
     return parsed
+
+
+def _pressure_ratio() -> float:
+    return _ratio_from_env(_ENV_PRESSURE_RATIO, _DEFAULT_PRESSURE_RATIO)
+
+
+def _idle_reclaim_ratio() -> float:
+    return _ratio_from_env(_ENV_RECLAIM_RATIO, _DEFAULT_IDLE_RECLAIM_RATIO)
 
 
 def cgroup_under_memory_pressure() -> bool:
@@ -46,6 +57,10 @@ def cgroup_under_memory_pressure() -> bool:
     return used >= int(snapshot.limit_bytes * _pressure_ratio())
 
 
-def should_defer_pool_recycle() -> bool:
-    """Skip planned pool child recycle while the cgroup is under pressure."""
-    return cgroup_under_memory_pressure()
+def cgroup_should_reclaim_idle_models() -> bool:
+    """True when cgroup non-reclaimable usage exceeds the idle model reclaim threshold."""
+    snapshot = read_cgroup_memory_snapshot()
+    if snapshot is None or snapshot.limit_bytes is None or snapshot.limit_bytes <= 0:
+        return False
+    used = cgroup_non_reclaimable_bytes(snapshot, count_active_file=False)
+    return used >= int(snapshot.limit_bytes * _idle_reclaim_ratio())

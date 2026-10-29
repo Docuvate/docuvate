@@ -3,6 +3,7 @@
 import type { DocumentRepresentationDto } from '@docuvate/contracts';
 import { Injectable } from '@nestjs/common';
 
+import { ServiceUnavailableError } from '../../../shared/domain/errors.js';
 import { isRecord, parseString } from '../../../shared/infrastructure/database/row-parse.js';
 import { workerApiUrl } from '../../../shared/infrastructure/worker/worker-api-path.js';
 import {
@@ -10,6 +11,7 @@ import {
   workerCompareTimeoutMs,
 } from '../../../shared/infrastructure/worker/worker-fetch.js';
 import { workerRequestHeaders } from '../../../shared/infrastructure/worker/worker-request-headers.js';
+import { WorkerExtractCapacityCoordinator } from '../../extraction/infrastructure/worker-extract-capacity.coordinator.js';
 import { PgDocumentRepresentationRepository } from '../infrastructure/pg-document-representation.repository.js';
 import { PersistDocumentRepresentationUseCase } from './persist-document-representation.use-case.js';
 
@@ -91,7 +93,8 @@ function parseWorkerRepresentation(value: unknown): DocumentRepresentationDto | 
 export class EnsureDocumentRepresentationUseCase {
   constructor(
     private readonly repository: PgDocumentRepresentationRepository,
-    private readonly persist: PersistDocumentRepresentationUseCase
+    private readonly persist: PersistDocumentRepresentationUseCase,
+    private readonly extractCapacity: WorkerExtractCapacityCoordinator
   ) {}
 
   async execute(tenantId: string, documentId: string, text: string): Promise<boolean> {
@@ -106,15 +109,24 @@ export class EnsureDocumentRepresentationUseCase {
     const workerUrl = process.env['WORKER_URL'] ?? 'http://localhost:8000';
     let payload: unknown;
     try {
-      payload = await fetchWorkerJson(
-        workerApiUrl(workerUrl, '/representation/from-text'),
-        {
-          method: 'POST',
-          headers: workerRequestHeaders(),
-          body: JSON.stringify({ text: trimmed }),
-        },
-        workerCompareTimeoutMs()
-      );
+      payload = await this.extractCapacity.runWithSlot(async () => {
+        try {
+          return await fetchWorkerJson(
+            workerApiUrl(workerUrl, '/representation/from-text'),
+            {
+              method: 'POST',
+              headers: workerRequestHeaders(),
+              body: JSON.stringify({ text: trimmed }),
+            },
+            workerCompareTimeoutMs()
+          );
+        } catch (error: unknown) {
+          if (error instanceof ServiceUnavailableError) {
+            this.extractCapacity.onWorkerPressure503(5);
+          }
+          throw error;
+        }
+      });
     } catch {
       return false;
     }

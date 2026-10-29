@@ -5,6 +5,7 @@ import pytest
 
 from docuvate_worker.domain.extract_errors import ExtractRetryableError
 from docuvate_worker.infrastructure.extract_memory.admission import (
+    ExtractAdmissionController,
     decide_extract_admission,
     estimate_extract_incremental_memory_bytes,
     estimate_extract_memory_bytes,
@@ -154,7 +155,35 @@ def test_extract_admission_slot_raises_retryable_when_concurrent_capacity_exhaus
                 pass
         assert exc_info.value.error_type == "ExtractResourceBusy"
     finally:
-        controller.release(estimate)
+        assert first.ticket is not None
+        controller.release(first.ticket)
+
+
+def test_running_job_is_not_counted_twice_on_top_of_measured_usage(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("DOCUVATE_EXTRACT_POOL", "0")
+    monkeypatch.setenv("DOCUVATE_EXTRACT_MEM_HEADROOM_BYTES", "300000000")
+    monkeypatch.setenv("DOCUVATE_EXTRACT_MEM_MIN_FREE_BYTES", "96000000")
+
+    def _snapshot() -> CgroupMemorySnapshot:
+        return _PRODUCTION_IDLE
+
+    monkeypatch.setattr(
+        "docuvate_worker.infrastructure.extract_memory.admission.read_cgroup_memory_snapshot",
+        _snapshot,
+    )
+    controller = ExtractAdmissionController()
+    first = controller.try_acquire(_LOG_ESTIMATE_BYTES, 1)
+    assert first.admit
+    assert first.ticket is not None
+    pending = controller.try_acquire(_LOG_ESTIMATE_BYTES, 1)
+    assert not pending.admit
+    assert pending.reason == "concurrent_capacity"
+    controller.mark_started(first.ticket)
+    second = controller.try_acquire(_LOG_ESTIMATE_BYTES, 1)
+    assert second.admit
+    assert second.reason == "capacity_ok"
 
 
 # Warm-worker incremental RSS from public scan benchmarks (models already resident).

@@ -10,7 +10,7 @@ import { QueueExtractionUseCase } from './queue-extraction.use-case.js';
 export class RequeueDocumentExtractionUseCase {
   constructor(
     @Inject(DOCUMENT_REPOSITORY) private readonly documents: DocumentRepository,
-    private readonly queueExtraction: QueueExtractionUseCase
+    @Inject(QueueExtractionUseCase) private readonly queueExtraction: QueueExtractionUseCase
   ) {}
 
   async execute(documentId: string, userId: string): Promise<void> {
@@ -21,6 +21,6 @@ export class RequeueDocumentExtractionUseCase {
     if (doc.status === 'queued' || doc.status === 'extracting') {
       throw new ValidationError('Extraktion läuft bereits.');
     }
-    await this.queueExtraction.execute(documentId, userId);
+    await this.queueExtraction.execute(documentId, userId, { throwOnEnqueueFailure: true });
   }
 }

@@ -5,6 +5,7 @@
 
 from __future__ import annotations
 
+import importlib.util
 import logging
 
 logger = logging.getLogger(__name__)
@@ -12,33 +13,31 @@ logger = logging.getLogger(__name__)
 _availability_cache: dict[str, bool] | None = None
 
 
-def _probe_paddle() -> bool:
-    try:
-        import cv2  # noqa: F401, PLC0415
-        import paddleocr  # noqa: F401, PLC0415
+def _module_installed(name: str) -> bool:
+    """True when ``name`` is importable, without importing it.
 
-        return True
-    except Exception as exc:
-        logger.debug("PaddleOCR unavailable: %s", exc)
+    The probes run in the long-lived API parent process. Importing paddle, cv2 or
+    docling there maps hundreds of MiB of native code and heap into the parent for
+    the rest of its life, which starves the cgroup budget that extract admission
+    reserves for the pool child. ``find_spec`` only resolves the package location.
+    """
+    try:
+        return importlib.util.find_spec(name) is not None
+    except (ImportError, ValueError) as exc:
+        logger.debug("module %s unavailable: %s", name, exc)
         return False
+
+
+def _probe_paddle() -> bool:
+    return _module_installed("cv2") and _module_installed("paddleocr")
 
 
 def _probe_tesseract() -> bool:
-    try:
-        import pytesseract  # noqa: F401, PLC0415
-
-        return True
-    except Exception:
-        return False
+    return _module_installed("pytesseract")
 
 
 def _probe_docling() -> bool:
-    try:
-        import docling  # noqa: F401, PLC0415
-
-        return True
-    except Exception:
-        return False
+    return _module_installed("docling")
 
 
 def probe_engine_available(engine_id: str) -> bool:

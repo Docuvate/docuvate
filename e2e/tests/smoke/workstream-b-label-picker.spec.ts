@@ -8,6 +8,7 @@ import {
   assertDocumentRowChipsMinReadable,
   assertTagFilterPopoverChipInset,
 } from '../../helpers/label-picker-geometry';
+import { parseJsonItemsArray, parseJsonStringField } from '../../helpers/json-body';
 import { smokeFixtureStoragePath } from '../../helpers/smoke-fixture-auth';
 
 const webOrigin = process.env['E2E_WEB_URL'] ?? 'http://localhost:5173';
@@ -48,8 +49,14 @@ const rowChipEllipsisRoutes = [
   { path: '/filesystem/unassigned', slug: 'filesystem' },
 ] as const;
 
-/** Long unique names (each ≥ 60 characters) that cannot collide with seeded German stems. */
-const WS_B_LONG_LABEL_COUNT = 5;
+/** German compound-style names (each ≥ 60 characters). */
+const WS_B_LONG_GERMAN_LABEL_STEMS = [
+  'Bundesfinanzministeriumsverwaltungsarchivierungsbestimmungsdokumentenregisterführung',
+  'VerkehrsinfrastrukturfinanzierungsgesellschaftsjahresabrechnungsunterlagenOriginal',
+  'LandwirtschaftlicheBetriebshaftungsvertragsnachweisdokumentationGesamtbestand',
+  'Universitätsverwaltungsstudienabgabenbescheinigungsarchivierungssachbearbeitung',
+  'EnergieversorgungsnetzwerkstrompreisregulierungsbehördlicheMeldungsdokumentation',
+] as const;
 
 const fixturePdf = path.join(process.cwd(), 'fixtures/synthetic-upload.pdf');
 
@@ -61,35 +68,50 @@ function md5File(filePath: string): string {
   return crypto.createHash('md5').update(fs.readFileSync(filePath)).digest('hex');
 }
 
-function uniqueLongLabelName(runToken: string, index: number): string {
-  const unique = randomUUID().replace(/-/g, '');
-  return `wsb${runToken}${unique}${unique}${String(index).padStart(2, '0')}`;
+function assertLongGermanLabelStems(): void {
+  for (const stem of WS_B_LONG_GERMAN_LABEL_STEMS) {
+    expect(stem.length).toBeGreaterThanOrEqual(60);
+  }
+}
+
+async function waitForDocumentReady(
+  request: import('@playwright/test').APIRequestContext,
+  documentId: string
+): Promise<void> {
+  await expect
+    .poll(
+      async () => {
+        const res = await request.get(`${apiBase}/v1/documents/${documentId}`, {
+          headers: { origin: webOrigin },
+        });
+        if (!res.ok()) {
+          return 'pending';
+        }
+        return parseJsonStringField(await res.json(), 'status');
+      },
+      { timeout: 420_000, intervals: [2000, 3000, 5000] }
+    )
+    .toBe('ready');
 }
 
 async function provisionLongLabelRowFixture(
   request: import('@playwright/test').APIRequestContext
 ): Promise<string> {
+  assertLongGermanLabelStems();
   const tagIds: string[] = [];
   const runToken = randomUUID().slice(0, 8);
-  for (let index = 0; index < WS_B_LONG_LABEL_COUNT; index += 1) {
-    const name = uniqueLongLabelName(runToken, index);
-    expect(name.length).toBeGreaterThanOrEqual(60);
+  for (let index = 0; index < WS_B_LONG_GERMAN_LABEL_STEMS.length; index += 1) {
+    const name = `${randomUUID()}-${WS_B_LONG_GERMAN_LABEL_STEMS[index]}`;
     const response = await request.post(`${apiBase}/v1/tags`, {
       headers: { origin: webOrigin },
       data: { name, color: '#7c3aed', matchingAlgorithm: 'none', match: '' },
     });
-    if (!response.ok()) {
-      throw new Error(`create tag failed: ${String(response.status())} ${await response.text()}`);
-    }
-    const body: unknown = await response.json();
-    const tagId =
-      typeof body === 'object' && body !== null && 'id' in body && typeof body.id === 'string'
-        ? body.id
-        : '';
-    if (!tagId) {
-      throw new Error('create tag response missing id');
-    }
-    tagIds.push(tagId);
+    const responseBody = await response.text();
+    expect(
+      response.ok(),
+      `create tag failed status=${response.status()} body=${responseBody}`
+    ).toBeTruthy();
+    tagIds.push(parseJsonStringField(JSON.parse(responseBody), 'id'));
   }
 
   const uploadName = `ws-b-ellipsis-fixture-${runToken}.pdf`;
@@ -108,7 +130,7 @@ async function provisionLongLabelRowFixture(
     },
   });
   expect(upload.ok()).toBeTruthy();
-  const created = (await upload.json()) as { id: string };
+  const created = { id: parseJsonStringField(await upload.json(), 'id') };
 
   for (const tagId of tagIds) {
     const assign = await request.post(`${apiBase}/v1/documents/${created.id}/tags/${tagId}`, {
@@ -117,8 +139,7 @@ async function provisionLongLabelRowFixture(
     expect(assign.ok()).toBeTruthy();
   }
 
-  // Chip-row tests only need the library row and tags. Waiting for extract-ready
-  // turns a worker 422 into a 5-minute poll of a permanently failed document.
+  await waitForDocumentReady(request, created.id);
   return uploadName;
 }
 
@@ -198,7 +219,7 @@ async function seedLabels(request: import('@playwright/test').APIRequestContext,
     const name = `ws-b-seed-${String(index).padStart(4, '0')}`;
     const response = await request.post(`${apiBase}/v1/tags`, {
       headers: { origin: webOrigin },
-      data: { name, color: '#7c3aed', matchingAlgorithm: 'none', match: '' },
+      data: { name, color: '#7c3aed' },
     });
     if (response.status() === 409 || response.status() === 400 || response.status() === 422) {
       continue;
@@ -211,8 +232,7 @@ async function seedLabels(request: import('@playwright/test').APIRequestContext,
     { headers: { origin: webOrigin } }
   );
   expect(search.ok()).toBeTruthy();
-  const page = (await search.json()) as { items: unknown[] };
-  expect(page.items.length).toBeGreaterThan(0);
+  expect(parseJsonItemsArray(await search.json()).length).toBeGreaterThan(0);
 }
 
 async function assertFullyInViewport(
@@ -279,27 +299,15 @@ async function openTagFilterPortaledList(page: import('@playwright/test').Page):
 }
 
 test.describe('Workstream B label picker', () => {
-  test.describe.configure({ mode: 'serial', retries: 0, timeout: 300_000 });
+  test.describe.configure({ mode: 'serial', retries: 0, timeout: 600_000 });
 
   test.beforeAll(async ({ request }) => {
-    test.setTimeout(300_000);
+    test.setTimeout(480_000);
     fs.mkdirSync(artifactRoot, { recursive: true });
     const health = await request.get(`${apiBase}/health`);
     test.skip(!health.ok(), 'API not running');
     await seedLabels(request, 500);
-    let lastError: unknown;
-    for (let attempt = 0; attempt < 2; attempt += 1) {
-      try {
-        ellipsisFixtureUploadName = await provisionLongLabelRowFixture(request);
-        lastError = undefined;
-        break;
-      } catch (error) {
-        lastError = error;
-      }
-    }
-    if (lastError !== undefined) {
-      throw lastError;
-    }
+    ellipsisFixtureUploadName = await provisionLongLabelRowFixture(request);
   });
 
   for (const viewport of tagFilterViewports) {

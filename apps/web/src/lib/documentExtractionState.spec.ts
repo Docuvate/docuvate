@@ -22,6 +22,13 @@ describe('presentExtractionFailure', () => {
     const result = presentExtractionFailure('documents.extractionFailedTimeout');
     expect(result.userMessage).not.toBe('documents.extractionFailedTimeout');
     expect(result.userMessage.toLowerCase()).toMatch(/zeitlimit|time limit/);
-    expect(result.technicalDetail).toBe('Worker extraction timeout');
+    expect(result.technicalDetail).toBeNull();
+  });
+
+  it('translates typed failure codes stored as i18n keys', () => {
+    const key = 'documents.extractionFailureCode.resource_exhausted';
+    const result = presentExtractionFailure(key);
+    expect(result.userMessage).not.toBe(key);
+    expect(result.technicalDetail).toBeNull();
   });
 });

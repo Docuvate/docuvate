@@ -72,4 +72,16 @@ describe('QueueExtractionUseCase', () => {
     expect(String(failedCall?.[2]?.failureReason).length).toBeGreaterThan(0);
     expect(documents.updateStatus).not.toHaveBeenCalledWith('d1', 'queued');
   });
+
+  it('rethrows enqueue errors when throwOnEnqueueFailure is set', async () => {
+    const err = new Error('BullMQ job document-extract-d1 not queued (state=failed)');
+    const documents = {
+      findByIdForUser: vi.fn(() => Promise.resolve({ id: 'd1', userId: 'u1' })),
+      updateStatus: vi.fn<UpdateStatusFn>(),
+    };
+    const queue = { enqueue: vi.fn(() => Promise.reject(err)) };
+    const useCase = await buildUseCase(documents, queue);
+
+    await expect(useCase.execute('d1', 'u1', { throwOnEnqueueFailure: true })).rejects.toThrow(err);
+  });
 });

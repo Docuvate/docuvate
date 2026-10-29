@@ -15,7 +15,11 @@ export class QueueExtractionUseCase {
     private readonly queue: ExtractionQueueService
   ) {}
 
-  async execute(documentId: string, userId: string): Promise<void> {
+  async execute(
+    documentId: string,
+    userId: string,
+    options?: { throwOnEnqueueFailure?: boolean }
+  ): Promise<void> {
     const doc = await this.documents.findByIdForUser(documentId, userId);
     if (!doc) {
       throw new NotFoundError('Document');
@@ -34,6 +38,9 @@ export class QueueExtractionUseCase {
       );
       const failureReason = error instanceof Error ? error.message : String(error);
       await this.documents.updateStatus(documentId, 'failed', { failureReason });
+      if (options?.throwOnEnqueueFailure) {
+        throw error;
+      }
     }
   }
 }

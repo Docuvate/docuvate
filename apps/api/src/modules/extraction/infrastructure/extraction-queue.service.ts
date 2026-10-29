@@ -1,12 +1,18 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
-import { Queue, UnrecoverableError, Worker } from 'bullmq';
+import { Inject, Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import { type Job, Queue, UnrecoverableError, Worker } from 'bullmq';
 import type IORedis from 'ioredis';
 
+import { DOCUMENT_REPOSITORY, type DocumentRepository } from '../../../shared/domain/ports.js';
 import { arenaSampleRate } from '../../../shared/infrastructure/arena/arena-sample-config.js';
 import { parseString, requireRecord } from '../../../shared/infrastructure/database/row-parse.js';
 import { enqueueBullJobWithRetry } from '../../../shared/infrastructure/queue/bullmq-enqueue-retry.js';
+import {
+  assertBullFixedJobIdQueued,
+  isBullJobQueuedState,
+  prepareBullFixedJobIdForAdd,
+} from '../../../shared/infrastructure/queue/bullmq-fixed-job-id.js';
 import {
   createValkeyConnection,
   waitForValkeyReady,
@@ -14,6 +20,8 @@ import {
 import { RunArenaSampleCompareUseCase } from '../../documents/application/run-arena-sample-compare.use-case.js';
 import { RunExtractionUseCase } from '../../documents/application/run-extraction.use-case.js';
 import { ResolveFeatureFlagsUseCase } from '../../feature-flags/application/resolve-feature-flags.use-case.js';
+import { extractionDeadlineMaxRetries } from '../domain/extraction-deadline.config.js';
+import { toExtractionFailure } from '../domain/extraction-failure.js';
 import {
   documentExtractionConcurrency,
   extractionJobId,
@@ -21,8 +29,12 @@ import {
   extractionQueueMaxStalledCount,
   extractionQueueStalledIntervalMs,
 } from '../domain/extraction-queue.config.js';
-import { isPermanentExtractionFailureMessage } from '../domain/extraction-queue-failures.js';
+import {
+  planExtractionJobFailed,
+  planProcessorFailure,
+} from '../domain/plan-extraction-job-failure.js';
 import type { ExtractionReconcileJob } from '../domain/plan-extraction-reconcile.js';
+import { WorkerExtractCapacityCoordinator } from './worker-extract-capacity.coordinator.js';
 
 function parseExtractionJobDocumentId(data: unknown): string {
   const row = requireRecord(data);
@@ -59,6 +71,12 @@ function isLiveExtractionJobState(state: string): boolean {
   }
 }
 
+const ORPHAN_REQUEUE_COUNTER_TTL_SECONDS = 7 * 24 * 60 * 60;
+
+function orphanRequeueKey(documentId: string): string {
+  return `docuvate:extraction:orphan-requeues:${documentId}`;
+}
+
 @Injectable()
 export class ExtractionQueueService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(ExtractionQueueService.name);
@@ -70,7 +88,9 @@ export class ExtractionQueueService implements OnModuleInit, OnModuleDestroy {
   constructor(
     private readonly runExtraction: RunExtractionUseCase,
     private readonly runArenaSample: RunArenaSampleCompareUseCase,
-    private readonly resolveFeatureFlags: ResolveFeatureFlagsUseCase
+    private readonly resolveFeatureFlags: ResolveFeatureFlagsUseCase,
+    private readonly extractCapacity: WorkerExtractCapacityCoordinator,
+    @Inject(DOCUMENT_REPOSITORY) private readonly documents: DocumentRepository
   ) {}
 
   async onModuleInit(): Promise<void> {
@@ -88,46 +108,52 @@ export class ExtractionQueueService implements OnModuleInit, OnModuleDestroy {
           return;
         }
         const userId = parseString(requireRecord(job.data).userId).trim();
-        try {
-          await this.recordExtractionStart(documentId);
-          await this.runExtraction.execute(documentId);
-        } catch (error: unknown) {
-          const message = error instanceof Error ? error.message : String(error);
-          if (isPermanentExtractionFailureMessage(message)) {
-            throw new UnrecoverableError(message);
+        await this.extractCapacity.runWithSlot(async () => {
+          try {
+            await this.recordExtractionStart(documentId);
+            await this.runExtraction.execute(documentId);
+          } catch (error: unknown) {
+            const failure = toExtractionFailure(error);
+            const plan = planProcessorFailure({
+              failure,
+              attemptsMade: job.attemptsMade,
+              deadlineMaxRetries: extractionDeadlineMaxRetries(),
+            });
+            if (plan.kind === 'fail_document') {
+              await this.documents.updateStatus(documentId, 'failed', {
+                failureReason: plan.failureReason,
+              });
+            }
+            if (plan.kind !== 'retry') {
+              throw new UnrecoverableError(failure.message);
+            }
+            throw failure;
           }
-          throw error;
-        }
-        await this.maybeEnqueueArenaSample(documentId, userId);
+          await this.connection.del(orphanRequeueKey(documentId));
+          await this.maybeEnqueueArenaSample(documentId, userId);
+        });
       },
       {
         connection: this.connection,
-        concurrency: documentExtractionConcurrency(),
+        concurrency: documentExtractionConcurrency(this.extractCapacity.recommendedSlots()),
         lockDuration: extractionQueueLockDurationMs(),
         stalledInterval: extractionQueueStalledIntervalMs(),
         maxStalledCount: extractionQueueMaxStalledCount(),
       }
     );
+    this.worker.on('failed', (job, error) => {
+      if (!job) {
+        return;
+      }
+      void this.persistFinalJobFailure(job, error).catch((persistError: unknown) => {
+        const detail = persistError instanceof Error ? persistError.message : String(persistError);
+        this.logger.warn(`Could not persist final extraction failure: ${detail}`);
+      });
+    });
+    this.extractCapacity.onSlotsChanged((slots) => {
+      this.worker.concurrency = documentExtractionConcurrency(slots);
+    });
     this.ready = true;
-  }
-
-  async enqueue(documentId: string, _userId: string): Promise<void> {
-    await enqueueBullJobWithRetry(
-      () =>
-        this.queue.add(
-          'extract',
-          { documentId, userId: _userId },
-          {
-            jobId: extractionJobId(documentId),
-            attempts: 5,
-            backoff: { type: 'exponential', delay: 5_000 },
-            removeOnComplete: 1_000,
-            removeOnFail: 500,
-          }
-        ),
-      { maxAttempts: 5, label: QUEUE_NAME }
-    );
-    this.logger.debug(`Enqueued extraction for document ${documentId}`);
   }
 
   isReady(): boolean {
@@ -144,7 +170,11 @@ export class ExtractionQueueService implements OnModuleInit, OnModuleDestroy {
     if (job) {
       const state = await job.getState();
       live = isLiveExtractionJobState(state);
-      if (typeof job.processedOn === 'number' && Number.isFinite(job.processedOn) && job.processedOn > 0) {
+      if (
+        typeof job.processedOn === 'number' &&
+        Number.isFinite(job.processedOn) &&
+        job.processedOn > 0
+      ) {
         startedAtMs = job.processedOn;
       }
     }
@@ -185,6 +215,64 @@ export class ExtractionQueueService implements OnModuleInit, OnModuleDestroy {
       await existing.remove();
     }
     await this.enqueue(documentId, userId);
+  }
+
+  async isJobQueuedOrActive(documentId: string): Promise<boolean> {
+    const jobId = extractionJobId(documentId);
+    const job = await this.queue.getJob(jobId);
+    if (!job) {
+      return false;
+    }
+    const state = await job.getState();
+    return isBullJobQueuedState(state);
+  }
+
+  async recordOrphanRequeue(documentId: string): Promise<number> {
+    const key = orphanRequeueKey(documentId);
+    const count = await this.connection.incr(key);
+    await this.connection.expire(key, ORPHAN_REQUEUE_COUNTER_TTL_SECONDS);
+    return count;
+  }
+
+  private async persistFinalJobFailure(job: Job, error: Error): Promise<void> {
+    const documentId = parseExtractionJobDocumentId(job.data);
+    const state = await job.getState();
+    const document = await this.documents.findById(documentId);
+    const failureReason = planExtractionJobFailed({
+      jobName: job.name,
+      jobFinallyFailed: state === 'failed',
+      documentStatus: document?.status ?? null,
+      error,
+    });
+    if (failureReason === null) {
+      return;
+    }
+    this.logger.warn(`Extraction job for ${documentId} finally failed: ${error.message}`);
+    await this.documents.updateStatus(documentId, 'failed', { failureReason });
+  }
+
+  async enqueue(documentId: string, _userId: string): Promise<void> {
+    const jobId = extractionJobId(documentId);
+    const prep = await prepareBullFixedJobIdForAdd(this.queue, jobId);
+    if (prep === 'add') {
+      await enqueueBullJobWithRetry(
+        () =>
+          this.queue.add(
+            'extract',
+            { documentId, userId: _userId },
+            {
+              jobId,
+              attempts: 5,
+              backoff: { type: 'exponential', delay: 5_000 },
+              removeOnComplete: 1_000,
+              removeOnFail: 500,
+            }
+          ),
+        { maxAttempts: 5, label: QUEUE_NAME }
+      );
+    }
+    await assertBullFixedJobIdQueued(this.queue, jobId);
+    this.logger.debug(`Enqueued extraction for document ${documentId}`);
   }
 
   async maybeEnqueueArenaSample(documentId: string, tenantId: string): Promise<void> {

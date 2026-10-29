@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 
 import { isRecord, parseNumber, parseString } from '../../../shared/infrastructure/database/row-parse.js';
 import { workerApiUrl } from '../../../shared/infrastructure/worker/worker-api-path.js';
@@ -48,6 +48,7 @@ function parsePropagationScores(raw: unknown): CeLabelPropagationScore[] {
 
 @Injectable()
 export class HttpCeMlAdapter {
+  private readonly logger = new Logger(HttpCeMlAdapter.name);
   async propagateLabelScores(input: {
     labelName: string;
     passageVectors: number[][];
@@ -193,13 +194,16 @@ export class HttpCeMlAdapter {
       return [];
     }
     const { url, secret } = workerBase();
-    const response = await fetch(workerApiUrl(url, '/ml/ce/missing-label-batch'), {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Worker-Secret': secret,
-      },
-      body: JSON.stringify({
+    let response: Response;
+    try {
+      response = await fetch(workerApiUrl(url, '/ml/ce/missing-label-batch'), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Worker-Secret': secret,
+        },
+        signal: AbortSignal.timeout(10_000),
+        body: JSON.stringify({
         targets: input.targets.map((target) => ({
           target_document_index: target.targetDocumentIndex,
           assigned_tag_ids: target.assignedTagIds,
@@ -212,7 +216,18 @@ export class HttpCeMlAdapter {
         })),
         labeled_document_indices: input.labeledDocumentIndices,
       }),
-    });
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.debug(`Worker CE missing-label batch unavailable (${message}); skipping batch hints`);
+      return [];
+    }
+    if (response.status === 404 || response.status === 405) {
+      this.logger.debug(
+        `Worker CE missing-label batch unavailable (${String(response.status)}); skipping batch hints`
+      );
+      return [];
+    }
     if (!response.ok) {
       throw new Error(`Worker CE missing-label batch failed: ${String(response.status)}`);
     }

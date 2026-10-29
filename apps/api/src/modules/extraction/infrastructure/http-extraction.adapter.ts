@@ -11,7 +11,7 @@ import type {
   LayoutIrPage,
   RepresentationUnitDto,
 } from '@docuvate/contracts';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
 import type {
   ExtractionCompareItem,
@@ -24,11 +24,20 @@ import { workerApiUrl } from '../../../shared/infrastructure/worker/worker-api-p
 import {
   fetchWorkerJson,
   workerCompareTimeoutMs,
-  workerExtractTimeoutMs,
 } from '../../../shared/infrastructure/worker/worker-fetch.js';
 import { workerRequestHeaders } from '../../../shared/infrastructure/worker/worker-request-headers.js';
 import { parseExtractedFacts } from '../../exact-facts/infrastructure/parse-extracted-facts.js';
-import { EXTRACTION_TIMEOUT_FAILURE_MESSAGE } from '../domain/extraction-queue-failures.js';
+import { extractionWorkerFetchTimeoutMs } from '../domain/extraction-deadline.config.js';
+import { ExtractionFailure } from '../domain/extraction-failure.js';
+import {
+  extractionFailureFromWorkerResponse,
+  parseWorkerExtractErrorBody,
+  type WorkerExtractErrorBody,
+} from '../domain/extraction-worker-errors.js';
+import {
+  parseWorkerRetryAfterSeconds,
+  WorkerExtractCapacityCoordinator,
+} from './worker-extract-capacity.coordinator.js';
 
 function isExtractedField(value: unknown): value is ExtractedField {
   if (!isRecord(value)) {
@@ -353,7 +362,7 @@ function parseCompareResponse(
 
 @Injectable()
 export class HttpExtractionAdapter implements ExtractionPort {
-  private readonly logger = new Logger(HttpExtractionAdapter.name);
+  constructor(private readonly extractCapacity: WorkerExtractCapacityCoordinator) {}
 
   private workerHeaders(): Record<string, string> {
     return workerRequestHeaders();
@@ -376,52 +385,47 @@ export class HttpExtractionAdapter implements ExtractionPort {
       embeddingDensityState: options?.embeddingDensityState,
       buildExactFactIndex: options?.buildExactFactIndex === true,
     });
-    const timeoutMs = workerExtractTimeoutMs();
-    const maxAttempts = 5;
-    let lastError: Error | null = null;
-    for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
-      try {
-        const response = await fetch(url, {
-          method: 'POST',
-          headers: this.workerHeaders(),
-          body,
-          signal: AbortSignal.timeout(timeoutMs),
-        });
-        if (response.status === 502 || response.status === 503 || response.status === 504) {
-          throw new Error(`Worker extraction unavailable: ${String(response.status)}`);
-        }
-        if (!response.ok) {
-          throw new Error(`Worker extraction failed: ${String(response.status)}`);
-        }
-        const data: unknown = await response.json();
-        return {
-          result: parseExtractionResultBody(data),
-          previewPdf: parsePreviewPdfBase64(data),
-        };
-      } catch (error: unknown) {
-        if (error instanceof Error && (error.name === 'TimeoutError' || error.name === 'AbortError')) {
-          this.logger.warn(
-            `Worker /extract aborted after ${String(timeoutMs)}ms (attempt ${String(attempt)})`
-          );
-          throw new Error(EXTRACTION_TIMEOUT_FAILURE_MESSAGE);
-        }
-        const message = error instanceof Error ? error.message : String(error);
-        const retryable =
-          message.includes('fetch failed') ||
-          message.includes('Worker extraction unavailable') ||
-          message.includes('ECONNREFUSED') ||
-          message.includes('ECONNRESET');
-        lastError = error instanceof Error ? error : new Error(message);
-        if (!retryable || attempt >= maxAttempts) {
-          throw lastError;
-        }
-        const delayMs = Math.min(32_000, 2_000 * 2 ** (attempt - 1));
-        await new Promise((resolve) => {
-          setTimeout(resolve, delayMs);
-        });
-      }
+    const signal = AbortSignal.timeout(extractionWorkerFetchTimeoutMs());
+    let response: Response;
+    try {
+      response = await fetch(url, {
+        method: 'POST',
+        headers: this.workerHeaders(),
+        body,
+        signal,
+      });
+    } catch (error: unknown) {
+      // Single attempt: BullMQ owns retries. A fired timeout signal is the API-side deadline;
+      // any other fetch rejection means the worker could not be reached.
+      const detail = error instanceof Error ? error.message : String(error);
+      throw new ExtractionFailure(signal.aborted ? 'worker_timeout' : 'worker_unreachable', detail);
     }
-    throw lastError ?? new Error('Worker extraction failed');
+    if (!response.ok) {
+      let errorBody: WorkerExtractErrorBody | null = null;
+      try {
+        errorBody = parseWorkerExtractErrorBody(await response.json());
+      } catch {
+        errorBody = null;
+      }
+      const failure = extractionFailureFromWorkerResponse(response.status, errorBody);
+      if (failure.code === 'worker_busy') {
+        this.extractCapacity.onWorkerPressure503(
+          parseWorkerRetryAfterSeconds(response.headers.get('retry-after'))
+        );
+      }
+      throw failure;
+    }
+    let data: unknown;
+    try {
+      data = await response.json();
+    } catch (error: unknown) {
+      const detail = error instanceof Error ? error.message : String(error);
+      throw new ExtractionFailure(signal.aborted ? 'worker_timeout' : 'worker_error', detail);
+    }
+    return {
+      result: parseExtractionResultBody(data),
+      previewPdf: parsePreviewPdfBase64(data),
+    };
   }
 
   async listEngines(): Promise<WorkerEngineListItem[]> {

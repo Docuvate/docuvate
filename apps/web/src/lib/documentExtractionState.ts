@@ -21,21 +21,6 @@ export interface ExtractionFailurePresentation {
   technicalDetail: string | null;
 }
 
-const WORKER_HTTP_FAILURE = /^Worker extraction failed: (\d{3})$/;
-
-function looksLikeInternalError(reason: string): boolean {
-  if (WORKER_HTTP_FAILURE.test(reason)) {
-    return true;
-  }
-  if (reason.startsWith('Worker extraction failed')) {
-    return true;
-  }
-  if (/^[A-Za-z][A-Za-z ]+ failed: \d{3}$/.test(reason)) {
-    return true;
-  }
-  return false;
-}
-
 export function presentExtractionFailure(
   reason: string | null | undefined
 ): ExtractionFailurePresentation {
@@ -46,24 +31,17 @@ export function presentExtractionFailure(
       technicalDetail: null,
     };
   }
-  if (
-    trimmed === 'documents.extractionFailedTimeout' ||
-    trimmed.includes('Worker extraction timeout')
-  ) {
+  if (i18n.exists(trimmed)) {
+    // The API stores typed failure codes as i18n keys.
     return {
-      userMessage: i18n.t('documents.extractionFailedTimeout'),
-      technicalDetail: 'Worker extraction timeout',
+      userMessage: i18n.t(trimmed),
+      technicalDetail: null,
     };
   }
-  if (looksLikeInternalError(trimmed)) {
-    return {
-      userMessage: i18n.t('documents.extractionFailedWorker'),
-      technicalDetail: trimmed,
-    };
-  }
+  // Reasons without a known i18n key are shown as technical detail behind a generic message.
   return {
-    userMessage: trimmed,
-    technicalDetail: null,
+    userMessage: i18n.t('documents.extractionFailedWorker'),
+    technicalDetail: trimmed,
   };
 }
 

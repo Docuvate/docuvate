@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # End-to-end smoke: compose stack + synthetic fixture seeder + cited-chat checks (CPU extractive).
+# Worker load tests (throughput bench + 2 GiB soak) run separately: scripts/ci/worker-load.sh.
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 cd "$ROOT"
@@ -17,7 +18,6 @@ bash scripts/ci/compose-smoke-pull-images.sh
 for attempt in 1 2 3 4 5; do
   if "${COMPOSE[@]}" --profile smoke up --wait --build \
     postgres migrate db-storage-guard minio minio-init valkey mailpit api worker web; then
-    bash apps/worker/tests/scripts/worker_http_throughput_smoke.sh
     if ! "${COMPOSE[@]}" --profile smoke up --wait smoke-seed; then
       exit 1
     fi

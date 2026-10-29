@@ -25,11 +25,13 @@ _PROC_STATUS_FIELD_COUNT = 2
 
 ChildExitReason = Literal[
     "planned_recycle",
+    "admission_reclaim",
     "replaced_dead_child",
     "exited_before_job",
     "exited_after_job",
     "stdin_closed",
     "unexpected",
+    "oom_killed",
 ]
 
 
@@ -44,6 +46,7 @@ class ChildExitDiagnostics:
     cgroup_current_bytes: int | None
     cgroup_oom_kills: int | None
     jobs_served: int | None
+    likely_oom_kill: bool
 
 
 def _read_proc_rss_bytes(pid: int) -> int | None:
@@ -88,16 +91,23 @@ def describe_child_exit(
     else:
         cgroup_limit = cgroup_memory_limit_bytes()
         cgroup_current = cgroup_memory_current_bytes()
+    signal_name = _signal_name(returncode)
+    oom_kills = cgroup_oom_kill_count()
+    likely_oom = signal_name == "SIGKILL" and oom_kills is not None and oom_kills > 0
+    exit_reason: ChildExitReason | str = reason
+    if likely_oom and reason not in {"planned_recycle", "admission_reclaim"}:
+        exit_reason = "oom_killed"
     return ChildExitDiagnostics(
         pid=pid,
         returncode=returncode,
-        reason=reason,
+        reason=exit_reason,
         rss_bytes=rss,
-        signal_name=_signal_name(returncode),
+        signal_name=signal_name,
         cgroup_limit_bytes=cgroup_limit,
         cgroup_current_bytes=cgroup_current,
-        cgroup_oom_kills=cgroup_oom_kill_count(),
+        cgroup_oom_kills=oom_kills,
         jobs_served=jobs_served,
+        likely_oom_kill=likely_oom,
     )
 
 
@@ -107,9 +117,11 @@ def log_child_exit(diagnostics: ChildExitDiagnostics) -> None:
         if diagnostics.rss_bytes is not None
         else None
     )
-    logger.warning(
+    log_fn = logger.error if diagnostics.likely_oom_kill else logger.warning
+    log_fn(
         "extract_pool_child_exit reason=%s pid=%s code=%s signal=%s rss_mib=%s "
-        "jobs_served=%s cgroup_current_mib=%s cgroup_limit_mib=%s cgroup_oom_kills=%s",
+        "jobs_served=%s cgroup_current_mib=%s cgroup_limit_mib=%s cgroup_oom_kills=%s "
+        "likely_oom_kill=%s",
         diagnostics.reason,
         diagnostics.pid,
         diagnostics.returncode,
@@ -127,4 +139,5 @@ def log_child_exit(diagnostics: ChildExitDiagnostics) -> None:
             else None
         ),
         diagnostics.cgroup_oom_kills,
+        diagnostics.likely_oom_kill,
     )

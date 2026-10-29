@@ -59,6 +59,10 @@ def _pool_size_from_env() -> int:
     return resolve_extract_concurrency()
 
 
+def pool_resident_bytes_per_child() -> int:
+    return _pool_resident_bytes()
+
+
 def pool_memory_reserved_bytes(*, pending_jobs: int) -> int:
     """Bytes for pool children that would spawn beyond those already counted in cgroup RSS."""
     if os.environ.get("DOCUVATE_EXTRACT_POOL", "0") != "1":

@@ -13,6 +13,7 @@ import signal
 import subprocess
 import sys
 import tempfile
+import threading
 import traceback
 from typing import Any
 
@@ -20,6 +21,7 @@ from docuvate_worker.application.extract import extract_document
 from docuvate_worker.domain.embedding_density.schemas import EmbeddingDensityStatePayload
 from docuvate_worker.domain.extract_errors import (
     ExtractPermanentError,
+    ExtractRetryableError,
     permanent_failure_from_subprocess,
 )
 from docuvate_worker.domain.models import (
@@ -29,6 +31,9 @@ from docuvate_worker.domain.models import (
     ExtractionResult,
 )
 from docuvate_worker.infrastructure.extract_memory.admission import extract_admission_slot
+from docuvate_worker.infrastructure.extract_memory.extract_deadline import (
+    extract_wall_clock_deadline_seconds,
+)
 from docuvate_worker.infrastructure.extract_memory.retry_policy import (
     apply_memory_retry_overrides,
     memory_retry_already_applied,
@@ -37,6 +42,11 @@ from docuvate_worker.infrastructure.extractors.paddle_engine import release_padd
 from docuvate_worker.infrastructure.onnx_e5_encoder import release_onnx_encoder
 from docuvate_worker.infrastructure.onnx_runtime_env import configure_onnx_runtime_env
 from docuvate_worker.infrastructure.worker_memory_hygiene import reclaim_python_heap
+from docuvate_worker.presentation.extract_active import (
+    ActiveExtractHandle,
+    bind_active_extract,
+    clear_active_extract,
+)
 from docuvate_worker.presentation.extract_subprocess_errors import (
     meaningful_stderr_tail,
     subprocess_failure_message,
@@ -236,9 +246,17 @@ def _execute_payload(payload: dict[str, Any]) -> dict[str, Any]:
 
 def _run_subprocess_once(payload: dict[str, Any], *, timeout: float) -> dict[str, Any]:
     if extract_pool_enabled() and os.environ.get("DOCUVATE_EXTRACT_CHILD_LOOP") != "1":
-        return pooled_extract_child().run_job(payload, timeout=timeout)
+        handle = ActiveExtractHandle(cancel_event=threading.Event())
+        bind_active_extract(handle)
+        try:
+            return pooled_extract_child().run_job(payload, timeout=timeout)
+        except ExtractRetryableError:
+            raise
+        finally:
+            clear_active_extract()
     with tempfile.TemporaryFile(mode="w+", encoding="utf-8") as stdout_file:
-        proc = subprocess.run(
+        try:
+            proc = subprocess.run(
             [sys.executable, "-m", "docuvate_worker.presentation.extract_subprocess_runner"],
             input=json.dumps(payload),
             stdout=stdout_file,
@@ -246,7 +264,12 @@ def _run_subprocess_once(payload: dict[str, Any], *, timeout: float) -> dict[str
             text=True,
             timeout=timeout,
             check=False,
-        )
+            )
+        except subprocess.TimeoutExpired:
+            raise ExtractRetryableError(
+                reason="extract deadline exceeded",
+                error_type="ExtractDeadlineExceeded",
+            ) from None
         stdout_file.seek(0)
         raw_out = stdout_file.read()
         if proc.returncode != 0:
@@ -267,7 +290,11 @@ def _run_subprocess_once(payload: dict[str, Any], *, timeout: float) -> dict[str
             return {
                 "ok": False,
                 "error": message,
-                "error_type": "RuntimeError",
+                "error_type": (
+                    CHILD_KILLED_ERROR_TYPE
+                    if proc.returncode == -signal.SIGKILL
+                    else "ExtractChildExited"
+                ),
                 "permanent": proc.returncode == -signal.SIGKILL,
             }
         parsed = json.loads(raw_out)
@@ -276,11 +303,13 @@ def _run_subprocess_once(payload: dict[str, Any], *, timeout: float) -> dict[str
         return parsed
 
 
+CHILD_KILLED_ERROR_TYPE = "ExtractChildKilled"
+
+
 def _sigkill_envelope(envelope: dict[str, Any]) -> bool:
     if envelope.get("ok") is not False:
         return False
-    error_text = str(envelope.get("error") or "")
-    return "SIGKILL" in error_text
+    return envelope.get("error_type") == CHILD_KILLED_ERROR_TYPE
 
 
 def _resource_exhausted_message() -> str:
@@ -347,9 +376,12 @@ def run_extract_isolated(
         ),
         "build_exact_fact_index": build_exact_fact_index,
     }
-    timeout = float(os.environ.get("DOCUVATE_EXTRACT_TIMEOUT_SECONDS", "900"))
+    timeout = extract_wall_clock_deadline_seconds(content, mime_type)
     with extract_admission_slot(content, mime_type):
-        return _run_extract_subprocess(payload, timeout=timeout)
+        try:
+            return _run_extract_subprocess(payload, timeout=timeout)
+        except ExtractRetryableError:
+            raise
 
 
 def main() -> None:
@@ -360,6 +392,8 @@ def main() -> None:
             if not stripped:
                 continue
             payload = json.loads(stripped)
+            if payload.get("__docuvate_op") == "cancel":
+                continue
             envelope = _execute_payload(payload)
             sys.stdout.write(json.dumps(envelope) + "\n")
             sys.stdout.flush()

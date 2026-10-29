@@ -26,17 +26,20 @@ const AUTHENTICATED_ROUTES: { path: string; slug: string }[] = [
   { path: '/filesystem', slug: 'filesystem' },
 ];
 
-async function assertColorContrast(page: import('@playwright/test').Page, label: string): Promise<void> {
+async function assertColorContrast(
+  page: import('@playwright/test').Page,
+  label: string
+): Promise<void> {
   const results = await new AxeBuilder({ page }).withRules(['color-contrast']).analyze();
-  expect(
-    results.violations,
-    `${label}: ${results.violations.map((v) => v.id).join(', ')}`
-  ).toEqual([]);
+  expect(results.violations, `${label}: ${results.violations.map((v) => v.id).join(', ')}`).toEqual(
+    []
+  );
 }
 
 async function waitForLabelsPageReady(page: import('@playwright/test').Page): Promise<void> {
   await page.waitForLoadState('domcontentloaded');
-  await page.locator('main').waitFor({ state: 'visible', timeout: 60_000 });
+  await expect(page.locator('.app-boot-loading')).toHaveCount(0, { timeout: 90_000 });
+  await page.locator('.labels-page').waitFor({ state: 'visible', timeout: 90_000 });
 }
 
 async function waitForAppShell(page: import('@playwright/test').Page): Promise<void> {
@@ -57,10 +60,7 @@ test.describe('Contrast axe color-contrast', () => {
           await page.goto(`${webOrigin}${route.path}`);
           await page.waitForLoadState('networkidle');
           await setTheme(page, theme);
-          await assertColorContrast(
-            page,
-            `${route.slug} ${theme} ${viewport.label}`
-          );
+          await assertColorContrast(page, `${route.slug} ${theme} ${viewport.label}`);
         }
       }
     }
@@ -70,7 +70,8 @@ test.describe('Contrast axe color-contrast', () => {
     test.use({ storageState: smokeFixtureStoragePath() });
 
     test('app surfaces', async ({ page, request }) => {
-      test.setTimeout(180_000);
+      // Up to 360 s waiting for the concurrently running smoke seed, plus the surface checks.
+      test.setTimeout(540_000);
       const health = await request.get(`${apiBase}/health`);
       test.skip(!health.ok(), 'compose API not running');
 
@@ -110,16 +111,15 @@ test.describe('Contrast axe color-contrast', () => {
               await waitForAppShell(page);
             }
             await setTheme(page, theme);
-            await assertColorContrast(
-              page,
-              `${route.slug} ${theme} ${viewport.label}`
-            );
+            await assertColorContrast(page, `${route.slug} ${theme} ${viewport.label}`);
           }
 
           recommendationsMode = 'fail';
           await page.goto(`${webOrigin}/structure/labels`, { waitUntil: 'domcontentloaded' });
           await waitForLabelsPageReady(page);
-          await page.locator('.labels-todo-load-error p.error').waitFor({ state: 'visible', timeout: 30_000 });
+          await page
+            .locator('.labels-todo-load-error p.error')
+            .waitFor({ state: 'visible', timeout: 30_000 });
           await setTheme(page, theme);
           await assertColorContrast(page, `labels-error ${theme} ${viewport.label}`);
 

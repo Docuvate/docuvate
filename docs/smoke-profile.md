@@ -35,3 +35,11 @@ For optional smoke validation after deploy, set `DOCUVATE_SMOKE_SEED=1` and run 
 ## Branch protection
 
 Configure GitHub required checks to **only** `ci-ok`. Path-filtered and migration-only jobs may show as skipped; `ci-ok` treats skipped as success.
+
+## Worker load tests
+
+The worker HTTP throughput bench and the 2 GiB count-based compose soak are not part of smoke. They run in the separate `worker-load` CI job (in parallel to smoke, only when worker, compose, or CI workflow paths change):
+
+```bash
+bash scripts/ci/worker-load.sh
+```

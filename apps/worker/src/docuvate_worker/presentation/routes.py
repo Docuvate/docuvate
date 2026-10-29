@@ -1,10 +1,11 @@
 # SPDX-FileCopyrightText: 2026 Thomas Faust
 # SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 
+import asyncio
 import base64
 import os
 
-from fastapi import APIRouter, Header, HTTPException
+from fastapi import APIRouter, Header, HTTPException, Request
 
 from docuvate_worker.application.document_chat import (
     DocumentChatError,
@@ -39,6 +40,10 @@ from docuvate_worker.infrastructure.chat.rag_rerank import (
     rerank_passages,
     reranker_status,
 )
+from docuvate_worker.infrastructure.extract_memory.admission import admission_retry_after_seconds
+from docuvate_worker.infrastructure.extract_memory.extract_capacity import (
+    capacity_report_with_http_slots,
+)
 from docuvate_worker.infrastructure.extractors.compare import run_compare
 from docuvate_worker.infrastructure.extractors.engine_catalog import list_engine_meta
 from docuvate_worker.infrastructure.extractors.heuristic_fields import (
@@ -61,6 +66,7 @@ from docuvate_worker.infrastructure.ml.ce_ml.missing_label import (
 )
 from docuvate_worker.infrastructure.ml.registry import resolve_active_model
 from docuvate_worker.presentation.cpu_pipeline_response import cpu_pipeline_to_response
+from docuvate_worker.presentation.extract_active import cancel_active_extract
 from docuvate_worker.presentation.extract_http_concurrency import extract_http_slot
 from docuvate_worker.presentation.extract_subprocess_runner import run_extract_isolated
 from docuvate_worker.presentation.extracted_fact_response import extracted_facts_to_response
@@ -103,6 +109,7 @@ from docuvate_worker.presentation.schemas import (
     EmbedResponse,
     EngineInfo,
     EngineListResponse,
+    ExtractCapacityResponse,
     ExtractedField,
     ExtractionImageModel,
     ExtractRequest,
@@ -157,6 +164,19 @@ async def health() -> HealthResponse:
     return HealthResponse(status="ok")
 
 
+@router.get("/health/capacity", response_model=ExtractCapacityResponse)
+async def health_capacity() -> ExtractCapacityResponse:
+    report = capacity_report_with_http_slots()
+    return ExtractCapacityResponse(
+        recommended_concurrent_extractions=report.recommended_concurrent_extractions,
+        active_extract_jobs=report.active_extract_jobs,
+        extract_slots_free=report.extract_slots_free,
+        memory_available_bytes=report.memory_available_bytes,
+        evictable_model_bytes=report.evictable_model_bytes,
+        cgroup_limit_bytes=report.cgroup_limit_bytes,
+    )
+
+
 @router.get("/health/ready", response_model=HealthResponse)
 def health_ready() -> HealthResponse:
     status = reranker_status()
@@ -193,7 +213,8 @@ def hardware_capabilities(
 
 
 @router.post("/extract", response_model=ExtractResponse)
-def extract(
+async def extract(
+    request: Request,
     body: ExtractRequest,
     x_worker_secret: str | None = Header(default=None, alias="X-Worker-Secret"),
 ) -> ExtractResponse:
@@ -211,21 +232,41 @@ def extract(
         )
     try:
         with extract_http_slot():
-            result = run_extract_isolated(
-                content=raw,
-                mime_type=body.mime_type,
-                engine=body.engine,
-                embedding_density_state=density_state,
-                build_exact_fact_index=body.build_exact_fact_index,
+            loop = asyncio.get_running_loop()
+            future = loop.run_in_executor(
+                None,
+                lambda: run_extract_isolated(
+                    content=raw,
+                    mime_type=body.mime_type,
+                    engine=body.engine,
+                    embedding_density_state=density_state,
+                    build_exact_fact_index=body.build_exact_fact_index,
+                ),
             )
+            while not future.done():
+                if await request.is_disconnected():
+                    cancel_active_extract()
+                    raise ExtractRetryableError(
+                        reason="client disconnected",
+                        error_type="ExtractClientDisconnected",
+                    )
+                await asyncio.sleep(0.25)
+            result = future.result()
     except ExtractRetryableError as exc:
+        if exc.error_type == "ExtractDeadlineExceeded":
+            error_code = "extract_deadline_exceeded"
+        elif exc.error_type == "ExtractClientDisconnected":
+            error_code = "extract_client_disconnected"
+        else:
+            error_code = "extract_resource_busy"
         raise HTTPException(
             status_code=503,
             detail={
-                "errorCode": "extract_resource_busy",
+                "errorCode": error_code,
                 "errorType": exc.error_type,
                 "reason": exc.reason,
             },
+            headers={"Retry-After": str(admission_retry_after_seconds())},
         ) from exc
     except ExtractPermanentError as exc:
         raise HTTPException(

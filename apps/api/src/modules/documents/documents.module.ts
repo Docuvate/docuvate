@@ -55,11 +55,13 @@ import { SendDocumentChatThreadMessageUseCase } from './application/send-documen
 import { StreamDocumentChatMessageUseCase } from './application/stream-document-chat-message.use-case.js';
 import { UpdateDocumentUseCase } from './application/update-document.use-case.js';
 import { UploadDocumentUseCase } from './application/upload-document.use-case.js';
+import { DOCUMENT_EXTRACTION_ENQUEUE } from './domain/document-extraction-enqueue.token.js';
 import { DocumentChatGenerationActiveRegistry } from './infrastructure/document-chat-generation-active.registry.js';
 import { DocumentChatGenerationCancelRegistry } from './infrastructure/document-chat-generation-cancel.registry.js';
 import { DocumentChatGenerationQueueService } from './infrastructure/document-chat-generation-queue.service.js';
 import { FailedDocumentExtractionReconcileService } from './infrastructure/failed-document-extraction-reconcile.service.js';
 import { HeuristicFieldSuggestionsBackfillService } from './infrastructure/heuristic-field-suggestions-backfill.service.js';
+import { OrphanDocumentExtractionReconcileService } from './infrastructure/orphan-document-extraction-reconcile.service.js';
 import { PgDocumentReviewQueueRepository } from './infrastructure/pg-document-review-queue.repository.js';
 import { PgInstallationUserCountReader } from './infrastructure/pg-installation-user-count.reader.js';
 import { StaleChatGenerationReconcileService } from './infrastructure/stale-chat-generation-reconcile.service.js';
@@ -109,6 +111,7 @@ import { ReviewQueueController } from './presentation/review-queue.controller.js
     QueueExtractionUseCase,
     RunExtractionUseCase,
     ExtractionQueueService,
+    { provide: DOCUMENT_EXTRACTION_ENQUEUE, useExisting: ExtractionQueueService },
     DocumentChatUseCase,
     ListDocumentChatThreadsUseCase,
     CreateDocumentChatThreadUseCase,
@@ -118,6 +121,7 @@ import { ReviewQueueController } from './presentation/review-queue.controller.js
     DocumentChatGenerationQueueService,
     FailedDocumentExtractionReconcileService,
     StaleDocumentExtractionReconcileService,
+    OrphanDocumentExtractionReconcileService,
     StaleChatGenerationReconcileService,
     DocumentChatGenerationActiveRegistry,
     DocumentChatGenerationCancelRegistry,

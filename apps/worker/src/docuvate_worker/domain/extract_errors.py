@@ -34,20 +34,26 @@ class ExtractRetryableError(Exception):
         return f"{self.error_type}: {self.reason}"
 
 
+# Exception types raised inside the extract child that will fail identically on retry.
+PERMANENT_SUBPROCESS_ERROR_TYPES: frozenset[str] = frozenset(
+    {
+        "OverflowError",
+        "ValueError",
+        "TypeError",
+        "UnicodeDecodeError",
+        "MemoryError",
+        "RecursionError",
+        "ExtractResourceExhausted",
+    }
+)
+
+
 def permanent_failure_from_subprocess(
     *,
     error_type: str,
     reason: str,
 ) -> ExtractPermanentError | None:
-    lowered = reason.casefold()
-    if error_type in {"OverflowError", "ValueError", "TypeError", "UnicodeDecodeError"}:
-        return ExtractPermanentError(reason=reason, error_type=error_type)
-    if "overflowerror" in lowered or "math range error" in lowered:
-        return ExtractPermanentError(reason=reason, error_type=error_type)
-    if "extractresourceexhausted" in lowered or "zu groß" in lowered:
-        return ExtractPermanentError(reason=reason, error_type="ExtractResourceExhausted")
-    if "out of memory" in lowered or "sigkill" in lowered:
-        return ExtractPermanentError(reason=reason, error_type="ExtractResourceExhausted")
-    if error_type in {"MemoryError", "RecursionError"}:
+    """Classify a child failure by its exception type only (never by message text)."""
+    if error_type in PERMANENT_SUBPROCESS_ERROR_TYPES:
         return ExtractPermanentError(reason=reason, error_type=error_type)
     return None
