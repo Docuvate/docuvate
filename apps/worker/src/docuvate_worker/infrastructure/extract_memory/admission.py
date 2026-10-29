@@ -30,6 +30,8 @@ from docuvate_worker.infrastructure.extract_memory.memory_pressure import (
 )
 from docuvate_worker.infrastructure.extract_memory.model_residency import (
     evictable_pool_model_bytes,
+    pool_child_running,
+    reclaim_idle_parent_memory,
     reclaim_model_memory_for_admission,
 )
 from docuvate_worker.infrastructure.extract_memory.pixel_budget import (
@@ -176,13 +178,59 @@ def document_exceeds_cgroup_even_without_models(
     """True when a single page cannot fit even if all pool models were unloaded."""
     if snapshot is None or snapshot.limit_bytes is None:
         return False
-    ceiling = (
-        snapshot.limit_bytes
-        - headroom_bytes
-        - min_free_bytes
-        - DEFAULT_PARENT_RSS_BYTES
-    )
+    ceiling = snapshot.limit_bytes - headroom_bytes - min_free_bytes - DEFAULT_PARENT_RSS_BYTES
     return minimum_chunk_bytes > max(0, ceiling)
+
+
+def _decide_idle_admission(
+    *,
+    snapshot: CgroupMemorySnapshot,
+    available: int | None,
+    minimum_chunk_bytes: int,
+    headroom_bytes: int,
+    min_free_bytes: int,
+    reserved_bytes: int,
+    evictable_model_bytes: int,
+    pool_child_alive: bool,
+) -> AdmissionDecision:
+    """Admission for the first job on an idle worker (no admitted job)."""
+    need = minimum_chunk_bytes + min_free_bytes + reserved_bytes
+    effective_available = (available or 0) + evictable_model_bytes
+    if available is not None and effective_available < need:
+        if document_exceeds_cgroup_even_without_models(
+            minimum_chunk_bytes,
+            snapshot,
+            headroom_bytes=headroom_bytes,
+            min_free_bytes=min_free_bytes,
+        ):
+            return AdmissionDecision(
+                admit=False,
+                available_bytes=available,
+                reason="minimum_chunk_exceeds_cgroup",
+            )
+        if not pool_child_alive:
+            return AdmissionDecision(
+                admit=True,
+                available_bytes=available,
+                reason="idle_liveness",
+            )
+        return AdmissionDecision(
+            admit=False,
+            available_bytes=available,
+            reason="memory_pressure",
+        )
+    if (
+        available is not None
+        and available < need
+        and effective_available >= need
+        and evictable_model_bytes > 0
+    ):
+        return AdmissionDecision(
+            admit=True,
+            available_bytes=available,
+            reason="idle_evictable_models",
+        )
+    return AdmissionDecision(admit=True, available_bytes=available, reason="idle_first_job")
 
 
 def decide_extract_admission(
@@ -196,7 +244,15 @@ def decide_extract_admission(
     reserved_bytes: int,
     count_active_file: bool,
     evictable_model_bytes: int = 0,
+    pool_child_alive: bool = True,
 ) -> AdmissionDecision:
+    """Decide whether one more extract job fits the cgroup.
+
+    Liveness: an idle worker (no admitted job) whose pool child is not running has
+    nothing left to evict, so waiting cannot free memory. Refusing would turn every
+    later document into ``worker_busy`` forever; instead the first job is admitted
+    (``idle_liveness``) unless the document alone cannot fit the cgroup limit.
+    """
     if snapshot is None or snapshot.limit_bytes is None:
         return AdmissionDecision(admit=True, available_bytes=None, reason="no_cgroup_limit")
     available = cgroup_memory_available_bytes(
@@ -206,37 +262,16 @@ def decide_extract_admission(
         count_active_file=count_active_file,
     )
     if active_jobs <= 0:
-        need = minimum_chunk_bytes + min_free_bytes + reserved_bytes
-        effective_available = (available or 0) + evictable_model_bytes
-        if available is not None and effective_available < need:
-            if document_exceeds_cgroup_even_without_models(
-                minimum_chunk_bytes,
-                snapshot,
-                headroom_bytes=headroom_bytes,
-                min_free_bytes=min_free_bytes,
-            ):
-                return AdmissionDecision(
-                    admit=False,
-                    available_bytes=available,
-                    reason="minimum_chunk_exceeds_cgroup",
-                )
-            return AdmissionDecision(
-                admit=False,
-                available_bytes=available,
-                reason="memory_pressure",
-            )
-        if (
-            available is not None
-            and available < need
-            and effective_available >= need
-            and evictable_model_bytes > 0
-        ):
-            return AdmissionDecision(
-                admit=True,
-                available_bytes=available,
-                reason="idle_evictable_models",
-            )
-        return AdmissionDecision(admit=True, available_bytes=available, reason="idle_first_job")
+        return _decide_idle_admission(
+            snapshot=snapshot,
+            available=available,
+            minimum_chunk_bytes=minimum_chunk_bytes,
+            headroom_bytes=headroom_bytes,
+            min_free_bytes=min_free_bytes,
+            reserved_bytes=reserved_bytes,
+            evictable_model_bytes=evictable_model_bytes,
+            pool_child_alive=pool_child_alive,
+        )
     if available is None:
         return AdmissionDecision(admit=True, available_bytes=None, reason="no_cgroup_limit")
     need = estimate_bytes + min_free_bytes
@@ -285,27 +320,44 @@ class ExtractAdmissionController:
         """
         return sum(slot.estimate_bytes for slot in self._active if not slot.started)
 
+    def _decide_locked(self, estimate_bytes: int, minimum_chunk_bytes: int) -> AdmissionDecision:
+        snapshot = read_cgroup_memory_snapshot()
+        idle = len(self._active) == 0
+        pool_reserved = pool_memory_reserved_bytes(pending_jobs=len(self._active) + 1)
+        return decide_extract_admission(
+            snapshot=snapshot,
+            estimate_bytes=estimate_bytes,
+            minimum_chunk_bytes=minimum_chunk_bytes,
+            active_jobs=len(self._active),
+            headroom_bytes=self._headroom_bytes(),
+            min_free_bytes=self._min_free_bytes(),
+            reserved_bytes=self._reserved_bytes() + pool_reserved,
+            count_active_file=self._count_active_file(),
+            evictable_model_bytes=evictable_pool_model_bytes() if idle else 0,
+            pool_child_alive=pool_child_running() if idle else True,
+        )
+
     def try_acquire(
         self,
         estimate_bytes: int,
         minimum_chunk_bytes: int,
     ) -> AdmissionDecision:
         with self._lock:
-            snapshot = read_cgroup_memory_snapshot()
-            pending_jobs = len(self._active) + 1
-            pool_reserved = pool_memory_reserved_bytes(pending_jobs=pending_jobs)
-            evictable = evictable_pool_model_bytes() if len(self._active) == 0 else 0
-            decision = decide_extract_admission(
-                snapshot=snapshot,
-                estimate_bytes=estimate_bytes,
-                minimum_chunk_bytes=minimum_chunk_bytes,
-                active_jobs=len(self._active),
-                headroom_bytes=self._headroom_bytes(),
-                min_free_bytes=self._min_free_bytes(),
-                reserved_bytes=self._reserved_bytes() + pool_reserved,
-                count_active_file=self._count_active_file(),
-                evictable_model_bytes=evictable,
-            )
+            decision = self._decide_locked(estimate_bytes, minimum_chunk_bytes)
+            if decision.reason == "idle_liveness":
+                # Nothing is running and no pool child holds models: free what the
+                # parent still caches, then decide on fresh numbers. If memory is
+                # still short, admit anyway rather than refuse an idle worker forever.
+                reclaim_idle_parent_memory()
+                decision = self._decide_locked(estimate_bytes, minimum_chunk_bytes)
+                if decision.reason == "idle_liveness":
+                    logger.warning(
+                        "extract_admission_idle_liveness estimate_bytes=%s available=%s "
+                        "minimum_chunk_bytes=%s",
+                        estimate_bytes,
+                        decision.available_bytes,
+                        minimum_chunk_bytes,
+                    )
             if decision.admit:
                 if decision.reason == "idle_evictable_models":
                     reclaim_model_memory_for_admission()
@@ -323,7 +375,7 @@ class ExtractAdmissionController:
                     "extract_admission_denied estimate_bytes=%s pool_reserved=%s available=%s "
                     "active_jobs=%s reason=%s",
                     estimate_bytes,
-                    pool_reserved,
+                    pool_memory_reserved_bytes(pending_jobs=len(self._active) + 1),
                     decision.available_bytes,
                     len(self._active),
                     decision.reason,
@@ -403,10 +455,7 @@ def extract_admission_slot(content: bytes, mime_type: str) -> Iterator[None]:
             time.sleep(_wait_interval_seconds())
     if decision is None or not decision.admit:
         raise ExtractRetryableError(
-            reason=(
-                "Worker memory is temporarily fully utilized; "
-                "retry extraction shortly."
-            ),
+            reason=("Worker memory is temporarily fully utilized; retry extraction shortly."),
             error_type="ExtractResourceBusy",
         )
     ticket = decision.ticket

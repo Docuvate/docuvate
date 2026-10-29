@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+import importlib.util
+
 from docuvate_worker.infrastructure.chat.context_qa import answer_from_document_context
 from docuvate_worker.infrastructure.chat.donut_vqa import answer_with_donut, donut_available
 from docuvate_worker.infrastructure.hardware_capabilities import (
@@ -80,13 +82,8 @@ def chat_provider_status() -> list[dict[str, str | bool]]:
     from docuvate_worker.infrastructure.chat.rag_rerank import reranker_status  # noqa: PLC0415
 
     rerank = reranker_status()
-    donut_installed = False
-    try:
-        import transformers  # noqa: F401, PLC0415
-
-        donut_installed = True
-    except ImportError:
-        donut_installed = False
+    # Resolve without importing: transformers pulls torch into the API parent process.
+    donut_installed = importlib.util.find_spec("transformers") is not None
     donut_ok = donut_available()
     rerank_available = bool(rerank.get("available"))
     rerank_reason = str(rerank.get("reason") or "")

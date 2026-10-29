@@ -61,6 +61,11 @@ def test_transient_pressure_raises_retryable_not_permanent(
         "docuvate_worker.infrastructure.extract_memory.admission.reclaim_model_memory_for_admission",
         lambda: 0,
     )
+    # A warm pool child still runs, so waiting can free memory: stay retryable.
+    monkeypatch.setattr(
+        "docuvate_worker.infrastructure.extract_memory.admission.pool_child_running",
+        lambda: True,
+    )
 
     with pytest.raises(ExtractRetryableError):
         with extract_admission_slot(pdf, "application/pdf"):

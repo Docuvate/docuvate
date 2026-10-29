@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import importlib.util
 import io
 from typing import Any, Protocol, cast
 
@@ -21,9 +22,8 @@ _pipeline: Any | None = None
 
 
 def donut_available() -> bool:
-    try:
-        import transformers  # noqa: F401, PLC0415
-    except ImportError:
+    # Resolve without importing: transformers pulls torch into the API parent process.
+    if importlib.util.find_spec("transformers") is None:
         return False
     if not heavy_vision_capable():
         return False
