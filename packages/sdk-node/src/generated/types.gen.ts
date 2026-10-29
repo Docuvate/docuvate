@@ -118,6 +118,29 @@ export type ApplyLabelCorrectionResponseDto = {
     similarDocumentsUpdated: number;
 };
 
+export type ApplyTableCorrectionRequestDto = {
+    id: string;
+    op: 'create' | 'set_headers' | 'edit_cell' | 'remove';
+    page?: number;
+    shape?: 'rect' | 'polygon';
+    x0?: number;
+    y0?: number;
+    x1?: number;
+    y1?: number;
+    blockIndexes?: Array<number>;
+    beforeRegionId?: string;
+    tableType?: 'line_items' | 'key_value' | 'other';
+    headerRows?: number;
+    headerCols?: number;
+    cell?: DocumentRegionTableCellDto;
+};
+
+export type ApplyTableCorrectionResponseDto = {
+    noChange: boolean;
+    correction: DocumentCorrectionDto;
+    region: DocumentRegionDto;
+};
+
 export type AuthOidcProviderPublicResponseDto = {
     providerId: string;
     displayName: string;
@@ -454,6 +477,7 @@ export type DocumentRegionDto = {
     needsReview: boolean;
     blockIndexes: Array<number>;
     field?: DocumentRegionFieldDto;
+    table?: DocumentRegionTableDto;
     createdAt: string;
 };
 
@@ -465,6 +489,34 @@ export type DocumentRegionFieldDto = {
 export type DocumentRegionListResponseDto = {
     irSha256: string;
     items: Array<DocumentRegionDto>;
+};
+
+export type DocumentRegionTableCellDto = {
+    row: number;
+    col: number;
+    text: string;
+};
+
+export type DocumentRegionTableDto = {
+    tableType: 'line_items' | 'key_value' | 'other';
+    headerRows: number;
+    headerCols: number;
+    rules: Array<DocumentRegionTableRuleDto>;
+    merges: Array<DocumentRegionTableMergeDto>;
+    cells: Array<DocumentRegionTableCellDto>;
+};
+
+export type DocumentRegionTableMergeDto = {
+    row0: number;
+    col0: number;
+    rowSpan: number;
+    colSpan: number;
+};
+
+export type DocumentRegionTableRuleDto = {
+    axis: 'row' | 'col';
+    ord: number;
+    pos: number;
 };
 
 export type DocumentResponseDto = {
@@ -3760,6 +3812,55 @@ export type ListDocumentRegionsResponses = {
 };
 
 export type ListDocumentRegionsResponse = ListDocumentRegionsResponses[keyof ListDocumentRegionsResponses];
+
+export type ApplyDocumentTableCorrectionData = {
+    body: ApplyTableCorrectionRequestDto;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/documents/{id}/table-corrections';
+};
+
+export type ApplyDocumentTableCorrectionErrors = {
+    401: ProblemDetailsDto;
+    403: ProblemDetailsDto;
+    404: ProblemDetailsDto;
+    422: ProblemDetailsDto;
+};
+
+export type ApplyDocumentTableCorrectionError = ApplyDocumentTableCorrectionErrors[keyof ApplyDocumentTableCorrectionErrors];
+
+export type ApplyDocumentTableCorrectionResponses = {
+    200: ApplyTableCorrectionResponseDto;
+};
+
+export type ApplyDocumentTableCorrectionResponse = ApplyDocumentTableCorrectionResponses[keyof ApplyDocumentTableCorrectionResponses];
+
+export type WithdrawDocumentTableCorrectionData = {
+    body?: never;
+    path: {
+        id: string;
+        correctionId: string;
+    };
+    query?: never;
+    url: '/documents/{id}/table-corrections/{correctionId}/withdraw';
+};
+
+export type WithdrawDocumentTableCorrectionErrors = {
+    401: ProblemDetailsDto;
+    403: ProblemDetailsDto;
+    404: ProblemDetailsDto;
+    422: ProblemDetailsDto;
+};
+
+export type WithdrawDocumentTableCorrectionError = WithdrawDocumentTableCorrectionErrors[keyof WithdrawDocumentTableCorrectionErrors];
+
+export type WithdrawDocumentTableCorrectionResponses = {
+    200: OkResponseDto;
+};
+
+export type WithdrawDocumentTableCorrectionResponse = WithdrawDocumentTableCorrectionResponses[keyof WithdrawDocumentTableCorrectionResponses];
 
 export type RefreshSuggestionsData = {
     body?: never;

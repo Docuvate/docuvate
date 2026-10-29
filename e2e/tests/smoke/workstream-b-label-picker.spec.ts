@@ -256,15 +256,16 @@ async function openLibraryFilters(
   page: import('@playwright/test').Page,
   useDrawer: boolean
 ): Promise<void> {
-  const filterToggle = page.getByRole('button', {
-    name: /show filters|filter anzeigen|hide filters|filter ausblenden/i,
-  });
+  // Class selector: the toggle label varies by locale and active filter count ("Filters (2)").
+  const filterToggle = page.locator('button.library-filter-toggle');
   if (useDrawer) {
     await filterToggle.click();
     await expect(page.locator('.library-filter-drawer')).toBeVisible({ timeout: 30_000 });
     return;
   }
   const panel = page.getByTestId('library-filter-panel');
+  // Wait for the library to render before deciding; an instant isVisible() raced the first paint.
+  await expect(panel.or(filterToggle).first()).toBeVisible({ timeout: 60_000 });
   if (!(await panel.isVisible())) {
     await filterToggle.click();
   }

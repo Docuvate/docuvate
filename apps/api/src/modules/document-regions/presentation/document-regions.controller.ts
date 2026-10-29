@@ -17,13 +17,17 @@ import {
   ApiDocuvateRoute,
 } from '../../../shared/presentation/swagger/openapi-decorators.js';
 import { ApplyFieldCorrectionUseCase } from '../application/apply-field-correction.use-case.js';
+import { ApplyTableCorrectionUseCase } from '../application/apply-table-correction.use-case.js';
 import { ConfirmDocumentFieldUseCase } from '../application/confirm-document-field.use-case.js';
 import { ListDocumentRegionsUseCase } from '../application/list-document-regions.use-case.js';
 import { ListLayoutTokensUseCase } from '../application/list-layout-tokens.use-case.js';
 import { WithdrawFieldCorrectionUseCase } from '../application/withdraw-field-correction.use-case.js';
+import { WithdrawTableCorrectionUseCase } from '../application/withdraw-table-correction.use-case.js';
 import {
   ApplyFieldCorrectionRequestDto,
   ApplyFieldCorrectionResponseDto,
+  ApplyTableCorrectionRequestDto,
+  ApplyTableCorrectionResponseDto,
   ConfirmDocumentFieldRequestDto,
   ConfirmDocumentFieldResponseDto,
   DocumentLayoutTokensResponseDto,
@@ -41,6 +45,8 @@ export class DocumentRegionsController {
     private readonly listRegions: ListDocumentRegionsUseCase,
     private readonly applyFieldCorrection: ApplyFieldCorrectionUseCase,
     private readonly withdrawFieldCorrection: WithdrawFieldCorrectionUseCase,
+    private readonly applyTableCorrection: ApplyTableCorrectionUseCase,
+    private readonly withdrawTableCorrection: WithdrawTableCorrectionUseCase,
     private readonly confirmField: ConfirmDocumentFieldUseCase
   ) {}
 
@@ -108,6 +114,43 @@ export class DocumentRegionsController {
     @Param('correctionId') correctionId: string
   ): Promise<OkResponseDto> {
     await this.withdrawFieldCorrection.execute(id, session.user.id, subject, correctionId);
+    return { ok: true };
+  }
+
+  @Post(':id/table-corrections')
+  @ApiDocuvateRoute({
+    operationId: 'applyDocumentTableCorrection',
+    summary: 'Create or update a table region correction',
+  })
+  @ApiOkResponse({ type: ApplyTableCorrectionResponseDto })
+  async applyTable(
+    @Session() session: AuthSession,
+    @AuthSubject() subject: AuthorizationSubject,
+    @Param('id') id: string,
+    @Body() body: ApplyTableCorrectionRequestDto,
+    @Res({ passthrough: true }) reply: FastifyReply
+  ): Promise<ApplyTableCorrectionResponseDto | undefined> {
+    const result = await this.applyTableCorrection.execute(id, session.user.id, subject, body);
+    if (result.noChange) {
+      reply.code(204);
+      return undefined;
+    }
+    return result;
+  }
+
+  @Post(':id/table-corrections/:correctionId/withdraw')
+  @HttpCode(200)
+  @ApiDocuvateRoute({
+    operationId: 'withdrawDocumentTableCorrection',
+    summary: 'Withdraw a table correction',
+  })
+  async withdrawTable(
+    @Session() session: AuthSession,
+    @AuthSubject() subject: AuthorizationSubject,
+    @Param('id') id: string,
+    @Param('correctionId') correctionId: string
+  ): Promise<OkResponseDto> {
+    await this.withdrawTableCorrection.execute(id, session.user.id, subject, correctionId);
     return { ok: true };
   }
 

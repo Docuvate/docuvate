@@ -8642,6 +8642,182 @@
         ]
       }
     },
+    "/documents/{id}/table-corrections": {
+      "post": {
+        "operationId": "applyDocumentTableCorrection",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApplyTableCorrectionRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApplyTableCorrectionResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Create or update a table region correction",
+        "tags": [
+          "Documents"
+        ]
+      }
+    },
+    "/documents/{id}/table-corrections/{correctionId}/withdraw": {
+      "post": {
+        "operationId": "withdrawDocumentTableCorrection",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "correctionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Withdraw a table correction",
+        "tags": [
+          "Documents"
+        ]
+      }
+    },
     "/documents/{id}/tag-suggestions/refresh": {
       "post": {
         "operationId": "refreshSuggestions",
@@ -14091,6 +14267,120 @@
           "similarDocumentsUpdated"
         ]
       },
+      "ApplyTableCorrectionRequestDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "op": {
+            "enum": [
+              "create",
+              "set_headers",
+              "edit_cell",
+              "remove"
+            ],
+            "type": "string"
+          },
+          "page": {
+            "type": "number",
+            "minimum": 1
+          },
+          "shape": {
+            "enum": [
+              "rect",
+              "polygon"
+            ],
+            "type": "string"
+          },
+          "x0": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "y0": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "x1": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "y1": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "blockIndexes": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "beforeRegionId": {
+            "type": "string",
+            "nullable": true,
+            "format": "uuid"
+          },
+          "tableType": {
+            "enum": [
+              "line_items",
+              "key_value",
+              "other"
+            ],
+            "type": "string"
+          },
+          "headerRows": {
+            "type": "number",
+            "minimum": 0
+          },
+          "headerCols": {
+            "type": "number",
+            "minimum": 0
+          },
+          "cell": {
+            "$ref": "#/components/schemas/DocumentRegionTableCellDto"
+          }
+        },
+        "required": [
+          "id",
+          "op"
+        ]
+      },
+      "ApplyTableCorrectionResponseDto": {
+        "type": "object",
+        "properties": {
+          "noChange": {
+            "type": "boolean"
+          },
+          "correction": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DocumentCorrectionDto"
+              }
+            ]
+          },
+          "region": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DocumentRegionDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "noChange",
+          "correction",
+          "region"
+        ]
+      },
       "AuthOidcProviderPublicResponseDto": {
         "type": "object",
         "properties": {
@@ -15327,6 +15617,9 @@
           "field": {
             "$ref": "#/components/schemas/DocumentRegionFieldDto"
           },
+          "table": {
+            "$ref": "#/components/schemas/DocumentRegionTableDto"
+          },
           "createdAt": {
             "type": "string"
           }
@@ -15380,6 +15673,118 @@
         "required": [
           "irSha256",
           "items"
+        ]
+      },
+      "DocumentRegionTableCellDto": {
+        "type": "object",
+        "properties": {
+          "row": {
+            "type": "number",
+            "minimum": 0
+          },
+          "col": {
+            "type": "number",
+            "minimum": 0
+          },
+          "text": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "row",
+          "col",
+          "text"
+        ]
+      },
+      "DocumentRegionTableDto": {
+        "type": "object",
+        "properties": {
+          "tableType": {
+            "enum": [
+              "line_items",
+              "key_value",
+              "other"
+            ],
+            "type": "string"
+          },
+          "headerRows": {
+            "type": "number"
+          },
+          "headerCols": {
+            "type": "number"
+          },
+          "rules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DocumentRegionTableRuleDto"
+            }
+          },
+          "merges": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DocumentRegionTableMergeDto"
+            }
+          },
+          "cells": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DocumentRegionTableCellDto"
+            }
+          }
+        },
+        "required": [
+          "tableType",
+          "headerRows",
+          "headerCols",
+          "rules",
+          "merges",
+          "cells"
+        ]
+      },
+      "DocumentRegionTableMergeDto": {
+        "type": "object",
+        "properties": {
+          "row0": {
+            "type": "number"
+          },
+          "col0": {
+            "type": "number"
+          },
+          "rowSpan": {
+            "type": "number"
+          },
+          "colSpan": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "row0",
+          "col0",
+          "rowSpan",
+          "colSpan"
+        ]
+      },
+      "DocumentRegionTableRuleDto": {
+        "type": "object",
+        "properties": {
+          "axis": {
+            "enum": [
+              "row",
+              "col"
+            ],
+            "type": "string"
+          },
+          "ord": {
+            "type": "number"
+          },
+          "pos": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "axis",
+          "ord",
+          "pos"
         ]
       },
       "DocumentResponseDto": {

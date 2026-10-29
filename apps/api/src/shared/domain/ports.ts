@@ -7,6 +7,7 @@ import type {
   DocumentListQuery,
   DocumentRegionDto,
   DocumentRegionRole,
+  DocumentRegionTableDto,
   DuplicateCandidateSource,
   DuplicateFeatureVector,
   ExtractedField,
@@ -17,6 +18,7 @@ import type {
   LayoutToken,
   MatchingAlgorithm,
   NormalizedBBox,
+  TableCorrectionOp,
 } from '@docuvate/contracts';
 
 import type {
@@ -896,6 +898,17 @@ export interface InsertFieldCorrectionInput {
   tagId: string | null;
 }
 
+export interface InsertTableCorrectionInput {
+  id: string;
+  userId: string;
+  documentId: string;
+  op: TableCorrectionOp;
+  beforeRegionId: string | null;
+  afterRegionId: string | null;
+  oldValue: string | null;
+  newValue: string | null;
+}
+
 export interface InsertDocumentRegionInput {
   id: string;
   documentId: string;
@@ -911,6 +924,7 @@ export interface InsertDocumentRegionInput {
   boundText?: string;
   fieldKey?: string;
   valueOverride?: string | null;
+  table?: DocumentRegionTableDto;
 }
 
 export interface DocumentRegionRepository {
@@ -921,11 +935,17 @@ export interface DocumentRegionRepository {
   insertRegion(input: InsertDocumentRegionInput): Promise<DocumentRegionRecord>;
   supersedeRegion(regionId: string, successorId: string | null): Promise<void>;
   insertFieldCorrection(input: InsertFieldCorrectionInput): Promise<boolean>;
+  insertTableCorrection(input: InsertTableCorrectionInput): Promise<boolean>;
   findFieldCorrection(
     documentId: string,
     correctionId: string
   ): Promise<InsertFieldCorrectionInput | null>;
+  findTableCorrection(
+    documentId: string,
+    correctionId: string
+  ): Promise<InsertTableCorrectionInput | null>;
   withdrawFieldCorrection(documentId: string, correctionId: string): Promise<boolean>;
+  withdrawTableCorrection(documentId: string, correctionId: string): Promise<boolean>;
   confirmField(input: {
     documentId: string;
     userId: string;

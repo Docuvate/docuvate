@@ -214,6 +214,29 @@ jobs:
           path: field-regions-artifacts/
           retention-days: 14
           if-no-files-found: error
+      - name: Document table regions (Playwright)
+        run: |
+          set -euo pipefail
+          node e2e/scripts/provision-smoke-storage.mjs
+          export TABLE_REGIONS_ARTIFACT_DIR="${GITHUB_WORKSPACE}/table-regions-artifacts"
+          mkdir -p "$TABLE_REGIONS_ARTIFACT_DIR"
+          E2E_WEB_URL=http://localhost:5173 E2E_API_URL=http://localhost:3001 \
+            pnpm --filter @docuvate/e2e exec playwright test tests/smoke/document-table-regions.spec.ts \
+            --config=playwright.workstream-e.config.ts
+      - name: Verify table-region screenshots
+        if: ${{ success() }}
+        run: |
+          set -euo pipefail
+          export TABLE_REGIONS_ARTIFACT_DIR="${GITHUB_WORKSPACE}/table-regions-artifacts"
+          node e2e/scripts/verify-table-region-screenshots.mjs
+      - name: Upload table-region screenshots
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: table-regions-screenshots
+          path: table-regions-artifacts/
+          retention-days: 14
+          if-no-files-found: warn
       - name: Workstream B label picker (Playwright + screenshots)
         run: |
           set -euo pipefail

@@ -108,6 +108,9 @@ export async function assertNoHorizontalOverflow(page: Page): Promise<void> {
           if (style.visibility === 'hidden' || style.display === 'none') {
             return;
           }
+          if (child.closest('details:not([open])')) {
+            return;
+          }
           if (
             parentStyle.overflowX === 'auto' ||
             parentStyle.overflowX === 'scroll' ||
@@ -280,7 +283,10 @@ export async function assertOverflowMissesHeader(page: Page): Promise<void> {
   expect(overlap.ok, overlap.reason).toBe(true);
 }
 
-export async function assertToastMissesSheetActions(page: Page): Promise<void> {
+export async function assertToastMissesSheetActions(
+  page: Page,
+  actionsSelector = '[data-testid="field-correction-sheet"] .document-field-correction-actions'
+): Promise<void> {
   const toast = page.locator('.toast').first();
   if ((await toast.count()) === 0 || !(await toast.isVisible())) {
     await page.evaluate(() => {
@@ -299,11 +305,9 @@ export async function assertToastMissesSheetActions(page: Page): Promise<void> {
   await expect
     .poll(
       async () => {
-        return page.evaluate(() => {
+        return page.evaluate((selector) => {
           const toastEl = document.querySelector('.toast');
-          const actions = document.querySelector(
-            '[data-testid="field-correction-sheet"] .document-field-correction-actions'
-          );
+          const actions = document.querySelector(selector);
           if (!(toastEl instanceof HTMLElement) || !(actions instanceof HTMLElement)) {
             return 'missing toast or sheet actions';
           }
@@ -318,11 +322,19 @@ export async function assertToastMissesSheetActions(page: Page): Promise<void> {
           return intersects
             ? `toastBottom=${String(a.bottom)} actionsTop=${String(b.top)}`
             : 'ok';
-        });
+        }, actionsSelector);
       },
       { timeout: 5_000 }
     )
     .toBe('ok');
+}
+
+export async function assertTableCorrectionSheet(page: Page): Promise<void> {
+  const sheet = page.locator('[data-testid="table-correction-sheet"]');
+  await expect(sheet).toBeVisible({ timeout: 15_000 });
+  await expect(sheet).toHaveAttribute('role', 'dialog');
+  await expect(sheet).toHaveAttribute('aria-modal', 'true');
+  await expect(sheet.getByTestId('corrected-table-card')).toBeVisible();
 }
 
 export async function assertFieldNameStackedAboveValue(page: Page): Promise<void> {

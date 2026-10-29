@@ -107,4 +107,47 @@ describe('document regions (Testcontainers Postgres)', () => {
     expect(remapped?.blockIndexes).toEqual([4]);
     expect(remapped?.irSha256).toBe(nextHash);
   });
+
+  it('stores a table region with header rows and cell texts', async () => {
+    const created = await regions.insertRegion({
+      id: randomUUID(),
+      documentId,
+      page: 1,
+      shape: 'rect',
+      role: 'table',
+      x0: 0.1,
+      y0: 0.1,
+      x1: 0.6,
+      y1: 0.4,
+      irSha256: hashLayoutIrHex(sampleIr('208,82 €')),
+      blockIndexes: [4, 9],
+      boundText: 'Item Qty',
+      table: {
+        tableType: 'line_items',
+        headerRows: 1,
+        headerCols: 0,
+        rules: [
+          { axis: 'row', ord: 0, pos: 0.1 },
+          { axis: 'row', ord: 1, pos: 0.25 },
+          { axis: 'row', ord: 2, pos: 0.4 },
+          { axis: 'col', ord: 0, pos: 0.1 },
+          { axis: 'col', ord: 1, pos: 0.35 },
+          { axis: 'col', ord: 2, pos: 0.6 },
+        ],
+        merges: [],
+        cells: [
+          { row: 0, col: 0, text: 'Item' },
+          { row: 0, col: 1, text: 'Qty' },
+          { row: 1, col: 0, text: 'Widget A' },
+          { row: 1, col: 1, text: '2' },
+        ],
+      },
+    });
+    expect(created.table?.headerRows).toBe(1);
+    expect(created.table?.cells).toHaveLength(4);
+    const listed = await regions.listActiveRegions(documentId, 'table');
+    expect(listed.some((region) => region.id === created.id && region.table?.cells[0]?.text === 'Item')).toBe(
+      true
+    );
+  });
 });

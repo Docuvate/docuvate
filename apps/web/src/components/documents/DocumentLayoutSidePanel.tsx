@@ -32,6 +32,7 @@ import { sourceChipPageLabel } from '../../lib/sourceChipLabel';
 import { Button } from '../ui/Button';
 import { FieldValueRow } from '../ui/FieldValueRow';
 import { SourceChip } from '../ui/SourceChip';
+import { CorrectedTableCard } from './CorrectedTableCard';
 import { DocumentChatPanel } from './DocumentChatPanel';
 
 export type LayoutSideTab = 'fields' | 'tables' | 'outline' | 'chat';
@@ -59,12 +60,16 @@ interface DocumentLayoutSidePanelProps {
   documentChatLocalModelReady?: boolean;
   showChatTab?: boolean;
   fieldRegions?: DocumentRegionDto[];
+  tableRegions?: DocumentRegionDto[];
+  onTableHeaderChange?: (regionId: string, headerRows: number, headerCols: number) => void;
+  onTableCellChange?: (regionId: string, row: number, col: number, text: string) => void;
   onConfirmField?: (key: string, value: string) => void;
   onCorrectField?: (key: string) => void;
   onHighlightField?: (key: string) => void;
   onSelectField?: (key: string) => void;
   /** When the correction bottom sheet is open, unmount the inline field list so each field has one source chip. */
   hideInlineFieldList?: boolean;
+  hideInlineTableList?: boolean;
 }
 
 export function DocumentLayoutSidePanel({
@@ -88,11 +93,15 @@ export function DocumentLayoutSidePanel({
   documentChatLocalModelReady = false,
   showChatTab = true,
   fieldRegions = [],
+  tableRegions = [],
+  onTableHeaderChange,
+  onTableCellChange,
   onConfirmField,
   onCorrectField,
   onHighlightField,
   onSelectField,
   hideInlineFieldList = false,
+  hideInlineTableList = false,
 }: DocumentLayoutSidePanelProps) {
   const { t, i18n } = useTranslation();
   const tabsBaseId = useId();
@@ -436,7 +445,24 @@ export function DocumentLayoutSidePanel({
 
         {activeTab === 'tables' ? (
           <div className="layout-side-tables">
-            {tables.length === 0 ? (
+            {hideInlineTableList
+              ? null
+              : tableRegions.map((region, index) => (
+                  <CorrectedTableCard
+                    key={region.id}
+                    region={region}
+                    index={index}
+                    active={activeOverlayId === `region-table-${region.id}`}
+                    onSelect={() => { onOverlaySelect(`region-table-${region.id}`, region.page); }}
+                    onHeaderChange={(headerRows, headerCols) => {
+                      onTableHeaderChange?.(region.id, headerRows, headerCols);
+                    }}
+                    onCellChange={(row, col, text) => {
+                      onTableCellChange?.(region.id, row, col, text);
+                    }}
+                  />
+                ))}
+            {tables.length === 0 && tableRegions.length === 0 ? (
               <p className="muted">{t('documents.layoutTablesEmpty')}</p>
             ) : (
               tables.map((table) => (

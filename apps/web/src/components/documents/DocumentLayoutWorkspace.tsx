@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type {
   ApplyFieldCorrectionRequest,
+  ApplyTableCorrectionRequest,
   DocumentDto,
   DocumentRegionDto,
   ExtractedField,
@@ -14,10 +15,12 @@ import { useTranslation } from 'react-i18next';
 
 import {
   applyDocumentFieldCorrection,
+  applyDocumentTableCorrection,
   confirmDocumentField,
   listDocumentLayoutTokens,
   listDocumentRegions,
   withdrawDocumentFieldCorrection,
+  withdrawDocumentTableCorrection,
 } from '../../lib/api';
 import { formatUserFacingError } from '../../lib/apiErrors';
 import { isExtractionPending } from '../../lib/documentExtractionState';
@@ -26,6 +29,7 @@ import { layoutIrDocumentFromPageSummaries } from '../../lib/layoutIrPages';
 import {
   buildLayoutOverlays,
   hitTestLayoutOverlay,
+  type LayoutOverlayRegion,
   overlayForExtractionBlock,
 } from '../../lib/layoutOverlayModel';
 import {
@@ -53,6 +57,7 @@ import {
   DocumentSelectionLayer,
 } from './DocumentSelectionLayer';
 import { type DocumentSelectionTool, DocumentSelectionTools } from './DocumentSelectionTools';
+import { DocumentTableCorrectionSheet } from './DocumentTableCorrectionSheet';
 import { ExtractedLayoutHtmlFrame, LAYOUT_IR_ZOOM_STEPS, type LayoutIrZoomStep } from './ExtractedLayoutHtmlFrame';
 import { ExtractedTextPanel } from './ExtractedTextPanel';
 import { type PdfLayoutOverlay, PdfViewer } from './PdfViewer';
@@ -61,6 +66,7 @@ type LeftDocumentMode = 'original' | 'text';
 type AdvancedViewerMode = 'reconstruction' | 'compare';
 
 const REGION_FIELD_OVERLAY_PREFIX = 'region-field-';
+const REGION_TABLE_OVERLAY_PREFIX = 'region-table-';
 const CORRECTION_SHEET_MAX_WIDTH_PX = 1023;
 
 function regionFieldOverlayId(regionId: string): string {
@@ -72,6 +78,17 @@ function regionIdFromFieldOverlay(overlayId: string): string | null {
     return null;
   }
   return overlayId.slice(REGION_FIELD_OVERLAY_PREFIX.length);
+}
+
+function regionTableOverlayId(regionId: string): string {
+  return `${REGION_TABLE_OVERLAY_PREFIX}${regionId}`;
+}
+
+function regionIdFromTableOverlay(overlayId: string): string | null {
+  if (!overlayId.startsWith(REGION_TABLE_OVERLAY_PREFIX)) {
+    return null;
+  }
+  return overlayId.slice(REGION_TABLE_OVERLAY_PREFIX.length);
 }
 
 interface DocumentLayoutWorkspaceProps {
@@ -179,22 +196,27 @@ export function DocumentLayoutWorkspace({
   const [selectionDraft, setSelectionDraft] = useState<DocumentSelectionDraft | null>(null);
   const [layoutTokens, setLayoutTokens] = useState<LayoutToken[]>([]);
   const [fieldRegions, setFieldRegions] = useState<DocumentRegionDto[]>([]);
+  const [tableRegions, setTableRegions] = useState<DocumentRegionDto[]>([]);
   const [reanchorFieldKey, setReanchorFieldKey] = useState<string | null>(null);
   const [selectedFieldKey, setSelectedFieldKey] = useState<string | null>(null);
+  const [selectedTableId, setSelectedTableId] = useState<string | null>(null);
 
   const refreshRegions = useCallback(async () => {
-    const [tokenPage, regions] = await Promise.all([
+    const [tokenPage, fields, tables] = await Promise.all([
       listDocumentLayoutTokens(doc.id, viewerPage),
       listDocumentRegions(doc.id, 'field'),
+      listDocumentRegions(doc.id, 'table'),
     ]);
     setLayoutTokens(tokenPage.tokens);
-    setFieldRegions(regions.items);
+    setFieldRegions(fields.items);
+    setTableRegions(tables.items);
   }, [doc.id, viewerPage]);
 
   useEffect(() => {
     void refreshRegions().catch(() => {
       setLayoutTokens([]);
       setFieldRegions([]);
+      setTableRegions([]);
     });
   }, [refreshRegions]);
 
@@ -237,7 +259,8 @@ export function DocumentLayoutWorkspace({
     [highlightRegion, onLayoutSideTabChange]
   );
 
-  const correctionSheetOpen = Boolean(correctionSheetViewport && selectedFieldKey);
+  const tableSheetOpen = Boolean(correctionSheetViewport && selectedTableId);
+  const correctionSheetOpen = Boolean(correctionSheetViewport && (selectedFieldKey ?? selectedTableId));
   useEffect(() => {
     onCorrectionSheetOpenChange?.(correctionSheetOpen);
     return () => {
@@ -293,6 +316,34 @@ export function DocumentLayoutWorkspace({
     [doc.id, fields, onFieldsChange, refreshRegions, selectionDraft?.text, toast]
   );
 
+  const runTableCorrection = useCallback(
+    async (body: ApplyTableCorrectionRequest, successMessage: string) => {
+      const result = await applyDocumentTableCorrection(doc.id, body);
+      await refreshRegions();
+      if (result?.region?.id) {
+        setSelectedTableId(result.region.id);
+        setSelectedFieldKey(null);
+        setActiveOverlayId(regionTableOverlayId(result.region.id));
+        onLayoutSideTabChange('tables');
+      }
+      if (result?.correction) {
+        const correctionId = result.correction.id;
+        toast.success(successMessage, {
+          undo: () => {
+            void withdrawDocumentTableCorrection(doc.id, correctionId)
+              .then(() => refreshRegions())
+              .catch((err: unknown) => {
+                toast.error(formatUserFacingError(err, 'errors.generic'));
+              });
+          },
+        });
+      }
+      setSelectionDraft(null);
+      setSelectionTool('none');
+    },
+    [doc.id, onLayoutSideTabChange, refreshRegions, toast]
+  );
+
   const layoutPageCount = layoutIr?.pages.length ?? layoutIrPages?.length ?? 1;
   const { metricsByPage, metrics: compareMetrics } = useLayoutCompare(
     doc.id,
@@ -326,15 +377,28 @@ export function DocumentLayoutWorkspace({
     layoutIr ??
     (layoutIrPages?.length ? layoutIrDocumentFromPageSummaries(layoutIrPages) : null);
 
-  const overlays = useMemo(
-    () => (layoutIr ? buildLayoutOverlays(layoutIr) : []),
-    [layoutIr]
-  );
+  const overlays = useMemo(() => {
+    const base = layoutIr ? buildLayoutOverlays(layoutIr) : [];
+    const corrected: LayoutOverlayRegion[] = tableRegions.map((region, index) => ({
+      id: `region-table-${region.id}`,
+      page: region.page,
+      x: region.x0,
+      y: region.y0,
+      width: Math.max(0, region.x1 - region.x0),
+      height: Math.max(0, region.y1 - region.y0),
+      kind: 'table',
+      label: String(index + 1),
+      tableIndex: 1000 + index,
+    }));
+    return [...base, ...corrected];
+  }, [layoutIr, tableRegions]);
 
   const pdfOverlays: PdfLayoutOverlay[] = useMemo(() => {
     const fromIr = overlays.map((o) => {
       let label = o.label;
-      if (o.kind === 'table' && o.tableIndex != null) {
+      if (o.id.startsWith('region-table-')) {
+        label = t('documents.layoutCorrectedTableLabel', { n: o.label });
+      } else if (o.kind === 'table' && o.tableIndex != null) {
         label = t('documents.layoutTableLabel', { n: o.tableIndex + 1 });
       } else if (o.kind === 'field' && o.label) {
         label = fieldLabelForKey(o.label);
@@ -377,10 +441,22 @@ export function DocumentLayoutWorkspace({
         const fieldKey = fieldRegion?.field?.fieldKey;
         if (fieldKey) {
           setSelectedFieldKey(fieldKey);
+          setSelectedTableId(null);
           onLayoutSideTabChange('fields');
         }
         if (fieldRegion) {
           onViewerPageChange(fieldRegion.page);
+        }
+        return;
+      }
+      const tableId = regionIdFromTableOverlay(overlayId);
+      if (tableId) {
+        setSelectedTableId(tableId);
+        setSelectedFieldKey(null);
+        onLayoutSideTabChange('tables');
+        const tableRegion = tableRegions.find((item) => item.id === tableId);
+        if (tableRegion) {
+          onViewerPageChange(tableRegion.page);
         }
         return;
       }
@@ -402,6 +478,7 @@ export function DocumentLayoutWorkspace({
     [
       blocks,
       fieldRegions,
+      tableRegions,
       onActiveBlockIndexChange,
       onHighlightBlocks,
       onLayoutSideTabChange,
@@ -425,6 +502,7 @@ export function DocumentLayoutWorkspace({
         setSelectionTool('none');
         setReanchorFieldKey(null);
         setSelectedFieldKey(null);
+        setSelectedTableId(null);
         return;
       }
       if (event.key === 't' || event.key === 'T') {
@@ -549,12 +627,13 @@ export function DocumentLayoutWorkspace({
   return (
     <div
       className={
-        correctionSheetViewport && selectedFieldKey
+        correctionSheetOpen
           ? 'layout-workspace layout-workspace--correction-sheet'
           : 'layout-workspace'
       }
       data-correction-sheet-viewport={correctionSheetViewport ? '1' : '0'}
       data-selected-field={selectedFieldKey ?? ''}
+      data-selected-table={selectedTableId ?? ''}
     >
       <div className="layout-workspace-main">
         <Card className="preview-card preview-card-pdf layout-viewer-card">
@@ -724,6 +803,28 @@ export function DocumentLayoutWorkspace({
                           ]
                         : fieldOptions
                     }
+                    onMarkTable={
+                      reanchorFieldKey
+                        ? undefined
+                        : () => {
+                            void runTableCorrection(
+                              {
+                                id: crypto.randomUUID(),
+                                op: 'create',
+                                page: selectionDraft.page,
+                                shape: 'rect',
+                                x0: selectionDraft.rect.x0,
+                                y0: selectionDraft.rect.y0,
+                                x1: selectionDraft.rect.x1,
+                                y1: selectionDraft.rect.y1,
+                                blockIndexes: selectionDraft.tokens.map((token) => token.blockIndex),
+                              },
+                              t('documents.tableCorrectionSaved')
+                            ).catch((err: unknown) => {
+                                toast.error(formatUserFacingError(err, 'errors.generic'));
+                              });
+                          }
+                    }
                     onCreate={(fieldKey) => {
                       void runFieldCorrection(
                         {
@@ -810,7 +911,13 @@ export function DocumentLayoutWorkspace({
           knownFieldKeys={knownFieldKeys}
           fieldLabelForKey={fieldLabelForKey}
           activeTab={layoutSideTab}
-          onTabChange={onLayoutSideTabChange}
+          onTabChange={(tab) => {
+            onLayoutSideTabChange(tab);
+            if (tab === 'tables' && correctionSheetViewport && tableRegions.length > 0 && !selectedTableId) {
+              setSelectedTableId(tableRegions[0].id);
+              setSelectedFieldKey(null);
+            }
+          }}
           activeOverlayId={activeOverlayId}
           onOverlaySelect={onOverlaySelect}
           onAcceptSuggestion={(key, value) => {
@@ -823,6 +930,34 @@ export function DocumentLayoutWorkspace({
           heuristicSuggestions={heuristicSuggestions}
           recognizedCatalog={recognizedCatalog}
           fieldRegions={fieldRegions}
+          tableRegions={tableRegions}
+          onTableHeaderChange={(regionId, headerRows, headerCols) => {
+            void runTableCorrection(
+              {
+                id: crypto.randomUUID(),
+                op: 'set_headers',
+                beforeRegionId: regionId,
+                headerRows,
+                headerCols,
+              },
+              t('documents.tableCorrectionSaved')
+            ).catch((err: unknown) => {
+              toast.error(formatUserFacingError(err, 'errors.generic'));
+            });
+          }}
+          onTableCellChange={(regionId, row, col, text) => {
+            void runTableCorrection(
+              {
+                id: crypto.randomUUID(),
+                op: 'edit_cell',
+                beforeRegionId: regionId,
+                cell: { row, col, text },
+              },
+              t('documents.tableCorrectionSaved')
+            ).catch((err: unknown) => {
+              toast.error(formatUserFacingError(err, 'errors.generic'));
+            });
+          }}
           onConfirmField={(key, value) => {
             void confirmDocumentField(doc.id, key, value)
               .then(() => {
@@ -847,7 +982,8 @@ export function DocumentLayoutWorkspace({
           }}
           onHighlightField={highlightRegion}
           onSelectField={selectField}
-          hideInlineFieldList={correctionSheetOpen}
+          hideInlineFieldList={Boolean(correctionSheetViewport && selectedFieldKey)}
+          hideInlineTableList={tableSheetOpen}
           documentChatAvailable={documentChatAvailable}
           documentChatUiEnabled={documentChatUiEnabled}
           documentChatLocalModelEnabled={documentChatLocalModelEnabled}
@@ -906,6 +1042,54 @@ export function DocumentLayoutWorkspace({
           }
           onSourceClick={
             selectedFieldKey ? () => { highlightRegion(selectedFieldKey); } : undefined
+          }
+        />
+      ) : null}
+      {correctionSheetViewport ? (
+        <DocumentTableCorrectionSheet
+          open={selectedTableId != null}
+          region={tableRegions.find((item) => item.id === selectedTableId) ?? null}
+          index={Math.max(0, tableRegions.findIndex((item) => item.id === selectedTableId))}
+          onClose={() => { setSelectedTableId(null); }}
+          onSelect={() => {
+            if (selectedTableId) {
+              setActiveOverlayId(regionTableOverlayId(selectedTableId));
+            }
+          }}
+          onHeaderChange={
+            selectedTableId
+              ? (headerRows, headerCols) => {
+                  void runTableCorrection(
+                    {
+                      id: crypto.randomUUID(),
+                      op: 'set_headers',
+                      beforeRegionId: selectedTableId,
+                      headerRows,
+                      headerCols,
+                    },
+                    t('documents.tableCorrectionSaved')
+                  ).catch((err: unknown) => {
+                    toast.error(formatUserFacingError(err, 'errors.generic'));
+                  });
+                }
+              : undefined
+          }
+          onCellChange={
+            selectedTableId
+              ? (row, col, text) => {
+                  void runTableCorrection(
+                    {
+                      id: crypto.randomUUID(),
+                      op: 'edit_cell',
+                      beforeRegionId: selectedTableId,
+                      cell: { row, col, text },
+                    },
+                    t('documents.tableCorrectionSaved')
+                  ).catch((err: unknown) => {
+                    toast.error(formatUserFacingError(err, 'errors.generic'));
+                  });
+                }
+              : undefined
           }
         />
       ) : null}
