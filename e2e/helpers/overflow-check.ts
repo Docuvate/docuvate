@@ -33,17 +33,21 @@ interface BottomSheetLayout {
   reason: string;
 }
 
+const ARTIFACT_DIR_ENV_KEYS: readonly string[] = [
+  'FIELD_REGIONS_ARTIFACT_DIR',
+  'TABLE_REGIONS_ARTIFACT_DIR',
+  'LAYOUT_BLOCKS_ARTIFACT_DIR',
+];
+
 function artifactOutputDirs(): string[] {
-  const dirs: string[] = [];
-  const fieldDir = process.env['FIELD_REGIONS_ARTIFACT_DIR'];
-  const tableDir = process.env['TABLE_REGIONS_ARTIFACT_DIR'];
-  if (fieldDir) {
-    dirs.push(fieldDir);
+  const dirs = new Set<string>();
+  for (const key of ARTIFACT_DIR_ENV_KEYS) {
+    const dir = process.env[key];
+    if (dir) {
+      dirs.add(dir);
+    }
   }
-  if (tableDir && tableDir !== fieldDir) {
-    dirs.push(tableDir);
-  }
-  return dirs;
+  return [...dirs];
 }
 
 function cursorScreenshotDir(): string | undefined {
@@ -335,6 +339,14 @@ export async function assertTableCorrectionSheet(page: Page): Promise<void> {
   await expect(sheet).toHaveAttribute('role', 'dialog');
   await expect(sheet).toHaveAttribute('aria-modal', 'true');
   await expect(sheet.getByTestId('corrected-table-card')).toBeVisible();
+}
+
+export async function assertBlockCorrectionSheet(page: Page): Promise<void> {
+  const sheet = page.locator('[data-testid="block-correction-sheet"]');
+  await expect(sheet).toBeVisible({ timeout: 15_000 });
+  await expect(sheet).toHaveAttribute('role', 'dialog');
+  await expect(sheet).toHaveAttribute('aria-modal', 'true');
+  await expect(sheet.getByTestId('corrected-block-card')).toBeVisible();
 }
 
 export async function assertFieldNameStackedAboveValue(page: Page): Promise<void> {

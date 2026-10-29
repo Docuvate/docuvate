@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type {
+  DocumentRegionBlockType,
   DocumentRegionDto,
   ExtractedField,
   LayoutIrDocument,
@@ -32,6 +33,7 @@ import { sourceChipPageLabel } from '../../lib/sourceChipLabel';
 import { Button } from '../ui/Button';
 import { FieldValueRow } from '../ui/FieldValueRow';
 import { SourceChip } from '../ui/SourceChip';
+import { CorrectedBlockCard } from './CorrectedBlockCard';
 import { CorrectedTableCard } from './CorrectedTableCard';
 import { DocumentChatPanel } from './DocumentChatPanel';
 
@@ -61,8 +63,12 @@ interface DocumentLayoutSidePanelProps {
   showChatTab?: boolean;
   fieldRegions?: DocumentRegionDto[];
   tableRegions?: DocumentRegionDto[];
+  blockRegions?: DocumentRegionDto[];
   onTableHeaderChange?: (regionId: string, headerRows: number, headerCols: number) => void;
   onTableCellChange?: (regionId: string, row: number, col: number, text: string) => void;
+  onBlockTypeChange?: (regionId: string, blockType: DocumentRegionBlockType) => void;
+  onBlockRankChange?: (regionId: string, readingRank: number) => void;
+  onBlockIgnore?: (regionId: string) => void;
   onConfirmField?: (key: string, value: string) => void;
   onCorrectField?: (key: string) => void;
   onHighlightField?: (key: string) => void;
@@ -70,6 +76,7 @@ interface DocumentLayoutSidePanelProps {
   /** When the correction bottom sheet is open, unmount the inline field list so each field has one source chip. */
   hideInlineFieldList?: boolean;
   hideInlineTableList?: boolean;
+  hideInlineBlockList?: boolean;
 }
 
 export function DocumentLayoutSidePanel({
@@ -94,14 +101,19 @@ export function DocumentLayoutSidePanel({
   showChatTab = true,
   fieldRegions = [],
   tableRegions = [],
+  blockRegions = [],
   onTableHeaderChange,
   onTableCellChange,
+  onBlockTypeChange,
+  onBlockRankChange,
+  onBlockIgnore,
   onConfirmField,
   onCorrectField,
   onHighlightField,
   onSelectField,
   hideInlineFieldList = false,
   hideInlineTableList = false,
+  hideInlineBlockList = false,
 }: DocumentLayoutSidePanelProps) {
   const { t, i18n } = useTranslation();
   const tabsBaseId = useId();
@@ -516,9 +528,29 @@ export function DocumentLayoutSidePanel({
 
         {activeTab === 'outline' ? (
           <div className="layout-side-outline">
-            {outline.length === 0 ? (
+            {hideInlineBlockList
+              ? null
+              : blockRegions.map((region, index) => (
+                  <CorrectedBlockCard
+                    key={region.id}
+                    region={region}
+                    index={index}
+                    active={activeOverlayId === `region-block-${region.id}`}
+                    onSelect={() => { onOverlaySelect(`region-block-${region.id}`, region.page); }}
+                    onTypeChange={(blockType) => {
+                      onBlockTypeChange?.(region.id, blockType);
+                    }}
+                    onRankChange={(readingRank) => {
+                      onBlockRankChange?.(region.id, readingRank);
+                    }}
+                    onIgnore={() => {
+                      onBlockIgnore?.(region.id);
+                    }}
+                  />
+                ))}
+            {outline.length === 0 && blockRegions.length === 0 ? (
               <p className="muted">{t('documents.layoutOutlineEmpty')}</p>
-            ) : (
+            ) : outline.length === 0 ? null : (
               <ul className="layout-outline-list layout-outline-list-nested">
                 {outlineTree.map((node) => (
                   <OutlineTreeNode

@@ -10,6 +10,8 @@ import type {
   AdminOidcProviderDto,
   AdminUserDto,
   AdminUserListResponse,
+  ApplyBlockCorrectionRequest,
+  ApplyBlockCorrectionResponse,
   ApplyDuplicateSetDecisionsRequest,
   ApplyFieldCorrectionRequest,
   ApplyFieldCorrectionResponse,
@@ -353,6 +355,26 @@ export async function withdrawDocumentTableCorrection(
   correctionId: string
 ): Promise<void> {
   await requestNoContent(`/documents/${documentId}/table-corrections/${correctionId}/withdraw`, {
+    method: 'POST',
+  });
+}
+
+export async function applyDocumentBlockCorrection(
+  documentId: string,
+  body: ApplyBlockCorrectionRequest
+): Promise<ApplyBlockCorrectionResponse | null> {
+  const result = await request<ApplyBlockCorrectionResponse | undefined>(
+    `/documents/${documentId}/block-corrections`,
+    { method: 'POST', body: JSON.stringify(body) }
+  );
+  return result ?? null;
+}
+
+export async function withdrawDocumentBlockCorrection(
+  documentId: string,
+  correctionId: string
+): Promise<void> {
+  await requestNoContent(`/documents/${documentId}/block-corrections/${correctionId}/withdraw`, {
     method: 'POST',
   });
 }

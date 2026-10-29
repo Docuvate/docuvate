@@ -1,10 +1,12 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type {
+  BlockCorrectionOp,
   CustomFieldType,
   DocumentBulkAction,
   DocumentExtractionImageDto,
   DocumentListQuery,
+  DocumentRegionBlockDto,
   DocumentRegionDto,
   DocumentRegionRole,
   DocumentRegionTableDto,
@@ -909,6 +911,17 @@ export interface InsertTableCorrectionInput {
   newValue: string | null;
 }
 
+export interface InsertBlockCorrectionInput {
+  id: string;
+  userId: string;
+  documentId: string;
+  op: BlockCorrectionOp;
+  beforeRegionId: string | null;
+  afterRegionId: string | null;
+  oldValue: string | null;
+  newValue: string | null;
+}
+
 export interface InsertDocumentRegionInput {
   id: string;
   documentId: string;
@@ -925,6 +938,7 @@ export interface InsertDocumentRegionInput {
   fieldKey?: string;
   valueOverride?: string | null;
   table?: DocumentRegionTableDto;
+  block?: DocumentRegionBlockDto;
 }
 
 export interface DocumentRegionRepository {
@@ -936,6 +950,7 @@ export interface DocumentRegionRepository {
   supersedeRegion(regionId: string, successorId: string | null): Promise<void>;
   insertFieldCorrection(input: InsertFieldCorrectionInput): Promise<boolean>;
   insertTableCorrection(input: InsertTableCorrectionInput): Promise<boolean>;
+  insertBlockCorrection(input: InsertBlockCorrectionInput): Promise<boolean>;
   findFieldCorrection(
     documentId: string,
     correctionId: string
@@ -944,8 +959,13 @@ export interface DocumentRegionRepository {
     documentId: string,
     correctionId: string
   ): Promise<InsertTableCorrectionInput | null>;
+  findBlockCorrection(
+    documentId: string,
+    correctionId: string
+  ): Promise<InsertBlockCorrectionInput | null>;
   withdrawFieldCorrection(documentId: string, correctionId: string): Promise<boolean>;
   withdrawTableCorrection(documentId: string, correctionId: string): Promise<boolean>;
+  withdrawBlockCorrection(documentId: string, correctionId: string): Promise<boolean>;
   confirmField(input: {
     documentId: string;
     userId: string;

@@ -85,6 +85,28 @@ export type AdminUserResponseDto = {
     lastLoginAt?: string;
 };
 
+export type ApplyBlockCorrectionRequestDto = {
+    id: string;
+    op: 'create' | 'set_type' | 'set_rank' | 'ignore' | 'remove';
+    page?: number;
+    shape?: 'rect' | 'polygon';
+    x0?: number;
+    y0?: number;
+    x1?: number;
+    y1?: number;
+    blockIndexes?: Array<number>;
+    beforeRegionId?: string;
+    blockType?: 'heading' | 'paragraph' | 'list' | 'key_value' | 'table' | 'header' | 'footer';
+    headingLevel?: number;
+    readingRank?: number;
+};
+
+export type ApplyBlockCorrectionResponseDto = {
+    noChange: boolean;
+    correction: DocumentCorrectionDto;
+    region: DocumentRegionDto;
+};
+
 export type ApplyFieldCorrectionRequestDto = {
     id: string;
     op: 'create' | 'reanchor' | 'edit_value' | 'remove';
@@ -463,6 +485,12 @@ export type DocumentPipelineModulesResponseDto = {
     modules: Array<DocumentPipelineModuleDescriptorDto>;
 };
 
+export type DocumentRegionBlockDto = {
+    blockType: 'heading' | 'paragraph' | 'list' | 'key_value' | 'table' | 'header' | 'footer';
+    headingLevel: number;
+    readingRank: number;
+};
+
 export type DocumentRegionDto = {
     id: string;
     documentId: string;
@@ -478,6 +506,7 @@ export type DocumentRegionDto = {
     blockIndexes: Array<number>;
     field?: DocumentRegionFieldDto;
     table?: DocumentRegionTableDto;
+    block?: DocumentRegionBlockDto;
     createdAt: string;
 };
 
@@ -3039,6 +3068,55 @@ export type PatchError = PatchErrors[keyof PatchErrors];
 export type PatchResponses = {
     200: unknown;
 };
+
+export type ApplyDocumentBlockCorrectionData = {
+    body: ApplyBlockCorrectionRequestDto;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/documents/{id}/block-corrections';
+};
+
+export type ApplyDocumentBlockCorrectionErrors = {
+    401: ProblemDetailsDto;
+    403: ProblemDetailsDto;
+    404: ProblemDetailsDto;
+    422: ProblemDetailsDto;
+};
+
+export type ApplyDocumentBlockCorrectionError = ApplyDocumentBlockCorrectionErrors[keyof ApplyDocumentBlockCorrectionErrors];
+
+export type ApplyDocumentBlockCorrectionResponses = {
+    200: ApplyBlockCorrectionResponseDto;
+};
+
+export type ApplyDocumentBlockCorrectionResponse = ApplyDocumentBlockCorrectionResponses[keyof ApplyDocumentBlockCorrectionResponses];
+
+export type WithdrawDocumentBlockCorrectionData = {
+    body?: never;
+    path: {
+        id: string;
+        correctionId: string;
+    };
+    query?: never;
+    url: '/documents/{id}/block-corrections/{correctionId}/withdraw';
+};
+
+export type WithdrawDocumentBlockCorrectionErrors = {
+    401: ProblemDetailsDto;
+    403: ProblemDetailsDto;
+    404: ProblemDetailsDto;
+    422: ProblemDetailsDto;
+};
+
+export type WithdrawDocumentBlockCorrectionError = WithdrawDocumentBlockCorrectionErrors[keyof WithdrawDocumentBlockCorrectionErrors];
+
+export type WithdrawDocumentBlockCorrectionResponses = {
+    200: OkResponseDto;
+};
+
+export type WithdrawDocumentBlockCorrectionResponse = WithdrawDocumentBlockCorrectionResponses[keyof WithdrawDocumentBlockCorrectionResponses];
 
 export type ChatData = {
     body: DocumentChatRequestDto;

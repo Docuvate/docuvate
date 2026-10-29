@@ -5930,6 +5930,182 @@
         ]
       }
     },
+    "/documents/{id}/block-corrections": {
+      "post": {
+        "operationId": "applyDocumentBlockCorrection",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApplyBlockCorrectionRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApplyBlockCorrectionResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Create or update a layout block correction",
+        "tags": [
+          "Documents"
+        ]
+      }
+    },
+    "/documents/{id}/block-corrections/{correctionId}/withdraw": {
+      "post": {
+        "operationId": "withdrawDocumentBlockCorrection",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "correctionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Withdraw a layout block correction",
+        "tags": [
+          "Documents"
+        ]
+      }
+    },
     "/documents/{id}/chat": {
       "post": {
         "operationId": "chat",
@@ -14119,6 +14295,125 @@
           "createdAt"
         ]
       },
+      "ApplyBlockCorrectionRequestDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "op": {
+            "enum": [
+              "create",
+              "set_type",
+              "set_rank",
+              "ignore",
+              "remove"
+            ],
+            "type": "string"
+          },
+          "page": {
+            "type": "number",
+            "minimum": 1
+          },
+          "shape": {
+            "enum": [
+              "rect",
+              "polygon"
+            ],
+            "type": "string"
+          },
+          "x0": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "y0": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "x1": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "y1": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "blockIndexes": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "beforeRegionId": {
+            "type": "string",
+            "nullable": true,
+            "format": "uuid"
+          },
+          "blockType": {
+            "enum": [
+              "heading",
+              "paragraph",
+              "list",
+              "key_value",
+              "table",
+              "header",
+              "footer"
+            ],
+            "type": "string"
+          },
+          "headingLevel": {
+            "type": "number",
+            "nullable": true,
+            "minimum": 1,
+            "maximum": 6
+          },
+          "readingRank": {
+            "type": "number",
+            "nullable": true,
+            "minimum": 1
+          }
+        },
+        "required": [
+          "id",
+          "op"
+        ]
+      },
+      "ApplyBlockCorrectionResponseDto": {
+        "type": "object",
+        "properties": {
+          "noChange": {
+            "type": "boolean"
+          },
+          "correction": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DocumentCorrectionDto"
+              }
+            ]
+          },
+          "region": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DocumentRegionDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "noChange",
+          "correction",
+          "region"
+        ]
+      },
       "ApplyFieldCorrectionRequestDto": {
         "type": "object",
         "properties": {
@@ -15562,6 +15857,36 @@
           "modules"
         ]
       },
+      "DocumentRegionBlockDto": {
+        "type": "object",
+        "properties": {
+          "blockType": {
+            "enum": [
+              "heading",
+              "paragraph",
+              "list",
+              "key_value",
+              "table",
+              "header",
+              "footer"
+            ],
+            "type": "string"
+          },
+          "headingLevel": {
+            "type": "number",
+            "nullable": true
+          },
+          "readingRank": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "blockType",
+          "headingLevel",
+          "readingRank"
+        ]
+      },
       "DocumentRegionDto": {
         "type": "object",
         "properties": {
@@ -15619,6 +15944,9 @@
           },
           "table": {
             "$ref": "#/components/schemas/DocumentRegionTableDto"
+          },
+          "block": {
+            "$ref": "#/components/schemas/DocumentRegionBlockDto"
           },
           "createdAt": {
             "type": "string"

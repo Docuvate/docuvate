@@ -3353,9 +3353,50 @@ mark.global-search-mark {
   min-height: var(--dv-touch-target-min);
 }
 
-.layout-table-header-stepper input {
+.layout-table-header-stepper input,
+.layout-table-header-stepper select {
   width: 4.5rem;
+  max-width: 100%;
+  min-width: 0;
   min-height: var(--dv-touch-target-min);
+}
+
+.layout-table-header-stepper select {
+  width: auto;
+  max-width: min(12rem, 100%);
+}
+
+.layout-block-card {
+  margin-bottom: var(--dv-space-md);
+  border: 1px solid var(--dv-color-border);
+  border-radius: var(--dv-radius-sm);
+  min-width: 0;
+  max-width: 100%;
+}
+
+.layout-block-card-active {
+  border-color: var(--dv-color-accent-text);
+}
+
+.layout-block-card .layout-table-card-head span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.layout-block-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--dv-space-sm);
+  padding: var(--dv-space-xs) var(--dv-space-sm);
+  min-width: 0;
+  max-width: 100%;
+}
+
+.layout-block-ignore {
+  min-height: var(--dv-touch-target-min);
+  max-width: 100%;
 }
 
 .layout-data-table-editable th,

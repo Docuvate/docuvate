@@ -10,7 +10,16 @@ export type DocumentCorrectionStatus = 'active' | 'withdrawn';
 export type FieldCorrectionOp = 'create' | 'reanchor' | 'edit_value' | 'remove';
 export type FieldCorrectionScope = 'document' | 'label' | 'always';
 export type TableCorrectionOp = 'create' | 'set_headers' | 'edit_cell' | 'remove';
+export type BlockCorrectionOp = 'create' | 'set_type' | 'set_rank' | 'ignore' | 'remove';
 export type DocumentRegionTableType = 'line_items' | 'key_value' | 'other';
+export type DocumentRegionBlockType =
+  | 'heading'
+  | 'paragraph'
+  | 'list'
+  | 'key_value'
+  | 'table'
+  | 'header'
+  | 'footer';
 
 export type LayoutTokenDto = LayoutToken;
 
@@ -53,6 +62,12 @@ export interface DocumentRegionTableDto {
   cells: DocumentRegionTableCellDto[];
 }
 
+export interface DocumentRegionBlockDto {
+  blockType: DocumentRegionBlockType;
+  headingLevel: number | null;
+  readingRank: number | null;
+}
+
 export interface DocumentRegionDto {
   id: string;
   documentId: string;
@@ -68,6 +83,7 @@ export interface DocumentRegionDto {
   blockIndexes: number[];
   field?: DocumentRegionFieldDto;
   table?: DocumentRegionTableDto;
+  block?: DocumentRegionBlockDto;
   createdAt: string;
 }
 
@@ -98,7 +114,7 @@ export interface DocumentCorrectionDto {
   documentId: string;
   kind: DocumentCorrectionKind;
   status: DocumentCorrectionStatus;
-  op: FieldCorrectionOp | TableCorrectionOp;
+  op: FieldCorrectionOp | TableCorrectionOp | BlockCorrectionOp;
   fieldKey: string;
   beforeRegionId: string | null;
   afterRegionId: string | null;
@@ -131,6 +147,28 @@ export interface ApplyTableCorrectionRequest {
 }
 
 export interface ApplyTableCorrectionResponse {
+  noChange: boolean;
+  correction: DocumentCorrectionDto | null;
+  region: DocumentRegionDto | null;
+}
+
+export interface ApplyBlockCorrectionRequest {
+  id: string;
+  op: BlockCorrectionOp;
+  page?: number;
+  shape?: DocumentRegionShape;
+  x0?: number;
+  y0?: number;
+  x1?: number;
+  y1?: number;
+  blockIndexes?: number[];
+  beforeRegionId?: string | null;
+  blockType?: DocumentRegionBlockType;
+  headingLevel?: number | null;
+  readingRank?: number | null;
+}
+
+export interface ApplyBlockCorrectionResponse {
   noChange: boolean;
   correction: DocumentCorrectionDto | null;
   region: DocumentRegionDto | null;

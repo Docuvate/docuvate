@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type {
+  ApplyBlockCorrectionRequest,
   ApplyFieldCorrectionRequest,
   ApplyTableCorrectionRequest,
   DocumentDto,
@@ -10,15 +11,17 @@ import type {
   LayoutToken,
   RecognizedFieldDefinitionDto,
 } from '@docuvate/contracts';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import {
+  applyDocumentBlockCorrection,
   applyDocumentFieldCorrection,
   applyDocumentTableCorrection,
   confirmDocumentField,
   listDocumentLayoutTokens,
   listDocumentRegions,
+  withdrawDocumentBlockCorrection,
   withdrawDocumentFieldCorrection,
   withdrawDocumentTableCorrection,
 } from '../../lib/api';
@@ -46,6 +49,7 @@ import { useToast } from '../save/ToastProvider';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
 import { SegmentedControl } from '../ui/SegmentedControl';
+import { DocumentBlockCorrectionSheet } from './DocumentBlockCorrectionSheet';
 import { DocumentExtractionRecovery } from './DocumentExtractionRecovery';
 import { DocumentFieldContextBar } from './DocumentFieldContextBar';
 import { DocumentFieldCorrectionSheet } from './DocumentFieldCorrectionSheet';
@@ -67,6 +71,7 @@ type AdvancedViewerMode = 'reconstruction' | 'compare';
 
 const REGION_FIELD_OVERLAY_PREFIX = 'region-field-';
 const REGION_TABLE_OVERLAY_PREFIX = 'region-table-';
+const REGION_BLOCK_OVERLAY_PREFIX = 'region-block-';
 const CORRECTION_SHEET_MAX_WIDTH_PX = 1023;
 
 function regionFieldOverlayId(regionId: string): string {
@@ -89,6 +94,17 @@ function regionIdFromTableOverlay(overlayId: string): string | null {
     return null;
   }
   return overlayId.slice(REGION_TABLE_OVERLAY_PREFIX.length);
+}
+
+function regionBlockOverlayId(regionId: string): string {
+  return `${REGION_BLOCK_OVERLAY_PREFIX}${regionId}`;
+}
+
+function regionIdFromBlockOverlay(overlayId: string): string | null {
+  if (!overlayId.startsWith(REGION_BLOCK_OVERLAY_PREFIX)) {
+    return null;
+  }
+  return overlayId.slice(REGION_BLOCK_OVERLAY_PREFIX.length);
 }
 
 interface DocumentLayoutWorkspaceProps {
@@ -197,19 +213,24 @@ export function DocumentLayoutWorkspace({
   const [layoutTokens, setLayoutTokens] = useState<LayoutToken[]>([]);
   const [fieldRegions, setFieldRegions] = useState<DocumentRegionDto[]>([]);
   const [tableRegions, setTableRegions] = useState<DocumentRegionDto[]>([]);
+  const [blockRegions, setBlockRegions] = useState<DocumentRegionDto[]>([]);
   const [reanchorFieldKey, setReanchorFieldKey] = useState<string | null>(null);
   const [selectedFieldKey, setSelectedFieldKey] = useState<string | null>(null);
   const [selectedTableId, setSelectedTableId] = useState<string | null>(null);
+  const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
 
   const refreshRegions = useCallback(async () => {
-    const [tokenPage, fields, tables] = await Promise.all([
+    const [tokenPage, fields, tables, blocks, ignored] = await Promise.all([
       listDocumentLayoutTokens(doc.id, viewerPage),
       listDocumentRegions(doc.id, 'field'),
       listDocumentRegions(doc.id, 'table'),
+      listDocumentRegions(doc.id, 'block'),
+      listDocumentRegions(doc.id, 'ignore'),
     ]);
     setLayoutTokens(tokenPage.tokens);
     setFieldRegions(fields.items);
     setTableRegions(tables.items);
+    setBlockRegions([...blocks.items, ...ignored.items]);
   }, [doc.id, viewerPage]);
 
   useEffect(() => {
@@ -217,6 +238,7 @@ export function DocumentLayoutWorkspace({
       setLayoutTokens([]);
       setFieldRegions([]);
       setTableRegions([]);
+      setBlockRegions([]);
     });
   }, [refreshRegions]);
 
@@ -260,7 +282,10 @@ export function DocumentLayoutWorkspace({
   );
 
   const tableSheetOpen = Boolean(correctionSheetViewport && selectedTableId);
-  const correctionSheetOpen = Boolean(correctionSheetViewport && (selectedFieldKey ?? selectedTableId));
+  const blockSheetOpen = Boolean(correctionSheetViewport && selectedBlockId);
+  const correctionSheetOpen = Boolean(
+    correctionSheetViewport && (selectedFieldKey ?? selectedTableId ?? selectedBlockId)
+  );
   useEffect(() => {
     onCorrectionSheetOpenChange?.(correctionSheetOpen);
     return () => {
@@ -344,6 +369,48 @@ export function DocumentLayoutWorkspace({
     [doc.id, onLayoutSideTabChange, refreshRegions, toast]
   );
 
+  // Block edits on one card (type, then rank) can fire before the first response lands; run them
+  // one after another so each request sees the region its predecessor produced.
+  const blockCorrectionQueue = useRef<Promise<void>>(Promise.resolve());
+  const applyBlockCorrectionNow = useCallback(
+    async (body: ApplyBlockCorrectionRequest, successMessage: string) => {
+      const result = await applyDocumentBlockCorrection(doc.id, body);
+      await refreshRegions();
+      if (result?.region?.id) {
+        setSelectedBlockId(result.region.id);
+        setSelectedFieldKey(null);
+        setSelectedTableId(null);
+        setActiveOverlayId(regionBlockOverlayId(result.region.id));
+        onLayoutSideTabChange('outline');
+      }
+      if (result?.correction) {
+        const correctionId = result.correction.id;
+        toast.success(successMessage, {
+          undo: () => {
+            void withdrawDocumentBlockCorrection(doc.id, correctionId)
+              .then(() => refreshRegions())
+              .catch((err: unknown) => {
+                toast.error(formatUserFacingError(err, 'errors.generic'));
+              });
+          },
+        });
+      }
+      setSelectionDraft(null);
+      setSelectionTool('none');
+    },
+    [doc.id, onLayoutSideTabChange, refreshRegions, toast]
+  );
+  const runBlockCorrection = useCallback(
+    (body: ApplyBlockCorrectionRequest, successMessage: string): Promise<void> => {
+      const run = blockCorrectionQueue.current
+        .catch(() => undefined)
+        .then(() => applyBlockCorrectionNow(body, successMessage));
+      blockCorrectionQueue.current = run;
+      return run;
+    },
+    [applyBlockCorrectionNow]
+  );
+
   const layoutPageCount = layoutIr?.pages.length ?? layoutIrPages?.length ?? 1;
   const { metricsByPage, metrics: compareMetrics } = useLayoutCompare(
     doc.id,
@@ -379,8 +446,8 @@ export function DocumentLayoutWorkspace({
 
   const overlays = useMemo(() => {
     const base = layoutIr ? buildLayoutOverlays(layoutIr) : [];
-    const corrected: LayoutOverlayRegion[] = tableRegions.map((region, index) => ({
-      id: `region-table-${region.id}`,
+    const correctedTables: LayoutOverlayRegion[] = tableRegions.map((region, index) => ({
+      id: regionTableOverlayId(region.id),
       page: region.page,
       x: region.x0,
       y: region.y0,
@@ -390,14 +457,26 @@ export function DocumentLayoutWorkspace({
       label: String(index + 1),
       tableIndex: 1000 + index,
     }));
-    return [...base, ...corrected];
-  }, [layoutIr, tableRegions]);
+    const correctedBlocks: LayoutOverlayRegion[] = blockRegions.map((region, index) => ({
+      id: regionBlockOverlayId(region.id),
+      page: region.page,
+      x: region.x0,
+      y: region.y0,
+      width: Math.max(0, region.x1 - region.x0),
+      height: Math.max(0, region.y1 - region.y0),
+      kind: region.block?.blockType === 'heading' ? 'heading' : 'text',
+      label: String(index + 1),
+    }));
+    return [...base, ...correctedTables, ...correctedBlocks];
+  }, [blockRegions, layoutIr, tableRegions]);
 
   const pdfOverlays: PdfLayoutOverlay[] = useMemo(() => {
     const fromIr = overlays.map((o) => {
       let label = o.label;
-      if (o.id.startsWith('region-table-')) {
+      if (o.id.startsWith(REGION_TABLE_OVERLAY_PREFIX)) {
         label = t('documents.layoutCorrectedTableLabel', { n: o.label });
+      } else if (o.id.startsWith(REGION_BLOCK_OVERLAY_PREFIX)) {
+        label = t('documents.layoutCorrectedBlockLabel', { n: o.label });
       } else if (o.kind === 'table' && o.tableIndex != null) {
         label = t('documents.layoutTableLabel', { n: o.tableIndex + 1 });
       } else if (o.kind === 'field' && o.label) {
@@ -453,10 +532,23 @@ export function DocumentLayoutWorkspace({
       if (tableId) {
         setSelectedTableId(tableId);
         setSelectedFieldKey(null);
+        setSelectedBlockId(null);
         onLayoutSideTabChange('tables');
         const tableRegion = tableRegions.find((item) => item.id === tableId);
         if (tableRegion) {
           onViewerPageChange(tableRegion.page);
+        }
+        return;
+      }
+      const blockId = regionIdFromBlockOverlay(overlayId);
+      if (blockId) {
+        setSelectedBlockId(blockId);
+        setSelectedFieldKey(null);
+        setSelectedTableId(null);
+        onLayoutSideTabChange('outline');
+        const blockRegion = blockRegions.find((item) => item.id === blockId);
+        if (blockRegion) {
+          onViewerPageChange(blockRegion.page);
         }
         return;
       }
@@ -479,6 +571,7 @@ export function DocumentLayoutWorkspace({
       blocks,
       fieldRegions,
       tableRegions,
+      blockRegions,
       onActiveBlockIndexChange,
       onHighlightBlocks,
       onLayoutSideTabChange,
@@ -503,6 +596,7 @@ export function DocumentLayoutWorkspace({
         setReanchorFieldKey(null);
         setSelectedFieldKey(null);
         setSelectedTableId(null);
+        setSelectedBlockId(null);
         return;
       }
       if (event.key === 't' || event.key === 'T') {
@@ -634,6 +728,7 @@ export function DocumentLayoutWorkspace({
       data-correction-sheet-viewport={correctionSheetViewport ? '1' : '0'}
       data-selected-field={selectedFieldKey ?? ''}
       data-selected-table={selectedTableId ?? ''}
+      data-selected-block={selectedBlockId ?? ''}
     >
       <div className="layout-workspace-main">
         <Card className="preview-card preview-card-pdf layout-viewer-card">
@@ -825,6 +920,29 @@ export function DocumentLayoutWorkspace({
                               });
                           }
                     }
+                    onMarkBlock={
+                      reanchorFieldKey
+                        ? undefined
+                        : () => {
+                            void runBlockCorrection(
+                              {
+                                id: crypto.randomUUID(),
+                                op: 'create',
+                                page: selectionDraft.page,
+                                shape: 'rect',
+                                x0: selectionDraft.rect.x0,
+                                y0: selectionDraft.rect.y0,
+                                x1: selectionDraft.rect.x1,
+                                y1: selectionDraft.rect.y1,
+                                blockIndexes: selectionDraft.tokens.map((token) => token.blockIndex),
+                                blockType: 'paragraph',
+                              },
+                              t('documents.blockCorrectionSaved')
+                            ).catch((err: unknown) => {
+                              toast.error(formatUserFacingError(err, 'errors.generic'));
+                            });
+                          }
+                    }
                     onCreate={(fieldKey) => {
                       void runFieldCorrection(
                         {
@@ -916,6 +1034,12 @@ export function DocumentLayoutWorkspace({
             if (tab === 'tables' && correctionSheetViewport && tableRegions.length > 0 && !selectedTableId) {
               setSelectedTableId(tableRegions[0].id);
               setSelectedFieldKey(null);
+              setSelectedBlockId(null);
+            }
+            if (tab === 'outline' && correctionSheetViewport && blockRegions.length > 0 && !selectedBlockId) {
+              setSelectedBlockId(blockRegions[0].id);
+              setSelectedFieldKey(null);
+              setSelectedTableId(null);
             }
           }}
           activeOverlayId={activeOverlayId}
@@ -931,6 +1055,45 @@ export function DocumentLayoutWorkspace({
           recognizedCatalog={recognizedCatalog}
           fieldRegions={fieldRegions}
           tableRegions={tableRegions}
+          blockRegions={blockRegions}
+          onBlockTypeChange={(regionId, blockType) => {
+            void runBlockCorrection(
+              {
+                id: crypto.randomUUID(),
+                op: 'set_type',
+                beforeRegionId: regionId,
+                blockType,
+              },
+              t('documents.blockCorrectionSaved')
+            ).catch((err: unknown) => {
+              toast.error(formatUserFacingError(err, 'errors.generic'));
+            });
+          }}
+          onBlockRankChange={(regionId, readingRank) => {
+            void runBlockCorrection(
+              {
+                id: crypto.randomUUID(),
+                op: 'set_rank',
+                beforeRegionId: regionId,
+                readingRank,
+              },
+              t('documents.blockCorrectionSaved')
+            ).catch((err: unknown) => {
+              toast.error(formatUserFacingError(err, 'errors.generic'));
+            });
+          }}
+          onBlockIgnore={(regionId) => {
+            void runBlockCorrection(
+              {
+                id: crypto.randomUUID(),
+                op: 'ignore',
+                beforeRegionId: regionId,
+              },
+              t('documents.blockCorrectionSaved')
+            ).catch((err: unknown) => {
+              toast.error(formatUserFacingError(err, 'errors.generic'));
+            });
+          }}
           onTableHeaderChange={(regionId, headerRows, headerCols) => {
             void runTableCorrection(
               {
@@ -984,6 +1147,7 @@ export function DocumentLayoutWorkspace({
           onSelectField={selectField}
           hideInlineFieldList={Boolean(correctionSheetViewport && selectedFieldKey)}
           hideInlineTableList={tableSheetOpen}
+          hideInlineBlockList={blockSheetOpen}
           documentChatAvailable={documentChatAvailable}
           documentChatUiEnabled={documentChatUiEnabled}
           documentChatLocalModelEnabled={documentChatLocalModelEnabled}
@@ -1085,6 +1249,69 @@ export function DocumentLayoutWorkspace({
                       cell: { row, col, text },
                     },
                     t('documents.tableCorrectionSaved')
+                  ).catch((err: unknown) => {
+                    toast.error(formatUserFacingError(err, 'errors.generic'));
+                  });
+                }
+              : undefined
+          }
+        />
+      ) : null}
+      {correctionSheetViewport ? (
+        <DocumentBlockCorrectionSheet
+          open={selectedBlockId != null}
+          region={blockRegions.find((item) => item.id === selectedBlockId) ?? null}
+          index={Math.max(0, blockRegions.findIndex((item) => item.id === selectedBlockId))}
+          onClose={() => { setSelectedBlockId(null); }}
+          onSelect={() => {
+            if (selectedBlockId) {
+              setActiveOverlayId(regionBlockOverlayId(selectedBlockId));
+            }
+          }}
+          onTypeChange={
+            selectedBlockId
+              ? (blockType) => {
+                  void runBlockCorrection(
+                    {
+                      id: crypto.randomUUID(),
+                      op: 'set_type',
+                      beforeRegionId: selectedBlockId,
+                      blockType,
+                    },
+                    t('documents.blockCorrectionSaved')
+                  ).catch((err: unknown) => {
+                    toast.error(formatUserFacingError(err, 'errors.generic'));
+                  });
+                }
+              : undefined
+          }
+          onRankChange={
+            selectedBlockId
+              ? (readingRank) => {
+                  void runBlockCorrection(
+                    {
+                      id: crypto.randomUUID(),
+                      op: 'set_rank',
+                      beforeRegionId: selectedBlockId,
+                      readingRank,
+                    },
+                    t('documents.blockCorrectionSaved')
+                  ).catch((err: unknown) => {
+                    toast.error(formatUserFacingError(err, 'errors.generic'));
+                  });
+                }
+              : undefined
+          }
+          onIgnore={
+            selectedBlockId
+              ? () => {
+                  void runBlockCorrection(
+                    {
+                      id: crypto.randomUUID(),
+                      op: 'ignore',
+                      beforeRegionId: selectedBlockId,
+                    },
+                    t('documents.blockCorrectionSaved')
                   ).catch((err: unknown) => {
                     toast.error(formatUserFacingError(err, 'errors.generic'));
                   });
