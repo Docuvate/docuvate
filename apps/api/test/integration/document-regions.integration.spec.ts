@@ -150,4 +150,33 @@ describe('document regions (Testcontainers Postgres)', () => {
       true
     );
   });
+
+  it('stores a block region with type and reading rank', async () => {
+    const created = await regions.insertRegion({
+      id: randomUUID(),
+      documentId,
+      page: 1,
+      shape: 'rect',
+      role: 'block',
+      x0: 0.1,
+      y0: 0.2,
+      x1: 0.7,
+      y1: 0.3,
+      irSha256: hashLayoutIrHex(sampleIr('208,82 €')),
+      blockIndexes: [4],
+      boundText: 'Widget A',
+      block: {
+        blockType: 'heading',
+        headingLevel: 2,
+        readingRank: 1,
+      },
+    });
+    expect(created.block?.blockType).toBe('heading');
+    expect(created.block?.headingLevel).toBe(2);
+    expect(created.block?.readingRank).toBe(1);
+    const listed = await regions.listActiveRegions(documentId, 'block');
+    expect(listed.some((region) => region.id === created.id && region.block?.blockType === 'heading')).toBe(
+      true
+    );
+  });
 });

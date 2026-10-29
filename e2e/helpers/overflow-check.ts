@@ -337,6 +337,14 @@ export async function assertTableCorrectionSheet(page: Page): Promise<void> {
   await expect(sheet.getByTestId('corrected-table-card')).toBeVisible();
 }
 
+export async function assertBlockCorrectionSheet(page: Page): Promise<void> {
+  const sheet = page.locator('[data-testid="block-correction-sheet"]');
+  await expect(sheet).toBeVisible({ timeout: 15_000 });
+  await expect(sheet).toHaveAttribute('role', 'dialog');
+  await expect(sheet).toHaveAttribute('aria-modal', 'true');
+  await expect(sheet.getByTestId('corrected-block-card')).toBeVisible();
+}
+
 export async function assertFieldNameStackedAboveValue(page: Page): Promise<void> {
   const name = page.locator('.layout-side-fields .field-value-row-name').first();
   const value = page.locator('.layout-side-fields .field-value-row-value').first();

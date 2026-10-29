@@ -1,6 +1,9 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type {
+  BlockCorrectionOp,
+  DocumentRegionBlockDto,
+  DocumentRegionBlockType,
   DocumentRegionRole,
   DocumentRegionShape,
   DocumentRegionTableDto,
@@ -18,6 +21,7 @@ import type {
   DocumentLayoutIrSnapshot,
   DocumentRegionRecord,
   DocumentRegionRepository,
+  InsertBlockCorrectionInput,
   InsertDocumentRegionInput,
   InsertFieldCorrectionInput,
   InsertTableCorrectionInput,
@@ -103,6 +107,36 @@ function parseTableType(value: unknown): DocumentRegionTableType {
       return type;
     default:
       return 'other';
+  }
+}
+
+function parseBlockOp(value: unknown): BlockCorrectionOp {
+  const op = parseString(value);
+  switch (op) {
+    case 'create':
+    case 'set_type':
+    case 'set_rank':
+    case 'ignore':
+    case 'remove':
+      return op;
+    default:
+      return 'create';
+  }
+}
+
+function parseBlockType(value: unknown): DocumentRegionBlockType {
+  const type = parseString(value);
+  switch (type) {
+    case 'heading':
+    case 'paragraph':
+    case 'list':
+    case 'key_value':
+    case 'table':
+    case 'header':
+    case 'footer':
+      return type;
+    default:
+      return 'paragraph';
   }
 }
 
@@ -285,6 +319,47 @@ function attachTable(
   return { ...region, table };
 }
 
+async function loadBlockSatellites(
+  client: Pool | PoolClient,
+  regionIds: string[]
+): Promise<Map<string, DocumentRegionBlockDto>> {
+  const map = new Map<string, DocumentRegionBlockDto>();
+  if (regionIds.length === 0) {
+    return map;
+  }
+  const result = await client.query(
+    `SELECT region_id, block_type, heading_level, reading_rank
+     FROM document_region_block_types
+     WHERE region_id = ANY($1::uuid[])`,
+    [regionIds]
+  );
+  for (const raw of result.rows) {
+    const row = recordFromUnknown(raw);
+    if (!row) {
+      continue;
+    }
+    map.set(parseString(row.region_id), {
+      blockType: parseBlockType(row.block_type),
+      headingLevel: row.heading_level == null ? null : parseNumber(row.heading_level, 1),
+      readingRank: row.reading_rank == null ? null : parseNumber(row.reading_rank, 0),
+    });
+  }
+  return map;
+}
+
+function attachSatellites(
+  region: DocumentRegionRecord,
+  tables: Map<string, DocumentRegionTableDto>,
+  blocks: Map<string, DocumentRegionBlockDto>
+): DocumentRegionRecord {
+  const withTable = attachTable(region, tables);
+  const block = blocks.get(withTable.id);
+  if (!block) {
+    return withTable;
+  }
+  return { ...withTable, block };
+}
+
 export async function remapActiveRegionsOnClient(
   client: PoolClient,
   documentId: string,
@@ -419,8 +494,9 @@ export class PgDocumentRegionRepository implements DocumentRegionRepository {
     }
     const tokens = await loadBlockIndexes(this.pool, ids);
     const tables = await loadTableSatellites(this.pool, ids);
+    const blocks = await loadBlockSatellites(this.pool, ids);
     return rows.map((row) =>
-      attachTable(parseRegionRow(row, tokens.get(parseString(row.id)) ?? []), tables)
+      attachSatellites(parseRegionRow(row, tokens.get(parseString(row.id)) ?? []), tables, blocks)
     );
   }
 
@@ -440,7 +516,8 @@ export class PgDocumentRegionRepository implements DocumentRegionRepository {
     }
     const tokens = await loadBlockIndexes(this.pool, [regionId]);
     const tables = await loadTableSatellites(this.pool, [regionId]);
-    return attachTable(parseRegionRow(row, tokens.get(regionId) ?? []), tables);
+    const blocks = await loadBlockSatellites(this.pool, [regionId]);
+    return attachSatellites(parseRegionRow(row, tokens.get(regionId) ?? []), tables, blocks);
   }
 
   async findActiveFieldRegion(
@@ -530,6 +607,13 @@ export class PgDocumentRegionRepository implements DocumentRegionRepository {
             [input.id, merge.row0, merge.col0, merge.rowSpan, merge.colSpan]
           );
         }
+      }
+      if (input.block) {
+        await client.query(
+          `INSERT INTO document_region_block_types (region_id, block_type, heading_level, reading_rank)
+           VALUES ($1, $2, $3, $4)`,
+          [input.id, input.block.blockType, input.block.headingLevel, input.block.readingRank]
+        );
       }
       await client.query('COMMIT');
     } catch (error) {
@@ -755,6 +839,124 @@ export class PgDocumentRegionRepository implements DocumentRegionRepository {
          FROM corrections c
          INNER JOIN correction_region_changes ch ON ch.correction_id = c.id
          WHERE c.id = $1 AND c.document_id = $2 AND c.kind = 'table' AND c.status = 'active'
+         FOR UPDATE`,
+        [correctionId, documentId]
+      );
+      const row = recordFromUnknown(current.rows[0]);
+      if (!row) {
+        await client.query('ROLLBACK');
+        return false;
+      }
+      await client.query(
+        `UPDATE corrections
+         SET status = 'withdrawn', withdrawn_at = now()
+         WHERE id = $1`,
+        [correctionId]
+      );
+      const beforeId = parseOptionalString(row.before_region_id);
+      const afterId = parseOptionalString(row.after_region_id);
+      if (afterId && beforeId) {
+        await client.query(`UPDATE document_regions SET superseded_by = $2 WHERE id = $1`, [
+          afterId,
+          beforeId,
+        ]);
+        await client.query(`UPDATE document_regions SET superseded_by = NULL WHERE id = $1`, [
+          beforeId,
+        ]);
+      } else if (afterId) {
+        await client.query(`UPDATE document_regions SET superseded_by = $1 WHERE id = $1`, [
+          afterId,
+        ]);
+      } else if (beforeId) {
+        await client.query(`UPDATE document_regions SET superseded_by = NULL WHERE id = $1`, [
+          beforeId,
+        ]);
+      }
+      await client.query('COMMIT');
+      return true;
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  async insertBlockCorrection(input: InsertBlockCorrectionInput): Promise<boolean> {
+    const client = await this.pool.connect();
+    try {
+      await client.query('BEGIN');
+      const inserted = await client.query(
+        `INSERT INTO corrections (id, user_id, document_id, kind, created_by, status)
+         VALUES ($1, $2, $3, 'block', $2, 'active')
+         ON CONFLICT (id) DO NOTHING`,
+        [input.id, input.userId, input.documentId]
+      );
+      if (inserted.rowCount === 0) {
+        await client.query('COMMIT');
+        return false;
+      }
+      await client.query(
+        `INSERT INTO correction_region_changes (correction_id, op, before_region_id, after_region_id)
+         VALUES ($1, $2, $3, $4)`,
+        [input.id, input.op, input.beforeRegionId, input.afterRegionId]
+      );
+      if (input.oldValue != null || input.newValue != null) {
+        await client.query(
+          `INSERT INTO correction_field_values (correction_id, old_value, new_value)
+           VALUES ($1, $2, $3)`,
+          [input.id, input.oldValue, input.newValue]
+        );
+      }
+      await client.query('COMMIT');
+      return true;
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  async findBlockCorrection(
+    documentId: string,
+    correctionId: string
+  ): Promise<InsertBlockCorrectionInput | null> {
+    const result = await this.pool.query(
+      `SELECT c.id, c.user_id, c.document_id, ch.op, ch.before_region_id, ch.after_region_id,
+              fv.old_value, fv.new_value
+       FROM corrections c
+       INNER JOIN correction_region_changes ch ON ch.correction_id = c.id
+       LEFT JOIN correction_field_values fv ON fv.correction_id = c.id
+       WHERE c.id = $1 AND c.document_id = $2 AND c.kind = 'block'
+       LIMIT 1`,
+      [correctionId, documentId]
+    );
+    const row = recordFromUnknown(result.rows[0]);
+    if (!row) {
+      return null;
+    }
+    return {
+      id: parseString(row.id),
+      userId: parseString(row.user_id),
+      documentId: parseString(row.document_id),
+      op: parseBlockOp(row.op),
+      beforeRegionId: parseOptionalString(row.before_region_id),
+      afterRegionId: parseOptionalString(row.after_region_id),
+      oldValue: parseOptionalString(row.old_value),
+      newValue: parseOptionalString(row.new_value),
+    };
+  }
+
+  async withdrawBlockCorrection(documentId: string, correctionId: string): Promise<boolean> {
+    const client = await this.pool.connect();
+    try {
+      await client.query('BEGIN');
+      const current = await client.query(
+        `SELECT c.id, ch.op, ch.before_region_id, ch.after_region_id
+         FROM corrections c
+         INNER JOIN correction_region_changes ch ON ch.correction_id = c.id
+         WHERE c.id = $1 AND c.document_id = $2 AND c.kind = 'block' AND c.status = 'active'
          FOR UPDATE`,
         [correctionId, documentId]
       );

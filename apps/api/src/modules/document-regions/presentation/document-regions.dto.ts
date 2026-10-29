@@ -120,6 +120,17 @@ export class DocumentRegionTableDto {
   cells!: DocumentRegionTableCellDto[];
 }
 
+export class DocumentRegionBlockDto {
+  @ApiProperty({ enum: ['heading', 'paragraph', 'list', 'key_value', 'table', 'header', 'footer'] })
+  blockType!: 'heading' | 'paragraph' | 'list' | 'key_value' | 'table' | 'header' | 'footer';
+
+  @ApiProperty({ nullable: true, type: Number })
+  headingLevel!: number | null;
+
+  @ApiProperty({ nullable: true, type: Number })
+  readingRank!: number | null;
+}
+
 export class DocumentRegionDto {
   @ApiProperty()
   id!: string;
@@ -162,6 +173,9 @@ export class DocumentRegionDto {
 
   @ApiPropertyOptional({ type: DocumentRegionTableDto })
   table?: DocumentRegionTableDto;
+
+  @ApiPropertyOptional({ type: DocumentRegionBlockDto })
+  block?: DocumentRegionBlockDto;
 
   @ApiProperty()
   createdAt!: string;
@@ -433,6 +447,102 @@ export class ApplyTableCorrectionRequestDto {
 }
 
 export class ApplyTableCorrectionResponseDto {
+  @ApiProperty()
+  noChange!: boolean;
+
+  @ApiProperty({ nullable: true, type: DocumentCorrectionDto })
+  correction!: DocumentCorrectionDto | null;
+
+  @ApiProperty({ nullable: true, type: DocumentRegionDto })
+  region!: DocumentRegionDto | null;
+}
+
+export class ApplyBlockCorrectionRequestDto {
+  @ApiProperty()
+  @IsUUID()
+  id!: string;
+
+  @ApiProperty({ enum: ['create', 'set_type', 'set_rank', 'ignore', 'remove'] })
+  @IsIn(['create', 'set_type', 'set_rank', 'ignore', 'remove'])
+  op!: 'create' | 'set_type' | 'set_rank' | 'ignore' | 'remove';
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  page?: number;
+
+  @ApiPropertyOptional({ enum: ['rect', 'polygon'] })
+  @IsOptional()
+  @IsIn(['rect', 'polygon'])
+  shape?: 'rect' | 'polygon';
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  @Max(1)
+  x0?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  @Max(1)
+  y0?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  @Max(1)
+  x1?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  @Max(1)
+  y1?: number;
+
+  @ApiPropertyOptional({ type: [Number] })
+  @IsOptional()
+  @IsArray()
+  @IsInt({ each: true })
+  blockIndexes?: number[];
+
+  @ApiPropertyOptional({ nullable: true, type: String })
+  @IsOptional()
+  @IsUUID()
+  beforeRegionId?: string | null;
+
+  @ApiPropertyOptional({ enum: ['heading', 'paragraph', 'list', 'key_value', 'table', 'header', 'footer'] })
+  @IsOptional()
+  @IsIn(['heading', 'paragraph', 'list', 'key_value', 'table', 'header', 'footer'])
+  blockType?: 'heading' | 'paragraph' | 'list' | 'key_value' | 'table' | 'header' | 'footer';
+
+  @ApiPropertyOptional({ nullable: true, type: Number })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(6)
+  headingLevel?: number | null;
+
+  @ApiPropertyOptional({ nullable: true, type: Number })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  readingRank?: number | null;
+}
+
+export class ApplyBlockCorrectionResponseDto {
   @ApiProperty()
   noChange!: boolean;
 

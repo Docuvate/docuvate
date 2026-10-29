@@ -4,11 +4,13 @@ import { Module } from '@nestjs/common';
 
 import { DOCUMENT_REGION_REPOSITORY } from '../../shared/domain/ports.js';
 import { ExtractionFeedbackModule } from '../extraction-feedback/extraction-feedback.module.js';
+import { ApplyBlockCorrectionUseCase } from './application/apply-block-correction.use-case.js';
 import { ApplyFieldCorrectionUseCase } from './application/apply-field-correction.use-case.js';
 import { ApplyTableCorrectionUseCase } from './application/apply-table-correction.use-case.js';
 import { ConfirmDocumentFieldUseCase } from './application/confirm-document-field.use-case.js';
 import { ListDocumentRegionsUseCase } from './application/list-document-regions.use-case.js';
 import { ListLayoutTokensUseCase } from './application/list-layout-tokens.use-case.js';
+import { WithdrawBlockCorrectionUseCase } from './application/withdraw-block-correction.use-case.js';
 import { WithdrawFieldCorrectionUseCase } from './application/withdraw-field-correction.use-case.js';
 import { WithdrawTableCorrectionUseCase } from './application/withdraw-table-correction.use-case.js';
 import { PgDocumentRegionRepository } from './infrastructure/pg-document-region.repository.js';
@@ -25,6 +27,8 @@ import { DocumentRegionsController } from './presentation/document-regions.contr
     WithdrawFieldCorrectionUseCase,
     ApplyTableCorrectionUseCase,
     WithdrawTableCorrectionUseCase,
+    ApplyBlockCorrectionUseCase,
+    WithdrawBlockCorrectionUseCase,
     ConfirmDocumentFieldUseCase,
   ],
   exports: [DOCUMENT_REGION_REPOSITORY],
