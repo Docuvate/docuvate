@@ -14,11 +14,30 @@ const password = process.env['E2E_SMOKE_PASSWORD'] ?? 'SmokeBenchFixture1!';
 
 fs.mkdirSync(path.dirname(storagePath), { recursive: true });
 
+const MAX_SIGN_IN_ATTEMPTS = 5;
+const DEFAULT_RETRY_SECONDS = 10;
+
+/** Back-to-back CI steps can hit the auth sign-in throttle; wait it out instead of failing. */
+function retryDelayMs(response) {
+  const header = response.headers()['x-retry-after'] ?? response.headers()['retry-after'];
+  const seconds = Number(header);
+  return (Number.isFinite(seconds) && seconds > 0 ? seconds : DEFAULT_RETRY_SECONDS) * 1000 + 250;
+}
+
 const ctx = await request.newContext();
-const login = await ctx.post(`${apiBase}/api/auth/sign-in/email`, {
+let login = await ctx.post(`${apiBase}/api/auth/sign-in/email`, {
   headers: { origin: webOrigin },
   data: { email, password },
 });
+for (let attempt = 1; login.status() === 429 && attempt < MAX_SIGN_IN_ATTEMPTS; attempt += 1) {
+  const delay = retryDelayMs(login);
+  console.log(`smoke sign-in throttled (429), retrying in ${delay} ms`);
+  await new Promise((resolve) => setTimeout(resolve, delay));
+  login = await ctx.post(`${apiBase}/api/auth/sign-in/email`, {
+    headers: { origin: webOrigin },
+    data: { email, password },
+  });
+}
 if (!login.ok()) {
   throw new Error(`smoke sign-in failed: ${login.status()} ${await login.text()}`);
 }
