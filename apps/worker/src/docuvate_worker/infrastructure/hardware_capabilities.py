@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import importlib.util
-import json
 import logging
 import os
 import subprocess
@@ -12,6 +11,8 @@ import sys
 from dataclasses import dataclass
 from types import ModuleType
 from typing import Literal, cast
+
+from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 logger = logging.getLogger(__name__)
 
@@ -127,22 +128,24 @@ def probe_accelerator_in_process() -> AcceleratorProbe:
     return _CPU_PROBE
 
 
+class _AcceleratorProbePayload(BaseModel):
+    model_config = ConfigDict(extra="ignore", strict=True)
+
+    device: str
+    vram_mb: int = Field(alias="vramMb")
+
+
 def parse_accelerator_probe_output(stdout: str) -> AcceleratorProbe:
     """Parse the probe child's last JSON line; anything unexpected means CPU."""
     lines = [line for line in stdout.splitlines() if line.strip()]
     if not lines:
         return _CPU_PROBE
     try:
-        payload: object = json.loads(lines[-1])
-    except json.JSONDecodeError:
+        payload = _AcceleratorProbePayload.model_validate_json(lines[-1])
+    except ValidationError:
         return _CPU_PROBE
-    if not isinstance(payload, dict):
-        return _CPU_PROBE
-    fields = cast(dict[str, object], payload)
-    device_raw = fields.get("device")
-    vram_raw = fields.get("vramMb")
-    if not isinstance(device_raw, str) or not isinstance(vram_raw, int):
-        return _CPU_PROBE
+    device_raw = payload.device
+    vram_raw = payload.vram_mb
     device = _DEVICES_BY_NAME.get(device_raw)
     if device is None:
         return _CPU_PROBE
