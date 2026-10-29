@@ -43,3 +43,7 @@ The worker HTTP throughput bench and the 2 GiB count-based compose soak are not 
 ```bash
 bash scripts/ci/worker-load.sh
 ```
+
+## worker-load gating
+
+`worker-load` runs on PRs only when worker, bench, compose, or `scripts/ci/worker-load.sh` paths change; editing `.github/workflows/ci.yml` alone does not trigger it. Every push to `main` runs it, so changes to the job definition are covered there.

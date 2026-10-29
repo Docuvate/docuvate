@@ -41,6 +41,12 @@ emit_if_match k8s '^(deploy/|tools/k8s-|charts/)'
 emit_if_match sftp '^apps/sftp-ingest/'
 emit_if_match site '^(apps/site/|packages/tokens/)'
 emit_if_match worker '^(apps/worker/|bench/)'
-emit_if_match worker_load '^(apps/worker/|bench/|scripts/ci/worker-load\.sh|scripts/ci/compose-smoke-pull-images\.sh|docker-compose(\.ci|\.smoke)?\.yml|\.github/workflows/ci\.yml)'
+# ci.yml is excluded on purpose: web PRs edit it often. Pushes to main always run worker-load,
+# so edits to the worker-load job block are still exercised there.
+if [[ "${GITHUB_EVENT_NAME:-}" == "push" && "${GITHUB_REF:-}" == "refs/heads/main" ]]; then
+  echo "worker_load=true" >> "$GITHUB_OUTPUT"
+else
+  emit_if_match worker_load '^(apps/worker/|bench/|scripts/ci/worker-load\.sh|scripts/ci/compose-smoke-pull-images\.sh|docker-compose(\.ci|\.smoke)?\.yml)'
+fi
 emit_if_match migrations '^apps/api/.*migrations/'
 emit_if_match api '^(apps/api/|packages/contracts/|packages/otel/)'
