@@ -79,6 +79,9 @@ async function bootstrap(): Promise<void> {
   app.enableCors({
     origin: process.env['WEB_ORIGIN'] ?? 'http://localhost:5173',
     credentials: true,
+    // @fastify/cors defaults to GET,HEAD,POST; the web app also sends PATCH/PUT/DELETE
+    // cross-origin in dev (VITE_API_URL=http://localhost:3001).
+    methods: ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   });
 
   app.useGlobalPipes(
