@@ -16841,7 +16841,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
     width: 100%;
     position: sticky;
     top: 0;
-    z-index: 2;
+    z-index: calc(var(--dv-z-base) + 2);
   }
 
   .layout-workspace[data-mobile-pane='document'] > .layout-side-panel,
