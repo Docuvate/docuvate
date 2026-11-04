@@ -4,11 +4,11 @@
 
 from __future__ import annotations
 
-from docuvate_worker.domain.extract_errors import permanent_failure_from_subprocess
-from docuvate_worker.presentation.extract_subprocess_runner import (
+from docuvate_worker.domain.extract_errors import (
     CHILD_KILLED_ERROR_TYPE,
-    _sigkill_envelope,
+    permanent_failure_from_subprocess,
 )
+from docuvate_worker.presentation.extract_subprocess_runner import _sigkill_envelope
 
 
 def test_message_text_does_not_make_a_failure_permanent() -> None:

@@ -74,3 +74,38 @@ def public_domain_dense_scan_pdf(
     out = io.BytesIO()
     writer.write(out)
     return out.getvalue()
+
+
+def public_domain_phone_scan_pdf(
+    page_count: int,
+    *,
+    size_px: tuple[int, int] = (2400, 3200),
+) -> bytes:
+    """Phone-camera style scan: 72 DPI images, so the MediaBox in points equals the pixel size.
+
+    At the 100 DPI layout-compare resolution such a page is ~15 MP, far beyond paper sizes.
+    """
+    if page_count < 1:
+        raise ValueError("page_count must be >= 1")
+    base_lines = _constitution_lines()
+    width_pt, height_pt = float(size_px[0]), float(size_px[1])
+    writer = PdfWriter()
+    for page_index in range(page_count):
+        page_lines: list[tuple[str, float, float, int]] = []
+        y = height_pt - 160.0
+        line_no = 0
+        while y > 160.0:
+            text = base_lines[(page_index + line_no) % len(base_lines)]
+            page_lines.append((text, 120.0, y, 34))
+            y -= 58.0
+            line_no += 1
+        page_pdf = _build_scan_pdf(
+            page_lines,
+            media=(width_pt, height_pt),
+            include_text_layer=False,
+            dpi=72,
+        )
+        writer.add_page(PdfReader(io.BytesIO(page_pdf)).pages[0])
+    out = io.BytesIO()
+    writer.write(out)
+    return out.getvalue()

@@ -13,6 +13,10 @@ import numpy as np
 from PIL import Image
 
 from docuvate_worker.domain.models import ExtractedDocumentImage, ExtractionBlock
+from docuvate_worker.infrastructure.extract_memory.bounded_raster import (
+    open_image_bounded,
+    render_pdf_page_bounded,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -21,6 +25,11 @@ ImageKind = Literal["embedded", "figure"]
 _MIN_PAGE_FRACTION = 0.012
 _MAX_IMAGES_PER_DOCUMENT = 48
 _THUMBNAIL_MAX = (240, 160)
+# Decode budget before thumbnailing (4x the thumbnail area keeps LANCZOS quality).
+_THUMBNAIL_DECODE_MAX_PIXELS = _THUMBNAIL_MAX[0] * _THUMBNAIL_MAX[1] * 16
+_FIGURE_RENDER_DPI = 72
+# A3 at 72 DPI is 1.0 MP, so standard paper sizes render unchanged.
+_FIGURE_RENDER_MAX_PIXELS = 1_000_000
 
 
 def _clamp01(value: float) -> float:
@@ -45,7 +54,7 @@ def _normalize_box(
 
 def _thumbnail_from_bytes(raw: bytes) -> bytes | None:
     try:
-        with Image.open(io.BytesIO(raw)) as img:
+        with open_image_bounded(raw, _THUMBNAIL_DECODE_MAX_PIXELS) as img:
             rgb = img.convert("RGB")
             rgb.thumbnail(_THUMBNAIL_MAX, Image.Resampling.LANCZOS)
             out = io.BytesIO()
@@ -141,17 +150,15 @@ def _figure_regions_from_page_render(
     page_blocks: list[ExtractionBlock],
     existing: list[tuple[float, float, float, float]],
 ) -> list[ExtractedDocumentImage]:
-    from pdf2image import convert_from_bytes  # noqa: PLC0415
-
     try:
-        images = convert_from_bytes(
-            content, first_page=page_num, last_page=page_num, dpi=72, fmt="png"
+        page_image = render_pdf_page_bounded(
+            content, page_num, dpi=_FIGURE_RENDER_DPI, max_pixels=_FIGURE_RENDER_MAX_PIXELS
         )
     except Exception:
         return []
-    if not images:
+    if page_image is None:
         return []
-    rgb = np.asarray(images[0].convert("L"))
+    rgb = np.asarray(page_image.convert("L"))
     h_px, w_px = rgb.shape
     if h_px < 8 or w_px < 8:
         return []
@@ -203,7 +210,7 @@ def _figure_regions_from_page_render(
                     break
         if overlaps:
             continue
-        crop = images[0].crop((x0, y0, x1, y1))
+        crop = page_image.crop((x0, y0, x1, y1))
         buf = io.BytesIO()
         crop.save(buf, format="PNG")
         thumb = _thumbnail_from_bytes(buf.getvalue())

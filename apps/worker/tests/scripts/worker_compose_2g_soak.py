@@ -5,9 +5,10 @@
 """Count-based soak of /v1/extract on the compose worker (2 GiB cgroup, default env).
 
 Every corpus document is extracted ``--passes`` times. Pass criteria: each document ends in
-success or a typed worker failure (``detail.errorCode``), zero cgroup OOM kills, and peak cgroup
-memory below the limit. Throughput is reported, not gated. Worker restarts are gated by the
-wrapper shell script.
+success or a typed worker failure (``detail.errorCode``), the large phone scans always succeed,
+zero cgroup OOM kills, and peak cgroup memory below the limit. Cgroup memory is sampled during
+every request and the peak is reported per document. Throughput is reported, not gated. Worker
+restarts are gated by the wrapper shell script.
 """
 
 from __future__ import annotations
@@ -17,6 +18,7 @@ import base64
 import json
 import os
 import sys
+import threading
 import time
 import urllib.error
 import urllib.request
@@ -28,11 +30,19 @@ if str(_WORKER_ROOT) not in sys.path:
     sys.path.insert(0, str(_WORKER_ROOT))
 
 from docuvate_worker.infrastructure.extract_memory.cgroup import (
+    cgroup_memory_current_bytes,
+    cgroup_memory_peak_bytes,
     cgroup_oom_kill_count,
     read_cgroup_memory_snapshot,
 )
-from tests.public_domain_dense_scans import public_domain_dense_scan_pdf
+from tests.public_domain_dense_scans import (
+    public_domain_dense_scan_pdf,
+    public_domain_phone_scan_pdf,
+)
 from tests.synthetic_layout_pdfs import form_disclosure_pdf
+
+_PHONE_SCAN_PREFIX = "phone_scan_mediabox_px_p"
+_SAMPLE_INTERVAL_SECONDS = 0.05
 
 
 def _build_corpus() -> list[tuple[str, bytes]]:
@@ -42,6 +52,9 @@ def _build_corpus() -> list[tuple[str, bytes]]:
         for dpi in (120, 150, 180):
             label = f"scan_p{pages}_d{dpi}"
             items.append((label, public_domain_dense_scan_pdf(pages, dpi=dpi)))
+    items.extend(
+        (f"{_PHONE_SCAN_PREFIX}{pages}", public_domain_phone_scan_pdf(pages)) for pages in (1, 2)
+    )
     return items
 
 
@@ -139,6 +152,12 @@ class SoakTally:
     retried_503: int = 0
     peak_cgroup_bytes: int = 0
     cgroup_limit_bytes: int | None = None
+    peak_bytes_by_doc: dict[str, int] = field(default_factory=dict)
+    must_succeed_failures: list[str] = field(default_factory=list)
+
+    def record_request_peak(self, label: str, peak_bytes: int) -> None:
+        self.peak_cgroup_bytes = max(self.peak_cgroup_bytes, peak_bytes)
+        self.peak_bytes_by_doc[label] = max(self.peak_bytes_by_doc.get(label, 0), peak_bytes)
 
     def sample_cgroup(self) -> None:
         snapshot = read_cgroup_memory_snapshot()
@@ -150,16 +169,44 @@ class SoakTally:
             self.peak_cgroup_bytes = max(self.peak_cgroup_bytes, snapshot.current_bytes)
 
 
-def _extract_until_final(*, args: argparse.Namespace, pdf: bytes, tally: SoakTally) -> None:
+class _RequestPeakSampler:
+    """Samples cgroup memory.current in the background while one request is in flight."""
+
+    def __init__(self) -> None:
+        self.peak_bytes = 0
+        self._stop = threading.Event()
+        self._thread = threading.Thread(target=self._run, daemon=True)
+
+    def _run(self) -> None:
+        while not self._stop.is_set():
+            current = cgroup_memory_current_bytes()
+            if current is not None:
+                self.peak_bytes = max(self.peak_bytes, current)
+            self._stop.wait(_SAMPLE_INTERVAL_SECONDS)
+
+    def __enter__(self) -> _RequestPeakSampler:
+        self._thread.start()
+        return self
+
+    def __exit__(self, *_exc: object) -> None:
+        self._stop.set()
+        self._thread.join()
+
+
+def _extract_until_final(
+    *, args: argparse.Namespace, label: str, pdf: bytes, tally: SoakTally
+) -> None:
     """One document: retry typed 503s (as BullMQ would), then record the final outcome."""
     for attempt in range(1, _MAX_ATTEMPTS_PER_DOC + 1):
         tally.sample_cgroup()
-        outcome = _post_extract(
-            base_url=args.base_url,
-            secret=args.secret,
-            content=pdf,
-            timeout_seconds=args.timeout_seconds,
-        )
+        with _RequestPeakSampler() as sampler:
+            outcome = _post_extract(
+                base_url=args.base_url,
+                secret=args.secret,
+                content=pdf,
+                timeout_seconds=args.timeout_seconds,
+            )
+        tally.record_request_peak(label, sampler.peak_bytes)
         if outcome.status == _HTTP_OK:
             tally.successes += 1
             return
@@ -171,6 +218,8 @@ def _extract_until_final(*, args: argparse.Namespace, pdf: bytes, tally: SoakTal
             tally.retried_503 += 1
             time.sleep(outcome.retry_after_seconds)
             continue
+        if label.startswith(_PHONE_SCAN_PREFIX):
+            tally.must_succeed_failures.append(f"{label}:{outcome.status}:{outcome.error_type}")
         if outcome.error_code:
             key = f"{outcome.status}:{outcome.error_code}:{outcome.error_type}"
             tally.typed_failures[key] = tally.typed_failures.get(key, 0) + 1
@@ -213,11 +262,11 @@ def main() -> int:
     attempted = 0
     started = time.monotonic()
     for _pass in range(args.passes):
-        for _label, pdf in corpus:
+        for label, pdf in corpus:
             if time.monotonic() >= overall_deadline:
                 break
             attempted += 1
-            _extract_until_final(args=args, pdf=pdf, tally=tally)
+            _extract_until_final(args=args, label=label, pdf=pdf, tally=tally)
     elapsed = time.monotonic() - started
     tally.sample_cgroup()
     oom_after = cgroup_oom_kill_count()
@@ -241,7 +290,12 @@ def main() -> int:
         "wall_seconds": round(elapsed, 2),
         "docs_per_min": round((attempted / elapsed) * 60.0, 2) if elapsed > 0 else 0.0,
         "cgroup_peak_mib": _mib(tally.peak_cgroup_bytes) or 0,
+        "cgroup_memory_peak_file_mib": _mib(cgroup_memory_peak_bytes()),
         "cgroup_limit_mib": _mib(tally.cgroup_limit_bytes),
+        "peak_mib_by_doc": {
+            label: _mib(peak) or 0 for label, peak in sorted(tally.peak_bytes_by_doc.items())
+        },
+        "must_succeed_failures": tally.must_succeed_failures,
     }
     print(json.dumps(result))
     if attempted < planned:
@@ -250,6 +304,8 @@ def main() -> int:
         return 4
     if oom_kills > 0:
         return 6
+    if tally.must_succeed_failures:
+        return 8
     if tally.cgroup_limit_bytes is not None and tally.peak_cgroup_bytes >= tally.cgroup_limit_bytes:
         return 7
     return 0

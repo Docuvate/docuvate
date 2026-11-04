@@ -9,7 +9,6 @@ import base64
 import json
 import logging
 import os
-import signal
 import subprocess
 import sys
 import tempfile
@@ -20,6 +19,8 @@ from typing import Any
 from docuvate_worker.application.extract import extract_document
 from docuvate_worker.domain.embedding_density.schemas import EmbeddingDensityStatePayload
 from docuvate_worker.domain.extract_errors import (
+    CHILD_KILLED_ERROR_TYPE,
+    RESOURCE_EXHAUSTED_ERROR_TYPE,
     ExtractPermanentError,
     ExtractRetryableError,
     permanent_failure_from_subprocess,
@@ -31,6 +32,9 @@ from docuvate_worker.domain.models import (
     ExtractionResult,
 )
 from docuvate_worker.infrastructure.extract_memory.admission import extract_admission_slot
+from docuvate_worker.infrastructure.extract_memory.child_process_diagnostics import (
+    child_exit_envelope,
+)
 from docuvate_worker.infrastructure.extract_memory.extract_active import (
     ActiveExtractHandle,
     bind_active_extract,
@@ -44,8 +48,8 @@ from docuvate_worker.infrastructure.extract_memory.extract_subprocess_pool impor
     pooled_extract_child,
 )
 from docuvate_worker.infrastructure.extract_memory.retry_policy import (
-    apply_memory_retry_overrides,
-    memory_retry_already_applied,
+    memory_retry_scope,
+    with_memory_retry,
 )
 from docuvate_worker.infrastructure.extractors.paddle_engine import release_paddle_ocr
 from docuvate_worker.infrastructure.onnx_e5_encoder import release_onnx_encoder
@@ -221,13 +225,14 @@ def _execute_payload(payload: dict[str, Any]) -> dict[str, Any]:
         EmbeddingDensityStatePayload.model_validate(density) if density is not None else None
     )
     try:
-        result = extract_document(
-            base64.b64decode(str(payload["content_base64"])),
-            str(payload["mime_type"]),
-            engine=payload.get("engine"),
-            embedding_density_state=density_state,
-            build_exact_fact_index=bool(payload.get("build_exact_fact_index")),
-        )
+        with memory_retry_scope(payload):
+            result = extract_document(
+                base64.b64decode(str(payload["content_base64"])),
+                str(payload["mime_type"]),
+                engine=payload.get("engine"),
+                embedding_density_state=density_state,
+                build_exact_fact_index=bool(payload.get("build_exact_fact_index")),
+            )
         return {"ok": True, "result": extraction_result_to_wire(result)}
     except Exception as exc:
         tb_lines = traceback.format_exception(type(exc), exc, exc.__traceback__)
@@ -285,23 +290,11 @@ def _run_subprocess_once(payload: dict[str, Any], *, timeout: float) -> dict[str
                 proc.stderr,
                 stdout_snippet=raw_out[:500] if raw_out else None,
             )
-            return {
-                "ok": False,
-                "error": message,
-                "error_type": (
-                    CHILD_KILLED_ERROR_TYPE
-                    if proc.returncode == -signal.SIGKILL
-                    else "ExtractChildExited"
-                ),
-                "permanent": proc.returncode == -signal.SIGKILL,
-            }
+            return child_exit_envelope(proc.returncode, message)
         parsed = json.loads(raw_out)
         if not isinstance(parsed, dict):
             raise RuntimeError("extract subprocess returned non-object JSON")
         return parsed
-
-
-CHILD_KILLED_ERROR_TYPE = "ExtractChildKilled"
 
 
 def _sigkill_envelope(envelope: dict[str, Any]) -> bool:
@@ -322,14 +315,13 @@ def _run_extract_subprocess(
     timeout: float,
 ) -> ExtractionResult:
     envelope = _run_subprocess_once(payload, timeout=timeout)
-    if _sigkill_envelope(envelope) and not memory_retry_already_applied():
+    if _sigkill_envelope(envelope):
         logger.warning("extract_subprocess_sigkill_retry")
-        with apply_memory_retry_overrides():
-            envelope = _run_subprocess_once(payload, timeout=timeout)
+        envelope = _run_subprocess_once(with_memory_retry(payload), timeout=timeout)
     if _sigkill_envelope(envelope):
         raise ExtractPermanentError(
             reason=_resource_exhausted_message(),
-            error_type="ExtractResourceExhausted",
+            error_type=RESOURCE_EXHAUSTED_ERROR_TYPE,
         )
     _raise_from_envelope(envelope)
     try:

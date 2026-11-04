@@ -11,8 +11,15 @@ from dataclasses import dataclass
 
 import cv2
 import numpy as np
-from pdf2image import convert_from_bytes
 from skimage.metrics import structural_similarity as skimage_ssim
+
+from docuvate_worker.infrastructure.extract_memory.bounded_raster import (
+    bounded_page_dpi,
+    render_pdf_page_at_dpi,
+)
+from docuvate_worker.infrastructure.extract_memory.raster_settings import (
+    layout_compare_max_pixels_per_page,
+)
 
 DEFAULT_COMPARE_DPI = 100
 _INK_DIFF_THRESHOLD = 12
@@ -30,19 +37,31 @@ class PagePixelCompareResult:
 def render_pdf_page_gray(
     pdf_bytes: bytes,
     *,
-    page_number: int = 1,
-    dpi: int = DEFAULT_COMPARE_DPI,
+    page_number: int,
+    dpi: int,
+    max_pixels: int,
 ) -> np.ndarray:
-    images = convert_from_bytes(
-        pdf_bytes,
-        dpi=dpi,
-        first_page=page_number,
-        last_page=page_number,
-    )
-    if not images:
+    image = render_pdf_page_at_dpi(pdf_bytes, page_number, dpi=dpi, max_pixels=max_pixels)
+    if image is None:
         raise ValueError(f"PDF has no page {page_number}")
-    rgb = np.asarray(images[0].convert("RGB"))
+    with image:
+        rgb = np.asarray(image.convert("RGB"))
     return cv2.cvtColor(rgb, cv2.COLOR_RGB2GRAY)
+
+
+def compare_render_dpi(
+    original_pdf: bytes,
+    reconstruction_pdf: bytes,
+    *,
+    page_number: int,
+    dpi: int,
+    max_pixels: int,
+) -> int:
+    """One DPI for both renders (so they align) that keeps each within the pixel budget."""
+    return min(
+        bounded_page_dpi(original_pdf, page_number, dpi=dpi, max_pixels=max_pixels),
+        bounded_page_dpi(reconstruction_pdf, page_number, dpi=dpi, max_pixels=max_pixels),
+    )
 
 
 def compile_typst_to_pdf_bytes(typst_source: str, typst_bin: str | None = None) -> bytes:
@@ -98,8 +117,20 @@ def compare_pdf_pages(
     page_number: int = 1,
     dpi: int = DEFAULT_COMPARE_DPI,
 ) -> PagePixelCompareResult:
-    orig = render_pdf_page_gray(original_pdf, page_number=page_number, dpi=dpi)
-    recon = render_pdf_page_gray(reconstruction_pdf, page_number=page_number, dpi=dpi)
+    max_pixels = layout_compare_max_pixels_per_page()
+    render_dpi = compare_render_dpi(
+        original_pdf,
+        reconstruction_pdf,
+        page_number=page_number,
+        dpi=dpi,
+        max_pixels=max_pixels,
+    )
+    orig = render_pdf_page_gray(
+        original_pdf, page_number=page_number, dpi=render_dpi, max_pixels=max_pixels
+    )
+    recon = render_pdf_page_gray(
+        reconstruction_pdf, page_number=page_number, dpi=render_dpi, max_pixels=max_pixels
+    )
     heatmap = diff_heatmap_gray(orig, recon)
     return PagePixelCompareResult(
         ssim=structural_similarity(orig, recon),

@@ -34,6 +34,13 @@ class ExtractRetryableError(Exception):
         return f"{self.error_type}: {self.reason}"
 
 
+# The extract child was SIGKILLed mid-job (cgroup OOM killer); retried once with reduced settings.
+CHILD_KILLED_ERROR_TYPE = "ExtractChildKilled"
+# The extract child exited mid-job with a non-SIGKILL status.
+CHILD_EXITED_ERROR_TYPE = "ExtractChildExited"
+# Raised when the child is still killed after the reduced-settings retry.
+RESOURCE_EXHAUSTED_ERROR_TYPE = "ExtractResourceExhausted"
+
 # Exception types raised inside the extract child that will fail identically on retry.
 PERMANENT_SUBPROCESS_ERROR_TYPES: frozenset[str] = frozenset(
     {
@@ -43,7 +50,7 @@ PERMANENT_SUBPROCESS_ERROR_TYPES: frozenset[str] = frozenset(
         "UnicodeDecodeError",
         "MemoryError",
         "RecursionError",
-        "ExtractResourceExhausted",
+        RESOURCE_EXHAUSTED_ERROR_TYPE,
     }
 )
 

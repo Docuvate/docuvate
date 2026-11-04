@@ -155,6 +155,18 @@ def cgroup_memory_current_bytes() -> int | None:
     return None
 
 
+def cgroup_memory_peak_bytes() -> int | None:
+    """High-water mark of cgroup memory since the cgroup was created (v2 memory.peak)."""
+    for candidate in (
+        _CGROUP_ROOT / "memory.peak",
+        Path("/sys/fs/cgroup/memory/memory.max_usage_in_bytes"),
+    ):
+        value = _read_int_file(candidate)
+        if value is not None:
+            return value
+    return None
+
+
 def cgroup_oom_kill_count() -> int | None:
     events = _CGROUP_ROOT / "memory.events"
     if not events.is_file():
