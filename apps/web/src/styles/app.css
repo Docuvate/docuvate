@@ -3204,6 +3204,32 @@ mark.global-search-mark {
   font-size: 0.9rem;
 }
 
+.layout-side-subsection-title {
+  margin: var(--dv-space-sm) 0 var(--dv-space-2xs);
+  font-size: var(--dv-font-size-xs);
+  font-weight: var(--dv-font-weight-semibold);
+  color: var(--dv-color-text-muted);
+}
+
+.layout-field-filter {
+  width: 100%;
+  margin-bottom: var(--dv-space-xs);
+}
+
+.layout-field-mark-hint {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--dv-space-xs);
+  margin-bottom: var(--dv-space-xs);
+  padding: var(--dv-space-xs) var(--dv-space-sm);
+  border: 1px solid var(--dv-color-accent);
+  border-radius: var(--dv-radius-md);
+  background: var(--dv-color-bg-raised);
+  font-size: var(--dv-font-size-sm);
+}
+
 .layout-field-list,
 .layout-field-suggestion-list,
 .layout-outline-list {

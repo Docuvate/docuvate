@@ -6,7 +6,7 @@ import type {
   LayoutIrDocument,
   RecognizedFieldDefinitionDto,
 } from '@docuvate/contracts';
-import { type KeyboardEvent, useCallback, useEffect, useId, useMemo, useRef } from 'react';
+import { type KeyboardEvent, useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { isConfirmedFieldConfidence } from '../../lib/documentFieldValueRowState';
@@ -22,6 +22,10 @@ import {
   type LayoutOutlineNode,
   type LayoutOverlayRegion,
 } from '../../lib/layoutOverlayModel';
+import {
+  groupLayoutPanelFields,
+  LAYOUT_FIELD_FILTER_MIN_FIELDS,
+} from '../../lib/layoutPanelFieldGroups';
 import { fieldsForLayoutPanel } from '../../lib/layoutPanelFields';
 import {
   buildRecognizedFieldDefinitionIndex,
@@ -32,6 +36,7 @@ import {
 import { sourceChipPageLabel } from '../../lib/sourceChipLabel';
 import { Button } from '../ui/Button';
 import { FieldValueRow } from '../ui/FieldValueRow';
+import { Input } from '../ui/Input';
 import { SourceChip } from '../ui/SourceChip';
 import { CorrectedTableCard } from './CorrectedTableCard';
 import { DocumentChatPanel } from './DocumentChatPanel';
@@ -66,6 +71,8 @@ interface DocumentLayoutSidePanelProps {
   onTableCellChange?: (regionId: string, row: number, col: number, text: string) => void;
   onConfirmField?: (key: string, value: string) => void;
   onCorrectField?: (key: string) => void;
+  /** Saves a typed value for a field (recorded as a correction). */
+  onSaveFieldValue?: (key: string, value: string) => void;
   onHighlightField?: (key: string) => void;
   onSelectField?: (key: string) => void;
   /** When the correction bottom sheet is open, unmount the inline field list so each field has one source chip. */
@@ -99,6 +106,7 @@ export function DocumentLayoutSidePanel({
   onTableCellChange,
   onConfirmField,
   onCorrectField,
+  onSaveFieldValue,
   onHighlightField,
   onSelectField,
   hideInlineFieldList = false,
@@ -132,6 +140,12 @@ export function DocumentLayoutSidePanel({
   }, [overlays]);
 
   const panelFields = useMemo(() => fieldsForLayoutPanel(fields), [fields]);
+  const [fieldQuery, setFieldQuery] = useState('');
+  const fieldGroups = useMemo(
+    () => groupLayoutPanelFields(panelFields, fieldQuery, fieldLabelForKey),
+    [fieldLabelForKey, fieldQuery, panelFields]
+  );
+  const showFieldFilter = panelFields.length > LAYOUT_FIELD_FILTER_MIN_FIELDS;
   const locale = i18n.language;
   const formatFieldValue = useCallback(
     (key: string, value: string) => formatExtractedFieldDisplayValue(key, value, locale),
@@ -302,6 +316,45 @@ export function DocumentLayoutSidePanel({
     return map;
   }, [fieldRegions]);
 
+  const renderFieldRow = (field: ExtractedField, missing: boolean) => {
+    const region = regionByFieldKey.get(field.key);
+    const sourceLabel = region ? sourceChipPageLabel(region.page, locale) : undefined;
+    return (
+      <li
+        key={field.key}
+        className="layout-field-row"
+        data-layout-overlay-target={fieldOverlayIdByKey.get(field.key) ?? undefined}
+      >
+        <FieldValueRow
+          fieldName={fieldLabelForKey(field.key)}
+          value={missing ? '' : formatFieldValue(field.key, field.value)}
+          state={
+            missing
+              ? 'missing'
+              : isConfirmedFieldConfidence(field.confidence)
+                ? 'confirmed'
+                : 'suggested'
+          }
+          confidencePercent={
+            field.confidence != null ? Math.round(field.confidence * 100) : undefined
+          }
+          sourceLabel={sourceLabel}
+          onSelect={onSelectField ? () => { onSelectField(field.key); } : undefined}
+          onConfirm={
+            onConfirmField && !missing
+              ? () => { onConfirmField(field.key, field.value); }
+              : undefined
+          }
+          onCorrect={onCorrectField ? () => { onCorrectField(field.key); } : undefined}
+          onSaveValue={
+            onSaveFieldValue ? (value) => { onSaveFieldValue(field.key, value); } : undefined
+          }
+          onSourceClick={onHighlightField ? () => { onHighlightField(field.key); } : undefined}
+        />
+      </li>
+    );
+  };
+
   return (
     <aside
       className={`layout-side-panel${activeTab === 'chat' ? ' layout-side-panel--chat' : ''}`}
@@ -349,49 +402,36 @@ export function DocumentLayoutSidePanel({
             {panelFields.length === 0 && suggestions.length === 0 ? (
               <p className="muted">{t('documents.layoutFieldsEmpty')}</p>
             ) : null}
-            <ul className="layout-field-list">
-              {panelFields.map((field) => {
-                const region = regionByFieldKey.get(field.key);
-                const sourceLabel = region
-                  ? sourceChipPageLabel(region.page, locale)
-                  : undefined;
-                return (
-                  <li
-                    key={field.key}
-                    className="layout-field-row"
-                    data-layout-overlay-target={fieldOverlayIdByKey.get(field.key) ?? undefined}
-                  >
-                    <FieldValueRow
-                      fieldName={fieldLabelForKey(field.key)}
-                      value={
-                        field.value.trim().length > 0
-                          ? formatFieldValue(field.key, field.value)
-                          : t('documents.fieldRegionEmptyHint')
-                      }
-                      state={isConfirmedFieldConfidence(field.confidence) ? 'confirmed' : 'suggested'}
-                      confidencePercent={
-                        field.confidence != null ? Math.round(field.confidence * 100) : undefined
-                      }
-                      sourceLabel={sourceLabel}
-                      onSelect={
-                        onSelectField ? () => { onSelectField(field.key); } : undefined
-                      }
-                      onConfirm={
-                        onConfirmField
-                          ? () => { onConfirmField(field.key, field.value); }
-                          : undefined
-                      }
-                      onCorrect={
-                        onCorrectField ? () => { onCorrectField(field.key); } : undefined
-                      }
-                      onSourceClick={
-                        onHighlightField ? () => { onHighlightField(field.key); } : undefined
-                      }
-                    />
-                  </li>
-                );
-              })}
+            {showFieldFilter ? (
+              <Input
+                type="search"
+                className="layout-field-filter"
+                value={fieldQuery}
+                placeholder={t('documents.layoutFieldsFilterPlaceholder')}
+                aria-label={t('documents.layoutFieldsFilterAria')}
+                onChange={(event) => { setFieldQuery(event.target.value); }}
+              />
+            ) : null}
+            {fieldQuery.trim() &&
+            fieldGroups.found.length === 0 &&
+            fieldGroups.missing.length === 0 ? (
+              <p className="muted">
+                {t('documents.layoutFieldsFilterEmpty', { query: fieldQuery.trim() })}
+              </p>
+            ) : null}
+            <ul className="layout-field-list" data-testid="layout-field-list-found">
+              {fieldGroups.found.map((field) => renderFieldRow(field, false))}
             </ul>
+            {fieldGroups.missing.length > 0 ? (
+              <>
+                <h4 className="layout-side-subsection-title">
+                  {t('documents.layoutFieldsMissing', { count: fieldGroups.missing.length })}
+                </h4>
+                <ul className="layout-field-list" data-testid="layout-field-list-missing">
+                  {fieldGroups.missing.map((field) => renderFieldRow(field, true))}
+                </ul>
+              </>
+            ) : null}
             {suggestions.length > 0 ? (
               <>
                 <h3 className="layout-side-section-title">{t('documents.layoutFieldSuggestions')}</h3>

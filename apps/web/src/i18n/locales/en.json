@@ -902,7 +902,6 @@
     "selectionFieldCreateOption": "Create field “{{name}}”",
     "selectionAccept": "Create field",
     "fieldCorrectionSaved": "Correction saved · {{name}}",
-    "fieldRegionEmptyHint": "No text in this region - saved as an image area",
     "fieldCorrectionSheetTitle": "Correct {{name}}",
     "fieldValueInputLabel": "Field value",
     "fieldValueInputAria": "Value for {{name}}",
@@ -1068,7 +1067,13 @@
       "claim_busy": "Extraction for this document was already in progress.",
       "internal_error": "Extraction failed due to an internal error.",
       "orphan_requeue_exhausted": "Extraction was restarted too often without finishing and was stopped."
-    }
+    },
+    "layoutFieldsMissing": "Not found ({{count}})",
+    "layoutFieldsFilterPlaceholder": "Filter fields…",
+    "layoutFieldsFilterAria": "Filter recognized fields",
+    "layoutFieldsFilterEmpty": "No field matches “{{query}}”.",
+    "fieldMarkHint": "Drag a box around the value for “{{name}}” on the document.",
+    "fieldMarkHintCancel": "Cancel marking"
   },
   "settings": {
     "title": "Settings",
@@ -2322,7 +2327,13 @@
     "fieldValue": {
       "confirmed": "Confirmed",
       "correct": "Correct",
-      "moreActions": "More actions"
+      "moreActions": "More actions",
+      "missing": "Not found",
+      "enterValue": "Enter value",
+      "markInDocument": "Mark in document",
+      "inputPlaceholder": "Enter value…",
+      "inputAria": "Value for {{name}}",
+      "save": "Save"
     },
     "suggestion": {
       "accept": "Apply",
