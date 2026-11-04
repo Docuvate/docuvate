@@ -4,7 +4,6 @@ import {
   namesAreNearDuplicate,
   normalizeLabelKey,
 } from '../../../shared/domain/label-name-similarity.js';
-import { isRecord, parseString } from '../../../shared/domain/row-parse.js';
 
 const MAX_BLOCKLIST_PATTERN_LENGTH = 200;
 
@@ -42,74 +41,6 @@ export function isBlockedLabelCandidate(
     matchesUserBlocklist(candidateName, blockPhrases) ||
     matchesBlocklistPattern(candidateName, blockPatterns)
   );
-}
-
-function phrasesAreRelated(a: string, b: string): boolean {
-  if (namesAreNearDuplicate(a, b)) {
-    return true;
-  }
-  const keyA = normalizeLabelKey(a).replace(/[^a-z0-9]+/g, '');
-  const keyB = normalizeLabelKey(b).replace(/[^a-z0-9]+/g, '');
-  if (!keyA || !keyB) {
-    return false;
-  }
-  if (keyA === keyB) {
-    return true;
-  }
-  const shorter = keyA.length <= keyB.length ? keyA : keyB;
-  const longer = keyA.length <= keyB.length ? keyB : keyA;
-  if (shorter.length >= 4 && longer.includes(shorter)) {
-    return true;
-  }
-  return false;
-}
-
-export function clusterBlocklistPhrases(phrases: string[]): string[][] {
-  const unique = [...new Set(phrases.map((p) => p.trim()).filter((p) => p.length >= 2))];
-  if (unique.length < 2) {
-    return [];
-  }
-  const clusters: string[][] = [];
-  for (const phrase of unique) {
-    let placed = false;
-    for (const cluster of clusters) {
-      if (cluster.some((existing) => phrasesAreRelated(existing, phrase))) {
-        cluster.push(phrase);
-        placed = true;
-        break;
-      }
-    }
-    if (!placed) {
-      clusters.push([phrase]);
-    }
-  }
-  return clusters.filter((c) => c.length >= 2);
-}
-
-export function parseBlocklistPatternProposal(raw: string): {
-  pattern: string;
-  explanation: string;
-} | null {
-  const trimmed = raw.trim();
-  if (!trimmed) {
-    return null;
-  }
-  const jsonMatch = /\{[\s\S]*\}/.exec(trimmed);
-  const jsonText = jsonMatch?.[0] ?? trimmed;
-  try {
-    const parsed: unknown = JSON.parse(jsonText);
-    if (!isRecord(parsed)) {
-      return null;
-    }
-    const pattern = parseString(parsed.pattern).trim();
-    const explanation = parseString(parsed.explanation).trim();
-    if (!pattern || !compileBlocklistPattern(pattern)) {
-      return null;
-    }
-    return { pattern, explanation: explanation || 'Vorgeschlagenes Muster' };
-  } catch {
-    return null;
-  }
 }
 
 export function matchesUserBlocklist(candidateName: string, blockPhrases: string[]): boolean {

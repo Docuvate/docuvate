@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# End-to-end smoke: compose stack + synthetic fixture seeder + cited-chat checks (CPU extractive).
+# End-to-end smoke: compose stack + synthetic fixture seeder + label/field/duplicate checks.
 # Worker load tests (throughput bench + 2 GiB soak) run separately: scripts/ci/worker-load.sh.
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"

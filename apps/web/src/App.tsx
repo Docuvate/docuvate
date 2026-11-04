@@ -26,7 +26,6 @@ import { ErrorCodeDocPage } from './pages/ErrorCodeDocPage';
 import { ErrorScreensPreviewHarnessShell } from './pages/ErrorScreensPreviewHarnessShell';
 import { ErrorScreensPreviewPage } from './pages/ErrorScreensPreviewPage';
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
-import { GlobalChatPage } from './pages/GlobalChatPage';
 import { InviteAcceptPage } from './pages/InviteAcceptPage';
 import { LibraryPage } from './pages/LibraryPage';
 import { LoginBackupCodePage } from './pages/LoginBackupCodePage';
@@ -124,14 +123,6 @@ export function App() {
         element={
           <ShellRoute>
             <DuplicatesOverviewPage />
-          </ShellRoute>
-        }
-      />
-      <Route
-        path={routes.globalChat}
-        element={
-          <ShellRoute>
-            <GlobalChatPage />
           </ShellRoute>
         }
       />

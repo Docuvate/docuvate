@@ -15,21 +15,12 @@ import { Input } from '../components/ui/Input';
 import { useAdvancedFeaturesEnabled } from '../lib/advancedFeatures';
 import {
   addLabelRecommendationBlocklist,
-  confirmLabelRecommendationBlocklistPattern,
   listLabelRecommendationBlocklist,
-  proposeLabelRecommendationBlocklistPattern,
   removeLabelRecommendationBlocklist,
   removeLabelRecommendationBlocklistPattern,
 } from '../lib/api';
 import { formatUserFacingError } from '../lib/apiErrors';
-import { clusterBlocklistPhrases } from '../lib/blocklistClusters';
 import { formatCustomerDate } from '../lib/formatCustomerDate';
-
-interface PatternProposal {
-  pattern: string;
-  explanation: string;
-  phrases: string[];
-}
 
 interface UndoState {
   phrase: string;
@@ -55,9 +46,6 @@ export function BlockedLabelsSettingsPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [undo, setUndo] = useState<UndoState | null>(null);
-  const [proposal, setProposal] = useState<PatternProposal | null>(null);
-  const [proposalHint, setProposalHint] = useState<string | null>(null);
-  const [proposingFor, setProposingFor] = useState<string[] | null>(null);
 
   const dismissUndo = useCallback(() => {
     setUndo(null);
@@ -89,11 +77,6 @@ export function BlockedLabelsSettingsPage() {
     const timer = window.setTimeout(dismissUndo, UNDO_MS);
     return () => { window.clearTimeout(timer); };
   }, [undo, dismissUndo]);
-
-  const clusters = useMemo(
-    () => clusterBlocklistPhrases(items.map((entry) => entry.phrase)),
-    [items]
-  );
 
   const filteredItems = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -179,44 +162,6 @@ export function BlockedLabelsSettingsPage() {
       setPatterns((prev) => prev.filter((p) => p.id !== id));
     } catch (err) {
       setError(formatUserFacingError(err, 'errors.deleteFailed'));
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  async function onProposePattern(phrases: string[]) {
-    setBusy(true);
-    setError(null);
-    setProposal(null);
-    setProposalHint(null);
-    setProposingFor(phrases);
-    try {
-      const result = await proposeLabelRecommendationBlocklistPattern(phrases);
-      if (result.proposal) {
-        setProposal(result.proposal);
-      } else {
-        setProposalHint(result.setupHint ?? t('settings.blockedLabels.regexNoProposal'));
-      }
-    } catch (err) {
-      setError(formatUserFacingError(err, 'errors.actionFailed'));
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  async function onConfirmProposal() {
-    if (!proposal) {
-      return;
-    }
-    setBusy(true);
-    setError(null);
-    try {
-      const saved = await confirmLabelRecommendationBlocklistPattern(proposal.pattern);
-      setPatterns((prev) => [saved, ...prev.filter((p) => p.id !== saved.id)]);
-      setProposal(null);
-      setProposingFor(null);
-    } catch (err) {
-      setError(formatUserFacingError(err, 'errors.saveFailed'));
     } finally {
       setBusy(false);
     }
@@ -363,63 +308,6 @@ export function BlockedLabelsSettingsPage() {
             ))}
           </ul>
         </section>
-      ) : null}
-
-      {advancedFeaturesEnabled && !loading && clusters.length > 0 ? (
-        <section className="blocked-labels-advanced card">
-          <p className="muted">{t('labelBlocklist.regexSuggestLead')}</p>
-          {clusters.map((cluster) => (
-            <div key={cluster.join('|')} className="blocked-labels-cluster">
-              <p className="blocked-labels-cluster-phrases">{cluster.join(' · ')}</p>
-              <Button
-                type="button"
-                variant="secondary"
-                disabled={busy}
-                onClick={() => void onProposePattern(cluster)}
-              >
-                {t('labelBlocklist.regexSuggest')}
-              </Button>
-            </div>
-          ))}
-        </section>
-      ) : null}
-
-      {proposalHint ? (
-        <p className="muted blocked-labels-meta" role="status">
-          {proposalHint}
-        </p>
-      ) : null}
-
-      {proposal ? (
-        <div
-          className="blocked-labels-proposal card"
-          role="region"
-          aria-label={t('labelBlocklist.regexSuggestAria')}
-        >
-          <p className="blocked-labels-proposal-lead">
-            {t('settings.blockedLabels.regexProposalFor', {
-              phrases: proposingFor?.join(', ') ?? proposal.phrases.join(', '),
-            })}
-          </p>
-          <code className="blocked-labels-pattern-code">{proposal.pattern}</code>
-          <p className="muted blocked-labels-meta">{proposal.explanation}</p>
-          <div className="blocked-labels-proposal-actions">
-            <Button type="button" disabled={busy} onClick={() => void onConfirmProposal()}>
-              {t('labelBlocklist.applyPattern')}
-            </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              disabled={busy}
-              onClick={() => {
-                setProposal(null);
-                setProposingFor(null);
-              }}
-            >
-              {t('labelBlocklist.discard')}
-            </Button>
-          </div>
-        </div>
       ) : null}
     </SettingsSectionLayout>
   );

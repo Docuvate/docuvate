@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type {
   CustomFieldType,
-  DocumentExtractionImageDto,
   DocumentListQuery,
   DocumentRegionDto,
   DocumentRegionRole,
@@ -20,7 +19,6 @@ import type {
   LabelSuggestionPreset,
   LayoutToken,
   MatchingAlgorithm,
-  NormalizedBBox,
   TableCorrectionOp,
 } from '@docuvate/contracts';
 
@@ -259,7 +257,6 @@ export interface ExtractionPort {
 export interface UserPreferencesEntity {
   userId: string;
   preferredExtractorEngine: string;
-  preferredChatProvider: string | null;
   useArenaWinnerAsDefault: boolean;
   arenaWinnerEngine: string | null;
   /** Learned cosine threshold for Labelraum “near unlabeled” and assign recommendations. */
@@ -271,9 +268,6 @@ export interface UserPreferencesEntity {
   advancedFeaturesEnabled: boolean;
   themePreference: 'light' | 'dark' | 'system';
   locale: 'de' | 'en' | null;
-  documentChatCloudBaseUrl: string | null;
-  /** Decrypted API key for server-side LLM calls; never expose to clients. */
-  documentChatCloudApiKey: string | null;
   updatedAt: Date;
 }
 
@@ -283,7 +277,6 @@ export interface UserPreferencesRepository {
     userId: string,
     patch: {
       preferredExtractorEngine?: string;
-      preferredChatProvider?: string | null;
       useArenaWinnerAsDefault?: boolean;
       arenaWinnerEngine?: string | null;
       labelNearSimilarityThreshold?: number;
@@ -292,8 +285,6 @@ export interface UserPreferencesRepository {
       advancedFeaturesEnabled?: boolean;
       themePreference?: 'light' | 'dark' | 'system';
       locale?: 'de' | 'en' | null;
-      documentChatCloudBaseUrl?: string | null;
-      documentChatCloudApiKey?: string | null;
     }
   ): Promise<UserPreferencesEntity>;
   recordArenaRating(input: {
@@ -625,144 +616,6 @@ export interface SearchPort {
   ): Promise<DocumentEntity[]>;
 }
 
-export interface ChatMessage {
-  role: 'user' | 'assistant';
-  content: string;
-}
-
-export interface DocumentChatContext {
-  title: string;
-  filename: string;
-  text: string;
-  fields: ExtractedField[];
-}
-
-export interface DocumentChatFilePayload {
-  buffer: Buffer;
-  mimeType: string;
-}
-
-export interface DocumentChatPort {
-  chat(
-    message: string,
-    history: ChatMessage[],
-    context: DocumentChatContext,
-    options?: {
-      providerId?: string;
-      file?: DocumentChatFilePayload;
-    }
-  ): Promise<{
-    reply: ChatMessage;
-    configured: boolean;
-    provider?: string;
-    setupHint?: string;
-  }>;
-}
-
-export type ChatThreadScope = 'document' | 'library';
-
-export interface DocumentChatThreadEntity {
-  id: string;
-  userId: string;
-  title: string;
-  scope: ChatThreadScope;
-  documentIds: string[];
-  createdAt: Date;
-  updatedAt: Date;
-  lastMessagePreview?: string | null;
-  activeGenerationStatus?: DocumentChatGenerationStatus | null;
-}
-
-export type DocumentChatGenerationStatus = 'pending' | 'streaming' | 'done' | 'failed';
-
-export type DocumentChatGenerationPhase = 'retrieving' | 'generating' | 'verifying';
-
-export interface DocumentChatMessageCitationEntity {
-  ordinal: number;
-  documentId: string;
-  documentTitle: string;
-  chunkId: string;
-  quote: string;
-  charStart: number;
-  charEnd: number;
-  page: number | null;
-  blocks: ExtractionBlock[];
-  bbox?: NormalizedBBox | null;
-  documentImage?: DocumentExtractionImageDto | null;
-}
-
-export interface DocumentChatMessageEntity {
-  id: string;
-  threadId: string;
-  role: 'user' | 'assistant';
-  content: string;
-  createdAt: Date;
-  updatedAt: Date;
-  generationStatus?: DocumentChatGenerationStatus | null;
-  generationPhase?: DocumentChatGenerationPhase | null;
-  errorCode?: string | null;
-  errorDetail?: string | null;
-  citations?: DocumentChatMessageCitationEntity[];
-}
-
-export interface DocumentChatMessageGenerationPatch {
-  content?: string;
-  generationStatus?: DocumentChatGenerationStatus | null;
-  generationPhase?: DocumentChatGenerationPhase | null;
-  errorCode?: string | null;
-  errorDetail?: string | null;
-  /** When true, terminal status updates apply only if the message is still in-flight. */
-  finalizeOnlyIfInFlight?: boolean;
-}
-
-export interface DocumentChatThreadRepository {
-  listThreadsForLibrary(
-    userId: string,
-    pagination?: { limit: number; cursor?: string }
-  ): Promise<{
-    threads: DocumentChatThreadEntity[];
-    hasMore: boolean;
-    nextCursor: string | null;
-    total: number | null;
-  }>;
-  listThreadsForDocument(documentId: string, userId: string): Promise<DocumentChatThreadEntity[]>;
-  createThread(
-    userId: string,
-    documentIds: string[],
-    options?: { title?: string; scope?: ChatThreadScope }
-  ): Promise<DocumentChatThreadEntity>;
-  findThreadForUser(threadId: string, userId: string): Promise<DocumentChatThreadEntity | null>;
-  assertThreadLinkedToDocument(
-    threadId: string,
-    documentId: string,
-    userId: string
-  ): Promise<DocumentChatThreadEntity>;
-  listMessages(threadId: string, userId: string): Promise<DocumentChatMessageEntity[]>;
-  findMessageForUser(messageId: string, userId: string): Promise<DocumentChatMessageEntity | null>;
-  appendMessage(
-    threadId: string,
-    role: 'user' | 'assistant',
-    content: string,
-    options?: {
-      generationStatus?: DocumentChatGenerationStatus;
-      generationPhase?: DocumentChatGenerationPhase;
-    }
-  ): Promise<DocumentChatMessageEntity>;
-  updateMessageGeneration(
-    messageId: string,
-    patch: DocumentChatMessageGenerationPatch
-  ): Promise<DocumentChatMessageEntity>;
-  resetMessageForRetry(messageId: string): Promise<DocumentChatMessageEntity>;
-  touchThread(threadId: string): Promise<void>;
-  updateTitleIfDefault(threadId: string, title: string): Promise<void>;
-  renameThread(threadId: string, userId: string, title: string): Promise<DocumentChatThreadEntity>;
-  deleteThread(threadId: string, userId: string): Promise<void>;
-  /** Mark pending/streaming assistant messages older than maxAgeMs as failed (generation_timeout). */
-  listInFlightAssistantMessageIdsOlderThan(maxAgeMs: number): Promise<string[]>;
-  failAssistantGenerationsByIds(messageIds: string[]): Promise<number>;
-  touchMessageGenerationHeartbeat(messageId: string): Promise<void>;
-}
-
 export interface FolderListItem extends FolderEntity {
   documentCount: number;
 }
@@ -1011,8 +864,6 @@ export const EXTRACTION_PORT = Symbol('EXTRACTION_PORT');
 export const EMBEDDING_PORT = Symbol('EMBEDDING_PORT');
 export const LABEL_EMBEDDING_REPOSITORY = Symbol('LABEL_EMBEDDING_REPOSITORY');
 export const SEARCH_PORT = Symbol('SEARCH_PORT');
-export const DOCUMENT_CHAT_PORT = Symbol('DOCUMENT_CHAT_PORT');
-export const DOCUMENT_CHAT_THREAD_REPOSITORY = Symbol('DOCUMENT_CHAT_THREAD_REPOSITORY');
 export const FOLDER_REPOSITORY = Symbol('FOLDER_REPOSITORY');
 export const DUPLICATE_REPOSITORY = Symbol('DUPLICATE_REPOSITORY');
 export const DUPLICATE_STACK_REPOSITORY = Symbol('DUPLICATE_STACK_REPOSITORY');

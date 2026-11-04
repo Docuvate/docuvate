@@ -10,7 +10,6 @@ import {
 } from '../../../shared/infrastructure/auth/auth.guard.js';
 import { EncoderReindexProgressDto } from '../../../shared/presentation/dtos/encoder-reindex.dto.js';
 import {
-  DocumentChatProviderListResponseDto,
   ExtractionEngineListResponseDto,
   UpdateUserSettingsRequestDto,
   UserSettingsResponseDto,
@@ -24,9 +23,7 @@ import {
   ApiDocuvateRoute,
 } from '../../../shared/presentation/swagger/openapi-decorators.js';
 import { GetEncoderReindexProgressUseCase } from '../../representation/application/get-encoder-reindex-progress.use-case.js';
-import { EffectiveDocumentChatProviderUseCase } from '../application/effective-document-chat-provider.use-case.js';
 import { GetHardwareCapabilitiesUseCase } from '../application/hardware-capabilities.use-case.js';
-import { ListDocumentChatProvidersUseCase } from '../application/list-document-chat-providers.use-case.js';
 import {
   GetUserSettingsUseCase,
   ListExtractionEnginesUseCase,
@@ -46,8 +43,6 @@ export class SettingsController {
     private readonly getSettings: GetUserSettingsUseCase,
     private readonly updateSettings: UpdateUserSettingsUseCase,
     private readonly listEngines: ListExtractionEnginesUseCase,
-    private readonly listChatProviders: ListDocumentChatProvidersUseCase,
-    private readonly effectiveChatProvider: EffectiveDocumentChatProviderUseCase,
     private readonly hardwareCapabilities: GetHardwareCapabilitiesUseCase,
     private readonly encoderReindexProgress: GetEncoderReindexProgressUseCase,
     private readonly getWorkspaceMl: GetWorkspaceMlSettingsUseCase,
@@ -78,14 +73,8 @@ export class SettingsController {
   @Get()
   @ApiDocuvateRoute({ operationId: 'getUserSettings', summary: 'Get user settings' })
   async get(@Session() session: AuthSession): Promise<UserSettingsResponseDto> {
-    await this.effectiveChatProvider.executeForUser(session.user.id, {
-      persistUnavailablePreferenceClear: true,
-    });
     const { row } = await this.getSettings.execute(session.user.id);
-    const resolved = await this.effectiveChatProvider.resolveFromPreference(
-      row.preferredChatProvider
-    );
-    return toUserSettingsResponseDto(row, resolved);
+    return toUserSettingsResponseDto(row);
   }
 
   @Patch()
@@ -95,16 +84,7 @@ export class SettingsController {
     @Body() body: UpdateUserSettingsRequestDto
   ): Promise<UserSettingsResponseDto> {
     const row = await this.updateSettings.execute(session.user.id, body);
-    const resolved = await this.effectiveChatProvider.resolveFromPreference(
-      row.preferredChatProvider
-    );
-    return toUserSettingsResponseDto(row, resolved);
-  }
-
-  @Get('chat-providers')
-  @ApiDocuvateRoute({ operationId: 'listChatProviders', summary: 'List document chat providers' })
-  async chatProviders(): Promise<DocumentChatProviderListResponseDto> {
-    return this.listChatProviders.execute();
+    return toUserSettingsResponseDto(row);
   }
 
   @Get('extraction-engines')

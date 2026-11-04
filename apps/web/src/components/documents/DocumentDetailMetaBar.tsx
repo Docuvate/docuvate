@@ -8,7 +8,7 @@ import { documentContentUrl } from '../../lib/api';
 import { Badge } from '../ui/Badge';
 import { Menu, MenuContent, MenuTrigger } from '../ui/overlay/Menu';
 
-type DetailTab = 'details' | 'labels' | 'chat';
+type DetailTab = 'details' | 'labels';
 
 interface DocumentDetailMetaBarProps {
   doc: DocumentDto;
@@ -23,24 +23,16 @@ export function DocumentDetailTabStrip({
   activeTab,
   labelCount,
   onTabChange,
-  showChatTab = true,
 }: {
   activeTab: DetailTab | null;
   labelCount: number;
   onTabChange: (tab: DetailTab | null) => void;
-  showChatTab?: boolean;
 }) {
   const { t } = useTranslation();
-  const tabs: [DetailTab, string][] = showChatTab
-    ? [
-        ['details', t('documents.tabDetails')],
-        ['labels', t('documents.tabLabels')],
-        ['chat', t('documents.tabChat')],
-      ]
-    : [
-        ['details', t('documents.tabDetails')],
-        ['labels', t('documents.tabLabels')],
-      ];
+  const tabs: [DetailTab, string][] = [
+    ['details', t('documents.tabDetails')],
+    ['labels', t('documents.tabLabels')],
+  ];
 
   return (
     <div className="detail-tabs-bar" role="tablist" aria-label={t('documents.tabsAria')}>

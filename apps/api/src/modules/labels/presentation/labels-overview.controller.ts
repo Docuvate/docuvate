@@ -23,7 +23,6 @@ import {
   LabelRecommendationBlocklistEntryResponseDto,
   LabelRecommendationBlocklistListResponseDto,
   LabelRecommendationListResponseDto,
-  ProposeLabelRecommendationBlocklistPatternRequestDto,
 } from '../../../shared/presentation/dtos/labels.dto.js';
 import {
   ApiDocuvateController,
@@ -31,7 +30,6 @@ import {
 } from '../../../shared/presentation/swagger/openapi-decorators.js';
 import {
   ConfirmBlocklistPatternUseCase,
-  ProposeBlocklistPatternUseCase,
   RemoveBlocklistPatternUseCase,
 } from '../application/blocklist-pattern.use-case.js';
 import { GetLabelDocumentInventoryUseCase } from '../application/get-label-document-inventory.use-case.js';
@@ -62,7 +60,6 @@ export class LabelsOverviewController {
     private readonly listBlocklist: ListRecommendationBlocklistUseCase,
     private readonly addBlocklist: AddRecommendationBlocklistUseCase,
     private readonly removeBlocklist: RemoveRecommendationBlocklistUseCase,
-    private readonly proposeBlocklistPattern: ProposeBlocklistPatternUseCase,
     private readonly confirmBlocklistPattern: ConfirmBlocklistPatternUseCase,
     private readonly removeBlocklistPattern: RemoveBlocklistPatternUseCase
   ) {}
@@ -149,15 +146,6 @@ export class LabelsOverviewController {
     @Session() session: AuthSession
   ): Promise<LabelRecommendationBlocklistListResponseDto> {
     return this.listBlocklist.execute(session.user.id);
-  }
-
-  @Post('recommendation-blocklist/propose-pattern')
-  @ApiDocuvateRoute({ operationId: 'proposePattern', summary: 'proposePattern' })
-  async proposePattern(
-    @Session() session: AuthSession,
-    @Body() body: ProposeLabelRecommendationBlocklistPatternRequestDto
-  ) {
-    return this.proposeBlocklistPattern.execute(session.user.id, body.phrases);
   }
 
   @Post('recommendation-blocklist/patterns')

@@ -11,7 +11,6 @@ export const FEATURE_FLAG_DB_KEYS: Record<FeatureFlagKey, string> = {
   answerAbstention: 'answer_abstention',
   learnedValueTypes: 'learned_value_types',
   layoutKeyValueRoles: 'layout_key_value_roles',
-  localChatModel: 'local_chat_model',
 };
 
 export const FEATURE_FLAG_KEYS_ORDERED: FeatureFlagKey[] = [
@@ -23,7 +22,6 @@ export const FEATURE_FLAG_KEYS_ORDERED: FeatureFlagKey[] = [
   'answerAbstention',
   'learnedValueTypes',
   'layoutKeyValueRoles',
-  'localChatModel',
 ];
 
 export function mergeFeatureFlags(

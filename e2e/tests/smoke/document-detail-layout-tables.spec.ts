@@ -32,13 +32,6 @@ test.describe('document detail layout tables', () => {
     await page.locator('.layout-workspace').waitFor({ state: 'visible', timeout: 120_000 });
     await page.locator('.pdf-page-canvas').first().waitFor({ state: 'visible', timeout: 180_000 });
 
-    const chatSideTab = page.locator('.layout-side-tabs').getByRole('tab', { name: /^Chat$/i });
-    if (
-      (await chatSideTab.count()) > 0 &&
-      (await chatSideTab.getAttribute('aria-selected')) === 'true'
-    ) {
-      await chatSideTab.click();
-    }
     await page.locator('.layout-side-tabs').waitFor({ state: 'visible', timeout: 120_000 });
     await page.getByRole('tab', { name: /Tables|Tabellen/i }).click();
     const dataTable = page.locator('.layout-data-table');

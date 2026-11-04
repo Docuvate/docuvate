@@ -7,7 +7,6 @@ import { Avatar } from '../components/ui/Avatar';
 import { Banner } from '../components/ui/Banner';
 import { Breadcrumb } from '../components/ui/Breadcrumb';
 import { Button } from '../components/ui/Button';
-import { ChatMessage } from '../components/ui/ChatMessage';
 import { Checkbox } from '../components/ui/Checkbox';
 import { Chip } from '../components/ui/Chip';
 import { Confidence } from '../components/ui/Confidence';
@@ -71,7 +70,6 @@ export function DesignSystemShowcase() {
       <TabBar>
         <Tab active>{t('designSystem.showcase.tabDetails')}</Tab>
         <Tab>{t('designSystem.showcase.tabLabels')}</Tab>
-        <Tab>{t('designSystem.showcase.tabChat')}</Tab>
       </TabBar>
       <Pagination from={1} to={8} total={128} />
 
@@ -141,15 +139,6 @@ export function DesignSystemShowcase() {
           </>
         }
       />
-
-      <h3>{t('designSystem.showcase.chat')}</h3>
-      <ChatMessage messageRole="user">{t('designSystem.showcase.chatQuestion')}</ChatMessage>
-      <ChatMessage
-        messageRole="assistant"
-        sources={[{ label: t('designSystem.showcase.chatSource'), kind: 'page' }]}
-      >
-        {t('designSystem.showcase.chatAnswer')}
-      </ChatMessage>
 
       <h3>{t('designSystem.showcase.menu')}</h3>
       <div className="styles-menu-demo">

@@ -51,5 +51,4 @@ def test_allowed_keys_cover_defaults() -> None:
     manifest = load_manifest(default_manifest_path())
     allowed = allowed_load_keys(manifest)
     assert "intfloat/multilingual-e5-small" in allowed
-    assert "BAAI/bge-reranker-v2-m3-int8" in allowed
-    assert "qwen2.5:3b" in allowed
+    assert "BAAI/bge-reranker-v2-m3-int8" not in allowed

@@ -278,32 +278,3 @@ export function throwApiRequestError(
 export function notifyApiRequestSucceeded(): void {
   markApiRequestSucceeded();
 }
-
-const CHAT_GENERATION_ERROR_KEYS: Record<string, string> = {
-  generation_timeout: 'documents.documentChat.errorTimeout',
-  cancelled: 'documents.documentChat.errorCancelled',
-  ollama_error: 'documents.documentChat.errorOllama',
-  worker_unreachable: 'documents.documentChat.errorWorkerUnreachable',
-  provider_unavailable: 'documents.documentChat.errorProviderUnavailable',
-  unknown: 'documents.documentChat.errorGeneric',
-};
-
-export function toUserFacingChatGenerationError(
-  errorCode: string | null | undefined,
-  options?: { log?: boolean }
-): UserFacingError {
-  const normalized = errorCode?.trim() ?? 'unknown';
-  const i18nKey = CHAT_GENERATION_ERROR_KEYS[normalized] ?? CHAT_GENERATION_ERROR_KEYS.unknown;
-  if (options?.log && normalized !== 'unknown') {
-    console.warn('[api]', 'chatGeneration', { errorCode: normalized, i18nKey });
-  }
-  return {
-    i18nKey,
-    retryable: normalized !== 'cancelled',
-  };
-}
-
-export function formatChatGenerationError(errorCode: string | null | undefined): string {
-  const facing = toUserFacingChatGenerationError(errorCode, { log: true });
-  return i18n.t(facing.i18nKey, facing.params ?? {});
-}

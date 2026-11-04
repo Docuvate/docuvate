@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 /**
- * Smoke profile seeder: upload synthetic fixtures, wait for pipeline, run cited-chat checks.
- * CPU-only stack (no Ollama); uses extractive cited-chat fallback.
+ * Smoke profile seeder: upload synthetic fixtures, wait for pipeline, run label/field/duplicate checks.
  */
 import { readFileSync, readdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -105,112 +104,6 @@ async function uploadFixture(cookie, fixture) {
   }
   const doc = await waitDocumentPipeline(cookie, created.id);
   return { ...doc, ...patch, id: created.id };
-}
-
-async function createThread(cookie) {
-  const out = await api(cookie, 'POST', '/v1/chat/threads', { title: 'smoke bench' });
-  return out.thread.id;
-}
-
-async function sendAndStream(cookie, threadId, message) {
-  const posted = await api(cookie, 'POST', `/v1/chat/threads/${threadId}/messages`, { message });
-  const messageId = posted.assistantMessage.id;
-  const headers = { origin: WEB_ORIGIN, cookie: cookie.split(';')[0] };
-  const res = await fetch(
-    `${AUTH_BASE}/v1/chat/threads/${threadId}/messages/${messageId}/stream`,
-    { headers }
-  );
-  if (!res.ok) {
-    throw new Error(`stream ${res.status}: ${await res.text()}`);
-  }
-  let finalContent = '';
-  let generationStatus = '';
-  const reader = res.body.getReader();
-  const decoder = new TextDecoder();
-  let buffer = '';
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) {
-      break;
-    }
-    buffer += decoder.decode(value, { stream: true });
-    const lines = buffer.split('\n');
-    buffer = lines.pop() ?? '';
-    for (const line of lines) {
-      if (!line.startsWith('data:')) {
-        continue;
-      }
-      const event = JSON.parse(line.slice(5).trim());
-      const msg = event.message ?? {};
-      if (msg.content) {
-        finalContent = String(msg.content);
-      }
-      if (event.type === 'done') {
-        generationStatus = String(msg.generationStatus ?? 'done');
-      }
-      if (msg.generationStatus === 'error') {
-        throw new Error(`chat generation error: ${msg.errorDetail ?? finalContent}`);
-      }
-    }
-  }
-  const messages = await api(cookie, 'GET', `/v1/chat/threads/${threadId}/messages`);
-  const finalMsg = messages.messages.find((m) => m.id === messageId) ?? {};
-  const citations = finalMsg.citations ?? [];
-  return {
-    generationStatus,
-    content: String(finalMsg.content ?? finalContent),
-    citations,
-  };
-}
-
-function citationTitles(citations) {
-  return citations.map((c) => c.documentTitle ?? c.documentId ?? '');
-}
-
-async function runChatChecks(cookie) {
-  let threadId = await createThread(cookie);
-  const results = [];
-  for (const check of manifest.chatChecks) {
-    if (check.newThread) {
-      threadId = await createThread(cookie);
-    }
-    const out = await sendAndStream(cookie, threadId, check.question);
-    const lower = out.content.toLowerCase();
-    const abstained = lower.includes(ABSTENTION_SNIPPET);
-    const titles = citationTitles(out.citations);
-    let ok = true;
-    if (check.expectAbstention) {
-      ok = abstained && out.citations.length === 0;
-    } else {
-      ok = !abstained && out.generationStatus !== 'error';
-      if (check.expectCitationTitleContains) {
-        ok =
-          ok &&
-          titles.some((t) =>
-            t.toLowerCase().includes(String(check.expectCitationTitleContains).toLowerCase())
-          );
-      }
-      if (check.expectMinCitations != null) {
-        ok = ok && out.citations.length >= check.expectMinCitations;
-      }
-      if (check.expectAnswerContainsAny) {
-        ok =
-          ok &&
-          check.expectAnswerContainsAny.some((needle) =>
-            out.content.toLowerCase().includes(String(needle).toLowerCase())
-          );
-      }
-    }
-    results.push({ id: check.id, ok, citations: out.citations.length, preview: out.content.slice(0, 120) });
-    if (!ok) {
-      console.error('Chat check failed', check.id, out);
-    }
-  }
-  const failed = results.filter((r) => !r.ok);
-  if (failed.length > 0) {
-    throw new Error(`Smoke chat checks failed: ${JSON.stringify(failed)}`);
-  }
-  console.log('Smoke chat checks passed:', results.map((r) => r.id).join(', '));
 }
 
 async function runDuplicateSmokeCheck(cookie, docsByTitle) {
@@ -432,7 +325,6 @@ async function main() {
   await runHeaderDateAdoptionCheck(cookie, docsByTitle);
   await runLabelExclusivityCheck(cookie, docsByTitle);
   await runPayrollFieldLearning(cookie, docsByTitle);
-  await runChatChecks(cookie);
   console.log('Smoke seed-and-verify OK');
 }
 

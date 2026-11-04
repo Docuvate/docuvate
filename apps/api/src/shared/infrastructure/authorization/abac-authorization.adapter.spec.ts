@@ -66,7 +66,7 @@ describe('AbacAuthorizationAdapter', () => {
 
   it('requires explicit claims for service principals', async () => {
     await expect(
-      adapter.authorize({ subject: serviceRead, action: 'document:chat', resource })
+      adapter.authorize({ subject: serviceRead, action: 'document:write', resource })
     ).resolves.toBe('deny');
     await expect(
       adapter.authorize({ subject: serviceRead, action: 'document:read', resource })

@@ -13,30 +13,19 @@ part 'update_user_settings_request_dto.g.dart';
 ///
 /// Properties:
 /// * [preferredExtractorEngine] 
-/// * [preferredChatProvider] 
 /// * [useArenaWinnerAsDefault] 
-/// * [labelFieldConfidenceThreshold] 
 /// * [fieldExtractionConfidenceGateEnabled] 
 /// * [fieldExtractionRequiredLabelIds] 
 /// * [advancedFeaturesEnabled] 
-/// * [fuzzyDuplicateDetectionEnabled] 
 /// * [themePreference] 
 /// * [locale] 
-/// * [documentChatCloudBaseUrl] 
-/// * [documentChatCloudApiKey] 
 @BuiltValue()
 abstract class UpdateUserSettingsRequestDto implements Built<UpdateUserSettingsRequestDto, UpdateUserSettingsRequestDtoBuilder> {
   @BuiltValueField(wireName: r'preferredExtractorEngine')
   String? get preferredExtractorEngine;
 
-  @BuiltValueField(wireName: r'preferredChatProvider')
-  String? get preferredChatProvider;
-
   @BuiltValueField(wireName: r'useArenaWinnerAsDefault')
   bool? get useArenaWinnerAsDefault;
-
-  @BuiltValueField(wireName: r'labelFieldConfidenceThreshold')
-  num? get labelFieldConfidenceThreshold;
 
   @BuiltValueField(wireName: r'fieldExtractionConfidenceGateEnabled')
   bool? get fieldExtractionConfidenceGateEnabled;
@@ -47,9 +36,6 @@ abstract class UpdateUserSettingsRequestDto implements Built<UpdateUserSettingsR
   @BuiltValueField(wireName: r'advancedFeaturesEnabled')
   bool? get advancedFeaturesEnabled;
 
-  @BuiltValueField(wireName: r'fuzzyDuplicateDetectionEnabled')
-  bool? get fuzzyDuplicateDetectionEnabled;
-
   @BuiltValueField(wireName: r'themePreference')
   UpdateUserSettingsRequestDtoThemePreferenceEnum? get themePreference;
   // enum themePreferenceEnum {  light,  dark,  system,  };
@@ -57,12 +43,6 @@ abstract class UpdateUserSettingsRequestDto implements Built<UpdateUserSettingsR
   @BuiltValueField(wireName: r'locale')
   UpdateUserSettingsRequestDtoLocaleEnum? get locale;
   // enum localeEnum {  de,  en,  };
-
-  @BuiltValueField(wireName: r'documentChatCloudBaseUrl')
-  String? get documentChatCloudBaseUrl;
-
-  @BuiltValueField(wireName: r'documentChatCloudApiKey')
-  String? get documentChatCloudApiKey;
 
   UpdateUserSettingsRequestDto._();
 
@@ -94,25 +74,11 @@ class _$UpdateUserSettingsRequestDtoSerializer implements PrimitiveSerializer<Up
         specifiedType: const FullType(String),
       );
     }
-    if (object.preferredChatProvider != null) {
-      yield r'preferredChatProvider';
-      yield serializers.serialize(
-        object.preferredChatProvider,
-        specifiedType: const FullType(String),
-      );
-    }
     if (object.useArenaWinnerAsDefault != null) {
       yield r'useArenaWinnerAsDefault';
       yield serializers.serialize(
         object.useArenaWinnerAsDefault,
         specifiedType: const FullType(bool),
-      );
-    }
-    if (object.labelFieldConfidenceThreshold != null) {
-      yield r'labelFieldConfidenceThreshold';
-      yield serializers.serialize(
-        object.labelFieldConfidenceThreshold,
-        specifiedType: const FullType(num),
       );
     }
     if (object.fieldExtractionConfidenceGateEnabled != null) {
@@ -136,13 +102,6 @@ class _$UpdateUserSettingsRequestDtoSerializer implements PrimitiveSerializer<Up
         specifiedType: const FullType(bool),
       );
     }
-    if (object.fuzzyDuplicateDetectionEnabled != null) {
-      yield r'fuzzyDuplicateDetectionEnabled';
-      yield serializers.serialize(
-        object.fuzzyDuplicateDetectionEnabled,
-        specifiedType: const FullType(bool),
-      );
-    }
     if (object.themePreference != null) {
       yield r'themePreference';
       yield serializers.serialize(
@@ -155,20 +114,6 @@ class _$UpdateUserSettingsRequestDtoSerializer implements PrimitiveSerializer<Up
       yield serializers.serialize(
         object.locale,
         specifiedType: const FullType(UpdateUserSettingsRequestDtoLocaleEnum),
-      );
-    }
-    if (object.documentChatCloudBaseUrl != null) {
-      yield r'documentChatCloudBaseUrl';
-      yield serializers.serialize(
-        object.documentChatCloudBaseUrl,
-        specifiedType: const FullType(String),
-      );
-    }
-    if (object.documentChatCloudApiKey != null) {
-      yield r'documentChatCloudApiKey';
-      yield serializers.serialize(
-        object.documentChatCloudApiKey,
-        specifiedType: const FullType(String),
       );
     }
   }
@@ -201,26 +146,12 @@ class _$UpdateUserSettingsRequestDtoSerializer implements PrimitiveSerializer<Up
           ) as String;
           result.preferredExtractorEngine = valueDes;
           break;
-        case r'preferredChatProvider':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(String),
-          ) as String;
-          result.preferredChatProvider = valueDes;
-          break;
         case r'useArenaWinnerAsDefault':
           final valueDes = serializers.deserialize(
             value,
             specifiedType: const FullType(bool),
           ) as bool;
           result.useArenaWinnerAsDefault = valueDes;
-          break;
-        case r'labelFieldConfidenceThreshold':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(num),
-          ) as num;
-          result.labelFieldConfidenceThreshold = valueDes;
           break;
         case r'fieldExtractionConfidenceGateEnabled':
           final valueDes = serializers.deserialize(
@@ -243,13 +174,6 @@ class _$UpdateUserSettingsRequestDtoSerializer implements PrimitiveSerializer<Up
           ) as bool;
           result.advancedFeaturesEnabled = valueDes;
           break;
-        case r'fuzzyDuplicateDetectionEnabled':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(bool),
-          ) as bool;
-          result.fuzzyDuplicateDetectionEnabled = valueDes;
-          break;
         case r'themePreference':
           final valueDes = serializers.deserialize(
             value,
@@ -263,20 +187,6 @@ class _$UpdateUserSettingsRequestDtoSerializer implements PrimitiveSerializer<Up
             specifiedType: const FullType(UpdateUserSettingsRequestDtoLocaleEnum),
           ) as UpdateUserSettingsRequestDtoLocaleEnum;
           result.locale = valueDes;
-          break;
-        case r'documentChatCloudBaseUrl':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(String),
-          ) as String;
-          result.documentChatCloudBaseUrl = valueDes;
-          break;
-        case r'documentChatCloudApiKey':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(String),
-          ) as String;
-          result.documentChatCloudApiKey = valueDes;
           break;
         default:
           unhandled.add(key);

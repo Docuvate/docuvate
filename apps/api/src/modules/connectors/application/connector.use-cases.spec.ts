@@ -42,7 +42,6 @@ function flags(overrides: Partial<FeatureFlagsDto>): FeatureFlagsDto {
     answerAbstention: false,
     learnedValueTypes: true,
     layoutKeyValueRoles: false,
-    localChatModel: false,
     ...overrides,
   };
 }

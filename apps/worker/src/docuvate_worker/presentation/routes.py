@@ -7,11 +7,6 @@ import os
 
 from fastapi import APIRouter, Header, HTTPException, Request
 
-from docuvate_worker.application.document_chat import (
-    DocumentChatError,
-    chat_on_document,
-    chat_provider_status,
-)
 from docuvate_worker.application.embedding import embed_texts
 from docuvate_worker.application.embedding_density import (
     classify_embedding,
@@ -30,16 +25,6 @@ from docuvate_worker.domain.representation.encode import encode_units
 from docuvate_worker.domain.representation.units import (
     RepresentationUnit,
     paragraph_units_from_text,
-)
-from docuvate_worker.infrastructure.chat.context_qa import (
-    extractive_answer_from_passages,
-    retrieve_document_rag_context,
-)
-from docuvate_worker.infrastructure.chat.rag_rerank import (
-    RERANKER_MODEL,
-    RagPassage,
-    rerank_passages,
-    reranker_status,
 )
 from docuvate_worker.infrastructure.extract_memory.admission import admission_retry_after_seconds
 from docuvate_worker.infrastructure.extract_memory.extract_active import cancel_active_extract
@@ -94,12 +79,6 @@ from docuvate_worker.presentation.schemas import (
     CompareEngineResponse,
     CompareRequest,
     CompareResponse,
-    DocumentChatProviderInfo,
-    DocumentChatProviderListResponse,
-    DocumentChatRagContextRequest,
-    DocumentChatRagContextResponse,
-    DocumentChatRequest,
-    DocumentChatResponse,
     DocumentRepresentationModel,
     EmbeddingDensityCalibrateRequest,
     EmbeddingDensityCalibrateResponse,
@@ -139,11 +118,6 @@ from docuvate_worker.presentation.schemas import (
     MlResolvedModelResponse,
     MlRetrainRunRequest,
     MlRetrainRunResponse,
-    RagExtractiveAnswerRequest,
-    RagExtractiveAnswerResponse,
-    RagRetrieveRequest,
-    RagRetrieveResponse,
-    RagRetrieveResultItem,
     RepresentationFromTextRequest,
     SmartDuplicateCandidateModel,
     SmartDuplicatesDetectRequest,
@@ -186,17 +160,7 @@ async def health_capacity() -> ExtractCapacityResponse:
 
 
 @router.get("/health/ready", response_model=HealthResponse)
-def health_ready() -> HealthResponse:
-    status = reranker_status()
-    if status.get("available") and not status.get("loaded"):
-        from docuvate_worker.infrastructure.chat.rag_rerank import (  # noqa: PLC0415
-            ensure_reranker_loaded,
-        )
-
-        ensure_reranker_loaded()
-        status = reranker_status()
-    if not status.get("available"):
-        return HealthResponse(status="degraded")
+async def health_ready() -> HealthResponse:
     return HealthResponse(status="ok")
 
 
@@ -458,113 +422,6 @@ def extract_compare(
             for row in run.items
         ],
     )
-
-
-@router.get("/document-chat/providers", response_model=DocumentChatProviderListResponse)
-def list_document_chat_providers(
-    x_worker_secret: str | None = Header(default=None, alias="X-Worker-Secret"),
-) -> DocumentChatProviderListResponse:
-    _require_worker_secret(x_worker_secret)
-    return DocumentChatProviderListResponse(
-        providers=[
-            DocumentChatProviderInfo(
-                id=str(p["id"]),
-                label=str(p["label"]),
-                description=str(p["description"]),
-                available=bool(p["available"]),
-            )
-            for p in chat_provider_status()
-        ]
-    )
-
-
-@router.post("/rag/retrieve", response_model=RagRetrieveResponse)
-def rag_retrieve(
-    body: RagRetrieveRequest,
-    x_worker_secret: str | None = Header(default=None, alias="X-Worker-Secret"),
-) -> RagRetrieveResponse:
-    _require_worker_secret(x_worker_secret)
-    passages = [RagPassage(id=p.id, text=p.text) for p in body.passages]
-    ranked, reranker_used = rerank_passages(body.query, passages, top_k=4)
-    return RagRetrieveResponse(
-        results=[RagRetrieveResultItem(id=r.id, score=r.score) for r in ranked],
-        reranker_used=reranker_used,
-        reranker_model=RERANKER_MODEL if reranker_used else None,
-    )
-
-
-@router.post("/rag/extractive-answer", response_model=RagExtractiveAnswerResponse)
-def rag_extractive_answer(
-    body: RagExtractiveAnswerRequest,
-    x_worker_secret: str | None = Header(default=None, alias="X-Worker-Secret"),
-) -> RagExtractiveAnswerResponse:
-    _require_worker_secret(x_worker_secret)
-    pairs = [(p.id, p.text) for p in body.passages]
-    result = extractive_answer_from_passages(body.query, pairs)
-    if result is None:
-        return RagExtractiveAnswerResponse()
-    return RagExtractiveAnswerResponse(
-        passage_id=result.passage_id,
-        answer=result.answer,
-        quote=result.quote,
-    )
-
-
-@router.post("/document-chat/rag-context", response_model=DocumentChatRagContextResponse)
-def document_chat_rag_context(
-    body: DocumentChatRagContextRequest,
-    x_worker_secret: str | None = Header(default=None, alias="X-Worker-Secret"),
-) -> DocumentChatRagContextResponse:
-    _require_worker_secret(x_worker_secret)
-    result = retrieve_document_rag_context(
-        body.message,
-        title=body.title,
-        filename=body.filename,
-        text=body.text,
-        fields=[{"key": f.key, "value": f.value} for f in body.fields],
-    )
-    return DocumentChatRagContextResponse(context_text=result.context_text, chunks=result.chunks)
-
-
-@router.post("/document-chat", response_model=DocumentChatResponse)
-def document_chat(
-    body: DocumentChatRequest,
-    x_worker_secret: str | None = Header(default=None, alias="X-Worker-Secret"),
-) -> DocumentChatResponse:
-    _require_worker_secret(x_worker_secret)
-
-    raw: bytes | None = None
-    if body.content_base64:
-        raw = _decode_content(body.content_base64)
-
-    try:
-        reply, configured, provider = chat_on_document(
-            provider=body.provider,
-            message=body.message,
-            title=body.title,
-            filename=body.filename,
-            text=body.text,
-            fields=[{"key": f.key, "value": f.value} for f in body.fields],
-            raw=raw,
-            mime_type=body.mime_type,
-        )
-    except DocumentChatError as exc:
-        return DocumentChatResponse(
-            reply=str(exc),
-            configured=exc.configured,
-            provider=body.provider,
-        )
-    except Exception:
-        return DocumentChatResponse(
-            reply=(
-                "Der Dokument-Chat konnte Ihre Frage gerade nicht verarbeiten. "
-                "Bitte in Kürze erneut versuchen."
-            ),
-            configured=False,
-            provider=body.provider,
-        )
-
-    return DocumentChatResponse(reply=reply, configured=configured, provider=provider)
 
 
 @router.post("/ml/embedding-density/classify", response_model=EmbeddingDensityClassifyResponse)

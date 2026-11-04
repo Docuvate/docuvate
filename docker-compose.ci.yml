@@ -1,13 +1,5 @@
-# CI compose-smoke: skip Ollama model pull; worker stays up for PDF extraction E2E.
+# CI compose-smoke: worker stays up for PDF extraction E2E.
 services:
-  ollama:
-    profiles: [ci-heavy]
-
-  ollama-init:
-    image: alpine:3.20
-    entrypoint: ['sh', '-c', 'exit 0']
-    depends_on: !reset []
-
   db-storage-guard:
     pull_policy: build
 
@@ -19,8 +11,6 @@ services:
     environment:
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-docuvate-ci-compose-better-auth-signing-key-2026}
       DV_ALLOW_SIGNUP: 'true'
-      # Ollama is not started in compose-smoke; avoid ~4s DNS/connect stalls on settings.
-      OLLAMA_URL: ''
       WORKER_DEPENDENCY_TIMEOUT_MS: '2500'
       # Smoke profile may exercise layout compare UI (tenant resolves via env default).
       DOCUVATE_FEATURE_LAYOUT_RECONSTRUCTION_COMPARE: 'true'

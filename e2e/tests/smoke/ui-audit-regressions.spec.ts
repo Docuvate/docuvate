@@ -4,7 +4,7 @@ import {
   openLayoutAdvancedCompare,
   openLayoutDocumentPage,
   uploadLayoutTableDocument,
-} from '../../helpers/layout-chat-fixture';
+} from '../../helpers/layout-document-fixture';
 import { smokeFixtureStoragePath } from '../../helpers/smoke-fixture-auth';
 
 const apiBase = process.env['E2E_API_URL'] ?? 'http://localhost:3001';

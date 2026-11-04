@@ -7,8 +7,7 @@ export type AuthorizationAction =
   | 'document:list'
   | 'document:write'
   | 'document:delete'
-  | 'document:content:read'
-  | 'document:chat';
+  | 'document:content:read';
 
 export type AuthorizationDecision = 'allow' | 'deny';
 

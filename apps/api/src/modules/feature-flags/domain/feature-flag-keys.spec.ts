@@ -14,7 +14,6 @@ describe('mergeFeatureFlags', () => {
     answerAbstention: false,
     learnedValueTypes: false,
     layoutKeyValueRoles: false,
-    localChatModel: false,
   };
 
   it('uses tenant override when present', () => {
@@ -28,12 +27,10 @@ describe('mergeFeatureFlags', () => {
   it('merges ML feature overrides', () => {
     const overrides = new Map([
       [FEATURE_FLAG_DB_KEYS.exactAnswers, true],
-      [FEATURE_FLAG_DB_KEYS.localChatModel, true],
     ]);
     expect(mergeFeatureFlags(defaults, overrides)).toEqual({
       ...defaults,
       exactAnswers: true,
-      localChatModel: true,
     });
   });
 

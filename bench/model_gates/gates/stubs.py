@@ -12,8 +12,6 @@ _STUBS: tuple[tuple[str, str], ...] = (
     ("tables", "Row/column F1 on balance-sheet fixture — PR 7"),
     ("ocr", "German scan CER gate — PR 8"),
     ("embeddings", "Recall@k on DE document retrieval — PR 3"),
-    ("reranker", "Recall@10 and MRR gate — PR 3"),
-    ("chat_llm", "Cited LLM chat accuracy/latency — PR 2"),
     ("duplicates", "Duplicate-pair precision — PR 9"),
 )
 

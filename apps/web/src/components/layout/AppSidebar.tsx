@@ -5,7 +5,6 @@ import {
   Folder,
   LayoutDashboard,
   ListChecks,
-  MessageSquare,
   Settings,
   Tags,
   X,
@@ -42,7 +41,6 @@ const primaryNav = [
     end: false as const,
     icon: 'documents' as const,
   },
-  { to: routes.globalChat, labelKey: 'nav.globalChat', end: true as const, icon: 'chat' as const },
   {
     to: routes.structureLabels,
     labelKey: 'nav.labels',
@@ -152,11 +150,6 @@ export function AppSidebar({ mobileDrawerOpen = false, onCloseMobileDrawer }: Ap
                 {icon === 'folders' ? (
                   <NavIcon>
                     <Folder size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE} />
-                  </NavIcon>
-                ) : null}
-                {icon === 'chat' ? (
-                  <NavIcon>
-                    <MessageSquare size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE} />
                   </NavIcon>
                 ) : null}
                 <span className="sidebar-link-label">{t(labelKey)}</span>

@@ -32,7 +32,6 @@ import {
   TAG_CUSTOM_FIELD_REPOSITORY,
   TAXONOMY_REPOSITORY,
 } from '../../domain/ports.js';
-import { DocumentChatModule } from '../chat/document-chat.module.js';
 import { UuidIdGenerator } from '../ids/uuid-id-generator.js';
 import { MinioObjectStorage } from '../storage/minio-object.storage.js';
 import { SystemClock } from '../time/system-clock.js';
@@ -55,7 +54,7 @@ const typeOrmRootImports =
 
 @Global()
 @Module({
-  imports: [...typeOrmRootImports, DocumentChatModule],
+  imports: [...typeOrmRootImports],
   providers: [
     {
       provide: PG_POOL,

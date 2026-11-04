@@ -4,7 +4,6 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { EMBEDDING_PORT, LABEL_EMBEDDING_REPOSITORY } from '../../shared/domain/ports.js';
-import { DocumentChatModule } from '../../shared/infrastructure/chat/document-chat.module.js';
 import { CorrectionEntity } from '../../shared/infrastructure/database/entities/correction.entity.js';
 import { CorrectionLabelAssignmentEntity } from '../../shared/infrastructure/database/entities/correction-label-assignment.entity.js';
 import { CorrectionPropagatedAssignmentEntity } from '../../shared/infrastructure/database/entities/correction-propagated-assignment.entity.js';
@@ -35,7 +34,6 @@ import { ApplySparkLabelPropagationUseCase } from './application/apply-spark-lab
 import { BackfillDocumentEmbeddingsUseCase } from './application/backfill-document-embeddings.use-case.js';
 import {
   ConfirmBlocklistPatternUseCase,
-  ProposeBlocklistPatternUseCase,
   RemoveBlocklistPatternUseCase,
 } from './application/blocklist-pattern.use-case.js';
 import {
@@ -108,7 +106,6 @@ const embeddingDensityTypeOrmImports = skipEmbeddingDensityTypeOrm
 
 @Module({
   imports: [
-    DocumentChatModule,
     SettingsModule,
     RecognizedFieldsModule,
     RepresentationModule,
@@ -129,7 +126,6 @@ const embeddingDensityTypeOrmImports = skipEmbeddingDensityTypeOrm
     ListRecommendationBlocklistUseCase,
     AddRecommendationBlocklistUseCase,
     RemoveRecommendationBlocklistUseCase,
-    ProposeBlocklistPatternUseCase,
     ConfirmBlocklistPatternUseCase,
     RemoveBlocklistPatternUseCase,
     ApplyLabelMatchingUseCase,

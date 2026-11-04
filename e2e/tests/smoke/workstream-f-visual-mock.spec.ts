@@ -26,7 +26,6 @@ const mockFeatureFlags = {
     answerAbstention: false,
     learnedValueTypes: true,
     layoutKeyValueRoles: false,
-    localChatModel: false,
   },
 };
 

@@ -36,7 +36,7 @@ abstract class MlRetrainJobDto implements Built<MlRetrainJobDto, MlRetrainJobDto
 
   @BuiltValueField(wireName: r'status')
   MlRetrainJobDtoStatusEnum get status;
-  // enum statusEnum {  queued,  failed,  cancelled,  running,  succeeded,  };
+  // enum statusEnum {  queued,  failed,  running,  cancelled,  succeeded,  };
 
   @BuiltValueField(wireName: r'trainingSnapshotId')
   String get trainingSnapshotId;
@@ -274,10 +274,10 @@ class MlRetrainJobDtoStatusEnum extends EnumClass {
   static const MlRetrainJobDtoStatusEnum queued = _$mlRetrainJobDtoStatusEnum_queued;
   @BuiltValueEnumConst(wireName: r'failed')
   static const MlRetrainJobDtoStatusEnum failed = _$mlRetrainJobDtoStatusEnum_failed;
-  @BuiltValueEnumConst(wireName: r'cancelled')
-  static const MlRetrainJobDtoStatusEnum cancelled = _$mlRetrainJobDtoStatusEnum_cancelled;
   @BuiltValueEnumConst(wireName: r'running')
   static const MlRetrainJobDtoStatusEnum running = _$mlRetrainJobDtoStatusEnum_running;
+  @BuiltValueEnumConst(wireName: r'cancelled')
+  static const MlRetrainJobDtoStatusEnum cancelled = _$mlRetrainJobDtoStatusEnum_cancelled;
   @BuiltValueEnumConst(wireName: r'succeeded')
   static const MlRetrainJobDtoStatusEnum succeeded = _$mlRetrainJobDtoStatusEnum_succeeded;
 

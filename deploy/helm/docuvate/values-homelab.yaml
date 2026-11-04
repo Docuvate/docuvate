@@ -13,9 +13,6 @@ postgres:
 minio:
   enabled: true
 
-ollama:
-  enabled: false
-
 mailpit:
   enabled: false
 

@@ -7,7 +7,6 @@ import {
   ApiRequestError,
   formatUserFacingError,
   looksLikeI18nKey,
-  toUserFacingChatGenerationError,
   toUserFacingError,
 } from './apiErrors';
 
@@ -80,24 +79,6 @@ describe('toUserFacingError', () => {
   it('uses context fallback when nothing matches', () => {
     const facing = toUserFacingError(new Error('mystery'), 'errors.settingsLoadFailed');
     expect(facing.i18nKey).toBe('errors.settingsLoadFailed');
-  });
-});
-
-describe('toUserFacingChatGenerationError', () => {
-  beforeEach(async () => {
-    await i18n.changeLanguage('de');
-    vi.spyOn(console, 'warn').mockImplementation(() => undefined);
-  });
-
-  it('maps ollama_error', () => {
-    const facing = toUserFacingChatGenerationError('ollama_error');
-    expect(facing.i18nKey).toBe('documents.documentChat.errorOllama');
-    expect(facing.retryable).toBe(true);
-  });
-
-  it('marks cancelled as not retryable', () => {
-    const facing = toUserFacingChatGenerationError('cancelled');
-    expect(facing.retryable).toBe(false);
   });
 });
 

@@ -40,10 +40,10 @@ const MlRetrainJobDtoStatusEnum _$mlRetrainJobDtoStatusEnum_queued =
     const MlRetrainJobDtoStatusEnum._('queued');
 const MlRetrainJobDtoStatusEnum _$mlRetrainJobDtoStatusEnum_failed =
     const MlRetrainJobDtoStatusEnum._('failed');
-const MlRetrainJobDtoStatusEnum _$mlRetrainJobDtoStatusEnum_cancelled =
-    const MlRetrainJobDtoStatusEnum._('cancelled');
 const MlRetrainJobDtoStatusEnum _$mlRetrainJobDtoStatusEnum_running =
     const MlRetrainJobDtoStatusEnum._('running');
+const MlRetrainJobDtoStatusEnum _$mlRetrainJobDtoStatusEnum_cancelled =
+    const MlRetrainJobDtoStatusEnum._('cancelled');
 const MlRetrainJobDtoStatusEnum _$mlRetrainJobDtoStatusEnum_succeeded =
     const MlRetrainJobDtoStatusEnum._('succeeded');
 
@@ -53,10 +53,10 @@ MlRetrainJobDtoStatusEnum _$mlRetrainJobDtoStatusEnumValueOf(String name) {
       return _$mlRetrainJobDtoStatusEnum_queued;
     case 'failed':
       return _$mlRetrainJobDtoStatusEnum_failed;
-    case 'cancelled':
-      return _$mlRetrainJobDtoStatusEnum_cancelled;
     case 'running':
       return _$mlRetrainJobDtoStatusEnum_running;
+    case 'cancelled':
+      return _$mlRetrainJobDtoStatusEnum_cancelled;
     case 'succeeded':
       return _$mlRetrainJobDtoStatusEnum_succeeded;
     default:
@@ -68,8 +68,8 @@ final BuiltSet<MlRetrainJobDtoStatusEnum> _$mlRetrainJobDtoStatusEnumValues =
     new BuiltSet<MlRetrainJobDtoStatusEnum>(const <MlRetrainJobDtoStatusEnum>[
   _$mlRetrainJobDtoStatusEnum_queued,
   _$mlRetrainJobDtoStatusEnum_failed,
-  _$mlRetrainJobDtoStatusEnum_cancelled,
   _$mlRetrainJobDtoStatusEnum_running,
+  _$mlRetrainJobDtoStatusEnum_cancelled,
   _$mlRetrainJobDtoStatusEnum_succeeded,
 ]);
 
@@ -116,15 +116,15 @@ class _$MlRetrainJobDtoStatusEnumSerializer
   static const Map<String, Object> _toWire = const <String, Object>{
     'queued': 'queued',
     'failed': 'failed',
-    'cancelled': 'cancelled',
     'running': 'running',
+    'cancelled': 'cancelled',
     'succeeded': 'succeeded',
   };
   static const Map<Object, String> _fromWire = const <Object, String>{
     'queued': 'queued',
     'failed': 'failed',
-    'cancelled': 'cancelled',
     'running': 'running',
+    'cancelled': 'cancelled',
     'succeeded': 'succeeded',
   };
 

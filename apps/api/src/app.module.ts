@@ -5,7 +5,6 @@ import { Module } from '@nestjs/common';
 import { AdminModule } from './modules/admin/admin.module.js';
 import { AuthInvitationsModule } from './modules/auth/auth-invitations.module.js';
 import { AuthPublicModule } from './modules/auth/auth-public.module.js';
-import { ChatModule } from './modules/chat/chat.module.js';
 import { ConnectorsModule } from './modules/connectors/connectors.module.js';
 import { DocumentPipelineModule } from './modules/document-pipeline/document-pipeline.module.js';
 import { DocumentRegionsModule } from './modules/document-regions/document-regions.module.js';
@@ -57,7 +56,6 @@ import { ExtensionHostModule } from './shared/infrastructure/extensions/extensio
     AuthInvitationsModule,
     WorkspaceModule,
     SftpIngressModule,
-    ChatModule,
   ],
 })
 // Nest requires a module class token; this module has no instance state.

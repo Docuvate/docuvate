@@ -11,7 +11,6 @@ sed -i "s/^appVersion: .*/appVersion: \"${VERSION}\"/" "$ROOT/deploy/helm/docuva
 sed -i "s/newTag: \".*\"/newTag: \"${VERSION}\"/g" "$ROOT/deploy/kustomize/base/kustomization.yaml"
 sed -i "s/name: docuvate-db-migrate-.*/name: docuvate-db-migrate-${SUFFIX}/" "$ROOT/deploy/kustomize/base/jobs/db-migrate.yaml"
 sed -i "s/name: docuvate-minio-init-.*/name: docuvate-minio-init-${SUFFIX}/" "$ROOT/deploy/kustomize/components/minio/job-init-bucket.yaml"
-sed -i "s/name: docuvate-ollama-init-.*/name: docuvate-ollama-init-${SUFFIX}/" "$ROOT/deploy/kustomize/components/ollama/job-pull-model.yaml"
 for patch in homelab dev; do
   f="$ROOT/deploy/kustomize/overlays/${patch}/patch-db-migrate-wait.yaml"
   if [[ -f "$f" ]]; then

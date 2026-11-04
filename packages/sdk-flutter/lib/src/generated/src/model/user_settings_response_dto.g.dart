@@ -6,44 +6,6 @@ part of 'user_settings_response_dto.dart';
 // BuiltValueGenerator
 // **************************************************************************
 
-const UserSettingsResponseDtoDocumentChatReadinessEnum
-    _$userSettingsResponseDtoDocumentChatReadinessEnum_ready =
-    const UserSettingsResponseDtoDocumentChatReadinessEnum._('ready');
-const UserSettingsResponseDtoDocumentChatReadinessEnum
-    _$userSettingsResponseDtoDocumentChatReadinessEnum_off =
-    const UserSettingsResponseDtoDocumentChatReadinessEnum._('off');
-const UserSettingsResponseDtoDocumentChatReadinessEnum
-    _$userSettingsResponseDtoDocumentChatReadinessEnum_unavailable =
-    const UserSettingsResponseDtoDocumentChatReadinessEnum._('unavailable');
-const UserSettingsResponseDtoDocumentChatReadinessEnum
-    _$userSettingsResponseDtoDocumentChatReadinessEnum_starting =
-    const UserSettingsResponseDtoDocumentChatReadinessEnum._('starting');
-
-UserSettingsResponseDtoDocumentChatReadinessEnum
-    _$userSettingsResponseDtoDocumentChatReadinessEnumValueOf(String name) {
-  switch (name) {
-    case 'ready':
-      return _$userSettingsResponseDtoDocumentChatReadinessEnum_ready;
-    case 'off':
-      return _$userSettingsResponseDtoDocumentChatReadinessEnum_off;
-    case 'unavailable':
-      return _$userSettingsResponseDtoDocumentChatReadinessEnum_unavailable;
-    case 'starting':
-      return _$userSettingsResponseDtoDocumentChatReadinessEnum_starting;
-    default:
-      throw new ArgumentError(name);
-  }
-}
-
-final BuiltSet<UserSettingsResponseDtoDocumentChatReadinessEnum>
-    _$userSettingsResponseDtoDocumentChatReadinessEnumValues = new BuiltSet<
-        UserSettingsResponseDtoDocumentChatReadinessEnum>(const <UserSettingsResponseDtoDocumentChatReadinessEnum>[
-  _$userSettingsResponseDtoDocumentChatReadinessEnum_ready,
-  _$userSettingsResponseDtoDocumentChatReadinessEnum_off,
-  _$userSettingsResponseDtoDocumentChatReadinessEnum_unavailable,
-  _$userSettingsResponseDtoDocumentChatReadinessEnum_starting,
-]);
-
 const UserSettingsResponseDtoThemePreferenceEnum
     _$userSettingsResponseDtoThemePreferenceEnum_light =
     const UserSettingsResponseDtoThemePreferenceEnum._('light');
@@ -100,52 +62,12 @@ final BuiltSet<UserSettingsResponseDtoLocaleEnum>
   _$userSettingsResponseDtoLocaleEnum_en,
 ]);
 
-Serializer<UserSettingsResponseDtoDocumentChatReadinessEnum>
-    _$userSettingsResponseDtoDocumentChatReadinessEnumSerializer =
-    new _$UserSettingsResponseDtoDocumentChatReadinessEnumSerializer();
 Serializer<UserSettingsResponseDtoThemePreferenceEnum>
     _$userSettingsResponseDtoThemePreferenceEnumSerializer =
     new _$UserSettingsResponseDtoThemePreferenceEnumSerializer();
 Serializer<UserSettingsResponseDtoLocaleEnum>
     _$userSettingsResponseDtoLocaleEnumSerializer =
     new _$UserSettingsResponseDtoLocaleEnumSerializer();
-
-class _$UserSettingsResponseDtoDocumentChatReadinessEnumSerializer
-    implements
-        PrimitiveSerializer<UserSettingsResponseDtoDocumentChatReadinessEnum> {
-  static const Map<String, Object> _toWire = const <String, Object>{
-    'ready': 'ready',
-    'off': 'off',
-    'unavailable': 'unavailable',
-    'starting': 'starting',
-  };
-  static const Map<Object, String> _fromWire = const <Object, String>{
-    'ready': 'ready',
-    'off': 'off',
-    'unavailable': 'unavailable',
-    'starting': 'starting',
-  };
-
-  @override
-  final Iterable<Type> types = const <Type>[
-    UserSettingsResponseDtoDocumentChatReadinessEnum
-  ];
-  @override
-  final String wireName = 'UserSettingsResponseDtoDocumentChatReadinessEnum';
-
-  @override
-  Object serialize(Serializers serializers,
-          UserSettingsResponseDtoDocumentChatReadinessEnum object,
-          {FullType specifiedType = FullType.unspecified}) =>
-      _toWire[object.name] ?? object.name;
-
-  @override
-  UserSettingsResponseDtoDocumentChatReadinessEnum deserialize(
-          Serializers serializers, Object serialized,
-          {FullType specifiedType = FullType.unspecified}) =>
-      UserSettingsResponseDtoDocumentChatReadinessEnum.valueOf(
-          _fromWire[serialized] ?? (serialized is String ? serialized : ''));
-}
 
 class _$UserSettingsResponseDtoThemePreferenceEnumSerializer
     implements PrimitiveSerializer<UserSettingsResponseDtoThemePreferenceEnum> {
@@ -215,37 +137,11 @@ class _$UserSettingsResponseDto extends UserSettingsResponseDto {
   @override
   final String preferredExtractorEngine;
   @override
-  final String? preferredChatProvider;
-  @override
-  final String? effectiveChatProvider;
-  @override
-  final String? customerChatProvider;
-  @override
-  final bool? documentChatUiEnabled;
-  @override
-  final bool? documentChatAvailable;
-  @override
-  final UserSettingsResponseDtoDocumentChatReadinessEnum? documentChatReadiness;
-  @override
-  final String? documentChatReadinessReason;
-  @override
-  final String? documentChatOllamaModel;
-  @override
-  final bool? documentChatRunsOnCpu;
-  @override
-  final bool? documentChatLocalModelEnabled;
-  @override
-  final bool? documentChatLocalModelReady;
-  @override
   final bool? advancedFeaturesEnabled;
-  @override
-  final bool? fuzzyDuplicateDetectionEnabled;
   @override
   final bool useArenaWinnerAsDefault;
   @override
   final String? arenaWinnerEngine;
-  @override
-  final num? labelFieldConfidenceThreshold;
   @override
   final bool? fieldExtractionConfidenceGateEnabled;
   @override
@@ -254,10 +150,6 @@ class _$UserSettingsResponseDto extends UserSettingsResponseDto {
   final UserSettingsResponseDtoThemePreferenceEnum? themePreference;
   @override
   final UserSettingsResponseDtoLocaleEnum? locale;
-  @override
-  final String? documentChatCloudBaseUrl;
-  @override
-  final bool? documentChatCloudApiKeyConfigured;
 
   factory _$UserSettingsResponseDto(
           [void Function(UserSettingsResponseDtoBuilder)? updates]) =>
@@ -265,28 +157,13 @@ class _$UserSettingsResponseDto extends UserSettingsResponseDto {
 
   _$UserSettingsResponseDto._(
       {required this.preferredExtractorEngine,
-      this.preferredChatProvider,
-      this.effectiveChatProvider,
-      this.customerChatProvider,
-      this.documentChatUiEnabled,
-      this.documentChatAvailable,
-      this.documentChatReadiness,
-      this.documentChatReadinessReason,
-      this.documentChatOllamaModel,
-      this.documentChatRunsOnCpu,
-      this.documentChatLocalModelEnabled,
-      this.documentChatLocalModelReady,
       this.advancedFeaturesEnabled,
-      this.fuzzyDuplicateDetectionEnabled,
       required this.useArenaWinnerAsDefault,
       this.arenaWinnerEngine,
-      this.labelFieldConfidenceThreshold,
       this.fieldExtractionConfidenceGateEnabled,
       this.fieldExtractionRequiredLabelIds,
       this.themePreference,
-      this.locale,
-      this.documentChatCloudBaseUrl,
-      this.documentChatCloudApiKeyConfigured})
+      this.locale})
       : super._() {
     BuiltValueNullFieldError.checkNotNull(preferredExtractorEngine,
         r'UserSettingsResponseDto', 'preferredExtractorEngine');
@@ -308,60 +185,28 @@ class _$UserSettingsResponseDto extends UserSettingsResponseDto {
     if (identical(other, this)) return true;
     return other is UserSettingsResponseDto &&
         preferredExtractorEngine == other.preferredExtractorEngine &&
-        preferredChatProvider == other.preferredChatProvider &&
-        effectiveChatProvider == other.effectiveChatProvider &&
-        customerChatProvider == other.customerChatProvider &&
-        documentChatUiEnabled == other.documentChatUiEnabled &&
-        documentChatAvailable == other.documentChatAvailable &&
-        documentChatReadiness == other.documentChatReadiness &&
-        documentChatReadinessReason == other.documentChatReadinessReason &&
-        documentChatOllamaModel == other.documentChatOllamaModel &&
-        documentChatRunsOnCpu == other.documentChatRunsOnCpu &&
-        documentChatLocalModelEnabled == other.documentChatLocalModelEnabled &&
-        documentChatLocalModelReady == other.documentChatLocalModelReady &&
         advancedFeaturesEnabled == other.advancedFeaturesEnabled &&
-        fuzzyDuplicateDetectionEnabled ==
-            other.fuzzyDuplicateDetectionEnabled &&
         useArenaWinnerAsDefault == other.useArenaWinnerAsDefault &&
         arenaWinnerEngine == other.arenaWinnerEngine &&
-        labelFieldConfidenceThreshold == other.labelFieldConfidenceThreshold &&
         fieldExtractionConfidenceGateEnabled ==
             other.fieldExtractionConfidenceGateEnabled &&
         fieldExtractionRequiredLabelIds ==
             other.fieldExtractionRequiredLabelIds &&
         themePreference == other.themePreference &&
-        locale == other.locale &&
-        documentChatCloudBaseUrl == other.documentChatCloudBaseUrl &&
-        documentChatCloudApiKeyConfigured ==
-            other.documentChatCloudApiKeyConfigured;
+        locale == other.locale;
   }
 
   @override
   int get hashCode {
     var _$hash = 0;
     _$hash = $jc(_$hash, preferredExtractorEngine.hashCode);
-    _$hash = $jc(_$hash, preferredChatProvider.hashCode);
-    _$hash = $jc(_$hash, effectiveChatProvider.hashCode);
-    _$hash = $jc(_$hash, customerChatProvider.hashCode);
-    _$hash = $jc(_$hash, documentChatUiEnabled.hashCode);
-    _$hash = $jc(_$hash, documentChatAvailable.hashCode);
-    _$hash = $jc(_$hash, documentChatReadiness.hashCode);
-    _$hash = $jc(_$hash, documentChatReadinessReason.hashCode);
-    _$hash = $jc(_$hash, documentChatOllamaModel.hashCode);
-    _$hash = $jc(_$hash, documentChatRunsOnCpu.hashCode);
-    _$hash = $jc(_$hash, documentChatLocalModelEnabled.hashCode);
-    _$hash = $jc(_$hash, documentChatLocalModelReady.hashCode);
     _$hash = $jc(_$hash, advancedFeaturesEnabled.hashCode);
-    _$hash = $jc(_$hash, fuzzyDuplicateDetectionEnabled.hashCode);
     _$hash = $jc(_$hash, useArenaWinnerAsDefault.hashCode);
     _$hash = $jc(_$hash, arenaWinnerEngine.hashCode);
-    _$hash = $jc(_$hash, labelFieldConfidenceThreshold.hashCode);
     _$hash = $jc(_$hash, fieldExtractionConfidenceGateEnabled.hashCode);
     _$hash = $jc(_$hash, fieldExtractionRequiredLabelIds.hashCode);
     _$hash = $jc(_$hash, themePreference.hashCode);
     _$hash = $jc(_$hash, locale.hashCode);
-    _$hash = $jc(_$hash, documentChatCloudBaseUrl.hashCode);
-    _$hash = $jc(_$hash, documentChatCloudApiKeyConfigured.hashCode);
     _$hash = $jf(_$hash);
     return _$hash;
   }
@@ -370,32 +215,15 @@ class _$UserSettingsResponseDto extends UserSettingsResponseDto {
   String toString() {
     return (newBuiltValueToStringHelper(r'UserSettingsResponseDto')
           ..add('preferredExtractorEngine', preferredExtractorEngine)
-          ..add('preferredChatProvider', preferredChatProvider)
-          ..add('effectiveChatProvider', effectiveChatProvider)
-          ..add('customerChatProvider', customerChatProvider)
-          ..add('documentChatUiEnabled', documentChatUiEnabled)
-          ..add('documentChatAvailable', documentChatAvailable)
-          ..add('documentChatReadiness', documentChatReadiness)
-          ..add('documentChatReadinessReason', documentChatReadinessReason)
-          ..add('documentChatOllamaModel', documentChatOllamaModel)
-          ..add('documentChatRunsOnCpu', documentChatRunsOnCpu)
-          ..add('documentChatLocalModelEnabled', documentChatLocalModelEnabled)
-          ..add('documentChatLocalModelReady', documentChatLocalModelReady)
           ..add('advancedFeaturesEnabled', advancedFeaturesEnabled)
-          ..add(
-              'fuzzyDuplicateDetectionEnabled', fuzzyDuplicateDetectionEnabled)
           ..add('useArenaWinnerAsDefault', useArenaWinnerAsDefault)
           ..add('arenaWinnerEngine', arenaWinnerEngine)
-          ..add('labelFieldConfidenceThreshold', labelFieldConfidenceThreshold)
           ..add('fieldExtractionConfidenceGateEnabled',
               fieldExtractionConfidenceGateEnabled)
           ..add('fieldExtractionRequiredLabelIds',
               fieldExtractionRequiredLabelIds)
           ..add('themePreference', themePreference)
-          ..add('locale', locale)
-          ..add('documentChatCloudBaseUrl', documentChatCloudBaseUrl)
-          ..add('documentChatCloudApiKeyConfigured',
-              documentChatCloudApiKeyConfigured))
+          ..add('locale', locale))
         .toString();
   }
 }
@@ -410,76 +238,10 @@ class UserSettingsResponseDtoBuilder
   set preferredExtractorEngine(String? preferredExtractorEngine) =>
       _$this._preferredExtractorEngine = preferredExtractorEngine;
 
-  String? _preferredChatProvider;
-  String? get preferredChatProvider => _$this._preferredChatProvider;
-  set preferredChatProvider(String? preferredChatProvider) =>
-      _$this._preferredChatProvider = preferredChatProvider;
-
-  String? _effectiveChatProvider;
-  String? get effectiveChatProvider => _$this._effectiveChatProvider;
-  set effectiveChatProvider(String? effectiveChatProvider) =>
-      _$this._effectiveChatProvider = effectiveChatProvider;
-
-  String? _customerChatProvider;
-  String? get customerChatProvider => _$this._customerChatProvider;
-  set customerChatProvider(String? customerChatProvider) =>
-      _$this._customerChatProvider = customerChatProvider;
-
-  bool? _documentChatUiEnabled;
-  bool? get documentChatUiEnabled => _$this._documentChatUiEnabled;
-  set documentChatUiEnabled(bool? documentChatUiEnabled) =>
-      _$this._documentChatUiEnabled = documentChatUiEnabled;
-
-  bool? _documentChatAvailable;
-  bool? get documentChatAvailable => _$this._documentChatAvailable;
-  set documentChatAvailable(bool? documentChatAvailable) =>
-      _$this._documentChatAvailable = documentChatAvailable;
-
-  UserSettingsResponseDtoDocumentChatReadinessEnum? _documentChatReadiness;
-  UserSettingsResponseDtoDocumentChatReadinessEnum? get documentChatReadiness =>
-      _$this._documentChatReadiness;
-  set documentChatReadiness(
-          UserSettingsResponseDtoDocumentChatReadinessEnum?
-              documentChatReadiness) =>
-      _$this._documentChatReadiness = documentChatReadiness;
-
-  String? _documentChatReadinessReason;
-  String? get documentChatReadinessReason =>
-      _$this._documentChatReadinessReason;
-  set documentChatReadinessReason(String? documentChatReadinessReason) =>
-      _$this._documentChatReadinessReason = documentChatReadinessReason;
-
-  String? _documentChatOllamaModel;
-  String? get documentChatOllamaModel => _$this._documentChatOllamaModel;
-  set documentChatOllamaModel(String? documentChatOllamaModel) =>
-      _$this._documentChatOllamaModel = documentChatOllamaModel;
-
-  bool? _documentChatRunsOnCpu;
-  bool? get documentChatRunsOnCpu => _$this._documentChatRunsOnCpu;
-  set documentChatRunsOnCpu(bool? documentChatRunsOnCpu) =>
-      _$this._documentChatRunsOnCpu = documentChatRunsOnCpu;
-
-  bool? _documentChatLocalModelEnabled;
-  bool? get documentChatLocalModelEnabled =>
-      _$this._documentChatLocalModelEnabled;
-  set documentChatLocalModelEnabled(bool? documentChatLocalModelEnabled) =>
-      _$this._documentChatLocalModelEnabled = documentChatLocalModelEnabled;
-
-  bool? _documentChatLocalModelReady;
-  bool? get documentChatLocalModelReady => _$this._documentChatLocalModelReady;
-  set documentChatLocalModelReady(bool? documentChatLocalModelReady) =>
-      _$this._documentChatLocalModelReady = documentChatLocalModelReady;
-
   bool? _advancedFeaturesEnabled;
   bool? get advancedFeaturesEnabled => _$this._advancedFeaturesEnabled;
   set advancedFeaturesEnabled(bool? advancedFeaturesEnabled) =>
       _$this._advancedFeaturesEnabled = advancedFeaturesEnabled;
-
-  bool? _fuzzyDuplicateDetectionEnabled;
-  bool? get fuzzyDuplicateDetectionEnabled =>
-      _$this._fuzzyDuplicateDetectionEnabled;
-  set fuzzyDuplicateDetectionEnabled(bool? fuzzyDuplicateDetectionEnabled) =>
-      _$this._fuzzyDuplicateDetectionEnabled = fuzzyDuplicateDetectionEnabled;
 
   bool? _useArenaWinnerAsDefault;
   bool? get useArenaWinnerAsDefault => _$this._useArenaWinnerAsDefault;
@@ -490,12 +252,6 @@ class UserSettingsResponseDtoBuilder
   String? get arenaWinnerEngine => _$this._arenaWinnerEngine;
   set arenaWinnerEngine(String? arenaWinnerEngine) =>
       _$this._arenaWinnerEngine = arenaWinnerEngine;
-
-  num? _labelFieldConfidenceThreshold;
-  num? get labelFieldConfidenceThreshold =>
-      _$this._labelFieldConfidenceThreshold;
-  set labelFieldConfidenceThreshold(num? labelFieldConfidenceThreshold) =>
-      _$this._labelFieldConfidenceThreshold = labelFieldConfidenceThreshold;
 
   bool? _fieldExtractionConfidenceGateEnabled;
   bool? get fieldExtractionConfidenceGateEnabled =>
@@ -524,19 +280,6 @@ class UserSettingsResponseDtoBuilder
   set locale(UserSettingsResponseDtoLocaleEnum? locale) =>
       _$this._locale = locale;
 
-  String? _documentChatCloudBaseUrl;
-  String? get documentChatCloudBaseUrl => _$this._documentChatCloudBaseUrl;
-  set documentChatCloudBaseUrl(String? documentChatCloudBaseUrl) =>
-      _$this._documentChatCloudBaseUrl = documentChatCloudBaseUrl;
-
-  bool? _documentChatCloudApiKeyConfigured;
-  bool? get documentChatCloudApiKeyConfigured =>
-      _$this._documentChatCloudApiKeyConfigured;
-  set documentChatCloudApiKeyConfigured(
-          bool? documentChatCloudApiKeyConfigured) =>
-      _$this._documentChatCloudApiKeyConfigured =
-          documentChatCloudApiKeyConfigured;
-
   UserSettingsResponseDtoBuilder() {
     UserSettingsResponseDto._defaults(this);
   }
@@ -545,30 +288,15 @@ class UserSettingsResponseDtoBuilder
     final $v = _$v;
     if ($v != null) {
       _preferredExtractorEngine = $v.preferredExtractorEngine;
-      _preferredChatProvider = $v.preferredChatProvider;
-      _effectiveChatProvider = $v.effectiveChatProvider;
-      _customerChatProvider = $v.customerChatProvider;
-      _documentChatUiEnabled = $v.documentChatUiEnabled;
-      _documentChatAvailable = $v.documentChatAvailable;
-      _documentChatReadiness = $v.documentChatReadiness;
-      _documentChatReadinessReason = $v.documentChatReadinessReason;
-      _documentChatOllamaModel = $v.documentChatOllamaModel;
-      _documentChatRunsOnCpu = $v.documentChatRunsOnCpu;
-      _documentChatLocalModelEnabled = $v.documentChatLocalModelEnabled;
-      _documentChatLocalModelReady = $v.documentChatLocalModelReady;
       _advancedFeaturesEnabled = $v.advancedFeaturesEnabled;
-      _fuzzyDuplicateDetectionEnabled = $v.fuzzyDuplicateDetectionEnabled;
       _useArenaWinnerAsDefault = $v.useArenaWinnerAsDefault;
       _arenaWinnerEngine = $v.arenaWinnerEngine;
-      _labelFieldConfidenceThreshold = $v.labelFieldConfidenceThreshold;
       _fieldExtractionConfidenceGateEnabled =
           $v.fieldExtractionConfidenceGateEnabled;
       _fieldExtractionRequiredLabelIds =
           $v.fieldExtractionRequiredLabelIds?.toBuilder();
       _themePreference = $v.themePreference;
       _locale = $v.locale;
-      _documentChatCloudBaseUrl = $v.documentChatCloudBaseUrl;
-      _documentChatCloudApiKeyConfigured = $v.documentChatCloudApiKeyConfigured;
       _$v = null;
     }
     return this;
@@ -597,34 +325,18 @@ class UserSettingsResponseDtoBuilder
                   preferredExtractorEngine,
                   r'UserSettingsResponseDto',
                   'preferredExtractorEngine'),
-              preferredChatProvider: preferredChatProvider,
-              effectiveChatProvider: effectiveChatProvider,
-              customerChatProvider: customerChatProvider,
-              documentChatUiEnabled: documentChatUiEnabled,
-              documentChatAvailable: documentChatAvailable,
-              documentChatReadiness: documentChatReadiness,
-              documentChatReadinessReason: documentChatReadinessReason,
-              documentChatOllamaModel: documentChatOllamaModel,
-              documentChatRunsOnCpu: documentChatRunsOnCpu,
-              documentChatLocalModelEnabled: documentChatLocalModelEnabled,
-              documentChatLocalModelReady: documentChatLocalModelReady,
               advancedFeaturesEnabled: advancedFeaturesEnabled,
-              fuzzyDuplicateDetectionEnabled: fuzzyDuplicateDetectionEnabled,
               useArenaWinnerAsDefault: BuiltValueNullFieldError.checkNotNull(
                   useArenaWinnerAsDefault,
                   r'UserSettingsResponseDto',
                   'useArenaWinnerAsDefault'),
               arenaWinnerEngine: arenaWinnerEngine,
-              labelFieldConfidenceThreshold: labelFieldConfidenceThreshold,
               fieldExtractionConfidenceGateEnabled:
                   fieldExtractionConfidenceGateEnabled,
               fieldExtractionRequiredLabelIds:
                   _fieldExtractionRequiredLabelIds?.build(),
               themePreference: themePreference,
-              locale: locale,
-              documentChatCloudBaseUrl: documentChatCloudBaseUrl,
-              documentChatCloudApiKeyConfigured:
-                  documentChatCloudApiKeyConfigured);
+              locale: locale);
     } catch (_) {
       late String _$failedField;
       try {

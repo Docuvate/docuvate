@@ -18,7 +18,6 @@ const ENV_KEYS = [
   'DOCUVATE_FEATURE_ANSWER_ABSTENTION',
   'DOCUVATE_FEATURE_LEARNED_VALUE_TYPES',
   'DOCUVATE_FEATURE_LAYOUT_KEY_VALUE_ROLES',
-  'DOCUVATE_FEATURE_LOCAL_CHAT_MODEL',
 ] as const;
 
 describe('readFeatureFlagDefaultsFromEnv', () => {
@@ -40,7 +39,6 @@ describe('readFeatureFlagDefaultsFromEnv', () => {
       answerAbstention: false,
       learnedValueTypes: true,
       layoutKeyValueRoles: false,
-      localChatModel: false,
     });
   });
 
@@ -54,7 +52,6 @@ describe('readFeatureFlagDefaultsFromEnv', () => {
     process.env['DOCUVATE_FEATURE_ANSWER_ABSTENTION'] = 'yes';
     process.env['DOCUVATE_FEATURE_LEARNED_VALUE_TYPES'] = 'true';
     process.env['DOCUVATE_FEATURE_LAYOUT_KEY_VALUE_ROLES'] = '1';
-    process.env['DOCUVATE_FEATURE_LOCAL_CHAT_MODEL'] = 'yes';
     expect(readFeatureFlagDefaultsFromEnv()).toEqual({
       layoutReconstructionCompare: true,
       sourceConnectors: true,
@@ -64,7 +61,6 @@ describe('readFeatureFlagDefaultsFromEnv', () => {
       answerAbstention: true,
       learnedValueTypes: true,
       layoutKeyValueRoles: true,
-      localChatModel: true,
     });
   });
 

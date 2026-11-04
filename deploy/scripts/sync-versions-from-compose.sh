@@ -16,7 +16,6 @@ extract_image() {
 POSTGRES="$(extract_image postgres)"
 VALKEY="$(extract_image valkey)"
 MINIO="$(extract_image minio)"
-OLLAMA="ollama/ollama:0.12.6@sha256:a61a8fd395dbb931cc8cb1b5da7a2510746575c87113fdc45b647ee59ef7f808"
 APP_VERSION="$(grep -m1 'newTag:' "$ROOT/deploy/kustomize/base/kustomization.yaml" | sed 's/.*"\(.*\)".*/\1/')"
 
 cat >"$OUT" <<EOF
@@ -27,6 +26,5 @@ DOCUVATE_POSTGRES_IMAGE=${POSTGRES}
 DOCUVATE_VALKEY_IMAGE=${VALKEY}
 DOCUVATE_MINIO_IMAGE=${MINIO}
 DOCUVATE_MINIO_MC_IMAGE=${MINIO}
-DOCUVATE_OLLAMA_IMAGE=${OLLAMA}
 EOF
 echo "Wrote $OUT"

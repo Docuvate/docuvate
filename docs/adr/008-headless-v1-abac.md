@@ -22,7 +22,7 @@ Integrators call `https://<host>/v1/...` with either a better-auth session cooki
 ### Authorization (ABAC)
 
 - Application code depends on **`AuthorizationPort`** (domain), not Nest guards, for policy decisions.
-- **Deny by default.** Policies evaluate **subject** attributes (kind, tenant, roles, claims) against **resource** attributes (owner, status, tag ids, folder/mappe) and **action** (`document:read`, `document:list`, `document:content:read`, `document:chat`, …).
+- **Deny by default.** Policies evaluate **subject** attributes (kind, tenant, roles, claims) against **resource** attributes (owner, status, tag ids, folder/mappe) and **action** (`document:read`, `document:list`, `document:content:read`, …).
 - MVP engine is an in-process **`AbacAuthorizationAdapter`**: owner users allow-all on their tenant; service principals require explicit claims; cross-tenant always denied. Label/folder/status rules are extensible incrementally.
 - Enforced first on **document list, get, content, and chat** use cases; other endpoints still rely on repository user scoping until policies expand.
 
