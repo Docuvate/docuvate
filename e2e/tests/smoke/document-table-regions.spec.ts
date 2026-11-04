@@ -64,6 +64,22 @@ async function drawTableRectangle(page: Page): Promise<void> {
   await page.mouse.up();
 }
 
+async function waitForTableCorrectionSave(page: Page): Promise<void> {
+  const refreshed = page.waitForResponse(
+    (response) =>
+      response.request().method() === 'GET' &&
+      new URL(response.url()).pathname.endsWith('/regions'),
+    { timeout: 30_000 }
+  );
+  await page.waitForResponse(
+    (response) =>
+      response.request().method() === 'POST' &&
+      new URL(response.url()).pathname.endsWith('/table-corrections'),
+    { timeout: 30_000 }
+  );
+  await refreshed;
+}
+
 test.describe('document table regions', () => {
   test.describe.configure({ mode: 'serial', timeout: 420_000, retries: 0 });
 
@@ -116,7 +132,9 @@ test.describe('document table regions', () => {
     await headerRows.blur();
     const firstCell = card.locator('.layout-table-cell-input').first();
     await firstCell.fill('Position');
-    await firstCell.blur();
+    // A pending save re-selects its table when it resolves, which would reopen the narrow sheet
+    // after the viewport loop closed it; wait for the request instead of the (already shown) toast.
+    await Promise.all([waitForTableCorrectionSave(page), firstCell.blur()]);
     await expect(page.getByText(/Tabellenkorrektur gespeichert|Table correction saved/i)).toBeVisible({
       timeout: 30_000,
     });
@@ -130,7 +148,10 @@ test.describe('document table regions', () => {
         { timeout: 10_000 }
       );
       const openTableSheet = page.getByTestId('table-correction-sheet');
-      if ((await openTableSheet.count()) > 0) {
+      if (viewport.width < 1024) {
+        // The selected table reopens its correction sheet on narrow viewports; the sheet chunk
+        // loads lazily, so wait for it instead of sampling the count once.
+        await expect(openTableSheet).toBeVisible({ timeout: 15_000 });
         await page.keyboard.press('Escape');
         await expect(openTableSheet).toHaveCount(0);
       }
