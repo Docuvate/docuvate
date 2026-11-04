@@ -1,3 +1,24 @@
+CREATE TABLE IF NOT EXISTS workspace_ml_settings (
+  tenant_id UUID PRIMARY KEY REFERENCES tenants(id) ON DELETE CASCADE,
+  label_auto_assign TEXT NOT NULL DEFAULT 'normal',
+  label_suggestions TEXT NOT NULL DEFAULT 'normal',
+  duplicate_detection TEXT NOT NULL DEFAULT 'exact',
+  field_acceptance TEXT NOT NULL DEFAULT 'normal',
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_by_user_id TEXT REFERENCES "user"(id) ON DELETE SET NULL,
+  CONSTRAINT workspace_ml_settings_label_auto_assign_check CHECK (
+    label_auto_assign IN ('off', 'cautious', 'normal')
+  ),
+  CONSTRAINT workspace_ml_settings_label_suggestions_check CHECK (
+    label_suggestions IN ('few', 'normal', 'many')
+  ),
+  CONSTRAINT workspace_ml_settings_duplicate_detection_check CHECK (
+    duplicate_detection IN ('off', 'exact', 'similar')
+  ),
+  CONSTRAINT workspace_ml_settings_field_acceptance_check CHECK (
+    field_acceptance IN ('cautious', 'normal', 'generous')
+  )
+);
 
 -- Carry the previous per-user choices of the earliest installation admin into the workspace.
 -- Skipped when the schema is already migrated (baseline stamping re-runs this migration).
