@@ -1,9 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { cosineSimilarity } from './cosine.js';
 import { computeDocumentCoverage } from './label-coverage.js';
 import { type LabelHybridModel, predictLabelHybrid } from './label-hybrid-auto-match.js';
-import type { TagPairSignal } from './label-merge-rename-suggestions.js';
 import { discoverOpenSetNewLabelClusters } from './label-open-set-discovery.js';
 import type { TagCentroidRef } from './tag-centroid-ref.js';
 
@@ -28,16 +26,6 @@ interface EmbeddingClusterNewLabel {
   documentIds: string[];
 }
 
-interface EmbeddingMergeRecommendation {
-  id: string;
-  tagIds: [string, string];
-  names: [string, string];
-  score: number;
-  similarity: number;
-  reason: string;
-}
-
-export const MIN_LABEL_SUPPORT_FOR_MERGE = 3;
 const MIN_LABEL_SUPPORT_FOR_SIMILARITY_PCT = 3;
 
 type SimilarityDisplayTier = 'high' | 'medium' | 'low';
@@ -68,29 +56,6 @@ export function formatAssignRecommendationReason(input: {
   }
   const pct = Math.min(99, Math.round(input.similarity * 100));
   return `Labelraum · ${String(pct)} % zu „${input.tagName}"`;
-}
-
-export function formatMergeRecommendationReason(input: {
-  nameA: string;
-  nameB: string;
-  similarity: number;
-  supportCount: number;
-  scoredReason?: string;
-}): string {
-  if (input.supportCount < MIN_LABEL_SUPPORT_FOR_SIMILARITY_PCT) {
-    const tier =
-      similarityDisplayTier(input.similarity) === 'high'
-        ? 'hohe'
-        : similarityDisplayTier(input.similarity) === 'medium'
-          ? 'mittlere'
-          : 'niedrige';
-    return `Sehr ähnliche Namen (${input.nameA} / ${input.nameB}) · ${tier} Überschneidung`;
-  }
-  if (input.scoredReason) {
-    return input.scoredReason;
-  }
-  const pct = Math.min(99, Math.round(input.similarity * 100));
-  return `Labelraum · ${String(pct)} % Überschneidung (${input.nameA} / ${input.nameB})`;
 }
 
 export function suggestAssignRecommendations(input: {
@@ -154,112 +119,6 @@ export function suggestAssignRecommendations(input: {
     });
   }
   return out.sort((a, b) => b.score - a.score);
-}
-
-function averageCrossSetSimilarity(a: number[][], b: number[][]): number | null {
-  if (a.length === 0 || b.length === 0) {
-    return null;
-  }
-  let sum = 0;
-  let count = 0;
-  for (const va of a) {
-    for (const vb of b) {
-      sum += cosineSimilarity(va, vb);
-      count += 1;
-    }
-  }
-  return count > 0 ? sum / count : null;
-}
-
-export function scoreLabelPairForMerge(
-  a: TagPairSignal & { docEmbeddings: number[][] },
-  b: TagPairSignal & { docEmbeddings: number[][] }
-): { score: number; similarity: number; reason: string } | null {
-  let centroidSim = 0;
-  if (a.centroid.length > 0 && b.centroid.length > 0) {
-    centroidSim = cosineSimilarity(a.centroid, b.centroid);
-  }
-  const cross = averageCrossSetSimilarity(a.docEmbeddings, b.docEmbeddings);
-  const crossSim = cross ?? centroidSim;
-  const hasDocs = a.docEmbeddings.length > 0 && b.docEmbeddings.length > 0;
-  const combined = hasDocs ? 0.45 * centroidSim + 0.55 * crossSim : centroidSim;
-  const pct = Math.round(combined * 100);
-  const centroidPct = Math.round(centroidSim * 100);
-
-  if (combined < 0.78 && centroidSim < 0.85) {
-    return null;
-  }
-
-  const reason =
-    hasDocs && cross != null
-      ? `Labelraum · ${String(pct)} % (Zentren ${String(centroidPct)} %, Dokumente ${String(Math.round(cross * 100))} %)`
-      : `Labelraum · ${String(pct)} % (Zentren ${String(centroidPct)} %)`;
-
-  return {
-    score: Math.min(0.99, combined),
-    similarity: combined,
-    reason,
-  };
-}
-
-export function suggestEmbeddingMergeRecommendations(input: {
-  tags: TagPairSignal[];
-  docEmbeddingsByTagId: ReadonlyMap<string, number[][]>;
-  dismissedKeys: ReadonlySet<string>;
-  nameNearDuplicate: (a: string, b: string) => boolean;
-}): EmbeddingMergeRecommendation[] {
-  const out: EmbeddingMergeRecommendation[] = [];
-  for (let i = 0; i < input.tags.length; i++) {
-    for (let j = i + 1; j < input.tags.length; j++) {
-      const a = input.tags[i];
-      const b = input.tags[j];
-      const idPair = [a.tagId, b.tagId].sort();
-      const mergeId = `merge:${idPair[0]}:${idPair[1]}`;
-      if (input.dismissedKeys.has(mergeId)) {
-        continue;
-      }
-
-      const aDocs = input.docEmbeddingsByTagId.get(a.tagId) ?? [];
-      const bDocs = input.docEmbeddingsByTagId.get(b.tagId) ?? [];
-      if (
-        aDocs.length < MIN_LABEL_SUPPORT_FOR_MERGE ||
-        bDocs.length < MIN_LABEL_SUPPORT_FOR_MERGE
-      ) {
-        continue;
-      }
-
-      const nameDup = input.nameNearDuplicate(a.name, b.name);
-      if (!nameDup) {
-        continue;
-      }
-
-      const scored = scoreLabelPairForMerge(
-        { ...a, docEmbeddings: aDocs },
-        { ...b, docEmbeddings: bDocs }
-      );
-      if (!scored || scored.similarity < 0.78) {
-        continue;
-      }
-
-      const supportCount = Math.min(aDocs.length, bDocs.length);
-      const sim = scored.similarity;
-      out.push({
-        id: mergeId,
-        tagIds: [a.tagId, b.tagId],
-        names: [a.name, b.name],
-        score: Math.min(0.99, scored.score),
-        similarity: sim,
-        reason: formatMergeRecommendationReason({
-          nameA: a.name,
-          nameB: b.name,
-          similarity: sim,
-          supportCount,
-          scoredReason: scored.reason,
-        }),
-      });
-    }
-  }
-  return out.sort((x, y) => y.score - x.score).slice(0, 6);
 }
 
 export function suggestEmbeddingClusterNewLabels(input: {

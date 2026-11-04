@@ -21,7 +21,6 @@ import {
   type UserPreferencesRepository,
 } from '../../../shared/domain/ports.js';
 import type { LabelHybridDocumentRow } from '../domain/label-hybrid-document-row.js';
-import { suggestMergeAndRename } from '../domain/label-merge-rename-suggestions.js';
 import { OPEN_SET_MIN_CLUSTER_SIZE } from '../domain/label-open-set-discovery.js';
 import {
   buildExcludedDocumentsByLabelKey,
@@ -29,10 +28,8 @@ import {
 } from '../domain/label-recommendation-cluster-exclusions.js';
 import { clusterDocumentSimilarities } from '../domain/label-recommendation-cluster-similarity.js';
 import {
-  MIN_LABEL_SUPPORT_FOR_MERGE,
   suggestAssignRecommendations,
   suggestEmbeddingClusterNewLabels,
-  suggestEmbeddingMergeRecommendations,
 } from '../domain/label-recommendation-scoring.js';
 import { isBlockedLabelCandidate } from '../domain/recommendation-blocklist.js';
 import type { TagCentroidRef } from '../domain/tag-centroid-ref.js';
@@ -159,7 +156,6 @@ export class GetLabelRecommendationsUseCase {
     const threshold = preferences.labelNearSimilarityThreshold;
 
     const tagNameById = new Map(nonInboxTags.map((t) => [t.id, t.name]));
-    const centroidByTag = new Map(centroids.map((c) => [c.tagId, c.centroid]));
     const centroidRefs: TagCentroidRef[] = centroids
       .filter((c) => c.centroid.length > 0 && tagNameById.has(c.tagId))
       .map((c) => ({ tagId: c.tagId, centroid: c.centroid }));
@@ -216,34 +212,12 @@ export class GetLabelRecommendationsUseCase {
       });
     }
 
-    const embeddingMerges = suggestEmbeddingMergeRecommendations({
-      tags: nonInboxTags.map((t) => ({
-        tagId: t.id,
-        name: t.name,
-        centroid: centroidByTag.get(t.id) ?? [],
-      })),
-      docEmbeddingsByTagId,
-      dismissedKeys,
-      nameNearDuplicate: namesAreNearDuplicate,
-    });
-
-    const mergeTagIds = new Set<string>();
-    for (const suggestion of embeddingMerges) {
-      for (const tagId of suggestion.tagIds) {
-        mergeTagIds.add(tagId);
-      }
-      items.push({
-        id: suggestion.id,
-        kind: 'merge',
-        tagIds: suggestion.tagIds,
-        tagNames: suggestion.names,
-        score: suggestion.score,
-        similarity: suggestion.similarity,
-        source: 'embedding',
-        reason: suggestion.reason,
-      });
-    }
-
+    // Label merge suggestions are intentionally not generated. Calibrated on a real library
+    // (91 labels, 4095 pairs): document-mean embeddings put almost every label pair at
+    // centroid cosine ≥ 0.94, and sibling labels (e.g. per-semester or per-year labels with
+    // mutually exclusive documents) are indistinguishable from genuine duplicates by
+    // centroid, cross-set or leave-one-out separability. Name edit distance flagged those
+    // siblings as duplicates. Without a sound signal, merging stays a manual action.
     const clusterNew = suggestEmbeddingClusterNewLabels({
       rows: embeddingRows.map((row) => ({
         documentId: row.documentId,
@@ -291,41 +265,6 @@ export class GetLabelRecommendationsUseCase {
       });
     }
 
-    const mergeRename = suggestMergeAndRename(
-      nonInboxTags.map((t) => ({
-        tagId: t.id,
-        name: t.name,
-        centroid: centroidByTag.get(t.id) ?? [],
-      })),
-      dismissedKeys
-    );
-
-    for (const suggestion of mergeRename) {
-      if (suggestion.kind === 'merge') {
-        if (items.some((i) => i.kind === 'merge' && i.id === suggestion.id)) {
-          continue;
-        }
-        items.push({
-          id: suggestion.id,
-          kind: 'merge',
-          tagIds: suggestion.tagIds,
-          tagNames: suggestion.names,
-          score: suggestion.score,
-          reason: suggestion.reason,
-        });
-      } else {
-        items.push({
-          id: suggestion.id,
-          kind: 'rename',
-          tagId: suggestion.tagId,
-          proposedName: suggestion.toName,
-          currentName: suggestion.fromName,
-          score: suggestion.score,
-          reason: suggestion.reason,
-        });
-      }
-    }
-
     const filtered = items.filter((item) => {
       if (item.kind === 'new' && item.proposedName) {
         if (labelNameConflictsExisting(item.proposedName, existingTagNames)) {
@@ -340,24 +279,6 @@ export class GetLabelRecommendationsUseCase {
         if (item.proposedName) {
           return !isBlockedLabelCandidate(item.proposedName, blockPhrases, patternStrings);
         }
-      }
-      if (item.kind === 'merge' && item.tagNames) {
-        if (
-          item.tagNames.length >= 2 &&
-          !namesAreNearDuplicate(item.tagNames[0], item.tagNames[1])
-        ) {
-          return false;
-        }
-        if (item.tagIds?.length === 2) {
-          const aCount = docEmbeddingsByTagId.get(item.tagIds[0])?.length ?? 0;
-          const bCount = docEmbeddingsByTagId.get(item.tagIds[1])?.length ?? 0;
-          if (aCount < MIN_LABEL_SUPPORT_FOR_MERGE || bCount < MIN_LABEL_SUPPORT_FOR_MERGE) {
-            return false;
-          }
-        }
-        return !item.tagNames.some((name) =>
-          isBlockedLabelCandidate(name, blockPhrases, patternStrings)
-        );
       }
       return true;
     });
@@ -382,37 +303,6 @@ export class GetLabelRecommendationsUseCase {
     const dedupedNew = filtered.filter((item) => item.kind !== 'new' || allowedNewIds.has(item.id));
 
     const sorted = dedupedNew.sort((a, b) => b.score - a.score).slice(0, 8);
-
-    for (const item of sorted) {
-      if (item.kind !== 'merge' || !item.tagIds?.length) {
-        continue;
-      }
-      for (const tagId of item.tagIds) {
-        mergeTagIds.add(tagId);
-      }
-    }
-
-    const mergeSamples = await this.inventoryRepo.loadSampleDocumentIdsByTag(
-      userId,
-      [...mergeTagIds],
-      2
-    );
-    for (const item of sorted) {
-      if (item.kind !== 'merge' || !item.tagIds?.length) {
-        continue;
-      }
-      const sampleIds: string[] = [];
-      for (const tagId of item.tagIds) {
-        for (const docId of mergeSamples.get(tagId) ?? []) {
-          if (!sampleIds.includes(docId)) {
-            sampleIds.push(docId);
-          }
-        }
-      }
-      if (sampleIds.length > 0) {
-        item.sampleDocumentIds = sampleIds.slice(0, 4);
-      }
-    }
 
     const previewIds = new Set<string>();
     for (const item of sorted) {
