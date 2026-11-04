@@ -17740,6 +17740,10 @@
           "confidenceGateEnabled": {
             "type": "boolean",
             "nullable": true
+          },
+          "showInFilter": {
+            "type": "boolean",
+            "description": "Sent by the catalog editor on every save; without it the whitelist rejects the whole request."
           }
         },
         "required": [

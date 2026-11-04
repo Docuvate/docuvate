@@ -1047,6 +1047,10 @@ export type ReplaceRecognizedFieldItemDto = {
     gateLabelMatch?: 'any' | 'all';
     minLabelConfidence?: number;
     confidenceGateEnabled?: boolean;
+    /**
+     * Sent by the catalog editor on every save; without it the whitelist rejects the whole request.
+     */
+    showInFilter?: boolean;
 };
 
 export type ReplaceRecognizedFieldsRequestDto = {
