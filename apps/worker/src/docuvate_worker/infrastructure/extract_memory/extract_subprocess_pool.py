@@ -5,6 +5,7 @@
 
 from __future__ import annotations
 
+import contextlib
 import json
 import logging
 import os
@@ -18,6 +19,7 @@ from typing import IO, Any
 
 from docuvate_worker.domain.extract_errors import ExtractRetryableError
 from docuvate_worker.infrastructure.extract_memory.child_process_diagnostics import (
+    child_exit_envelope,
     describe_child_exit,
     log_child_exit,
 )
@@ -41,6 +43,7 @@ _ENV_CANCEL_GRACE = "DOCUVATE_EXTRACT_CANCEL_GRACE_SECONDS"
 _DEFAULT_RECYCLE = 40
 _DEFAULT_CANCEL_GRACE = 5.0
 _CANCEL_LINE = json.dumps({"__docuvate_op": "cancel"})
+_EXIT_REAP_SECONDS = 5.0
 
 
 def _cancel_grace_seconds() -> float:
@@ -53,15 +56,13 @@ def _cancel_grace_seconds() -> float:
 
 
 def _readline_with_timeout(stream: IO[str], timeout: float) -> str | None:
+    """Next stdout line; ``""`` when the child closed stdout (died), ``None`` on timeout."""
     if timeout <= 0:
         return None
     ready, _, _ = select.select([stream], [], [], timeout)
     if not ready:
         return None
-    line = stream.readline()
-    if not line:
-        return None
-    return line
+    return stream.readline()
 
 
 class PooledExtractChild:
@@ -179,6 +180,16 @@ class PooledExtractChild:
         """Test hook: attach a mock child process without spawning."""
         self._proc = proc
 
+    def _child_died_during_job(self, proc: subprocess.Popen[str]) -> dict[str, Any]:
+        """Stdout EOF before a reply: the child died (e.g. OOM-killed), not a deadline."""
+        with contextlib.suppress(subprocess.TimeoutExpired):
+            proc.wait(timeout=_EXIT_REAP_SECONDS)
+        returncode = proc.poll()
+        self._close(reason="exited_during_job")
+        return child_exit_envelope(
+            returncode, f"extract pool child exited during job (returncode={returncode})"
+        )
+
     def run_job(self, payload: dict[str, Any], *, timeout: float) -> dict[str, Any]:
         self._cancel_requested.clear()
         attach_pool_child_to_active(self)
@@ -208,13 +219,15 @@ class PooledExtractChild:
             deadline = time.monotonic() + timeout
             remaining = max(0.0, deadline - time.monotonic())
             raw_out = _readline_with_timeout(stdout, remaining)
+            if raw_out == "":
+                return self._child_died_during_job(proc)
             if raw_out is None and (
                 self._cancel_requested.is_set() or time.monotonic() >= deadline
             ):
                 self.request_cancel()
                 grace = _cancel_grace_seconds()
                 raw_out = _readline_with_timeout(stdout, grace)
-            if raw_out is None:
+            if not raw_out:
                 reason = (
                     "client disconnected"
                     if self._cancel_requested.is_set()
@@ -229,8 +242,6 @@ class PooledExtractChild:
             exit_after = proc.poll()
             if exit_after is not None:
                 self._log_exit(proc, "exited_after_job")
-        if not raw_out:
-            raise RuntimeError("extract pool child closed stdout")
         envelope = json.loads(raw_out)
         if not isinstance(envelope, dict):
             raise RuntimeError("extract pool child returned non-object JSON")

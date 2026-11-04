@@ -47,5 +47,5 @@ if [ "${OOM_KILLED_STATE}" != "false" ]; then
 fi
 
 # Exit codes from the soak: 3 not all docs attempted in time, 4 untyped failure,
-# 6 cgroup OOM kill, 7 peak memory reached the cgroup limit.
+# 6 cgroup OOM kill, 7 peak memory reached the cgroup limit, 8 a large phone scan did not succeed.
 exit "${SOAK_RC}"

@@ -1,15 +1,18 @@
 # SPDX-FileCopyrightText: 2026 Thomas Faust
 # SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 
-import io
-
 from docuvate_worker.domain.extraction_geometry import (
     PageDimensions,
     extraction_block_from_absolute,
 )
 from docuvate_worker.domain.models import ExtractionBlock, ExtractionResult
 from docuvate_worker.domain.ports import ExtractorEngine
+from docuvate_worker.infrastructure.extract_memory.bounded_raster import open_image_bounded
+from docuvate_worker.infrastructure.extract_memory.raster_settings import (
+    raster_max_pixels_per_page,
+)
 from docuvate_worker.infrastructure.extractors.heuristic_fields import heuristic_field_suggestions
+from docuvate_worker.infrastructure.extractors.pdf_raster import iter_pdf_page_images
 
 
 class TesseractExtractor(ExtractorEngine):
@@ -34,28 +37,24 @@ class TesseractExtractor(ExtractorEngine):
 
     def _ocr_with_layout(self, content: bytes, mime_type: str) -> tuple[str, list[ExtractionBlock]]:
         import pytesseract  # noqa: PLC0415
-        from pdf2image import convert_from_bytes  # noqa: PLC0415
-        from PIL import Image  # noqa: PLC0415
 
         if mime_type == "application/pdf":
-            images = convert_from_bytes(content)
-            if not images:
-                return "", []
             page_texts: list[str] = []
             all_blocks: list[ExtractionBlock] = []
             block_index = 0
-            for page_num, image in enumerate(images, start=1):
-                page_text, blocks = self._ocr_image(
-                    image, page=page_num, pytesseract=pytesseract, block_offset=block_index
-                )
+            for page_num, image in iter_pdf_page_images(content):
+                with image:
+                    page_text, blocks = self._ocr_image(
+                        image, page=page_num, pytesseract=pytesseract, block_offset=block_index
+                    )
                 if page_text:
                     page_texts.append(page_text)
                 all_blocks.extend(blocks)
                 block_index += len(blocks)
             return "\n\n".join(page_texts), all_blocks
 
-        image = Image.open(io.BytesIO(content))
-        text, blocks = self._ocr_image(image, page=1, pytesseract=pytesseract, block_offset=0)
+        with open_image_bounded(content, raster_max_pixels_per_page()) as image:
+            text, blocks = self._ocr_image(image, page=1, pytesseract=pytesseract, block_offset=0)
         return text, blocks
 
     def _ocr_image(

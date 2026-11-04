@@ -3,20 +3,22 @@
 
 from __future__ import annotations
 
-import io
 import logging
 import os
 from dataclasses import dataclass, field
 from typing import Any
 
 import numpy as np
-from PIL import Image
 
 from docuvate_worker.domain.extraction_geometry import (
     PageDimensions,
     extraction_block_from_absolute,
 )
 from docuvate_worker.domain.models import ExtractionBlock
+from docuvate_worker.infrastructure.extract_memory.bounded_raster import open_image_bounded
+from docuvate_worker.infrastructure.extract_memory.raster_settings import (
+    raster_max_pixels_per_page,
+)
 from docuvate_worker.infrastructure.extractors.pdf_raster import iter_pdf_page_images
 from docuvate_worker.infrastructure.extractors.rapidocr_loader import build_rapidocr_engine
 from docuvate_worker.infrastructure.extractors.rapidocr_protocol import RapidOcrEngine
@@ -103,8 +105,8 @@ def _blocks_from_ocr_result(
 
 
 def ocr_image_bytes(content: bytes) -> tuple[str, list[ExtractionBlock]]:
-    image = Image.open(io.BytesIO(content)).convert("RGB")
-    array = np.asarray(image)
+    with open_image_bounded(content, raster_max_pixels_per_page()) as decoded:
+        array = np.asarray(decoded.convert("RGB"))
     page_height, page_width = array.shape[:2]
     ocr = _get_rapidocr()
     result, _ = ocr(array, use_cls=False)

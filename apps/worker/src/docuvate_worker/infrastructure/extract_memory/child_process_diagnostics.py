@@ -12,6 +12,10 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
 
+from docuvate_worker.domain.extract_errors import (
+    CHILD_EXITED_ERROR_TYPE,
+    CHILD_KILLED_ERROR_TYPE,
+)
 from docuvate_worker.infrastructure.extract_memory.cgroup import (
     cgroup_memory_current_bytes,
     cgroup_memory_limit_bytes,
@@ -21,6 +25,18 @@ from docuvate_worker.infrastructure.extract_memory.cgroup import (
 
 logger = logging.getLogger(__name__)
 
+
+def child_exit_envelope(returncode: int | None, message: str) -> dict[str, object]:
+    """Failure envelope for a child that died mid-job; SIGKILL means the OOM killer."""
+    killed = returncode == -signal.SIGKILL
+    return {
+        "ok": False,
+        "error": message,
+        "error_type": CHILD_KILLED_ERROR_TYPE if killed else CHILD_EXITED_ERROR_TYPE,
+        "permanent": killed,
+    }
+
+
 _PROC_STATUS_FIELD_COUNT = 2
 
 ChildExitReason = Literal[
@@ -29,6 +45,7 @@ ChildExitReason = Literal[
     "replaced_dead_child",
     "exited_before_job",
     "exited_after_job",
+    "exited_during_job",
     "stdin_closed",
     "unexpected",
     "oom_killed",

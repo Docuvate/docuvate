@@ -39,10 +39,11 @@ from docuvate_worker.infrastructure.extract_memory.pixel_budget import (
     page_pixel_count_at_dpi,
 )
 from docuvate_worker.infrastructure.extract_memory.pool_memory import pool_memory_reserved_bytes
-from docuvate_worker.infrastructure.extract_memory.raster_estimate import (
-    estimate_raster_dpi,
-    estimate_raster_max_dpi,
-    estimate_raster_max_pixels_per_page,
+from docuvate_worker.infrastructure.extract_memory.raster_settings import (
+    layout_compare_max_pixels_per_page,
+    raster_dpi,
+    raster_max_dpi,
+    raster_max_pixels_per_page,
 )
 from docuvate_worker.infrastructure.extractors.pdf_chunk_extract import (
     pdf_chunk_page_size,
@@ -65,6 +66,8 @@ _DEFAULT_MIN_FREE = 96_000_000
 _DEFAULT_WAIT_MS = 250
 _DEFAULT_WAIT_ATTEMPTS = 12
 _MIN_CHUNK_PAGES = 1
+# Two uint8 gray renders, RGB decode, int16 diff and float64 SSIM buffers per compared pixel.
+_COMPARE_BYTES_PER_PIXEL = 128
 
 
 def _env_int(name: str, default: int) -> int:
@@ -138,9 +141,9 @@ def estimate_extract_incremental_memory_bytes(
     peak_raster_pages = _env_int(_ENV_PEAK_RASTER_PAGES, _DEFAULT_PEAK_RASTER_PAGES)
     peak_raster_pages = max(_MIN_CHUNK_PAGES, peak_raster_pages)
     pages_in_chunk = min(chunk_pages, pages, peak_raster_pages)
-    target_dpi = estimate_raster_dpi()
-    max_dpi = estimate_raster_max_dpi()
-    max_px = estimate_raster_max_pixels_per_page()
+    target_dpi = raster_dpi()
+    max_dpi = raster_max_dpi()
+    max_px = raster_max_pixels_per_page()
     sizes = _pdf_page_sizes_pt(content)
     megapixels = _megapixels_for_pdf_pages(
         sizes,
@@ -149,7 +152,12 @@ def estimate_extract_incremental_memory_bytes(
         max_dpi=max_dpi,
         max_px=max_px,
     )
-    return max(bytes_per_mp, int(megapixels * bytes_per_mp))
+    return max(bytes_per_mp, int(megapixels * bytes_per_mp), layout_compare_peak_bytes())
+
+
+def layout_compare_peak_bytes() -> int:
+    """Peak increment of the layout reconstruction compare (two bounded renders plus SSIM)."""
+    return layout_compare_max_pixels_per_page() * _COMPARE_BYTES_PER_PIXEL
 
 
 def estimate_minimum_chunk_memory_bytes(content: bytes, mime_type: str) -> int:

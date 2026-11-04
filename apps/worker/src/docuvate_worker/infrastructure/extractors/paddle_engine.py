@@ -1,7 +1,6 @@
 # SPDX-FileCopyrightText: 2026 Thomas Faust
 # SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 
-import io
 import logging
 import os
 from typing import Any, Protocol, cast
@@ -14,6 +13,10 @@ from docuvate_worker.domain.extraction_geometry import (
     extraction_block_from_absolute,
 )
 from docuvate_worker.domain.models import ExtractionBlock
+from docuvate_worker.infrastructure.extract_memory.bounded_raster import open_image_bounded
+from docuvate_worker.infrastructure.extract_memory.raster_settings import (
+    raster_max_pixels_per_page,
+)
 from docuvate_worker.infrastructure.extractors.paddle_errors import map_paddle_exception
 from docuvate_worker.infrastructure.extractors.pdf_raster import iter_pdf_page_images
 from docuvate_worker.infrastructure.worker_memory_hygiene import reclaim_python_heap
@@ -147,8 +150,8 @@ def _ocr_pil_image(
 
 
 def ocr_image_bytes(content: bytes) -> tuple[str, list[ExtractionBlock]]:
-    image = Image.open(io.BytesIO(content))
-    text, blocks = _ocr_pil_image(image, page=1, block_offset=0)
+    with open_image_bounded(content, raster_max_pixels_per_page()) as image:
+        text, blocks = _ocr_pil_image(image, page=1, block_offset=0)
     return text.strip(), blocks
 
 
