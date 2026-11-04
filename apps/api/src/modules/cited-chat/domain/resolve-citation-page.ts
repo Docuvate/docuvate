@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { ExtractionBlock } from '@docuvate/contracts';
 
-import { normalizeForQuoteMatch } from './verify-citation-quote.js';
+import { normalizeForQuoteMatch } from './quote-match-normalize.js';
 
 /** Page of the extraction block that contains the cited quote (not chunk index default). */
 export function resolveCitationPageFromBlocks(

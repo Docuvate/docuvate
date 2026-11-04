@@ -14,7 +14,7 @@ import { IsNumber, IsOptional, Max, Min } from 'class-validator';
 
 import { CursorListQueryDto } from './cursor-list-query.dto.js';
 
-export class DocumentReviewFieldSuggestionDtoClass {
+class DocumentReviewFieldSuggestionDtoClass {
   @ApiProperty()
   key!: string;
 
@@ -28,7 +28,7 @@ export class DocumentReviewFieldSuggestionDtoClass {
   confidence?: number;
 }
 
-export class DocumentDuplicateStackSummaryDtoClass {
+class DocumentDuplicateStackSummaryDtoClass {
   @ApiProperty()
   stackId!: string;
 
@@ -39,7 +39,7 @@ export class DocumentDuplicateStackSummaryDtoClass {
   pendingReview!: boolean;
 }
 
-export class DocumentReviewQueueItemDtoClass {
+class DocumentReviewQueueItemDtoClass {
   @ApiProperty()
   documentId!: string;
 

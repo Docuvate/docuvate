@@ -28,7 +28,7 @@ import {
   parseString,
   recordFromUnknown,
   requireRecord,
-} from '../../../shared/infrastructure/database/row-parse.js';
+} from '../../../shared/domain/row-parse.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 import {
   buildAscIdTiebreakerKeyset,
@@ -176,7 +176,9 @@ export class PgWorkspaceRepository {
     viewId: string,
     filters: { fieldKey: string; valueText: string }[]
   ): Promise<void> {
-    await client.query(`DELETE FROM saved_document_view_field_filters WHERE view_id = $1`, [viewId]);
+    await client.query(`DELETE FROM saved_document_view_field_filters WHERE view_id = $1`, [
+      viewId,
+    ]);
     for (const filter of filters) {
       const fieldKey = filter.fieldKey.trim();
       const valueText = filter.valueText.trim();
@@ -227,12 +229,7 @@ export class PgWorkspaceRepository {
     let keysetSql = '';
     if (input.cursor) {
       const decoded = decodeIdTiebreakerCursor(input.cursor);
-      const keyset = buildAscIdTiebreakerKeyset(
-        'v.position',
-        'v.id',
-        decoded,
-        params.length + 1
-      );
+      const keyset = buildAscIdTiebreakerKeyset('v.position', 'v.id', decoded, params.length + 1);
       keysetSql = ` AND ${keyset.conditionSql}`;
       params.push(...keyset.params);
     }
@@ -273,9 +270,7 @@ export class PgWorkspaceRepository {
       });
     }
 
-    const total = input.cursor
-      ? null
-      : await this.countViewsVisibleToUser(userId);
+    const total = input.cursor ? null : await this.countViewsVisibleToUser(userId);
 
     return { items, hasMore, nextCursor, total };
   }

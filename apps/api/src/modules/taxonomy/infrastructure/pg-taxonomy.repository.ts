@@ -17,7 +17,7 @@ import {
   parseOptionalString,
   parseString,
   requireRecord,
-} from '../../../shared/infrastructure/database/row-parse.js';
+} from '../../../shared/domain/row-parse.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 import {
   parseTagSuggestionDecisionTier,
@@ -29,10 +29,7 @@ import type {
   TagEntity,
   TagSuggestionEntity,
 } from '../domain/taxonomy.entity.js';
-import {
-  decodeTagSearchCursor,
-  encodeTagSearchCursor,
-} from './tag-search-cursor.js';
+import { decodeTagSearchCursor, encodeTagSearchCursor } from './tag-search-cursor.js';
 
 const INBOX_NAME = 'Posteingang';
 

@@ -1,6 +1,11 @@
 from html.parser import HTMLParser
 
-from docuvate_worker.domain.layout_ir import FontWeight, LayoutIrBlock, LayoutIrDocument, LayoutIrPage
+from docuvate_worker.domain.layout_ir import (
+    FontWeight,
+    LayoutIrBlock,
+    LayoutIrDocument,
+    LayoutIrPage,
+)
 from docuvate_worker.infrastructure.layout.render_html import layout_ir_to_html
 
 
@@ -12,7 +17,7 @@ class _FirstRunStyleParser(HTMLParser):
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         if tag != "span" or self.style is not None:
             return
-        attr_map = {k: v for k, v in attrs}
+        attr_map = dict(attrs)
         if attr_map.get("class") == "run":
             self.style = attr_map.get("style")
 

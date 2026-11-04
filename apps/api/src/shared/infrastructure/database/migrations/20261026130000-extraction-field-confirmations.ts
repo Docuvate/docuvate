@@ -6,10 +6,7 @@ import { join } from 'node:path';
 import type { MigrationInterface, QueryRunner } from 'typeorm';
 
 import { extractionFieldValuesEquivalent } from '../../../../modules/extraction-feedback/domain/extraction-field-value-equivalence.js';
-import {
-  parseString,
-  requireRecord,
-} from '../row-parse.js';
+import { parseString, requireRecord } from '../../../domain/row-parse.js';
 
 async function loadSql(name: string): Promise<string> {
   return readFile(join(__dirname, 'sql', name), 'utf8');

@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { ThemePreference } from '@docuvate/contracts';
-import { type DocuvateTheme,docuvateThemeAttribute } from '@docuvate/tokens';
+import { type DocuvateTheme, docuvateThemeAttribute } from '@docuvate/tokens';
 
 import {
   COMPACT_THEME_STORAGE_KEY,
@@ -21,7 +21,7 @@ function applyResolvedTheme(resolved: DocuvateTheme): void {
   window.localStorage.setItem(COMPACT_THEME_STORAGE_KEY, resolved);
 }
 
-export function readResolvedTheme(): DocuvateTheme {
+function readResolvedTheme(): DocuvateTheme {
   const preference = readStoredThemePreference();
   return resolveThemeFromPreference(preference, readSystemPrefersDark());
 }
@@ -61,10 +61,14 @@ export function subscribeThemeStore(onStoreChange: () => void): () => void {
     attributes: true,
     attributeFilter: [docuvateThemeAttribute],
   });
-  const onPreferenceEvent = () => { onStoreChange(); };
+  const onPreferenceEvent = () => {
+    onStoreChange();
+  };
   window.addEventListener(THEME_PREFERENCE_CHANGE_EVENT, onPreferenceEvent);
   const media = window.matchMedia('(prefers-color-scheme: dark)');
-  const onMedia = () => { onStoreChange(); };
+  const onMedia = () => {
+    onStoreChange();
+  };
   media.addEventListener('change', onMedia);
   return () => {
     observer.disconnect();

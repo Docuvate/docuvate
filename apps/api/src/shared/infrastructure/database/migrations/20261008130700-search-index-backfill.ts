@@ -4,7 +4,7 @@ import type { MigrationInterface, QueryRunner } from 'typeorm';
 
 import { tokenizeSearchQuery } from '../../../../modules/search/domain/normalize-search-text.js';
 import { splitTextChunks } from '../../../../modules/search/domain/split-text-chunks.js';
-import { parseOptionalString, parseString, requireRecord } from '../row-parse.js';
+import { parseOptionalString, parseString, requireRecord } from '../../../domain/row-parse.js';
 
 const MAX_TERMS_PER_TEXT = 200;
 const DOCUMENT_TEXT_SLICE = 4000;

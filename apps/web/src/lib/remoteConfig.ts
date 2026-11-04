@@ -28,7 +28,7 @@ function emit(): void {
   }
 }
 
-export function readFeatureFlags(): FeatureFlagsDto {
+function readFeatureFlags(): FeatureFlagsDto {
   return cachedFlags;
 }
 

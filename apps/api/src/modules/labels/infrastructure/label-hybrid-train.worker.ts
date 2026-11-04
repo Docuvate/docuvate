@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { parentPort, workerData } from 'node:worker_threads';
 
-import type { LabelHybridDocumentRow } from '../domain/label-hybrid-training.js';
+import type { LabelHybridDocumentRow } from '../domain/label-hybrid-document-row.js';
 import { trainUserLabelHybridModel } from '../domain/label-hybrid-training.js';
 
 interface LabelHybridTrainWorkerData {

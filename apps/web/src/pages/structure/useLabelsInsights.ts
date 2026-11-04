@@ -45,12 +45,12 @@ interface LoadOptions {
   silent?: boolean;
 }
 
-export interface LabelRecommendationAcceptOptions {
+interface LabelRecommendationAcceptOptions {
   documentIds: string[];
   excludedDocumentIds: string[];
 }
 
-export interface LabelInsightsSaveSuccessOptions {
+interface LabelInsightsSaveSuccessOptions {
   message?: string;
   undo?: () => void | Promise<void>;
 }
@@ -77,10 +77,7 @@ export function useLabelsInsights(
     unlabeled: 0,
   });
 
-  const queueItems = useMemo(
-    () => prepareLabelQueue(recommendations, []),
-    [recommendations]
-  );
+  const queueItems = useMemo(() => prepareLabelQueue(recommendations, []), [recommendations]);
 
   const warmPollDelayMsRef = useRef(4_000);
   const warmPollTimeoutRef = useRef<number | null>(null);
@@ -93,81 +90,89 @@ export function useLabelsInsights(
     warmPollDelayMsRef.current = 4_000;
   }, []);
 
-  useEffect(() => () => {
-    clearWarmPoll();
-  }, [clearWarmPoll]);
+  useEffect(
+    () => () => {
+      clearWarmPoll();
+    },
+    [clearWarmPoll]
+  );
 
-  const load = useCallback(async (options?: LoadOptions) => {
-    if (!options?.silent) {
-      setLoading(true);
-    }
-    setError(null);
-    setRecommendationsError(null);
-    try {
-      const recsPromise = listLabelRecommendations()
-        .then((recs) => {
-          setRecommendations(recs.items);
-          const warming = recs.state === 'warming';
-          setRecommendationsWarming(warming);
-          setRecommendationsError(null);
-          if (warming) {
-            if (warmPollTimeoutRef.current !== null) {
-              window.clearTimeout(warmPollTimeoutRef.current);
-            }
-            const delayMs = warmPollDelayMsRef.current;
-            warmPollTimeoutRef.current = window.setTimeout(() => {
-              warmPollTimeoutRef.current = null;
-              void load({ silent: true });
-            }, delayMs);
-            warmPollDelayMsRef.current = Math.min(30_000, delayMs * 2);
-          } else {
-            clearWarmPoll();
-          }
-        })
-        .catch((err: unknown) => {
-          setRecommendations([]);
-          setRecommendationsWarming(false);
-          setRecommendationsError(formatUserFacingError(err, 'errors.recommendationsLoadFailed'));
-        });
-
-      const summaryPromise = getLabelDocumentInventorySummary()
-        .then((summary) => {
-          setDocumentCountByTagId(summary.documentCountByTagId);
-          setLabelInventory(summary.inventory);
-        })
-        .catch(() => {
-          setDocumentCountByTagId({});
-          setLabelInventory({ total: 0, labeled: 0, unlabeled: 0 });
-        });
-
-      const mapPromise = getLabelMap()
-        .then((map) => {
-          setCoverageSummary(map.coverageSummary ?? null);
-          setMapEmptyReason(map.emptyReason ?? null);
-          setExtractedDocumentCount(map.extractedDocumentCount);
-        })
-        .catch((err: unknown) => {
-          setCoverageSummary(null);
-          setMapEmptyReason(null);
-          setExtractedDocumentCount(0);
-          setError((prev) => prev ?? formatUserFacingError(err, 'errors.labelsInsightsLoadFailed'));
-        });
-
-      const reviewPromise = getDocumentReviewQueueSummary()
-        .then((summary) => {
-          setDocumentReviewPendingCount(summary.pendingCount);
-        })
-        .catch(() => {
-          setDocumentReviewPendingCount(0);
-        });
-
-      await Promise.all([recsPromise, summaryPromise, mapPromise, reviewPromise]);
-    } finally {
+  const load = useCallback(
+    async (options?: LoadOptions) => {
       if (!options?.silent) {
-        setLoading(false);
+        setLoading(true);
       }
-    }
-  }, [clearWarmPoll]);
+      setError(null);
+      setRecommendationsError(null);
+      try {
+        const recsPromise = listLabelRecommendations()
+          .then((recs) => {
+            setRecommendations(recs.items);
+            const warming = recs.state === 'warming';
+            setRecommendationsWarming(warming);
+            setRecommendationsError(null);
+            if (warming) {
+              if (warmPollTimeoutRef.current !== null) {
+                window.clearTimeout(warmPollTimeoutRef.current);
+              }
+              const delayMs = warmPollDelayMsRef.current;
+              warmPollTimeoutRef.current = window.setTimeout(() => {
+                warmPollTimeoutRef.current = null;
+                void load({ silent: true });
+              }, delayMs);
+              warmPollDelayMsRef.current = Math.min(30_000, delayMs * 2);
+            } else {
+              clearWarmPoll();
+            }
+          })
+          .catch((err: unknown) => {
+            setRecommendations([]);
+            setRecommendationsWarming(false);
+            setRecommendationsError(formatUserFacingError(err, 'errors.recommendationsLoadFailed'));
+          });
+
+        const summaryPromise = getLabelDocumentInventorySummary()
+          .then((summary) => {
+            setDocumentCountByTagId(summary.documentCountByTagId);
+            setLabelInventory(summary.inventory);
+          })
+          .catch(() => {
+            setDocumentCountByTagId({});
+            setLabelInventory({ total: 0, labeled: 0, unlabeled: 0 });
+          });
+
+        const mapPromise = getLabelMap()
+          .then((map) => {
+            setCoverageSummary(map.coverageSummary ?? null);
+            setMapEmptyReason(map.emptyReason ?? null);
+            setExtractedDocumentCount(map.extractedDocumentCount);
+          })
+          .catch((err: unknown) => {
+            setCoverageSummary(null);
+            setMapEmptyReason(null);
+            setExtractedDocumentCount(0);
+            setError(
+              (prev) => prev ?? formatUserFacingError(err, 'errors.labelsInsightsLoadFailed')
+            );
+          });
+
+        const reviewPromise = getDocumentReviewQueueSummary()
+          .then((summary) => {
+            setDocumentReviewPendingCount(summary.pendingCount);
+          })
+          .catch(() => {
+            setDocumentReviewPendingCount(0);
+          });
+
+        await Promise.all([recsPromise, summaryPromise, mapPromise, reviewPromise]);
+      } finally {
+        if (!options?.silent) {
+          setLoading(false);
+        }
+      }
+    },
+    [clearWarmPoll]
+  );
 
   const accept = useCallback(
     async (item: LabelRecommendationDto, options?: LabelRecommendationAcceptOptions) => {
@@ -210,9 +215,9 @@ export function useLabelsInsights(
           const docIds = [...assignedDocumentIds];
           hooks?.onSaveSuccess?.({
             undo: () => {
-              void Promise.all(docIds.map((documentId) => removeDocumentTag(documentId, tagId))).then(
-                () => Promise.all([onReloadTags({ silent: true }), load({ silent: true })])
-              );
+              void Promise.all(
+                docIds.map((documentId) => removeDocumentTag(documentId, tagId))
+              ).then(() => Promise.all([onReloadTags({ silent: true }), load({ silent: true })]));
             },
           });
         } else if (item.kind === 'new' && createdTagId) {
@@ -239,22 +244,25 @@ export function useLabelsInsights(
     [hooks, load, onReloadTags]
   );
 
-  const dismiss = useCallback(async (item: LabelRecommendationDto, scope: 'local' | 'global') => {
-    setBusyId(item.id);
-    setRecommendations((prev) => prev.filter((r) => r.id !== item.id));
-    try {
-      await dismissLabelRecommendation(item.id, {
-        blockFuture: scope === 'global',
-        phrase: dismissPhrase(item),
-        phrases: dismissPhrases(item),
-      });
-    } catch (err) {
-      setError(formatUserFacingError(err, 'errors.dismissFailed'));
-      void load({ silent: true });
-    } finally {
-      setBusyId(null);
-    }
-  }, [load]);
+  const dismiss = useCallback(
+    async (item: LabelRecommendationDto, scope: 'local' | 'global') => {
+      setBusyId(item.id);
+      setRecommendations((prev) => prev.filter((r) => r.id !== item.id));
+      try {
+        await dismissLabelRecommendation(item.id, {
+          blockFuture: scope === 'global',
+          phrase: dismissPhrase(item),
+          phrases: dismissPhrases(item),
+        });
+      } catch (err) {
+        setError(formatUserFacingError(err, 'errors.dismissFailed'));
+        void load({ silent: true });
+      } finally {
+        setBusyId(null);
+      }
+    },
+    [load]
+  );
 
   return {
     queueItems,

@@ -6,9 +6,9 @@ import { MetadataScanner, ModulesContainer } from '@nestjs/core';
 
 import { IS_PUBLIC_ROUTE_KEY } from './public.decorator.js';
 
-export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
-export interface PublicRouteEntry {
+interface PublicRouteEntry {
   method: HttpMethod;
   path: string;
 }

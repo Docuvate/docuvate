@@ -2,10 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { type Mock, vi } from 'vitest';
 
-import type {
-  WorkspaceMlSettings,
-  WorkspaceMlSettingsRepository,
-} from '../shared/domain/ports.js';
+import type { WorkspaceMlSettings, WorkspaceMlSettingsRepository } from '../shared/domain/ports.js';
 
 export function createWorkspaceMlSettings(
   overrides: Partial<WorkspaceMlSettings> = {}
@@ -19,7 +16,7 @@ export function createWorkspaceMlSettings(
   };
 }
 
-export interface WorkspaceMlSettingsRepositoryStub {
+interface WorkspaceMlSettingsRepositoryStub {
   get: Mock<WorkspaceMlSettingsRepository['get']>;
   update: Mock<WorkspaceMlSettingsRepository['update']>;
 }

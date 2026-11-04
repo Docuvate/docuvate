@@ -41,9 +41,3 @@ export function runExclusiveLabelHybridTrain<T>(task: () => Promise<T>): Promise
     pendingRuns.push(run);
   });
 }
-
-/** @internal test hook */
-export function resetExclusiveLabelHybridTrainQueue(): void {
-  activeTrain = null;
-  pendingRuns.length = 0;
-}

@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 
-import { isRecord, parseString } from '../../../shared/infrastructure/database/row-parse.js';
+import { isRecord, parseString } from '../../../shared/domain/row-parse.js';
 import { ExtractionFailure, type ExtractionFailureCode } from './extraction-failure.js';
 
 export interface WorkerExtractErrorBody {

@@ -3,13 +3,10 @@
 import type pg from 'pg';
 
 import { normalizeSearchText } from '../domain/normalize-search-text.js';
-import {
-  CHUNK_VOCAB_GATE_MIN_LENGTH,
-  isFourDigitYearToken,
-} from '../domain/vocabulary-gate.js';
+import { CHUNK_VOCAB_GATE_MIN_LENGTH, isFourDigitYearToken } from '../domain/vocabulary-gate.js';
 import { CHUNK_FTS_MIN_TERM_LENGTH } from './global-search-chunk-fts.query.js';
 
-export { CHUNK_VOCAB_GATE_MIN_LENGTH, isFourDigitYearToken } from '../domain/vocabulary-gate.js';
+export { isFourDigitYearToken } from '../domain/vocabulary-gate.js';
 
 export function requiresVocabularyForChunkFts(term: string): boolean {
   if (term.length < CHUNK_FTS_MIN_TERM_LENGTH) {

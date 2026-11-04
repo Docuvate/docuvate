@@ -4,7 +4,7 @@ import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/commo
 import { Queue, Worker } from 'bullmq';
 import IORedis from 'ioredis';
 
-import { parseString, requireRecord } from '../../../shared/infrastructure/database/row-parse.js';
+import { parseString, requireRecord } from '../../../shared/domain/row-parse.js';
 import { ReindexStaleRepresentationUseCase } from '../application/reindex-stale-representation.use-case.js';
 import {
   ENCODER_REINDEX_BATCH_SIZE,

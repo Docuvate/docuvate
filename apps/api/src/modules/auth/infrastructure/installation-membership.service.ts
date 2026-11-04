@@ -10,7 +10,7 @@ import {
 } from '../domain/installation.constants.js';
 import { dbRoleToInstanceRole } from '../domain/installation-authorization.js';
 
-export interface InstallationMembership {
+interface InstallationMembership {
   userId: string;
   dbRole: InstallationDbRole;
   suspended: boolean;

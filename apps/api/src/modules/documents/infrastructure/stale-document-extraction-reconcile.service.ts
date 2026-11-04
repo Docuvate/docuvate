@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 
-import { isRecord, parseString } from '../../../shared/infrastructure/database/row-parse.js';
+import { isRecord, parseString } from '../../../shared/domain/row-parse.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 import { workerExtractTimeoutMs } from '../../../shared/infrastructure/worker/worker-fetch.js';
 import { EXTRACTION_TIMEOUT_FAILURE_MESSAGE } from '../../extraction/domain/extraction-queue-failures.js';

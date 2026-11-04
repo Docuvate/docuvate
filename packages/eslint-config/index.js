@@ -12,7 +12,26 @@ export const docuvateStrictRules = {
   '@typescript-eslint/switch-exhaustiveness-check': 'error',
   'simple-import-sort/imports': 'error',
   'simple-import-sort/exports': 'error',
+  'max-depth': ['error', 4],
 };
+
+/**
+ * Size/complexity ceilings. Each app passes its current worst case so the rules act as a
+ * ratchet (no file or function may get worse); lower the numbers as offenders get split.
+ * Long-term targets: complexity 15, max-lines 400, max-lines-per-function 120, max-params 4.
+ * @param {{ complexity: number; maxLines: number; maxLinesPerFunction: number; maxParams: number }} ceilings
+ */
+export function sizeCeilingRules(ceilings) {
+  return {
+    complexity: ['error', ceilings.complexity],
+    'max-lines': ['error', { max: ceilings.maxLines, skipBlankLines: true, skipComments: true }],
+    'max-lines-per-function': [
+      'error',
+      { max: ceilings.maxLinesPerFunction, skipBlankLines: true, skipComments: true },
+    ],
+    'max-params': ['error', ceilings.maxParams],
+  };
+}
 
 const defaultIgnores = ['**/dist/**', '**/node_modules/**', '**/coverage/**'];
 

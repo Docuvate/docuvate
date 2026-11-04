@@ -1,14 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Check, ChevronDown, Search } from 'lucide-react';
-import {
-  type KeyboardEvent,
-  useCallback,
-  useId,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import { type KeyboardEvent, useCallback, useId, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Chip } from './Chip';
@@ -46,7 +39,7 @@ interface ComboboxMultiProps extends ComboboxBaseProps {
   onChange: (value: string[]) => void;
 }
 
-export type ComboboxProps = ComboboxSingleProps | ComboboxMultiProps;
+type ComboboxProps = ComboboxSingleProps | ComboboxMultiProps;
 
 const LIST_MAX_HEIGHT_REM = 20;
 const ROW_HEIGHT_REM = 2.5;
@@ -97,14 +90,20 @@ export function Combobox(props: ComboboxProps) {
   const frequentOptions = useMemo(() => {
     const candidates = props.options.filter((option) => !selectedSet.has(option.value));
     return [...candidates]
-      .sort((a, b) => (b.frequency ?? 0) - (a.frequency ?? 0) || a.label.localeCompare(b.label, 'de-DE'))
+      .sort(
+        (a, b) => (b.frequency ?? 0) - (a.frequency ?? 0) || a.label.localeCompare(b.label, 'de-DE')
+      )
       .slice(0, FREQUENT_LIMIT);
   }, [props.options, selectedSet]);
 
-  const frequentIds = useMemo(() => new Set(frequentOptions.map((o) => o.value)), [frequentOptions]);
+  const frequentIds = useMemo(
+    () => new Set(frequentOptions.map((o) => o.value)),
+    [frequentOptions]
+  );
 
   const remaining = useMemo(
-    () => filtered.filter((option) => !selectedSet.has(option.value) && !frequentIds.has(option.value)),
+    () =>
+      filtered.filter((option) => !selectedSet.has(option.value) && !frequentIds.has(option.value)),
     [filtered, selectedSet, frequentIds]
   );
 
@@ -145,9 +144,7 @@ export function Combobox(props: ComboboxProps) {
   }
 
   const displayValue =
-    !multiple && !open && props.value
-      ? (optionByValue.get(props.value)?.label ?? '')
-      : '';
+    !multiple && !open && props.value ? (optionByValue.get(props.value)?.label ?? '') : '';
 
   return (
     <div
@@ -161,7 +158,9 @@ export function Combobox(props: ComboboxProps) {
               key={option.value}
               label={option.label}
               variant="assigned"
-              onRemove={() => { removeChip(option.value); }}
+              onRemove={() => {
+                removeChip(option.value);
+              }}
             />
           ))}
         </div>
@@ -178,13 +177,19 @@ export function Combobox(props: ComboboxProps) {
           aria-autocomplete="list"
           aria-label={props['aria-label']}
           disabled={props.disabled}
-          placeholder={open ? (props.placeholder ?? t('combobox.searchPlaceholder')) : (props.placeholder ?? t('combobox.searchPlaceholder'))}
+          placeholder={
+            open
+              ? (props.placeholder ?? t('combobox.searchPlaceholder'))
+              : (props.placeholder ?? t('combobox.searchPlaceholder'))
+          }
           value={open ? query : displayValue}
           onChange={(e) => {
             setQuery(e.target.value);
             if (!open) setOpen(true);
           }}
-          onFocus={() => { setOpen(true); }}
+          onFocus={() => {
+            setOpen(true);
+          }}
           onKeyDown={onInputKeyDown}
         />
         <IconButton
@@ -193,7 +198,10 @@ export function Combobox(props: ComboboxProps) {
           className="combobox-toggle"
           expanded={open}
           disabled={props.disabled}
-          onClick={() => { setOpen((v) => !v); inputRef.current?.focus(); }}
+          onClick={() => {
+            setOpen((v) => !v);
+            inputRef.current?.focus();
+          }}
         />
       </div>
       <Popover
@@ -228,7 +236,9 @@ export function Combobox(props: ComboboxProps) {
                   option={option}
                   active={selectedSet.has(option.value)}
                   multiple={multiple}
-                  onSelect={() => { toggleOption(option.value); }}
+                  onSelect={() => {
+                    toggleOption(option.value);
+                  }}
                 />
               ))}
             </>
@@ -244,7 +254,9 @@ export function Combobox(props: ComboboxProps) {
                   option={option}
                   active={selectedSet.has(option.value)}
                   multiple={multiple}
-                  onSelect={() => { toggleOption(option.value); }}
+                  onSelect={() => {
+                    toggleOption(option.value);
+                  }}
                 />
               ))}
             </>
@@ -258,7 +270,9 @@ export function Combobox(props: ComboboxProps) {
               option={option}
               active={selectedSet.has(option.value)}
               multiple={multiple}
-              onSelect={() => { toggleOption(option.value); }}
+              onSelect={() => {
+                toggleOption(option.value);
+              }}
             />
           ))}
           {filtered.length === 0 ? (

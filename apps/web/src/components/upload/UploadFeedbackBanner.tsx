@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import type { UploadItem } from '../../lib/useDocumentUploadQueue';
-import { useDocumentUploadContext } from './DocumentUploadProvider';
+import { useDocumentUploadContext } from './documentUploadContext';
 
 const SUCCESS_DISMISS_MS = 6000;
 

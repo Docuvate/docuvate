@@ -15,9 +15,9 @@ import { getAdminPasswordPolicy, updateAdminPasswordPolicy } from '../../lib/api
 import { formatUserFacingError } from '../../lib/apiErrors';
 import { notifySaved, notifySaveError } from '../../lib/saveNotify';
 import { useFormDraft } from '../../lib/useFormDraft';
-import { PasswordPolicyChecklist } from '../auth/PasswordPolicyChecklist';
-import { PageFormSaveKit } from '../save/PageFormSaveKit';
-import { SettingsSectionCard } from '../settings/SettingsSectionCard';
+import { PasswordPolicyChecklist } from '../auth';
+import { PageFormSaveKit } from '../save';
+import { SettingsSectionCard } from '../settings';
 import { Input } from '../ui/Input';
 import { Switch } from '../ui/Switch';
 
@@ -115,7 +115,9 @@ export function AdminPasswordPolicyCard() {
                   });
                 }}
               />
-              <span className="muted admin-password-policy-unit">{t('admin.passwordPolicy.minLengthUnit')}</span>
+              <span className="muted admin-password-policy-unit">
+                {t('admin.passwordPolicy.minLengthUnit')}
+              </span>
             </div>
             <p className="muted settings-field-help">{t('admin.passwordPolicy.minLengthHelp')}</p>
           </label>
@@ -163,7 +165,10 @@ export function AdminPasswordPolicyCard() {
         </div>
         <div className="admin-password-policy-preview">
           <p className="settings-subheading">{t('admin.passwordPolicy.previewTitle')}</p>
-          <PasswordPolicyChecklist policy={PASSWORD_POLICY_PREVIEW_POLICY} password={PREVIEW_SAMPLE} />
+          <PasswordPolicyChecklist
+            policy={PASSWORD_POLICY_PREVIEW_POLICY}
+            password={PREVIEW_SAMPLE}
+          />
         </div>
       </div>
       <PageFormSaveKit

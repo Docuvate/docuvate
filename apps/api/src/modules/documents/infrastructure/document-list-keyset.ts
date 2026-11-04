@@ -4,7 +4,7 @@ import type { DocumentListQuery, DocumentSortField, SortOrder } from '@docuvate/
 
 import type { DocumentListCursorPayload } from './document-list-cursor.js';
 
-export interface DocumentListKeysetSql {
+interface DocumentListKeysetSql {
   conditionSql: string;
   params: unknown[];
 }

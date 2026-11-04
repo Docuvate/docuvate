@@ -10,7 +10,6 @@ export class CreateFolderRequestDto implements CreateFolderRequest {
   @IsOptional()
   @IsUUID('4')
   parentId?: string | null;
-
 }
 
 export class UpdateFolderRequestDto implements UpdateFolderRequest {
@@ -25,11 +24,4 @@ export class UpdateFolderRequestDto implements UpdateFolderRequest {
 
 export class FolderListResponseDto {
   items!: FolderDto[];
-}
-
-export class FolderResponseDto implements FolderDto {
-  id!: string;
-  name!: string;
-  createdAt!: string;
-  updatedAt!: string;
 }

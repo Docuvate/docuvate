@@ -19,7 +19,7 @@ import {
   type DuplicateRepository,
   type DuplicateStackRepository,
 } from '../../../shared/domain/ports.js';
-import { parseNumber, parseString, requireRecord } from '../../../shared/infrastructure/database/row-parse.js';
+import { parseNumber, parseString, requireRecord } from '../../../shared/domain/row-parse.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 import { clampCursorListLimit } from '../../../shared/infrastructure/pagination/clamp-cursor-list-limit.js';
 import { toDocumentListItemDto } from '../../documents/presentation/document.mapper.js';

@@ -10,7 +10,7 @@ import {
   OBJECT_STORAGE,
   type ObjectStorage,
 } from '../../../shared/domain/ports.js';
-import { isRecord } from '../../../shared/infrastructure/database/row-parse.js';
+import { isRecord } from '../../../shared/domain/row-parse.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 import { workerApiUrl } from '../../../shared/infrastructure/worker/worker-api-path.js';
 import { fetchWorkerJson } from '../../../shared/infrastructure/worker/worker-fetch.js';
@@ -76,9 +76,7 @@ export class RebuildDocumentFactIndexUseCase {
     const row = isRecord(response) ? response : {};
     const facts = parseExtractedFacts(row.extractedFacts);
     const wallTimeMs =
-      typeof row.wallTimeMs === 'number' && Number.isFinite(row.wallTimeMs)
-        ? row.wallTimeMs
-        : null;
+      typeof row.wallTimeMs === 'number' && Number.isFinite(row.wallTimeMs) ? row.wallTimeMs : null;
     await this.persistFacts.execute(tenantId, documentId, facts, wallTimeMs);
   }
 }

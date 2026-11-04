@@ -81,19 +81,3 @@ export function applySavedViewToLibrary(
     visibleColumns: view.visibleColumns,
   };
 }
-
-export function savedViewToListQuery(view: SavedDocumentViewDto): DocumentListQuery {
-  return {
-    sort: view.sort,
-    order: view.order,
-    status: view.status ?? undefined,
-    inbox: view.inbox ?? undefined,
-    withoutNonInboxLabel: view.withoutNonInboxLabel ?? undefined,
-    tagIds: view.tagIds.length > 0 ? view.tagIds : undefined,
-    folderId: view.folderId ?? undefined,
-    fieldFilters: normalizeFieldFilters(view.fieldFilters),
-    documentDateFrom: view.documentDateFrom ?? undefined,
-    documentDateTo: view.documentDateTo ?? undefined,
-    q: view.searchQuery.trim() || undefined,
-  };
-}

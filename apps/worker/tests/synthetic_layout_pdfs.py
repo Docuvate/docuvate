@@ -4,6 +4,16 @@ from __future__ import annotations
 
 import io
 
+from pypdf import PdfReader, PdfWriter
+from pypdf.generic import (
+    ArrayObject,
+    BooleanObject,
+    DictionaryObject,
+    NameObject,
+    NumberObject,
+    TextStringObject,
+)
+
 _BORN_DIGITAL_BANNER = (
     "Synthetic layout regression document with enough words to classify as born digital."
 )
@@ -27,7 +37,9 @@ def _single_page_pdf(
             f"3 0 obj<< /Type /Page /Parent 2 0 R /MediaBox {mb} "
             f"/Contents 4 0 R /Resources << /Font << {font_entries} >> >> >>endobj\n"
         ).encode("latin-1"),
-        bytes(f"4 0 obj<< /Length {len(stream_b)} >>stream\n", "latin-1") + stream_b + b"\nendstream\nendobj\n",
+        bytes(f"4 0 obj<< /Length {len(stream_b)} >>stream\n", "latin-1")
+        + stream_b
+        + b"\nendstream\nendobj\n",
         b"5 0 obj<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>endobj\n",
     ]
     if extra_font_objects:
@@ -94,7 +106,9 @@ def layout_regression_payroll_pdf() -> bytes:
             f"3 0 obj<< /Type /Page /Parent 2 0 R /MediaBox {mb} "
             f"/Contents 4 0 R /Resources << /Font << /F1 5 0 R /F2 6 0 R >> >> >>endobj\n"
         ).encode("latin-1"),
-        bytes(f"4 0 obj<< /Length {len(stream_b)} >>stream\n", "latin-1") + stream_b + b"\nendstream\nendobj\n",
+        bytes(f"4 0 obj<< /Length {len(stream_b)} >>stream\n", "latin-1")
+        + stream_b
+        + b"\nendstream\nendobj\n",
         b"5 0 obj<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>endobj\n",
         b"6 0 obj<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>endobj\n",
     ]
@@ -105,8 +119,8 @@ def layout_regression_payroll_pdf() -> bytes:
     for obj in objects:
         xref_lines.append(f"{offset:010d} 00000 n \n".encode("latin-1"))
         offset += len(obj)
-    trailer = (
-        f"trailer<< /Size 7 /Root 1 0 R >>\nstartxref\n{xref_start}\n%%EOF\n".encode("latin-1")
+    trailer = f"trailer<< /Size 7 /Root 1 0 R >>\nstartxref\n{xref_start}\n%%EOF\n".encode(
+        "latin-1"
     )
     return body + b"".join(xref_lines) + trailer
 
@@ -228,12 +242,6 @@ def german_umlaut_body_pdf() -> bytes:
     return _single_page_pdf(stream)
 
 
-def scanned_page_with_ocr_text_layer_pdf() -> bytes:
-    from tests.synthetic_scan_pdfs import scanned_with_invisible_ocr_text_layer_pdf
-
-    return scanned_with_invisible_ocr_text_layer_pdf()
-
-
 def multipage_portrait_landscape_table_pdf() -> bytes:
     """Portrait table header + landscape continuation page."""
     page1 = _single_page_pdf(
@@ -289,16 +297,6 @@ def form_disclosure_pdf() -> bytes:
 
 def form_disclosure_acroform_pdf() -> bytes:
     """Born-digital form with AcroForm text field and checked checkbox."""
-    from pypdf import PdfReader, PdfWriter
-    from pypdf.generic import (
-        ArrayObject,
-        BooleanObject,
-        DictionaryObject,
-        NameObject,
-        NumberObject,
-        TextStringObject,
-    )
-
     base = _single_page_pdf(
         "\n".join(
             [
@@ -360,8 +358,6 @@ def form_disclosure_acroform_pdf() -> bytes:
 
 def rotated_mediabox_pdf() -> bytes:
     """Portrait MediaBox with /Rotate 90; pdfplumber reports 842×595."""
-    from pypdf import PdfReader, PdfWriter
-
     base = _single_page_pdf(_banner_stream(), media=(595.0, 842.0))
     reader = PdfReader(io.BytesIO(base))
     writer = PdfWriter()
@@ -390,8 +386,6 @@ def mixed_page_sizes_pdf() -> bytes:
 
 
 def _merge_two_pages(page1: bytes, page2: bytes) -> bytes:
-    from pypdf import PdfReader, PdfWriter
-
     writer = PdfWriter()
     for blob in (page1, page2):
         reader = PdfReader(io.BytesIO(blob))

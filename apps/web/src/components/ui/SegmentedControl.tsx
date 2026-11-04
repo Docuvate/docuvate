@@ -8,7 +8,7 @@ import {
   useRef,
 } from 'react';
 
-export interface SegmentedOption<T extends string> {
+interface SegmentedOption<T extends string> {
   value: T;
   label: ReactNode;
   disabled?: boolean;
@@ -118,7 +118,9 @@ export function SegmentedControl<T extends string>({
             disabled={option.disabled}
             tabIndex={selected ? 0 : -1}
             className={`segmented-control__option${selected ? ' segmented-control__option--selected' : ''}`}
-            onClick={() => { onChange(option.value); }}
+            onClick={() => {
+              onChange(option.value);
+            }}
           >
             {option.label}
           </button>

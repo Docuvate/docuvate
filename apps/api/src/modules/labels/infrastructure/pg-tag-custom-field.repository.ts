@@ -11,7 +11,7 @@ import {
   parseNumber,
   parseString,
   requireRecord,
-} from '../../../shared/infrastructure/database/row-parse.js';
+} from '../../../shared/domain/row-parse.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 import type { TagCustomFieldEntity } from '../domain/tag-custom-field.entity.js';
 

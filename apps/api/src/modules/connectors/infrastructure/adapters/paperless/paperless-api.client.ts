@@ -7,7 +7,7 @@ import {
   parseOptionalString,
   parseString,
   recordFromUnknown,
-} from '../../../../../shared/infrastructure/database/row-parse.js';
+} from '../../../../../shared/domain/row-parse.js';
 import type { ConnectorConfigurationInput } from '../../../domain/connector.types.js';
 import { joinUrl, trimTrailingSlash } from '../shared/connector-http.js';
 import type {
@@ -24,12 +24,11 @@ import {
   MAX_LIST_ITEMS,
   MAX_LIST_PAGES,
   paperlessSafeFetch,
-  PaperlessUrlValidationError,
   readResponseWithSizeCap,
   validatePaperlessBaseUrl,
 } from './paperless-url-security.js';
 
-export interface PaperlessAuthHeaders {
+interface PaperlessAuthHeaders {
   Authorization: string;
 }
 
@@ -236,11 +235,11 @@ function parsePaperlessCustomField(value: unknown): PaperlessCustomField | null 
   };
 }
 
-export function resolvePaperlessBaseUrl(credentials: ConnectorConfigurationInput): string {
+function resolvePaperlessBaseUrl(credentials: ConnectorConfigurationInput): string {
   return trimTrailingSlash(readCredentialString(credentials, 'base_url').trim());
 }
 
-export async function resolveValidatedPaperlessBaseUrl(
+async function resolveValidatedPaperlessBaseUrl(
   credentials: ConnectorConfigurationInput
 ): Promise<string> {
   return validatePaperlessBaseUrl(resolvePaperlessBaseUrl(credentials));
@@ -266,9 +265,7 @@ function acceptHeader(apiVersion: number): string {
   return `application/json; version=${String(apiVersion)}`;
 }
 
-export async function obtainPaperlessApiToken(
-  credentials: ConnectorConfigurationInput
-): Promise<string> {
+async function obtainPaperlessApiToken(credentials: ConnectorConfigurationInput): Promise<string> {
   const baseUrl = await resolveValidatedPaperlessBaseUrl(credentials);
   const username = readCredentialString(credentials, 'username').trim();
   const password = readCredentialString(credentials, 'password').trim();
@@ -524,5 +521,3 @@ export class PaperlessApiClient {
     return this.listAllPages('/api/custom_fields/', 100, parsePaperlessCustomField);
   }
 }
-
-export { PaperlessUrlValidationError };

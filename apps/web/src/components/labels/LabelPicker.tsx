@@ -30,7 +30,7 @@ import { Popover } from '../ui/overlay/Popover';
 const SEARCH_DEBOUNCE_MS = 200;
 const LIST_MAX_HEIGHT_PX = 320;
 
-export type LabelPickerSelectionMode = 'single' | 'toggle';
+type LabelPickerSelectionMode = 'single' | 'toggle';
 
 interface LabelPickerBaseProps {
   placeholder?: string;
@@ -58,7 +58,7 @@ interface LabelPickerToggleProps extends LabelPickerBaseProps {
   onToggleTag: (tagId: string) => void;
 }
 
-export type LabelPickerProps = LabelPickerSingleProps | LabelPickerToggleProps;
+type LabelPickerProps = LabelPickerSingleProps | LabelPickerToggleProps;
 
 function isToggleProps(props: LabelPickerProps): props is LabelPickerToggleProps {
   return props.selectionMode === 'toggle';
@@ -89,10 +89,7 @@ export function LabelPicker(props: LabelPickerProps) {
   const [activeRowIndex, setActiveRowIndex] = useState(0);
   const debouncedQuery = useDebouncedValue(query, SEARCH_DEBOUNCE_MS);
   const search = useTagSearchInfiniteQuery(debouncedQuery, open);
-  const flattened = useMemo(
-    () => flattenTagSearchPages(search.data?.pages),
-    [search.data?.pages]
-  );
+  const flattened = useMemo(() => flattenTagSearchPages(search.data?.pages), [search.data?.pages]);
 
   const rows = useMemo(
     () =>
@@ -149,13 +146,7 @@ export function LabelPicker(props: LabelPickerProps) {
     if (last >= rows.length - 3 && flattened.hasMore && !search.isFetchingNextPage) {
       void search.fetchNextPage();
     }
-  }, [
-    flattened.hasMore,
-    open,
-    rows.length,
-    search,
-    virtualizer.range?.endIndex,
-  ]);
+  }, [flattened.hasMore, open, rows.length, search, virtualizer.range?.endIndex]);
 
   function trySelectActiveRow(): boolean {
     if (activeRowIndex < 0 || activeRowIndex >= rows.length) {
@@ -212,11 +203,11 @@ export function LabelPicker(props: LabelPickerProps) {
     props.createOptionLabel &&
     query.trim().length > 0 &&
     !flattened.tags.some(
-      (tag) => tag.name.trim().toLocaleLowerCase('de-DE') === query.trim().toLocaleLowerCase('de-DE')
+      (tag) =>
+        tag.name.trim().toLocaleLowerCase('de-DE') === query.trim().toLocaleLowerCase('de-DE')
     );
 
-  const showTruncatedTotal =
-    flattened.total != null && flattened.total > flattened.tags.length;
+  const showTruncatedTotal = flattened.total != null && flattened.total > flattened.tags.length;
 
   return (
     <div
@@ -225,7 +216,12 @@ export function LabelPicker(props: LabelPickerProps) {
       data-testid={props.testId}
     >
       <div className="label-picker-combobox-control" ref={controlRef}>
-        <Search className="label-picker-combobox-search-icon" size={16} strokeWidth={2} aria-hidden />
+        <Search
+          className="label-picker-combobox-search-icon"
+          size={16}
+          strokeWidth={2}
+          aria-hidden
+        />
         <input
           ref={inputRef}
           type="search"
@@ -245,7 +241,9 @@ export function LabelPicker(props: LabelPickerProps) {
             setOpen(true);
             setActiveRowIndex(0);
           }}
-          onFocus={() => { setOpen(true); }}
+          onFocus={() => {
+            setOpen(true);
+          }}
           onKeyDown={onInputKeyDown}
         />
         <IconButton
@@ -360,7 +358,11 @@ function LabelPickerRowView({
 }) {
   const { t } = useTranslation();
   if (row.kind === 'header') {
-    return <div className="label-picker-combobox-section" aria-hidden>{row.label}</div>;
+    return (
+      <div className="label-picker-combobox-section" aria-hidden>
+        {row.label}
+      </div>
+    );
   }
   if (row.kind === 'loading') {
     return <p className="label-picker-combobox-status muted">{t('labelPicker.loading')}</p>;
@@ -378,14 +380,11 @@ function LabelPickerRowView({
       role="option"
       aria-selected={selectionMode === 'toggle' ? isActive : active}
       className={`label-picker-combobox-option label-picker-item${active ? ' label-picker-combobox-option--active' : ''}${isActive ? ' label-picker-combobox-option--selected' : ''}`}
-      onClick={() => { onSelect(row.tag); }}
+      onClick={() => {
+        onSelect(row.tag);
+      }}
     >
-      <Chip
-        label={row.tag.name}
-        variant="assigned"
-        color={row.tag.color}
-        truncateLabel
-      />
+      <Chip label={row.tag.name} variant="assigned" color={row.tag.color} truncateLabel />
       {selectionMode === 'toggle' && isActive ? (
         <Check size={16} strokeWidth={2.25} aria-hidden />
       ) : null}

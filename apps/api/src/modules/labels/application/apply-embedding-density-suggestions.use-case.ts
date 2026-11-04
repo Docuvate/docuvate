@@ -2,10 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable, Logger } from '@nestjs/common';
 
-import {
-  TAXONOMY_REPOSITORY,
-  type TaxonomyRepository,
-} from '../../../shared/domain/ports.js';
+import { TAXONOMY_REPOSITORY, type TaxonomyRepository } from '../../../shared/domain/ports.js';
 import { embeddingDensityGloballyEnabled } from '../domain/embedding-density-flag.js';
 import { tagIdConflictsWithAssigned } from '../domain/filter-exclusive-tag-suggestions.js';
 import { HttpEmbeddingDensityAdapter } from '../infrastructure/http-embedding-density.adapter.js';
@@ -13,7 +10,7 @@ import { PgEmbeddingDensityRepository } from '../infrastructure/pg-embedding-den
 import { PgLabelCoOccurrenceRepository } from '../infrastructure/pg-label-co-occurrence.repository.js';
 import { PurgeExclusiveTagSuggestionsService } from '../infrastructure/purge-exclusive-tag-suggestions.service.js';
 
-export type EmbeddingDensitySuggestionOutcome = 'not_ready' | 'handled';
+type EmbeddingDensitySuggestionOutcome = 'not_ready' | 'handled';
 
 @Injectable()
 export class ApplyEmbeddingDensitySuggestionsUseCase {

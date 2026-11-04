@@ -5,7 +5,7 @@ from __future__ import annotations
 
 
 def character_shingles(text: str, *, size: int) -> set[str]:
-    normalized = ' '.join(text.upper().split())
+    normalized = " ".join(text.upper().split())
     if len(normalized) < size:
         return {normalized} if normalized else set()
     return {normalized[i : i + size] for i in range(len(normalized) - size + 1)}

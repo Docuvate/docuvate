@@ -5,12 +5,10 @@ import {
   labelSuggestionMeetsBatchThreshold,
   type LabelSuggestionScoreRow,
 } from '../../../labels/domain/label-suggestion-calibrated-confidence.js';
-import {
-  tagPairConflicts,
-} from '../../../labels/infrastructure/pg-label-co-occurrence.repository.js';
+import { tagPairConflicts } from '../../../labels/domain/tag-pair-conflicts.js';
 import type { TagSuggestionEntity } from '../../../taxonomy/domain/taxonomy.entity.js';
 
-export function rankLabelSuggestionsForReview(
+function rankLabelSuggestionsForReview(
   suggestions: TagSuggestionEntity[],
   fineThresholds: ReadonlyMap<string, number>
 ): TagSuggestionEntity[] {

@@ -12,7 +12,7 @@ import {
   parseOptionalNumber,
   parseString,
   requireRecord,
-} from '../../../shared/infrastructure/database/row-parse.js';
+} from '../../../shared/domain/row-parse.js';
 import { parseLabelFieldStorageKey } from '../../labels/domain/tag-custom-field.entity.js';
 import { parseGlobalFieldStorageKey } from '../../recognized-fields/domain/recognized-field.entity.js';
 import { normalizeFieldValue } from '../domain/normalize-field-value.js';
@@ -85,7 +85,7 @@ export async function loadFieldDefinitionLookup(
 }
 
 /** Storage key as persisted: label-scoped fields always carry their label in the key. */
-export function fieldStorageKey(field: ExtractedField): string {
+function fieldStorageKey(field: ExtractedField): string {
   const key = field.key.trim();
   if (field.tagId && !key.startsWith('label:')) {
     return `label:${field.tagId}:${key}`;
@@ -93,7 +93,7 @@ export function fieldStorageKey(field: ExtractedField): string {
   return key;
 }
 
-export interface DocumentFieldValueRow {
+interface DocumentFieldValueRow {
   fieldStorageKey: string;
   valueText: string;
   confidence: number | null;

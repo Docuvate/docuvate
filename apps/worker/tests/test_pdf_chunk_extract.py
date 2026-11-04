@@ -2,16 +2,18 @@
 # SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 
 import io
+from pathlib import Path
 
-from pypdf import PdfReader, PdfWriter
+import pytest
+from pypdf import PdfWriter
 
 from docuvate_worker.domain.models import ExtractionBlock
 from docuvate_worker.infrastructure.extractors.pdf_chunk_extract import (
     iter_pdf_page_chunk_specs,
+    load_cached_chunk_result,
     merge_chunk_ocr_results,
     pdf_page_count,
     persist_chunk_result,
-    load_cached_chunk_result,
     shift_blocks_page_offset,
     slice_pdf_bytes,
 )
@@ -39,7 +41,7 @@ def test_chunk_specs_cover_all_pages() -> None:
     assert len(specs) == 3
 
 
-def test_chunk_cache_roundtrip(tmp_path, monkeypatch) -> None:
+def test_chunk_cache_roundtrip(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("DOCUVATE_EXTRACT_CHUNK_CACHE_DIR", str(tmp_path))
     content = _three_page_pdf()
     spec = iter_pdf_page_chunk_specs(3, chunk_pages=2)[0]
@@ -78,5 +80,6 @@ def test_merge_and_shift_page_offsets() -> None:
     )
     assert shifted[0].page == 5
     text, blocks = merge_chunk_ocr_results([("one", shifted), ("two", [])])
-    assert "one" in text and "two" in text
+    assert "one" in text
+    assert "two" in text
     assert blocks[0].page == 5

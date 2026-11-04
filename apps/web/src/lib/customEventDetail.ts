@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { isRecord } from './apiErrors';
 
-export function readCustomEventDetail(event: Event): unknown {
+function readCustomEventDetail(event: Event): unknown {
   return event instanceof CustomEvent ? event.detail : undefined;
 }
 

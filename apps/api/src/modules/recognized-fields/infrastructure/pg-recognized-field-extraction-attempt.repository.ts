@@ -10,7 +10,7 @@ import {
   parseOptionalNumber,
   parseString,
   requireRecord,
-} from '../../../shared/infrastructure/database/row-parse.js';
+} from '../../../shared/domain/row-parse.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 import type { FieldGateDefaults } from '../domain/field-gate-defaults.js';
 import { RECOGNIZED_FIELD_EXTRACTOR_VERSION } from '../domain/recognized-field-reextract-config.js';
@@ -23,7 +23,7 @@ const OUTCOMES: readonly RecognizedFieldExtractionOutcome[] = [
   'found',
 ];
 
-export interface RecognizedFieldExtractionAttemptRow {
+interface RecognizedFieldExtractionAttemptRow {
   fieldDefinitionId: string;
   fieldKey: string;
   outcome: RecognizedFieldExtractionOutcome;
@@ -47,7 +47,10 @@ function mapRow(row: Record<string, unknown>): RecognizedFieldExtractionAttemptR
 export class PgRecognizedFieldExtractionAttemptRepository {
   constructor(@Inject(PG_POOL) private readonly pool: pg.Pool) {}
 
-  async listForDocument(documentId: string, userId: string): Promise<RecognizedFieldExtractionAttemptRow[]> {
+  async listForDocument(
+    documentId: string,
+    userId: string
+  ): Promise<RecognizedFieldExtractionAttemptRow[]> {
     const result = await this.pool.query(
       `SELECT a.field_definition_id, a.outcome, a.confidence, a.extractor_version, a.updated_at, r.field_key
        FROM document_recognized_field_extraction_attempt a

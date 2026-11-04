@@ -7,8 +7,6 @@ import {
   streamDocumentChatLlm,
 } from './cited-chat-llm.js';
 
-export type { CitedAnswerJson, CitedClaimJson } from '../domain/cited-answer-json.js';
-
 const ANSWER_JSON_SCHEMA = {
   type: 'object',
   properties: {
@@ -171,4 +169,3 @@ function parseCitedAnswerJsonResponse(
     return { ok: false, detail: 'invalid json response' };
   }
 }
-

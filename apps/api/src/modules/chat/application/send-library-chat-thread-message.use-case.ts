@@ -16,7 +16,7 @@ import { DocumentChatGenerationQueueService } from '../../documents/infrastructu
 import { assertChatEnabled } from '../../settings/application/assert-chat-enabled.js';
 import { EffectiveDocumentChatProviderUseCase } from '../../settings/application/effective-document-chat-provider.use-case.js';
 
-export interface SendLibraryChatThreadMessageResult extends DocumentChatResponse {
+interface SendLibraryChatThreadMessageResult extends DocumentChatResponse {
   userMessage: DocumentChatMessageEntity;
   assistantMessage: DocumentChatMessageEntity;
   asyncGeneration: boolean;

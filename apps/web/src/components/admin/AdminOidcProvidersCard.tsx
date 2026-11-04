@@ -18,8 +18,8 @@ import {
 import { formatUserFacingError } from '../../lib/apiErrors';
 import { notifySaved, notifySaveError } from '../../lib/saveNotify';
 import { useFormDraft } from '../../lib/useFormDraft';
-import { PageFormSaveKit } from '../save/PageFormSaveKit';
-import { SettingsSectionCard } from '../settings/SettingsSectionCard';
+import { PageFormSaveKit } from '../save';
+import { SettingsSectionCard } from '../settings';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { PasswordInput } from '../ui/PasswordInput';
@@ -147,7 +147,13 @@ export function AdminOidcProvidersCard() {
       ) : null}
       <div className="admin-oidc-layout settings-stack">
         <div className="admin-oidc-list">
-          <Button type="button" variant="secondary" onClick={() => { setSelectedId(null); }}>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() => {
+              setSelectedId(null);
+            }}
+          >
             {t('admin.oidcProviders.newProvider')}
           </Button>
           <ul>
@@ -158,7 +164,9 @@ export function AdminOidcProvidersCard() {
                   <Button
                     type="button"
                     variant={selectedId === provider.id ? 'primary' : 'secondary'}
-                    onClick={() => { setSelectedId(provider.id); }}
+                    onClick={() => {
+                      setSelectedId(provider.id);
+                    }}
                   >
                     {provider.displayName}
                   </Button>
@@ -249,7 +257,12 @@ export function AdminOidcProvidersCard() {
             </p>
           ) : null}
           {adminSelected ? (
-            <Button type="button" variant="secondary" disabled={saving} onClick={() => void removeSelected()}>
+            <Button
+              type="button"
+              variant="secondary"
+              disabled={saving}
+              onClick={() => void removeSelected()}
+            >
               {t('admin.oidcProviders.delete')}
             </Button>
           ) : null}
@@ -259,7 +272,9 @@ export function AdminOidcProvidersCard() {
         dirty={form.dirty}
         saving={saving}
         onSave={() => void save()}
-        onDiscard={() => { form.discard(); }}
+        onDiscard={() => {
+          form.discard();
+        }}
       />
     </SettingsSectionCard>
   );

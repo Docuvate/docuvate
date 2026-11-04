@@ -14,17 +14,16 @@ def extraction_blocks_to_models(
     context: str,
 ) -> list[ExtractionBlockModel]:
     safe = sanitize_extraction_blocks(blocks, context=context) or []
-    models: list[ExtractionBlockModel] = []
-    for block in safe:
-        models.append(
-            ExtractionBlockModel(
-                page=block.page,
-                x=block.x,
-                y=block.y,
-                width=block.width,
-                height=block.height,
-                text=block.text,
-                block_index=block.block_index,
-            )
+    models: list[ExtractionBlockModel] = [
+        ExtractionBlockModel(
+            page=block.page,
+            x=block.x,
+            y=block.y,
+            width=block.width,
+            height=block.height,
+            text=block.text,
+            block_index=block.block_index,
         )
+        for block in safe
+    ]
     return models

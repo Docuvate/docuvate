@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Checkbox } from './Checkbox';
 
-export interface DocumentTableRowProps {
+interface DocumentTableRowProps {
   selected?: boolean;
   title: ReactNode;
   meta?: ReactNode;
@@ -29,9 +29,7 @@ export function DocumentTableRow({
 }: DocumentTableRowProps) {
   const { t } = useTranslation();
   return (
-    <div
-      className={`doc-table-row${selected ? ' doc-table-row-selected' : ''}`.trim()}
-    >
+    <div className={`doc-table-row${selected ? ' doc-table-row-selected' : ''}`.trim()}>
       <Checkbox
         checked={selected}
         aria-label={t('ui.table.selectRow')}

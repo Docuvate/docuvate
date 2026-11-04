@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import type { LabelHybridDocumentRow } from './label-hybrid-training.js';
+import type { LabelHybridDocumentRow } from './label-hybrid-document-row.js';
 
 /**
  * Fingerprint of user-confirmed labeled rows (document + tag set).

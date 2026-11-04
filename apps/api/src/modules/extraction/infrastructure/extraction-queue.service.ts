@@ -5,8 +5,8 @@ import { type Job, Queue, UnrecoverableError, Worker } from 'bullmq';
 import type IORedis from 'ioredis';
 
 import { DOCUMENT_REPOSITORY, type DocumentRepository } from '../../../shared/domain/ports.js';
+import { parseString, requireRecord } from '../../../shared/domain/row-parse.js';
 import { arenaSampleRate } from '../../../shared/infrastructure/arena/arena-sample-config.js';
-import { parseString, requireRecord } from '../../../shared/infrastructure/database/row-parse.js';
 import { enqueueBullJobWithRetry } from '../../../shared/infrastructure/queue/bullmq-enqueue-retry.js';
 import {
   assertBullFixedJobIdQueued,

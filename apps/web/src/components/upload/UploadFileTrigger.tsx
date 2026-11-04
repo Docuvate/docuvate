@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 
 import { UPLOAD_ACCEPT } from '../../lib/documentUploadConstants';
 import { Button } from '../ui/Button';
-import { useDocumentUploadContext } from './DocumentUploadProvider';
+import { useDocumentUploadContext } from './documentUploadContext';
 
 interface UploadFileTriggerProps {
   variant?: 'primary' | 'secondary' | 'ghost';

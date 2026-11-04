@@ -1,17 +1,21 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import type { DocumentExtractionImageDto, ExtractionBlock, NormalizedBBox } from '@docuvate/contracts';
+import type {
+  DocumentExtractionImageDto,
+  ExtractionBlock,
+  NormalizedBBox,
+} from '@docuvate/contracts';
 import { Inject, Injectable } from '@nestjs/common';
 import type pg from 'pg';
 
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 import { loadExtractionImagesForDocuments } from '../../documents/infrastructure/document-extraction-images.persistence.js';
+import { normalizeForQuoteMatch } from '../domain/quote-match-normalize.js';
 import { resolveCitationBboxFromBlocks } from '../domain/resolve-citation-bbox.js';
 import { resolveCitationDocumentImage } from '../domain/resolve-citation-document-image.js';
 import { resolveCitationPageFromBlocks } from '../domain/resolve-citation-page.js';
-import { normalizeForQuoteMatch } from '../domain/verify-citation-quote.js';
 
-export interface StoredChatCitation {
+interface StoredChatCitation {
   ordinal: number;
   documentId: string;
   documentTitle: string;
@@ -146,9 +150,7 @@ export class PgChatMessageCitationsRepository {
       bbox: null,
       documentImage: null,
     }));
-    const enriched = await this.enrichCitationPages(
-      new Map([['single', mapped]])
-    );
+    const enriched = await this.enrichCitationPages(new Map([['single', mapped]]));
     return enriched.get('single') ?? mapped;
   }
 
@@ -206,11 +208,7 @@ export class PgChatMessageCitationsRepository {
         messageId,
         citations.map((c) => ({
           ...c,
-          page: resolveCitationPageFromBlocks(
-            c.quote,
-            blocksByDoc.get(c.documentId) ?? [],
-            c.page
-          ),
+          page: resolveCitationPageFromBlocks(c.quote, blocksByDoc.get(c.documentId) ?? [], c.page),
         }))
       );
     }

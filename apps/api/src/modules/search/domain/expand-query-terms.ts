@@ -4,7 +4,7 @@ import { isTypoWithinDistance } from './damerau-levenshtein.js';
 import { normalizeSearchText, tokenizeSearchQuery } from './normalize-search-text.js';
 import { CHUNK_VOCAB_GATE_MIN_LENGTH, isFourDigitYearToken } from './vocabulary-gate.js';
 
-export interface VocabularyCandidate {
+interface VocabularyCandidate {
   term: string;
   similarity: number;
 }
@@ -12,11 +12,11 @@ export interface VocabularyCandidate {
 export const MIN_VOCABULARY_SIMILARITY = 0.45;
 export const MIN_QUERY_RELEVANCE_SCORE = 0.45;
 /** Vocabulary neighbors shorter than this are never used as fuzzy expansions. */
-export const MIN_FUZZY_EXPANSION_TERM_LENGTH = 4;
+const MIN_FUZZY_EXPANSION_TERM_LENGTH = 4;
 const MAX_EXPANSIONS_PER_TOKEN = 6;
 const MIN_TOKEN_LENGTH_FOR_TYPO = 5;
 
-export interface ExpandQueryTermsResult {
+interface ExpandQueryTermsResult {
   expanded: string[];
   /** Highest confidence from accepted vocabulary neighbors (0 when none qualify). */
   queryRelevance: number;

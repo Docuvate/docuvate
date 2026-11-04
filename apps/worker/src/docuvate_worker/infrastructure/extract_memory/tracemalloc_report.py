@@ -44,8 +44,7 @@ def capture_tracemalloc_top(stage: str) -> list[AllocationSite]:
     path = os.environ.get("DOCUVATE_EXTRACT_TRACEMALLOC_PATH")
     if path:
         lines = [f"stage={stage}"]
-        for site in sites:
-            lines.append(f"{site.size_kib:.1f} KiB x{site.count} {site.traceback}")
+        lines.extend(f"{site.size_kib:.1f} KiB x{site.count} {site.traceback}" for site in sites)
         with open(path, "a", encoding="utf-8") as handle:
             handle.write("\n".join(lines) + "\n")
     return sites

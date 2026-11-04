@@ -1,9 +1,9 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 
-import { type ConfidenceLevel,confidenceLevelFromPercent } from '../../lib/confidenceLevel';
+import { type ConfidenceLevel, confidenceLevelFromPercent } from '../../lib/confidenceLevel';
 
-export interface ConfidenceProps {
+interface ConfidenceProps {
   /** 0–100 */
   value: number;
   className?: string;

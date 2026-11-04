@@ -28,7 +28,7 @@ import {
   parseOptionalString,
   parseString,
   recordFromUnknown,
-} from '../../../shared/infrastructure/database/row-parse.js';
+} from '../../../shared/domain/row-parse.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 import { bufferToHex } from '../domain/ir-hash.js';
 
@@ -865,4 +865,3 @@ export class PgDocumentRegionRepository implements DocumentRegionRepository {
     }
   }
 }
-

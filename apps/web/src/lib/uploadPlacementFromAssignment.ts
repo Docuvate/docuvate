@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { DocumentUploadAssignment } from './documentUploadAssignment';
 
-export interface UploadPlacementQuery {
+interface UploadPlacementQuery {
   folderId?: string;
 }
 

@@ -5,7 +5,7 @@ import type { TFunction } from 'i18next';
 import { routes } from '../routes';
 import { fuzzyMatchScore, highlightFuzzySpans } from './fuzzyScore';
 
-export interface RegistryHit {
+interface RegistryHit {
   type: 'setting' | 'action';
   id: string;
   title: string;

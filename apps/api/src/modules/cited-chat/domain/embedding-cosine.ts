@@ -18,18 +18,3 @@ export function cosineSimilarity(a: number[], b: number[]): number {
   }
   return dot / (Math.sqrt(na) * Math.sqrt(nb));
 }
-
-export function meanVector(vectors: number[][]): number[] {
-  if (vectors.length === 0) {
-    return [];
-  }
-  const dim = vectors[0].length;
-  const acc = new Array<number>(dim).fill(0);
-  for (const vec of vectors) {
-    for (let i = 0; i < dim; i += 1) {
-      acc[i] += vec[i] ?? 0;
-    }
-  }
-  const n = vectors.length;
-  return acc.map((v) => v / n);
-}

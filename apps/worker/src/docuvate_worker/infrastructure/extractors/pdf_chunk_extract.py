@@ -10,6 +10,7 @@ import io
 import json
 import logging
 import os
+import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -87,10 +88,7 @@ def _content_fingerprint(content: bytes) -> str:
 
 def _chunk_cache_dir() -> Path:
     base = os.environ.get(_ENV_CHUNK_CACHE, "").strip()
-    if base:
-        path = Path(base)
-    else:
-        path = Path(os.environ.get("TMPDIR", "/tmp")) / "docuvate-extract-chunks"
+    path = Path(base) if base else Path(tempfile.gettempdir()) / "docuvate-extract-chunks"
     path.mkdir(parents=True, exist_ok=True)
     return path
 
@@ -194,19 +192,18 @@ def shift_blocks_page_offset(
 ) -> list[ExtractionBlock]:
     if page_offset == 0:
         return blocks
-    shifted: list[ExtractionBlock] = []
-    for block in blocks:
-        shifted.append(
-            ExtractionBlock(
-                page=block.page + page_offset,
-                x=block.x,
-                y=block.y,
-                width=block.width,
-                height=block.height,
-                text=block.text,
-                block_index=block.block_index,
-            )
+    shifted: list[ExtractionBlock] = [
+        ExtractionBlock(
+            page=block.page + page_offset,
+            x=block.x,
+            y=block.y,
+            width=block.width,
+            height=block.height,
+            text=block.text,
+            block_index=block.block_index,
         )
+        for block in blocks
+    ]
     return shifted
 
 

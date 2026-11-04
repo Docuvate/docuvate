@@ -21,12 +21,6 @@ export function documentStatusLabel(status: DocumentStatus): string {
   return translated;
 }
 
-export function documentStatusFilterToken(status: DocumentStatus): string {
-  if (status === 'failed') return 'error';
-  if (status === 'extracting') return 'extraction';
-  return status;
-}
-
 export const documentStatusValues: DocumentStatus[] = [
   'uploaded',
   'queued',

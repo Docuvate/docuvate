@@ -11,7 +11,7 @@ import { UPLOAD_ACCEPT } from '../../lib/documentUploadConstants';
 import { routes } from '../../lib/routes';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
-import { DocumentUploadProvider, useDocumentUploadContext } from '../upload/DocumentUploadProvider';
+import { DocumentUploadProvider, useDocumentUploadContext } from '../upload';
 import { UploadDropzone } from '../UploadDropzone';
 
 function OnboardingUploadButton() {
@@ -77,17 +77,30 @@ export function DashboardOnboarding() {
             <div className="dashboard-onboarding-step-icon dashboard-onboarding-step-icon-active">
               <Upload size={20} aria-hidden />
             </div>
-            <h2 className="dashboard-onboarding-step-title">{t('dashboard.onboarding.stepUploadTitle')}</h2>
-            <p className="dashboard-onboarding-step-text">{t('dashboard.onboarding.stepUploadText')}</p>
+            <h2 className="dashboard-onboarding-step-title">
+              {t('dashboard.onboarding.stepUploadTitle')}
+            </h2>
+            <p className="dashboard-onboarding-step-text">
+              {t('dashboard.onboarding.stepUploadText')}
+            </p>
             <OnboardingUploadButton />
           </Card>
           <Card className="dashboard-onboarding-step">
             <div className="dashboard-onboarding-step-icon">
               <Sparkles size={20} aria-hidden />
             </div>
-            <h2 className="dashboard-onboarding-step-title">{t('dashboard.onboarding.stepReviewTitle')}</h2>
-            <p className="dashboard-onboarding-step-text">{t('dashboard.onboarding.stepReviewText')}</p>
-            <Button type="button" variant="secondary" disabled className="dashboard-onboarding-step-btn">
+            <h2 className="dashboard-onboarding-step-title">
+              {t('dashboard.onboarding.stepReviewTitle')}
+            </h2>
+            <p className="dashboard-onboarding-step-text">
+              {t('dashboard.onboarding.stepReviewText')}
+            </p>
+            <Button
+              type="button"
+              variant="secondary"
+              disabled
+              className="dashboard-onboarding-step-btn"
+            >
               {t('dashboard.onboarding.stepReviewPending')}
             </Button>
           </Card>
@@ -95,8 +108,12 @@ export function DashboardOnboarding() {
             <div className="dashboard-onboarding-step-icon">
               <Link2 size={20} aria-hidden />
             </div>
-            <h2 className="dashboard-onboarding-step-title">{t('dashboard.onboarding.stepConnectTitle')}</h2>
-            <p className="dashboard-onboarding-step-text">{t('dashboard.onboarding.stepConnectText')}</p>
+            <h2 className="dashboard-onboarding-step-title">
+              {t('dashboard.onboarding.stepConnectTitle')}
+            </h2>
+            <p className="dashboard-onboarding-step-text">
+              {t('dashboard.onboarding.stepConnectText')}
+            </p>
             <Link
               to={routes.settingsConnectors}
               className="btn btn-secondary dashboard-onboarding-step-btn"

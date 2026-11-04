@@ -4,10 +4,7 @@ import { Inject, Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/commo
 import { Queue, Worker } from 'bullmq';
 import type IORedis from 'ioredis';
 
-import {
-  isRecord,
-  parseString,
-} from '../../../shared/infrastructure/database/row-parse.js';
+import { isRecord, parseString } from '../../../shared/domain/row-parse.js';
 import {
   CORRECTION_DRIVEN_FAMILY_IDS,
   mlopsEnabled,
@@ -128,11 +125,7 @@ export class MlRetrainQueueService implements OnModuleInit, OnModuleDestroy {
     if (!queue) {
       return;
     }
-    await queue.add(
-      'retrain',
-      { jobId, familyId },
-      { removeOnComplete: 100, removeOnFail: 50 }
-    );
+    await queue.add('retrain', { jobId, familyId }, { removeOnComplete: 100, removeOnFail: 50 });
   }
 
   private async scanThresholds(): Promise<void> {

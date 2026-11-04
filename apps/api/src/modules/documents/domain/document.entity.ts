@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { DocumentExtractionDto } from '@docuvate/contracts';
 
-import type { FolderEntity } from '../../../shared/domain/ports.js';
+import type { FolderEntity } from '../../../shared/domain/folder.entity.js';
 import type { TagEntity } from '../../taxonomy/domain/taxonomy.entity.js';
 
 export type DocumentStatus = 'uploaded' | 'queued' | 'extracting' | 'ready' | 'failed';

@@ -30,23 +30,6 @@ export function todoWhyLine(
   return t('labelRecommendations.typeRename');
 }
 
-export function todoBadgeLabel(item: LabelRecommendationDto, t: TFunction): string {
-  switch (item.kind) {
-    case 'assign':
-      return t('labels.todoBadgeAssign');
-    case 'new':
-      return t('labels.todoBadgeNew');
-    case 'merge':
-      return t('labels.todoBadgeMerge');
-    case 'rename':
-      return t('labelRecommendations.badgeRename');
-    default: {
-      const _exhaustive: never = item.kind;
-      return _exhaustive;
-    }
-  }
-}
-
 export function recommendationLabelName(item: LabelRecommendationDto): string {
   if (item.kind === 'new') {
     return item.proposedName ?? item.id;

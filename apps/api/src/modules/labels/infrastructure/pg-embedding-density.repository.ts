@@ -38,7 +38,7 @@ export interface EmbeddingDensityTrainingExamples {
   allLabelIds: string[];
 }
 
-export interface CorrectionPropagatedAssignmentRow {
+interface CorrectionPropagatedAssignmentRow {
   documentId: string;
   tagId: string;
   inboxCleared: boolean;
@@ -86,7 +86,9 @@ export class PgEmbeddingDensityRepository {
   }
 
   async listUsersWithCalibrationReady(): Promise<string[]> {
-    const rows = await this.userStateRepo.find({ select: ['userId', 'coarseReady', 'fineReadyTagIds'] });
+    const rows = await this.userStateRepo.find({
+      select: ['userId', 'coarseReady', 'fineReadyTagIds'],
+    });
     return rows
       .filter((row) => row.coarseReady || row.fineReadyTagIds.length > 0)
       .map((row) => row.userId);
@@ -124,7 +126,10 @@ export class PgEmbeddingDensityRepository {
     return map;
   }
 
-  async loadWorkerState(userId: string, tagIds: string[]): Promise<EmbeddingDensityWorkerState | null> {
+  async loadWorkerState(
+    userId: string,
+    tagIds: string[]
+  ): Promise<EmbeddingDensityWorkerState | null> {
     const userState = await this.userStateRepo.findOne({ where: { userId } });
     if (!userState) {
       return null;
@@ -242,7 +247,9 @@ export class PgEmbeddingDensityRepository {
       const sumXxF32 =
         stats.sum_xx_f32 !== undefined
           ? Buffer.from(stats.sum_xx_f32, 'base64')
-          : encodeSumXxF32(stats.sum_xx.length > 0 ? stats.sum_xx : Array.from({ length: dim }, () => []));
+          : encodeSumXxF32(
+              stats.sum_xx.length > 0 ? stats.sum_xx : Array.from({ length: dim }, () => [])
+            );
       await this.classNiwRepo.upsert(
         {
           userId,
@@ -461,14 +468,8 @@ export class PgEmbeddingDensityRepository {
       return false;
     }
     const withdrawnAt = new Date();
-    await this.correctionsRepo.update(
-      { id: correctionId },
-      { status: 'withdrawn', withdrawnAt }
-    );
-    await this.correctionRepo.update(
-      { correctionId },
-      { status: 'withdrawn' }
-    );
+    await this.correctionsRepo.update({ id: correctionId }, { status: 'withdrawn', withdrawnAt });
+    await this.correctionRepo.update({ correctionId }, { status: 'withdrawn' });
     return true;
   }
 

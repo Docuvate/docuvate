@@ -2,7 +2,9 @@
 
 from fastapi.testclient import TestClient
 
+from docuvate_worker.infrastructure.layout.extract import extract_layout_pdf_bytes
 from docuvate_worker.main import app
+from tests.synthetic_layout_fpdf import arabic_rtl_pdf
 
 client = TestClient(app)
 SECRET = "worker-shared-secret"
@@ -13,9 +15,6 @@ def _headers() -> dict[str, str]:
 
 
 def test_render_typst_marks_arabic_unreliable() -> None:
-    from docuvate_worker.infrastructure.layout.extract import extract_layout_pdf_bytes
-    from tests.synthetic_layout_fpdf import arabic_rtl_pdf
-
     pdf = arabic_rtl_pdf()
     doc = extract_layout_pdf_bytes(pdf)
     assert doc is not None

@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Button } from '../ui/Button';
 
-export interface SaveBarProps {
+interface SaveBarProps {
   visible: boolean;
   saving: boolean;
   error?: string | null;

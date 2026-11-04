@@ -3,14 +3,11 @@
 
 from __future__ import annotations
 
-import sys
-from pathlib import Path
-
-ROOT = Path(__file__).resolve().parents[3]
-if str(ROOT) not in sys.path:
-    sys.path.insert(0, str(ROOT))
-
-from bench.model_gates.ratchet import compare_to_baseline, merge_baseline_with_measured, metric_direction_for
+from bench.model_gates.ratchet import (
+    compare_to_baseline,
+    merge_baseline_with_measured,
+    metric_direction_for,
+)
 from bench.model_gates.schema import CommittedBaseline
 
 

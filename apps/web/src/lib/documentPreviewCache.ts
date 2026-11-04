@@ -13,11 +13,3 @@ export async function fetchDocumentPreviewBuffer(
   bufferByDocumentId.set(documentId, buffer);
   return buffer;
 }
-
-export function clearDocumentPreviewCache(documentId?: string): void {
-  if (documentId) {
-    bufferByDocumentId.delete(documentId);
-    return;
-  }
-  bufferByDocumentId.clear();
-}

@@ -13,7 +13,7 @@ import {
   type ObjectStorage,
 } from '../../../shared/domain/ports.js';
 
-export interface DocumentPreviewContent {
+interface DocumentPreviewContent {
   buffer: Buffer;
   filename: string;
 }

@@ -1,8 +1,8 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { isRecord, parseNumber } from '../../../shared/infrastructure/database/row-parse.js';
+import { isRecord, parseNumber } from '../../../shared/domain/row-parse.js';
 
-export interface CitedChatBenchTimingMs {
+interface CitedChatBenchTimingMs {
   embedMs: number;
   retrieveMs: number;
   rerankMs: number;
@@ -12,7 +12,7 @@ export interface CitedChatBenchTimingMs {
   promptChars: number;
 }
 
-export interface CitedChatBenchStatsPayload {
+interface CitedChatBenchStatsPayload {
   citedRejectedClaims: number;
   timingMs?: CitedChatBenchTimingMs;
 }

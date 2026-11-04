@@ -13,11 +13,11 @@ import type {
   WorkspaceMlSettings,
   WorkspaceMlSettingsRepository,
 } from '../../../shared/domain/ports.js';
-import { parseEnum, recordFromUnknown } from '../../../shared/infrastructure/database/row-parse.js';
+import { parseEnum, recordFromUnknown } from '../../../shared/domain/row-parse.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 import { INSTALLATION_TENANT_ID } from '../../auth/domain/installation.constants.js';
 
-export const WORKSPACE_ML_SETTINGS_DEFAULTS: WorkspaceMlSettings = {
+const WORKSPACE_ML_SETTINGS_DEFAULTS: WorkspaceMlSettings = {
   labelAutoAssign: 'normal',
   labelSuggestions: 'normal',
   duplicateDetection: 'exact',
@@ -33,14 +33,26 @@ function mapRow(raw: unknown): WorkspaceMlSettings {
   }
   const defaults = WORKSPACE_ML_SETTINGS_DEFAULTS;
   return {
-    labelAutoAssign: parseEnum(row.label_auto_assign, LABEL_AUTO_ASSIGN_PRESETS, defaults.labelAutoAssign),
-    labelSuggestions: parseEnum(row.label_suggestions, LABEL_SUGGESTION_PRESETS, defaults.labelSuggestions),
+    labelAutoAssign: parseEnum(
+      row.label_auto_assign,
+      LABEL_AUTO_ASSIGN_PRESETS,
+      defaults.labelAutoAssign
+    ),
+    labelSuggestions: parseEnum(
+      row.label_suggestions,
+      LABEL_SUGGESTION_PRESETS,
+      defaults.labelSuggestions
+    ),
     duplicateDetection: parseEnum(
       row.duplicate_detection,
       DUPLICATE_DETECTION_MODES,
       defaults.duplicateDetection
     ),
-    fieldAcceptance: parseEnum(row.field_acceptance, FIELD_ACCEPTANCE_PRESETS, defaults.fieldAcceptance),
+    fieldAcceptance: parseEnum(
+      row.field_acceptance,
+      FIELD_ACCEPTANCE_PRESETS,
+      defaults.fieldAcceptance
+    ),
   };
 }
 

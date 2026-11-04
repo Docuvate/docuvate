@@ -8,10 +8,14 @@ import { PgCitedChatRetrievalRepository } from '../../src/modules/cited-chat/inf
 import { PgDuplicateRepository } from '../../src/modules/duplicates/infrastructure/pg-duplicate.repository.js';
 import { PgGlobalSearchRepository } from '../../src/modules/search/infrastructure/pg-global-search.repository.js';
 import { PgTaxonomyRepository } from '../../src/modules/taxonomy/infrastructure/pg-taxonomy.repository.js';
-import { parseNumber, parseString, requireRecord } from '../../src/shared/infrastructure/database/row-parse.js';
+import { parseNumber, parseString, requireRecord } from '../../src/shared/domain/row-parse.js';
 import { withTenantPgClient } from '../../src/shared/infrastructure/database/tenant-pg.js';
 import { closeIntegrationPool, getIntegrationPool } from './pg-pool.js';
-import { deleteSyntheticUser, insertSyntheticUser, newIsolationUserId } from './pg-test-isolation.js';
+import {
+  deleteSyntheticUser,
+  insertSyntheticUser,
+  newIsolationUserId,
+} from './pg-test-isolation.js';
 
 /** Exercise RLS policies (superuser test DB otherwise bypasses row security). */
 async function withRlsEnforcedPgClient<T>(
@@ -120,8 +124,16 @@ describe('tenant representation cross-tenant leak (blocking, Testcontainers Post
 
     const client = await pool.connect();
     try {
-      await insertSyntheticUser(client, { id: userA, name: 'Tenant A', email: `${userA}@example.test` });
-      await insertSyntheticUser(client, { id: userB, name: 'Tenant B', email: `${userB}@example.test` });
+      await insertSyntheticUser(client, {
+        id: userA,
+        name: 'Tenant A',
+        email: `${userA}@example.test`,
+      });
+      await insertSyntheticUser(client, {
+        id: userB,
+        name: 'Tenant B',
+        email: `${userB}@example.test`,
+      });
     } finally {
       client.release();
     }
@@ -185,7 +197,9 @@ describe('tenant representation cross-tenant leak (blocking, Testcontainers Post
     const suggestions = await taxonomyRepo.listSuggestions(docA, userA);
     const duplicates = await duplicateRepo.listForDocument(docA, userA);
     const sqlScoped = await withRlsEnforcedPgClient(pool, userA, async (client) => {
-      const rep = await client.query(`SELECT document_id::text FROM document_representation ORDER BY document_id`);
+      const rep = await client.query(
+        `SELECT document_id::text FROM document_representation ORDER BY document_id`
+      );
       const units = await client.query(
         `SELECT document_id::text FROM document_representation_unit ORDER BY document_id`
       );

@@ -8,12 +8,16 @@ import type {
   OperationObject,
 } from '@nestjs/swagger/dist/interfaces/open-api-spec.interface.js';
 
-import { isOpenApiHttpMethodKey, isOpenApiOperationObject, openApiPathItemOperations } from './openapi-type-guards.js';
+import {
+  isOpenApiHttpMethodKey,
+  isOpenApiOperationObject,
+  openApiPathItemOperations,
+} from './openapi-type-guards.js';
 import { isPublicOpenApiExcludedPath } from './public-openapi-paths.js';
 
-export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD' | 'OPTIONS';
+type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD' | 'OPTIONS';
 
-export interface RouteAllowlistEntry {
+interface RouteAllowlistEntry {
   method: HttpMethod | '*';
   path: string;
   /** Comment for maintainers (health checks, better-auth, etc.) */
@@ -21,14 +25,14 @@ export interface RouteAllowlistEntry {
 }
 
 /** Routes served by the API but intentionally omitted from the product OpenAPI document. */
-export const OPENAPI_ROUTE_ALLOWLIST: RouteAllowlistEntry[] = [
+const OPENAPI_ROUTE_ALLOWLIST: RouteAllowlistEntry[] = [
   { method: 'GET', path: '/health', reason: 'Load balancer liveness probe' },
   { method: 'GET', path: '/health/ready', reason: 'Load balancer readiness probe' },
   { method: '*', path: '/api/auth/*', reason: 'better-auth handler (not part of /v1 product API)' },
 ];
 
 /** Operations documented without auth (browser redirects or public metadata). */
-export const OPENAPI_PUBLIC_OPERATION_IDS = new Set<string>([
+const OPENAPI_PUBLIC_OPERATION_IDS = new Set<string>([
   'getOpenApiDocument',
   'connectorOAuthCallback',
 ]);
@@ -43,7 +47,7 @@ const HTTP_METHODS = new Set<HttpMethod>([
   'OPTIONS',
 ]);
 
-export function normalizeFastifyPath(rawPath: string): string {
+function normalizeFastifyPath(rawPath: string): string {
   let path = rawPath.split('?')[0] ?? rawPath;
   if (path.startsWith('/v1')) {
     path = path.slice(3) || '/';
@@ -60,7 +64,7 @@ function pathMatchesAllowlist(normalizedPath: string, pattern: string): boolean 
   return normalizedPath === pattern;
 }
 
-export function isRouteAllowlisted(method: string, rawPath: string): boolean {
+function isRouteAllowlisted(method: string, rawPath: string): boolean {
   const normalized = normalizeFastifyPath(rawPath);
   const upper = method.toUpperCase();
   for (const entry of OPENAPI_ROUTE_ALLOWLIST) {
@@ -70,7 +74,7 @@ export function isRouteAllowlisted(method: string, rawPath: string): boolean {
   return false;
 }
 
-export interface RegisteredRoute {
+interface RegisteredRoute {
   method: HttpMethod;
   path: string;
 }
@@ -181,7 +185,7 @@ function openApiPathKey(method: HttpMethod, path: string): string {
   return `${method.toUpperCase()} ${path}`;
 }
 
-export function collectOpenApiRoutes(document: OpenAPIObject): Set<string> {
+function collectOpenApiRoutes(document: OpenAPIObject): Set<string> {
   const keys = new Set<string>();
   for (const [path, pathItem] of Object.entries(document.paths)) {
     for (const [method, operation] of Object.entries(pathItem)) {
@@ -195,7 +199,7 @@ export function collectOpenApiRoutes(document: OpenAPIObject): Set<string> {
   return keys;
 }
 
-export interface OpenApiRouteAuditResult {
+interface OpenApiRouteAuditResult {
   missingFromSpec: RegisteredRoute[];
   extraInSpec: string[];
   flaggedOperations: string[];

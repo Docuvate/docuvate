@@ -9,14 +9,11 @@ import {
   parseOptionalString,
   parseString,
   requireRecord,
-} from '../../../shared/infrastructure/database/row-parse.js';
+} from '../../../shared/domain/row-parse.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 import type { TextChunkSpan } from '../../cited-chat/domain/split-text-chunks-with-spans.js';
 import { cosineSimilarity } from '../domain/cosine-similarity.js';
-import {
-  expandQueryTerms,
-  MIN_QUERY_RELEVANCE_SCORE,
-} from '../domain/expand-query-terms.js';
+import { expandQueryTerms, MIN_QUERY_RELEVANCE_SCORE } from '../domain/expand-query-terms.js';
 import type { GlobalSearchRepositoryResult } from '../domain/global-search.types.js';
 import {
   buildHighlightTerms,
@@ -29,7 +26,7 @@ import {
   searchTextVariants,
   tokenizeSearchQuery,
 } from '../domain/normalize-search-text.js';
-import { type RankedItem,reciprocalRankFusion } from '../domain/reciprocal-rank-fusion.js';
+import { type RankedItem, reciprocalRankFusion } from '../domain/reciprocal-rank-fusion.js';
 import type { ResolvedFieldFilter } from '../domain/resolve-field-definition.js';
 import type { SearchFieldDefinitionRow } from '../domain/resolve-field-definition.js';
 import {
@@ -411,12 +408,7 @@ export class PgGlobalSearchRepository {
       }
     }
 
-    let fused = reciprocalRankFusion([
-      ftsList,
-      trgmTitleList,
-      chunkFtsList,
-      fieldLeg.ranks,
-    ]);
+    let fused = reciprocalRankFusion([ftsList, trgmTitleList, chunkFtsList, fieldLeg.ranks]);
 
     if (
       fieldFilters.length === 0 &&
@@ -541,13 +533,13 @@ export class PgGlobalSearchRepository {
     );
 
     const textQueries: Promise<{
-        rows: {
-          document_id: string;
-          field_storage_key: string;
-          value_text: string;
-          score: number;
-        }[];
-      }>[] = [];
+      rows: {
+        document_id: string;
+        field_storage_key: string;
+        value_text: string;
+        score: number;
+      }[];
+    }>[] = [];
     for (const textProbe of gatedFieldProbes) {
       textQueries.push(
         queryWithWordSimilarityThreshold(
@@ -689,11 +681,7 @@ export class PgGlobalSearchRepository {
     queryTokens: string[],
     limit: number
   ): Promise<{ items: GlobalSearchRepositoryResult['folders'] }> {
-    const probe = await resolveVocabularyGatedNameProbe(
-      this.pool,
-      userId,
-      variantQueries[0] ?? q
-    );
+    const probe = await resolveVocabularyGatedNameProbe(this.pool, userId, variantQueries[0] ?? q);
     if (probe === null) {
       return { items: [] };
     }
@@ -736,11 +724,7 @@ export class PgGlobalSearchRepository {
     queryTokens: string[],
     limit: number
   ): Promise<{ items: GlobalSearchRepositoryResult['labels'] }> {
-    const probe = await resolveVocabularyGatedNameProbe(
-      this.pool,
-      userId,
-      variantQueries[0] ?? q
-    );
+    const probe = await resolveVocabularyGatedNameProbe(this.pool, userId, variantQueries[0] ?? q);
     if (probe === null) {
       return { items: [] };
     }

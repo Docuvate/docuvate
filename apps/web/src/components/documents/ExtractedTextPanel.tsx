@@ -14,7 +14,7 @@ import { typstExportDegradedMessage } from '../../lib/layoutExportTypst';
 import { layoutIrDocumentFromPageSummaries } from '../../lib/layoutIrPages';
 import { buildLayoutReadingBlocks } from '../../lib/layoutIrReadingContent';
 import { useNarrowTopbar } from '../../lib/useNarrowTopbar';
-import { useToastNotify } from '../save/ToastProvider';
+import { useToastNotify } from '../save';
 import { Button } from '../ui/Button';
 import { ContextMenu, type ContextMenuEntry } from '../ui/ContextMenu';
 import { Input } from '../ui/Input';
@@ -147,7 +147,9 @@ export function ExtractedTextPanel({
       try {
         await navigator.clipboard.writeText(text);
         setCopyHint(hint);
-        window.setTimeout(() => { setCopyHint(null); }, 2000);
+        window.setTimeout(() => {
+          setCopyHint(null);
+        }, 2000);
       } catch {
         setCopyHint(t('documents.extractedTextCopyFailed'));
       }
@@ -178,11 +180,15 @@ export function ExtractedTextPanel({
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        const safeTitle = (documentTitle ?? 'document').replace(/[^\wäöüÄÖÜß.-]+/g, '-').slice(0, 80);
+        const safeTitle = (documentTitle ?? 'document')
+          .replace(/[^\wäöüÄÖÜß.-]+/g, '-')
+          .slice(0, 80);
         const suffix = mode === 'semantisch' ? '-semantisch' : '-exakt';
         a.download = `${safeTitle}-layout${suffix}.typ`;
         a.click();
-        window.setTimeout(() => { URL.revokeObjectURL(url); }, 0);
+        window.setTimeout(() => {
+          URL.revokeObjectURL(url);
+        }, 0);
         setExportMenuOpen(false);
         if (!reconstructionReliable) {
           pushSuccess(typstExportDegradedMessage(t, unreliableReason));
@@ -352,7 +358,9 @@ export function ExtractedTextPanel({
                           data-block-index={index}
                           data-block-id={block.blockIndex ?? index}
                           className={`extracted-text-segment${isActive ? ' extracted-text-segment-active' : ''}`}
-                          onClick={() => { selectBlock(block); }}
+                          onClick={() => {
+                            selectBlock(block);
+                          }}
                           onKeyDown={(e) => {
                             if (e.key === 'Enter' || e.key === ' ') {
                               e.preventDefault();
@@ -389,21 +397,22 @@ export function ExtractedTextPanel({
       ? layoutIrDocumentFromPageSummaries(layoutIrPages)
       : LAYOUT_IR_PLACEHOLDER;
   const canShowLayoutFrame = Boolean(documentId) && (layoutIrPending || hasLayoutIr);
-  const layoutPane = canShowLayoutFrame && documentId ? (
-    <ExtractedLayoutHtmlFrame
-      documentId={documentId}
-      layoutIr={frameLayoutIr}
-      activePage={activePage}
-      pageSynced={pageSynced}
-      pageCount={frameLayoutIr.pages.length}
-      zoom={layoutZoom}
-      requeueBusy={requeueBusy}
-      onRequeueExtraction={onRequeueExtraction}
-      suspendHtmlFetch={layoutIrPending}
-    />
-  ) : (
-    <ExtractedLayoutFallback requeueBusy={requeueBusy} onRequeue={onRequeueExtraction} />
-  );
+  const layoutPane =
+    canShowLayoutFrame && documentId ? (
+      <ExtractedLayoutHtmlFrame
+        documentId={documentId}
+        layoutIr={frameLayoutIr}
+        activePage={activePage}
+        pageSynced={pageSynced}
+        pageCount={frameLayoutIr.pages.length}
+        zoom={layoutZoom}
+        requeueBusy={requeueBusy}
+        onRequeueExtraction={onRequeueExtraction}
+        suspendHtmlFetch={layoutIrPending}
+      />
+    ) : (
+      <ExtractedLayoutFallback requeueBusy={requeueBusy} onRequeue={onRequeueExtraction} />
+    );
 
   const openExportMenu = useCallback(() => {
     const trigger = exportTriggerRef.current;
@@ -417,16 +426,26 @@ export function ExtractedTextPanel({
     <div className={`extracted-text-panel${textOnly ? ' extracted-text-panel-d7' : ''}`}>
       {textOnly && !editMode ? (
         <div className="extracted-text-d7-head">
-          <span className="extracted-text-d7-title">{t('documents.extractedTextRecognizedTitle')}</span>
+          <span className="extracted-text-d7-title">
+            {t('documents.extractedTextRecognizedTitle')}
+          </span>
           <Input
             className="extracted-text-d7-search"
             value={searchQuery}
-            onChange={(e) => { setSearchQuery(e.target.value); }}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+            }}
             placeholder={t('documents.extractedTextSearchPlaceholder')}
             aria-label={t('documents.extractedTextSearchPlaceholder')}
           />
           {canCopy ? (
-            <Button type="button" variant="ghost" onClick={() => { onCopyPlain(); }}>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => {
+                onCopyPlain();
+              }}
+            >
               {t('documents.extractedTextCopyButton')}
             </Button>
           ) : null}
@@ -445,7 +464,9 @@ export function ExtractedTextPanel({
                   type="button"
                   variant={contentMode === 'text' ? 'secondary' : 'ghost'}
                   aria-pressed={contentMode === 'text'}
-                  onClick={() => { setContentMode('text'); }}
+                  onClick={() => {
+                    setContentMode('text');
+                  }}
                 >
                   {t('documents.extractedContentModeText')}
                 </Button>
@@ -453,7 +474,9 @@ export function ExtractedTextPanel({
                   type="button"
                   variant={contentMode === 'layout' ? 'secondary' : 'ghost'}
                   aria-pressed={contentMode === 'layout'}
-                  onClick={() => { setContentMode('layout'); }}
+                  onClick={() => {
+                    setContentMode('layout');
+                  }}
                 >
                   {t('documents.extractedContentModeLayout')}
                 </Button>
@@ -510,7 +533,9 @@ export function ExtractedTextPanel({
               variant={layoutZoom === step ? 'secondary' : 'ghost'}
               className="layout-ir-zoom-btn"
               aria-pressed={layoutZoom === step}
-              onClick={() => { setLayoutZoom(step); }}
+              onClick={() => {
+                setLayoutZoom(step);
+              }}
             >
               {t('documents.layoutZoomPercent', { value: step })}
             </Button>

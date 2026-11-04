@@ -40,11 +40,3 @@ export interface CreateSftpIngressAccountInput {
   labelIds: string[];
   mapSubfolders: boolean;
 }
-
-export interface SftpIngressAuthResult {
-  accountId: string;
-  userId: string;
-  folderId: string | null;
-  labelIds: string[];
-  mapSubfolders: boolean;
-}

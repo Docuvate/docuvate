@@ -125,7 +125,7 @@ export interface ReplaceDashboardLayoutRequest {
   }>;
 }
 
-export interface DashboardLabelCountDto {
+interface DashboardLabelCountDto {
   name: string;
   count: number;
 }

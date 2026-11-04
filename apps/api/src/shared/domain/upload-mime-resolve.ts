@@ -1,10 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import {
-  isAllowedUploadMime,
-  normalizeMimeType,
-  resolveUploadMime,
-} from '@docuvate/contracts';
+import { resolveUploadMime } from '@docuvate/contracts';
 
 function readAscii(buffer: Buffer, start: number, len: number): string {
   return buffer.subarray(start, start + len).toString('ascii');
@@ -96,20 +92,4 @@ export function resolveAllowedUploadMime(
   buffer: Buffer
 ): string | null {
   return resolveUploadMime(filename, declaredMime, buffer, sniffUploadMime);
-}
-
-export function assertAllowedUploadMime(
-  filename: string,
-  declaredMime: string,
-  buffer: Buffer
-): string {
-  const resolved = resolveAllowedUploadMime(filename, declaredMime, buffer);
-  if (!resolved) {
-    throw new Error('UNSUPPORTED_UPLOAD_TYPE');
-  }
-  const normalized = normalizeMimeType(resolved);
-  if (!isAllowedUploadMime(normalized)) {
-    throw new Error('UNSUPPORTED_UPLOAD_TYPE');
-  }
-  return normalized;
 }

@@ -3,6 +3,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 
 import type { LabelHybridModel } from '../domain/label-hybrid-auto-match.js';
+import type { LabelHybridDocumentRow } from '../domain/label-hybrid-document-row.js';
 import {
   baselineFromTrainedRows,
   emptyRetrainBaseline,
@@ -10,7 +11,6 @@ import {
   type LabelHybridRetrainBaseline,
 } from '../domain/label-hybrid-retrain-policy.js';
 import { computeLabelHybridTrainingRevision } from '../domain/label-hybrid-revision.js';
-import type { LabelHybridDocumentRow } from '../domain/label-hybrid-training.js';
 import { trainUserLabelHybridModel } from '../domain/label-hybrid-training.js';
 import {
   labelHybridRetrainMinIntervalMs,
@@ -133,10 +133,7 @@ export class LabelHybridModelCacheService {
   /**
    * True when hybrid assign scoring must wait for a first model and training should run off-request.
    */
-  shouldReturnWarmingResponse(
-    userId: string,
-    rows: readonly LabelHybridDocumentRow[]
-  ): boolean {
+  shouldReturnWarmingResponse(userId: string, rows: readonly LabelHybridDocumentRow[]): boolean {
     const revision = computeLabelHybridTrainingRevision(rows);
     const entry = this.entries.get(userId) ?? createCacheEntry();
     this.entries.set(userId, entry);
@@ -187,7 +184,11 @@ export class LabelHybridModelCacheService {
     }, labelHybridTrainDebounceMs());
   }
 
-  private scheduleIntervalRetry(userId: string, entry: UserHybridCacheEntry, delayMs: number): void {
+  private scheduleIntervalRetry(
+    userId: string,
+    entry: UserHybridCacheEntry,
+    delayMs: number
+  ): void {
     if (delayMs <= 0) {
       void this.startTrainingIfNeeded(userId, entry);
       return;
@@ -213,10 +214,7 @@ export class LabelHybridModelCacheService {
     return Math.max(0, minInterval - elapsed);
   }
 
-  private async startTrainingIfNeeded(
-    userId: string,
-    entry: UserHybridCacheEntry
-  ): Promise<void> {
+  private async startTrainingIfNeeded(userId: string, entry: UserHybridCacheEntry): Promise<void> {
     if (entry.trainingPromise) {
       return;
     }
@@ -255,11 +253,7 @@ export class LabelHybridModelCacheService {
         entry.trainingPromise = null;
         const followRevision = entry.pendingRevision;
         const followRows = entry.pendingRows;
-        if (
-          followRevision !== null &&
-          followRows !== null &&
-          followRevision !== revision
-        ) {
+        if (followRevision !== null && followRows !== null && followRevision !== revision) {
           void this.startTrainingIfNeeded(userId, entry);
         } else {
           entry.pendingRows = null;

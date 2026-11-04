@@ -20,5 +20,4 @@ class RapidOcrEngine(Protocol):
         image: OcrImage,
         *,
         use_cls: bool = False,
-    ) -> tuple[OcrResult, object]:
-        ...
+    ) -> tuple[OcrResult, object]: ...

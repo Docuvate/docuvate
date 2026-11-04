@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 /** Synthetic typo evaluation set (neutral invented names only). */
-export interface TypoCorpusCase {
+interface TypoCorpusCase {
   id: string;
   locale: 'de' | 'en';
   query: string;

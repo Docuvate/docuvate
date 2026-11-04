@@ -16,7 +16,7 @@ DOCUMENT_CHAT_CLOUD_BLOCKED_IPS.addSubnet('fc00::', 7, 'ipv6');
 DOCUMENT_CHAT_CLOUD_BLOCKED_IPS.addSubnet('fe80::', 10, 'ipv6');
 
 /** Unwrap IPv4-mapped IPv6 (::ffff:a.b.c.d) for blocklist checks. */
-export function normalizeIpForDocumentChatCloudBlockCheck(ip: string): string {
+function normalizeIpForDocumentChatCloudBlockCheck(ip: string): string {
   const trimmed = ip.trim();
   const lower = trimmed.toLowerCase();
   if (lower.startsWith('::ffff:')) {

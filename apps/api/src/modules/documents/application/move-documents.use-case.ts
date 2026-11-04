@@ -12,7 +12,7 @@ import {
   type FolderRepository,
 } from '../../../shared/domain/ports.js';
 
-export interface MoveDocumentsResult {
+interface MoveDocumentsResult {
   affected: number;
   previousFolderIds: { documentId: string; folderId: string | null }[];
 }

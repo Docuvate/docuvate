@@ -45,9 +45,3 @@ export class SftpIngressCreateAccountBodyDto {
   @IsBoolean()
   mapSubfolders?: boolean;
 }
-
-export class SftpIngressEventsQueryDto {
-  @IsOptional()
-  @IsString()
-  limit?: string;
-}

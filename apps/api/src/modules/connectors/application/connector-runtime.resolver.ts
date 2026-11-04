@@ -12,7 +12,7 @@ import {
 import type { ConnectorConfigurationInput, ConnectorPluginId } from '../domain/connector.types.js';
 import type { ConnectorRuntimePorts } from '../domain/connector-runtime.ports.js';
 
-export interface ResolvedConnectorRuntime {
+interface ResolvedConnectorRuntime {
   pluginId: ConnectorPluginId;
   displayName: string;
   credentials: ConnectorConfigurationInput;

@@ -20,7 +20,6 @@ def find_smart_duplicate_candidates(
 ) -> list[SmartDuplicateCandidate]:
     focus = SmartDuplicateDocument(document_id=focus_document_id, lines=focus_lines)
     peers = [
-        SmartDuplicateDocument(document_id=doc_id, lines=lines)
-        for doc_id, lines in peer_documents
+        SmartDuplicateDocument(document_id=doc_id, lines=lines) for doc_id, lines in peer_documents
     ]
     return score_smart_duplicate_candidates(focus, peers, config=config)

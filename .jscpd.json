@@ -1,0 +1,19 @@
+{
+  "threshold": 1.5,
+  "minTokens": 70,
+  "format": ["typescript", "tsx"],
+  "reporters": ["consoleFull"],
+  "silent": true,
+  "absolute": false,
+  "gitignore": true,
+  "ignore": [
+    "**/*.spec.ts",
+    "**/*.spec.tsx",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/generated/**",
+    "**/migrations/**",
+    "**/dist/**",
+    "**/node_modules/**"
+  ]
+}

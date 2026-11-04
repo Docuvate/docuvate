@@ -8,10 +8,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import type pg from 'pg';
 
 import { ValidationError } from '../../../shared/domain/errors.js';
-import {
-  parseNumber,
-  requireRecord,
-} from '../../../shared/infrastructure/database/row-parse.js';
+import { parseNumber, requireRecord } from '../../../shared/domain/row-parse.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 
 type FilterInput = Pick<
@@ -27,8 +24,7 @@ export class SavedViewScopeValidator {
     const visibility = input.visibility ?? 'private';
     const tagIds = input.tagIds ?? [];
     const fieldFilters = input.fieldFilters ?? [];
-    const hasScoped =
-      input.folderId != null || fieldFilters.length > 0 || tagIds.length > 0;
+    const hasScoped = input.folderId != null || fieldFilters.length > 0 || tagIds.length > 0;
 
     if (visibility === 'shared' && hasScoped) {
       throw new ValidationError(

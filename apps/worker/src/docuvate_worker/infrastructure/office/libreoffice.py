@@ -42,7 +42,7 @@ def convert_bytes_to_pdf(
         out_dir.mkdir()
         src.write_bytes(content)
         env = os.environ.copy()
-        env.setdefault("HOME", "/tmp")
+        env.setdefault("HOME", tempfile.gettempdir())
         try:
             subprocess.run(
                 [

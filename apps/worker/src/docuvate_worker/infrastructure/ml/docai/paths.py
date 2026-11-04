@@ -6,9 +6,7 @@ from __future__ import annotations
 from functools import lru_cache
 from pathlib import Path
 
-_DOCAI_MODEL_ROOT = (
-    Path(__file__).resolve().parents[5] / "models" / "docai_v0_3" / "model"
-)
+_DOCAI_MODEL_ROOT = Path(__file__).resolve().parents[5] / "models" / "docai_v0_3" / "model"
 _NER_MODEL = Path(__file__).resolve().parents[5] / "models" / "ner_doc.int8.onnx"
 
 

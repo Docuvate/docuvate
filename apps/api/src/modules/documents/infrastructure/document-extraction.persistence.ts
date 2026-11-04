@@ -13,7 +13,7 @@ import {
   parseOptionalNumber,
   parseString,
   requireRecord,
-} from '../../../shared/infrastructure/database/row-parse.js';
+} from '../../../shared/domain/row-parse.js';
 import {
   loadDocumentFieldValues,
   replaceDocumentFieldValues,

@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { tokenizeSearchQuery } from '../../search/domain/normalize-search-text.js';
-import type { CitedChatChunkCandidate } from '../infrastructure/pg-cited-chat-retrieval.repository.js';
+import type { CitedChatChunkCandidate } from './cited-chat-chunk-candidate.js';
 const SENTENCE_SPLIT = /(?<=[.!?])\s+/;
 
 function scoreSentence(sentence: string, tokens: string[]): number {
@@ -35,7 +35,10 @@ export function tryExtractiveCitedAnswer(
     return null;
   }
 
-  const sentences = body.split(SENTENCE_SPLIT).map((s) => s.trim()).filter(Boolean);
+  const sentences = body
+    .split(SENTENCE_SPLIT)
+    .map((s) => s.trim())
+    .filter(Boolean);
   let quote = sentences[0] ?? body;
   if (tokens.length > 0 && sentences.length > 1) {
     let bestSentence = quote;

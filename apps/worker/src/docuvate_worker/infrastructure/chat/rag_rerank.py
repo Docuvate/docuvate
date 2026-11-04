@@ -15,6 +15,7 @@ from pydantic import BaseModel
 class _TextCrossEncoder(Protocol):
     def rerank(self, query: str, texts: list[str]) -> list[float]: ...
 
+
 logger = logging.getLogger(__name__)
 
 _lock = threading.Lock()
@@ -105,9 +106,7 @@ def _get_reranker() -> _TextCrossEncoder | None:
         try:
             from fastembed.rerank.cross_encoder import TextCrossEncoder  # noqa: PLC0415
 
-            _reranker = cast(
-                _TextCrossEncoder, TextCrossEncoder(model_name=RERANKER_MODEL)
-            )
+            _reranker = cast(_TextCrossEncoder, TextCrossEncoder(model_name=RERANKER_MODEL))
             logger.info("Loaded reranker model %s", RERANKER_MODEL)
         except Exception as exc:
             _reranker_failed = True
@@ -137,6 +136,5 @@ def rerank_passages(
         reverse=True,
     )
     return [
-        RagRetrieveResult(id=p.id, score=sigmoid_score(float(score)))
-        for p, score in ranked[:top_k]
+        RagRetrieveResult(id=p.id, score=sigmoid_score(float(score))) for p, score in ranked[:top_k]
     ], True

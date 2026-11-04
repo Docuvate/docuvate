@@ -66,8 +66,8 @@ def _font_size_from_da(raw: object) -> float | None:
     if raw is None:
         return None
     parts = str(raw).replace("/", " ").split()
-    for idx, token in enumerate(parts):
-        if token == "Tf" and idx > 0:
+    for idx, part in enumerate(parts):
+        if part == "Tf" and idx > 0:
             try:
                 return float(parts[idx - 1])
             except ValueError:

@@ -2,12 +2,18 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
 
-export interface TabProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+interface TabProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   active?: boolean;
   children: ReactNode;
 }
 
-export function Tab({ active = false, className = '', children, type = 'button', ...props }: TabProps) {
+export function Tab({
+  active = false,
+  className = '',
+  children,
+  type = 'button',
+  ...props
+}: TabProps) {
   return (
     <button
       type={type}

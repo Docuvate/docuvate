@@ -77,9 +77,7 @@ def _with_document_images(
     )
 
 
-def _with_layout_ir(
-    result: ExtractionResult, content: bytes, mime_type: str
-) -> ExtractionResult:
+def _with_layout_ir(result: ExtractionResult, content: bytes, mime_type: str) -> ExtractionResult:
     if result.layout_ir:
         return result
     try:
@@ -150,5 +148,3 @@ def extract_document(
     finally:
         set_active_memory_profiler(None)
         profiler.stop()
-
-

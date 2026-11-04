@@ -14,7 +14,7 @@ const workerStateEnvelopeSchema = z.object({
   state: embeddingDensityWorkerStateSchema,
 });
 
-export interface EmbeddingDensityClassifyResult {
+interface EmbeddingDensityClassifyResult {
   decisionTier: string;
   confidence: number;
   labelId: string | null;
@@ -73,20 +73,23 @@ export class HttpEmbeddingDensityAdapter {
     documentIds: string[];
     delta: number;
   }): Promise<{ state: EmbeddingDensityWorkerState; metrics: Record<string, number> }> {
-    const response = await fetch(workerApiUrl(this.workerUrl(), '/ml/embedding-density/calibrate'), {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Worker-Secret': this.secret(),
-      },
-      body: JSON.stringify({
-        state: payload.state,
-        vectors: payload.vectors,
-        label_ids: payload.exampleLabelIds,
-        document_ids: payload.documentIds,
-        delta: payload.delta,
-      }),
-    });
+    const response = await fetch(
+      workerApiUrl(this.workerUrl(), '/ml/embedding-density/calibrate'),
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Worker-Secret': this.secret(),
+        },
+        body: JSON.stringify({
+          state: payload.state,
+          vectors: payload.vectors,
+          label_ids: payload.exampleLabelIds,
+          document_ids: payload.documentIds,
+          delta: payload.delta,
+        }),
+      }
+    );
     if (!response.ok) {
       throw new Error(`Worker embedding-density calibrate failed: ${String(response.status)}`);
     }

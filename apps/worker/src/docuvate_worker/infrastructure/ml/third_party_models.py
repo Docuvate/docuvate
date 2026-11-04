@@ -23,6 +23,8 @@ def _is_huggingface_model_id(token: str) -> bool:
     if org.lower() in _NON_HF_FIRST_SEGMENT:
         return False
     return _HF_MODEL_ID.match(token) is not None
+
+
 _OLLAMA_TAG = re.compile(r"^[\w.+-]+:[\w.+-]+$")
 _NON_HF_FIRST_SEGMENT = frozenset(
     {
@@ -201,28 +203,25 @@ def collect_referenced_load_keys(
     return by_file
 
 
-def _entry_for_load_key(
-    key: str, manifest: ThirdPartyModelsManifest
-) -> ManifestModelEntry | None:
+def _entry_for_load_key(key: str, manifest: ThirdPartyModelsManifest) -> ManifestModelEntry | None:
     for entry in manifest.models:
         if key in entry.load_keys:
             return entry
     return None
 
 
-def _forbidden_substring_violations(
-    key: str, manifest: ThirdPartyModelsManifest
-) -> list[str]:
+def _forbidden_substring_violations(key: str, manifest: ThirdPartyModelsManifest) -> list[str]:
     entry = _entry_for_load_key(key, manifest)
     if entry is not None and entry.allow_forbidden_substrings:
         return []
     lowered = key.lower()
     if any(exc in lowered for exc in manifest.policy.forbidden_substring_exceptions):
         return []
-    errors: list[str] = []
-    for forbidden in manifest.policy.forbidden_load_key_substrings:
-        if forbidden.lower() in lowered:
-            errors.append(f"load key {key!r} matches forbidden substring {forbidden!r}")
+    errors: list[str] = [
+        f"load key {key!r} matches forbidden substring {forbidden!r}"
+        for forbidden in manifest.policy.forbidden_load_key_substrings
+        if forbidden.lower() in lowered
+    ]
     return errors
 
 

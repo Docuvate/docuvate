@@ -25,7 +25,9 @@ _NEGATIVE_VENDOR = [
 ]
 
 
-def _calibrate_threshold_for_precision(scores: list[tuple[float, int]], min_precision: float) -> float:
+def _calibrate_threshold_for_precision(
+    scores: list[tuple[float, int]], min_precision: float
+) -> float:
     ordered = sorted(scores, key=lambda row: row[0], reverse=True)
     best = 1.0
     best_recall = -1.0
@@ -65,7 +67,9 @@ def _vendor_scores(models, scale: float, offset: float) -> list[tuple[float, int
         addr = models.log_likelihood(candidate, "address")
         ident = models.log_likelihood(candidate, "identifier")
         margin = org - max(free, addr, ident)
-        rows.append((_vendor_confidence(margin, had_label=had_label, scale=scale, offset=offset), 1))
+        rows.append(
+            (_vendor_confidence(margin, had_label=had_label, scale=scale, offset=offset), 1)
+        )
     for text in _NEGATIVE_VENDOR:
         org = models.log_likelihood(text, "organization")
         free = models.log_likelihood(text, "free_text")

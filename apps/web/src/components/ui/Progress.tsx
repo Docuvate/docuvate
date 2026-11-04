@@ -1,9 +1,9 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 
-export type ProgressTone = 'accent' | 'ok' | 'danger';
+type ProgressTone = 'accent' | 'ok' | 'danger';
 
-export interface ProgressProps {
+interface ProgressProps {
   value: number;
   max?: number;
   tone?: ProgressTone;
@@ -12,7 +12,13 @@ export interface ProgressProps {
   label?: string;
 }
 
-export function Progress({ value, max = 100, tone = 'accent', className = '', label }: ProgressProps) {
+export function Progress({
+  value,
+  max = 100,
+  tone = 'accent',
+  className = '',
+  label,
+}: ProgressProps) {
   const clamped = Math.min(max, Math.max(0, value));
   const percent = max > 0 ? (clamped / max) * 100 : 0;
   const toneClass = tone === 'ok' ? 'progress-ok' : tone === 'danger' ? 'progress-danger' : '';

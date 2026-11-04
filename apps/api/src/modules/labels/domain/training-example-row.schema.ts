@@ -7,5 +7,3 @@ export const trainingExampleRawRowSchema = z.object({
   tagId: z.uuid(),
   documentId: z.uuid(),
 });
-
-export type TrainingExampleRawRow = z.infer<typeof trainingExampleRawRowSchema>;

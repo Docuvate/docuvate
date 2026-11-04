@@ -1,8 +1,8 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { parseString } from '../database/row-parse.js';
+import { parseString } from '../../domain/row-parse.js';
 
-export interface EnqueueRetryOptions {
+interface EnqueueRetryOptions {
   maxAttempts: number;
   initialDelayMs?: number;
   label: string;

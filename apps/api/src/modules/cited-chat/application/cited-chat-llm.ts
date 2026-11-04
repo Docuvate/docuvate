@@ -1,5 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import { isRecord } from '../../../shared/domain/row-parse.js';
 import {
   DocumentChatCloudUrlError,
   validateDocumentChatCloudBaseUrl,
@@ -20,7 +21,6 @@ import {
   postOpenAiCompatibleChat,
   streamOpenAiCompatibleChat,
 } from '../../../shared/infrastructure/chat/openai-compatible-stream-chat.js';
-import { isRecord } from '../../../shared/infrastructure/database/row-parse.js';
 
 export function resolveCitedChatLlmConfig(input?: {
   cloudBaseUrl?: string | null;
@@ -61,7 +61,8 @@ async function ensureOpenAiCompatibleBaseUrlSafe(
     await validateDocumentChatCloudBaseUrl(config.baseUrl);
     return { ok: true };
   } catch (err) {
-    const code = err instanceof DocumentChatCloudUrlError ? err.code : 'document_chat_cloud_url_invalid';
+    const code =
+      err instanceof DocumentChatCloudUrlError ? err.code : 'document_chat_cloud_url_invalid';
     return { ok: false, detail: code };
   }
 }

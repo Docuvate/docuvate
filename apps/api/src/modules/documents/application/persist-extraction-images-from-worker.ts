@@ -6,7 +6,7 @@ import type { ExtractionImageIngestDto } from '@docuvate/contracts';
 
 import type { ObjectStorage } from '../../../shared/domain/ports.js';
 
-export interface PersistedExtractionImageRow {
+interface PersistedExtractionImageRow {
   id: string;
   page: number;
   x: number;

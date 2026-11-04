@@ -37,9 +37,7 @@ class FieldMetrics:
 def _load_eval_docs() -> list[dict[str, object]]:
     payload = json.loads(HOLDOUT_PATH.read_text(encoding="utf-8"))
     return [
-        doc
-        for doc in payload["documents"]
-        if isinstance(doc, dict) and doc.get("split") == "eval"
+        doc for doc in payload["documents"] if isinstance(doc, dict) and doc.get("split") == "eval"
     ]
 
 
@@ -109,8 +107,7 @@ def main() -> int:
             for field, metrics in _field_metrics(eval_docs, regex_rows).items()
         },
         "after_ml_pipeline": {
-            field: asdict(metrics)
-            for field, metrics in _field_metrics(eval_docs, ml_rows).items()
+            field: asdict(metrics) for field, metrics in _field_metrics(eval_docs, ml_rows).items()
         },
     }
     print(json.dumps(payload, indent=2))

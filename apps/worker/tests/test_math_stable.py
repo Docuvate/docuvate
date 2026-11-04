@@ -7,6 +7,7 @@ import numpy as np
 
 from docuvate_worker.domain.math_stable import exp_neg_clamped, sigmoid, softmax
 from docuvate_worker.infrastructure.ml.value_types.amount_line_ranker import (
+    AmountLineFeatures,
     AmountLineRanker,
 )
 
@@ -40,8 +41,6 @@ def test_softmax_many_labels_large_logits() -> None:
 
 
 def test_amount_line_ranker_extreme_linear() -> None:
-    from docuvate_worker.infrastructure.ml.value_types.amount_line_ranker import AmountLineFeatures
-
     ranker = AmountLineRanker(
         coefficients=tuple(1.0 for _ in range(11)),
         intercept=1e4,

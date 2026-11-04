@@ -21,7 +21,7 @@ import {
   parseString,
   parseStringArray,
   requireRecord,
-} from '../../../shared/infrastructure/database/row-parse.js';
+} from '../../../shared/domain/row-parse.js';
 import { withTenantPgClient } from '../../../shared/infrastructure/database/tenant-pg.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 import { EnsureDocumentRepresentationUseCase } from '../../representation/application/ensure-document-representation.use-case.js';

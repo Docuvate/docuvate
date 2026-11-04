@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 
 import { IconButton } from './IconButton';
 
-export interface PaginationProps {
+interface PaginationProps {
   from: number;
   to: number;
   total: number;

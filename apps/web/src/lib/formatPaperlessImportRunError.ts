@@ -3,19 +3,12 @@
 import type { PaperlessImportRunErrorDto } from '@docuvate/contracts';
 import type { TFunction } from 'i18next';
 
-const PAPERLESS_IMPORT_KEY_PREFIX = 'connectors.paperlessImport.';
-
-export function isPaperlessImportMessageKey(key: string): boolean {
-  return key.startsWith(PAPERLESS_IMPORT_KEY_PREFIX);
-}
-
 export function formatPaperlessImportRunError(
   t: TFunction,
   row: PaperlessImportRunErrorDto
 ): string {
-  const params = row.messageParams.maxMb !== undefined
-    ? { maxMb: row.messageParams.maxMb }
-    : undefined;
+  const params =
+    row.messageParams.maxMb !== undefined ? { maxMb: row.messageParams.maxMb } : undefined;
   const translated = t(row.messageKey, {
     ...params,
     defaultValue: '',

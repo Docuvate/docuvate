@@ -8,7 +8,10 @@ import type {
 } from '@docuvate/contracts';
 import { Inject, Injectable } from '@nestjs/common';
 
-import { namesAreNearDuplicate, normalizeLabelKey } from '../../../shared/domain/label-name-similarity.js';
+import {
+  namesAreNearDuplicate,
+  normalizeLabelKey,
+} from '../../../shared/domain/label-name-similarity.js';
 import {
   LABEL_EMBEDDING_REPOSITORY,
   type LabelEmbeddingRepository,
@@ -17,8 +20,7 @@ import {
   USER_PREFERENCES_REPOSITORY,
   type UserPreferencesRepository,
 } from '../../../shared/domain/ports.js';
-import type { TagCentroidRef } from '../domain/label-coverage.js';
-import { type LabelHybridDocumentRow } from '../domain/label-hybrid-training.js';
+import type { LabelHybridDocumentRow } from '../domain/label-hybrid-document-row.js';
 import { suggestMergeAndRename } from '../domain/label-merge-rename-suggestions.js';
 import { OPEN_SET_MIN_CLUSTER_SIZE } from '../domain/label-open-set-discovery.js';
 import {
@@ -33,11 +35,12 @@ import {
   suggestEmbeddingMergeRecommendations,
 } from '../domain/label-recommendation-scoring.js';
 import { isBlockedLabelCandidate } from '../domain/recommendation-blocklist.js';
+import type { TagCentroidRef } from '../domain/tag-centroid-ref.js';
 import { LabelHybridModelCacheService } from '../infrastructure/label-hybrid-model-cache.service.js';
 import type { LabelDocumentInventoryQueries } from '../infrastructure/pg-label-document-inventory.repository.js';
 import { PgLabelDocumentInventoryRepository } from '../infrastructure/pg-label-document-inventory.repository.js';
 
-export interface GetLabelRecommendationsOptions {
+interface GetLabelRecommendationsOptions {
   abortSignal?: AbortSignal;
 }
 
@@ -79,9 +82,7 @@ function enrichWithSampleDocuments(
         continue;
       }
       const similarity = similarities.get(id);
-      sampleDocuments.push(
-        similarity !== undefined ? { ...preview, similarity } : preview
-      );
+      sampleDocuments.push(similarity !== undefined ? { ...preview, similarity } : preview);
     }
     return sampleDocuments.length > 0 ? { ...item, sampleDocuments } : item;
   });
@@ -378,9 +379,7 @@ export class GetLabelRecommendationsUseCase {
     }
     const allowedNewIds = new Set([...newSuggestionsByDoc.values()].map((item) => item.id));
 
-    const dedupedNew = filtered.filter(
-      (item) => item.kind !== 'new' || allowedNewIds.has(item.id)
-    );
+    const dedupedNew = filtered.filter((item) => item.kind !== 'new' || allowedNewIds.has(item.id));
 
     const sorted = dedupedNew.sort((a, b) => b.score - a.score).slice(0, 8);
 

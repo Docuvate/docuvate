@@ -8,10 +8,8 @@ import {
   toExtractionFailure,
 } from './extraction-failure.js';
 
-export type ProcessorFailurePlan =
-  | { kind: 'retry' }
-  | { kind: 'unrecoverable' }
-  | { kind: 'fail_document'; failureReason: string };
+type ProcessorFailurePlan =
+  { kind: 'retry' } | { kind: 'unrecoverable' } | { kind: 'fail_document'; failureReason: string };
 
 /** Decide what the BullMQ processor does with a typed extraction failure (BullMQ is the only retry owner). */
 export function planProcessorFailure(input: {

@@ -2,16 +2,11 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { DocumentDto } from '@docuvate/contracts';
 
-export function showDocumentFilenameSubtitle(doc: DocumentDto): boolean {
-  const title = doc.title.trim();
-  return title.length > 0 && doc.filename.trim() !== title;
-}
-
 function resolveLocaleTag(locale: string): string {
   return locale.startsWith('de') ? 'de-DE' : 'en-US';
 }
 
-export type DocumentDateDisplayStyle = 'full' | 'table';
+type DocumentDateDisplayStyle = 'full' | 'table';
 
 function formatLocaleDate(raw: string, locale: string, style: DocumentDateDisplayStyle): string {
   const parsed = Date.parse(raw);
@@ -23,9 +18,10 @@ function formatLocaleDate(raw: string, locale: string, style: DocumentDateDispla
   if (style === 'table') {
     return new Intl.DateTimeFormat(tag, { dateStyle: 'medium' }).format(new Date(parsed));
   }
-  return new Intl.DateTimeFormat(tag, hasTime ? { dateStyle: 'medium', timeStyle: 'short' } : { dateStyle: 'medium' }).format(
-    new Date(parsed)
-  );
+  return new Intl.DateTimeFormat(
+    tag,
+    hasTime ? { dateStyle: 'medium', timeStyle: 'short' } : { dateStyle: 'medium' }
+  ).format(new Date(parsed));
 }
 
 export function documentDisplayDateParts(
@@ -56,9 +52,6 @@ export function isPdfMime(mimeType: string): boolean {
   return mimeType === 'application/pdf';
 }
 
-export function isStoredPdfPreview(doc: {
-  mimeType: string;
-  previewAvailable?: boolean;
-}): boolean {
+export function isStoredPdfPreview(doc: { mimeType: string; previewAvailable?: boolean }): boolean {
   return doc.previewAvailable === true && !isPdfMime(doc.mimeType);
 }

@@ -8,7 +8,7 @@ import { type InfiniteData, useInfiniteQuery } from '@tanstack/react-query';
 
 import { searchRecognizedFieldFilterValuesPage } from '../api';
 
-export function fieldFilterValueQueryKey(
+function fieldFilterValueQueryKey(
   fieldKey: string,
   q: string
 ): readonly ['recognized-field-values', string, string] {
@@ -36,6 +36,6 @@ export function useFieldFilterValueSearch(fieldKey: string, searchQuery: string,
         limit: RECOGNIZED_FIELD_FILTER_VALUES_DEFAULT_LIMIT,
       }),
     getNextPageParam: (lastPage) =>
-      lastPage.hasMore ? lastPage.nextCursor ?? undefined : undefined,
+      lastPage.hasMore ? (lastPage.nextCursor ?? undefined) : undefined,
   });
 }

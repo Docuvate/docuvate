@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 
 import { getAdminAuthSignInSettings } from '../../lib/api';
 import { formatUserFacingError } from '../../lib/apiErrors';
-import { SettingsSectionCard } from '../settings/SettingsSectionCard';
+import { SettingsSectionCard } from '../settings';
 import { Switch } from '../ui/Switch';
 
 const ICON = { size: 20, strokeWidth: 1.75, 'aria-hidden': true as const };

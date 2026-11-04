@@ -53,7 +53,9 @@ def test_render_typst_rejects_string_rotation() -> None:
             "rotationDeg": '#read("/etc/passwd")',
         }
     ]
-    response = client.post("/v1/layout/render-typst", headers=_headers(), json={"layoutIr": payload})
+    response = client.post(
+        "/v1/layout/render-typst", headers=_headers(), json={"layoutIr": payload}
+    )
     assert response.status_code == 422
 
 

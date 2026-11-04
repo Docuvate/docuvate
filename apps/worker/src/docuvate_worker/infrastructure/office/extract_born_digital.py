@@ -122,8 +122,7 @@ def _extract_xlsx(content: bytes) -> OfficeExtractResult:
     all_blocks: list[ExtractionBlock] = []
     for page_idx, (name, rows) in enumerate(sheets, start=1):
         text_parts.append(f"## {name}\n")
-        for row in rows:
-            text_parts.append("\t".join(row))
+        text_parts.extend("\t".join(row) for row in rows)
         sheet_doc = layout_ir_from_grid(name, rows, page=page_idx)
         if sheet_doc.pages:
             layout_pages.append(sheet_doc.pages[0])
@@ -431,19 +430,18 @@ def extract_office_born_digital(content: bytes, mime_type: str) -> OfficeExtract
 def build_heading_layout(blocks: tuple[ExtractionBlock, ...]) -> LayoutIrDocument | None:
     if not blocks:
         return None
-    ir_blocks: list[LayoutIrBlock] = []
-    for block in blocks:
-        ir_blocks.append(
-            LayoutIrBlock(
-                page=block.page,
-                x=block.x,
-                y=block.y,
-                width=block.width,
-                height=block.height,
-                text=block.text,
-                block_index=block.block_index,
-            )
+    ir_blocks: list[LayoutIrBlock] = [
+        LayoutIrBlock(
+            page=block.page,
+            x=block.x,
+            y=block.y,
+            width=block.width,
+            height=block.height,
+            text=block.text,
+            block_index=block.block_index,
         )
+        for block in blocks
+    ]
     page = LayoutIrPage(
         page=1,
         width_pt=612.0,

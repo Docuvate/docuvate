@@ -25,10 +25,7 @@ export const kernelStateWireSchema = z.object({
 });
 
 /** Matches worker `float("-inf")` and Postgres `real` default before novelty is fit. */
-export const noveltyThresholdWireSchema = z.union([
-  z.number(),
-  z.literal(Number.NEGATIVE_INFINITY),
-]);
+const noveltyThresholdWireSchema = z.union([z.number(), z.literal(Number.NEGATIVE_INFINITY)]);
 
 export const embeddingDensityWorkerStateSchema = z.object({
   label_ids: z.array(z.string()),
@@ -53,7 +50,7 @@ export type ClassNiwStatsWire = z.infer<typeof classNiwStatsWireSchema>;
 export type KernelStateWire = z.infer<typeof kernelStateWireSchema>;
 export type EmbeddingDensityWorkerState = z.infer<typeof embeddingDensityWorkerStateSchema>;
 
-export const embeddingDensityClassifyWireSchema = z.object({
+const embeddingDensityClassifyWireSchema = z.object({
   decision_tier: z.string(),
   confidence: z.number(),
   label_id: z.string().nullable(),
@@ -65,20 +62,8 @@ export const embeddingDensityClassifyWireSchema = z.object({
   confirm_confidence: z.number().optional(),
 });
 
-export type EmbeddingDensityClassifyWire = z.infer<typeof embeddingDensityClassifyWireSchema>;
+type EmbeddingDensityClassifyWire = z.infer<typeof embeddingDensityClassifyWireSchema>;
 
-export const embeddingDensityTrainWireSchema = z.object({
-  state: embeddingDensityWorkerStateSchema,
-});
-
-export function parseEmbeddingDensityWorkerState(
-  value: unknown
-): EmbeddingDensityWorkerState {
-  return embeddingDensityWorkerStateSchema.parse(value);
-}
-
-export function parseEmbeddingDensityClassifyWire(
-  value: unknown
-): EmbeddingDensityClassifyWire {
+export function parseEmbeddingDensityClassifyWire(value: unknown): EmbeddingDensityClassifyWire {
   return embeddingDensityClassifyWireSchema.parse(value);
 }

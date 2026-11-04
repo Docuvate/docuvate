@@ -4,7 +4,7 @@ import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/commo
 import { Queue, Worker } from 'bullmq';
 import IORedis from 'ioredis';
 
-import { isRecord, parseString } from '../../../../../shared/infrastructure/database/row-parse.js';
+import { isRecord, parseString } from '../../../../../shared/domain/row-parse.js';
 import { ConnectorRuntimeResolver } from '../../../application/connector-runtime.resolver.js';
 import { PaperlessImportExecutor } from './paperless-import.executor.js';
 import { PaperlessImportRepository } from './paperless-import.repository.js';

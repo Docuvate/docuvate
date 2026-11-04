@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useCallback, useSyncExternalStore } from 'react';
 
-export const ADVANCED_FEATURES_STORAGE_KEY = 'docuvate.advancedFeatures';
+const ADVANCED_FEATURES_STORAGE_KEY = 'docuvate.advancedFeatures';
 
-export function readAdvancedFeaturesEnabled(): boolean {
+function readAdvancedFeaturesEnabled(): boolean {
   if (import.meta.env.VITE_ADVANCED_FEATURES === 'true') {
     return true;
   }

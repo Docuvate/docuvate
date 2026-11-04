@@ -12,16 +12,12 @@ import { listDocumentsPage } from '../api';
 import { useCursorInfiniteQuery } from '../pagination/useCursorInfiniteQuery';
 import { documentListQueryKey } from './documentListQueryKey';
 
-export type DocumentsInfinitePage = DocumentListResponseDto;
+type DocumentsInfinitePage = DocumentListResponseDto;
 
 export function useDocumentsInfiniteQuery(filters: DocumentListQuery | null) {
   const queryKey = useMemo(() => documentListQueryKey(filters), [filters]);
 
-  return useCursorInfiniteQuery<
-    DocumentDto,
-    DocumentListQuery,
-    DocumentListResponseDto
-  >({
+  return useCursorInfiniteQuery<DocumentDto, DocumentListQuery, DocumentListResponseDto>({
     queryKey,
     enabled: filters !== null,
     extraParams: filters ?? {},
@@ -40,9 +36,7 @@ export function useDocumentsInfiniteQuery(filters: DocumentListQuery | null) {
   });
 }
 
-export function flattenDocumentPages(
-  pages: DocumentsInfinitePage[] | undefined
-): DocumentDto[] {
+export function flattenDocumentPages(pages: DocumentsInfinitePage[] | undefined): DocumentDto[] {
   if (!pages?.length) {
     return [];
   }

@@ -3,11 +3,11 @@
 import { useLayoutEffect, useState } from 'react';
 
 /** Stacked card rows for dense tables (admin users, label vocabulary). */
-export const STACKED_TABLE_MAX_WIDTH_PX = 640;
+const STACKED_TABLE_MAX_WIDTH_PX = 640;
 
-export const STACKED_TABLE_MEDIA_QUERY = `(max-width: ${String(STACKED_TABLE_MAX_WIDTH_PX)}px)`;
+const STACKED_TABLE_MEDIA_QUERY = `(max-width: ${String(STACKED_TABLE_MAX_WIDTH_PX)}px)`;
 
-export function readStackedTableLayout(): boolean {
+function readStackedTableLayout(): boolean {
   if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
     return false;
   }
@@ -22,10 +22,14 @@ export function useStackedTableLayout(): boolean {
       return;
     }
     const mq = window.matchMedia(STACKED_TABLE_MEDIA_QUERY);
-    const sync = () => { setMatches(mq.matches); };
+    const sync = () => {
+      setMatches(mq.matches);
+    };
     sync();
     mq.addEventListener('change', sync);
-    return () => { mq.removeEventListener('change', sync); };
+    return () => {
+      mq.removeEventListener('change', sync);
+    };
   }, []);
 
   return matches;

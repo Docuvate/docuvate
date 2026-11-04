@@ -6,8 +6,7 @@ import i18n from '../i18n';
 import { updateDocument } from './api';
 
 export type DocumentUploadAssignment =
-  | { kind: 'inbox' }
-  | { kind: 'folder'; folderId: string; label: string };
+  { kind: 'inbox' } | { kind: 'folder'; folderId: string; label: string };
 
 export interface LibraryDropTarget {
   enabled: boolean;
@@ -50,7 +49,7 @@ export function resolveLibraryDropTarget(input: {
   return disabledTarget();
 }
 
-export function disabledLibraryDropTarget(): LibraryDropTarget {
+function disabledLibraryDropTarget(): LibraryDropTarget {
   return {
     enabled: false,
     assignment: { kind: 'inbox' },

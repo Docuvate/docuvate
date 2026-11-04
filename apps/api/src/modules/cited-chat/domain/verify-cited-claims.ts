@@ -1,14 +1,14 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import type { CitedChatChunkCandidate } from '../infrastructure/pg-cited-chat-retrieval.repository.js';
 import type { CitedClaimCitationJson, CitedClaimJson } from './cited-answer-json.js';
+import type { CitedChatChunkCandidate } from './cited-chat-chunk-candidate.js';
 import { isChunkDumpClaim, isIndexPassageClaim } from './claim-chunk-dump.js';
+import { normalizeForQuoteMatch } from './quote-match-normalize.js';
 import { bestEvidenceSpanInChunk } from './retrieval-span-citation.js';
 import {
   bestQuoteMatchScore,
   findQuoteInChunk,
   fuzzySpanSearchInChunk,
-  normalizeForQuoteMatch,
   resolveQuoteInCandidateChunk,
   validateMatchedSpanNumbers,
 } from './verify-citation-quote.js';
@@ -30,7 +30,7 @@ export interface RejectedCitedClaim {
   source: string;
 }
 
-export interface VerifiedCitedClaim {
+interface VerifiedCitedClaim {
   ordinal: number;
   text: string;
   chunkId: string;
@@ -39,8 +39,7 @@ export interface VerifiedCitedClaim {
   charEnd: number;
 }
 
-const UUID_SOURCE =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const UUID_SOURCE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export function normalizeCitedSourceLabel(
   raw: string,
@@ -91,7 +90,7 @@ export function normalizeCitedSourceLabel(
   return null;
 }
 
-export function expandClaimCitations(claim: CitedClaimJson): CitedClaimCitationJson[] {
+function expandClaimCitations(claim: CitedClaimJson): CitedClaimCitationJson[] {
   if (Array.isArray(claim.citations) && claim.citations.length > 0) {
     return claim.citations.map((c) => ({
       source: c.source.trim(),
@@ -106,11 +105,11 @@ export function expandClaimCitations(claim: CitedClaimJson): CitedClaimCitationJ
   ];
 }
 
-interface TopRow { chunk: CitedChatChunkCandidate }
+interface TopRow {
+  chunk: CitedChatChunkCandidate;
+}
 
-type CitationRowResolve =
-  | { ok: true; row: TopRow }
-  | { ok: false; reason: CitedClaimRejectReason };
+type CitationRowResolve = { ok: true; row: TopRow } | { ok: false; reason: CitedClaimRejectReason };
 
 function rowForSourceLabel(
   top: TopRow[],
@@ -343,11 +342,7 @@ export function verifyCitedClaims(input: {
       let match = resolveQuoteInCandidateChunk(row.chunk, groundedQuote, {
         claimText: quoteMatchClaimText,
       });
-      if (
-        !match &&
-        quoteMatchClaimText.length > 0 &&
-        groundedQuote !== quoteMatchClaimText
-      ) {
+      if (!match && quoteMatchClaimText.length > 0 && groundedQuote !== quoteMatchClaimText) {
         match = resolveQuoteInCandidateChunk(row.chunk, quoteMatchClaimText, {
           claimText: quoteMatchClaimText,
         });

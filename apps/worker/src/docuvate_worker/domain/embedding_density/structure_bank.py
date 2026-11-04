@@ -137,10 +137,7 @@ class StructureBank:
             for i in range(arr.shape[0]):
                 if i in chosen:
                     continue
-                d = min(
-                    float(np.linalg.norm(arr[i, :] - arr[j, :], ord=2))
-                    for j in chosen
-                )
+                d = min(float(np.linalg.norm(arr[i, :] - arr[j, :], ord=2)) for j in chosen)
                 dists.append((d, i))
             if not dists:
                 break

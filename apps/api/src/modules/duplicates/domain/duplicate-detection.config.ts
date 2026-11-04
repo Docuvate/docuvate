@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-export interface DuplicateDetectionConfig {
+interface DuplicateDetectionConfig {
   /** Minimum cosine similarity to retrieve embedding neighbors for classifier scoring. */
   embeddingThreshold: number;
   maxEmbeddingCandidates: number;

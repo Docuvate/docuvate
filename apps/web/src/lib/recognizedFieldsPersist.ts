@@ -6,7 +6,7 @@ import type { RecognizedFieldDraft } from './recognizedFieldDraft';
 import { draftsFromRecognizedDefinitions } from './recognizedFieldDraft';
 import { resolvedFieldKey } from './recognizedFieldRules';
 
-export function recognizedFieldsToApiPayload(fields: RecognizedFieldDraft[]) {
+function recognizedFieldsToApiPayload(fields: RecognizedFieldDraft[]) {
   return fields.map((row, index) => ({
     key: resolvedFieldKey(row),
     label: row.label.trim(),

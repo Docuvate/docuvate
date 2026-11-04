@@ -244,9 +244,7 @@ def _build_success_payload(
         height_px=height_px,
         original_png_base64=_png_base64(result.original_gray),
         reconstruction_png_base64=_png_base64(result.reconstruction_gray),
-        heatmap_png_base64=(
-            _heatmap_png_base64(result.heatmap_gray) if include_heatmap else None
-        ),
+        heatmap_png_base64=(_heatmap_png_base64(result.heatmap_gray) if include_heatmap else None),
         error_code=None,
     )
 

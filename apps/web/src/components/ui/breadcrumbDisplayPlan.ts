@@ -1,14 +1,14 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 
-import type { BreadcrumbItem } from './Breadcrumb';
+import type { BreadcrumbItem } from './breadcrumbItem';
 
 export type BreadcrumbPlanSegment =
   | { kind: 'link'; index: number; label: string; to: string; ellipsis: boolean }
   | { kind: 'current'; index: number; label: string }
   | { kind: 'collapsed'; items: BreadcrumbItem[] };
 
-export interface BreadcrumbPlanOptions {
+interface BreadcrumbPlanOptions {
   /** Last crumb is a link; page title is shown outside the breadcrumb. */
   trailEndsWithLink?: boolean;
 }

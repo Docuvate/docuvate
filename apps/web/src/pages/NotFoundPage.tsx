@@ -3,7 +3,7 @@
 import { DocuvateErrorPage } from '../components/errors/DocuvateErrorPage';
 import { FullPageErrorShell } from '../components/errors/FullPageErrorShell';
 
-export interface NotFoundPageProps {
+interface NotFoundPageProps {
   /** When true, render only the error card (inside AppShell). */
   embedded?: boolean;
 }
@@ -17,9 +17,5 @@ export function NotFoundPage({ embedded = false }: NotFoundPageProps) {
       </FullPageErrorShell>
     );
   }
-  return (
-    <FullPageErrorShell testId="not-found-page">
-      {content}
-    </FullPageErrorShell>
-  );
+  return <FullPageErrorShell testId="not-found-page">{content}</FullPageErrorShell>;
 }

@@ -1,13 +1,13 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { MoreHorizontal } from 'lucide-react';
-import { type ReactNode,useRef, useState } from 'react';
+import { type ReactNode, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { ContextMenu, type ContextMenuEntry } from '../../components/ui/ContextMenu';
 import { IconButton } from '../../components/ui/IconButton';
 
-export interface DateisystemContentSecondaryAction {
+interface DateisystemContentSecondaryAction {
   id: string;
   menuLabel: string;
   onMenuSelect: () => void;
@@ -80,7 +80,9 @@ export function DateisystemContentActions({ primary, secondary }: DateisystemCon
         y={menuPos.y}
         items={menuItems}
         anchorRef={overflowBtnRef}
-        onClose={() => { setMenuOpen(false); }}
+        onClose={() => {
+          setMenuOpen(false);
+        }}
       />
     </div>
   );

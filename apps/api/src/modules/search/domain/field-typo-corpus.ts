@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 /** Field-value search evaluation (recognized + label custom fields). */
-export interface FieldTypoCorpusCase {
+interface FieldTypoCorpusCase {
   id: string;
   locale: 'de' | 'en';
   query: string;

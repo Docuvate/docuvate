@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type pg from 'pg';
 
-export interface TrgmSessionOptions {
+interface TrgmSessionOptions {
   /** When true, disables sequential scans so EXPLAIN can assert index use. */
   disableSeqScan?: boolean;
   /** When set, applies SET LOCAL pg_trgm.strict_word_similarity_threshold for <<% / <<% ops. */
@@ -26,9 +26,7 @@ export async function queryWithWordSimilarityThreshold<R extends pg.QueryResultR
     await client.query(`SET LOCAL pg_trgm.word_similarity_threshold = ${thresholdLiteral}`);
     if (sessionOptions?.strictWordSimilarityThreshold != null) {
       const strictLiteral = String(sessionOptions.strictWordSimilarityThreshold);
-      await client.query(
-        `SET LOCAL pg_trgm.strict_word_similarity_threshold = ${strictLiteral}`
-      );
+      await client.query(`SET LOCAL pg_trgm.strict_word_similarity_threshold = ${strictLiteral}`);
     }
     if (sessionOptions?.similarityThreshold != null) {
       const similarityLiteral = String(sessionOptions.similarityThreshold);

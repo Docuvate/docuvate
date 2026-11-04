@@ -3,12 +3,9 @@
 import { Inject, Injectable } from '@nestjs/common';
 import type pg from 'pg';
 
-import { parseString, requireRecord } from '../../../shared/infrastructure/database/row-parse.js';
+import { parseString, requireRecord } from '../../../shared/domain/row-parse.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
-
-function pairKey(tagIdA: string, tagIdB: string): string {
-  return tagIdA < tagIdB ? `${tagIdA}:${tagIdB}` : `${tagIdB}:${tagIdA}`;
-}
+import { tagPairKey } from '../domain/tag-pair-conflicts.js';
 
 @Injectable()
 export class PgLabelCoOccurrenceRepository {
@@ -38,7 +35,7 @@ export class PgLabelCoOccurrenceRepository {
     const seen = new Set<string>();
     for (const row of coOccurring.rows) {
       const record = requireRecord(row);
-      seen.add(pairKey(parseString(record.a), parseString(record.b)));
+      seen.add(tagPairKey(parseString(record.a), parseString(record.b)));
     }
 
     const exclusive = new Set<string>();
@@ -49,19 +46,11 @@ export class PgLabelCoOccurrenceRepository {
         if (!left || !right) {
           continue;
         }
-        if (!seen.has(pairKey(left, right))) {
-          exclusive.add(pairKey(left, right));
+        if (!seen.has(tagPairKey(left, right))) {
+          exclusive.add(tagPairKey(left, right));
         }
       }
     }
     return exclusive;
   }
-}
-
-export function tagPairConflicts(
-  tagIdA: string,
-  tagIdB: string,
-  exclusivePairs: ReadonlySet<string>
-): boolean {
-  return exclusivePairs.has(pairKey(tagIdA, tagIdB));
 }

@@ -4,7 +4,7 @@ import { normalizeSearchText } from './normalize-search-text.js';
 
 export type NormalizedFieldKind = 'text' | 'number' | 'currency' | 'date';
 
-export interface NormalizedFieldValue {
+interface NormalizedFieldValue {
   kind: NormalizedFieldKind;
   displayValue: string;
   textNorm: string | null;

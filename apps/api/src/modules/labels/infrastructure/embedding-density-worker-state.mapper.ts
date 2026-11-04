@@ -17,7 +17,7 @@ import {
 
 const embeddingVectorSchema = z.array(z.number());
 
-export function classNiwEntityToWire(row: EmbeddingDensityClassNiwEntity): {
+function classNiwEntityToWire(row: EmbeddingDensityClassNiwEntity): {
   tagId: string;
   stats: ClassNiwStatsWire;
 } {
@@ -39,7 +39,7 @@ export function classNiwEntityToWire(row: EmbeddingDensityClassNiwEntity): {
   return { tagId: row.tagId, stats };
 }
 
-export function thresholdEntityToWire(
+function thresholdEntityToWire(
   row: EmbeddingDensityDecisionThresholdEntity,
   groupNameById: Map<string, string>
 ): { key: string; payload: CalibrationThresholdWire; scope: string } {
@@ -105,13 +105,12 @@ export function buildWorkerState(params: {
     novelty_threshold: params.userState.noveltyLogThreshold,
     coarse_ready: params.userState.coarseReady,
     fine_ready: Object.fromEntries(
-      params.tagIds.map((tagId) => [
-        tagId,
-        params.userState.fineReadyTagIds.includes(tagId),
-      ])
+      params.tagIds.map((tagId) => [tagId, params.userState.fineReadyTagIds.includes(tagId)])
     ),
     label_to_group: labelToGroup,
-    log_priors: Object.fromEntries(params.tagIds.map((id) => [id, -Math.log(params.tagIds.length)])),
+    log_priors: Object.fromEntries(
+      params.tagIds.map((id) => [id, -Math.log(params.tagIds.length)])
+    ),
     class_stats: classStats,
     coarse_thresholds: coarse,
     fine_thresholds: fine,

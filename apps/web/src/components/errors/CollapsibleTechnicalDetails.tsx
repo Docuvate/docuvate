@@ -4,7 +4,7 @@ import { ChevronDown } from 'lucide-react';
 import { useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-export interface CollapsibleTechnicalDetailsProps {
+interface CollapsibleTechnicalDetailsProps {
   errorType: string;
   statusCode?: number;
   occurredAt: Date;
@@ -53,7 +53,9 @@ export function CollapsibleTechnicalDetails({
           </div>
           <div>
             <dt>{t('errors.pages.technicalDetails.statusCode')}</dt>
-            <dd>{statusCode != null ? String(statusCode) : t('errors.pages.technicalDetails.none')}</dd>
+            <dd>
+              {statusCode != null ? String(statusCode) : t('errors.pages.technicalDetails.none')}
+            </dd>
           </div>
           <div>
             <dt>{t('errors.pages.technicalDetails.timestamp')}</dt>

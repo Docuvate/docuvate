@@ -1,12 +1,12 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { normalizeForQuoteMatch, normalizeNumbersForQuoteMatch } from './verify-citation-quote.js';
+import { normalizeForQuoteMatch, normalizeNumbersForQuoteMatch } from './quote-match-normalize.js';
 
-export function wordContainsDigit(word: string): boolean {
+function wordContainsDigit(word: string): boolean {
   return /\d/.test(word);
 }
 
-export function normalizeMatchWord(word: string): string {
+function normalizeMatchWord(word: string): string {
   if (wordContainsDigit(word)) {
     return normalizeNumbersForQuoteMatch(word);
   }
@@ -38,7 +38,7 @@ export function numericTokensPresentInText(required: string[], text: string): bo
   return required.every((token) => pool.includes(token));
 }
 
-export function levenshteinAtMostOne(a: string, b: string): boolean {
+function levenshteinAtMostOne(a: string, b: string): boolean {
   if (a === b) {
     return true;
   }

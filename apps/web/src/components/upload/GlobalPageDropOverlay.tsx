@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 
 import { isFileDrag } from '../../lib/documentUploadConstants';
-import { useDocumentUploadContext } from './DocumentUploadProvider';
+import { useDocumentUploadContext } from './documentUploadContext';
 
 export function GlobalPageDropOverlay() {
   const { dropTarget, enqueueFiles } = useDocumentUploadContext();

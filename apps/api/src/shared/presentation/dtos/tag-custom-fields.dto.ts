@@ -10,16 +10,7 @@ import type {
 import { Type } from 'class-transformer';
 import { IsArray, IsIn, IsInt, IsOptional, IsString, Min, ValidateNested } from 'class-validator';
 
-export class TagCustomFieldDefinitionDtoClass implements TagCustomFieldDefinitionDto {
-  id!: string;
-  tagId!: string;
-  key!: string;
-  label!: string;
-  fieldType!: CustomFieldType;
-  sortOrder!: number;
-}
-
-export class ReplaceTagCustomFieldItemDto {
+class ReplaceTagCustomFieldItemDto {
   @IsString()
   key!: string;
 
@@ -41,13 +32,6 @@ export class ReplaceTagCustomFieldsRequestDto implements ReplaceTagCustomFieldsR
   @ValidateNested({ each: true })
   @Type(() => ReplaceTagCustomFieldItemDto)
   fields!: ReplaceTagCustomFieldItemDto[];
-}
-
-export class TagCustomFieldSuggestionDtoClass implements TagCustomFieldSuggestionDto {
-  key!: string;
-  label!: string;
-  confidence!: number;
-  kind!: string;
 }
 
 export class TagCustomFieldListResponseDtoClass implements TagCustomFieldListResponseDto {

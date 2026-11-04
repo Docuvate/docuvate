@@ -13,7 +13,7 @@ import { DocumentAuthorizationService } from '../../../shared/application/docume
 import type { AuthorizationSubject } from '../../../shared/domain/authorization.js';
 import { NotFoundError } from '../../../shared/domain/errors.js';
 import { DOCUMENT_REPOSITORY, type DocumentRepository } from '../../../shared/domain/ports.js';
-import { isRecord, parseNumber } from '../../../shared/infrastructure/database/row-parse.js';
+import { isRecord, parseNumber } from '../../../shared/domain/row-parse.js';
 
 function isLayoutIrBlock(value: unknown): value is LayoutIrBlock {
   if (!isRecord(value)) {

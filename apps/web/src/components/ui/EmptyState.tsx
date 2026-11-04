@@ -3,7 +3,7 @@
 import type { LucideIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
 
-export interface EmptyStateProps {
+interface EmptyStateProps {
   icon: LucideIcon;
   title: string;
   description: string;
@@ -11,7 +11,13 @@ export interface EmptyStateProps {
   className?: string;
 }
 
-export function EmptyState({ icon: Icon, title, description, actions, className = '' }: EmptyStateProps) {
+export function EmptyState({
+  icon: Icon,
+  title,
+  description,
+  actions,
+  className = '',
+}: EmptyStateProps) {
   return (
     <div className={`ds-empty-state${className ? ` ${className}` : ''}`.trim()}>
       <div className="ds-empty-state-icon">

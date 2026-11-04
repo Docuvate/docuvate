@@ -71,9 +71,7 @@ from docuvate_worker.infrastructure.ml.value_types.vendor_line_ranker import (
 )
 
 HOLDOUT_PATH = REPO_ROOT / "apps/worker/tests/fixtures/global_field_holdout.v1.json"
-FROZEN_EVAL_PATH = (
-    REPO_ROOT / "apps/worker/tests/fixtures/global_field_holdout_frozen_eval.v1.json"
-)
+FROZEN_EVAL_PATH = REPO_ROOT / "apps/worker/tests/fixtures/global_field_holdout_frozen_eval.v1.json"
 FROZEN_EVAL_V2_PATH = (
     REPO_ROOT / "apps/worker/tests/fixtures/global_field_holdout_frozen_eval_v2.v1.json"
 )
@@ -110,9 +108,7 @@ RECALL_FLOOR_VS_BEST = 0.85
 def _load_docs(split: str) -> list[dict[str, object]]:
     payload = json.loads(HOLDOUT_PATH.read_text(encoding="utf-8"))
     return [
-        doc
-        for doc in payload["documents"]
-        if isinstance(doc, dict) and doc.get("split") == split
+        doc for doc in payload["documents"] if isinstance(doc, dict) and doc.get("split") == split
     ]
 
 
@@ -180,13 +176,7 @@ def _iter_vendor_training_rows(
                 supplier_cosines=supplier_cosines,
                 digits_ratio=_digits_ratio(candidate),
             )
-            label = (
-                0
-                if vendor_gt_str is None
-                else 1
-                if candidate == vendor_gt_str
-                else 0
-            )
+            label = 0 if vendor_gt_str is None else 1 if candidate == vendor_gt_str else 0
             xs.append(features.as_vector())
             ys.append(label)
     return np.asarray(xs, dtype=np.float64), np.asarray(ys, dtype=np.int64)
@@ -422,9 +412,7 @@ def _warm_passage_cache(docs: list[dict[str, object]]) -> None:
     if not lines:
         return
     vectors = embed_passages(lines)
-    register_passage_vectors(
-        {text: vector for text, vector in zip(lines, vectors, strict=True)}
-    )
+    register_passage_vectors({text: vector for text, vector in zip(lines, vectors, strict=True)})
 
 
 def main() -> None:
@@ -540,10 +528,7 @@ def main() -> None:
                         "recall": recall,
                     }
                 )
-                if (
-                    precision + 1e-9 >= TARGET_PRECISION
-                    and vendor_metrics.predicted_slots > 0
-                ):
+                if precision + 1e-9 >= TARGET_PRECISION and vendor_metrics.predicted_slots > 0:
                     strictness = float(min_score) + float(min_conf) - float(min_labeled) * 0.25
                     vendor_feasible.append(
                         (
@@ -630,10 +615,7 @@ def main() -> None:
                         "recall": recall,
                     }
                 )
-                if (
-                    precision + 1e-9 >= TARGET_PRECISION
-                    and amount_metrics.predicted_slots > 0
-                ):
+                if precision + 1e-9 >= TARGET_PRECISION and amount_metrics.predicted_slots > 0:
                     amount_feasible.append(
                         (
                             recall,
@@ -678,16 +660,13 @@ def main() -> None:
     _write_artifact(payload)
 
     confirm_metrics = {
-        field: asdict(slot_metrics_for_field(confirm_docs, _predict, field))
-        for field in FIELD_KEYS
+        field: asdict(slot_metrics_for_field(confirm_docs, _predict, field)) for field in FIELD_KEYS
     }
     eval_metrics = {
-        field: asdict(slot_metrics_for_field(eval_docs, _predict, field))
-        for field in FIELD_KEYS
+        field: asdict(slot_metrics_for_field(eval_docs, _predict, field)) for field in FIELD_KEYS
     }
     frozen_eval_metrics = {
-        field: asdict(slot_metrics_for_field(frozen_docs, _predict, field))
-        for field in FIELD_KEYS
+        field: asdict(slot_metrics_for_field(frozen_docs, _predict, field)) for field in FIELD_KEYS
     }
     frozen_eval_v2_metrics = {
         field: asdict(slot_metrics_for_field(frozen_v2_docs, _predict, field))

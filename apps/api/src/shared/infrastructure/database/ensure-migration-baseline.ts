@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { DataSource, MigrationInterface } from 'typeorm';
 
+import { isRecord } from '../../domain/row-parse.js';
 import { migrationSchemaPresent, regClassExists } from './migration-baseline-markers.js';
-import { isRecord } from './row-parse.js';
 import { buildTypeOrmOptions } from './typeorm-options.js';
 
 function migrationCount(rows: unknown): number {
@@ -36,7 +36,9 @@ function isMigrationCtor(value: unknown): value is new () => MigrationInterface 
   return typeof value === 'function';
 }
 
-async function ensureMigrationsTable(runner: ReturnType<DataSource['createQueryRunner']>): Promise<void> {
+async function ensureMigrationsTable(
+  runner: ReturnType<DataSource['createQueryRunner']>
+): Promise<void> {
   await runner.query(`
     CREATE TABLE IF NOT EXISTS migrations (
       id SERIAL PRIMARY KEY,

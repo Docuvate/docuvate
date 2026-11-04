@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 
 const MIN_DELAY_SECONDS = 1;
-export const API_HEALTH_BACKOFF_MAX_SECONDS = 30;
+const API_HEALTH_BACKOFF_MAX_SECONDS = 30;
 const MAX_DELAY_SECONDS = API_HEALTH_BACKOFF_MAX_SECONDS;
 
 /** Exponential backoff delay in seconds for the given attempt (1-based). */

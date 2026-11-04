@@ -89,8 +89,14 @@ def _build_scan_pdf(
             f"/Contents 5 0 R /Resources << /Font << /F1 6 0 R >> "
             f"/XObject << /Im1 4 0 R >> >> >>endobj\n"
         ).encode("latin-1"),
-        b"4 0 obj" + img_obj_header.encode("latin-1") + b" stream\n" + jpeg + b"\nendstream\nendobj\n",
-        bytes(f"5 0 obj<< /Length {len(stream_b)} >>stream\n", "latin-1") + stream_b + b"\nendstream\nendobj\n",
+        b"4 0 obj"
+        + img_obj_header.encode("latin-1")
+        + b" stream\n"
+        + jpeg
+        + b"\nendstream\nendobj\n",
+        bytes(f"5 0 obj<< /Length {len(stream_b)} >>stream\n", "latin-1")
+        + stream_b
+        + b"\nendstream\nendobj\n",
         b"6 0 obj<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>endobj\n",
     ]
     body = b"%PDF-1.4\n" + b"".join(objects)
@@ -102,7 +108,9 @@ def _build_scan_pdf(
         xref_lines.append(f"{offset:010d} 00000 n \n".encode("latin-1"))
         offset += len(obj)
     trailer = (
-        f"trailer<< /Size {obj_count} /Root 1 0 R >>\nstartxref\n{xref_start}\n%%EOF\n".encode("latin-1")
+        f"trailer<< /Size {obj_count} /Root 1 0 R >>\nstartxref\n{xref_start}\n%%EOF\n".encode(
+            "latin-1"
+        )
     )
     return body + b"".join(xref_lines) + trailer
 

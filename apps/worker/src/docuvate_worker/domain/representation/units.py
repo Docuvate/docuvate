@@ -107,11 +107,11 @@ def _table_row_units(
                 break
             meta = taco.tables[table_index]
             header_rows = max(meta.header_row_count, 1)
-            header_text = " | ".join(
-                cell.text.strip()
-                for cell in table.rows[0]
-                if cell.text.strip()
-            ) if table.rows else ""
+            header_text = (
+                " | ".join(cell.text.strip() for cell in table.rows[0] if cell.text.strip())
+                if table.rows
+                else ""
+            )
             for row_idx, row in enumerate(table.rows):
                 if row_idx < header_rows:
                     continue

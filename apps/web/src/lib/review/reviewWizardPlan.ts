@@ -21,13 +21,13 @@ export interface ReviewWizardSuggestionTask {
   suggestedDocumentDate?: string | null;
 }
 
-export interface ReviewWizardDocumentSteps {
+interface ReviewWizardDocumentSteps {
   documentId: string;
   documentTitle: string;
   steps: ReviewWizardStepKind[];
 }
 
-export interface ReviewWizardPlan {
+interface ReviewWizardPlan {
   documents: ReviewWizardDocumentSteps[];
   tasks: ReviewWizardSuggestionTask[];
 }
@@ -118,7 +118,10 @@ export function buildReviewWizardPlan(items: DocumentReviewQueueItemDto[]): Revi
   return { documents, tasks };
 }
 
-export function reviewWizardProgress(plan: ReviewWizardPlan, taskIndex: number): {
+export function reviewWizardProgress(
+  plan: ReviewWizardPlan,
+  taskIndex: number
+): {
   documentIndex: number;
   documentCount: number;
   taskIndex: number;

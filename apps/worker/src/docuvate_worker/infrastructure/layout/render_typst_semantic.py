@@ -37,6 +37,7 @@ _SEMANTIC_PREAMBLE = """// Docuvate Export (semantisch). Quelle: Layout IR v1
 
 """
 
+
 def _escape_semantic_inline(text: str) -> str:
     stripped = text.replace("\r", "")
     if not stripped:
@@ -346,8 +347,7 @@ def _render_table(table: LayoutIrTable) -> str:
             header_cells = [_cell_content(c.text) for c in first]
             body_rows = list(table.rows[1:])
     for row in body_rows:
-        for cell in row:
-            flat.append(_cell_content(cell.text))
+        flat.extend(_cell_content(cell.text) for cell in row)
     parts: list[str] = [f"#table(\n  columns: ({col_spec}),\n  stroke: 0.5pt,\n  inset: 4pt,"]
     if header_cells:
         parts.append(f"  table.header({', '.join(header_cells)}),")
@@ -472,10 +472,10 @@ def _page_set_block(page: LayoutIrPage) -> str:
     w, h = page.width_pt, page.height_pt
     margin = "margin: (x: 14mm, y: 14mm)"
     if w <= 0 or h <= 0:
-        return f"#set page(paper: \"a4\", {margin})\n\n"
+        return f'#set page(paper: "a4", {margin})\n\n'
     portrait_a4 = abs(w - 595.28) < 2 and abs(h - 841.89) < 3  # noqa: PLR2004
     if portrait_a4:
-        return f"#set page(paper: \"a4\", {margin})\n\n"
+        return f'#set page(paper: "a4", {margin})\n\n'
     return f"#set page(width: {w:.2f}pt, height: {h:.2f}pt, {margin})\n\n"
 
 

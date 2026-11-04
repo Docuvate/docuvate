@@ -3,7 +3,7 @@
 import { Inject, Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import type pg from 'pg';
 
-import { parseString } from '../../../shared/infrastructure/database/row-parse.js';
+import { parseString } from '../../../shared/domain/row-parse.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 import { extractionFailureReasonKey } from '../../extraction/domain/extraction-failure.js';
 import type { DocumentExtractionEnqueuePort } from '../domain/document-extraction-enqueue.port.js';
@@ -65,9 +65,7 @@ export class OrphanDocumentExtractionReconcileService implements OnModuleInit, O
           requeued += 1;
         } catch (error: unknown) {
           const message = error instanceof Error ? error.message : String(error);
-          this.logger.warn(
-            `Could not re-enqueue extraction for document ${row.id}: ${message}`
-          );
+          this.logger.warn(`Could not re-enqueue extraction for document ${row.id}: ${message}`);
         }
       }
       if (requeued > 0) {

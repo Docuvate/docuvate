@@ -2,11 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Injectable } from '@nestjs/common';
 
-import {
-  parseBoolean,
-  parseString,
-  recordFromUnknown,
-} from '../../../shared/infrastructure/database/row-parse.js';
+import { parseBoolean, parseString, recordFromUnknown } from '../../../shared/domain/row-parse.js';
 import { fetchWorkerDependency } from '../../../shared/infrastructure/worker/worker-dependency-fetch.js';
 import {
   buildDocumentChatProvidersCatalog,
@@ -64,12 +60,14 @@ export class ListDocumentChatProvidersUseCase {
 
   async execute() {
     const hw = await this.hardware.execute();
-    let workerProviders: {
-      id: string;
-      label: string;
-      description: string;
-      available: boolean;
-    }[] | null = null;
+    let workerProviders:
+      | {
+          id: string;
+          label: string;
+          description: string;
+          available: boolean;
+        }[]
+      | null = null;
 
     const workerUrl = process.env['WORKER_URL'] ?? 'http://localhost:8000';
     try {

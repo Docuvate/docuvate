@@ -20,20 +20,25 @@ def test_run_extract_isolated_logs_subprocess_traceback(
         "ok": False,
         "error": "OverflowError: math range error",
         "error_type": "OverflowError",
-        "traceback": ["Traceback (most recent call last):\n", '  File "x.py", line 1\n', "OverflowError: math range error\n"],
+        "traceback": [
+            "Traceback (most recent call last):\n",
+            '  File "x.py", line 1\n',
+            "OverflowError: math range error\n",
+        ],
         "permanent": True,
     }
     proc = MagicMock()
     proc.returncode = 1
     proc.stderr = ""
+    handle = MagicMock()
+    handle.read.return_value = json.dumps(payload)
+    tmp_factory = MagicMock()
+    tmp_factory.return_value.__enter__.return_value = handle
     with (
         patch.object(runner.subprocess, "run", return_value=proc),
-        patch.object(runner.tempfile, "TemporaryFile") as tmp_mock,
+        patch.object(runner.tempfile, "TemporaryFile", tmp_factory),
         pytest.raises(ExtractPermanentError),
     ):
-        handle = MagicMock()
-        handle.read.return_value = json.dumps(payload)
-        tmp_mock.return_value.__enter__.return_value = handle
         runner.run_extract_isolated(
             content=b"%PDF",
             mime_type="application/pdf",

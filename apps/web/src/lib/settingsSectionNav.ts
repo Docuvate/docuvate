@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { routes } from './routes';
 
-export interface SettingsSectionNavItem {
+interface SettingsSectionNavItem {
   to: string;
   end: boolean;
   labelKey: string;

@@ -14,7 +14,7 @@ function isAvailable(id: DocumentChatProviderId, providers: ChatProviderAvailabi
   return entry.available !== false;
 }
 
-export function isCustomerFacingDocumentChatProvider(id: DocumentChatProviderId): boolean {
+function isCustomerFacingDocumentChatProvider(id: DocumentChatProviderId): boolean {
   return CUSTOMER_CHAT_PROVIDERS.includes(id);
 }
 

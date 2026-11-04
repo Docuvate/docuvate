@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import functools
 import importlib.util
 import sys
 import types
@@ -12,14 +13,10 @@ from docuvate_worker.domain.layout_ir import LayoutIrDocument
 
 _FIXTURE_ROOT = Path(__file__).resolve().parents[1] / "fixtures" / "pre_fix_renderer"
 _PACKAGE = "pre_fix_renderer"
-_layout_ir_to_typst: Callable[[LayoutIrDocument], str] | None = None
 
 
-def _load_pre_fix_package() -> None:
-    global _layout_ir_to_typst
-    if _layout_ir_to_typst is not None:
-        return
-
+@functools.cache
+def _load_pre_fix_renderer() -> Callable[[LayoutIrDocument], str]:
     pkg = types.ModuleType(_PACKAGE)
     pkg.__path__ = [str(_FIXTURE_ROOT)]
     pkg.__package__ = _PACKAGE
@@ -42,10 +39,9 @@ def _load_pre_fix_package() -> None:
         spec.loader.exec_module(mod)
 
     render_typst = sys.modules[f"{_PACKAGE}.render_typst"]
-    _layout_ir_to_typst = render_typst.layout_ir_to_typst
+    renderer: Callable[[LayoutIrDocument], str] = render_typst.layout_ir_to_typst
+    return renderer
 
 
 def typst_from_pre_fix_renderer(doc: LayoutIrDocument) -> str:
-    _load_pre_fix_package()
-    assert _layout_ir_to_typst is not None
-    return _layout_ir_to_typst(doc)
+    return _load_pre_fix_renderer()(doc)

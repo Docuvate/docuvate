@@ -5,9 +5,9 @@ import type { ExtractedField } from '@docuvate/contracts';
 import { fieldsByCorrectionSlot } from './correction-diff-slots.js';
 import { extractionFieldValuesEquivalent } from './extraction-field-value-equivalence.js';
 
-export const FIELD_CONFIRMED_CONFIDENCE_THRESHOLD = 0.85;
+const FIELD_CONFIRMED_CONFIDENCE_THRESHOLD = 0.85;
 
-export interface ExtractionFieldConfirmationDraft {
+interface ExtractionFieldConfirmationDraft {
   fieldKey: string;
   fieldTagId: string | null;
 }

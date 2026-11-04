@@ -78,7 +78,7 @@ def _doc_with_text(text: str) -> LayoutIrDocument:
         "Σcw β λ",
         "a#b$c*d_e`f<g>@h[i]j\\k=l-m+n/o~p",
         "line\nbreak",
-        "quote\"backslash\\",
+        'quote"backslash\\',
     ],
 )
 def test_typst_text_literal_roundtrip_and_compiles(sample: str) -> None:

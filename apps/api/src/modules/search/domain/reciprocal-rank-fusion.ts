@@ -18,7 +18,3 @@ export function reciprocalRankFusion(lists: RankedItem[][], k = DEFAULT_K): Map<
   }
   return scores;
 }
-
-export function sortByFusionScore(ids: string[], scores: Map<string, number>): string[] {
-  return [...ids].sort((a, b) => (scores.get(b) ?? 0) - (scores.get(a) ?? 0));
-}

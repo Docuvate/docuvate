@@ -96,7 +96,7 @@ function shingleSet(tokens: string[], size: number): Set<string> {
   return set;
 }
 
-export function shingleJaccardDistance(tokensA: string[], tokensB: string[], size = 3): number {
+function shingleJaccardDistance(tokensA: string[], tokensB: string[], size = 3): number {
   const a = shingleSet(tokensA, size);
   const b = shingleSet(tokensB, size);
   if (a.size === 0 && b.size === 0) return 0;

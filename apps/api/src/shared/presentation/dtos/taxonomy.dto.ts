@@ -1,13 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import type {
-  CorrespondentDto,
-  CreateCorrespondentRequest,
-  CreateTagRequest,
-  TagDto,
-  UpdateCorrespondentRequest,
-  UpdateTagRequest,
-} from '@docuvate/contracts';
+import type { CreateTagRequest, TagDto, UpdateTagRequest } from '@docuvate/contracts';
 import { Type } from 'class-transformer';
 import { IsBoolean, IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
 
@@ -40,23 +33,6 @@ export class UpdateTagRequestDto extends MatchingAlgorithmFieldsDto implements U
   isInbox?: boolean;
 }
 
-export class CreateCorrespondentRequestDto
-  extends MatchingAlgorithmFieldsDto
-  implements CreateCorrespondentRequest
-{
-  @IsString()
-  name!: string;
-}
-
-export class UpdateCorrespondentRequestDto
-  extends MatchingAlgorithmFieldsDto
-  implements UpdateCorrespondentRequest
-{
-  @IsOptional()
-  @IsString()
-  name?: string;
-}
-
 export class TagListResponseDto {
   items!: TagDto[];
 }
@@ -83,8 +59,4 @@ export class TagSearchResponseDto {
   nextCursor!: string | null;
   hasMore!: boolean;
   total!: number | null;
-}
-
-export class CorrespondentListResponseDto {
-  items!: CorrespondentDto[];
 }

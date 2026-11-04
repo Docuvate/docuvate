@@ -1,7 +1,9 @@
-from docuvate_worker.infrastructure.extractors.label_custom_fields import extract_label_custom_fields
+from docuvate_worker.infrastructure.extractors.label_custom_fields import (
+    extract_label_custom_fields,
+)
 
 
-def test_extract_near_label_and_amount():
+def test_extract_near_label_and_amount() -> None:
     text = "Rechnung\nRechnungsdatum: 01.02.2024\nBetrag: EUR 12,50"
     fields = extract_label_custom_fields(
         text,
@@ -119,14 +121,28 @@ def test_correction_teaches_ebeschv_gesamtbrutto_first_amount() -> None:
 
 def test_correction_teaches_catalog_label_anchor_for_different_amounts() -> None:
     examples = [
-        {"field_key": "bruttoentgelt", "value": "6.400,00", "label": "Bruttoentgelt", "label_tag_ids": []},
-        {"field_key": "bruttoentgelt", "value": "5.432,10", "label": "Bruttoentgelt", "label_tag_ids": []},
+        {
+            "field_key": "bruttoentgelt",
+            "value": "6.400,00",
+            "label": "Bruttoentgelt",
+            "label_tag_ids": [],
+        },
+        {
+            "field_key": "bruttoentgelt",
+            "value": "5.432,10",
+            "label": "Bruttoentgelt",
+            "label_tag_ids": [],
+        },
     ]
     text_a = "Entgeltnachweis\nBruttoentgelt 6.550,00"
     text_b = "Entgeltnachweis\nBruttoentgelt 4.100,00"
     spec = [{"key": "bruttoentgelt", "label": "Bruttoentgelt", "field_type": "currency"}]
-    rows_a = extract_label_custom_fields(text_a, tag_name="Entgeltnachweis", fields=spec, examples=examples)
-    rows_b = extract_label_custom_fields(text_b, tag_name="Entgeltnachweis", fields=spec, examples=examples)
+    rows_a = extract_label_custom_fields(
+        text_a, tag_name="Entgeltnachweis", fields=spec, examples=examples
+    )
+    rows_b = extract_label_custom_fields(
+        text_b, tag_name="Entgeltnachweis", fields=spec, examples=examples
+    )
     assert {row.value for row in rows_a} == {"6.550,00"}
     assert {row.value for row in rows_b} == {"4.100,00"}
 
@@ -148,7 +164,5 @@ def test_correction_generalizes_rechnungsbetrag_from_catalog_label() -> None:
     ]
     text = "Rechnung\nRechnungsbetrag 250,00 EUR"
     spec = [{"key": "rechnungsbetrag", "label": "Rechnungsbetrag", "field_type": "currency"}]
-    rows = extract_label_custom_fields(
-        text, tag_name="Rechnung", fields=spec, examples=examples
-    )
+    rows = extract_label_custom_fields(text, tag_name="Rechnung", fields=spec, examples=examples)
     assert {row.value for row in rows} == {"250,00"}

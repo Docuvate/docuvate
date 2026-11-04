@@ -8,7 +8,7 @@ function serializeBaseline(value: unknown): string {
   return JSON.stringify(value);
 }
 
-export interface UseFormDraftOptions<T> {
+interface UseFormDraftOptions<T> {
   isEqual?: (a: T, b: T) => boolean;
 }
 

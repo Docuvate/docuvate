@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { ErrorCodeDetails } from '../errors/ErrorCodeDetails';
 import { Button } from '../ui/Button';
 
-export const TOAST_AUTO_DISMISS_MS = 3000;
+const TOAST_AUTO_DISMISS_MS = 3000;
 
 interface ToastItemProps {
   id: string;
@@ -50,7 +50,9 @@ export function ToastItem({
       onDismiss(id);
       return;
     }
-    timerRef.current = setTimeout(() => { onDismiss(id); }, ms);
+    timerRef.current = setTimeout(() => {
+      onDismiss(id);
+    }, ms);
   }, [clearTimer, id, onDismiss]);
 
   useEffect(() => {

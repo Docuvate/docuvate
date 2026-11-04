@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-export interface StreamedCitedClaimJson {
+interface StreamedCitedClaimJson {
   text: string;
   source: string;
   quote: string;
@@ -15,7 +15,10 @@ function unescapeJsonString(fragment: string): string {
     .replace(/\\\\/g, '\\');
 }
 
-function readJsonStringValue(raw: string, startQuoteIndex: number): { value: string; endIndex: number } | null {
+function readJsonStringValue(
+  raw: string,
+  startQuoteIndex: number
+): { value: string; endIndex: number } | null {
   let i = startQuoteIndex + 1;
   let escaped = false;
   const start = i;

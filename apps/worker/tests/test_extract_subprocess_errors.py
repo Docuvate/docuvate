@@ -6,6 +6,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from docuvate_worker.domain.extract_errors import ExtractPermanentError
 from docuvate_worker.presentation import extract_subprocess_runner as runner
 from docuvate_worker.presentation.extract_subprocess_errors import (
     filter_benign_stderr,
@@ -27,8 +28,6 @@ def test_filter_benign_stderr_keeps_real_errors() -> None:
 
 
 def test_run_extract_isolated_reports_sigkill(monkeypatch: pytest.MonkeyPatch) -> None:
-    from docuvate_worker.domain.extract_errors import ExtractPermanentError
-
     monkeypatch.delenv("DOCUVATE_ALLOW_IN_PROCESS_EXTRACT", raising=False)
     monkeypatch.setenv("DOCUVATE_EXTRACT_ADMISSION", "0")
     proc = MagicMock()

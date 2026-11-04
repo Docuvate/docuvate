@@ -21,13 +21,13 @@ import {
 } from '@nestjs/common';
 
 import type { AuthorizationSubject } from '../../../shared/domain/authorization.js';
+import { isInstanceAdmin } from '../../../shared/domain/user-authorization-subject.js';
 import {
   AuthGuard,
   type AuthSession,
   AuthSubject,
   Session,
 } from '../../../shared/infrastructure/auth/auth.guard.js';
-import { isInstanceAdmin } from '../../../shared/infrastructure/auth/user-authorization-subject.js';
 import {
   ConnectorInstallationIdParamDto,
   ExportToConnectorRequestDto,

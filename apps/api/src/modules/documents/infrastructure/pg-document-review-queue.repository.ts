@@ -8,7 +8,7 @@ import {
   parseNumber,
   parseString,
   requireRecord,
-} from '../../../shared/infrastructure/database/row-parse.js';
+} from '../../../shared/domain/row-parse.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 import {
   buildDescIdTiebreakerKeyset,
@@ -16,12 +16,12 @@ import {
   encodeIdTiebreakerCursor,
 } from '../../../shared/infrastructure/pagination/id-tiebreaker-cursor.js';
 
-export interface PendingReviewDocumentRow {
+interface PendingReviewDocumentRow {
   id: string;
   createdAt: Date;
 }
 
-export interface PendingReviewDocumentPage {
+interface PendingReviewDocumentPage {
   rows: PendingReviewDocumentRow[];
   hasMore: boolean;
   nextCursor: string | null;

@@ -7,7 +7,7 @@ import { NavLink } from 'react-router-dom';
 
 import { buildConnectorBreadcrumbItems } from '../../lib/connectorBreadcrumbs';
 import { routes } from '../../lib/routes';
-import { SettingsSectionLayout } from '../settings/SettingsSectionLayout';
+import { SettingsSectionLayout } from '../settings';
 import { Breadcrumb } from '../ui/Breadcrumb';
 
 interface ConnectorDetailLayoutProps {

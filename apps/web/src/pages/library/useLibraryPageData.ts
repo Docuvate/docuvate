@@ -39,10 +39,7 @@ import {
   flattenDocumentPages,
   useDocumentsInfiniteQuery,
 } from '../../lib/documents/useDocumentsInfiniteQuery';
-import {
-  documentListQueryWithFieldFilters,
-  patchFieldFilter,
-} from '../../lib/libraryFieldFilters';
+import { documentListQueryWithFieldFilters, patchFieldFilter } from '../../lib/libraryFieldFilters';
 import {
   type LibraryFilterMode,
   readLibraryFilterMode,
@@ -57,7 +54,7 @@ import { childFolders } from '../../lib/ordnerTree';
 import { applySavedViewToLibrary, buildSavedViewPayload } from '../../lib/savedViewState';
 type SortField = NonNullable<DocumentListQuery['sort']>;
 
-export type LibrarySelectionScope = 'none' | 'loaded' | 'all-matching';
+type LibrarySelectionScope = 'none' | 'loaded' | 'all-matching';
 
 export function useLibraryPageData(mode: 'all' | 'folder' | 'unassigned' | 'ordner-root') {
   const { t } = useTranslation();
@@ -306,7 +303,9 @@ export function useLibraryPageData(mode: 'all' | 'folder' | 'unassigned' | 'ordn
     const timer = window.setInterval(() => {
       void refetchDocuments();
     }, 4000);
-    return () => { window.clearInterval(timer); };
+    return () => {
+      window.clearInterval(timer);
+    };
   }, [items, refetchDocuments]);
 
   async function onSearch(event: FormEvent) {
@@ -385,8 +384,7 @@ export function useLibraryPageData(mode: 'all' | 'folder' | 'unassigned' | 'ordn
 
   function toggleSelectAll() {
     const loadedIds = items.map((d) => d.id);
-    const allLoadedSelected =
-      loadedIds.length > 0 && loadedIds.every((id) => selected.has(id));
+    const allLoadedSelected = loadedIds.length > 0 && loadedIds.every((id) => selected.has(id));
     if (allLoadedSelected) {
       setSelected(new Set());
       setSelectionScope('none');
@@ -424,8 +422,7 @@ export function useLibraryPageData(mode: 'all' | 'folder' | 'unassigned' | 'ordn
   }, [fetchAllDocumentPages, selected, selectionScope]);
 
   const groupedLabelSuggestions = useMemo(() => {
-    const scope =
-      selected.size > 0 ? items.filter((doc) => selected.has(doc.id)) : items;
+    const scope = selected.size > 0 ? items.filter((doc) => selected.has(doc.id)) : items;
     const groups = computeGroupedLibraryLabelSuggestions(scope);
     return filterGroupedSuggestionsToSelection(groups, selected);
   }, [items, selected]);

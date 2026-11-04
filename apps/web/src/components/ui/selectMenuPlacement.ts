@@ -1,20 +1,20 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-export const SELECT_MENU_GAP_PX = 2;
-export const SELECT_MENU_MAX_HEIGHT_PX = 240;
-export const SELECT_MENU_MAX_OPTIONS_WITHOUT_SCROLL = 10;
+const SELECT_MENU_GAP_PX = 2;
+const SELECT_MENU_MAX_HEIGHT_PX = 240;
+const SELECT_MENU_MAX_OPTIONS_WITHOUT_SCROLL = 10;
 /** Estimated row height including padding (matches `.custom-select-option`). */
 export const SELECT_MENU_ITEM_ESTIMATE_PX = 38;
-export const SELECT_MENU_CHROME_PX = 16;
+const SELECT_MENU_CHROME_PX = 16;
 
-export interface SelectMenuPlacementInput {
+interface SelectMenuPlacementInput {
   triggerRect: DOMRect;
   measuredMenuHeight: number;
   optionCount: number;
   viewportHeight: number;
 }
 
-export interface SelectMenuPlacement {
+interface SelectMenuPlacement {
   top: number;
   left: number;
   width: number;

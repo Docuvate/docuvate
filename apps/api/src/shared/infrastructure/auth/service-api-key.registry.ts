@@ -3,17 +3,13 @@
 import { Injectable } from '@nestjs/common';
 
 import type { AuthorizationSubject } from '../../domain/authorization.js';
-import {
-  isRecord,
-  parseString,
-  parseStringArray,
-} from '../database/row-parse.js';
+import { isRecord, parseString, parseStringArray } from '../../domain/row-parse.js';
 import {
   assertSftpIngestServiceKeyAllowed,
   resolveSftpIngestServiceKey,
 } from './sftp-ingest-service-key.js';
 
-export interface ServiceApiKeyRecord {
+interface ServiceApiKeyRecord {
   keyId: string;
   secret: string;
   tenantUserId: string;
@@ -21,7 +17,7 @@ export interface ServiceApiKeyRecord {
   claims: string[];
 }
 
-export interface ResolvedServicePrincipal {
+interface ResolvedServicePrincipal {
   sessionUser: { id: string; email: string; name: string };
   subject: AuthorizationSubject;
 }

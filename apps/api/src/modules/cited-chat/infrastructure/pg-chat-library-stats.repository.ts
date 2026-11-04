@@ -11,12 +11,12 @@ const VERSION_STACK_FILTER = `NOT EXISTS (
   WHERE sm.document_id = d.id AND sm.role = 'version'
 )`;
 
-export interface TenantTagRow {
+interface TenantTagRow {
   id: string;
   name: string;
 }
 
-export interface StatsDocumentRow {
+interface StatsDocumentRow {
   id: string;
   title: string;
   filename: string;
@@ -37,7 +37,10 @@ export class PgChatLibraryStatsRepository {
     return result.rows.map((row) => ({ id: row.id, name: row.name }));
   }
 
-  async countDocuments(userId: string, options?: { status?: 'ready'; tagId?: string }): Promise<number> {
+  async countDocuments(
+    userId: string,
+    options?: { status?: 'ready'; tagId?: string }
+  ): Promise<number> {
     const params: unknown[] = [userId];
     let tagJoin = '';
     let statusFilter = '';

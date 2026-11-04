@@ -3,7 +3,7 @@
 import type { PasswordPolicyDto } from '@docuvate/contracts';
 import { normalizePasswordPolicy } from '@docuvate/contracts';
 
-import { parseBoolean, parseNumber } from '../../../shared/infrastructure/database/row-parse.js';
+import { parseBoolean, parseNumber } from '../../../shared/domain/row-parse.js';
 
 export interface InstallationPasswordPolicyRow {
   min_length: number;

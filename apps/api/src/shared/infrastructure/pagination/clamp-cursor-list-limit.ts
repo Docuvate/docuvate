@@ -1,9 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import {
-  CURSOR_LIST_DEFAULT_LIMIT,
-  CURSOR_LIST_MAX_LIMIT,
-} from '@docuvate/contracts';
+import { CURSOR_LIST_DEFAULT_LIMIT, CURSOR_LIST_MAX_LIMIT } from '@docuvate/contracts';
 
 export function clampCursorListLimit(limit: number | undefined): number {
   if (limit === undefined) {
@@ -16,4 +13,4 @@ export function clampCursorListLimit(limit: number | undefined): number {
   return Math.min(rounded, CURSOR_LIST_MAX_LIMIT);
 }
 
-export { CURSOR_LIST_DEFAULT_LIMIT, CURSOR_LIST_MAX_LIMIT };
+export { CURSOR_LIST_MAX_LIMIT };

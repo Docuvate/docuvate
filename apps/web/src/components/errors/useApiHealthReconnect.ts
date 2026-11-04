@@ -6,12 +6,12 @@ import { probeApiHealth } from '../../lib/apiHealth';
 import { apiHealthBackoffSeconds } from '../../lib/apiHealthBackoff';
 import { markApiRequestSucceeded } from '../../lib/serverReachability';
 
-export interface UseApiHealthReconnectOptions {
+interface UseApiHealthReconnectOptions {
   enabled: boolean;
   onRecovered?: () => void;
 }
 
-export interface ApiHealthReconnectState {
+interface ApiHealthReconnectState {
   secondsUntilRetry: number;
   countdownTotalSeconds: number;
   isProbing: boolean;

@@ -3,7 +3,7 @@
 import { apiBaseUrl } from './api';
 import { isRecord } from './apiErrors';
 
-export interface PasswordResetTokenVerification {
+interface PasswordResetTokenVerification {
   valid: boolean;
 }
 

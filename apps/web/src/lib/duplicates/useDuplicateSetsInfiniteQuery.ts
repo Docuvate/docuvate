@@ -6,16 +6,13 @@ import { useMemo } from 'react';
 import { listDuplicateSetsPage } from '../api';
 import { useCursorInfiniteQuery } from '../pagination/useCursorInfiniteQuery';
 
-export interface DuplicateSetsQueryParams {
+interface DuplicateSetsQueryParams {
   documentId?: string;
 }
 
 export function useDuplicateSetsInfiniteQuery(params: DuplicateSetsQueryParams = {}) {
   const documentId = params.documentId;
-  const queryKey = useMemo(
-    () => ['duplicate-sets', documentId ?? null] as const,
-    [documentId]
-  );
+  const queryKey = useMemo(() => ['duplicate-sets', documentId ?? null] as const, [documentId]);
 
   return useCursorInfiniteQuery<DuplicateSetDto, DuplicateSetsQueryParams>({
     queryKey,

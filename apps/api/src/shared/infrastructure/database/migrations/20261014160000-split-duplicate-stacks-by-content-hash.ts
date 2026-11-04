@@ -9,7 +9,7 @@ import {
   parseOptionalString,
   parseString,
   requireRecord,
-} from '../row-parse.js';
+} from '../../../domain/row-parse.js';
 
 interface StackMemberRow {
   documentId: string;
@@ -217,13 +217,7 @@ export class SplitDuplicateStacksByContentHash20261014160000 implements Migratio
         const newStackId = await createStack(queryRunner, userId);
         newStackIds.push(newStackId);
         for (const member of group) {
-          await moveMemberToStack(
-            queryRunner,
-            userId,
-            stackId,
-            newStackId,
-            member.documentId
-          );
+          await moveMemberToStack(queryRunner, userId, stackId, newStackId, member.documentId);
         }
       }
 

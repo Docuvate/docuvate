@@ -26,14 +26,3 @@ export function readLocationStateNumber(state: unknown, key: string): number | u
   const value: unknown = readObjectField(state, key);
   return typeof value === 'number' ? value : undefined;
 }
-
-export function readLocationStateString(state: unknown, key: string): string | undefined {
-  if (typeof state !== 'object' || state === null) {
-    return undefined;
-  }
-  if (!Object.hasOwn(state, key)) {
-    return undefined;
-  }
-  const value: unknown = readObjectField(state, key);
-  return typeof value === 'string' ? value : undefined;
-}

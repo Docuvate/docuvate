@@ -126,9 +126,7 @@ def ocr_pdf_bytes(
     block_index = 0
     dpi = _ocr_pdf_dpi()
     try:
-        for page_index, page in iter_pdf_page_images(
-            content, dpi=dpi, max_pages=max_pages
-        ):
+        for page_index, page in iter_pdf_page_images(content, dpi=dpi, max_pages=max_pages):
             try:
                 array = np.asarray(page.convert("RGB"))
                 page_h, page_w = array.shape[:2]

@@ -53,10 +53,7 @@ def discover_conditional_fields(
     doc_ids = sorted(items_by_document)
     doc_count = max(len(doc_ids), 1)
     keyed = [
-        (doc_id, item)
-        for doc_id in doc_ids
-        for item in items_by_document[doc_id]
-        if item.key_text
+        (doc_id, item) for doc_id in doc_ids for item in items_by_document[doc_id] if item.key_text
     ]
     keyless = [
         (doc_id, item)
@@ -95,10 +92,7 @@ def discover_conditional_fields(
         features = np.stack(
             [
                 np.r_[
-                    [
-                        1.0 if item.value_entity == ent else 0.0
-                        for ent in range(ENTITY_TYPE_COUNT)
-                    ],
+                    [1.0 if item.value_entity == ent else 0.0 for ent in range(ENTITY_TYPE_COUNT)],
                     item.position[0],
                     item.position[1] + item.position[3],
                 ]

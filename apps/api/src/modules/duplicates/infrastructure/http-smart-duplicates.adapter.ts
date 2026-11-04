@@ -14,12 +14,12 @@ const responseSchema = z.object({
   candidates: z.array(hitSchema),
 });
 
-export interface SmartDuplicatePeerInput {
+interface SmartDuplicatePeerInput {
   documentId: string;
   lines: string[];
 }
 
-export interface SmartDuplicateHit {
+interface SmartDuplicateHit {
   documentId: string;
   similarity: number;
 }

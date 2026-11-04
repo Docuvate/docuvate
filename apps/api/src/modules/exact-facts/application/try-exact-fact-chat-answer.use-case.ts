@@ -16,7 +16,7 @@ import { formatExactFactAnswer } from '../domain/format-exact-fact-answer.js';
 import { PgExactFactQueryRepository } from '../infrastructure/pg-exact-fact-query.repository.js';
 import { PgTenantExactFactChatSettingsRepository } from '../infrastructure/pg-tenant-exact-fact-chat-settings.repository.js';
 
-export interface ExactFactChatCitation {
+interface ExactFactChatCitation {
   ordinal: number;
   chunkId: string;
   quote: string;
@@ -24,7 +24,7 @@ export interface ExactFactChatCitation {
   charEnd: number;
 }
 
-export interface ExactFactChatAnswer {
+interface ExactFactChatAnswer {
   content: string;
   citations: ExactFactChatCitation[];
   abstained: boolean;
@@ -64,9 +64,7 @@ export class TryExactFactChatAnswerUseCase {
     answerAbstention: boolean;
   }): Promise<ExactFactChatAnswer | null> {
     const documentFilter =
-      input.scope === 'document' && input.documentIds.length > 0
-        ? input.documentIds
-        : undefined;
+      input.scope === 'document' && input.documentIds.length > 0 ? input.documentIds : undefined;
 
     let lookupRows: ExactFactRow[] = [];
     let sumAmount: { total: number; currencyCode: string | null; factCount: number } | null = null;
@@ -79,7 +77,11 @@ export class TryExactFactChatAnswerUseCase {
         gateRows = lookupRows;
         break;
       case 'sum_amounts':
-        sumAmount = await this.facts.sumMatchingAmounts(input.tenantId, input.query, documentFilter);
+        sumAmount = await this.facts.sumMatchingAmounts(
+          input.tenantId,
+          input.query,
+          documentFilter
+        );
         if (sumAmount) {
           const candidates = await this.facts.lookupFacts(
             input.tenantId,
@@ -91,7 +93,11 @@ export class TryExactFactChatAnswerUseCase {
         }
         break;
       case 'count_facts':
-        factCount = await this.facts.countMatchingFacts(input.tenantId, input.query, documentFilter);
+        factCount = await this.facts.countMatchingFacts(
+          input.tenantId,
+          input.query,
+          documentFilter
+        );
         if (factCount > 0) {
           gateRows = await this.facts.lookupFacts(
             input.tenantId,

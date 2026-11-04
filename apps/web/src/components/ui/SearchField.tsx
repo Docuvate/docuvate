@@ -3,7 +3,7 @@
 import { Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-export interface SearchFieldProps {
+interface SearchFieldProps {
   placeholder?: string;
   shortcutLabel?: string;
   focused?: boolean;

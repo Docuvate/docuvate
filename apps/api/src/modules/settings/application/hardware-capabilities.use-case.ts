@@ -8,7 +8,7 @@ import {
   parseEnum,
   parseNumber,
   recordFromUnknown,
-} from '../../../shared/infrastructure/database/row-parse.js';
+} from '../../../shared/domain/row-parse.js';
 import { fetchWorkerDependency } from '../../../shared/infrastructure/worker/worker-dependency-fetch.js';
 
 const INFERENCE_DEVICES: readonly InferenceDeviceKind[] = ['cuda', 'mps', 'rocm', 'cpu'];

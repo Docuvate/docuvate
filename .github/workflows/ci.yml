@@ -37,12 +37,31 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
       - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
       - uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
         with:
           node-version-file: .tool-versions
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - name: Cache gitleaks binary
+        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
+        with:
+          path: ~/.cache/gitleaks
+          key: gitleaks-8.24.3-linux-x64
+      - name: Secret scan (new commits, blocking)
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          set -euo pipefail
+          if [ -n "${BASE_SHA:-}" ] && [ "$BASE_SHA" != "0000000000000000000000000000000000000000" ] && git cat-file -e "$BASE_SHA^{commit}" 2>/dev/null; then
+            bash scripts/ci/gitleaks-scan.sh diff "$BASE_SHA"
+          else
+            bash scripts/ci/gitleaks-scan.sh diff HEAD~1
+          fi
+      - name: Secret scan (full history, report only)
+        run: bash scripts/ci/gitleaks-scan.sh history
       - name: No install-compat banned tokens
         run: node scripts/testing/check-no-legacy.mjs
       - name: No unresolved merge conflict markers
@@ -63,6 +82,12 @@ jobs:
       - name: Tool-versions drift guard tests
         run: node --test scripts/ci/check-tool-versions.test.mjs
       - run: pnpm openapi:check
+      - name: Architecture layering (dependency-cruiser)
+        run: pnpm lint:deps
+      - name: Dead code and unused exports (knip)
+        run: pnpm lint:dead-code
+      - name: Copy-paste duplication (jscpd)
+        run: pnpm lint:duplication
       - name: SDK Node codegen drift (Flutter SDK check runs in nightly)
         run: |
           set -euo pipefail

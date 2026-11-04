@@ -9,7 +9,7 @@ export interface DocumentChatLlmRuntimeConfig {
   apiKey: string | null;
 }
 
-export function documentChatCloudBaseUrlFromEnv(): string | null {
+function documentChatCloudBaseUrlFromEnv(): string | null {
   const raw =
     process.env['DOCUMENT_CHAT_OPENAI_BASE_URL'] ??
     process.env['DOCUMENT_CHAT_CLOUD_BASE_URL'] ??
@@ -18,15 +18,16 @@ export function documentChatCloudBaseUrlFromEnv(): string | null {
   return trimmed.length > 0 ? trimmed.replace(/\/$/, '') : null;
 }
 
-export function documentChatCloudApiKeyFromEnv(): string | null {
+function documentChatCloudApiKeyFromEnv(): string | null {
   const raw =
     process.env['DOCUMENT_CHAT_OPENAI_API_KEY'] ?? process.env['DOCUMENT_CHAT_CLOUD_API_KEY'] ?? '';
   const trimmed = raw.trim();
   return trimmed.length > 0 ? trimmed : null;
 }
 
-export function documentChatCloudModelFromEnv(): string | null {
-  const raw = process.env['DOCUMENT_CHAT_OPENAI_MODEL'] ?? process.env['DOCUMENT_CHAT_CLOUD_MODEL'] ?? '';
+function documentChatCloudModelFromEnv(): string | null {
+  const raw =
+    process.env['DOCUMENT_CHAT_OPENAI_MODEL'] ?? process.env['DOCUMENT_CHAT_CLOUD_MODEL'] ?? '';
   const trimmed = raw.trim();
   return trimmed.length > 0 ? trimmed : null;
 }

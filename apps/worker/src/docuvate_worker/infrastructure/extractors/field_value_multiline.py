@@ -12,9 +12,7 @@ _LABEL_LINE = re.compile(
     re.UNICODE,
 )
 _AMOUNT_TAIL = re.compile(r"^(?:EUR|€)\s*$", re.IGNORECASE)
-_AMOUNT_HEAD = re.compile(
-    r"^[0-9]{1,3}(?:\.[0-9]{3})*,[0-9]{2}$|^[0-9]+[.,][0-9]{2}$"
-)
+_AMOUNT_HEAD = re.compile(r"^[0-9]{1,3}(?:\.[0-9]{3})*,[0-9]{2}$|^[0-9]+[.,][0-9]{2}$")
 
 
 def _escape_label(label: str) -> str:

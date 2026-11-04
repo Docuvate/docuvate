@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from docuvate_worker.domain.layout_ir import (
+    LayoutIrBlock,
     LayoutIrDocument,
     LayoutIrVectorKind,
 )
@@ -31,7 +32,7 @@ class LayoutIrFixSignals:
         )
 
 
-def _is_upright_block(block) -> bool:
+def _is_upright_block(block: LayoutIrBlock) -> bool:
     if block.rotation_deg is not None and abs(block.rotation_deg) >= 0.5:
         return False
     if block.matrix is None:
@@ -74,9 +75,7 @@ def pre_typst_lacks_post_fix_markers(pre_typst: str) -> bool:
         return False
     if 'top-edge: "baseline"' in pre_typst:
         return False
-    if "%, origin: left)" in pre_typst:
-        return False
-    return True
+    return "%, origin: left)" not in pre_typst
 
 
 def typst_pre_and_post(doc: LayoutIrDocument) -> tuple[str, str]:

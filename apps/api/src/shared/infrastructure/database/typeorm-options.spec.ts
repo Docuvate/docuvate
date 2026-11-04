@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { afterEach, describe, expect, it } from 'vitest';
 
+import { TYPEORM_INITIAL_MIGRATION_NAME } from './initial-migration-name.js';
 import { BASELINE_MARKER_MIGRATION_NAMES } from './migration-baseline-markers.js';
 import { InitialSchema20261008120000 } from './migrations/20261008120000-initial-schema.js';
 import { GlobalSearchSchema20261008130500 } from './migrations/20261008130500-global-search-schema.js';
@@ -64,7 +65,7 @@ import { SearchVocabularyPruneStale20261028160000 } from './migrations/202610281
 import { SearchVocabularyDocumentTerms20261028180000 } from './migrations/20261028180000-search-vocabulary-document-terms.js';
 import { DocumentRegions20261029120000 } from './migrations/20261029120000-document-regions.js';
 import { WorkspaceMlSettings20261104090000 } from './migrations/20261104090000-workspace-ml-settings.js';
-import { buildTypeOrmOptions, TYPEORM_INITIAL_MIGRATION_NAME } from './typeorm-options.js';
+import { buildTypeOrmOptions } from './typeorm-options.js';
 
 const EXPECTED_MIGRATIONS = [
   InitialSchema20261008120000,

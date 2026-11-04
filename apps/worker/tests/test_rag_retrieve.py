@@ -2,7 +2,7 @@ from unittest.mock import patch
 
 from fastapi.testclient import TestClient
 
-from docuvate_worker.infrastructure.chat.rag_rerank import RagPassage, RagRetrieveResult
+from docuvate_worker.infrastructure.chat.rag_rerank import RagRetrieveResult
 from docuvate_worker.main import app
 
 client = TestClient(app)

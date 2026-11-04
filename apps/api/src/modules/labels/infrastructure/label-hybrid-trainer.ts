@@ -3,7 +3,7 @@
 import { Worker } from 'node:worker_threads';
 
 import type { LabelHybridModel } from '../domain/label-hybrid-auto-match.js';
-import type { LabelHybridDocumentRow } from '../domain/label-hybrid-training.js';
+import type { LabelHybridDocumentRow } from '../domain/label-hybrid-document-row.js';
 import { trainUserLabelHybridModel } from '../domain/label-hybrid-training.js';
 import { labelHybridTrainBudgetMs } from '../domain/label-hybrid-training-config.js';
 import { runExclusiveLabelHybridTrain } from './label-hybrid-global-train-queue.js';

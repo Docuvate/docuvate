@@ -7,7 +7,7 @@ import type {
   PasswordResetMailPayload,
 } from '../../domain/password-reset-mailer.port.js';
 
-export interface SmtpPasswordResetMailerOptions {
+interface SmtpPasswordResetMailerOptions {
   smtpUrl: string;
   mailFrom: string;
 }

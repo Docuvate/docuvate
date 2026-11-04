@@ -10,11 +10,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import type pg from 'pg';
 
 import type { DuplicatePairLabelRepository } from '../../../shared/domain/ports.js';
-import {
-  parseNumber,
-  parseString,
-  requireRecord,
-} from '../../../shared/infrastructure/database/row-parse.js';
+import { parseNumber, parseString, requireRecord } from '../../../shared/domain/row-parse.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 
 function canonicalPair(documentIdA: string, documentIdB: string): [string, string] {

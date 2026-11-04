@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { DocumentChatMessageRecordDto } from '@docuvate/contracts';
 
-export function isAssistantGenerationActive(message: DocumentChatMessageRecordDto): boolean {
+function isAssistantGenerationActive(message: DocumentChatMessageRecordDto): boolean {
   return (
     message.role === 'assistant' &&
     (message.generationStatus === 'pending' || message.generationStatus === 'streaming')
@@ -20,9 +20,9 @@ export function isChatGenerationInProgress(
   return messages.some(isAssistantGenerationActive);
 }
 
-export function threadListShowsGenerationSpinner(
-  thread: { activeGenerationStatus?: string | null }
-): boolean {
+export function threadListShowsGenerationSpinner(thread: {
+  activeGenerationStatus?: string | null;
+}): boolean {
   return (
     thread.activeGenerationStatus === 'pending' || thread.activeGenerationStatus === 'streaming'
   );

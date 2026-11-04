@@ -22,12 +22,12 @@ export interface PreparedTrainingExamplePayload {
   features: number[];
 }
 
-export interface LooCalibrationScore {
+interface LooCalibrationScore {
   confidence: number;
   correct: boolean;
 }
 
-export interface LooBatchWorkerInput {
+interface LooBatchWorkerInput {
   tagIds: string[];
   prepared: PreparedTrainingExamplePayload[];
   holdIndices: number[];
@@ -69,10 +69,7 @@ function trainMultinomialLogistic(
   rows: readonly { features: Float64Array; classIndex: number }[],
   dim: number
 ): number[][] {
-  const weights: Float64Array[] = Array.from(
-    { length: classCount },
-    () => new Float64Array(dim)
-  );
+  const weights: Float64Array[] = Array.from({ length: classCount }, () => new Float64Array(dim));
   const logits = new Float64Array(classCount);
   const probs = new Float64Array(classCount);
   for (let epoch = 0; epoch < TRAIN_EPOCHS; epoch++) {
@@ -287,7 +284,7 @@ function evaluateLooFoldHold(
   };
 }
 
-export function evaluateLooFoldsBatch(input: LooBatchWorkerInput): LooCalibrationScore[] {
+function evaluateLooFoldsBatch(input: LooBatchWorkerInput): LooCalibrationScore[] {
   const out: LooCalibrationScore[] = [];
   for (const hold of input.holdIndices) {
     const score = evaluateLooFoldHold(hold, input.tagIds, input.prepared);
@@ -298,7 +295,7 @@ export function evaluateLooFoldsBatch(input: LooBatchWorkerInput): LooCalibratio
   return out;
 }
 
-export function thresholdFromLooScores(looScores: readonly LooCalibrationScore[]): number {
+function thresholdFromLooScores(looScores: readonly LooCalibrationScore[]): number {
   if (looScores.length === 0) {
     return 0.92;
   }
@@ -473,10 +470,7 @@ export function learnConfidenceThresholdFromPrepared(
   if (payload.length === 0) {
     return 0.92;
   }
-  const calibrationSet = samplePreparedForCalibration(
-    payload,
-    labelHybridMaxCalibrationExamples()
-  );
+  const calibrationSet = samplePreparedForCalibration(payload, labelHybridMaxCalibrationExamples());
   if (calibrationSet.length <= LABEL_HYBRID_LOO_MAX_EXAMPLES) {
     return learnConfidenceThresholdLoo(tagIds, calibrationSet);
   }

@@ -11,7 +11,7 @@ export interface DuplicatePairMetaEdge extends DuplicatePairEdge {
   similarity: number;
 }
 
-export interface DuplicateSetDisplayInput {
+interface DuplicateSetDisplayInput {
   bulkArchiveEligible: boolean;
   maxSimilarity: number;
   sources: readonly ('hash' | 'embedding' | 'smart')[];

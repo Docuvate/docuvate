@@ -19,7 +19,7 @@ export function orphanExtractionBatchSize(): number {
   return positiveIntFromEnv('DOCUMENT_EXTRACTION_ORPHAN_BATCH_SIZE', DEFAULT_ORPHAN_BATCH_SIZE);
 }
 
-export type OrphanRequeuePlan = 'requeue' | 'fail';
+type OrphanRequeuePlan = 'requeue' | 'fail';
 
 /** `requeueCount` includes the requeue being decided now. */
 export function planOrphanRequeue(requeueCount: number, maxRequeues: number): OrphanRequeuePlan {

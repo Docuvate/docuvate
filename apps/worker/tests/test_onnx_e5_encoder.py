@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import json
 import math
+import platform
 from pathlib import Path
 
 from docuvate_worker.domain.representation.constants import (
@@ -12,7 +13,7 @@ from docuvate_worker.domain.representation.constants import (
     ENCODER_ONNX_FILE,
     ENCODER_REVISION,
 )
-from docuvate_worker.infrastructure.onnx_e5_encoder import embed_texts_onnx
+from docuvate_worker.infrastructure.onnx_e5_encoder import _resolve_onnx_filename, embed_texts_onnx
 
 _FIXTURE = Path(__file__).resolve().parent / "fixtures" / "e5_onnx_int8_fidelity.json"
 
@@ -34,7 +35,8 @@ def test_encoder_revision_tagged_for_onnx_int8() -> None:
 def test_onnx_int8_matches_fp32_fixture() -> None:
     payload = json.loads(_FIXTURE.read_text(encoding="utf-8"))
     pairs = payload["pairs"]
-    assert isinstance(pairs, list) and len(pairs) >= 2
+    assert isinstance(pairs, list)
+    assert len(pairs) >= 2
     for entry in pairs:
         text = str(entry["text"])
         expected_fp32 = [float(x) for x in entry["fp32"]]
@@ -50,9 +52,6 @@ def test_onnx_int8_vectors_are_unit_normalized() -> None:
 
 
 def test_onnx_int8_uses_vnni_graph_on_x86() -> None:
-    from docuvate_worker.infrastructure.onnx_e5_encoder import _resolve_onnx_filename
-
-    import platform
 
     if platform.machine().lower() in {"x86_64", "amd64"}:
         assert _resolve_onnx_filename() == ENCODER_ONNX_FILE

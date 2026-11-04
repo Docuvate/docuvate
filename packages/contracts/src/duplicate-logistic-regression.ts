@@ -36,7 +36,7 @@ export function featureVectorToArray(features: DuplicateFeatureVector): number[]
   return DUPLICATE_FEATURE_ORDER.map((key) => features[key]);
 }
 
-export function sigmoid(z: number): number {
+function sigmoid(z: number): number {
   if (z >= 0) {
     const exp = Math.exp(-z);
     return 1 / (1 + exp);

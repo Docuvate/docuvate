@@ -20,7 +20,7 @@ import { EffectiveDocumentChatProviderUseCase } from '../../settings/application
 import { DocumentChatGenerationQueueService } from '../infrastructure/document-chat-generation-queue.service.js';
 import { chatThreadTitleFromMessage } from './chat-thread-title.js';
 
-export interface SendDocumentChatThreadMessageResult extends DocumentChatResponse {
+interface SendDocumentChatThreadMessageResult extends DocumentChatResponse {
   userMessage: DocumentChatMessageEntity;
   assistantMessage: DocumentChatMessageEntity;
   asyncGeneration: boolean;

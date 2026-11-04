@@ -3,7 +3,7 @@
 import type { LucideIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
 
-export interface BannerProps {
+interface BannerProps {
   icon: LucideIcon;
   title: string;
   description?: string;
@@ -29,7 +29,10 @@ export function Banner({
           ? ' ds-banner-info'
           : '';
   return (
-    <div className={`ds-banner${variantClass}${className ? ` ${className}` : ''}`.trim()} role="status">
+    <div
+      className={`ds-banner${variantClass}${className ? ` ${className}` : ''}`.trim()}
+      role="status"
+    >
       <Icon size={20} strokeWidth={2} aria-hidden />
       <div className="ds-banner-body">
         <p className="ds-banner-title">{title}</p>

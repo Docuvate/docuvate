@@ -7,11 +7,11 @@ import {
   DOCUMENT_ENCODER_ID,
   DOCUMENT_ENCODER_REVISION,
 } from '../../../shared/domain/document-encoder.js';
-import { parseNumber, parseString, requireRecord } from '../../../shared/infrastructure/database/row-parse.js';
+import { parseNumber, parseString, requireRecord } from '../../../shared/domain/row-parse.js';
 import { withTenantPgClient } from '../../../shared/infrastructure/database/tenant-pg.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 
-export interface EncoderReindexProgress {
+interface EncoderReindexProgress {
   targetEncoderId: string;
   targetEncoderRevision: string;
   staleCount: number;

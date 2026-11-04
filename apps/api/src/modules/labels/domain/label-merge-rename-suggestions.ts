@@ -9,7 +9,7 @@ export interface TagPairSignal {
   centroid: number[];
 }
 
-export type MergeRenameSuggestion =
+type MergeRenameSuggestion =
   | {
       kind: 'merge';
       id: string;

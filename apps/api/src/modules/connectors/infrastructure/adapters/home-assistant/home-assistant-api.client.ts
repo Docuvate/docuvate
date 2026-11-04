@@ -4,11 +4,11 @@ import type { ConnectorConfigurationInput } from '../../../domain/connector.type
 import { readConnectorConfigString } from '../shared/connector-config-string.js';
 import { connectorFetch, joinUrl, trimTrailingSlash } from '../shared/connector-http.js';
 
-export function resolveHomeAssistantBaseUrl(credentials: ConnectorConfigurationInput): string {
+function resolveHomeAssistantBaseUrl(credentials: ConnectorConfigurationInput): string {
   return trimTrailingSlash(readConnectorConfigString(credentials, 'base_url'));
 }
 
-export function homeAssistantToken(credentials: ConnectorConfigurationInput): string {
+function homeAssistantToken(credentials: ConnectorConfigurationInput): string {
   return readConnectorConfigString(credentials, 'access_token');
 }
 

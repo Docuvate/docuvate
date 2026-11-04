@@ -16,6 +16,7 @@ import {
 } from '../../search/domain/reciprocal-rank-fusion.js';
 import type { ChatAnswerType } from '../domain/chat-answer-type-prototypes.schema.js';
 import { libraryAnswerTypeWantsContextualSupplement } from '../domain/chat-answer-type-prototypes.schema.js';
+import type { CitedChatChunkCandidate } from '../domain/cited-chat-chunk-candidate.js';
 import { RAG_HYBRID_CANDIDATE_LIMIT } from '../domain/cited-chat-constants.js';
 import type { CitedChatDocumentContextMeta } from '../domain/cited-chat-structured-context.js';
 import { hammingDistance, int8Dot, quantizeQueryVector } from '../domain/int8-retrieval.js';
@@ -28,17 +29,6 @@ import { chunkIndexText } from '../domain/split-text-chunks-with-spans.js';
 
 const TRGM_THRESHOLD = 0.32;
 const EMPTY_RANKED_ROWS: { id: string; score: number }[] = [];
-
-export interface CitedChatChunkCandidate {
-  chunkId: string;
-  documentId: string;
-  documentTitle: string;
-  body: string;
-  page: number | null;
-  charStart: number | null;
-  charEnd: number | null;
-  fusionScore: number;
-}
 
 @Injectable()
 export class PgCitedChatRetrievalRepository {
@@ -145,9 +135,7 @@ export class PgCitedChatRetrievalRepository {
     const scopedDocumentIds = sanitizeChatThreadDocumentIds(options?.documentIds ?? []);
     const docParams = scopedDocumentIds.length > 0 ? [scopedDocumentIds] : [];
     const docFilterAt = (paramIndex: number) =>
-      scopedDocumentIds.length > 0
-        ? `AND c.document_id = ANY($${String(paramIndex)}::uuid[])`
-        : '';
+      scopedDocumentIds.length > 0 ? `AND c.document_id = ANY($${String(paramIndex)}::uuid[])` : '';
 
     const ftsPromise =
       probe.length >= 2
@@ -219,8 +207,7 @@ export class PgCitedChatRetrievalRepository {
         .filter((row) => row.vector_int8 && row.vector_scale != null)
         .map((row) => ({
           id: row.id,
-          hamming:
-            row.binary_code != null ? hammingDistance(row.binary_code, queryPacked) : 9999,
+          hamming: row.binary_code != null ? hammingDistance(row.binary_code, queryPacked) : 9999,
           scale: row.vector_scale ?? 1,
           bytes: row.vector_int8 ?? Buffer.alloc(0),
         }))
@@ -393,9 +380,7 @@ export class PgCitedChatRetrievalRepository {
     }
     const patterns = tokens.map((token) => `%${token}%`);
     const periodPatterns = libraryContextPeriodPatterns(tokens);
-    const periodKeys = libraryContextYearMonths(query).map(
-      ({ month, year }) => `${year}-${month}`
-    );
+    const periodKeys = libraryContextYearMonths(query).map(({ month, year }) => `${year}-${month}`);
 
     const rows = await this.pool.query<{
       id: string;
@@ -423,9 +408,7 @@ export class PgCitedChatRetrievalRepository {
            OR d.title ILIKE ANY($3::text[])
            OR c.body ILIKE ANY($3::text[])
            ${
-             periodKeys.length > 0
-               ? `OR to_char(d.document_date, 'YYYY-MM') = ANY($4::text[])`
-               : ''
+             periodKeys.length > 0 ? `OR to_char(d.document_date, 'YYYY-MM') = ANY($4::text[])` : ''
            }
          )`
              : ''
@@ -535,7 +518,9 @@ export class PgCitedChatRetrievalRepository {
     documentIds: string[],
     query: string
   ): Promise<CitedChatChunkCandidate[]> {
-    const tokens = tokenizeSearchQuery(query).map(normalizeSearchText).filter((t) => t.length >= 2);
+    const tokens = tokenizeSearchQuery(query)
+      .map(normalizeSearchText)
+      .filter((t) => t.length >= 2);
     if (tokens.length === 0) {
       return [];
     }

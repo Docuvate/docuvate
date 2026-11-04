@@ -67,9 +67,8 @@ def test_transient_pressure_raises_retryable_not_permanent(
         lambda: True,
     )
 
-    with pytest.raises(ExtractRetryableError):
-        with extract_admission_slot(pdf, "application/pdf"):
-            pass
+    with pytest.raises(ExtractRetryableError), extract_admission_slot(pdf, "application/pdf"):
+        pass
 
 
 def test_huge_document_is_permanent_even_without_models() -> None:

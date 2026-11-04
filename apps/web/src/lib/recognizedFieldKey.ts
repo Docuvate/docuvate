@@ -8,7 +8,3 @@ export function deriveKeyFromLabel(label: string): string {
     .replace(/^_+|_+$/g, '')
     .slice(0, 64);
 }
-
-export function isValidFieldKey(key: string): boolean {
-  return deriveKeyFromLabel(key) === key.trim().toLowerCase() && key.trim().length > 0;
-}

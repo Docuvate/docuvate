@@ -11,7 +11,7 @@ import {
 import type { EnvOidcProviderConfig } from './load-oidc-env-providers.js';
 import { decryptOidcClientSecret, encryptOidcClientSecret } from './oidc-client-secret.codec.js';
 
-export interface UpsertOidcProviderInput {
+interface UpsertOidcProviderInput {
   providerId: string;
   displayName: string;
   issuer: string;
@@ -106,15 +106,7 @@ export class PgInstallationOidcProviderRepository {
        WHERE id = $1 AND source = 'admin'
        RETURNING id, provider_id, display_name, issuer, client_id, client_secret_encrypted,
                  scopes, enabled, source`,
-      [
-        id,
-        input.displayName,
-        input.issuer,
-        input.clientId,
-        encrypted,
-        input.scopes,
-        input.enabled,
-      ]
+      [id, input.displayName, input.issuer, input.clientId, encrypted, input.scopes, input.enabled]
     );
     const firstRow: unknown = result.rows.at(0);
     return firstRow === undefined ? null : oidcProviderRowFromUnknown(firstRow);

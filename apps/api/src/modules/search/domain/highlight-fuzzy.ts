@@ -87,4 +87,4 @@ function tokenizeFromQuery(query: string): string[] {
   return matches?.map((t) => t.toLowerCase()) ?? [];
 }
 
-export { damerauLevenshtein,fuzzyWordMatch };
+export { fuzzyWordMatch };

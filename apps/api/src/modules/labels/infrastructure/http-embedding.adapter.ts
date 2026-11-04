@@ -3,7 +3,7 @@
 import { Injectable } from '@nestjs/common';
 
 import type { EmbeddingPort } from '../../../shared/domain/ports.js';
-import { isRecord, parseNumber, parseString } from '../../../shared/infrastructure/database/row-parse.js';
+import { isRecord, parseNumber, parseString } from '../../../shared/domain/row-parse.js';
 import { workerApiUrl } from '../../../shared/infrastructure/worker/worker-api-path.js';
 
 const WORKER_EMBED_BATCH_MAX = 32;
@@ -56,10 +56,7 @@ export class HttpEmbeddingAdapter implements EmbeddingPort {
     }
     const model = parseString(raw.model);
     return {
-      model:
-        model.length > 0
-          ? model
-          : 'intfloat/multilingual-e5-small',
+      model: model.length > 0 ? model : 'intfloat/multilingual-e5-small',
       embeddings: parseEmbeddings(raw.embeddings),
     };
   }

@@ -1,3 +1,5 @@
+import os
+
 import pytest
 
 from docuvate_worker.infrastructure.chat.rag_rerank import (
@@ -15,8 +17,6 @@ def test_sigmoid_maps_logits_to_unit_interval() -> None:
 
 
 def test_reranker_prefers_relevant_passage() -> None:
-    import os
-
     if os.environ.get("RUN_RERANKER_INTEGRATION") != "1":
         pytest.skip("set RUN_RERANKER_INTEGRATION=1 to run ONNX reranker integration test")
     if not ensure_reranker_loaded():

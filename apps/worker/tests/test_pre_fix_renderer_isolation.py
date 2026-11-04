@@ -112,13 +112,15 @@ def test_each_renderer_fix_raises_ssim_on_at_least_two_fixtures() -> None:
         pre_src = typst_from_pre_fix_renderer(doc)
         post_src = layout_ir_to_typst(doc)
         signals = analyze_layout_ir_fix_signals(doc)
-        before, after, delta = _fixture_ssim_delta(fixture)
+        _before, _after, delta = _fixture_ssim_delta(fixture)
         flags = typst_renderer_fix_triggers(pre_src, post_src, signals)
         for fix_name, triggered in flags.items():
             if triggered and delta >= 0.01:
                 wins[fix_name].append(fixture.fixture_id)
     missing = [name for name in _FIX_LABELS if len(wins[name]) < 2]
-    assert not missing, f"fixes need >=2 fixtures with delta>=0.01: { {k: wins[k] for k in missing} }"
+    assert not missing, (
+        f"fixes need >=2 fixtures with delta>=0.01: { {k: wins[k] for k in missing} }"
+    )
 
 
 def test_layout_fix_signals_report(capsys: pytest.CaptureFixture[str]) -> None:

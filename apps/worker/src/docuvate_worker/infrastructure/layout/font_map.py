@@ -27,6 +27,7 @@ def is_italic_fontname(fontname: str | None) -> bool:
         return False
     return bool(_ITALIC_HINT.search(fontname))
 
+
 _PATTERNS: list[tuple[re.Pattern[str], tuple[str, float]]] = [
     (re.compile(r"times|nimbusrom|timesnewroman", re.I), ("Liberation Serif", 0.97)),
     (re.compile(r"courier|nimbusmono|liberationmono", re.I), ("Liberation Mono", 1.0)),

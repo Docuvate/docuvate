@@ -8,7 +8,7 @@ import {
   parseOptionalString,
   parseString,
   requireRecord,
-} from '../../../shared/infrastructure/database/row-parse.js';
+} from '../../../shared/domain/row-parse.js';
 
 type Db = pg.Pool | pg.PoolClient;
 

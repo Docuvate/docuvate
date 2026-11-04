@@ -31,9 +31,3 @@ export async function isSignupPermitted(pool: pg.Pool | pg.PoolClient): Promise<
   }
   return !(await hasAnyUser(pool));
 }
-
-export async function assertSignupPermitted(pool: pg.Pool): Promise<void> {
-  if (!(await isSignupPermitted(pool))) {
-    throw new Error('Self-registration is not allowed');
-  }
-}

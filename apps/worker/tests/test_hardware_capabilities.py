@@ -20,7 +20,9 @@ def _probe_in_process(monkeypatch: pytest.MonkeyPatch) -> None:
     )
 
 
-def _mock_torch(*, cuda: bool = False, mps: bool = False, rocm: bool = False, vram_bytes: int = 0):
+def _mock_torch(
+    *, cuda: bool = False, mps: bool = False, rocm: bool = False, vram_bytes: int = 0
+) -> MagicMock:
     torch = MagicMock()
     torch.cuda.is_available.return_value = cuda
     mps_backend = MagicMock()
@@ -64,12 +66,14 @@ def test_cuda_heavy_vision_when_enough_vram() -> None:
 
 def test_api_dict_shape() -> None:
     torch = _mock_torch(cuda=False, mps=True)
-    with patch.dict(os.environ, {"DOCUVATE_MPS_VRAM_MB": "16384"}, clear=False):
-        with patch(
+    with (
+        patch.dict(os.environ, {"DOCUVATE_MPS_VRAM_MB": "16384"}, clear=False),
+        patch(
             "docuvate_worker.infrastructure.hardware_capabilities._import_torch",
             return_value=torch,
-        ):
-            payload = detect_hardware_capabilities(force_refresh=True).as_api_dict()
+        ),
+    ):
+        payload = detect_hardware_capabilities(force_refresh=True).as_api_dict()
     assert payload["device"] == "mps"
     assert payload["capabilities"]["cpuRag"] is True
 

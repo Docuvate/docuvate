@@ -9,7 +9,7 @@ import {
   PASSWORD_RESET_TOKEN_MAX_LENGTH,
 } from '../domain/password-reset-token.constants.js';
 
-export interface VerifyPasswordResetTokenResult {
+interface VerifyPasswordResetTokenResult {
   valid: boolean;
 }
 

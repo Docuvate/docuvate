@@ -16,19 +16,15 @@ import type { ErrorSceneId } from './errorSceneManifest.generated';
 import { ReconnectCountdownBar } from './ReconnectCountdownBar';
 import { useApiHealthReconnect } from './useApiHealthReconnect';
 
-export type DocuvateErrorPageVariant =
-  | ConnectivityFailureKind
-  | 'not-found'
-  | 'unexpected'
-  | 'server-error-page'
-  | 'forbidden';
+type DocuvateErrorPageVariant =
+  ConnectivityFailureKind | 'not-found' | 'unexpected' | 'server-error-page' | 'forbidden';
 
-export interface PreviewReconnectSnapshot {
+interface PreviewReconnectSnapshot {
   secondsLeft: number;
   totalSeconds: number;
 }
 
-export interface DocuvateErrorPageProps {
+interface DocuvateErrorPageProps {
   variant: DocuvateErrorPageVariant;
   sourceError?: unknown;
   httpStatus?: number;
@@ -87,7 +83,9 @@ export function DocuvateErrorPage({
 
   const reconnectEnabled =
     enableAutoReconnect &&
-    (variant === 'server-unreachable' || variant === 'server-error' || variant === 'server-error-page');
+    (variant === 'server-unreachable' ||
+      variant === 'server-error' ||
+      variant === 'server-error-page');
 
   const reconnectHook = useApiHealthReconnect({
     enabled: reconnectEnabled && previewReconnect == null,
@@ -95,15 +93,14 @@ export function DocuvateErrorPage({
   });
 
   const secondsUntilRetry = previewReconnect?.secondsLeft ?? reconnectHook.secondsUntilRetry;
-  const countdownTotalSeconds = previewReconnect?.totalSeconds ?? reconnectHook.countdownTotalSeconds;
+  const countdownTotalSeconds =
+    previewReconnect?.totalSeconds ?? reconnectHook.countdownTotalSeconds;
   const isProbing = previewReconnect != null ? false : reconnectHook.isProbing;
   const retryNow = reconnectHook.retryNow;
 
   const parsed = sourceError != null ? readAuthClientErrorShape(sourceError) : {};
   const technicalErrorType =
-    parsed.message ??
-    (sourceError instanceof Error ? sourceError.name : undefined) ??
-    variant;
+    parsed.message ?? (sourceError instanceof Error ? sourceError.name : undefined) ?? variant;
   const technicalStatus = httpStatus ?? parsed.status ?? undefined;
 
   const copyKey = sceneCopyKey(variant);
@@ -132,75 +129,76 @@ export function DocuvateErrorPage({
   const animating = showReconnectUi && (isProbing || secondsUntilRetry > 0);
 
   const countdownSlot =
-    showReconnectUi && (secondsUntilRetry > 0 || isProbing || secondsUntilRetry === 0)
-      ? (
-        <ReconnectCountdownBar
-          secondsLeft={secondsUntilRetry}
-          totalSeconds={countdownTotalSeconds}
-          isProbing={isProbing}
-          probingLabel={t('errors.pages.unreachable.probing')}
-          label={
-            secondsUntilRetry > 0
-              ? t('errors.pages.unreachable.reconnectCountdown', { seconds: secondsUntilRetry })
-              : t('errors.pages.unreachable.ready')
-          }
-        />
-      )
-      : null;
+    showReconnectUi && (secondsUntilRetry > 0 || isProbing || secondsUntilRetry === 0) ? (
+      <ReconnectCountdownBar
+        secondsLeft={secondsUntilRetry}
+        totalSeconds={countdownTotalSeconds}
+        isProbing={isProbing}
+        probingLabel={t('errors.pages.unreachable.probing')}
+        label={
+          secondsUntilRetry > 0
+            ? t('errors.pages.unreachable.reconnectCountdown', { seconds: secondsUntilRetry })
+            : t('errors.pages.unreachable.ready')
+        }
+      />
+    ) : null;
 
   const defaultActions =
-    variant === 'not-found'
-      ? (
-        <Link className="btn btn-primary" to={routes.documents}>
-          {t('notFoundPage.documentsLink')}
-        </Link>
-      )
-      : variant === 'forbidden'
-        ? (
-          <Button type="button" variant="secondary" onClick={() => { navigate(routes.home); }}>
-            {t('errors.pages.home')}
-          </Button>
-        )
-      : showReconnectUi
-        ? (
-          <Button
-            ref={retryButtonRef}
-            type="button"
-            variant="primary"
-            disabled={isProbing || previewReconnect != null}
-            onClick={retryNow}
-          >
-            <RefreshCw size={16} strokeWidth={2} aria-hidden />
-            {t('errors.pages.unreachable.retryNow')}
-          </Button>
-        )
-        : (
-          <>
-            <Button
-              ref={retryButtonRef}
-              type="button"
-              variant="primary"
-              onClick={() => {
-                window.location.reload();
-              }}
-            >
-              <RefreshCw size={16} strokeWidth={2} aria-hidden />
-              {t('errors.pages.retry')}
-            </Button>
-            <Button type="button" variant="secondary" onClick={() => { navigate(routes.home); }}>
-              {t('errors.pages.home')}
-            </Button>
-          </>
-        );
+    variant === 'not-found' ? (
+      <Link className="btn btn-primary" to={routes.documents}>
+        {t('notFoundPage.documentsLink')}
+      </Link>
+    ) : variant === 'forbidden' ? (
+      <Button
+        type="button"
+        variant="secondary"
+        onClick={() => {
+          navigate(routes.home);
+        }}
+      >
+        {t('errors.pages.home')}
+      </Button>
+    ) : showReconnectUi ? (
+      <Button
+        ref={retryButtonRef}
+        type="button"
+        variant="primary"
+        disabled={isProbing || previewReconnect != null}
+        onClick={retryNow}
+      >
+        <RefreshCw size={16} strokeWidth={2} aria-hidden />
+        {t('errors.pages.unreachable.retryNow')}
+      </Button>
+    ) : (
+      <>
+        <Button
+          ref={retryButtonRef}
+          type="button"
+          variant="primary"
+          onClick={() => {
+            window.location.reload();
+          }}
+        >
+          <RefreshCw size={16} strokeWidth={2} aria-hidden />
+          {t('errors.pages.retry')}
+        </Button>
+        <Button
+          type="button"
+          variant="secondary"
+          onClick={() => {
+            navigate(routes.home);
+          }}
+        >
+          {t('errors.pages.home')}
+        </Button>
+      </>
+    );
 
   const showCodeBlock = Boolean(errorCode && requestId);
 
   return (
     <>
-      <div
-        className="error-scene-visual"
-        data-testid={`docuvate-error-${variant}`}
-      >
+      <div className="error-scene-visual" data-testid={`docuvate-error-${variant}`}>
         <ErrorSceneIllustration scene={scene} animating={animating} />
       </div>
       <div className="error-scene-copy" role="alert" aria-live="assertive">

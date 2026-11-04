@@ -24,16 +24,15 @@ def run_kite_index_stage(state: PipelineMutableState) -> StageEnvelope[KiteIndex
                 StageAvailability.NOT_AVAILABLE,
                 "no document representation for index metadata",
             )
-        indexed: list[KiteIndexChunk] = []
-        for encoded in rep.units:
-            indexed.append(
-                KiteIndexChunk(
-                    chunk_id=f"unit-{encoded.unit.unit_index}",
-                    level=encoded.unit.kind,
-                    text=encoded.unit.text,
-                    embedding_dim=384,
-                )
+        indexed: list[KiteIndexChunk] = [
+            KiteIndexChunk(
+                chunk_id=f"unit-{encoded.unit.unit_index}",
+                level=encoded.unit.kind,
+                text=encoded.unit.text,
+                embedding_dim=384,
             )
+            for encoded in rep.units
+        ]
         if rep.document_mean_int8:
             indexed.append(
                 KiteIndexChunk(

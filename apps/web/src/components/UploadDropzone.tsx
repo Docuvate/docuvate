@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 
 import { UPLOAD_ACCEPT } from '../lib/documentUploadConstants';
 import { Button } from './ui/Button';
-import { useDocumentUploadContext } from './upload/DocumentUploadProvider';
+import { useDocumentUploadContext } from './upload/documentUploadContext';
 import { UploadFeedbackBanner } from './upload/UploadFeedbackBanner';
 import { UploadQueueList } from './upload/UploadQueueList';
 import { UploadCompactBar } from './UploadCompactBar';
@@ -49,7 +49,11 @@ export function UploadDropzone({ compact = false }: UploadDropzoneProps) {
   return (
     <div className={`upload-section${compact ? ' upload-section-compact' : ''}`}>
       {compact && !showFullDropzone ? (
-        <UploadCompactBar onExpand={() => { setExpanded(true); }} />
+        <UploadCompactBar
+          onExpand={() => {
+            setExpanded(true);
+          }}
+        />
       ) : null}
       {showFullDropzone ? (
         <div
@@ -59,7 +63,9 @@ export function UploadDropzone({ compact = false }: UploadDropzoneProps) {
             e.stopPropagation();
             setDragOver(true);
           }}
-          onDragLeave={() => { setDragOver(false); }}
+          onDragLeave={() => {
+            setDragOver(false);
+          }}
           onDrop={onDrop}
           role="region"
           aria-label={t('upload.regionAria')}
@@ -97,7 +103,9 @@ export function UploadDropzone({ compact = false }: UploadDropzoneProps) {
           type="button"
           variant="ghost"
           className="upload-collapse-btn"
-          onClick={() => { setExpanded(false); }}
+          onClick={() => {
+            setExpanded(false);
+          }}
         >
           {t('upload.collapseBar')}
         </Button>

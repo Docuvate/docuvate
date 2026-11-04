@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Injectable, Logger } from '@nestjs/common';
 
-import { buildUserAuthorizationSubject } from '../../../../shared/infrastructure/auth/user-authorization-subject.js';
+import { buildUserAuthorizationSubject } from '../../../../shared/domain/user-authorization-subject.js';
 import { INSTANCE_ROLE_MEMBER } from '../../../auth/domain/instance-role.constants.js';
 import { autoPromoteMinConfidenceForField } from '../../domain/value-type-field-confidence.js';
 import { AcceptDocumentReviewUseCase } from './accept-document-review.use-case.js';

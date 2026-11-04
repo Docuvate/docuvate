@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { LabelHybridTrainingExample } from './label-hybrid-auto-match.js';
-import type { LabelHybridDocumentRow } from './label-hybrid-training.js';
+import type { LabelHybridDocumentRow } from './label-hybrid-document-row.js';
 import {
   labelHybridMaxExamplesPerTag,
   labelHybridMaxTrainingExamples,
@@ -9,7 +9,7 @@ import {
   labelHybridTextCharsForFeatures,
 } from './label-hybrid-training-config.js';
 
-export function trimLabelHybridRowText(text: string): string {
+function trimLabelHybridRowText(text: string): string {
   const limit = labelHybridTextCharsForFeatures();
   if (text.length <= limit) {
     return text;

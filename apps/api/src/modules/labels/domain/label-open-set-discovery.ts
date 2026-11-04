@@ -7,7 +7,6 @@ import {
 } from '../../search/domain/normalize-search-text.js';
 import { cosineSimilarity } from './cosine.js';
 import { isAcceptableLabelCandidate } from './label-candidate-validation.js';
-import type { TagCentroidRef } from './label-coverage.js';
 import { computeDocumentCoverage } from './label-coverage.js';
 import {
   buildHybridFeatureModel,
@@ -15,12 +14,13 @@ import {
   hybridFeatureVector,
   l2Normalize,
 } from './label-hybrid-features.js';
+import type { TagCentroidRef } from './tag-centroid-ref.js';
 
 /** Calibrated on synthetic open-set fixtures (held-out) for ≥0.95 precision. */
 export const OPEN_SET_MIN_CLUSTER_SIZE = 5;
-export const OPEN_SET_MIN_PAIRWISE_HYBRID_SIM = 0.68;
-export const OPEN_SET_MIN_COHESION = 0.72;
-export const OPEN_SET_MIN_SEPARATION = 0.08;
+const OPEN_SET_MIN_PAIRWISE_HYBRID_SIM = 0.68;
+const OPEN_SET_MIN_COHESION = 0.72;
+const OPEN_SET_MIN_SEPARATION = 0.08;
 export const OPEN_SET_EVAL_TARGET_PRECISION = 0.95;
 
 export interface OpenSetDocumentRow {
@@ -33,7 +33,7 @@ export interface OpenSetDocumentRow {
   fields: { key: string; value: string }[];
 }
 
-export interface OpenSetClusterSuggestion {
+interface OpenSetClusterSuggestion {
   id: string;
   proposedName: string;
   score: number;
@@ -51,7 +51,10 @@ interface PreparedRow extends OpenSetDocumentRow {
 
 function titleHeadingSpan(row: OpenSetDocumentRow): string {
   const titlePart = `${row.title} ${row.filename}`.trim();
-  const lines = row.text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+  const lines = row.text
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
   const headingLines = lines.slice(0, 3).join(' ');
   return `${titlePart} ${headingLines}`.trim();
 }
@@ -228,7 +231,11 @@ function buildPreparedRows(
 ): PreparedRow[] {
   return rows.map((row) => ({
     ...row,
-    hybrid: hybridFeatureVector(row.embedding, `${row.title}\n${row.filename}\n${row.text}`, featureModel),
+    hybrid: hybridFeatureVector(
+      row.embedding,
+      `${row.title}\n${row.filename}\n${row.text}`,
+      featureModel
+    ),
     namingText: titleHeadingSpan(row),
   }));
 }
@@ -368,7 +375,7 @@ export function discoverOpenSetNewLabelClusters(input: {
 }
 
 /** Synthetic evaluation helper — used in unit tests only. */
-export interface OpenSetEvalCase {
+interface OpenSetEvalCase {
   rows: OpenSetDocumentRow[];
   centroids: TagCentroidRef[];
   threshold: number;

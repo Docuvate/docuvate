@@ -95,8 +95,7 @@ def tokens_from_typst_source(typst: str) -> list[str]:
         if stripped.startswith("#") and "[" not in stripped:
             continue
         if any(
-            token in stripped
-            for token in ("columns:", "stroke:", "inset:", "align:", "..cells")
+            token in stripped for token in ("columns:", "stroke:", "inset:", "align:", "..cells")
         ):
             continue
         if stripped.startswith("[x]"):

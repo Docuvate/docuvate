@@ -3,7 +3,8 @@
 import type { FolderDto } from '@docuvate/contracts';
 import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
 
-import type { FolderEntity, FolderListItem } from '../../../shared/domain/ports.js';
+import type { FolderEntity } from '../../../shared/domain/folder.entity.js';
+import type { FolderListItem } from '../../../shared/domain/ports.js';
 import {
   AuthGuard,
   type AuthSession,

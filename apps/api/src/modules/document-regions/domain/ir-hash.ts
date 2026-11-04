@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { createHash } from 'node:crypto';
 
-export function hashLayoutIrBytes(ir: unknown): Buffer {
+function hashLayoutIrBytes(ir: unknown): Buffer {
   return createHash('sha256').update(JSON.stringify(ir), 'utf8').digest();
 }
 

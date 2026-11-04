@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { parseString, requireRecord } from '../../../shared/infrastructure/database/row-parse.js';
+import { parseString, requireRecord } from '../../../shared/domain/row-parse.js';
 
 export interface SqlQueryExecutor {
   query: (query: string, parameters?: unknown[]) => Promise<unknown>;
@@ -237,10 +237,10 @@ export async function backfillSearchVocabularyAllDocuments(
   let offset = 0;
   for (;;) {
     const rawRows = readQueryRows(
-      await executor.query(
-        `SELECT id::text AS id FROM documents ORDER BY id LIMIT $1 OFFSET $2`,
-        [BATCH_SIZE, offset]
-      )
+      await executor.query(`SELECT id::text AS id FROM documents ORDER BY id LIMIT $1 OFFSET $2`, [
+        BATCH_SIZE,
+        offset,
+      ])
     );
     if (rawRows.length === 0) {
       await recomputeSearchVocabularyDocFrequencyAll(executor);

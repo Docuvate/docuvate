@@ -30,7 +30,7 @@ import {
   type LabelSuggestionDismissScope,
 } from './LabelSuggestionDismissActions';
 
-export interface LabelRecommendationAcceptOptions {
+interface LabelRecommendationAcceptOptions {
   documentIds: string[];
   excludedDocumentIds: string[];
 }
@@ -75,8 +75,13 @@ interface TodoRowMainProps {
 }
 
 function TodoRowMain(props: TodoRowMainProps) {
-  const { item, tagColorById, documentCountByTagId, selectedDocumentIds, onSelectedDocumentIdsChange } =
-    props;
+  const {
+    item,
+    tagColorById,
+    documentCountByTagId,
+    selectedDocumentIds,
+    onSelectedDocumentIdsChange,
+  } = props;
   const { t } = useTranslation();
   const reason = todoWhyLine(item, t, documentCountByTagId);
   const sampleDocuments = item.sampleDocuments ?? [];
@@ -177,7 +182,9 @@ export function LabelsTodoQueue(props: Props) {
   const { t } = useTranslation();
   const [visibleIds, setVisibleIds] = useState<string[]>(() => props.items.map((i) => i.id));
   const [exitingIds, setExitingIds] = useState<Set<string>>(() => new Set());
-  const [selectedByItemId, setSelectedByItemId] = useState<Map<string, Set<string>>>(() => new Map());
+  const [selectedByItemId, setSelectedByItemId] = useState<Map<string, Set<string>>>(
+    () => new Map()
+  );
   const exitTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
   useEffect(() => {
@@ -377,7 +384,9 @@ export function LabelsTodoQueue(props: Props) {
               type="button"
               variant="secondary"
               disabled={acceptDisabled}
-              onClick={() => { props.onRename(item); }}
+              onClick={() => {
+                props.onRename(item);
+              }}
             >
               {t('labelRecommendations.renameAction')}
             </Button>
@@ -386,7 +395,9 @@ export function LabelsTodoQueue(props: Props) {
               type="button"
               variant={acceptVariant}
               disabled={acceptDisabled}
-              onClick={() => { wrapAccept(item); }}
+              onClick={() => {
+                wrapAccept(item);
+              }}
             >
               {clusterAcceptButtonLabel(item, selectedCount, totalCount, t)}
             </Button>
@@ -394,7 +405,9 @@ export function LabelsTodoQueue(props: Props) {
           <LabelSuggestionDismissActions
             labelName={recommendationLabelName(item)}
             disabled={props.busyId === item.id || exitingIds.has(item.id)}
-            onDismiss={(scope) => { wrapDismiss(item, scope); }}
+            onDismiss={(scope) => {
+              wrapDismiss(item, scope);
+            }}
           />
         </div>
       </li>

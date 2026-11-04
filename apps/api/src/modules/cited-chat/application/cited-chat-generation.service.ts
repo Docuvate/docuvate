@@ -23,6 +23,7 @@ import {
 } from '../domain/chat-answer-type-prototypes.schema.js';
 import { isDocumentOverviewQuestion } from '../domain/chat-document-overview.schema.js';
 import { serializeCitedChatBenchStats } from '../domain/cited-chat-bench-stats.js';
+import type { CitedChatChunkCandidate } from '../domain/cited-chat-chunk-candidate.js';
 import {
   CITED_CHAT_ABSTENTION_DE,
   CITED_CHAT_ABSTENTION_EN,
@@ -66,21 +67,31 @@ import {
 import { fetchWorkerExtractiveAnswer } from '../infrastructure/fetch-worker-extractive-answer.js';
 import { fetchWorkerRagRerank } from '../infrastructure/fetch-worker-rag-rerank.js';
 import { PgChatMessageCitationsRepository } from '../infrastructure/pg-chat-message-citations.repository.js';
-import {
-  type CitedChatChunkCandidate,
-  PgCitedChatRetrievalRepository,
-} from '../infrastructure/pg-cited-chat-retrieval.repository.js';
+import { PgCitedChatRetrievalRepository } from '../infrastructure/pg-cited-chat-retrieval.repository.js';
 import { ChatQueryRouterService } from './chat-query-router.service.js';
 import { resolveCitedChatLlmConfig } from './cited-chat-llm.js';
-import {
-  buildCitedChatSystemPrompt,
-  requestCitedAnswerFromOllama,
-} from './cited-chat-ollama.js';
+import { buildCitedChatSystemPrompt, requestCitedAnswerFromOllama } from './cited-chat-ollama.js';
 
 const CONTENT_FLUSH_MS = 250;
 const GENERATION_HEARTBEAT_MS = 15_000;
 
-export interface CitedChatGenerationInput {
+/** Append chunks whose `chunkId` is not yet present in `target`, preserving order. */
+function appendUnseenChunks<TChunk extends { chunkId: string }, TExtra extends { chunkId: string }>(
+  target: TChunk[],
+  extras: readonly TExtra[],
+  toCandidate: (extra: TExtra) => TChunk
+): void {
+  const seen = new Set(target.map((chunk) => chunk.chunkId));
+  for (const extra of extras) {
+    if (seen.has(extra.chunkId)) {
+      continue;
+    }
+    target.push(toCandidate(extra));
+    seen.add(extra.chunkId);
+  }
+}
+
+interface CitedChatGenerationInput {
   messageId: string;
   threadId: string;
   userId: string;
@@ -97,7 +108,7 @@ export interface CitedChatGenerationInput {
   onHeartbeat?: () => void | Promise<void>;
 }
 
-export interface CitedChatGenerationResult {
+interface CitedChatGenerationResult {
   content: string;
   abstained: boolean;
 }
@@ -164,8 +175,17 @@ export class CitedChatGenerationService {
     shouldAbort?: () => boolean | Promise<boolean>;
     onHeartbeat?: () => void | Promise<void>;
   }): Promise<CitedChatGenerationResult> {
-    const { messageId, threadId, userId, userMessage, documentIds, scope, locale, shouldAbort, onHeartbeat } =
-      input;
+    const {
+      messageId,
+      threadId,
+      userId,
+      userMessage,
+      documentIds,
+      scope,
+      locale,
+      shouldAbort,
+      onHeartbeat,
+    } = input;
     const abstentionText = locale === 'en' ? CITED_CHAT_ABSTENTION_EN : CITED_CHAT_ABSTENTION_DE;
 
     let lastHeartbeat = Date.now();
@@ -180,7 +200,13 @@ export class CitedChatGenerationService {
 
     const aborted = async (): Promise<boolean> => (await shouldAbort?.()) ?? false;
     if (await aborted()) {
-      await this.failGeneration(messageId, threadId, userId, 'cancelled', 'User cancelled generation');
+      await this.failGeneration(
+        messageId,
+        threadId,
+        userId,
+        'cancelled',
+        'User cancelled generation'
+      );
       return { content: '', abstained: true };
     }
 
@@ -192,9 +218,7 @@ export class CitedChatGenerationService {
 
     const priorMessages = await this.threads.listMessages(threadId, userId);
     const priorUserMessage =
-      priorMessages
-        .filter((m) => m.role === 'user' && m.id !== messageId)
-        .at(-1)?.content ?? null;
+      priorMessages.filter((m) => m.role === 'user' && m.id !== messageId).at(-1)?.content ?? null;
 
     const routed = await this.queryRouter.route({
       userId,
@@ -250,7 +274,8 @@ export class CitedChatGenerationService {
           return { content: exactAnswer.content, abstained: exactAnswer.abstained };
         }
         if (featureFlags.answerAbstention) {
-          const exactAbstention = locale === 'en' ? EXACT_FACT_ABSTENTION_EN : EXACT_FACT_ABSTENTION_DE;
+          const exactAbstention =
+            locale === 'en' ? EXACT_FACT_ABSTENTION_EN : EXACT_FACT_ABSTENTION_DE;
           await this.citationsRepo.replaceCitations(messageId, []);
           await this.threads.updateMessageGeneration(messageId, {
             content: exactAbstention,
@@ -287,8 +312,7 @@ export class CitedChatGenerationService {
         ? classifyChatAnswerType(queryVector)
         : 'free_text';
 
-    const filterIds =
-      scope === 'document' && documentIds.length > 0 ? documentIds : undefined;
+    const filterIds = scope === 'document' && documentIds.length > 0 ? documentIds : undefined;
 
     const documentOverview =
       scope === 'document' &&
@@ -317,8 +341,7 @@ export class CitedChatGenerationService {
           queryVector,
           tenantLabelEmbeds
         );
-        const supplementLabelRows =
-          alignedLabels.length > 0 ? alignedLabels : supplementLabels;
+        const supplementLabelRows = alignedLabels.length > 0 ? alignedLabels : supplementLabels;
         labelsForBoost = supplementLabelRows;
         const labelAlignedExtra = await this.retrieval.supplementLabelAlignedLibraryCandidates(
           userId,
@@ -337,13 +360,7 @@ export class CitedChatGenerationService {
             userMessage,
             periodMeta
           );
-          const seen = new Set(candidates.map((chunk) => chunk.chunkId));
-          for (const extra of labelAlignedExtra) {
-            if (!seen.has(extra.chunkId)) {
-              candidates.push(extra);
-              seen.add(extra.chunkId);
-            }
-          }
+          appendUnseenChunks(candidates, labelAlignedExtra, (extra) => extra);
         }
       }
       const contextualExtra = await this.retrieval.supplementContextualLibraryCandidates(
@@ -411,8 +428,7 @@ export class CitedChatGenerationService {
     let libraryPeriodDocIds: string[] = [];
     if (scope === 'library') {
       const wantsPeriodScope =
-        libraryContextYearMonths(userMessage).length > 0 ||
-        /\b20\d{2}\b/.test(userMessage);
+        libraryContextYearMonths(userMessage).length > 0 || /\b20\d{2}\b/.test(userMessage);
       if (wantsPeriodScope) {
         const readyDocIds = await this.retrieval.listReadyLibraryDocumentIds(userId);
         if (readyDocIds.length > 0) {
@@ -433,13 +449,10 @@ export class CitedChatGenerationService {
               userId,
               missingPeriodDocs
             );
-            const seen = new Set(candidates.map((chunk) => chunk.chunkId));
-            for (const extra of periodChunks) {
-              if (!seen.has(extra.chunkId)) {
-                candidates.push({ ...extra, fusionScore: Math.max(extra.fusionScore, 0.95) });
-                seen.add(extra.chunkId);
-              }
-            }
+            appendUnseenChunks(candidates, periodChunks, (extra) => ({
+              ...extra,
+              fusionScore: Math.max(extra.fusionScore, 0.95),
+            }));
           }
         } else {
           candidates = [];
@@ -451,7 +464,13 @@ export class CitedChatGenerationService {
 
     if (await aborted()) {
       await this.citationsRepo.replaceCitations(messageId, []);
-      await this.failGeneration(messageId, threadId, userId, 'cancelled', 'User cancelled generation');
+      await this.failGeneration(
+        messageId,
+        threadId,
+        userId,
+        'cancelled',
+        'User cancelled generation'
+      );
       return { content: '', abstained: true };
     }
 
@@ -499,10 +518,8 @@ export class CitedChatGenerationService {
         : ranked.slice(0, RAG_RERANK_TOP_K);
     const rerankerUsed = rerank.reachable && rerank.rerankerUsed;
     const bestScore = top[0]?.score ?? -1;
-    const gateOk =
-      documentOverview || passesCalibratedRetrievalGate({ bestScore, rerankerUsed });
-    const llmAttempt =
-      documentOverview || shouldAttemptCitedLlm({ bestScore, rerankerUsed });
+    const gateOk = documentOverview || passesCalibratedRetrievalGate({ bestScore, rerankerUsed });
+    const llmAttempt = documentOverview || shouldAttemptCitedLlm({ bestScore, rerankerUsed });
     const llmConfigured =
       resolveCitedChatLlmConfig({
         cloudBaseUrl: input.cloudLlm?.baseUrl,
@@ -510,9 +527,7 @@ export class CitedChatGenerationService {
         cloudModel: input.cloudLlm?.model,
       }) != null;
 
-    const extractiveMinScore = rerankerUsed
-      ? ragRerankerGateThreshold()
-      : ragFusionGateThreshold();
+    const extractiveMinScore = rerankerUsed ? ragRerankerGateThreshold() : ragFusionGateThreshold();
     let extractivePool =
       scope === 'library'
         ? libraryExtractiveRowsForScopedFact(top, answerType)
@@ -559,9 +574,7 @@ export class CitedChatGenerationService {
     );
 
     const libraryAmountExtractive =
-      scope === 'library' &&
-      gateOk &&
-      prefersAmountExtractiveAnswer(queryVector)
+      scope === 'library' && gateOk && prefersAmountExtractiveAnswer(queryVector)
         ? await this.resolveExtractiveAnswer(
             userMessage,
             extractivePool,
@@ -662,7 +675,13 @@ export class CitedChatGenerationService {
 
     if (await aborted()) {
       await this.citationsRepo.replaceCitations(messageId, []);
-      await this.failGeneration(messageId, threadId, userId, 'cancelled', 'User cancelled generation');
+      await this.failGeneration(
+        messageId,
+        threadId,
+        userId,
+        'cancelled',
+        'User cancelled generation'
+      );
       return { content: '', abstained: true };
     }
 
@@ -769,7 +788,13 @@ export class CitedChatGenerationService {
     if (!llm.ok) {
       if (llm.detail === 'aborted' || llm.detail === 'cancelled') {
         await this.citationsRepo.replaceCitations(messageId, []);
-        await this.failGeneration(messageId, threadId, userId, 'cancelled', 'User cancelled generation');
+        await this.failGeneration(
+          messageId,
+          threadId,
+          userId,
+          'cancelled',
+          'User cancelled generation'
+        );
         return { content: '', abstained: true };
       }
       const llmFallbackExtractive =
@@ -824,7 +849,13 @@ export class CitedChatGenerationService {
 
     if (await aborted()) {
       await this.citationsRepo.replaceCitations(messageId, []);
-      await this.failGeneration(messageId, threadId, userId, 'cancelled', 'User cancelled generation');
+      await this.failGeneration(
+        messageId,
+        threadId,
+        userId,
+        'cancelled',
+        'User cancelled generation'
+      );
       return { content: '', abstained: true };
     }
 

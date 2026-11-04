@@ -7,7 +7,7 @@ import {
   ListDuplicateSetsUseCase,
 } from '../../../duplicates/application/duplicate-set.use-cases.js';
 
-export interface ArchiveHashIdenticalDuplicateSetsResult {
+interface ArchiveHashIdenticalDuplicateSetsResult {
   setsArchived: number;
 }
 

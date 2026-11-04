@@ -163,9 +163,7 @@ SEMANTIC_READING_ORDER_BY_FIXTURE: dict[str, tuple[str, ...]] = {
         "row",
         "b",
     ),
-    "rotated_mediabox": (
-        *_BANNER,
-    ),
+    "rotated_mediabox": (*_BANNER,),
     "rotated_heading": (
         *_BANNER,
         "rotated",

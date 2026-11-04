@@ -1,9 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import {
-  parseOptionalString,
-  recordFromUnknown,
-} from '../../../shared/infrastructure/database/row-parse.js';
+import { parseOptionalString, recordFromUnknown } from '../../../shared/domain/row-parse.js';
 
 function normalizeModelTag(name: string): string {
   return name.split(':')[0]?.trim().toLowerCase() ?? name.trim().toLowerCase();
@@ -21,7 +18,9 @@ export async function isOllamaModelLoaded(
   }
   const base = normalizeModelTag(target);
   const controller = new AbortController();
-  const timer = setTimeout(() => { controller.abort(); }, timeoutMs);
+  const timer = setTimeout(() => {
+    controller.abort();
+  }, timeoutMs);
   try {
     const response = await fetch(`${ollamaUrl.replace(/\/$/, '')}/api/tags`, {
       signal: controller.signal,

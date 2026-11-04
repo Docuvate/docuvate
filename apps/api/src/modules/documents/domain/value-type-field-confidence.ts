@@ -3,7 +3,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { isRecord } from '../../../shared/infrastructure/database/row-parse.js';
+import { isRecord } from '../../../shared/domain/row-parse.js';
 
 interface ValueTypeFieldConfidenceArtifact {
   auto_promote_min_by_field: Record<string, number>;

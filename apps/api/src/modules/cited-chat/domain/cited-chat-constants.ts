@@ -13,10 +13,10 @@ export const RAG_RERANKER_GATE_MIN_DEFAULT = 0.21;
 export const RAG_FUSION_GATE_MIN_DEFAULT = 0.02;
 
 /** Below calibrated gate but above this, still attempt LLM (self-check via empty claims). */
-export const RAG_RERANKER_SOFT_MIN_DEFAULT = 0.08;
+const RAG_RERANKER_SOFT_MIN_DEFAULT = 0.08;
 
 /** Fusion floor for LLM when reranker is unreachable. */
-export const RAG_FUSION_SOFT_MIN_DEFAULT = 0.015;
+const RAG_FUSION_SOFT_MIN_DEFAULT = 0.015;
 
 export function ragRerankerGateThreshold(): number {
   const raw = process.env['RAG_RERANKER_GATE_MIN'];

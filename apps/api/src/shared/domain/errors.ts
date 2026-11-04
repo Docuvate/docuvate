@@ -4,7 +4,6 @@ import {
   ERROR_CODES,
   type ErrorCode,
   errorCodeI18nKey,
-  isErrorCode,
   notFoundCodeForResource,
 } from '@docuvate/contracts';
 
@@ -55,7 +54,10 @@ export class ValidationError extends DomainError {
 
 export class GatewayTimeoutError extends DomainError {
   constructor(detail: string = errorCodeI18nKey(ERROR_CODES.GATEWAY_TIMEOUT)) {
-    super(ERROR_CODES.GATEWAY_TIMEOUT, looksLikeI18nKey(detail) ? detail : errorCodeI18nKey(ERROR_CODES.GATEWAY_TIMEOUT));
+    super(
+      ERROR_CODES.GATEWAY_TIMEOUT,
+      looksLikeI18nKey(detail) ? detail : errorCodeI18nKey(ERROR_CODES.GATEWAY_TIMEOUT)
+    );
   }
 }
 
@@ -82,26 +84,4 @@ function looksLikeI18nKey(message: string): boolean {
     return false;
   }
   return /^[a-zA-Z][a-zA-Z0-9]*(\.[a-zA-Z][a-zA-Z0-9]*)+$/.test(message);
-}
-
-export function coerceLegacyErrorCode(code: string): ErrorCode {
-  if (isErrorCode(code)) {
-    return code;
-  }
-  switch (code) {
-    case 'NOT_FOUND':
-      return ERROR_CODES.RESOURCE_NOT_FOUND;
-    case 'FORBIDDEN':
-      return ERROR_CODES.ACCESS_FORBIDDEN;
-    case 'VALIDATION_ERROR':
-      return ERROR_CODES.VALIDATION_FAILED;
-    case 'GATEWAY_TIMEOUT':
-      return ERROR_CODES.GATEWAY_TIMEOUT;
-    case 'SERVICE_UNAVAILABLE':
-      return ERROR_CODES.SERVICE_UNAVAILABLE;
-    case 'CONFLICT':
-      return ERROR_CODES.CONFLICT;
-    default:
-      return ERROR_CODES.INTERNAL_ERROR;
-  }
 }

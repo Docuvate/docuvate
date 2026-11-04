@@ -8,7 +8,7 @@ import type {
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { SettingsCallout } from '../settings/SettingsCallout';
+import { SettingsCallout } from '../settings';
 import { Button } from '../ui/Button';
 import { CopyButton } from '../ui/CopyButton';
 import { Dialog, DialogBody, DialogFooter, DialogHeader } from '../ui/Dialog';
@@ -172,129 +172,139 @@ export function SftpIngressSetupDialog({
     >
       <DialogHeader title={t('sftpIngress.setupTitle')} titleId={titleId} />
       <DialogBody>
-      <ol
-        className="connector-sftp-wizard-steps"
-        aria-label={t('sftpIngress.setupStep', { current: step + 1, total: 3 })}
-      >
-        {STEP_LABEL_KEYS.map((key, index) => (
-          <li
-            key={key}
-            className={`connector-sftp-wizard-step${index === step ? ' connector-sftp-wizard-step--active' : ''}${index < step ? ' connector-sftp-wizard-step--done' : ''}`}
-            aria-current={index === step ? 'step' : undefined}
-          >
-            <span className="connector-sftp-wizard-step-index">{index + 1}</span>
-            <span className="connector-sftp-wizard-step-label">{t(key)}</span>
-          </li>
-        ))}
-      </ol>
+        <ol
+          className="connector-sftp-wizard-steps"
+          aria-label={t('sftpIngress.setupStep', { current: step + 1, total: 3 })}
+        >
+          {STEP_LABEL_KEYS.map((key, index) => (
+            <li
+              key={key}
+              className={`connector-sftp-wizard-step${index === step ? ' connector-sftp-wizard-step--active' : ''}${index < step ? ' connector-sftp-wizard-step--done' : ''}`}
+              aria-current={index === step ? 'step' : undefined}
+            >
+              <span className="connector-sftp-wizard-step-index">{index + 1}</span>
+              <span className="connector-sftp-wizard-step-label">{t(key)}</span>
+            </li>
+          ))}
+        </ol>
 
-      {step === 0 ? (
-        <div className="connector-sftp-setup-step connector-sftp-field-grid">
-          <label className="field">
-            <span>{t('sftpIngress.displayName')}</span>
-            <Input
-              ref={displayNameRef}
-              value={displayName}
-              onChange={(e) => { setDisplayName(e.target.value); }}
-              onBlur={() => { setNameBlurred(true); }}
-              autoComplete="off"
-              aria-invalid={showNameError || undefined}
-              aria-describedby={showNameError ? nameErrorId : undefined}
-              className={showNameError ? 'input-invalid' : ''}
-            />
-            {showNameError ? (
-              <p id={nameErrorId} className="field-inline-error" role="alert">
-                {t('sftpIngress.setupFieldErrorName')}
-              </p>
-            ) : null}
-          </label>
-          <div className="field">
-            <span id={`${titleId}-auth-mode`}>{t('sftpIngress.authModeLegend')}</span>
-            <SegmentedControl<AuthMode>
-              ariaLabel={t('sftpIngress.authModeLegend')}
-              value={authMode}
-              options={[
-                { value: 'password', label: t('sftpIngress.authModePassword') },
-                { value: 'sshKey', label: t('sftpIngress.authModeSshKey') },
-              ]}
-              onChange={(mode) => {
-                setAuthMode(mode);
-              }}
-            />
-          </div>
-          {authMode === 'sshKey' ? (
+        {step === 0 ? (
+          <div className="connector-sftp-setup-step connector-sftp-field-grid">
             <label className="field">
-              <span>{t('sftpIngress.sshPublicKey')}</span>
-              <textarea
-                ref={sshPublicKeyRef}
-                className={`input connector-sftp-textarea${showSshKeyError ? ' input-invalid' : ''}`}
-                rows={4}
-                value={sshPublicKey}
-                onChange={(e) => { setSshPublicKey(e.target.value); }}
-                onBlur={() => { setSshBlurred(true); }}
-                aria-invalid={showSshKeyError || undefined}
-                aria-describedby={showSshKeyError ? sshErrorId : undefined}
+              <span>{t('sftpIngress.displayName')}</span>
+              <Input
+                ref={displayNameRef}
+                value={displayName}
+                onChange={(e) => {
+                  setDisplayName(e.target.value);
+                }}
+                onBlur={() => {
+                  setNameBlurred(true);
+                }}
+                autoComplete="off"
+                aria-invalid={showNameError || undefined}
+                aria-describedby={showNameError ? nameErrorId : undefined}
+                className={showNameError ? 'input-invalid' : ''}
               />
-              {showSshKeyError ? (
-                <p id={sshErrorId} className="field-inline-error" role="alert">
-                  {t('sftpIngress.setupFieldErrorSshKey')}
+              {showNameError ? (
+                <p id={nameErrorId} className="field-inline-error" role="alert">
+                  {t('sftpIngress.setupFieldErrorName')}
                 </p>
               ) : null}
             </label>
-          ) : null}
-          <label className="field">
-            <span>{t('sftpIngress.targetFolder')}</span>
-            <Select
-              value={folderId}
-              onChange={setFolderId}
-              options={folderOptions}
-              aria-label={t('sftpIngress.targetFolder')}
-              menuPortal
-            />
-          </label>
-        </div>
-      ) : null}
-
-      {step === 1 ? (
-        <div className="connector-sftp-setup-step">
-          <p className="muted">{t('sftpIngress.printerStepLead')}</p>
-          <div className="connector-sftp-kv-grid">
-            <ValueRow label={t('sftpIngress.serverAddress')} value={endpointLine} />
-            <div className="connector-sftp-kv-row">
-              <span className="connector-sftp-kv-label">{t('sftpIngress.fingerprint')}</span>
-              {fingerprint ? (
-                <div className="connector-sftp-kv-value">
-                  <code>{fingerprint}</code>
-                  <CopyButton value={fingerprint} />
-                </div>
-              ) : (
-                <SettingsCallout variant="info">
-                  {!serverReady ? t('sftpIngress.serverLoading') : t('sftpIngress.fingerprintInfo')}
-                </SettingsCallout>
-              )}
+            <div className="field">
+              <span id={`${titleId}-auth-mode`}>{t('sftpIngress.authModeLegend')}</span>
+              <SegmentedControl<AuthMode>
+                ariaLabel={t('sftpIngress.authModeLegend')}
+                value={authMode}
+                options={[
+                  { value: 'password', label: t('sftpIngress.authModePassword') },
+                  { value: 'sshKey', label: t('sftpIngress.authModeSshKey') },
+                ]}
+                onChange={(mode) => {
+                  setAuthMode(mode);
+                }}
+              />
             </div>
-            <ValueRow label={t('sftpIngress.remotePath')} value="/" />
-          </div>
-        </div>
-      ) : null}
-
-      {step === 2 && created ? (
-        <div className="connector-sftp-setup-step">
-          <p>{t('sftpIngress.createdDescription')}</p>
-          <div className="connector-sftp-kv-grid">
-            <ValueRow label={t('sftpIngress.username')} value={created.account.username} />
-            {created.passwordPlain ? (
-              <div className="connector-sftp-kv-row">
-                <span className="connector-sftp-kv-label">{t('sftpIngress.passwordOnce')}</span>
-                <div className="connector-sftp-kv-value">
-                  <code className="connector-sftp-secret-mask">••••••••••••</code>
-                  <CopyButton value={created.passwordPlain} />
-                </div>
-              </div>
+            {authMode === 'sshKey' ? (
+              <label className="field">
+                <span>{t('sftpIngress.sshPublicKey')}</span>
+                <textarea
+                  ref={sshPublicKeyRef}
+                  className={`input connector-sftp-textarea${showSshKeyError ? ' input-invalid' : ''}`}
+                  rows={4}
+                  value={sshPublicKey}
+                  onChange={(e) => {
+                    setSshPublicKey(e.target.value);
+                  }}
+                  onBlur={() => {
+                    setSshBlurred(true);
+                  }}
+                  aria-invalid={showSshKeyError || undefined}
+                  aria-describedby={showSshKeyError ? sshErrorId : undefined}
+                />
+                {showSshKeyError ? (
+                  <p id={sshErrorId} className="field-inline-error" role="alert">
+                    {t('sftpIngress.setupFieldErrorSshKey')}
+                  </p>
+                ) : null}
+              </label>
             ) : null}
+            <label className="field">
+              <span>{t('sftpIngress.targetFolder')}</span>
+              <Select
+                value={folderId}
+                onChange={setFolderId}
+                options={folderOptions}
+                aria-label={t('sftpIngress.targetFolder')}
+                menuPortal
+              />
+            </label>
           </div>
-        </div>
-      ) : null}
+        ) : null}
+
+        {step === 1 ? (
+          <div className="connector-sftp-setup-step">
+            <p className="muted">{t('sftpIngress.printerStepLead')}</p>
+            <div className="connector-sftp-kv-grid">
+              <ValueRow label={t('sftpIngress.serverAddress')} value={endpointLine} />
+              <div className="connector-sftp-kv-row">
+                <span className="connector-sftp-kv-label">{t('sftpIngress.fingerprint')}</span>
+                {fingerprint ? (
+                  <div className="connector-sftp-kv-value">
+                    <code>{fingerprint}</code>
+                    <CopyButton value={fingerprint} />
+                  </div>
+                ) : (
+                  <SettingsCallout variant="info">
+                    {!serverReady
+                      ? t('sftpIngress.serverLoading')
+                      : t('sftpIngress.fingerprintInfo')}
+                  </SettingsCallout>
+                )}
+              </div>
+              <ValueRow label={t('sftpIngress.remotePath')} value="/" />
+            </div>
+          </div>
+        ) : null}
+
+        {step === 2 && created ? (
+          <div className="connector-sftp-setup-step">
+            <p>{t('sftpIngress.createdDescription')}</p>
+            <div className="connector-sftp-kv-grid">
+              <ValueRow label={t('sftpIngress.username')} value={created.account.username} />
+              {created.passwordPlain ? (
+                <div className="connector-sftp-kv-row">
+                  <span className="connector-sftp-kv-label">{t('sftpIngress.passwordOnce')}</span>
+                  <div className="connector-sftp-kv-value">
+                    <code className="connector-sftp-secret-mask">••••••••••••</code>
+                    <CopyButton value={created.passwordPlain} />
+                  </div>
+                </div>
+              ) : null}
+            </div>
+          </div>
+        ) : null}
       </DialogBody>
       <DialogFooter className="connector-sftp-ingress-dialog-actions">
         <Button
@@ -313,7 +323,14 @@ export function SftpIngressSetupDialog({
         ) : null}
         {step === 1 ? (
           <>
-            <Button type="button" variant="secondary" disabled={busy} onClick={() => { setStep(0); }}>
+            <Button
+              type="button"
+              variant="secondary"
+              disabled={busy}
+              onClick={() => {
+                setStep(0);
+              }}
+            >
               {t('sftpIngress.setupBack')}
             </Button>
             <Button

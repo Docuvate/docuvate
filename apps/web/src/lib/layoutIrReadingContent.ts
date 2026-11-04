@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { LayoutIrBlock, LayoutIrDocument, LayoutIrLine } from '@docuvate/contracts';
 
-export type LayoutReadingBlockKind = 'heading' | 'paragraph';
+type LayoutReadingBlockKind = 'heading' | 'paragraph';
 
-export interface LayoutReadingBlock {
+interface LayoutReadingBlock {
   id: string;
   page: number;
   kind: LayoutReadingBlockKind;
@@ -83,8 +83,7 @@ function clusterColumns(lines: LayoutIrLine[]): LayoutIrLine[][] {
       columns.push([line]);
       continue;
     }
-    const lastCenter =
-      last.reduce((sum, l) => sum + l.x + l.width / 2, 0) / last.length;
+    const lastCenter = last.reduce((sum, l) => sum + l.x + l.width / 2, 0) / last.length;
     if (Math.abs(center - lastCenter) >= COLUMN_GAP_MIN) {
       columns.push([line]);
     } else {
@@ -98,7 +97,10 @@ function clusterColumns(lines: LayoutIrLine[]): LayoutIrLine[][] {
 }
 
 function mergeParagraphLines(lines: LayoutIrLine[]): string {
-  return lines.map((l) => l.text.trim()).filter(Boolean).join(' ');
+  return lines
+    .map((l) => l.text.trim())
+    .filter(Boolean)
+    .join(' ');
 }
 
 function readingBlocksForPage(doc: LayoutIrDocument, page: number): LayoutReadingBlock[] {

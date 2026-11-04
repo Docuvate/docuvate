@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 /** Static catalog when the worker `/extract/engines` endpoint is unreachable. */
-export const EXTRACTION_ENGINE_FALLBACK = [
+const EXTRACTION_ENGINE_FALLBACK = [
   {
     id: 'pipeline',
     label: 'Pipeline (Standard)',

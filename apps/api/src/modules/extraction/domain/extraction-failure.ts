@@ -32,7 +32,7 @@ const RETRYABLE_BY_CODE: Readonly<Record<ExtractionFailureCode, boolean>> = {
   orphan_requeue_exhausted: false,
 };
 
-export function isRetryableExtractionFailureCode(code: ExtractionFailureCode): boolean {
+function isRetryableExtractionFailureCode(code: ExtractionFailureCode): boolean {
   return RETRYABLE_BY_CODE[code];
 }
 

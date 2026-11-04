@@ -10,8 +10,7 @@ def test_join_wrapped_title_lines() -> None:
         ["Heading Continued On Next Line"],
     )
     assert value == (
-        "Synthetic Nine Word Academic Title Case Example "
-        "Heading Continued On Next Line"
+        "Synthetic Nine Word Academic Title Case Example Heading Continued On Next Line"
     )
 
 

@@ -28,10 +28,3 @@ export interface DocumentChatProvider {
   readonly id: DocumentChatProviderId;
   chat(input: DocumentChatInput): Promise<DocumentChatResult>;
 }
-
-export interface ChatProviderCatalogEntry {
-  id: string;
-  label: string;
-  description: string;
-  available: boolean;
-}

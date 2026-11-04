@@ -21,9 +21,7 @@ class AmountLineRankerArtifact(TypedDict):
     min_score: float
 
 
-_ARTIFACT_PATH = (
-    Path(__file__).resolve().parent.parent / "artifacts" / "amount-line-ranker.v1.json"
-)
+_ARTIFACT_PATH = Path(__file__).resolve().parent.parent / "artifacts" / "amount-line-ranker.v1.json"
 
 
 @dataclass(frozen=True)

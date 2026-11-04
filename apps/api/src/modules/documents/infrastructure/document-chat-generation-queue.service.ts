@@ -8,11 +8,7 @@ import {
   DOCUMENT_CHAT_THREAD_REPOSITORY,
   type DocumentChatThreadRepository,
 } from '../../../shared/domain/ports.js';
-import {
-  isRecord,
-  parseOptionalString,
-  parseString,
-} from '../../../shared/infrastructure/database/row-parse.js';
+import { isRecord, parseOptionalString, parseString } from '../../../shared/domain/row-parse.js';
 import {
   createValkeyConnection,
   waitForValkeyReady,

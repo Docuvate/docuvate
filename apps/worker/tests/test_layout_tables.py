@@ -27,7 +27,8 @@ def test_delivery_note_table_cells_separate() -> None:
     assert len(page.blocks) >= 3
     assert len(page.tables) >= 1
     block_text = " ".join(b.text for b in page.blocks)
-    assert "Item" in block_text and "Qty" in block_text
+    assert "Item" in block_text
+    assert "Qty" in block_text
     table = page.tables[0]
     cell_texts = {cell.text for row in table.rows for cell in row}
     assert "Qty" in cell_texts
@@ -99,10 +100,6 @@ def test_rotated_text_extracted() -> None:
     assert not pdf_likely_scanned(content)
     doc = extract_layout_pdf_bytes(content)
     assert doc is not None
-    rotated = [
-        b
-        for b in doc.pages[0].blocks
-        if b.rotation_deg is not None or b.matrix is not None
-    ]
+    rotated = [b for b in doc.pages[0].blocks if b.rotation_deg is not None or b.matrix is not None]
     assert len(rotated) >= 1
     assert any(b.text == "Rotated" for b in rotated)

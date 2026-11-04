@@ -2,9 +2,11 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { SavedDocumentViewFieldFilterDto } from '@docuvate/contracts';
 
-import { isRecord } from '../../../shared/infrastructure/database/row-parse.js';
+import { isRecord } from '../../../shared/domain/row-parse.js';
 
-export function parseFieldFiltersQuery(raw: string | undefined): SavedDocumentViewFieldFilterDto[] | undefined {
+export function parseFieldFiltersQuery(
+  raw: string | undefined
+): SavedDocumentViewFieldFilterDto[] | undefined {
   if (raw == null || raw.trim() === '') return undefined;
   let parsed: unknown;
   try {

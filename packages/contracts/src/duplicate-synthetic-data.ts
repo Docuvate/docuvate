@@ -205,7 +205,7 @@ export function generateSyntheticDuplicateDataset(
   return { train, holdout };
 }
 
-export function contextFromDocuments(
+function contextFromDocuments(
   left: DuplicateCompareDocumentInput,
   right: DuplicateCompareDocumentInput,
   embeddingSimilarity: number,

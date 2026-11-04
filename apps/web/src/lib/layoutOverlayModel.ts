@@ -37,7 +37,7 @@ export interface LayoutOutlineEntry {
   y: number;
 }
 
-export interface LayoutTableView {
+interface LayoutTableView {
   tableIndex: number;
   page: number;
   columnCount: number;
@@ -60,7 +60,9 @@ function clamp01(n: number): number {
   return Math.min(1, Math.max(0, n));
 }
 
-function boxFromBlock(block: LayoutIrBlock): Pick<LayoutOverlayRegion, 'x' | 'y' | 'width' | 'height'> {
+function boxFromBlock(
+  block: LayoutIrBlock
+): Pick<LayoutOverlayRegion, 'x' | 'y' | 'width' | 'height'> {
   return {
     x: clamp01(block.x),
     y: clamp01(block.y),
@@ -185,7 +187,10 @@ export function buildLayoutOverlays(doc: LayoutIrDocument): LayoutOverlayRegion[
       if (!text) continue;
       const kind = classifyBlock(block);
       if (kind === 'text') continue;
-      const id = block.blockIndex != null ? `block-${String(block.blockIndex)}` : `ir-${String(page.page)}-${String(regions.length)}`;
+      const id =
+        block.blockIndex != null
+          ? `block-${String(block.blockIndex)}`
+          : `ir-${String(page.page)}-${String(regions.length)}`;
       regions.push({
         id,
         page: block.page,
@@ -221,8 +226,7 @@ export function buildLayoutOutline(
       if (!text || text.length > 160) continue;
       if (size < HEADING_MIN_PT && !bold) continue;
       const level: 1 | 2 | 3 = size >= 13 ? 1 : size >= 11 ? 2 : 3;
-      const overlay =
-        block.blockIndex != null ? overlayByBlock.get(block.blockIndex) : undefined;
+      const overlay = block.blockIndex != null ? overlayByBlock.get(block.blockIndex) : undefined;
       entries.push({
         id: `outline-${String(entries.length)}`,
         page: block.page,
@@ -283,9 +287,7 @@ function tableRowsWithHeader(table: LayoutIrTable): {
   headerRow: string[] | null;
   bodyRows: string[][];
 } {
-  const stringRows = table.rows.map((row) =>
-    row.map((cell) => formatLayoutTableCell(cell.text))
-  );
+  const stringRows = table.rows.map((row) => row.map((cell) => formatLayoutTableCell(cell.text)));
   if (stringRows.length === 0) {
     return { headerRow: null, bodyRows: [] };
   }
@@ -311,12 +313,7 @@ export function hitTestLayoutOverlay(
   ny: number
 ): LayoutOverlayRegion | undefined {
   return overlays.find(
-    (o) =>
-      o.page === page &&
-      nx >= o.x &&
-      nx <= o.x + o.width &&
-      ny >= o.y &&
-      ny <= o.y + o.height
+    (o) => o.page === page && nx >= o.x && nx <= o.x + o.width && ny >= o.y && ny <= o.y + o.height
   );
 }
 

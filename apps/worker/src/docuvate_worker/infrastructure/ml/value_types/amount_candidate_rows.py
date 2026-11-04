@@ -37,11 +37,7 @@ def _tokenize_value_candidates(line: str) -> list[str]:
     tokens: list[str] = []
     buf: list[str] = []
     for ch in line:
-        if (
-            ch.isalnum()
-            or ch in "./-"
-            or (ch == "," and buf and any(c.isdigit() for c in buf))
-        ):
+        if ch.isalnum() or ch in "./-" or (ch == "," and buf and any(c.isdigit() for c in buf)):
             buf.append(ch)
         elif buf:
             tokens.append("".join(buf))
@@ -69,9 +65,7 @@ class AmountCandidateRow:
     features: AmountLineFeatures
 
 
-def iter_amount_candidate_rows(
-    text: str, bundle: ValueTypeModelBundle
-) -> list[AmountCandidateRow]:
+def iter_amount_candidate_rows(text: str, bundle: ValueTypeModelBundle) -> list[AmountCandidateRow]:
     lines = [line.strip() for line in text.splitlines() if line.strip()]
     line_e5 = amount_lines_e5_cosine(lines)
     peer_values: list[float] = []
@@ -130,11 +124,7 @@ def iter_amount_candidate_rows(
         label_e5,
         parsed,
     ) in raw_rows:
-        vat_hint = (
-            vat_sum_consistency_hint(parsed, parsed_peers)
-            if parsed > 0
-            else 0.0
-        )
+        vat_hint = vat_sum_consistency_hint(parsed, parsed_peers) if parsed > 0 else 0.0
         features = build_amount_line_features(
             bundle=bundle,
             token=token,

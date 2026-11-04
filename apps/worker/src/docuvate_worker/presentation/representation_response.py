@@ -45,7 +45,5 @@ def document_representation_to_response(
             "ascii"
         ),
         document_max_scale=representation.document_max_scale,
-        document_max_int8_base64=base64.b64encode(representation.document_max_int8).decode(
-            "ascii"
-        ),
+        document_max_int8_base64=base64.b64encode(representation.document_max_int8).decode("ascii"),
     )

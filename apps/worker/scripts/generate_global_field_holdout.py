@@ -142,10 +142,7 @@ def _receipt(seed: random.Random, index: int) -> HoldoutDoc:
     amount_raw, amount_norm = _amount(seed)
     date_raw, date_norm = _date(seed)
     layouts = [
-        (
-            f"Rechnung {index:04d}\n{company}\n"
-            f"Betrag: {amount_raw} EUR\nFälligkeit: {date_raw}"
-        ),
+        (f"Rechnung {index:04d}\n{company}\nBetrag: {amount_raw} EUR\nFälligkeit: {date_raw}"),
         f"{company}\nRechnung\nEUR {amount_raw}\nDatum {date_raw}",
     ]
     text = seed.choice(layouts)
@@ -262,12 +259,7 @@ def _service_invoice(seed: random.Random, index: int) -> HoldoutDoc:
             f"Fälliger Gesamtbetrag {amount_raw} EUR\n"
             f"Zahlbar bis {date_raw}"
         ),
-        (
-            f"{vendor}\n"
-            f"Honorarnote Nr. {index:04d}\n"
-            f"Endsumme: {amount_raw} EUR\n"
-            f"Datum {date_raw}"
-        ),
+        (f"{vendor}\nHonorarnote Nr. {index:04d}\nEndsumme: {amount_raw} EUR\nDatum {date_raw}"),
     ]
     text = seed.choice(layouts)
     return HoldoutDoc(
@@ -504,7 +496,10 @@ def main() -> None:
     OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     OUT_PATH.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
     counts = {name: sum(1 for doc in docs if doc.split == name) for name in SPLIT_ORDER}
-    families = {name: sum(1 for doc in docs if doc.template_family == name) for name in payload["template_families"]}
+    families = {
+        name: sum(1 for doc in docs if doc.template_family == name)
+        for name in payload["template_families"]
+    }
     print(f"Wrote {OUT_PATH} ({len(docs)} docs, splits={counts}, families={families})")
 
 

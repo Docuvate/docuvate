@@ -9,7 +9,7 @@ import {
   removeDocumentTag,
 } from '../../lib/api';
 import { formatUserFacingError } from '../../lib/apiErrors';
-import { useToastNotify } from '../save/ToastProvider';
+import { useToastNotify } from '../save';
 import { Chip } from '../ui/Chip';
 
 interface Props {
@@ -74,12 +74,7 @@ export function DocumentLabelSuggestionChips({
             void dismiss(item.tag.id);
           }}
         >
-          <Chip
-            label={item.tag.name}
-            variant="suggest"
-            color={item.tag.color}
-            truncateLabel
-          />
+          <Chip label={item.tag.name} variant="suggest" color={item.tag.color} truncateLabel />
         </button>
       ))}
     </div>

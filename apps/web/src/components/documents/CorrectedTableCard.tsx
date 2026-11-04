@@ -3,7 +3,7 @@
 import type { DocumentRegionDto } from '@docuvate/contracts';
 import { useTranslation } from 'react-i18next';
 
-export interface CorrectedTableCardProps {
+interface CorrectedTableCardProps {
   region: DocumentRegionDto;
   index: number;
   active: boolean;

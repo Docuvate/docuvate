@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { createCipheriv, createDecipheriv, randomBytes, scryptSync } from 'node:crypto';
 
-import { parseString, recordFromUnknown } from '../../../shared/infrastructure/database/row-parse.js';
+import { parseString, recordFromUnknown } from '../../../shared/domain/row-parse.js';
 import type { ConnectorConfigurationInput } from '../domain/connector.types.js';
 
 function parseConnectorConfigurationInput(value: unknown): ConnectorConfigurationInput {

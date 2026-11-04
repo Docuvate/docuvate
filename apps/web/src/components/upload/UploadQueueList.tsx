@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Button } from '../ui/Button';
 import { Popover } from '../ui/overlay/Popover';
-import { useDocumentUploadContext } from './DocumentUploadProvider';
+import { useDocumentUploadContext } from './documentUploadContext';
 import {
   showUploadProgressBar,
   uploadProgressFillClass,
@@ -113,7 +113,9 @@ export function UploadQueueList({ className }: UploadQueueListProps) {
           <UploadQueueRow
             key={item.id}
             item={item}
-            onDismiss={() => { removeUploadItem(item.id); }}
+            onDismiss={() => {
+              removeUploadItem(item.id);
+            }}
           />
         ))}
         {overflow.length > 0 ? (
@@ -125,7 +127,9 @@ export function UploadQueueList({ className }: UploadQueueListProps) {
               aria-expanded={overflowOpen}
               aria-controls={popoverId}
               aria-label={t('upload.queueMoreAria', { count: overflow.length })}
-              onClick={() => { setOverflowOpen((open) => !open); }}
+              onClick={() => {
+                setOverflowOpen((open) => !open);
+              }}
             >
               +{overflow.length}
             </button>
@@ -139,14 +143,18 @@ export function UploadQueueList({ className }: UploadQueueListProps) {
               id={popoverId}
               role="region"
               aria-label={t('upload.queueOverflowPopoverAria')}
-              onEscape={() => { setOverflowOpen(false); }}
+              onEscape={() => {
+                setOverflowOpen(false);
+              }}
             >
               <ul className="upload-queue upload-queue-overflow-list">
                 {overflow.map((item) => (
                   <UploadQueueRow
                     key={item.id}
                     item={item}
-                    onDismiss={() => { removeUploadItem(item.id); }}
+                    onDismiss={() => {
+                      removeUploadItem(item.id);
+                    }}
                   />
                 ))}
               </ul>

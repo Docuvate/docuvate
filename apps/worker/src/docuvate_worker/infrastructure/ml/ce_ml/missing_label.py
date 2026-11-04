@@ -43,7 +43,7 @@ def unexplained_neighbor_label_mass_share(
     total = sum(mass.values())
     if total <= 0:
         return 0.0
-    assigned = {tag_id for tag_id in assigned_tag_ids}
+    assigned = set(assigned_tag_ids)
     covered = sum(value for tag_id, value in mass.items() if tag_id in assigned)
     return float((total - covered) / total)
 

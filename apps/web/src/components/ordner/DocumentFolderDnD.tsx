@@ -28,7 +28,7 @@ import { useTranslation } from 'react-i18next';
 
 import { moveDocuments } from '../../lib/api';
 import { formatUserFacingError } from '../../lib/apiErrors';
-import { useToastNotify } from '../save/ToastProvider';
+import { useToastNotify } from '../save';
 import {
   type DocumentDragData,
   documentDragId,
@@ -46,10 +46,6 @@ const DocumentFolderDnDContext = createContext<DocumentFolderDnDContextValue>({
   enabled: false,
   activeDropTargetId: null,
 });
-
-export function useDocumentFolderDnDActiveDropId(): string | null {
-  return useContext(DocumentFolderDnDContext).activeDropTargetId;
-}
 
 interface DocumentFolderDnDProviderProps {
   documents: DocumentDto[];
@@ -258,7 +254,6 @@ export function useFolderDropTarget({ folderId, folderName }: UseFolderDropTarge
     disabled: !ctx.enabled,
     data: { folderName },
   });
-  const highlighted =
-    isOver || (ctx.activeDropTargetId != null && ctx.activeDropTargetId === id);
+  const highlighted = isOver || (ctx.activeDropTargetId != null && ctx.activeDropTargetId === id);
   return { setNodeRef, highlighted };
 }

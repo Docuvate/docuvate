@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { QueryRunner } from 'typeorm';
 
-import { isRecord } from './row-parse.js';
-import { TYPEORM_INITIAL_MIGRATION_NAME } from './typeorm-options.js';
+import { isRecord } from '../../domain/row-parse.js';
+import { TYPEORM_INITIAL_MIGRATION_NAME } from './initial-migration-name.js';
 
 /** Every registered migration must have a `migrationSchemaPresent` case (keep in sync with TypeORM order). */
 export const BASELINE_MARKER_MIGRATION_NAMES = [
@@ -103,7 +103,7 @@ export async function regClassExists(runner: QueryRunner, relation: string): Pro
 }
 
 /** True after FoldersOnlyRemoveMappen (or equivalent): no mappen table or mappe_id columns. */
-export async function foldersOnlySchemaPresent(runner: QueryRunner): Promise<boolean> {
+async function foldersOnlySchemaPresent(runner: QueryRunner): Promise<boolean> {
   if (await regClassExists(runner, 'public.mappen')) {
     return false;
   }
@@ -200,7 +200,10 @@ export async function migrationSchemaPresent(
     case 'DocumentRecognizedFieldExtractionAttempt20261014120000':
       return regClassExists(runner, 'public.document_recognized_field_extraction_attempt');
     case 'RepairHashOnlyDuplicateStacks20261014140000':
-      return migrationSchemaPresent(runner, 'DocumentRecognizedFieldExtractionAttempt20261014120000');
+      return migrationSchemaPresent(
+        runner,
+        'DocumentRecognizedFieldExtractionAttempt20261014120000'
+      );
     case 'MappeDefaultRootFolders20261014150000':
       if (await foldersOnlySchemaPresent(runner)) {
         return true;
@@ -209,7 +212,11 @@ export async function migrationSchemaPresent(
     case 'SplitDuplicateStacksByContentHash20261014160000':
       return migrationSchemaPresent(runner, 'MappeDefaultRootFolders20261014150000');
     case 'DocumentRecognizedFieldExtractorVersion20261014170000':
-      return columnExists(runner, 'document_recognized_field_extraction_attempt', 'extractor_version');
+      return columnExists(
+        runner,
+        'document_recognized_field_extraction_attempt',
+        'extractor_version'
+      );
     case 'DocumentExtractionFailureHeuristicVersion20261015120000':
       return columnExists(runner, 'documents', 'extraction_failure_reason');
     case 'DocumentPreviewStorage20261015180000':

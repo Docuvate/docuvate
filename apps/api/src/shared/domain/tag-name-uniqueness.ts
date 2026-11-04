@@ -3,7 +3,10 @@
 import { ValidationError } from './errors.js';
 import { namesAreNearDuplicate, normalizeLabelKey } from './label-name-similarity.js';
 
-export interface TagNameRef { id: string; name: string }
+interface TagNameRef {
+  id: string;
+  name: string;
+}
 
 export function findNearDuplicateTag(
   name: string,

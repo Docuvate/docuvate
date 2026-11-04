@@ -5,7 +5,7 @@ import type { ExtractedField } from '@docuvate/contracts';
 import { fieldsByCorrectionSlot } from './correction-diff-slots.js';
 import { extractionFieldValuesEquivalent } from './extraction-field-value-equivalence.js';
 
-export interface ExtractionFieldCorrectionDraft {
+interface ExtractionFieldCorrectionDraft {
   fieldKey: string;
   oldValue: string;
   newValue: string;

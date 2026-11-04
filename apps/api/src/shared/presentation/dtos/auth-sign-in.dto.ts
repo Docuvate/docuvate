@@ -21,7 +21,7 @@ import {
   MinLength,
 } from 'class-validator';
 
-export class AuthOidcProviderPublicResponseDto implements AuthOidcProviderPublicDto {
+class AuthOidcProviderPublicResponseDto implements AuthOidcProviderPublicDto {
   @IsString()
   providerId!: string;
 

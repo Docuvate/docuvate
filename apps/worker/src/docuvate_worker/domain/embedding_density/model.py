@@ -180,7 +180,7 @@ class EmbeddingDensityModel:
     ) -> None:
         for lid in self.label_ids:
             self.class_stats[lid] = NiwClassStats.empty(self.dim)
-        counts: dict[str, int] = {lid: 0 for lid in self.label_ids}
+        counts: dict[str, int] = dict.fromkeys(self.label_ids, 0)
         for i, row in enumerate(vectors):
             lid = self.label_ids[int(labels[i])]
             self.class_stats[lid].add(row)

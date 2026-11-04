@@ -4,12 +4,12 @@ import { useId, useLayoutEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useViewportMaxWidth } from '../../lib/useViewportMaxWidth';
-import { useFittingChipCount } from '../library/useFittingChipCount';
+import { useFittingChipCount } from '../library';
 import { Chip, type ChipProps } from '../ui/Chip';
 import { BottomSheet } from '../ui/overlay/BottomSheet';
 import { Popover } from '../ui/overlay/Popover';
 
-export interface LabelChipItem {
+interface LabelChipItem {
   id: string;
   label: string;
   color?: string;
@@ -120,14 +120,18 @@ export function LabelChipRow({ items, className, overflowAriaLabel }: LabelChipR
                 t('library.moreLabelsAria', { count: overflow.length, names: overflowNames })
               }
               title={overflowNames}
-              onClick={() => { setOverflowOpen((open) => !open); }}
+              onClick={() => {
+                setOverflowOpen((open) => !open);
+              }}
             >
               <span className="chip-label">+{overflow.length}</span>
             </button>
             {sheetOverflow ? (
               <BottomSheet
                 open={overflowOpen}
-                onClose={() => { setOverflowOpen(false); }}
+                onClose={() => {
+                  setOverflowOpen(false);
+                }}
                 title={t('labelPicker.overflowPopoverAria')}
                 className="label-chip-row-overflow-popover"
                 id={popoverId}
@@ -150,7 +154,9 @@ export function LabelChipRow({ items, className, overflowAriaLabel }: LabelChipR
                 placement="bottom-end"
                 maxHeightPx={320}
                 flipEnabled={false}
-                onEscape={() => { setOverflowOpen(false); }}
+                onEscape={() => {
+                  setOverflowOpen(false);
+                }}
               >
                 {overflowList}
               </Popover>

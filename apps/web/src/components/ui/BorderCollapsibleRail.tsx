@@ -6,7 +6,7 @@ import type { ReactNode } from 'react';
 const ICON_SIZE = 16;
 const ICON_STROKE = 1.75;
 
-export interface BorderCollapsibleRailProps {
+interface BorderCollapsibleRailProps {
   collapsed: boolean;
   onToggle: () => void;
   expandLabel: string;

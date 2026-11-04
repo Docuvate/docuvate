@@ -10,7 +10,7 @@ import { Button } from '../ui/Button';
 import { Dialog, DialogBody, DialogFooter, DialogHeader } from '../ui/Dialog';
 import { Input } from '../ui/Input';
 
-export interface FolderPickTarget {
+interface FolderPickTarget {
   folderId: string;
   label: string;
 }
@@ -68,7 +68,9 @@ export function FolderTargetPickerDialog({
         <Input
           ref={searchInputRef}
           value={query}
-          onChange={(e) => { setQuery(e.target.value); }}
+          onChange={(e) => {
+            setQuery(e.target.value);
+          }}
           placeholder={t('filesystem.treeSearchPlaceholder')}
           aria-label={t('filesystem.treeSearchAria')}
         />
@@ -78,7 +80,9 @@ export function FolderTargetPickerDialog({
               <button
                 type="button"
                 className="folder-picker-option"
-                onClick={() => { onPick(option); }}
+                onClick={() => {
+                  onPick(option);
+                }}
               >
                 {option.label}
               </button>

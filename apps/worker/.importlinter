@@ -1,0 +1,22 @@
+# SPDX-FileCopyrightText: 2026 Thomas Faust
+# SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+[importlinter]
+root_package = docuvate_worker
+
+[importlinter:contract:layers]
+name = routes (presentation) -> services (application) -> domain, no reverse imports
+type = layers
+layers =
+    docuvate_worker.main
+    docuvate_worker.presentation
+    docuvate_worker.application
+    docuvate_worker.domain
+
+[importlinter:contract:domain-pure]
+name = domain never imports routes or the HTTP entrypoint
+type = forbidden
+source_modules =
+    docuvate_worker.domain
+forbidden_modules =
+    docuvate_worker.presentation
+    docuvate_worker.main

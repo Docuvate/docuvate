@@ -25,12 +25,12 @@ const SEARCH_SCOPE_TYPES: readonly GlobalSearchScopeType[] = [
   'actions',
 ];
 
-export interface SearchFieldFilter {
+interface SearchFieldFilter {
   fieldNameRaw: string;
   valueRaw: string;
 }
 
-export interface ParsedSearchScope {
+interface ParsedSearchScope {
   textQuery: string;
   scopes: GlobalSearchScopeType[];
   fieldFilters: SearchFieldFilter[];

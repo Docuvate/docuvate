@@ -27,7 +27,7 @@ export interface DocumentChatProvidersCatalog {
   };
 }
 
-export function documentChatDevProvidersEnabled(): boolean {
+function documentChatDevProvidersEnabled(): boolean {
   if (process.env['DOCUMENT_CHAT_DEV_PROVIDERS'] === 'true') {
     return true;
   }

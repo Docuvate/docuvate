@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { de as chronoDe, en as chronoEn } from 'chrono-node';
-import { isValid,parse as parseDate } from 'date-fns';
+import { isValid, parse as parseDate } from 'date-fns';
 import { de as localeDe, enUS as localeEnUS } from 'date-fns/locale';
 
 import { tokenizeSearchQuery } from '../../search/domain/normalize-search-text.js';
@@ -53,6 +53,18 @@ function periodsFromChrono(query: string): Set<string> {
 }
 
 /** date-fns + ICU month names (de/en) for phrases like "Oktober 2024" adjacent to a year token. */
+function addParsedMonthYears(out: Set<string>, phrase: string, yearNum: number): void {
+  for (const locale of [localeDe, localeEnUS] as const) {
+    for (const fmt of MONTH_YEAR_FORMATS) {
+      const parsed = parseDate(phrase, fmt, new Date(), { locale });
+      if (!isValid(parsed) || parsed.getFullYear() !== yearNum) {
+        continue;
+      }
+      addYearMonth(out, paddedMonth(parsed), paddedYear(parsed));
+    }
+  }
+}
+
 function periodsFromLocalizedMonthYear(query: string): Set<string> {
   const out = new Set<string>();
   const raw = tokenizeSearchQuery(query);
@@ -68,15 +80,7 @@ function periodsFromLocalizedMonthYear(query: string): Set<string> {
         continue;
       }
       const phrase = [...raw.slice(start, i), yearToken].join(' ');
-      for (const locale of [localeDe, localeEnUS] as const) {
-        for (const fmt of MONTH_YEAR_FORMATS) {
-          const parsed = parseDate(phrase, fmt, new Date(), { locale });
-          if (!isValid(parsed) || parsed.getFullYear() !== yearNum) {
-            continue;
-          }
-          addYearMonth(out, paddedMonth(parsed), paddedYear(parsed));
-        }
-      }
+      addParsedMonthYears(out, phrase, yearNum);
     }
   }
   return out;

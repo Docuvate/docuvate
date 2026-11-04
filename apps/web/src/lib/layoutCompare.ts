@@ -50,8 +50,8 @@ export function formatSsimScore(ssim: number, locale: string): string {
 }
 
 export const LAYOUT_COMPARE_VIRTUAL_PAGE_THRESHOLD = 12;
-export const LAYOUT_COMPARE_PAGE_WINDOW_RADIUS = 10;
-export const LAYOUT_COMPARE_METRICS_BATCH = 25;
+const LAYOUT_COMPARE_PAGE_WINDOW_RADIUS = 10;
+const LAYOUT_COMPARE_METRICS_BATCH = 25;
 
 export function layoutCompareVisiblePageRange(
   pageCount: number,

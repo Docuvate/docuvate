@@ -20,7 +20,7 @@ import { ToastItem } from './ToastItem';
 
 type ToastKind = 'success' | 'error';
 
-export interface ToastErrorMeta {
+interface ToastErrorMeta {
   retry?: () => void;
   code?: string;
   requestId?: string;
@@ -94,7 +94,10 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       code = retryOrMeta.code;
       requestId = retryOrMeta.requestId;
     }
-    setToasts((prev) => [...prev.slice(-2), { id, kind: 'error', message, retry, code, requestId }]);
+    setToasts((prev) => [
+      ...prev.slice(-2),
+      { id, kind: 'error', message, retry, code, requestId },
+    ]);
   }, []);
 
   const dismissSuccessToasts = useCallback(() => {
@@ -157,7 +160,9 @@ export function useToast() {
   const { pushSuccess, pushError } = useToastNotify();
   return useMemo(
     () => ({
-      success: (message?: string, options?: ToastSuccessOptions) => { pushSuccess(message, options); },
+      success: (message?: string, options?: ToastSuccessOptions) => {
+        pushSuccess(message, options);
+      },
       error: (message: string, retryOrMeta?: (() => void) | ToastErrorMeta) => {
         pushError(message, retryOrMeta);
       },

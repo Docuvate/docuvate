@@ -11,18 +11,18 @@ export function isTemporaryScanFilename(filename: string): boolean {
   return TEMP_SUFFIXES.some((suffix) => lower.endsWith(suffix));
 }
 
-export interface ScanFileValidationResult {
+interface ScanFileValidationResult {
   ok: true;
   mimeType: string;
   filename: string;
 }
 
-export interface ScanFileValidationFailure {
+interface ScanFileValidationFailure {
   ok: false;
   reasonKey: string;
 }
 
-export type ScanFileValidation = ScanFileValidationResult | ScanFileValidationFailure;
+type ScanFileValidation = ScanFileValidationResult | ScanFileValidationFailure;
 
 export function validateScanFile(
   filename: string,

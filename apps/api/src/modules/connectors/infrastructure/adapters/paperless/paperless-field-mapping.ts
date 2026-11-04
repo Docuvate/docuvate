@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { CustomFieldType } from '@docuvate/contracts';
 
-import { recordFromUnknown } from '../../../../../shared/infrastructure/database/row-parse.js';
+import { recordFromUnknown } from '../../../../../shared/domain/row-parse.js';
 import type { PaperlessCustomFieldDataType } from './paperless-api.types.js';
 
 export type PaperlessOcrMode = 'keep_paperless' | 'rerun_docuvate';
@@ -93,9 +93,7 @@ export function mergePaperlessNotes(notes: PaperlessDocumentNotes): string | nul
     const trimmed = notes.trim();
     return trimmed.length > 0 ? trimmed : null;
   }
-  const lines = notes
-    .map((row) => row.note.trim())
-    .filter((line) => line.length > 0);
+  const lines = notes.map((row) => row.note.trim()).filter((line) => line.length > 0);
   return lines.length > 0 ? lines.join('\n') : null;
 }
 

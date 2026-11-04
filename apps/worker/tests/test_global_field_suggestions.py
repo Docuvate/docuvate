@@ -2,6 +2,8 @@
 # SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 
 import importlib.util
+import json
+from pathlib import Path
 
 import pytest
 
@@ -50,9 +52,6 @@ def test_acme_invoice_amount_date_and_vendor() -> None:
 
 
 def test_holdout_eval_report_meets_precision_gates() -> None:
-    import json
-    from pathlib import Path
-
     report = json.loads(
         Path(__file__)
         .resolve()

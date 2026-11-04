@@ -1,7 +1,5 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import type { LayoutToken } from '@docuvate/contracts';
-
 const ANCHOR_TOKEN_LIMIT = 8;
 
 function isDigit(char: string): boolean {
@@ -153,29 +151,4 @@ export function inferFieldCorrectionAnchorLabel(
     return anchor.length > 0 ? anchor : null;
   }
   return null;
-}
-
-/** Prefer stored region tokens to the left of the value on the same line cluster. */
-export function inferFieldCorrectionAnchorFromTokens(
-  tokens: readonly LayoutToken[],
-  valueTokens: readonly LayoutToken[]
-): string | null {
-  if (valueTokens.length === 0) {
-    return null;
-  }
-  const page = valueTokens[0].page;
-  const minY = Math.min(...valueTokens.map((token) => token.y0));
-  const maxY = Math.max(...valueTokens.map((token) => token.y1));
-  const minX = Math.min(...valueTokens.map((token) => token.x0));
-  const left = tokens
-    .filter((token) => {
-      if (token.page !== page) {
-        return false;
-      }
-      const midY = (token.y0 + token.y1) / 2;
-      return midY >= minY && midY <= maxY && token.x1 <= minX;
-    })
-    .sort((a, b) => a.x0 - b.x0);
-  const labels = left.slice(-ANCHOR_TOKEN_LIMIT).map((token) => token.text.trim()).filter(Boolean);
-  return labels.length > 0 ? labels.join(' ') : null;
 }

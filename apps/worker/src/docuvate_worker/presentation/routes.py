@@ -42,6 +42,7 @@ from docuvate_worker.infrastructure.chat.rag_rerank import (
     reranker_status,
 )
 from docuvate_worker.infrastructure.extract_memory.admission import admission_retry_after_seconds
+from docuvate_worker.infrastructure.extract_memory.extract_active import cancel_active_extract
 from docuvate_worker.infrastructure.extract_memory.extract_capacity import (
     capacity_report_with_http_slots,
 )
@@ -68,7 +69,6 @@ from docuvate_worker.infrastructure.ml.ce_ml.missing_label import (
 from docuvate_worker.infrastructure.ml.ce_ml.new_label_signal import new_label_signals
 from docuvate_worker.infrastructure.ml.registry import resolve_active_model
 from docuvate_worker.presentation.cpu_pipeline_response import cpu_pipeline_to_response
-from docuvate_worker.presentation.extract_active import cancel_active_extract
 from docuvate_worker.presentation.extract_http_concurrency import extract_http_slot
 from docuvate_worker.presentation.extract_subprocess_runner import run_extract_isolated
 from docuvate_worker.presentation.extracted_fact_response import extracted_facts_to_response
@@ -220,6 +220,15 @@ def hardware_capabilities(
     )
 
 
+async def _abort_extract_if_client_disconnected(request: Request) -> None:
+    if await request.is_disconnected():
+        cancel_active_extract()
+        raise ExtractRetryableError(
+            reason="client disconnected",
+            error_type="ExtractClientDisconnected",
+        )
+
+
 @router.post("/extract", response_model=ExtractResponse)
 async def extract(
     request: Request,
@@ -252,12 +261,7 @@ async def extract(
                 ),
             )
             while not future.done():
-                if await request.is_disconnected():
-                    cancel_active_extract()
-                    raise ExtractRetryableError(
-                        reason="client disconnected",
-                        error_type="ExtractClientDisconnected",
-                    )
+                await _abort_extract_if_client_disconnected(request)
                 await asyncio.sleep(0.25)
             result = future.result()
     except ExtractRetryableError as exc:
@@ -286,11 +290,7 @@ async def extract(
             },
         ) from exc
     extracted_facts = result.extracted_facts
-    if (
-        body.build_exact_fact_index
-        and extracted_facts is None
-        and result.text.strip()
-    ):
+    if body.build_exact_fact_index and extracted_facts is None and result.text.strip():
         rebuilt = build_exact_fact_index(
             text=result.text,
             blocks=tuple(result.blocks or ()),
@@ -318,9 +318,7 @@ async def extract(
         cpu_pipeline=cpu_pipeline_to_response(result.cpu_pipeline),
         document_representation=document_representation_to_response(result.document_representation),
         extracted_facts=(
-            extracted_facts_to_response(extracted_facts)
-            if extracted_facts is not None
-            else None
+            extracted_facts_to_response(extracted_facts) if extracted_facts is not None else None
         ),
         preview_pdf_base64=(
             base64.b64encode(result.preview_pdf).decode("ascii") if result.preview_pdf else None
@@ -382,10 +380,7 @@ def extract_label_fields_route(
     rows = extract_label_custom_fields(
         body.text,
         tag_name=body.tag_name,
-        fields=[
-            {"key": f.key, "label": f.label, "field_type": f.field_type}
-            for f in body.fields
-        ],
+        fields=[{"key": f.key, "label": f.label, "field_type": f.field_type} for f in body.fields],
         examples=[
             {
                 "field_key": example.field_key,
@@ -398,10 +393,7 @@ def extract_label_fields_route(
         ],
     )
     return LabelFieldsExtractResponse(
-        fields=[
-            ExtractedField(key=f.key, value=f.value, confidence=f.confidence)
-            for f in rows
-        ]
+        fields=[ExtractedField(key=f.key, value=f.value, confidence=f.confidence) for f in rows]
     )
 
 
@@ -416,10 +408,7 @@ def extract_heuristic_field_suggestions_route(
     _require_worker_secret(x_worker_secret)
     rows = heuristic_field_suggestions(body.text)
     return HeuristicFieldSuggestionsResponse(
-        fields=[
-            ExtractedField(key=f.key, value=f.value, confidence=f.confidence)
-            for f in rows
-        ]
+        fields=[ExtractedField(key=f.key, value=f.value, confidence=f.confidence) for f in rows]
     )
 
 
@@ -616,16 +605,12 @@ def embedding_density_calibrate(
         "fine_labels_calibrated": (
             calibration_metrics.fine_labels_calibrated if calibration_metrics else 0.0
         ),
-        "coarse_ready": (
-            calibration_metrics.coarse_ready if calibration_metrics else 0.0
-        ),
+        "coarse_ready": (calibration_metrics.coarse_ready if calibration_metrics else 0.0),
         "fine_ready_labels": (
             calibration_metrics.fine_ready_labels if calibration_metrics else 0.0
         ),
     }
-    state_out = EmbeddingDensityStatePayload.model_validate(
-        payload.model_dump(exclude={"metrics"})
-    )
+    state_out = EmbeddingDensityStatePayload.model_validate(payload.model_dump(exclude={"metrics"}))
     return EmbeddingDensityCalibrateResponse(
         state=EmbeddingDensityStateModel(**state_out.model_dump()),
         metrics=metrics,
@@ -816,11 +801,7 @@ def ce_missing_label(
 ) -> CeMissingLabelResponse:
     _require_worker_secret(x_worker_secret)
     if not body.labeled_document_indices:
-        labeled_indices = [
-            document.document_index
-            for document in body.corpus
-            if document.tag_ids
-        ]
+        labeled_indices = [document.document_index for document in body.corpus if document.tag_ids]
     else:
         labeled_indices = body.labeled_document_indices
     vectors = [document.embedding for document in body.corpus]
@@ -844,9 +825,7 @@ def ce_missing_label_batch(
 ) -> CeMissingLabelBatchResponse:
     _require_worker_secret(x_worker_secret)
     if not body.labeled_document_indices:
-        labeled_indices = [
-            document.document_index for document in body.corpus if document.tag_ids
-        ]
+        labeled_indices = [document.document_index for document in body.corpus if document.tag_ids]
     else:
         labeled_indices = body.labeled_document_indices
     vectors = [document.embedding for document in body.corpus]

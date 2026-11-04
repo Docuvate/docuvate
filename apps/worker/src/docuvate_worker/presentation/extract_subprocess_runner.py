@@ -31,8 +31,17 @@ from docuvate_worker.domain.models import (
     ExtractionResult,
 )
 from docuvate_worker.infrastructure.extract_memory.admission import extract_admission_slot
+from docuvate_worker.infrastructure.extract_memory.extract_active import (
+    ActiveExtractHandle,
+    bind_active_extract,
+    clear_active_extract,
+)
 from docuvate_worker.infrastructure.extract_memory.extract_deadline import (
     extract_wall_clock_deadline_seconds,
+)
+from docuvate_worker.infrastructure.extract_memory.extract_subprocess_pool import (
+    extract_pool_enabled,
+    pooled_extract_child,
 )
 from docuvate_worker.infrastructure.extract_memory.retry_policy import (
     apply_memory_retry_overrides,
@@ -42,18 +51,9 @@ from docuvate_worker.infrastructure.extractors.paddle_engine import release_padd
 from docuvate_worker.infrastructure.onnx_e5_encoder import release_onnx_encoder
 from docuvate_worker.infrastructure.onnx_runtime_env import configure_onnx_runtime_env
 from docuvate_worker.infrastructure.worker_memory_hygiene import reclaim_python_heap
-from docuvate_worker.presentation.extract_active import (
-    ActiveExtractHandle,
-    bind_active_extract,
-    clear_active_extract,
-)
 from docuvate_worker.presentation.extract_subprocess_errors import (
     meaningful_stderr_tail,
     subprocess_failure_message,
-)
-from docuvate_worker.presentation.extract_subprocess_pool import (
-    extract_pool_enabled,
-    pooled_extract_child,
 )
 
 logger = logging.getLogger(__name__)
@@ -250,20 +250,18 @@ def _run_subprocess_once(payload: dict[str, Any], *, timeout: float) -> dict[str
         bind_active_extract(handle)
         try:
             return pooled_extract_child().run_job(payload, timeout=timeout)
-        except ExtractRetryableError:
-            raise
         finally:
             clear_active_extract()
     with tempfile.TemporaryFile(mode="w+", encoding="utf-8") as stdout_file:
         try:
             proc = subprocess.run(
-            [sys.executable, "-m", "docuvate_worker.presentation.extract_subprocess_runner"],
-            input=json.dumps(payload),
-            stdout=stdout_file,
-            stderr=subprocess.PIPE,
-            text=True,
-            timeout=timeout,
-            check=False,
+                [sys.executable, "-m", "docuvate_worker.presentation.extract_subprocess_runner"],
+                input=json.dumps(payload),
+                stdout=stdout_file,
+                stderr=subprocess.PIPE,
+                text=True,
+                timeout=timeout,
+                check=False,
             )
         except subprocess.TimeoutExpired:
             raise ExtractRetryableError(
@@ -314,8 +312,7 @@ def _sigkill_envelope(envelope: dict[str, Any]) -> bool:
 
 def _resource_exhausted_message() -> str:
     return (
-        "Document is too large or memory-intensive for this worker "
-        "(zu groß/zu speicherintensiv)."
+        "Document is too large or memory-intensive for this worker (zu groß/zu speicherintensiv)."
     )
 
 
@@ -378,10 +375,7 @@ def run_extract_isolated(
     }
     timeout = extract_wall_clock_deadline_seconds(content, mime_type)
     with extract_admission_slot(content, mime_type):
-        try:
-            return _run_extract_subprocess(payload, timeout=timeout)
-        except ExtractRetryableError:
-            raise
+        return _run_extract_subprocess(payload, timeout=timeout)
 
 
 def main() -> None:

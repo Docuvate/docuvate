@@ -2,14 +2,14 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { cosineSimilarity } from './cosine.js';
 
-export interface LabelOverlapTagInput {
+interface LabelOverlapTagInput {
   tagId: string;
   name: string;
   centroid: number[];
   docEmbeddings: number[][];
 }
 
-export interface LabelOverlapHighPair {
+interface LabelOverlapHighPair {
   tagIdA: string;
   tagIdB: string;
   tagNameA: string;
@@ -18,7 +18,7 @@ export interface LabelOverlapHighPair {
   mergeRecommendationId: string;
 }
 
-export interface LabelOverlapMatrix {
+interface LabelOverlapMatrix {
   tagIds: string[];
   tagNames: string[];
   /** Row-major n×n cosine similarities in embedding space. */

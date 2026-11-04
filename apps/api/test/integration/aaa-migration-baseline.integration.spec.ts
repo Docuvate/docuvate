@@ -3,9 +3,9 @@
 import { DataSource } from 'typeorm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
+import { isRecord } from '../../src/shared/domain/row-parse.js';
 import { ensureMigrationBaseline } from '../../src/shared/infrastructure/database/ensure-migration-baseline.js';
 import { regClassExists } from '../../src/shared/infrastructure/database/migration-baseline-markers.js';
-import { isRecord } from '../../src/shared/infrastructure/database/row-parse.js';
 import { buildTypeOrmOptions } from '../../src/shared/infrastructure/database/typeorm-options.js';
 import { restoreIntegrationDatabase } from './restore-integration-database.js';
 
@@ -82,5 +82,4 @@ describe('migration baseline (existing schema, empty migration history)', () => 
       await runner.release();
     }
   });
-
 });

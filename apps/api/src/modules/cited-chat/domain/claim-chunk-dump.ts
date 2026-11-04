@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { normalizeForQuoteMatch } from './verify-citation-quote.js';
+import { normalizeForQuoteMatch } from './quote-match-normalize.js';
 
 const CHUNK_DUMP_MIN_LEN = 160;
 
@@ -34,8 +34,6 @@ export function isChunkDumpClaim(claimText: string, quote: string): boolean {
     return false;
   }
   return (
-    claim.length >= CHUNK_DUMP_MIN_LEN &&
-    claimNorm.includes(quoteNorm) &&
-    quoteNorm.length >= 6
+    claim.length >= CHUNK_DUMP_MIN_LEN && claimNorm.includes(quoteNorm) && quoteNorm.length >= 6
   );
 }

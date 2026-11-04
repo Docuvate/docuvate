@@ -48,7 +48,9 @@ def embedded_subset_dejavu_pdf() -> bytes:
         pdf.set_font("DocuSubset", size=11)
         pdf.multi_cell(0, 8, _BORN_DIGITAL_BANNER)
         pdf.set_font("DocuSubset", size=12)
-        pdf.cell(0, 10, "Embedded DejaVu subset for layout regression", new_x="LMARGIN", new_y="NEXT")
+        pdf.cell(
+            0, 10, "Embedded DejaVu subset for layout regression", new_x="LMARGIN", new_y="NEXT"
+        )
         pdf.set_font("DocuSubset", size=10)
         pdf.cell(
             0,
@@ -192,10 +194,7 @@ def academic_layout_regression_paper_pdf() -> bytes:
                     0,
                     5,
                     f"Section {page_index + 1}. "
-                    + (
-                        "This page is filler prose for pagination and compare metrics. "
-                        * 3
-                    ),
+                    + ("This page is filler prose for pagination and compare metrics. " * 3),
                 )
                 pdf.set_x(pdf.l_margin)
 

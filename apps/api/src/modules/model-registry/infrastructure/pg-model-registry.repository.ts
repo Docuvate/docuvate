@@ -15,7 +15,7 @@ import {
   parseOptionalString,
   parseString,
   requireRecord,
-} from '../../../shared/infrastructure/database/row-parse.js';
+} from '../../../shared/domain/row-parse.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 import type { ModelRegistryRepository } from '../domain/model-registry.repository.port.js';
 import type {

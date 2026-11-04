@@ -8,7 +8,7 @@ from collections.abc import Callable
 import pytest
 from PIL import Image, ImageDraw, ImageFont
 
-from docuvate_worker.domain.models import ExtractionBlock, ExtractedField
+from docuvate_worker.domain.models import ExtractedField, ExtractionBlock
 from docuvate_worker.infrastructure.extractors.baseline_pipeline import extract_baseline_pipeline
 from docuvate_worker.infrastructure.extractors.pipeline import PipelineExtractor
 from tests.synthetic_layout_pdfs import delivery_note_table_pdf
@@ -48,22 +48,15 @@ def _png_ocr_fixture_bytes() -> bytes:
     return buf.getvalue()
 
 
-def _fields_equal(
-    left: list[ExtractedField] | None, right: list[ExtractedField] | None
-) -> bool:
+def _fields_equal(left: list[ExtractedField] | None, right: list[ExtractedField] | None) -> bool:
     a = left or []
     b = right or []
     if len(a) != len(b):
         return False
-    for fa, fb in zip(a, b, strict=True):
-        if fa.key != fb.key or fa.value != fb.value:
-            return False
-    return True
+    return all(not (fa.key != fb.key or fa.value != fb.value) for fa, fb in zip(a, b, strict=True))
 
 
-def _blocks_equal(
-    left: list[ExtractionBlock] | None, right: list[ExtractionBlock] | None
-) -> bool:
+def _blocks_equal(left: list[ExtractionBlock] | None, right: list[ExtractionBlock] | None) -> bool:
     a = left or []
     b = right or []
     if len(a) != len(b):
@@ -98,7 +91,9 @@ def _assert_equivalent(
     assert _blocks_equal(current.blocks, baseline.blocks), case_id
     assert current.cpu_pipeline is not None, case_id
     assert current.cpu_pipeline.taco is not None, case_id
-    logger.info("pipeline_equivalence_passed case=%s blocks=%d", case_id, len(baseline.blocks or []))
+    logger.info(
+        "pipeline_equivalence_passed case=%s blocks=%d", case_id, len(baseline.blocks or [])
+    )
 
 
 @pytest.mark.parametrize(

@@ -1,10 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import {
-  parseBoolean,
-  parseString,
-  recordFromUnknown,
-} from '../../../shared/infrastructure/database/row-parse.js';
+import { parseBoolean, parseString, recordFromUnknown } from '../../../shared/domain/row-parse.js';
 
 export type OidcProviderSource = 'admin' | 'env';
 

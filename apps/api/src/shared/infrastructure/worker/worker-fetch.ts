@@ -18,7 +18,10 @@ function parsePositiveTimeoutMs(raw: string | undefined, fallback: number): numb
 }
 
 export function workerCompareTimeoutMs(): number {
-  return parsePositiveTimeoutMs(process.env['WORKER_COMPARE_TIMEOUT_MS'], DEFAULT_COMPARE_TIMEOUT_MS);
+  return parsePositiveTimeoutMs(
+    process.env['WORKER_COMPARE_TIMEOUT_MS'],
+    DEFAULT_COMPARE_TIMEOUT_MS
+  );
 }
 
 /** HTTP deadline for API → worker `/extract`. A hung worker must not keep the document non-terminal. */
@@ -38,13 +41,13 @@ export function workerExtractTimeoutSeconds(): number {
   return Math.max(1, Math.ceil(workerExtractTimeoutMs() / 1000));
 }
 
-export function workerCompareTimeoutError(): GatewayTimeoutError {
+function workerCompareTimeoutError(): GatewayTimeoutError {
   return new GatewayTimeoutError(
     'Extraktions-Vergleich hat das Zeitlimit überschritten (OCR lädt Modelle?). Bitte erneut versuchen.'
   );
 }
 
-export function mapWorkerCompareHttpStatus(status: number): DomainError {
+function mapWorkerCompareHttpStatus(status: number): DomainError {
   if (status === 504 || status === 408) {
     return workerCompareTimeoutError();
   }
@@ -56,7 +59,7 @@ export function mapWorkerCompareHttpStatus(status: number): DomainError {
   return new ServiceUnavailableError(`Extraktions-Vergleich fehlgeschlagen (${String(status)}).`);
 }
 
-export interface WorkerFetchErrorMapping {
+interface WorkerFetchErrorMapping {
   onTimeout?: () => GatewayTimeoutError;
   onHttpError?: (status: number, responseBody?: unknown) => DomainError;
 }
@@ -105,7 +108,10 @@ export async function fetchWorkerJson(
     } catch {
       responseBody = undefined;
     }
-    throw errors.onHttpError?.(response.status, responseBody) ?? mapWorkerCompareHttpStatus(response.status);
+    throw (
+      errors.onHttpError?.(response.status, responseBody) ??
+      mapWorkerCompareHttpStatus(response.status)
+    );
   }
 
   return await response.json();

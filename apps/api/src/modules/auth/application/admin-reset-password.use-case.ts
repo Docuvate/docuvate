@@ -5,7 +5,7 @@ import {
   AUTH_MIN_PASSWORD_LENGTH,
 } from '../domain/auth-password.constants.js';
 
-export interface AdminResetPasswordInput {
+interface AdminResetPasswordInput {
   email: string;
   newPassword: string;
   revokeSessions: boolean;

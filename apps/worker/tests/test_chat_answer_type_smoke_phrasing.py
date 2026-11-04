@@ -4,16 +4,13 @@
 from __future__ import annotations
 
 import json
-import sys
 from pathlib import Path
+
+from bench.model_gates.gates.chat_answer_type import _classify
 
 from docuvate_worker.infrastructure.fastembed_model import embed_query
 
 ROOT = Path(__file__).resolve().parents[3]
-if str(ROOT) not in sys.path:
-    sys.path.insert(0, str(ROOT))
-
-from bench.model_gates.gates.chat_answer_type import _classify
 
 AMOUNT_SMOKE_IDS = frozenset({"fact", "payslip-gross-oct-2024", "lohnsteuer-2024"})
 
@@ -21,13 +18,10 @@ AMOUNT_SMOKE_IDS = frozenset({"fact", "payslip-gross-oct-2024", "lohnsteuer-2024
 def test_smoke_manifest_amount_checks_classify_as_amount() -> None:
     proto = json.loads(
         (
-            ROOT
-            / "apps/api/src/modules/cited-chat/domain/chat-answer-type-prototypes.json"
+            ROOT / "apps/api/src/modules/cited-chat/domain/chat-answer-type-prototypes.json"
         ).read_text(encoding="utf-8")
     )
-    manifest = json.loads(
-        (ROOT / "tools/smoke-bench/manifest.json").read_text(encoding="utf-8")
-    )
+    manifest = json.loads((ROOT / "tools/smoke-bench/manifest.json").read_text(encoding="utf-8"))
     embed_query("warmup")
     for row in manifest.get("chatChecks", []):
         if not isinstance(row, dict):

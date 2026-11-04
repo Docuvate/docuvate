@@ -4,8 +4,8 @@ import type { ExtractionBlock } from '@docuvate/contracts';
 
 import { normalizeExtractionSurfaceText } from './normalize-extraction-surface-text.js';
 
-export const CHUNK_SIZE = 320;
-export const CHUNK_OVERLAP = 64;
+const CHUNK_SIZE = 320;
+const CHUNK_OVERLAP = 64;
 
 export interface TextChunkSpan {
   body: string;
@@ -14,7 +14,7 @@ export interface TextChunkSpan {
   page: number | null;
 }
 
-export function normalizeDocumentText(text: string): string {
+function normalizeDocumentText(text: string): string {
   return normalizeExtractionSurfaceText(text).replace(/\s+/g, ' ').trim();
 }
 

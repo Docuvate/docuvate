@@ -13,7 +13,9 @@ pip install 'uv==0.12.23' >/dev/null
 VENV="${DOCUVATE_WORKER_VENV:-.venv}"
 uv venv "$VENV" --allow-existing
 uv pip install --python "$VENV/bin/python" -e ".[dev]" >/dev/null
-"$VENV/bin/ruff" check src
+"$VENV/bin/ruff" format --check src tests scripts
+"$VENV/bin/ruff" check src tests
+PYTHONPATH=src "$VENV/bin/lint-imports"
 "$VENV/bin/pyright"
 "$VENV/bin/mypy"
 "$VENV/bin/python" -m docuvate_worker.infrastructure.ml.third_party_models

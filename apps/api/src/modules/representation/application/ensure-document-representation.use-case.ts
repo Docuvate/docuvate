@@ -4,7 +4,7 @@ import type { DocumentRepresentationDto } from '@docuvate/contracts';
 import { Injectable } from '@nestjs/common';
 
 import { ServiceUnavailableError } from '../../../shared/domain/errors.js';
-import { isRecord, parseString } from '../../../shared/infrastructure/database/row-parse.js';
+import { isRecord, parseString } from '../../../shared/domain/row-parse.js';
 import { workerApiUrl } from '../../../shared/infrastructure/worker/worker-api-path.js';
 import {
   fetchWorkerJson,

@@ -71,12 +71,7 @@ def _service_invoice(rng: random.Random, index: int) -> HoldoutDoc:
             f"Fälliger Gesamtbetrag {amount_raw} EUR\n"
             f"Zahlbar bis {date_raw}"
         ),
-        (
-            f"{vendor}\n"
-            f"Honorarnote Nr. {index:04d}\n"
-            f"Endsumme: {amount_raw} EUR\n"
-            f"Datum {date_raw}"
-        ),
+        (f"{vendor}\nHonorarnote Nr. {index:04d}\nEndsumme: {amount_raw} EUR\nDatum {date_raw}"),
     ]
     text = rng.choice(layouts)
     return HoldoutDoc(
