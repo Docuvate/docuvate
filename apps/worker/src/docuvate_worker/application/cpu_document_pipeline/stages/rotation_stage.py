@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-import math
+import logging
 
 from docuvate_worker.domain.cpu_pipeline.contracts import (
     PipelineMutableState,
@@ -12,49 +12,42 @@ from docuvate_worker.domain.cpu_pipeline.contracts import (
     StageEnvelope,
 )
 from docuvate_worker.domain.cpu_pipeline.metrics import measure_stage
-from docuvate_worker.domain.models import ExtractionBlock
+from docuvate_worker.domain.cpu_pipeline.page_rotation import page_rotations_deg
+from docuvate_worker.domain.layout_ir import LayoutIrDocument
 
 STAGE_ID = "rotation_correction"
 
+logger = logging.getLogger(__name__)
 
-def _dominant_rotation_deg(blocks: tuple[ExtractionBlock, ...]) -> float:
-    if not blocks:
-        return 0.0
-    return 0.0
+
+def _pdf_layout(state: PipelineMutableState) -> LayoutIrDocument | None:
+    if state.mime_type != "application/pdf" or not state.blocks:
+        return None
+    from docuvate_worker.infrastructure.layout.layout_pdf_cache import (  # noqa: PLC0415
+        get_or_extract_layout_pdf,
+    )
+
+    try:
+        return get_or_extract_layout_pdf(state)
+    except Exception:
+        logger.warning("rotation_stage: PDF layout extraction failed", exc_info=True)
+        return None
 
 
 def run_rotation_stage(state: PipelineMutableState) -> StageEnvelope[RotationStageData]:
-    def _run() -> RotationStageData:
-        blocks = tuple(state.blocks)
-        if state.mime_type == "application/pdf" and blocks:
-            try:
-                from docuvate_worker.infrastructure.layout.layout_pdf_cache import (  # noqa: PLC0415
-                    get_or_extract_layout_pdf,
-                )
+    """Measure the dominant text rotation of every PDF page.
 
-                layout = get_or_extract_layout_pdf(state)
-            except Exception:
-                layout = None
-            if layout is not None and layout.pages:
-                page = layout.pages[0]
-                rotated = [
-                    b
-                    for b in page.blocks
-                    if b.rotation_deg is not None and abs(b.rotation_deg) >= 45.0
-                ]
-                if rotated:
-                    deg = rotated[0].rotation_deg or 90.0
-                    corrected = math.remainder(deg, 360.0)
-                    return RotationStageData(
-                        blocks=blocks,
-                        page_rotations_deg=(corrected,),
-                        correction_applied=True,
-                    )
-        dominant = _dominant_rotation_deg(blocks)
+    Only PDF text layers carry glyph orientation; OCR blocks are already upright, so other
+    inputs report no page measurements instead of a fabricated 0°.
+    """
+
+    def _run() -> RotationStageData:
+        layout = _pdf_layout(state)
+        rotations = page_rotations_deg(layout.pages) if layout is not None else ()
         return RotationStageData(
-            blocks=blocks,
-            page_rotations_deg=(dominant,),
-            correction_applied=False,
+            blocks=tuple(state.blocks),
+            page_rotations_deg=rotations,
+            correction_applied=any(rotation != 0.0 for rotation in rotations),
         )
 
     data, metrics = measure_stage(_run)
