@@ -14,6 +14,7 @@ import {
 } from '../../../shared/domain/ports.js';
 import { diffExtractionFieldConfirmations } from '../domain/diff-extraction-field-confirmations.js';
 import { diffExtractionFieldCorrections } from '../domain/diff-extraction-field-corrections.js';
+import { ResolveConfirmationPositionsService } from './resolve-confirmation-positions.service.js';
 
 interface RecordExtractionFieldFeedbackResult {
   correctionsRecorded: number;
@@ -26,7 +27,8 @@ export class RecordExtractionFieldCorrectionsUseCase {
     @Inject(DOCUMENT_REPOSITORY) private readonly documents: DocumentRepository,
     @Inject(TAXONOMY_REPOSITORY) private readonly taxonomy: TaxonomyRepository,
     @Inject(EXTRACTION_FIELD_FEEDBACK_REPOSITORY)
-    private readonly feedback: ExtractionFieldFeedbackRepository
+    private readonly feedback: ExtractionFieldFeedbackRepository,
+    private readonly positions: ResolveConfirmationPositionsService
   ) {}
 
   async execute(
@@ -61,21 +63,27 @@ export class RecordExtractionFieldCorrectionsUseCase {
               newValue: draft.newValue,
               labelTagIds,
               fieldTagId: draft.fieldTagId,
+              // The edit form has no way to mark where the corrected value sits.
+              position: null,
             }))
           );
 
-    const confirmationsRecorded =
-      confirmationDrafts.length === 0
-        ? 0
-        : await this.feedback.upsertConfirmations(
-            userId,
-            confirmationDrafts.map((draft) => ({
-              documentId,
-              fieldKey: draft.fieldKey,
-              labelTagIds,
-              fieldTagId: draft.fieldTagId,
-            }))
-          );
+    const confirmationPositions = await this.positions.resolve(
+      userId,
+      documentId,
+      confirmationDrafts
+    );
+    const confirmationsRecorded = await this.feedback.upsertConfirmations(
+      userId,
+      confirmationDrafts.map((draft, index) => ({
+        documentId,
+        fieldKey: draft.fieldKey,
+        value: draft.value,
+        labelTagIds,
+        fieldTagId: draft.fieldTagId,
+        position: confirmationPositions[index] ?? null,
+      }))
+    );
 
     return { correctionsRecorded, confirmationsRecorded };
   }

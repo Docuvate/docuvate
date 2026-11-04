@@ -64,6 +64,7 @@ import { SearchVocabularyPruneStale20261028160000 } from './migrations/202610281
 import { SearchVocabularyDocumentTerms20261028180000 } from './migrations/20261028180000-search-vocabulary-document-terms.js';
 import { DocumentRegions20261029120000 } from './migrations/20261029120000-document-regions.js';
 import { WorkspaceMlSettings20261104090000 } from './migrations/20261104090000-workspace-ml-settings.js';
+import { ExtractionFieldFeedbackPositions20261104120000 } from './migrations/20261104120000-extraction-field-feedback-positions.js';
 
 /** Set only by `scripts/export-openapi.mts` to skip TypeORM during OpenAPI export; `main.ts` refuses to boot when this is set. */
 export function isOpenApiHeadlessMode(): boolean {
@@ -147,6 +148,7 @@ export function buildTypeOrmOptions(): DataSourceOptions {
       SearchVocabularyDocumentTerms20261028180000,
       DocumentRegions20261029120000,
       WorkspaceMlSettings20261104090000,
+      ExtractionFieldFeedbackPositions20261104120000,
     ],
     migrationsTableName: 'migrations',
     synchronize: false,

@@ -11,7 +11,7 @@ describe('diffExtractionFieldConfirmations', () => {
         [{ key: 'global:absender', value: 'Nordwind GmbH', confidence: 0.7 }],
         [{ key: 'global:absender', value: 'Nordwind GmbH', confidence: 1 }]
       )
-    ).toEqual([{ fieldKey: 'global:absender', fieldTagId: null }]);
+    ).toEqual([{ fieldKey: 'global:absender', value: 'Nordwind GmbH', fieldTagId: null }]);
   });
 
   it('ignores repeat confirms', () => {

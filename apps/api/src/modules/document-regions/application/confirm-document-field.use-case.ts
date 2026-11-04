@@ -7,18 +7,21 @@ import { DocumentAuthorizationService } from '../../../shared/application/docume
 import type { AuthorizationSubject } from '../../../shared/domain/authorization.js';
 import { NotFoundError, ValidationError } from '../../../shared/domain/errors.js';
 import {
-  DOCUMENT_REGION_REPOSITORY,
   DOCUMENT_REPOSITORY,
-  type DocumentRegionRepository,
   type DocumentRepository,
+  EXTRACTION_FIELD_FEEDBACK_REPOSITORY,
+  type ExtractionFieldFeedbackRepository,
 } from '../../../shared/domain/ports.js';
-import { hashFieldValueBytes, hashFieldValueHex } from '../domain/ir-hash.js';
+import { ResolveConfirmationPositionsService } from '../../extraction-feedback/application/resolve-confirmation-positions.service.js';
+import { hashFieldValueHex } from '../domain/ir-hash.js';
 
 @Injectable()
 export class ConfirmDocumentFieldUseCase {
   constructor(
     @Inject(DOCUMENT_REPOSITORY) private readonly documents: DocumentRepository,
-    @Inject(DOCUMENT_REGION_REPOSITORY) private readonly regions: DocumentRegionRepository,
+    @Inject(EXTRACTION_FIELD_FEEDBACK_REPOSITORY)
+    private readonly feedback: ExtractionFieldFeedbackRepository,
+    private readonly positions: ResolveConfirmationPositionsService,
     private readonly authorization: DocumentAuthorizationService
   ) {}
 
@@ -44,14 +47,19 @@ export class ConfirmDocumentFieldUseCase {
       throw new NotFoundError('Field');
     }
     const confirmedValue = value.trim() || current.value;
-    const valueSha256 = hashFieldValueBytes(confirmedValue);
-    await this.regions.confirmField({
-      documentId,
-      userId,
-      fieldKey: key,
-      valueSha256,
-      fieldTagId: current.tagId ?? null,
-    });
+    const [position] = await this.positions.resolve(userId, documentId, [
+      { fieldKey: key, value: confirmedValue },
+    ]);
+    await this.feedback.upsertConfirmations(userId, [
+      {
+        documentId,
+        fieldKey: key,
+        value: confirmedValue,
+        labelTagIds: [],
+        fieldTagId: current.tagId ?? null,
+        position: position ?? null,
+      },
+    ]);
     const nextFields: ExtractedField[] = fields.map((field) =>
       field.key === key ? { ...field, value: confirmedValue, confidence: 1 } : field
     );

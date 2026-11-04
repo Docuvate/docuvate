@@ -339,27 +339,53 @@ export interface ExtractionFieldCorrectionRecord {
   createdAt: Date;
 }
 
+/** Where a user-confirmed or user-corrected value sits; page-normalized bbox, document text offsets. */
+export interface FieldFeedbackPosition {
+  source: 'model_fact' | 'user_region';
+  page: number;
+  docCharStart: number | null;
+  docCharEnd: number | null;
+  bbox: { x0: number; y0: number; x1: number; y1: number } | null;
+  blockIndexes: number[];
+}
+
+export interface FieldCorrectionWrite {
+  documentId: string;
+  fieldKey: string;
+  oldValue: string;
+  newValue: string;
+  labelTagIds: string[];
+  fieldTagId: string | null;
+  position: FieldFeedbackPosition | null;
+}
+
+export interface FieldConfirmationWrite {
+  documentId: string;
+  fieldKey: string;
+  value: string;
+  labelTagIds: string[];
+  fieldTagId: string | null;
+  position: FieldFeedbackPosition | null;
+}
+
+export interface FieldTrainingExample {
+  feedbackId: string;
+  kind: 'confirmation' | 'correction';
+  documentId: string;
+  fieldName: string;
+  value: string;
+  recordedAt: Date;
+  position: FieldFeedbackPosition | null;
+}
+
 export interface ExtractionFieldFeedbackRepository {
-  insertCorrectionsIdempotent(
+  insertCorrectionsIdempotent(userId: string, rows: FieldCorrectionWrite[]): Promise<number>;
+  /** Inserts or updates the confirmed value; returns rows written. */
+  upsertConfirmations(userId: string, rows: FieldConfirmationWrite[]): Promise<number>;
+  listTrainingExamples(
     userId: string,
-    rows: {
-      documentId: string;
-      fieldKey: string;
-      oldValue: string;
-      newValue: string;
-      labelTagIds: string[];
-      fieldTagId: string | null;
-    }[]
-  ): Promise<number>;
-  upsertConfirmations(
-    userId: string,
-    rows: {
-      documentId: string;
-      fieldKey: string;
-      labelTagIds: string[];
-      fieldTagId: string | null;
-    }[]
-  ): Promise<number>;
+    options: { limit: number; after: { recordedAt: Date; feedbackId: string } | null }
+  ): Promise<FieldTrainingExample[]>;
   listForUser(
     userId: string,
     options?: { limit?: number; afterCreatedAt?: Date; afterId?: string }
@@ -373,6 +399,33 @@ export interface ExtractionFieldFeedbackRepository {
 }
 
 export const EXTRACTION_FIELD_FEEDBACK_REPOSITORY = Symbol('EXTRACTION_FIELD_FEEDBACK_REPOSITORY');
+
+/** An active user-drawn field region on a document. */
+export interface FieldRegionAnchor {
+  fieldKey: string;
+  page: number;
+  bbox: { x0: number; y0: number; x1: number; y1: number };
+  blockIndexes: number[];
+}
+
+/** A model-extracted fact with its stored provenance. */
+export interface ExtractedFactAnchor {
+  predicateKey: string;
+  value: string;
+  page: number | null;
+  docCharStart: number | null;
+  docCharEnd: number | null;
+  bbox: { x: number; y: number; width: number; height: number } | null;
+}
+
+export interface FieldFeedbackAnchorReader {
+  listAnchors(
+    userId: string,
+    documentId: string
+  ): Promise<{ regions: FieldRegionAnchor[]; facts: ExtractedFactAnchor[] }>;
+}
+
+export const FIELD_FEEDBACK_ANCHOR_READER = Symbol('FIELD_FEEDBACK_ANCHOR_READER');
 
 export interface TagCustomFieldRecord {
   id: string;
@@ -935,13 +988,6 @@ export interface DocumentRegionRepository {
   ): Promise<InsertTableCorrectionInput | null>;
   withdrawFieldCorrection(documentId: string, correctionId: string): Promise<boolean>;
   withdrawTableCorrection(documentId: string, correctionId: string): Promise<boolean>;
-  confirmField(input: {
-    documentId: string;
-    userId: string;
-    fieldKey: string;
-    valueSha256: Buffer;
-    fieldTagId: string | null;
-  }): Promise<boolean>;
   replaceFieldTokenSpans(
     documentId: string,
     fieldKey: string,

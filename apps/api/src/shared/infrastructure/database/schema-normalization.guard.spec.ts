@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 /** Regression guard for ADR 015 (3NF + JSONB allowlist). See docs/adr/015-datenbankschema-mindestens-3nf.md */
-import { readdirSync,readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
@@ -65,6 +65,7 @@ const FORWARD_SQL_ORDER = [
   'search-vocabulary-document-terms-up.sql',
   'document-regions-up.sql',
   'workspace-ml-settings-up.sql',
+  'extraction-field-feedback-positions-up.sql',
 ];
 
 function loadForwardMigrationSql(): string {

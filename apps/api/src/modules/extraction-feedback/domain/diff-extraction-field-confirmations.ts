@@ -9,6 +9,7 @@ const FIELD_CONFIRMED_CONFIDENCE_THRESHOLD = 0.85;
 
 interface ExtractionFieldConfirmationDraft {
   fieldKey: string;
+  value: string;
   fieldTagId: string | null;
 }
 
@@ -45,6 +46,7 @@ export function diffExtractionFieldConfirmations(
     }
     drafts.push({
       fieldKey,
+      value: newValue,
       fieldTagId: next.tagId ?? prev?.tagId ?? null,
     });
   }
