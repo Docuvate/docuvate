@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import type { RecognizedFieldGateDraft } from '../components/settings/RecognizedFieldQualityGateEditor';
 import { replaceRecognizedFields } from './api';
-import type { RecognizedFieldDraft } from './recognizedFieldDraft';
+import type { RecognizedFieldDraft, RecognizedFieldGateDraft } from './recognizedFieldDraft';
 import { draftsFromRecognizedDefinitions } from './recognizedFieldDraft';
 import { resolvedFieldKey } from './recognizedFieldRules';
 

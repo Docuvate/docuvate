@@ -11,11 +11,11 @@ import {
   type FieldExtractionRuleMode,
   getExtractionRuleMode,
 } from '../../lib/recognizedFieldRules';
+import { Combobox } from '../ui/Combobox';
 import { Input } from '../ui/Input';
 import { SegmentedControl } from '../ui/SegmentedControl';
 import { Select } from '../ui/Select';
 import { ConfidenceThresholdSlider } from './ConfidenceThresholdSlider';
-import type { RecognizedFieldGateDraft } from './RecognizedFieldQualityGateEditor';
 
 const FIELD_TYPES: { value: CustomFieldType; labelKey: string }[] = [
   { value: 'text', labelKey: 'recognizedFields.typeText' },
@@ -27,7 +27,6 @@ const FIELD_TYPES: { value: CustomFieldType; labelKey: string }[] = [
 interface RecognizedFieldRowFormProps {
   row: RecognizedFieldDraft;
   tags: TagDto[];
-  gateDefaults: RecognizedFieldGateDraft;
   keyManual: boolean;
   onChange: (row: RecognizedFieldDraft) => void;
   onKeyManual: () => void;
@@ -36,7 +35,6 @@ interface RecognizedFieldRowFormProps {
 export function RecognizedFieldRowForm({
   row,
   tags,
-  gateDefaults,
   keyManual,
   onChange,
   onKeyManual,
@@ -58,13 +56,10 @@ export function RecognizedFieldRowForm({
   }
 
   function setRuleMode(nextMode: FieldExtractionRuleMode) {
-    onChange(applyExtractionRuleMode(row, nextMode, gateDefaults));
+    onChange(applyExtractionRuleMode(row, nextMode));
   }
 
-  function toggleGateLabel(tagId: string, checked: boolean) {
-    const gateLabelIds = checked
-      ? [...row.gateLabelIds, tagId]
-      : row.gateLabelIds.filter((id) => id !== tagId);
+  function setGateLabels(gateLabelIds: string[]) {
     onChange({
       ...row,
       gateLabelIds,
@@ -123,22 +118,15 @@ export function RecognizedFieldRowForm({
               {nonInboxTags.length === 0 ? (
                 <p className="muted">{t('recognizedFields.gateNoLabels')}</p>
               ) : (
-                <ul className="recognized-field-label-checklist">
-                  {nonInboxTags.map((tag) => (
-                    <li key={tag.id}>
-                      <label className="checkbox-row">
-                        <input
-                          type="checkbox"
-                          checked={row.gateLabelIds.includes(tag.id)}
-                          onChange={(e) => {
-                            toggleGateLabel(tag.id, e.target.checked);
-                          }}
-                        />
-                        <span>{tag.name}</span>
-                      </label>
-                    </li>
-                  ))}
-                </ul>
+                <Combobox
+                  multiple
+                  className="recognized-field-label-combobox"
+                  aria-label={t('recognizedFields.gateLabelsTitle')}
+                  placeholder={t('recognizedFields.gateLabelsPlaceholder')}
+                  options={nonInboxTags.map((tag) => ({ value: tag.id, label: tag.name }))}
+                  value={row.gateLabelIds}
+                  onChange={setGateLabels}
+                />
               )}
               {row.gateLabelIds.length > 1 ? (
                 <div

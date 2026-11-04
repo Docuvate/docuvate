@@ -6,6 +6,11 @@ import type { FieldValueRowState } from '../components/ui/FieldValueRow';
 
 const CONFIRMED_THRESHOLD = 0.85;
 
+/** A value without confidence was never scored or confirmed, so it stays a suggestion. */
+export function isConfirmedFieldConfidence(confidence: number | undefined): boolean {
+  return confidence != null && confidence >= CONFIRMED_THRESHOLD;
+}
+
 export function fieldValueRowState(
   field: ExtractedField,
   baseline: ExtractedField | undefined
@@ -13,8 +18,7 @@ export function fieldValueRowState(
   if (baseline && field.value.trim() !== baseline.value.trim()) {
     return 'corrected';
   }
-  const confidence = field.confidence ?? 1;
-  if (confidence >= CONFIRMED_THRESHOLD) {
+  if (isConfirmedFieldConfidence(field.confidence)) {
     return 'confirmed';
   }
   return 'suggested';

@@ -4833,12 +4833,6 @@ mark.global-search-mark {
   margin-inline-start: var(--dv-space-xs);
 }
 
-@media (min-width: 1180px) {
-  .recognized-fields-layout {
-    grid-template-columns: minmax(0, 1fr) 320px;
-  }
-}
-
 .recognized-fields-catalog-card {
   min-width: 0;
 }
@@ -5001,14 +4995,6 @@ mark.global-search-mark {
   background: var(--dv-color-bg-raised);
 }
 
-.recognized-field-label-checklist {
-  list-style: none;
-  margin: var(--dv-space-xs) 0 0;
-  padding: 0;
-  display: grid;
-  gap: var(--dv-space-xs);
-}
-
 .recognized-field-match-mode {
   display: flex;
   flex-wrap: wrap;
@@ -5031,32 +5017,6 @@ mark.global-search-mark {
   color: var(--dv-color-text-subtle);
 }
 
-.recognized-fields-defaults-card {
-  min-width: 0;
-  align-self: stretch;
-}
-
-.recognized-fields-defaults-card h2 {
-  margin-top: 0;
-}
-
-.recognized-fields-defaults-lead {
-  margin-top: 0;
-  margin-bottom: var(--dv-space-sm);
-  font-size: 0.875rem;
-  line-height: 1.45;
-}
-
-@media (min-width: 1180px) {
-  .recognized-fields-defaults-card {
-    width: 320px;
-    max-width: 320px;
-  }
-}
-
-.recognized-field-defaults-check {
-  margin-top: var(--dv-space-xs);
-}
 
 .segmented-control {
   --segmented-inset: 2px;

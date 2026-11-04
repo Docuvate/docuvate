@@ -1,6 +1,5 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import type { RecognizedFieldGateDraft } from '../components/settings/RecognizedFieldQualityGateEditor';
 import type { RecognizedFieldDraft } from './recognizedFieldDraft';
 import { deriveKeyFromLabel } from './recognizedFieldKey';
 
@@ -15,8 +14,7 @@ export function getExtractionRuleMode(row: RecognizedFieldDraft): FieldExtractio
 
 export function applyExtractionRuleMode(
   row: RecognizedFieldDraft,
-  mode: FieldExtractionRuleMode,
-  defaults: RecognizedFieldGateDraft
+  mode: FieldExtractionRuleMode
 ): RecognizedFieldDraft {
   switch (mode) {
     case 'always':
@@ -25,8 +23,7 @@ export function applyExtractionRuleMode(
       return {
         ...row,
         extractForAllDocuments: false,
-        gateLabelIds:
-          row.gateLabelIds.length > 0 ? row.gateLabelIds : [...defaults.requiredLabelIds],
+        gateLabelIds: row.gateLabelIds,
         confidenceGateEnabled: true,
         minLabelConfidence: row.minLabelConfidence,
       };
