@@ -508,6 +508,7 @@
     "searchPlaceholderShort": "Search…",
     "searchDocsAria": "Search documents",
     "filterToggle": "Show filters",
+    "filterToggleShort": "Filters",
     "filterToggleCollapse": "Hide filters",
     "filterToggleActive": "Filters ({{count}})",
     "moreLabelsAria": "{{count}} more labels: {{names}}",
@@ -2079,6 +2080,8 @@
     }
   },
   "savedViews": {
+    "menuLabel": "Views",
+    "menuAria": "Saved views: save, update, manage",
     "saveAction": "Save view",
     "saveConfirm": "Save",
     "saveDialogTitle": "Save view",

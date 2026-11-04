@@ -16853,3 +16853,162 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
     min-height: min(70vh, 640px);
   }
 }
+
+/* Compact document list toolbar (UX scale audit P0-5). */
+/* Filters live in a drawer below 1280px: the list takes the full width instead of the filter column. */
+.library-layout.library-layout--drawer-filters {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.library-saved-views-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--dv-space-2xs);
+}
+
+@media (max-width: 768px) {
+  .library-page .library-page-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--dv-space-xs) var(--dv-space-sm);
+  }
+
+  .library-page .library-page-header .library-toolbar {
+    display: contents;
+  }
+
+  .library-page .library-page-heading {
+    grid-column: 1;
+    grid-row: 1;
+    min-width: 0;
+  }
+
+  .library-page .library-page-heading h1 {
+    overflow-wrap: anywhere;
+  }
+
+  .library-page .library-saved-views-trigger {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: end;
+    min-height: var(--dv-touch-target-min);
+    min-width: var(--dv-touch-target-min);
+    justify-content: center;
+  }
+
+  .library-page .library-saved-views-trigger-label {
+    display: none;
+  }
+
+  .library-page .library-page-header .library-toolbar > .segmented-control {
+    grid-column: 1;
+    grid-row: 2;
+    flex-wrap: nowrap;
+    min-width: 0;
+    width: 100%;
+  }
+
+  .library-page .library-page-header .library-toolbar > .segmented-control .segmented-control__option {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding-inline: var(--dv-space-2xs);
+    font-size: 0.8rem;
+  }
+
+  .library-page .library-page-header .library-toolbar-sort {
+    grid-column: 2;
+    grid-row: 2;
+    min-width: 0;
+    max-width: 9.5rem;
+  }
+
+  .library-page .library-toolbar .custom-select.library-toolbar-sort {
+    min-width: 0;
+  }
+
+  .library-page .library-toolbar-sort .custom-select-trigger > span:first-child {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .library-list-toolbar .library-list-search.library-list-search--compact.library-search-row,
+  .library-list-toolbar .library-list-search.library-list-search--compact {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+  }
+
+  .library-list-toolbar
+    .library-list-search.library-list-search--compact
+    .library-list-search-actions {
+    display: flex;
+    flex-direction: row;
+    grid-column: 2;
+    width: auto;
+    gap: var(--dv-space-xs);
+  }
+
+  .library-list-toolbar
+    .library-list-search.library-list-search--compact
+    .library-list-search-actions
+    .btn {
+    width: auto;
+    white-space: nowrap;
+  }
+
+  .library-search-submit-icon {
+    min-height: var(--dv-touch-target-min);
+    min-width: var(--dv-touch-target-min);
+  }
+
+  .upload-section-compact .upload-compact-bar {
+    flex-wrap: nowrap;
+  }
+
+  .upload-section-compact .upload-compact-hint {
+    flex: 1 1 0;
+    min-width: 0;
+    font-size: 0.8rem;
+  }
+
+  /* The checkboxes explain themselves on phones; the idle hint row only cost space. */
+  .library-doc-table-card .bulk-bar-slot-idle {
+    display: none;
+  }
+}
+
+/* With the list at full width, search, filter and submit fit on one row on tablets. */
+@media (min-width: 769px) and (max-width: 1279px) {
+  .library-page .library-toolbar .custom-select.library-toolbar-sort {
+    min-width: 0;
+  }
+
+  .library-page .library-list-search.library-search-row:not(.library-list-search--compact) {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+  }
+
+  .library-page
+    .library-list-search.library-search-row:not(.library-list-search--compact)
+    .library-list-search-actions {
+    grid-column: 2;
+    flex-wrap: nowrap;
+    width: auto;
+  }
+
+  .library-page
+    .library-list-search.library-search-row:not(.library-list-search--compact)
+    .library-filter-toggle,
+  .library-page
+    .library-list-search.library-search-row:not(.library-list-search--compact)
+    button[type='submit'] {
+    flex: 0 0 auto;
+  }
+}
+
+.library-page .library-toolbar-sort .custom-select-trigger {
+  gap: var(--dv-space-2xs);
+}

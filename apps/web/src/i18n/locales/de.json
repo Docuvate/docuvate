@@ -508,6 +508,7 @@
     "searchPlaceholderShort": "Suchen…",
     "searchDocsAria": "Dokumente suchen",
     "filterToggle": "Filter einblenden",
+    "filterToggleShort": "Filter",
     "filterToggleCollapse": "Filter ausblenden",
     "filterToggleActive": "Filter ({{count}})",
     "moreLabelsAria": "{{count}} weitere Labels: {{names}}",
@@ -2079,6 +2080,8 @@
     }
   },
   "savedViews": {
+    "menuLabel": "Ansichten",
+    "menuAria": "Gespeicherte Ansichten: speichern, aktualisieren, verwalten",
     "saveAction": "Ansicht speichern",
     "saveConfirm": "Speichern",
     "saveDialogTitle": "Ansicht speichern",
