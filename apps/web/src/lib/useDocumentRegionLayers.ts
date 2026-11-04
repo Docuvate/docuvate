@@ -5,7 +5,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { listDocumentLayoutTokens, listDocumentRegions } from './api';
 
-export interface DocumentRegionLayers {
+interface DocumentRegionLayers {
   layoutTokens: LayoutToken[];
   fieldRegions: DocumentRegionDto[];
   tableRegions: DocumentRegionDto[];
