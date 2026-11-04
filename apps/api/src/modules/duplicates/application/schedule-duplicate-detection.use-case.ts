@@ -3,27 +3,32 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import {
-  USER_PREFERENCES_REPOSITORY,
-  type UserPreferencesRepository,
+  WORKSPACE_ML_SETTINGS_REPOSITORY,
+  type WorkspaceMlSettingsRepository,
 } from '../../../shared/domain/ports.js';
 import { DuplicateDetectionQueueService } from '../infrastructure/duplicate-detection-queue.service.js';
 import { ApplyExactDuplicateDetectionUseCase } from './apply-exact-duplicate-detection.use-case.js';
 
+/** Runs duplicate detection for a new document according to the workspace mode. */
 @Injectable()
 export class ScheduleDuplicateDetectionUseCase {
   constructor(
+    @Inject(ApplyExactDuplicateDetectionUseCase)
     private readonly applyExactDuplicateDetection: ApplyExactDuplicateDetectionUseCase,
+    @Inject(DuplicateDetectionQueueService)
     private readonly duplicateQueue: DuplicateDetectionQueueService,
-    @Inject(USER_PREFERENCES_REPOSITORY) private readonly preferences: UserPreferencesRepository
+    @Inject(WORKSPACE_ML_SETTINGS_REPOSITORY)
+    private readonly workspaceSettings: WorkspaceMlSettingsRepository
   ) {}
 
   async execute(documentId: string, userId: string, contentHash: string | null): Promise<void> {
-    await this.applyExactDuplicateDetection.execute(documentId, userId, contentHash);
-
-    const prefs = await this.preferences.getForUser(userId);
-    if (!prefs.fuzzyDuplicateDetectionEnabled) {
+    const { duplicateDetection } = await this.workspaceSettings.get();
+    if (duplicateDetection === 'off') {
       return;
     }
-    await this.duplicateQueue.enqueueFuzzy(documentId, userId);
+    await this.applyExactDuplicateDetection.execute(documentId, userId, contentHash);
+    if (duplicateDetection === 'similar') {
+      await this.duplicateQueue.enqueueFuzzy(documentId, userId);
+    }
   }
 }

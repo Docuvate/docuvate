@@ -1130,6 +1130,41 @@
     "suggestionsCardTitle": "Vorschläge",
     "suggestionsCardLead": "Legen Sie fest, ab welcher Konfidenz Docuvate Labels und Felder vorschlägt.",
     "suggestionsCardCta": "Schwellenwert in Erkannte Felder",
+    "workspaceMl": {
+      "title": "Automatik & Erkennung",
+      "lead": "Gilt für den ganzen Arbeitsbereich. Änderungen wirken auf neue Dokumente und neu gelernte Labels.",
+      "readOnly": "Nur Admins können diese Einstellungen ändern.",
+      "saveFailed": "Einstellung konnte nicht gespeichert werden.",
+      "loadFailed": "Einstellungen konnten nicht geladen werden.",
+      "labelAutoAssign": {
+        "label": "Labels automatisch vergeben",
+        "hint": "Wie sicher Docuvate sein muss, bevor ein Label ohne Rückfrage gesetzt wird.",
+        "off": "Aus",
+        "cautious": "Vorsichtig",
+        "normal": "Normal"
+      },
+      "labelSuggestions": {
+        "label": "Labels vorschlagen",
+        "hint": "Wie viele Label-Vorschläge du zum Bestätigen bekommst.",
+        "few": "Wenige",
+        "normal": "Normal",
+        "many": "Viele"
+      },
+      "duplicateDetection": {
+        "label": "Duplikate erkennen",
+        "hint": "Exakt findet identische Dateien und Texte. Ähnlich findet zusätzlich fast gleiche Dokumente, zum Beispiel einen zweiten Scan.",
+        "off": "Aus",
+        "exact": "Nur exakt",
+        "similar": "Auch ähnliche"
+      },
+      "fieldAcceptance": {
+        "label": "Felder übernehmen",
+        "hint": "Wie sicher das Label sein muss, bevor erkannte Felder übernommen werden. Gilt für Felder ohne eigene Mindest-Sicherheit.",
+        "cautious": "Vorsichtig",
+        "normal": "Normal",
+        "generous": "Großzügig"
+      }
+    },
     "chatDefaultAutomatic": "Automatisch (empfohlen)",
     "chatDevSuffix": "Entwicklung",
     "chatProviderIds": {
@@ -1754,7 +1789,6 @@
     "fieldSafetyLabel": "Mindest-Sicherheit",
     "fieldSafetyHint": "Gilt für Label-Vorschläge am Dokument, wenn noch kein passendes Label zugeordnet ist.",
     "gateSafetyAria": "Mindest-Sicherheit für Label-Vorschläge",
-    "gateSafetyLabelDefault": "Standard Mindest-Sicherheit",
     "gateBreakpointLabelEarly": "mehr Treffer",
     "gateBreakpointLabelStandard": "ausgewogen",
     "gateBreakpointLabelCautious": "sicherer",

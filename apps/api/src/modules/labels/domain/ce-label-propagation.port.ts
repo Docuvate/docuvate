@@ -1,5 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import type { LabelAutoAssignPreset, LabelSuggestionPreset } from '@docuvate/contracts';
 
 export interface CeLabelPropagationSeedPort {
   propagateAfterLabelSeed(
@@ -15,15 +16,19 @@ export interface CeLabelPropagationScoreRow {
   tier: 'auto_assign' | 'suggest' | 'none';
 }
 
+export interface CeLabelPropagationInput {
+  labelName: string;
+  passageVectors: number[][];
+  passageTexts: string[];
+  seedDocumentIndices: number[];
+  positiveDocumentIndices: number[];
+  calibrationDocumentIndices: number[];
+  autoAssign: LabelAutoAssignPreset;
+  suggestions: LabelSuggestionPreset;
+}
+
 export interface CeLabelPropagationScoresPort {
-  propagateLabelScores(input: {
-    labelName: string;
-    passageVectors: number[][];
-    passageTexts: string[];
-    seedDocumentIndices: number[];
-    positiveDocumentIndices: number[];
-    calibrationDocumentIndices: number[];
-  }): Promise<CeLabelPropagationScoreRow[]>;
+  propagateLabelScores(input: CeLabelPropagationInput): Promise<CeLabelPropagationScoreRow[]>;
 }
 
 export interface MissingLabelCorpusDocument {

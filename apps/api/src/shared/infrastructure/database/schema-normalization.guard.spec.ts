@@ -64,6 +64,7 @@ const FORWARD_SQL_ORDER = [
   'search-vocabulary-maintain-up.sql',
   'search-vocabulary-document-terms-up.sql',
   'document-regions-up.sql',
+  'workspace-ml-settings-up.sql',
 ];
 
 function loadForwardMigrationSql(): string {

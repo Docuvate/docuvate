@@ -7,6 +7,11 @@ from typing import Self
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from docuvate_worker.domain.label_automation_policy import (
+    LabelAutoAssignPreset,
+    LabelSuggestionPreset,
+)
+
 
 class ExtractRequest(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
@@ -686,6 +691,8 @@ class CeLabelPropagationRequest(BaseModel):
     seed_document_indices: list[int] = Field(default_factory=list)
     positive_document_indices: list[int] = Field(default_factory=list)
     calibration_document_indices: list[int] = Field(default_factory=list)
+    auto_assign: LabelAutoAssignPreset = "normal"
+    suggestions: LabelSuggestionPreset = "normal"
 
 
 class CeLabelPropagationScore(BaseModel):
@@ -786,6 +793,26 @@ class CeNewLabelSignalResult(BaseModel):
 
 class CeNewLabelSignalResponse(BaseModel):
     results: list[CeNewLabelSignalResult]
+
+
+class SmartDuplicatePeerModel(BaseModel):
+    document_id: str = Field(min_length=1, validation_alias="documentId")
+    lines: list[str]
+
+
+class SmartDuplicatesDetectRequest(BaseModel):
+    focus_document_id: str = Field(min_length=1, validation_alias="focusDocumentId")
+    focus_lines: list[str] = Field(validation_alias="focusLines")
+    peers: list[SmartDuplicatePeerModel]
+
+
+class SmartDuplicateCandidateModel(BaseModel):
+    document_id: str = Field(serialization_alias="documentId")
+    similarity: float
+
+
+class SmartDuplicatesDetectResponse(BaseModel):
+    candidates: list[SmartDuplicateCandidateModel]
 
 
 ExtractRequest.model_rebuild()

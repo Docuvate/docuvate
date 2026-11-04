@@ -67,6 +67,7 @@ export const BASELINE_MARKER_MIGRATION_NAMES = [
   'SearchVocabularyPruneStale20261028160000',
   'SearchVocabularyDocumentTerms20261028180000',
   'DocumentRegions20261029120000',
+  'WorkspaceMlSettings20261104090000',
 ] as const;
 
 async function featureFlagMlKeysConstraintPresent(runner: QueryRunner): Promise<boolean> {
@@ -246,7 +247,10 @@ export async function migrationSchemaPresent(
     case 'DocumentExtractedTextHash20261026140000':
       return columnExists(runner, 'documents', 'extracted_text_hash');
     case 'UserPreferencesFuzzyDuplicateDetection20261026150000':
-      return columnExists(runner, 'user_preferences', 'fuzzy_duplicate_detection_enabled');
+      return (
+        (await columnExists(runner, 'user_preferences', 'fuzzy_duplicate_detection_enabled')) ||
+        (await regClassExists(runner, 'public.workspace_ml_settings'))
+      );
     case 'RepairBinDocumentFilenames20261026160000':
       return migrationSchemaPresent(runner, 'UserPreferencesFuzzyDuplicateDetection20261026150000');
     case 'SearchVocabularyMaintain20261027140000':
@@ -261,6 +265,8 @@ export async function migrationSchemaPresent(
       return regClassExists(runner, 'public.search_vocabulary_document_terms');
     case 'DocumentRegions20261029120000':
       return regClassExists(runner, 'public.document_regions');
+    case 'WorkspaceMlSettings20261104090000':
+      return regClassExists(runner, 'public.workspace_ml_settings');
     default:
       return false;
   }

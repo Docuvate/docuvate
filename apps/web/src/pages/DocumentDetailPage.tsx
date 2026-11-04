@@ -7,9 +7,12 @@ import type {
   FolderDto,
   RecognizedFieldDefinitionDto,
   TagDto,
-  UserSettingsDto,
 } from '@docuvate/contracts';
-import { parseSuggestionStorageKey, semanticFieldKey } from '@docuvate/contracts';
+import {
+  FIELD_ACCEPTANCE_LABEL_CONFIDENCE,
+  parseSuggestionStorageKey,
+  semanticFieldKey,
+} from '@docuvate/contracts';
 import { ArrowLeft } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -41,6 +44,7 @@ import {
   fetchDocumentPreviewBlob,
   getDocument,
   getUserSettings,
+  getWorkspaceMlSettings,
   listFolders,
   listRecognizedFields,
   listTags,
@@ -61,6 +65,7 @@ import { isExtractionPending } from '../lib/documentExtractionState';
 import { fetchDocumentPreviewBuffer } from '../lib/documentPreviewCache';
 import {
   catalogFieldGateContextFromDocument,
+  type CatalogFieldGateSettings,
   mergeCatalogFieldsForDocument,
 } from '../lib/documentRecognizedCatalogFields';
 import { areBlocksDirty, areFieldsDirty } from '../lib/extractionDirty';
@@ -163,16 +168,9 @@ export function DocumentDetailPage() {
   const [layoutEditMode, setLayoutEditMode] = useState(false);
   const [showTechnicalDetails, setShowTechnicalDetails] = useState(false);
   const [recognizedCatalog, setRecognizedCatalog] = useState<RecognizedFieldDefinitionDto[]>([]);
-  const [fieldGateSettings, setFieldGateSettings] = useState<
-    Pick<
-      UserSettingsDto,
-      | 'fieldExtractionConfidenceGateEnabled'
-      | 'labelFieldConfidenceThreshold'
-      | 'fieldExtractionRequiredLabelIds'
-    >
-  >({
+  const [fieldGateSettings, setFieldGateSettings] = useState<CatalogFieldGateSettings>({
     fieldExtractionConfidenceGateEnabled: true,
-    labelFieldConfidenceThreshold: 0.62,
+    labelFieldConfidenceThreshold: FIELD_ACCEPTANCE_LABEL_CONFIDENCE.normal,
     fieldExtractionRequiredLabelIds: [],
   });
   const [documentDateAuto, setDocumentDateAuto] = useState(false);
@@ -256,8 +254,15 @@ export function DocumentDetailPage() {
     let active = true;
     setLoading(true);
     setError(null);
-    void Promise.all([load(), listTags(), listRecognizedFields(), listFolders(), getUserSettings()])
-      .then(([, tagList, recognized, f, settings]) => {
+    void Promise.all([
+      load(),
+      listTags(),
+      listRecognizedFields(),
+      listFolders(),
+      getUserSettings(),
+      getWorkspaceMlSettings(),
+    ])
+      .then(([, tagList, recognized, f, settings, workspaceMl]) => {
         if (!active) return;
         setTags(tagList);
         setRecognizedCatalog(recognized);
@@ -269,7 +274,8 @@ export function DocumentDetailPage() {
         setDocumentChatLocalModelReady(settings.documentChatLocalModelReady === true);
         setFieldGateSettings({
           fieldExtractionConfidenceGateEnabled: settings.fieldExtractionConfidenceGateEnabled !== false,
-          labelFieldConfidenceThreshold: settings.labelFieldConfidenceThreshold ?? 0.62,
+          labelFieldConfidenceThreshold:
+            FIELD_ACCEPTANCE_LABEL_CONFIDENCE[workspaceMl.fieldAcceptance],
           fieldExtractionRequiredLabelIds: settings.fieldExtractionRequiredLabelIds ?? [],
         });
       })

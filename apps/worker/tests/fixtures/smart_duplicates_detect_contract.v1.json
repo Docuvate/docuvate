@@ -1,0 +1,26 @@
+{
+  "path": "/ml/smart-duplicates/detect",
+  "request": {
+    "focusDocumentId": "focus",
+    "focusLines": [
+      "NORDWIND ENERGIE GMBH",
+      "Musterstrasse 12 80331 Muenchen",
+      "Rechnung Nr. 2024-1001",
+      "Datum: 15.03.2024",
+      "Gesamtbetrag EUR 199.00"
+    ],
+    "peers": [
+      {
+        "documentId": "rescan",
+        "lines": [
+          "NORDWIND ENERGIE GMBH",
+          "Musterstrasse 12 80331 Muenchen",
+          "Rechnung Nr. 2024-1001",
+          "Datum: 15.03.2024",
+          "Gesamtbetrag EUR 199.00"
+        ]
+      }
+    ]
+  },
+  "expectedDocumentIds": ["rescan"]
+}

@@ -16,6 +16,10 @@ import {
   UserSettingsResponseDto,
 } from '../../../shared/presentation/dtos/settings.dto.js';
 import {
+  UpdateWorkspaceMlSettingsRequestDto,
+  WorkspaceMlSettingsResponseDto,
+} from '../../../shared/presentation/dtos/workspace-ml-settings.dto.js';
+import {
   ApiDocuvateController,
   ApiDocuvateRoute,
 } from '../../../shared/presentation/swagger/openapi-decorators.js';
@@ -29,6 +33,10 @@ import {
   UpdateUserSettingsUseCase,
 } from '../application/settings.use-cases.js';
 import { toUserSettingsResponseDto } from '../application/user-settings-response.mapper.js';
+import {
+  GetWorkspaceMlSettingsUseCase,
+  UpdateWorkspaceMlSettingsUseCase,
+} from '../application/workspace-ml-settings.use-cases.js';
 
 @ApiDocuvateController('settings')
 @Controller('settings')
@@ -41,8 +49,31 @@ export class SettingsController {
     private readonly listChatProviders: ListDocumentChatProvidersUseCase,
     private readonly effectiveChatProvider: EffectiveDocumentChatProviderUseCase,
     private readonly hardwareCapabilities: GetHardwareCapabilitiesUseCase,
-    private readonly encoderReindexProgress: GetEncoderReindexProgressUseCase
+    private readonly encoderReindexProgress: GetEncoderReindexProgressUseCase,
+    private readonly getWorkspaceMl: GetWorkspaceMlSettingsUseCase,
+    private readonly updateWorkspaceMl: UpdateWorkspaceMlSettingsUseCase
   ) {}
+
+  @Get('workspace-ml')
+  @ApiDocuvateRoute({
+    operationId: 'getWorkspaceMlSettings',
+    summary: 'Get workspace automation and recognition settings',
+  })
+  async workspaceMl(@Session() session: AuthSession): Promise<WorkspaceMlSettingsResponseDto> {
+    return this.getWorkspaceMl.execute(session.user.id);
+  }
+
+  @Patch('workspace-ml')
+  @ApiDocuvateRoute({
+    operationId: 'updateWorkspaceMlSettings',
+    summary: 'Update workspace automation and recognition settings (installation admins)',
+  })
+  async patchWorkspaceMl(
+    @Session() session: AuthSession,
+    @Body() body: UpdateWorkspaceMlSettingsRequestDto
+  ): Promise<WorkspaceMlSettingsResponseDto> {
+    return this.updateWorkspaceMl.execute(session.user.id, body);
+  }
 
   @Get()
   @ApiDocuvateRoute({ operationId: 'getUserSettings', summary: 'Get user settings' })

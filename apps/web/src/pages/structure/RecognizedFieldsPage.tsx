@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import type { TagDto } from '@docuvate/contracts';
+import { FIELD_ACCEPTANCE_LABEL_CONFIDENCE, type TagDto } from '@docuvate/contracts';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
@@ -13,7 +13,13 @@ import {
   RecognizedFieldQualityGateEditor,
 } from '../../components/settings/RecognizedFieldQualityGateEditor';
 import { Card } from '../../components/ui/Card';
-import { getUserSettings, listRecognizedFields, listTags, updateUserSettings } from '../../lib/api';
+import {
+  getUserSettings,
+  getWorkspaceMlSettings,
+  listRecognizedFields,
+  listTags,
+  updateUserSettings,
+} from '../../lib/api';
 import { formatUserFacingError } from '../../lib/apiErrors';
 import {
   draftsFromRecognizedDefinitions,
@@ -32,7 +38,7 @@ export function RecognizedFieldsPage() {
   const [tags, setTags] = useState<TagDto[]>([]);
   const [gateBaseline, setGateBaseline] = useState<RecognizedFieldGateDraft>({
     confidenceGateEnabled: true,
-    labelFieldConfidenceThreshold: 0.62,
+    labelFieldConfidenceThreshold: FIELD_ACCEPTANCE_LABEL_CONFIDENCE.normal,
     requiredLabelIds: [],
   });
   const gateForm = useFormDraft(gateBaseline);
@@ -44,11 +50,17 @@ export function RecognizedFieldsPage() {
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
   useEffect(() => {
-    void Promise.all([listRecognizedFields(), listTags(), getUserSettings()])
-      .then(([recognized, tagList, settings]) => {
+    void Promise.all([
+      listRecognizedFields(),
+      listTags(),
+      getUserSettings(),
+      getWorkspaceMlSettings(),
+    ])
+      .then(([recognized, tagList, settings, workspaceMl]) => {
         const defaults: RecognizedFieldGateDraft = {
           confidenceGateEnabled: true,
-          labelFieldConfidenceThreshold: settings.labelFieldConfidenceThreshold ?? 0.62,
+          labelFieldConfidenceThreshold:
+            FIELD_ACCEPTANCE_LABEL_CONFIDENCE[workspaceMl.fieldAcceptance],
           requiredLabelIds: settings.fieldExtractionRequiredLabelIds ?? [],
         };
         const nextFields = draftsFromRecognizedDefinitions(recognized, defaults);
@@ -106,7 +118,6 @@ export function RecognizedFieldsPage() {
     try {
       await updateUserSettings({
         fieldExtractionConfidenceGateEnabled: true,
-        labelFieldConfidenceThreshold: gateForm.draft.labelFieldConfidenceThreshold,
         fieldExtractionRequiredLabelIds: gateForm.draft.requiredLabelIds,
       });
       setGateBaseline(gateForm.draft);

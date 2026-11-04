@@ -19,6 +19,8 @@ _SEQUENTIAL_GRID_STEPS = 40
 def split_conformal_accept_threshold(
     calibration_scores: FloatArray,
     calibration_labels: FloatArray,
+    *,
+    false_positive_cost: float = _FALSE_POSITIVE_COST,
 ) -> float | None:
     if calibration_scores.size == 0:
         return None
@@ -27,7 +29,7 @@ def split_conformal_accept_threshold(
     labels = calibration_labels[order]
     false_positives = np.cumsum(1.0 - labels)
     false_negatives = labels.sum() - np.cumsum(labels)
-    cost = _FALSE_POSITIVE_COST * false_positives + false_negatives
+    cost = false_positive_cost * false_positives + false_negatives
     best_index = int(np.argmin(cost))
     return float(scores[best_index])
 
@@ -36,6 +38,8 @@ def sequential_precision_floor(
     base_threshold: float,
     calibration_scores: FloatArray,
     calibration_labels: FloatArray,
+    *,
+    precision_target: float = _PRECISION_TARGET,
 ) -> float:
     if calibration_scores.size == 0:
         return base_threshold
@@ -64,7 +68,7 @@ def sequential_precision_floor(
         ucb = precision + math.sqrt(
             (math.log(_SEQUENTIAL_GRID_STEPS / _SEQUENTIAL_DELTA) + 2 * math.log(m + 1)) / (2 * m)
         )
-        if ucb < _PRECISION_TARGET:
+        if ucb < precision_target:
             for candidate in grid:
                 if candidate > tau:
                     tau = candidate

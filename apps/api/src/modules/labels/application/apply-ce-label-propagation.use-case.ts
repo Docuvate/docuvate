@@ -7,6 +7,8 @@ import {
   type LabelEmbeddingRepository,
   TAXONOMY_REPOSITORY,
   type TaxonomyRepository,
+  WORKSPACE_ML_SETTINGS_REPOSITORY,
+  type WorkspaceMlSettingsRepository,
 } from '../../../shared/domain/ports.js';
 import type { AssignDocumentTag } from '../domain/assign-document-tag.port.js';
 import type { CeLabelPropagationScoresPort } from '../domain/ce-label-propagation.port.js';
@@ -22,7 +24,9 @@ export class ApplyCeLabelPropagationUseCase {
     @Inject(TAXONOMY_REPOSITORY) private readonly taxonomy: TaxonomyRepository,
     @Inject(LABEL_EMBEDDING_REPOSITORY) private readonly labelEmbeddings: LabelEmbeddingRepository,
     @Inject(AssignDocumentTagUseCase) private readonly assignTag: AssignDocumentTag,
-    @Inject(HttpCeMlAdapter) private readonly ceMl: CeLabelPropagationScoresPort
+    @Inject(HttpCeMlAdapter) private readonly ceMl: CeLabelPropagationScoresPort,
+    @Inject(WORKSPACE_ML_SETTINGS_REPOSITORY)
+    private readonly workspaceSettings: WorkspaceMlSettingsRepository
   ) {}
 
   async propagateAfterLabelSeed(
@@ -51,6 +55,7 @@ export class ApplyCeLabelPropagationUseCase {
     const positiveDocumentIndices = rows.flatMap((row, index) =>
       row.nonInboxTagIds.includes(tagId) ? [index] : []
     );
+    const { labelAutoAssign, labelSuggestions } = await this.workspaceSettings.get();
     let scores;
     try {
       scores = await this.ceMl.propagateLabelScores({
@@ -60,6 +65,8 @@ export class ApplyCeLabelPropagationUseCase {
         seedDocumentIndices: seedIndices,
         positiveDocumentIndices,
         calibrationDocumentIndices,
+        autoAssign: labelAutoAssign,
+        suggestions: labelSuggestions,
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);

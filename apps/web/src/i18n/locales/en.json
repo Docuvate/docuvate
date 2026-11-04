@@ -1130,6 +1130,41 @@
     "suggestionsCardTitle": "Suggestions",
     "suggestionsCardLead": "Choose from which confidence Docuvate suggests labels and fields.",
     "suggestionsCardCta": "Threshold in Recognized fields",
+    "workspaceMl": {
+      "title": "Automation & recognition",
+      "lead": "Applies to the whole workspace. Changes affect new documents and newly learned labels.",
+      "readOnly": "Only admins can change these settings.",
+      "saveFailed": "Could not save the setting.",
+      "loadFailed": "Could not load the settings.",
+      "labelAutoAssign": {
+        "label": "Assign labels automatically",
+        "hint": "How certain Docuvate must be before it sets a label without asking.",
+        "off": "Off",
+        "cautious": "Cautious",
+        "normal": "Normal"
+      },
+      "labelSuggestions": {
+        "label": "Suggest labels",
+        "hint": "How many label suggestions you get to confirm.",
+        "few": "Few",
+        "normal": "Normal",
+        "many": "Many"
+      },
+      "duplicateDetection": {
+        "label": "Detect duplicates",
+        "hint": "Exact finds identical files and texts. Similar also finds near-identical documents, for example a second scan.",
+        "off": "Off",
+        "exact": "Exact only",
+        "similar": "Also similar"
+      },
+      "fieldAcceptance": {
+        "label": "Accept fields",
+        "hint": "How certain the label must be before recognized fields are accepted. Applies to fields without their own minimum certainty.",
+        "cautious": "Cautious",
+        "normal": "Normal",
+        "generous": "Generous"
+      }
+    },
     "chatDefaultAutomatic": "Automatic (recommended)",
     "chatDevSuffix": "development",
     "chatProviderIds": {
@@ -1754,7 +1789,6 @@
     "fieldSafetyLabel": "Minimum certainty",
     "fieldSafetyHint": "Applies to label suggestions on the document when no matching label is assigned yet.",
     "gateSafetyAria": "Minimum certainty for label suggestions",
-    "gateSafetyLabelDefault": "Default minimum certainty",
     "gateBreakpointLabelEarly": "more matches",
     "gateBreakpointLabelStandard": "balanced",
     "gateBreakpointLabelCautious": "stricter",

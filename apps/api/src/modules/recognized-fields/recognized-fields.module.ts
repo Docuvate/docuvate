@@ -7,6 +7,7 @@ import { SearchModule } from '../search/search.module.js';
 import { SettingsModule } from '../settings/settings.module.js';
 import { ApplyGlobalRecognizedFieldsUseCase } from './application/apply-global-recognized-fields.use-case.js';
 import { BackfillRecognizedFieldReextractionUseCase } from './application/backfill-recognized-field-reextraction.use-case.js';
+import { FieldGateDefaultsReader } from './application/field-gate-defaults.reader.js';
 import { ListRecognizedFieldAttemptsUseCase } from './application/list-recognized-field-attempts.use-case.js';
 import { ListRecognizedFieldFilterValuesUseCase } from './application/list-recognized-field-filter-values.use-case.js';
 import {
@@ -23,6 +24,7 @@ import { RecognizedFieldsController } from './presentation/recognized-fields.con
   imports: [SettingsModule, SearchModule, ExtractionFeedbackModule],
   controllers: [RecognizedFieldsController],
   providers: [
+    FieldGateDefaultsReader,
     ListRecognizedFieldsUseCase,
     ListRecognizedFieldFilterValuesUseCase,
     ReplaceRecognizedFieldsUseCase,

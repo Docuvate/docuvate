@@ -6889,6 +6889,20 @@ mark.global-search-mark {
   grid-column: 1 / -1;
 }
 
+.workspace-automation__field {
+  min-width: 0;
+}
+
+.workspace-automation__choice.segmented-control {
+  display: flex;
+  max-width: 100%;
+}
+
+.workspace-automation__choice .segmented-control__option {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
 .settings-section-card--full .settings-section-card-spacer {
   display: none;
 }

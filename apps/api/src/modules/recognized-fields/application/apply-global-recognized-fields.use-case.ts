@@ -14,8 +14,6 @@ import {
   type RecognizedFieldRepository,
   TAXONOMY_REPOSITORY,
   type TaxonomyRepository,
-  USER_PREFERENCES_REPOSITORY,
-  type UserPreferencesRepository,
 } from '../../../shared/domain/ports.js';
 import { mergeExtractedFields } from '../../document-pipeline/domain/merge-extracted-fields.js';
 import { evaluateFieldExtractionGate } from '../domain/field-extraction-gate.js';
@@ -26,6 +24,7 @@ import {
 } from '../domain/recognized-field.entity.js';
 import { resolveFieldExtractionGateConfig } from '../domain/resolve-field-extraction-gate.js';
 import { PgRecognizedFieldExtractionAttemptRepository } from '../infrastructure/pg-recognized-field-extraction-attempt.repository.js';
+import { FieldGateDefaultsReader } from './field-gate-defaults.reader.js';
 
 export interface ApplyGlobalRecognizedFieldsOptions {
   scopeDefinitionIds?: readonly string[];
@@ -40,7 +39,7 @@ export class ApplyGlobalRecognizedFieldsUseCase {
     @Inject(RECOGNIZED_FIELD_REPOSITORY) private readonly fieldDefs: RecognizedFieldRepository,
     @Inject(LABEL_FIELD_EXTRACTION_PORT) private readonly extraction: LabelFieldExtractionPort,
     @Inject(TAXONOMY_REPOSITORY) private readonly taxonomy: TaxonomyRepository,
-    @Inject(USER_PREFERENCES_REPOSITORY) private readonly prefs: UserPreferencesRepository,
+    private readonly gateDefaults: FieldGateDefaultsReader,
     @Inject(EXTRACTION_FIELD_FEEDBACK_REPOSITORY)
     private readonly fieldFeedback: ExtractionFieldFeedbackRepository,
     private readonly attempts: PgRecognizedFieldExtractionAttemptRepository
@@ -73,8 +72,7 @@ export class ApplyGlobalRecognizedFieldsUseCase {
       ? allDefs.filter((def) => scope.has(def.id))
       : allDefs;
 
-    const prefs = await this.prefs.getForUser(userId);
-    const fieldAcceptanceThreshold = prefs.labelFieldConfidenceThreshold;
+    const gateDefaults = await this.gateDefaults.read(userId);
 
     const assignedTags = await this.taxonomy.listTagsForDocument(documentId);
     const suggestions = await this.taxonomy.listSuggestions(documentId, userId);
@@ -101,7 +99,7 @@ export class ApplyGlobalRecognizedFieldsUseCase {
         defsToExtract.push(def);
         continue;
       }
-      const gateConfig = resolveFieldExtractionGateConfig(def, prefs);
+      const gateConfig = resolveFieldExtractionGateConfig(def, gateDefaults);
       if (!evaluateFieldExtractionGate(labelContext, gateConfig)) {
         attemptRows.push({
           documentId,
@@ -213,7 +211,7 @@ export class ApplyGlobalRecognizedFieldsUseCase {
           continue;
         }
         const confidence = row.confidence ?? 0;
-        if (confidence < fieldAcceptanceThreshold) {
+        if (confidence < gateDefaults.minLabelConfidence) {
           finalAttempts.push({
             documentId,
             fieldDefinitionId: def.id,

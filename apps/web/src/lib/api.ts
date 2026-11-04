@@ -117,7 +117,9 @@ import type {
   UpdateSavedDocumentViewRequest,
   UpdateTagRequest,
   UpdateUserSettingsRequest,
+  UpdateWorkspaceMlSettingsRequest,
   UserSettingsDto,
+  WorkspaceMlSettingsDto,
 } from '@docuvate/contracts';
 
 import { isRecord, notifyApiRequestSucceeded, throwApiRequestError } from './apiErrors';
@@ -1063,6 +1065,19 @@ export async function retryLibraryChatMessage(
 
 export async function getUserSettings(): Promise<UserSettingsDto> {
   return request<UserSettingsDto>('/settings');
+}
+
+export async function getWorkspaceMlSettings(): Promise<WorkspaceMlSettingsDto> {
+  return request<WorkspaceMlSettingsDto>('/settings/workspace-ml');
+}
+
+export async function updateWorkspaceMlSettings(
+  body: UpdateWorkspaceMlSettingsRequest
+): Promise<WorkspaceMlSettingsDto> {
+  return request<WorkspaceMlSettingsDto>('/settings/workspace-ml', {
+    method: 'PATCH',
+    body: JSON.stringify(body),
+  });
 }
 
 export async function getRemoteConfig(): Promise<RemoteConfigDto> {

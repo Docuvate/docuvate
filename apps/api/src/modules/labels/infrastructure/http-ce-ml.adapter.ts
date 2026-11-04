@@ -4,6 +4,7 @@ import { Injectable, Logger } from '@nestjs/common';
 
 import { isRecord, parseNumber, parseString } from '../../../shared/infrastructure/database/row-parse.js';
 import { workerApiUrl } from '../../../shared/infrastructure/worker/worker-api-path.js';
+import type { CeLabelPropagationInput } from '../domain/ce-label-propagation.port.js';
 
 export interface CeLabelPropagationScore {
   documentIndex: number;
@@ -49,14 +50,7 @@ function parsePropagationScores(raw: unknown): CeLabelPropagationScore[] {
 @Injectable()
 export class HttpCeMlAdapter {
   private readonly logger = new Logger(HttpCeMlAdapter.name);
-  async propagateLabelScores(input: {
-    labelName: string;
-    passageVectors: number[][];
-    passageTexts: string[];
-    seedDocumentIndices: number[];
-    positiveDocumentIndices: number[];
-    calibrationDocumentIndices: number[];
-  }): Promise<CeLabelPropagationScore[]> {
+  async propagateLabelScores(input: CeLabelPropagationInput): Promise<CeLabelPropagationScore[]> {
     const { url, secret } = workerBase();
     const response = await fetch(workerApiUrl(url, '/ml/ce/label-propagation'), {
       method: 'POST',
@@ -71,6 +65,8 @@ export class HttpCeMlAdapter {
         seed_document_indices: input.seedDocumentIndices,
         positive_document_indices: input.positiveDocumentIndices,
         calibration_document_indices: input.calibrationDocumentIndices,
+        auto_assign: input.autoAssign,
+        suggestions: input.suggestions,
       }),
     });
     if (!response.ok) {
