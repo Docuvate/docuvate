@@ -5,6 +5,7 @@
 
 from __future__ import annotations
 
+import copy
 from dataclasses import dataclass, field
 
 import numpy as np
@@ -222,6 +223,8 @@ class EmbeddingDensityModel:
 
         train_vectors = vectors[split.train_indices]
         train_labels = labels[split.train_indices]
+        full_class_stats = copy.deepcopy(self.class_stats)
+        full_log_priors = dict(self.log_priors)
         self._retrain_niw_on_subset(train_vectors, train_labels)
 
         selection_vectors = vectors[split.selection_indices]
@@ -297,6 +300,9 @@ class EmbeddingDensityModel:
                 self.fine_thresholds[lid] = thr
                 fine_counts[lid] = int(np.sum(scores >= thr.threshold))
 
+        # Held-out fitting only needs the train-split model; serving keeps every labelled example.
+        self.class_stats = full_class_stats
+        self.log_priors = full_log_priors
         self.coarse_ready = coarse_calibration_ready(coarse_accepted, coarse_certified)
         self.fine_ready = {
             lid: fine_label_calibration_ready(fine_counts.get(lid, 0), lid in self.fine_thresholds)

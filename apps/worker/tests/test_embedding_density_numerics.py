@@ -3,6 +3,7 @@
 
 import numpy as np
 
+from docuvate_worker.domain.embedding_density.calibration import fit_temperature_and_bias
 from docuvate_worker.domain.embedding_density.content_space import bhattacharyya_distance
 from docuvate_worker.domain.embedding_density.model import EmbeddingDensityModel
 from docuvate_worker.domain.embedding_density.niw import (
@@ -44,3 +45,10 @@ def test_posterior_with_many_blocks_simulated_logits() -> None:
     probs, log_px = model.posterior(vector)
     assert np.all(np.isfinite(probs))
     assert np.isfinite(log_px)
+
+
+def test_bias_stays_zero_when_selection_split_misses_classes() -> None:
+    logits = np.array([[0.0, -5.0, -9.0], [0.0, -4.0, -8.0], [-6.0, 0.0, -7.0]])
+    labels = np.array([0, 0, 1], dtype=np.int64)
+    _temperature, bias = fit_temperature_and_bias(logits, labels)
+    assert np.allclose(bias, 0.0)

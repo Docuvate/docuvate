@@ -64,6 +64,7 @@ from docuvate_worker.infrastructure.ml.ce_ml.missing_label import (
     missing_label_hint_score,
     missing_label_hint_scores_batch,
 )
+from docuvate_worker.infrastructure.ml.ce_ml.new_label_signal import new_label_signals
 from docuvate_worker.infrastructure.ml.registry import resolve_active_model
 from docuvate_worker.presentation.cpu_pipeline_response import cpu_pipeline_to_response
 from docuvate_worker.presentation.extract_active import cancel_active_extract
@@ -86,6 +87,9 @@ from docuvate_worker.presentation.schemas import (
     CeMissingLabelBatchResult,
     CeMissingLabelRequest,
     CeMissingLabelResponse,
+    CeNewLabelSignalRequest,
+    CeNewLabelSignalResponse,
+    CeNewLabelSignalResult,
     CompareEngineResponse,
     CompareRequest,
     CompareResponse,
@@ -1125,4 +1129,27 @@ def ml_active_model(
         version_tag=resolved.version_tag,
         artifact_uri=resolved.artifact_uri,
         source=resolved.source,
+    )
+
+
+@router.post("/ml/ce/new-label-signal", response_model=CeNewLabelSignalResponse)
+def ce_new_label_signal(
+    body: CeNewLabelSignalRequest,
+    x_worker_secret: str | None = Header(default=None, alias="X-Worker-Secret"),
+) -> CeNewLabelSignalResponse:
+    _require_worker_secret(x_worker_secret)
+    ordered = sorted(body.corpus, key=lambda document: document.document_index)
+    signals = new_label_signals(
+        passage_vectors=[document.embedding for document in ordered],
+        passage_texts=[document.text for document in ordered],
+        tag_ids_per_document=[document.tag_ids for document in ordered],
+        target_document_indices=body.target_document_indices,
+    )
+    return CeNewLabelSignalResponse(
+        results=[
+            CeNewLabelSignalResult(
+                document_index=signal.document_index, score=signal.score, show=signal.show
+            )
+            for signal in signals
+        ]
     )
