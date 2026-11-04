@@ -32,6 +32,7 @@ import {
   type DocumentRepository,
   EXTRACTION_FIELD_FEEDBACK_REPOSITORY,
   type ExtractionFieldFeedbackRepository,
+  type FieldFeedbackPosition,
 } from '../../../shared/domain/ports.js';
 import { layoutTokensFromIr } from '../domain/layout-tokens.js';
 import { isUuid } from '../domain/parse-uuid.js';
@@ -75,6 +76,17 @@ function toCorrectionDto(
     oldValue: input.oldValue,
     newValue: input.newValue,
     createdAt,
+  };
+}
+
+function userRegionPosition(region: DocumentRegionRecord): FieldFeedbackPosition {
+  return {
+    source: 'user_region',
+    page: region.page,
+    docCharStart: null,
+    docCharEnd: null,
+    bbox: { x0: region.x0, y0: region.y0, x1: region.x1, y1: region.y1 },
+    blockIndexes: region.blockIndexes,
   };
 }
 
@@ -183,7 +195,11 @@ export class ApplyFieldCorrectionUseCase {
             valueOverride: nextValue,
           });
     if (beforePayload === afterPayload) {
-      return { noChange: true, correction: null, region: existing ? stripSuperseded(existing) : null };
+      return {
+        noChange: true,
+        correction: null,
+        region: existing ? stripSuperseded(existing) : null,
+      };
     }
 
     const valueChanged = currentValue.trim() !== nextValue.trim();
@@ -260,11 +276,16 @@ export class ApplyFieldCorrectionUseCase {
           },
           new Date().toISOString()
         ),
-        region: replay ? stripSuperseded(replay) : afterRegion ? stripSuperseded(afterRegion) : null,
+        region: replay
+          ? stripSuperseded(replay)
+          : afterRegion
+            ? stripSuperseded(afterRegion)
+            : null,
       };
     }
 
     if (valueChanged && body.op !== 'remove') {
+      const markedRegion = afterRegion ?? existing;
       await this.feedback.insertCorrectionsIdempotent(userId, [
         {
           documentId,
@@ -273,6 +294,7 @@ export class ApplyFieldCorrectionUseCase {
           newValue: nextValue,
           labelTagIds: [],
           fieldTagId: currentField?.tagId ?? null,
+          position: markedRegion ? userRegionPosition(markedRegion) : null,
         },
       ]);
     }
@@ -310,7 +332,11 @@ export class ApplyFieldCorrectionUseCase {
     body: ApplyFieldCorrectionRequest,
     existing: DocumentRegionRecord | null,
     tokens: LayoutToken[]
-  ): { page: number; rect: { x0: number; y0: number; x1: number; y1: number }; tokens: LayoutToken[] } {
+  ): {
+    page: number;
+    rect: { x0: number; y0: number; x1: number; y1: number };
+    tokens: LayoutToken[];
+  } {
     const page = body.page ?? existing?.page ?? 1;
     const pageTokens = tokens.filter((token) => token.page === page);
     if (body.blockIndexes && body.blockIndexes.length > 0) {

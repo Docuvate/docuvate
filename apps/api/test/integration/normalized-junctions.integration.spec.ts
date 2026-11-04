@@ -104,6 +104,7 @@ describe('normalized junction tables (Testcontainers Postgres)', () => {
         newValue: '12,50',
         labelTagIds: [tagB, foreignTag],
         fieldTagId: null,
+        position: null,
       },
     ]);
     const corrections = await feedback.listForUser(userId);

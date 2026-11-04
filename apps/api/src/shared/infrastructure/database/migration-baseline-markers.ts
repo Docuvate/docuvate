@@ -68,6 +68,7 @@ export const BASELINE_MARKER_MIGRATION_NAMES = [
   'SearchVocabularyDocumentTerms20261028180000',
   'DocumentRegions20261029120000',
   'WorkspaceMlSettings20261104090000',
+  'ExtractionFieldFeedbackPositions20261104120000',
 ] as const;
 
 async function featureFlagMlKeysConstraintPresent(runner: QueryRunner): Promise<boolean> {
@@ -274,6 +275,8 @@ export async function migrationSchemaPresent(
       return regClassExists(runner, 'public.document_regions');
     case 'WorkspaceMlSettings20261104090000':
       return regClassExists(runner, 'public.workspace_ml_settings');
+    case 'ExtractionFieldFeedbackPositions20261104120000':
+      return columnExists(runner, 'extraction_field_confirmations', 'field_name_id');
     default:
       return false;
   }

@@ -1144,7 +1144,12 @@ export interface HardwareCapabilitiesDto {
   dockerMemoryHintEn?: string | null;
 }
 
-export type { FeatureFlagKey, FeatureFlagsDto, RemoteConfigDto, SourceConnectorPluginId } from './feature-flags.js';
+export type {
+  FeatureFlagKey,
+  FeatureFlagsDto,
+  RemoteConfigDto,
+  SourceConnectorPluginId,
+} from './feature-flags.js';
 export { SOURCE_CONNECTOR_PLUGIN_IDS, isSourceConnectorPluginId } from './feature-flags.js';
 
 export type ThemePreference = 'light' | 'dark' | 'system';
@@ -1198,16 +1203,28 @@ export interface UpdateUserSettingsRequest {
 }
 
 export type LabelAutoAssignPreset = 'off' | 'cautious' | 'normal';
-export const LABEL_AUTO_ASSIGN_PRESETS: readonly LabelAutoAssignPreset[] = ['off', 'cautious', 'normal'];
+export const LABEL_AUTO_ASSIGN_PRESETS: readonly LabelAutoAssignPreset[] = [
+  'off',
+  'cautious',
+  'normal',
+];
 
 export type LabelSuggestionPreset = 'few' | 'normal' | 'many';
 export const LABEL_SUGGESTION_PRESETS: readonly LabelSuggestionPreset[] = ['few', 'normal', 'many'];
 
 export type DuplicateDetectionMode = 'off' | 'exact' | 'similar';
-export const DUPLICATE_DETECTION_MODES: readonly DuplicateDetectionMode[] = ['off', 'exact', 'similar'];
+export const DUPLICATE_DETECTION_MODES: readonly DuplicateDetectionMode[] = [
+  'off',
+  'exact',
+  'similar',
+];
 
 export type FieldAcceptancePreset = 'cautious' | 'normal' | 'generous';
-export const FIELD_ACCEPTANCE_PRESETS: readonly FieldAcceptancePreset[] = ['cautious', 'normal', 'generous'];
+export const FIELD_ACCEPTANCE_PRESETS: readonly FieldAcceptancePreset[] = [
+  'cautious',
+  'normal',
+  'generous',
+];
 
 /** Minimum label confidence before gated recognized fields run, per workspace preset. */
 export const FIELD_ACCEPTANCE_LABEL_CONFIDENCE: Readonly<Record<FieldAcceptancePreset, number>> = {
@@ -1371,6 +1388,7 @@ export {
 } from './extracted-field-dedupe.js';
 export {
   GLOBAL_HEURISTIC_FIELD_KEYS,
+  canonicalFieldName,
   catalogDefinesSemanticKey,
   isPlainGlobalHeuristicField,
   partitionRecognizedAndHeuristicSuggestions,

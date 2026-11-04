@@ -10,12 +10,8 @@ export function hashLayoutIrHex(ir: unknown): string {
   return hashLayoutIrBytes(ir).toString('hex');
 }
 
-export function hashFieldValueBytes(value: string): Buffer {
-  return createHash('sha256').update(value, 'utf8').digest();
-}
-
 export function hashFieldValueHex(value: string): string {
-  return hashFieldValueBytes(value).toString('hex');
+  return createHash('sha256').update(value, 'utf8').digest('hex');
 }
 
 export function bufferToHex(value: unknown): string {

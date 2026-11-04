@@ -6,7 +6,9 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { PgDocumentRepository } from '../../src/modules/documents/infrastructure/pg-document.repository.js';
 import { RecordExtractionFieldCorrectionsUseCase } from '../../src/modules/extraction-feedback/application/record-extraction-field-corrections.use-case.js';
+import { ResolveConfirmationPositionsService } from '../../src/modules/extraction-feedback/application/resolve-confirmation-positions.service.js';
 import { PgExtractionFieldFeedbackRepository } from '../../src/modules/extraction-feedback/infrastructure/pg-extraction-field-feedback.repository.js';
+import { PgFieldFeedbackAnchorReader } from '../../src/modules/extraction-feedback/infrastructure/pg-field-feedback-anchor.reader.js';
 import { PgTaxonomyRepository } from '../../src/modules/taxonomy/infrastructure/pg-taxonomy.repository.js';
 import { closeIntegrationPool, getIntegrationPool } from './pg-pool.js';
 import {
@@ -37,7 +39,12 @@ describe('extraction field feedback (Testcontainers Postgres)', () => {
     const documents = new PgDocumentRepository(pool);
     const taxonomy = new PgTaxonomyRepository(pool);
     const feedback = new PgExtractionFieldFeedbackRepository(pool);
-    recordFeedback = new RecordExtractionFieldCorrectionsUseCase(documents, taxonomy, feedback);
+    recordFeedback = new RecordExtractionFieldCorrectionsUseCase(
+      documents,
+      taxonomy,
+      feedback,
+      new ResolveConfirmationPositionsService(new PgFieldFeedbackAnchorReader(pool))
+    );
   }, 60_000);
 
   afterAll(async () => {

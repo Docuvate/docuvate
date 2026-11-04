@@ -798,27 +798,6 @@ export class PgDocumentRegionRepository implements DocumentRegionRepository {
     }
   }
 
-  async confirmField(input: {
-    documentId: string;
-    userId: string;
-    fieldKey: string;
-    valueSha256: Buffer;
-    fieldTagId: string | null;
-  }): Promise<boolean> {
-    const result = await this.pool.query(
-      `INSERT INTO extraction_field_confirmations
-         (user_id, document_id, field_key, field_tag_id, value_sha256)
-       VALUES ($1, $2, $3, $4, $5)
-       ON CONFLICT (user_id, document_id, field_key)
-       DO UPDATE SET
-         value_sha256 = EXCLUDED.value_sha256,
-         confirmed_at = now()
-       WHERE extraction_field_confirmations.value_sha256 IS DISTINCT FROM EXCLUDED.value_sha256`,
-      [input.userId, input.documentId, input.fieldKey, input.fieldTagId, input.valueSha256]
-    );
-    return (result.rowCount ?? 0) > 0;
-  }
-
   async replaceFieldTokenSpans(
     documentId: string,
     fieldKey: string,

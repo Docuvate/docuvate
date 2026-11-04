@@ -11,7 +11,11 @@ import {
   seedGlobalSearchChunkPerfFixture,
 } from './helpers/seed-global-search-chunk-perf.js';
 import { closeIntegrationPool, getIntegrationPool } from './pg-pool.js';
-import { insertSyntheticUser, newIsolationUserId } from './pg-test-isolation.js';
+import {
+  deleteSyntheticUser,
+  insertSyntheticUser,
+  newIsolationUserId,
+} from './pg-test-isolation.js';
 
 function percentile(sortedMs: number[], p: number): number {
   const index = Math.min(sortedMs.length - 1, Math.ceil((p / 100) * sortedMs.length) - 1);
@@ -58,8 +62,10 @@ describe('PgGlobalSearchRepository chunk FTS perf fixture (Testcontainers Postgr
   }, 900_000);
 
   afterAll(async () => {
+    // Drop the 500k-chunk fixture so later migration specs do not re-backfill it.
+    await deleteSyntheticUser(pool, userId);
     await closeIntegrationPool();
-  });
+  }, 900_000);
 
   it('chunk FTS lateral SQL uses GIN on search_vector (no seq scan on chunks)', async () => {
     const terms = ['rechnung', 'beratung'];

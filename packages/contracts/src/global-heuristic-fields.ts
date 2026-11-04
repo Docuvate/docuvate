@@ -16,6 +16,15 @@ export function parseSuggestionStorageKey(key: string): string | null {
   return match ? match[1]! : null;
 }
 
+/**
+ * Canonical field name for any storage key spelling (`suggestion:*`, `global:*`,
+ * `label:<uuid>:*`, plain). Parses the key structure only; never inspects values.
+ */
+export function canonicalFieldName(storageKey: string): string {
+  const unprefixed = parseSuggestionStorageKey(storageKey) ?? storageKey;
+  return semanticFieldKey({ key: unprefixed, value: '' });
+}
+
 export type FieldSuggestionRow = {
   key: string;
   value: string;

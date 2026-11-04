@@ -17,6 +17,7 @@
     "db:migrate": "node scripts/run-migrations.mjs",
     "auth:reset-password": "node dist/scripts/auth-reset-password.js",
     "auth:promote-admin": "node dist/scripts/auth-promote-admin.js",
+    "training:export-fields": "node dist/scripts/export-field-training-examples.js",
     "openapi:export": "nest build && node --import tsx scripts/export-openapi.mts"
   },
   "dependencies": {

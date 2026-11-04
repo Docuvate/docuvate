@@ -51,6 +51,10 @@ export function parseOptionalNumber(value: unknown): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
+export function parseNumberArray(value: unknown): number[] {
+  return Array.isArray(value) ? value.map((item) => parseNumber(item)) : [];
+}
+
 export function parseBoolean(value: unknown): boolean {
   if (typeof value === 'boolean') {
     return value;
