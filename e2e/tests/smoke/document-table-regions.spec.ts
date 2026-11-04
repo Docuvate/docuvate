@@ -4,6 +4,7 @@ import { expect, test, type Page } from '@playwright/test';
 
 import { applyDocuvateLocale } from '../../helpers/docuvate-theme';
 import { openLayoutDocumentPage, uploadLayoutTableDocument } from '../../helpers/layout-chat-fixture';
+import { showLayoutPane } from '../../helpers/layout-pane';
 import {
   assertNoHorizontalOverflow,
   assertTableCorrectionSheet,
@@ -128,6 +129,12 @@ test.describe('document table regions', () => {
         viewport.width < 1024 ? '1' : '0',
         { timeout: 10_000 }
       );
+      const openTableSheet = page.getByTestId('table-correction-sheet');
+      if ((await openTableSheet.count()) > 0) {
+        await page.keyboard.press('Escape');
+        await expect(openTableSheet).toHaveCount(0);
+      }
+      await showLayoutPane(page, 'panel');
       await page
         .locator('.layout-side-tabs')
         .getByRole('tab', { name: /Tabellen|Tables/i })
