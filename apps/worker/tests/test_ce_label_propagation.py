@@ -21,9 +21,9 @@ def _mock_embed(texts: list[str]) -> list[list[float]]:
 
 @patch(
     "docuvate_worker.infrastructure.ml.ce_ml.label_propagation.embed_texts_onnx",
-    side_effect=_mock_embed,
+    new=_mock_embed,
 )
-def test_zero_examples_never_auto_assign(_mock: object) -> None:
+def test_zero_examples_never_auto_assign() -> None:
     vectors = np.eye(4, dtype=np.float32).tolist()
     scores = propagate_label_scores(vectors, label_name="Rechnung", seed_document_indices=[])
     assert scores
@@ -32,9 +32,9 @@ def test_zero_examples_never_auto_assign(_mock: object) -> None:
 
 @patch(
     "docuvate_worker.infrastructure.ml.ce_ml.label_propagation.embed_texts_onnx",
-    side_effect=_mock_embed,
+    new=_mock_embed,
 )
-def test_seeded_hybrid_prefers_neighbor(_mock: object) -> None:
+def test_seeded_hybrid_prefers_neighbor() -> None:
     vectors = [
         [1.0, 0.0, 0.0, 0.0],
         [0.99, 0.01, 0.0, 0.0],
@@ -115,9 +115,9 @@ def test_cautious_auto_assign_is_never_broader_than_normal() -> None:
 
 @patch(
     "docuvate_worker.infrastructure.ml.ce_ml.label_propagation.embed_texts_onnx",
-    side_effect=_mock_embed,
+    new=_mock_embed,
 )
-def test_zero_shot_suggestion_preset_shifts_threshold(_mock: object) -> None:
+def test_zero_shot_suggestion_preset_shifts_threshold() -> None:
     vectors = [[1.0, 0.0, 0.0, 0.0], [0.33, 0.94, 0.0, 0.0], [0.0, 1.0, 0.0, 0.0]]
 
     def suggested(preset: LabelSuggestionPreset) -> int:

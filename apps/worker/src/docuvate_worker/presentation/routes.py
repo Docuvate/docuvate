@@ -20,6 +20,7 @@ from docuvate_worker.application.embedding_density import (
     train_from_labeled_examples,
 )
 from docuvate_worker.application.retrain import run_retrain_stub
+from docuvate_worker.application.smart_duplicates_service import find_smart_duplicate_candidates
 from docuvate_worker.domain.cpu_pipeline.contracts import TacoStageData
 from docuvate_worker.domain.embedding_density.schemas import EmbeddingDensityStatePayload
 from docuvate_worker.domain.exact_fact_index.build import build_exact_fact_index
@@ -144,6 +145,9 @@ from docuvate_worker.presentation.schemas import (
     RagRetrieveResponse,
     RagRetrieveResultItem,
     RepresentationFromTextRequest,
+    SmartDuplicateCandidateModel,
+    SmartDuplicatesDetectRequest,
+    SmartDuplicatesDetectResponse,
 )
 
 router = APIRouter(prefix="/v1")
@@ -713,6 +717,25 @@ def representation_from_text(
     if model is None:
         raise HTTPException(status_code=500, detail="representation encode failed")
     return model
+
+
+@router.post("/ml/smart-duplicates/detect", response_model=SmartDuplicatesDetectResponse)
+def smart_duplicates_detect(
+    body: SmartDuplicatesDetectRequest,
+    x_worker_secret: str | None = Header(default=None, alias="X-Worker-Secret"),
+) -> SmartDuplicatesDetectResponse:
+    _require_worker_secret(x_worker_secret)
+    candidates = find_smart_duplicate_candidates(
+        focus_document_id=body.focus_document_id,
+        focus_lines=body.focus_lines,
+        peer_documents=[(peer.document_id, peer.lines) for peer in body.peers],
+    )
+    return SmartDuplicatesDetectResponse(
+        candidates=[
+            SmartDuplicateCandidateModel(document_id=row.document_id, similarity=row.similarity)
+            for row in candidates
+        ]
+    )
 
 
 @router.post("/ml/ce/label-propagation", response_model=CeLabelPropagationResponse)

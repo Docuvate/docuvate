@@ -795,4 +795,24 @@ class CeNewLabelSignalResponse(BaseModel):
     results: list[CeNewLabelSignalResult]
 
 
+class SmartDuplicatePeerModel(BaseModel):
+    document_id: str = Field(min_length=1, validation_alias="documentId")
+    lines: list[str]
+
+
+class SmartDuplicatesDetectRequest(BaseModel):
+    focus_document_id: str = Field(min_length=1, validation_alias="focusDocumentId")
+    focus_lines: list[str] = Field(validation_alias="focusLines")
+    peers: list[SmartDuplicatePeerModel]
+
+
+class SmartDuplicateCandidateModel(BaseModel):
+    document_id: str = Field(serialization_alias="documentId")
+    similarity: float
+
+
+class SmartDuplicatesDetectResponse(BaseModel):
+    candidates: list[SmartDuplicateCandidateModel]
+
+
 ExtractRequest.model_rebuild()
