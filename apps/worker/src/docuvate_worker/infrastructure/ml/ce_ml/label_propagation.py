@@ -18,9 +18,21 @@ from docuvate_worker.infrastructure.ml.ce_ml.conformal_threshold import (
 )
 from docuvate_worker.infrastructure.ml.ce_ml.constants import VECTOR_NORM_EPSILON
 from docuvate_worker.infrastructure.ml.ce_ml.hybrid_knn import hybrid_binary_label_scores
+from docuvate_worker.infrastructure.ml.ce_ml.label_ranker import (
+    AUTO_ACCEPT_MIN_EXAMPLES_PER_LABEL,
+    auto_accept_mask,
+    build_label_features,
+    learn_auto_accept_margin,
+    leave_one_out_votes,
+    predict_label_votes,
+)
 from docuvate_worker.infrastructure.onnx_e5_encoder import embed_texts_onnx
 
 FloatArray = NDArray[np.float32]
+
+_BINARY_CLASSES = 2
+_POSITIVE_CLASS = 1
+_RIDGE_MARGIN_SPAN = 2.0
 
 
 @dataclass(frozen=True)
@@ -42,30 +54,6 @@ def zero_shot_scores(label_name: str, passage_vectors: FloatArray) -> FloatArray
     normalized = passage_vectors / norms[:, None]
     query_norm = query / (np.linalg.norm(query) + VECTOR_NORM_EPSILON)
     return np.asarray(normalized @ query_norm, dtype=np.float32)
-
-
-def _leave_one_out_calibration(
-    passage_vectors: FloatArray,
-    passage_texts: list[str],
-    *,
-    calibration_indices: list[int],
-    positive_mask: FloatArray,
-) -> tuple[FloatArray, FloatArray]:
-    scores: list[float] = []
-    labels: list[float] = []
-    for held in calibration_indices:
-        pool = [index for index in calibration_indices if index != held]
-        if not pool:
-            continue
-        row_scores = hybrid_binary_label_scores(
-            passage_vectors,
-            passage_texts,
-            pool_indices=pool,
-            positive_mask=positive_mask,
-        )
-        scores.append(float(row_scores[held]))
-        labels.append(float(positive_mask[held]))
-    return np.asarray(scores, dtype=np.float32), np.asarray(labels, dtype=np.float32)
 
 
 def propagate_label_scores(
@@ -97,9 +85,7 @@ def propagate_label_scores(
         if 0 <= index < n:
             positive_mask[index] = 1.0
 
-    calibration_pool = [
-        index for index in (calibration_document_indices or []) if 0 <= index < n
-    ]
+    calibration_pool = [index for index in (calibration_document_indices or []) if 0 <= index < n]
     min_cal = label_propagation_min_calibration_docs()
     positives_in_pool = sum(1 for index in calibration_pool if positive_mask[index] > 0)
     negatives_in_pool = sum(1 for index in calibration_pool if positive_mask[index] == 0)
@@ -111,82 +97,75 @@ def propagate_label_scores(
     )
 
     if len(seed_document_indices) == 0:
-        scores = zero_shot_scores(label_name, matrix)
-        tiers = label_tiers(0)
-        auto_thr = tiers["autoAssignThreshold"]
-        sugg_thr = tiers["suggestThreshold"]
+        zero_shot = zero_shot_scores(label_name, matrix)
+        sugg_thr = label_tiers(0)["suggestThreshold"]
         out: list[LabelPropagationDocumentScore] = []
         for i in range(n):
-            score = float(scores[i])
-            if auto_thr is not None and score >= auto_thr:
-                tier = "auto_assign"
-            elif score >= sugg_thr:
-                tier = "suggest"
-            else:
-                tier = "none"
+            score = float(zero_shot[i])
+            tier = "suggest" if score >= sugg_thr else "none"
             out.append(LabelPropagationDocumentScore(document_index=i, score=score, tier=tier))
         return out
 
-    vote_pool = (
-        calibration_pool
-        if calibration_pool
-        else list(dict.fromkeys(positive_indices))
-    )
-    scores = hybrid_binary_label_scores(
-        matrix,
-        texts,
-        pool_indices=vote_pool,
-        positive_mask=positive_mask,
-    )
+    vote_pool = calibration_pool if calibration_pool else list(dict.fromkeys(positive_indices))
+    seed_set = set(seed_document_indices)
+    pool = np.asarray(list(dict.fromkeys(vote_pool)), dtype=np.int64)
+    pool_labels = np.asarray(positive_mask[pool] > 0, dtype=np.int64)
+    if int(pool_labels.min()) == int(pool_labels.max()):
+        hybrid = hybrid_binary_label_scores(
+            matrix, texts, pool_indices=pool.tolist(), positive_mask=positive_mask
+        )
+        return _abstain(n, seed_set, np.asarray(hybrid, dtype=np.float64))
 
+    features = build_label_features(matrix.astype(np.float64), texts)
+    votes = predict_label_votes(features, features[pool], pool_labels, _BINARY_CLASSES)
+    scores = _positive_score(votes.ridge_scores)
     if not can_calibrate:
-        abstain: list[LabelPropagationDocumentScore] = []
-        for i in range(n):
-            if i in seed_document_indices:
-                continue
-            abstain.append(
-                LabelPropagationDocumentScore(
-                    document_index=i,
-                    score=float(scores[i]),
-                    tier="none",
-                )
-            )
-        return abstain
+        return _abstain(n, seed_set, scores)
 
-    cal_scores, cal_labels = _leave_one_out_calibration(
-        matrix,
-        texts,
-        calibration_indices=calibration_pool,
-        positive_mask=positive_mask,
-    )
+    loo = leave_one_out_votes(features[pool], pool_labels, _BINARY_CLASSES)
+    cal_scores = _positive_score(loo.ridge_scores).astype(np.float32)
+    cal_labels = pool_labels.astype(np.float32)
     base_tau = split_conformal_accept_threshold(cal_scores, cal_labels)
     if base_tau is None:
-        abstain_none: list[LabelPropagationDocumentScore] = []
-        for i in range(n):
-            if i in seed_document_indices:
-                continue
-            abstain_none.append(
-                LabelPropagationDocumentScore(
-                    document_index=i,
-                    score=float(scores[i]),
-                    tier="none",
-                )
-            )
-        return abstain_none
-
+        return _abstain(n, seed_set, scores)
     tau = sequential_precision_floor(base_tau, cal_scores, cal_labels)
-    tiers = label_tiers(len(seed_document_indices))
-    auto_thr = tiers["autoAssignThreshold"]
+
+    positives = int(pool_labels.sum())
+    examples_per_class = np.asarray([pool_labels.size - positives, positives], dtype=np.int64)
+    margin_threshold = (
+        learn_auto_accept_margin(loo, pool_labels, accepted_class=_POSITIVE_CLASS)
+        if positives >= AUTO_ACCEPT_MIN_EXAMPLES_PER_LABEL
+        else None
+    )
+    auto = auto_accept_mask(
+        votes, margin_threshold=margin_threshold, examples_per_class=examples_per_class
+    ) & (votes.ridge == _POSITIVE_CLASS)
     propagated: list[LabelPropagationDocumentScore] = []
     for i in range(n):
-        if i in seed_document_indices:
+        if i in seed_set:
             continue
         score = float(scores[i])
-        if score < tau:
-            tier = "none"
-        elif auto_thr is not None and score >= max(tau, auto_thr):
+        if bool(auto[i]) and score >= tau:
             tier = "auto_assign"
-        else:
+        elif score >= tau:
             tier = "suggest"
+        else:
+            tier = "none"
         propagated.append(LabelPropagationDocumentScore(document_index=i, score=score, tier=tier))
     return propagated
+
+
+def _positive_score(ridge_scores: NDArray[np.float64]) -> NDArray[np.float64]:
+    """Map the binary Ridge margin (positive minus rest, within about +-2) onto [0, 1]."""
+    margin = ridge_scores[:, _POSITIVE_CLASS] - ridge_scores[:, 1 - _POSITIVE_CLASS]
+    return np.asarray(np.clip((margin + _RIDGE_MARGIN_SPAN) / (2 * _RIDGE_MARGIN_SPAN), 0.0, 1.0))
+
+
+def _abstain(
+    n: int, seed_set: set[int], scores: NDArray[np.float64]
+) -> list[LabelPropagationDocumentScore]:
+    return [
+        LabelPropagationDocumentScore(document_index=i, score=float(scores[i]), tier="none")
+        for i in range(n)
+        if i not in seed_set
+    ]

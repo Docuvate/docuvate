@@ -773,4 +773,19 @@ class CeMissingLabelBatchResponse(BaseModel):
     results: list[CeMissingLabelBatchResult]
 
 
+class CeNewLabelSignalRequest(BaseModel):
+    target_document_indices: list[int] = Field(min_length=1, max_length=256)
+    corpus: list[CeMissingLabelCorpusDocument] = Field(min_length=1)
+
+
+class CeNewLabelSignalResult(BaseModel):
+    document_index: int
+    score: float
+    show: bool
+
+
+class CeNewLabelSignalResponse(BaseModel):
+    results: list[CeNewLabelSignalResult]
+
+
 ExtractRequest.model_rebuild()

@@ -35,6 +35,10 @@ MIN_UNIQUE_DOCUMENTS_FOR_FINE_READY_PER_LABEL = 416
 TEMPERATURE_GRID_MIN = 0.1
 TEMPERATURE_GRID_MAX = 8.0
 TEMPERATURE_GRID_SIZE = 80
+BIAS_L2_PENALTY = 1.0
+BIAS_TRUST_RADIUS = 2.0
+BIAS_NEWTON_TOLERANCE = 1e-6
+MIN_SELECTION_EXAMPLES_PER_CLASS_FOR_BIAS = 5
 
 
 @dataclass(frozen=True)
@@ -173,7 +177,7 @@ def _nll_with_temperature_bias(
         probs = softmax(scaled[i])
         p = float(probs[int(y)])
         total -= float(np.log(max(p, 1e-12)))
-    return total
+    return total + 0.5 * BIAS_L2_PENALTY * float(np.dot(bias, bias))
 
 
 def _newton_bias_for_temperature(
@@ -183,26 +187,33 @@ def _newton_bias_for_temperature(
     *,
     max_steps: int = 25,
 ) -> NDArray[np.float64]:
+    """Penalised Newton steps for the per-class bias.
+
+    The L2 penalty (a Gaussian prior on the bias) keeps the Hessian well conditioned when a class
+    is missing from the small selection split; without it the bias diverges to +-1e4 and every
+    document collapses into one class. Steps are additionally clipped to a trust region.
+    """
     num_classes = logits.shape[1]
     bias = np.zeros(num_classes, dtype=np.float64)
     for _ in range(max_steps):
         scaled = logits / max(temperature, 1e-6) + bias
-        grad = np.zeros(num_classes, dtype=np.float64)
-        hess = np.zeros((num_classes, num_classes), dtype=np.float64)
+        grad = BIAS_L2_PENALTY * bias
+        hess = BIAS_L2_PENALTY * np.eye(num_classes, dtype=np.float64)
         for i, y in enumerate(labels):
             probs = softmax(scaled[i])
-            y_int = int(y)
-            for c in range(num_classes):
-                grad[c] += probs[c] - (1.0 if c == y_int else 0.0)
-            for a in range(num_classes):
-                for b in range(num_classes):
-                    hess[a, b] += probs[a] * (float(a == b) - probs[b])
+            onehot = np.zeros(num_classes, dtype=np.float64)
+            onehot[int(y)] = 1.0
+            grad = grad + probs - onehot
+            hess = hess + np.diag(probs) - np.outer(probs, probs)
         try:
-            step = np.linalg.solve(hess + np.eye(num_classes) * 1e-4, grad)
+            step = np.linalg.solve(hess, grad)
         except np.linalg.LinAlgError:
             break
-        bias -= step
-        if float(np.linalg.norm(step)) < 1e-6:  # noqa: PLR2004
+        step_norm = float(np.linalg.norm(step))
+        if step_norm > BIAS_TRUST_RADIUS:
+            step = step * (BIAS_TRUST_RADIUS / step_norm)
+        bias = bias - step
+        if step_norm < BIAS_NEWTON_TOLERANCE:
             break
     return bias
 
@@ -211,7 +222,12 @@ def fit_temperature_and_bias(
     logits: NDArray[np.float64],
     labels: NDArray[np.int64],
 ) -> tuple[float, NDArray[np.float64]]:
-    """Grid search beta (temperature) on 80 values; Newton on per-class bias for each."""
+    """Grid search the temperature; fit a penalised per-class bias only with enough evidence.
+
+    A per-class bias is only estimated when every class has at least
+    ``MIN_SELECTION_EXAMPLES_PER_CLASS_FOR_BIAS`` selection examples. Small workspaces keep a zero
+    bias, so calibration only rescales confidence and never changes the argmax label.
+    """
     grid = np.linspace(
         np.log(TEMPERATURE_GRID_MIN),
         np.log(TEMPERATURE_GRID_MAX),
@@ -222,8 +238,14 @@ def fit_temperature_and_bias(
     best_temp = 1.0
     best_bias = np.zeros(logits.shape[1], dtype=np.float64)
     best_nll = float("inf")
+    class_counts = np.bincount(labels, minlength=logits.shape[1])
+    fit_bias = bool(np.all(class_counts >= MIN_SELECTION_EXAMPLES_PER_CLASS_FOR_BIAS))
     for beta in betas.tolist():
-        bias = _newton_bias_for_temperature(logits, labels, float(beta))
+        bias = (
+            _newton_bias_for_temperature(logits, labels, float(beta))
+            if fit_bias
+            else np.zeros(logits.shape[1], dtype=np.float64)
+        )
         nll = _nll_with_temperature_bias(logits, labels, float(beta), bias)
         if nll < best_nll:
             best_nll = nll
