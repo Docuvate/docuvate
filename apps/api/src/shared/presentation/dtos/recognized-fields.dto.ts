@@ -53,6 +53,11 @@ class ReplaceRecognizedFieldItemDto {
   @IsOptional()
   @IsBoolean()
   confidenceGateEnabled?: boolean | null;
+
+  /** Sent by the catalog editor on every save; without it the whitelist rejects the whole request. */
+  @IsOptional()
+  @IsBoolean()
+  showInFilter?: boolean;
 }
 
 export class RecognizedFieldFilterValuesQueryDto {

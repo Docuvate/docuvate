@@ -4987,6 +4987,83 @@ mark.global-search-mark {
   outline-offset: 2px;
 }
 
+/* Small screens: one card per field instead of a squeezed four-column table, so field names
+   wrap at word boundaries and the rule reads in full. */
+@media (max-width: 767px) {
+  .recognized-fields-table,
+  .recognized-fields-table tbody {
+    display: block;
+    width: 100%;
+  }
+
+  .recognized-fields-table colgroup,
+  .recognized-fields-table thead {
+    display: none;
+  }
+
+  .recognized-fields-table tbody tr {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      'label actions'
+      'type actions'
+      'rule rule';
+    column-gap: var(--dv-space-sm);
+    row-gap: var(--dv-space-2xs);
+    padding: var(--dv-space-sm) 0;
+    border-bottom: 1px solid var(--dv-color-border);
+  }
+
+  .recognized-fields-table tbody td {
+    display: block;
+    width: auto;
+    min-width: 0;
+    max-width: none;
+    padding: 0;
+    border-bottom: none;
+  }
+
+  .recognized-fields-table__cell--label {
+    grid-area: label;
+    overflow-wrap: break-word;
+    hyphens: auto;
+  }
+
+  .recognized-fields-table__cell--type {
+    grid-area: type;
+    font-size: var(--dv-font-size-sm);
+    color: var(--dv-color-text-muted);
+  }
+
+  .recognized-fields-table__cell--rule {
+    grid-area: rule;
+    font-size: var(--dv-font-size-sm);
+  }
+
+  .recognized-fields-table__cell--type .recognized-fields-table__truncate,
+  .recognized-fields-table__cell--rule .recognized-fields-table__truncate {
+    white-space: normal;
+    overflow-wrap: break-word;
+  }
+
+  /* The hidden column headers become inline captions ("Typ: Datum"). */
+  .recognized-fields-table__cell--type::before,
+  .recognized-fields-table__cell--rule::before {
+    content: attr(data-label) ': ';
+    color: var(--dv-color-text-subtle);
+  }
+
+  .recognized-fields-table__cell--type .recognized-fields-table__truncate,
+  .recognized-fields-table__cell--rule .recognized-fields-table__truncate {
+    display: inline;
+  }
+
+  .recognized-fields-table .recognized-fields-table__actions {
+    grid-area: actions;
+    align-self: start;
+  }
+}
+
 .recognized-fields-table__editor-row td {
   padding: 0;
   border-bottom: 1px solid var(--dv-color-border);
@@ -16429,17 +16506,17 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 
 .labels-vocabulary-card-row__line1 {
   min-width: 0;
-  overflow: hidden;
 }
 
 .labels-vocabulary-card-row__line1 .chip {
   max-width: 100%;
 }
 
+/* Wrap long label names instead of truncating them; break inside a word only as a last resort. */
 .labels-vocabulary-card-row__line1 .chip-label {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .labels-vocabulary-card-row__line2 {
@@ -16454,9 +16531,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 .labels-vocabulary-card-row__count,
 .labels-vocabulary-card-row__auto {
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: break-word;
 }
 
 .labels-vocabulary-card-row__actions {
