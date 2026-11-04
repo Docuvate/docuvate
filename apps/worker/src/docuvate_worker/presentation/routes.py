@@ -731,6 +731,8 @@ def ce_label_propagation(
         passage_texts=passage_texts,
         positive_document_indices=body.positive_document_indices or None,
         calibration_document_indices=body.calibration_document_indices or None,
+        auto_assign=body.auto_assign,
+        suggestions=body.suggestions,
     )
     return CeLabelPropagationResponse(
         scores=[

@@ -9,12 +9,16 @@ import type {
   DocumentRegionRole,
   DocumentRegionTableDto,
   DuplicateCandidateSource,
+  DuplicateDetectionMode,
   DuplicateFeatureVector,
   ExtractedField,
   ExtractionBlock,
   ExtractionResult,
+  FieldAcceptancePreset,
   FieldCorrectionOp,
   FieldCorrectionScope,
+  LabelAutoAssignPreset,
+  LabelSuggestionPreset,
   LayoutToken,
   MatchingAlgorithm,
   NormalizedBBox,
@@ -262,16 +266,13 @@ export interface UserPreferencesEntity {
   preferredChatProvider: string | null;
   useArenaWinnerAsDefault: boolean;
   arenaWinnerEngine: string | null;
-  labelFieldConfidenceThreshold: number;
   /** Learned cosine threshold for Labelraum “near unlabeled” and assign recommendations. */
   labelNearSimilarityThreshold: number;
-  /** When true, gated catalog fields need label confidence or assignment (see threshold). */
+  /** When true, gated catalog fields need label confidence or assignment (workspace field acceptance). */
   fieldExtractionConfidenceGateEnabled: boolean;
   /** All must be assigned on the document before gated extraction (AND). */
   fieldExtractionRequiredLabelIds: string[];
   advancedFeaturesEnabled: boolean;
-  /** Near-duplicate embedding classifier (low-priority queue); default off. */
-  fuzzyDuplicateDetectionEnabled: boolean;
   themePreference: 'light' | 'dark' | 'system';
   locale: 'de' | 'en' | null;
   documentChatCloudBaseUrl: string | null;
@@ -289,12 +290,10 @@ export interface UserPreferencesRepository {
       preferredChatProvider?: string | null;
       useArenaWinnerAsDefault?: boolean;
       arenaWinnerEngine?: string | null;
-      labelFieldConfidenceThreshold?: number;
       labelNearSimilarityThreshold?: number;
       fieldExtractionConfidenceGateEnabled?: boolean;
       fieldExtractionRequiredLabelIds?: string[];
       advancedFeaturesEnabled?: boolean;
-      fuzzyDuplicateDetectionEnabled?: boolean;
       themePreference?: 'light' | 'dark' | 'system';
       locale?: 'de' | 'en' | null;
       documentChatCloudBaseUrl?: string | null;
@@ -313,6 +312,20 @@ export interface UserPreferencesRepository {
 }
 
 export const USER_PREFERENCES_REPOSITORY = Symbol('USER_PREFERENCES_REPOSITORY');
+
+export interface WorkspaceMlSettings {
+  labelAutoAssign: LabelAutoAssignPreset;
+  labelSuggestions: LabelSuggestionPreset;
+  duplicateDetection: DuplicateDetectionMode;
+  fieldAcceptance: FieldAcceptancePreset;
+}
+
+export interface WorkspaceMlSettingsRepository {
+  get(): Promise<WorkspaceMlSettings>;
+  update(patch: Partial<WorkspaceMlSettings>, updatedByUserId: string): Promise<WorkspaceMlSettings>;
+}
+
+export const WORKSPACE_ML_SETTINGS_REPOSITORY = Symbol('WORKSPACE_ML_SETTINGS_REPOSITORY');
 
 export interface ExtractionFieldCorrectionRecord {
   id: string;

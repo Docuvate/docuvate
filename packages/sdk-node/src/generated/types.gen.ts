@@ -1272,15 +1272,20 @@ export type UpdateUserSettingsRequestDto = {
     preferredExtractorEngine?: string;
     preferredChatProvider?: string;
     useArenaWinnerAsDefault?: boolean;
-    labelFieldConfidenceThreshold?: number;
     fieldExtractionConfidenceGateEnabled?: boolean;
     fieldExtractionRequiredLabelIds?: Array<string>;
     advancedFeaturesEnabled?: boolean;
-    fuzzyDuplicateDetectionEnabled?: boolean;
     themePreference?: 'light' | 'dark' | 'system';
     locale?: 'de' | 'en';
     documentChatCloudBaseUrl?: string;
     documentChatCloudApiKey?: string;
+};
+
+export type UpdateWorkspaceMlSettingsRequestDto = {
+    labelAutoAssign?: 'off' | 'cautious' | 'normal';
+    labelSuggestions?: 'few' | 'normal' | 'many';
+    duplicateDetection?: 'off' | 'exact' | 'similar';
+    fieldAcceptance?: 'cautious' | 'normal' | 'generous';
 };
 
 export type UserSettingsResponseDto = {
@@ -1297,16 +1302,22 @@ export type UserSettingsResponseDto = {
     documentChatLocalModelEnabled?: boolean;
     documentChatLocalModelReady?: boolean;
     advancedFeaturesEnabled?: boolean;
-    fuzzyDuplicateDetectionEnabled?: boolean;
     useArenaWinnerAsDefault: boolean;
     arenaWinnerEngine?: string;
-    labelFieldConfidenceThreshold?: number;
     fieldExtractionConfidenceGateEnabled?: boolean;
     fieldExtractionRequiredLabelIds?: Array<string>;
     themePreference?: 'light' | 'dark' | 'system';
     locale?: 'de' | 'en';
     documentChatCloudBaseUrl?: string;
     documentChatCloudApiKeyConfigured?: boolean;
+};
+
+export type WorkspaceMlSettingsResponseDto = {
+    labelAutoAssign: 'off' | 'cautious' | 'normal';
+    labelSuggestions: 'few' | 'normal' | 'many';
+    duplicateDetection: 'off' | 'exact' | 'similar';
+    fieldAcceptance: 'cautious' | 'normal' | 'generous';
+    editable: boolean;
 };
 
 export type GetAdminAccessData = {
@@ -5072,6 +5083,50 @@ export type GetHardwareCapabilitiesResponses = {
 };
 
 export type GetHardwareCapabilitiesResponse = GetHardwareCapabilitiesResponses[keyof GetHardwareCapabilitiesResponses];
+
+export type GetWorkspaceMlSettingsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/settings/workspace-ml';
+};
+
+export type GetWorkspaceMlSettingsErrors = {
+    401: ProblemDetailsDto;
+    403: ProblemDetailsDto;
+    404: ProblemDetailsDto;
+    422: ProblemDetailsDto;
+};
+
+export type GetWorkspaceMlSettingsError = GetWorkspaceMlSettingsErrors[keyof GetWorkspaceMlSettingsErrors];
+
+export type GetWorkspaceMlSettingsResponses = {
+    200: WorkspaceMlSettingsResponseDto;
+};
+
+export type GetWorkspaceMlSettingsResponse = GetWorkspaceMlSettingsResponses[keyof GetWorkspaceMlSettingsResponses];
+
+export type UpdateWorkspaceMlSettingsData = {
+    body: UpdateWorkspaceMlSettingsRequestDto;
+    path?: never;
+    query?: never;
+    url: '/settings/workspace-ml';
+};
+
+export type UpdateWorkspaceMlSettingsErrors = {
+    401: ProblemDetailsDto;
+    403: ProblemDetailsDto;
+    404: ProblemDetailsDto;
+    422: ProblemDetailsDto;
+};
+
+export type UpdateWorkspaceMlSettingsError = UpdateWorkspaceMlSettingsErrors[keyof UpdateWorkspaceMlSettingsErrors];
+
+export type UpdateWorkspaceMlSettingsResponses = {
+    200: WorkspaceMlSettingsResponseDto;
+};
+
+export type UpdateWorkspaceMlSettingsResponse = UpdateWorkspaceMlSettingsResponses[keyof UpdateWorkspaceMlSettingsResponses];
 
 export type ListSftpIngressAccountsData = {
     body?: never;

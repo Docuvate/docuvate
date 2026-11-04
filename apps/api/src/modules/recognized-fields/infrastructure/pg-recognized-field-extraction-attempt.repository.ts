@@ -12,6 +12,7 @@ import {
   requireRecord,
 } from '../../../shared/infrastructure/database/row-parse.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
+import type { FieldGateDefaults } from '../domain/field-gate-defaults.js';
 import { RECOGNIZED_FIELD_EXTRACTOR_VERSION } from '../domain/recognized-field-reextract-config.js';
 
 const OUTCOMES: readonly RecognizedFieldExtractionOutcome[] = [
@@ -113,13 +114,10 @@ export class PgRecognizedFieldExtractionAttemptRepository {
       minLabelConfidence: number | null;
       confidenceGateEnabled: boolean | null;
     },
-    prefs: {
-      fieldExtractionConfidenceGateEnabled: boolean;
-      labelFieldConfidenceThreshold: number;
-    },
+    defaults: Pick<FieldGateDefaults, 'confidenceGateEnabled' | 'minLabelConfidence'>,
     limit: number
   ): Promise<string[]> {
-    const ids = await this.listDocumentIdsForFieldReextraction(userId, field, prefs, limit);
+    const ids = await this.listDocumentIdsForFieldReextraction(userId, field, defaults, limit);
     if (ids.length === 0) {
       return [];
     }
@@ -169,16 +167,12 @@ export class PgRecognizedFieldExtractionAttemptRepository {
       minLabelConfidence: number | null;
       confidenceGateEnabled: boolean | null;
     },
-    prefs: {
-      fieldExtractionConfidenceGateEnabled: boolean;
-      labelFieldConfidenceThreshold: number;
-    },
+    defaults: Pick<FieldGateDefaults, 'confidenceGateEnabled' | 'minLabelConfidence'>,
     limit: number
   ): Promise<string[]> {
     const capped = Math.min(Math.max(limit, 1), 5000);
-    const confidenceGateEnabled =
-      field.confidenceGateEnabled ?? prefs.fieldExtractionConfidenceGateEnabled;
-    const minConfidence = field.minLabelConfidence ?? prefs.labelFieldConfidenceThreshold;
+    const confidenceGateEnabled = field.confidenceGateEnabled ?? defaults.confidenceGateEnabled;
+    const minConfidence = field.minLabelConfidence ?? defaults.minLabelConfidence;
 
     if (field.extractForAllDocuments) {
       const result = await this.pool.query<{ id: string }>(

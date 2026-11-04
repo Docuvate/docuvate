@@ -2,7 +2,10 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Module } from '@nestjs/common';
 
-import { USER_PREFERENCES_REPOSITORY } from '../../shared/domain/ports.js';
+import {
+  USER_PREFERENCES_REPOSITORY,
+  WORKSPACE_ML_SETTINGS_REPOSITORY,
+} from '../../shared/domain/ports.js';
 import { FeatureFlagsModule } from '../feature-flags/feature-flags.module.js';
 import { RepresentationModule } from '../representation/representation.module.js';
 import { WorkspaceModule } from '../workspace/workspace.module.js';
@@ -16,7 +19,12 @@ import {
   ResolveUserExtractorEngineUseCase,
   UpdateUserSettingsUseCase,
 } from './application/settings.use-cases.js';
+import {
+  GetWorkspaceMlSettingsUseCase,
+  UpdateWorkspaceMlSettingsUseCase,
+} from './application/workspace-ml-settings.use-cases.js';
 import { PgUserPreferencesRepository } from './infrastructure/pg-user-preferences.repository.js';
+import { PgWorkspaceMlSettingsRepository } from './infrastructure/pg-workspace-ml-settings.repository.js';
 import { SettingsController } from './presentation/settings.controller.js';
 
 @Module({
@@ -24,6 +32,9 @@ import { SettingsController } from './presentation/settings.controller.js';
   controllers: [SettingsController],
   providers: [
     { provide: USER_PREFERENCES_REPOSITORY, useClass: PgUserPreferencesRepository },
+    { provide: WORKSPACE_ML_SETTINGS_REPOSITORY, useClass: PgWorkspaceMlSettingsRepository },
+    GetWorkspaceMlSettingsUseCase,
+    UpdateWorkspaceMlSettingsUseCase,
     GetUserSettingsUseCase,
     UpdateUserSettingsUseCase,
     GetHardwareCapabilitiesUseCase,
@@ -35,6 +46,7 @@ import { SettingsController } from './presentation/settings.controller.js';
   ],
   exports: [
     USER_PREFERENCES_REPOSITORY,
+    WORKSPACE_ML_SETTINGS_REPOSITORY,
     RecordExtractionArenaRatingUseCase,
     ResolveUserExtractorEngineUseCase,
     EffectiveDocumentChatProviderUseCase,

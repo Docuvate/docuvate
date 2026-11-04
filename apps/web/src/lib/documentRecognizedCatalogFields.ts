@@ -35,18 +35,19 @@ export function catalogFieldGateContextFromDocument(
   return { assignedTagIds, assignedNonInboxTagIds, suggestions };
 }
 
+/** Account gate defaults plus the workspace field-acceptance confidence. */
+export type CatalogFieldGateSettings = Pick<
+  UserSettingsDto,
+  'fieldExtractionConfidenceGateEnabled' | 'fieldExtractionRequiredLabelIds'
+> & { labelFieldConfidenceThreshold: number };
+
 function gateConfigForDefinition(
   def: RecognizedFieldDefinitionDto,
-  settings: Pick<
-    UserSettingsDto,
-    | 'fieldExtractionConfidenceGateEnabled'
-    | 'labelFieldConfidenceThreshold'
-    | 'fieldExtractionRequiredLabelIds'
-  >
+  settings: CatalogFieldGateSettings
 ): FieldExtractionGateConfig {
   const confidenceGateEnabled =
     def.confidenceGateEnabled ?? settings.fieldExtractionConfidenceGateEnabled !== false;
-  const minLabelConfidence = def.minLabelConfidence ?? settings.labelFieldConfidenceThreshold ?? 0.62;
+  const minLabelConfidence = def.minLabelConfidence ?? settings.labelFieldConfidenceThreshold;
 
   let requiredLabelIds = def.gateLabelIds;
   if (
@@ -72,12 +73,7 @@ export function mergeCatalogFieldsForDocument(
   persisted: readonly ExtractedField[],
   catalog: readonly RecognizedFieldDefinitionDto[],
   gateContext: CatalogFieldGateContext,
-  settings: Pick<
-    UserSettingsDto,
-    | 'fieldExtractionConfidenceGateEnabled'
-    | 'labelFieldConfidenceThreshold'
-    | 'fieldExtractionRequiredLabelIds'
-  >
+  settings: CatalogFieldGateSettings
 ): ExtractedField[] {
   const byDefinitionId = new Map<string, ExtractedField>();
   for (const field of persisted) {

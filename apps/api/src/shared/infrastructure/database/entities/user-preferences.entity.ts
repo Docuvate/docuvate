@@ -34,13 +34,6 @@ export class UserPreferencesEntity {
   @Column('text', { name: 'preferred_chat_provider', nullable: true })
   preferredChatProvider: string | null;
 
-  @Column('real', {
-    name: 'label_field_confidence_threshold',
-    precision: 24,
-    default: () => '0.62',
-  })
-  labelFieldConfidenceThreshold: number;
-
   @Column('boolean', {
     name: 'field_extraction_confidence_gate_enabled',
     default: () => 'true',
@@ -59,12 +52,6 @@ export class UserPreferencesEntity {
     default: () => 'false',
   })
   advancedFeaturesEnabled: boolean;
-
-  @Column('boolean', {
-    name: 'fuzzy_duplicate_detection_enabled',
-    default: () => 'false',
-  })
-  fuzzyDuplicateDetectionEnabled: boolean;
 
   @Column('text', {
     name: 'theme_preference',

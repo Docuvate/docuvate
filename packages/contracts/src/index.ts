@@ -1170,12 +1170,8 @@ export interface UserSettingsDto {
   /** Local model loaded and ready for open-ended LLM answers. */
   documentChatLocalModelReady?: boolean;
   advancedFeaturesEnabled?: boolean;
-  /** Embedding/smart near-duplicate detection (async, off by default). */
-  fuzzyDuplicateDetectionEnabled?: boolean;
   useArenaWinnerAsDefault: boolean;
   arenaWinnerEngine?: string | null;
-  /** Min. label confidence (0–1) before gated recognized fields run for a suggested label. Assigned non-inbox labels qualify. */
-  labelFieldConfidenceThreshold?: number;
   /** When true, gated catalog fields require label confidence (or assignment). */
   fieldExtractionConfidenceGateEnabled?: boolean;
   /** All must be assigned on the document (AND) before gated field extraction. */
@@ -1191,16 +1187,50 @@ export interface UpdateUserSettingsRequest {
   preferredExtractorEngine?: ExtractorEngineId | string;
   preferredChatProvider?: DocumentChatProviderId | string | null;
   useArenaWinnerAsDefault?: boolean;
-  labelFieldConfidenceThreshold?: number;
   fieldExtractionConfidenceGateEnabled?: boolean;
   fieldExtractionRequiredLabelIds?: string[];
   advancedFeaturesEnabled?: boolean;
-  fuzzyDuplicateDetectionEnabled?: boolean;
   themePreference?: ThemePreference;
   locale?: UiLocale | null;
   documentChatCloudBaseUrl?: string | null;
   /** Set to empty string to clear a stored key. */
   documentChatCloudApiKey?: string | null;
+}
+
+export type LabelAutoAssignPreset = 'off' | 'cautious' | 'normal';
+export const LABEL_AUTO_ASSIGN_PRESETS: readonly LabelAutoAssignPreset[] = ['off', 'cautious', 'normal'];
+
+export type LabelSuggestionPreset = 'few' | 'normal' | 'many';
+export const LABEL_SUGGESTION_PRESETS: readonly LabelSuggestionPreset[] = ['few', 'normal', 'many'];
+
+export type DuplicateDetectionMode = 'off' | 'exact' | 'similar';
+export const DUPLICATE_DETECTION_MODES: readonly DuplicateDetectionMode[] = ['off', 'exact', 'similar'];
+
+export type FieldAcceptancePreset = 'cautious' | 'normal' | 'generous';
+export const FIELD_ACCEPTANCE_PRESETS: readonly FieldAcceptancePreset[] = ['cautious', 'normal', 'generous'];
+
+/** Minimum label confidence before gated recognized fields run, per workspace preset. */
+export const FIELD_ACCEPTANCE_LABEL_CONFIDENCE: Readonly<Record<FieldAcceptancePreset, number>> = {
+  cautious: 0.75,
+  normal: 0.62,
+  generous: 0.5,
+};
+
+/** Workspace-wide automation and recognition presets (installation admins edit, members read). */
+export interface WorkspaceMlSettingsDto {
+  labelAutoAssign: LabelAutoAssignPreset;
+  labelSuggestions: LabelSuggestionPreset;
+  duplicateDetection: DuplicateDetectionMode;
+  fieldAcceptance: FieldAcceptancePreset;
+  /** True when the current user may change these settings. */
+  editable: boolean;
+}
+
+export interface UpdateWorkspaceMlSettingsRequest {
+  labelAutoAssign?: LabelAutoAssignPreset;
+  labelSuggestions?: LabelSuggestionPreset;
+  duplicateDetection?: DuplicateDetectionMode;
+  fieldAcceptance?: FieldAcceptancePreset;
 }
 
 export interface ReplaceTagCustomFieldsRequest {

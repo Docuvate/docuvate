@@ -63,6 +63,7 @@ import { SearchVocabularyDocFrequencyCorrect20261028140000 } from './migrations/
 import { SearchVocabularyPruneStale20261028160000 } from './migrations/20261028160000-search-vocabulary-prune-stale.js';
 import { SearchVocabularyDocumentTerms20261028180000 } from './migrations/20261028180000-search-vocabulary-document-terms.js';
 import { DocumentRegions20261029120000 } from './migrations/20261029120000-document-regions.js';
+import { WorkspaceMlSettings20261104090000 } from './migrations/20261104090000-workspace-ml-settings.js';
 
 export const TYPEORM_INITIAL_MIGRATION_TIMESTAMP = 20261008120000;
 export const TYPEORM_INITIAL_MIGRATION_NAME = 'InitialSchema20261008120000';
@@ -148,6 +149,7 @@ export function buildTypeOrmOptions(): DataSourceOptions {
       SearchVocabularyPruneStale20261028160000,
       SearchVocabularyDocumentTerms20261028180000,
       DocumentRegions20261029120000,
+      WorkspaceMlSettings20261104090000,
     ],
     migrationsTableName: 'migrations',
     synchronize: false,

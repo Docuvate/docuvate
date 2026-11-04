@@ -5,6 +5,10 @@ import { describe, expect, it, vi } from 'vitest';
 import { createAssignDocumentTagUseCaseStub } from '../../../test-support/assign-document-tag-use-case.stub.js';
 import { createLabelEmbeddingRepositoryStub } from '../../../test-support/label-embedding-repository.stub.js';
 import { createTaxonomyRepositoryStub } from '../../../test-support/taxonomy-repository.stub.js';
+import {
+  createWorkspaceMlSettings,
+  createWorkspaceMlSettingsRepositoryStub,
+} from '../../../test-support/workspace-ml-settings-repository.stub.js';
 import type { CeLabelPropagationScoresPort } from '../domain/ce-label-propagation.port.js';
 import { ApplyCeLabelPropagationUseCase } from './apply-ce-label-propagation.use-case.js';
 
@@ -26,21 +30,26 @@ describe('ApplyCeLabelPropagationUseCase', () => {
         { documentId: 'd3', embedding: [0, 1], nonInboxTagIds: [] },
       ]),
     });
-    const ceMl: CeLabelPropagationScoresPort = {
-      propagateLabelScores: vi.fn().mockResolvedValue([
-        { documentIndex: 1, score: 0.99, tier: 'auto_assign' },
-        { documentIndex: 2, score: 0.5, tier: 'suggest' },
-      ]),
-    };
+    const propagateLabelScores = vi.fn().mockResolvedValue([
+      { documentIndex: 1, score: 0.99, tier: 'auto_assign' },
+      { documentIndex: 2, score: 0.5, tier: 'suggest' },
+    ]);
+    const ceMl: CeLabelPropagationScoresPort = { propagateLabelScores };
     const useCase = new ApplyCeLabelPropagationUseCase(
       taxonomy,
       labelEmbeddings,
       assignTag,
-      ceMl
+      ceMl,
+      createWorkspaceMlSettingsRepositoryStub(
+        createWorkspaceMlSettings({ labelAutoAssign: 'cautious', labelSuggestions: 'many' })
+      )
     );
     const applied = await useCase.propagateAfterLabelSeed('u1', 't1', ['d1']);
     expect(applied).toBe(1);
     expect(assignExecute).toHaveBeenCalledWith('d2', 'u1', 't1', { learnFromEmbedding: true });
     expect(upsertSuggestion).toHaveBeenCalledTimes(1);
+    expect(propagateLabelScores).toHaveBeenCalledWith(
+      expect.objectContaining({ autoAssign: 'cautious', suggestions: 'many' })
+    );
   });
 });

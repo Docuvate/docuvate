@@ -13,11 +13,8 @@ import {
   IsArray,
   IsBoolean,
   IsIn,
-  IsNumber,
   IsOptional,
   IsString,
-  Max,
-  Min,
   ValidateIf,
 } from 'class-validator';
 
@@ -38,12 +35,6 @@ export class UpdateUserSettingsRequestDto implements UpdateUserSettingsRequest {
   useArenaWinnerAsDefault?: boolean;
 
   @IsOptional()
-  @IsNumber()
-  @Min(0.5)
-  @Max(0.95)
-  labelFieldConfidenceThreshold?: number;
-
-  @IsOptional()
   @IsBoolean()
   fieldExtractionConfidenceGateEnabled?: boolean;
 
@@ -55,10 +46,6 @@ export class UpdateUserSettingsRequestDto implements UpdateUserSettingsRequest {
   @IsOptional()
   @IsBoolean()
   advancedFeaturesEnabled?: boolean;
-
-  @IsOptional()
-  @IsBoolean()
-  fuzzyDuplicateDetectionEnabled?: boolean;
 
   @IsOptional()
   @IsIn(THEME_PREFERENCES)
@@ -94,10 +81,8 @@ export class UserSettingsResponseDto implements UserSettingsDto {
   documentChatLocalModelEnabled?: boolean;
   documentChatLocalModelReady?: boolean;
   advancedFeaturesEnabled?: boolean;
-  fuzzyDuplicateDetectionEnabled?: boolean;
   useArenaWinnerAsDefault!: boolean;
   arenaWinnerEngine?: string | null;
-  labelFieldConfidenceThreshold?: number;
   fieldExtractionConfidenceGateEnabled?: boolean;
   fieldExtractionRequiredLabelIds?: string[];
   themePreference?: (typeof THEME_PREFERENCES)[number];

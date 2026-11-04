@@ -8,6 +8,12 @@ from dataclasses import dataclass
 import numpy as np
 from numpy.typing import NDArray
 
+from docuvate_worker.domain.label_automation_policy import (
+    LabelAutoAssignPreset,
+    LabelSuggestionPreset,
+    auto_assign_precision_target,
+    suggestion_policy,
+)
 from docuvate_worker.infrastructure.ml.ce_ml.calibration import (
     label_propagation_min_calibration_docs,
     label_tiers,
@@ -64,7 +70,10 @@ def propagate_label_scores(
     passage_texts: list[str] | None = None,
     positive_document_indices: list[int] | None = None,
     calibration_document_indices: list[int] | None = None,
+    auto_assign: LabelAutoAssignPreset = "normal",
+    suggestions: LabelSuggestionPreset = "normal",
 ) -> list[LabelPropagationDocumentScore]:
+    policy = suggestion_policy(suggestions)
     matrix = np.asarray(passage_vectors, dtype=np.float32)
     n = matrix.shape[0]
     if n == 0:
@@ -98,7 +107,7 @@ def propagate_label_scores(
 
     if len(seed_document_indices) == 0:
         zero_shot = zero_shot_scores(label_name, matrix)
-        sugg_thr = label_tiers(0)["suggestThreshold"]
+        sugg_thr = label_tiers(0)["suggestThreshold"] + policy.zero_shot_offset
         out: list[LabelPropagationDocumentScore] = []
         for i in range(n):
             score = float(zero_shot[i])
@@ -125,16 +134,23 @@ def propagate_label_scores(
     loo = leave_one_out_votes(features[pool], pool_labels, _BINARY_CLASSES)
     cal_scores = _positive_score(loo.ridge_scores).astype(np.float32)
     cal_labels = pool_labels.astype(np.float32)
-    base_tau = split_conformal_accept_threshold(cal_scores, cal_labels)
+    base_tau = split_conformal_accept_threshold(
+        cal_scores, cal_labels, false_positive_cost=policy.false_positive_cost
+    )
     if base_tau is None:
         return _abstain(n, seed_set, scores)
-    tau = sequential_precision_floor(base_tau, cal_scores, cal_labels)
+    tau = sequential_precision_floor(
+        base_tau, cal_scores, cal_labels, precision_target=policy.precision_target
+    )
 
     positives = int(pool_labels.sum())
     examples_per_class = np.asarray([pool_labels.size - positives, positives], dtype=np.int64)
+    auto_target = auto_assign_precision_target(auto_assign)
     margin_threshold = (
-        learn_auto_accept_margin(loo, pool_labels, accepted_class=_POSITIVE_CLASS)
-        if positives >= AUTO_ACCEPT_MIN_EXAMPLES_PER_LABEL
+        learn_auto_accept_margin(
+            loo, pool_labels, target_precision=auto_target, accepted_class=_POSITIVE_CLASS
+        )
+        if auto_target is not None and positives >= AUTO_ACCEPT_MIN_EXAMPLES_PER_LABEL
         else None
     )
     auto = auto_accept_mask(

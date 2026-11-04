@@ -7,6 +7,11 @@ from typing import Self
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from docuvate_worker.domain.label_automation_policy import (
+    LabelAutoAssignPreset,
+    LabelSuggestionPreset,
+)
+
 
 class ExtractRequest(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
@@ -686,6 +691,8 @@ class CeLabelPropagationRequest(BaseModel):
     seed_document_indices: list[int] = Field(default_factory=list)
     positive_document_indices: list[int] = Field(default_factory=list)
     calibration_document_indices: list[int] = Field(default_factory=list)
+    auto_assign: LabelAutoAssignPreset = "normal"
+    suggestions: LabelSuggestionPreset = "normal"
 
 
 class CeLabelPropagationScore(BaseModel):

@@ -12816,6 +12816,154 @@
         ]
       }
     },
+    "/settings/workspace-ml": {
+      "get": {
+        "operationId": "getWorkspaceMlSettings",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkspaceMlSettingsResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get workspace automation and recognition settings",
+        "tags": [
+          "Settings"
+        ]
+      },
+      "patch": {
+        "operationId": "updateWorkspaceMlSettings",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateWorkspaceMlSettingsRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkspaceMlSettingsResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Update workspace automation and recognition settings (installation admins)",
+        "tags": [
+          "Settings"
+        ]
+      }
+    },
     "/sftp-ingress/accounts": {
       "get": {
         "operationId": "listSftpIngressAccounts",
@@ -18419,11 +18567,6 @@
           "useArenaWinnerAsDefault": {
             "type": "boolean"
           },
-          "labelFieldConfidenceThreshold": {
-            "type": "number",
-            "minimum": 0.5,
-            "maximum": 0.95
-          },
           "fieldExtractionConfidenceGateEnabled": {
             "type": "boolean"
           },
@@ -18434,9 +18577,6 @@
             }
           },
           "advancedFeaturesEnabled": {
-            "type": "boolean"
-          },
-          "fuzzyDuplicateDetectionEnabled": {
             "type": "boolean"
           },
           "themePreference": {
@@ -18462,6 +18602,43 @@
           "documentChatCloudApiKey": {
             "type": "string",
             "nullable": true
+          }
+        }
+      },
+      "UpdateWorkspaceMlSettingsRequestDto": {
+        "type": "object",
+        "properties": {
+          "labelAutoAssign": {
+            "enum": [
+              "off",
+              "cautious",
+              "normal"
+            ],
+            "type": "string"
+          },
+          "labelSuggestions": {
+            "enum": [
+              "few",
+              "normal",
+              "many"
+            ],
+            "type": "string"
+          },
+          "duplicateDetection": {
+            "enum": [
+              "off",
+              "exact",
+              "similar"
+            ],
+            "type": "string"
+          },
+          "fieldAcceptance": {
+            "enum": [
+              "cautious",
+              "normal",
+              "generous"
+            ],
+            "type": "string"
           }
         }
       },
@@ -18516,18 +18693,12 @@
           "advancedFeaturesEnabled": {
             "type": "boolean"
           },
-          "fuzzyDuplicateDetectionEnabled": {
-            "type": "boolean"
-          },
           "useArenaWinnerAsDefault": {
             "type": "boolean"
           },
           "arenaWinnerEngine": {
             "type": "string",
             "nullable": true
-          },
-          "labelFieldConfidenceThreshold": {
-            "type": "number"
           },
           "fieldExtractionConfidenceGateEnabled": {
             "type": "boolean"
@@ -18565,6 +18736,53 @@
         "required": [
           "preferredExtractorEngine",
           "useArenaWinnerAsDefault"
+        ]
+      },
+      "WorkspaceMlSettingsResponseDto": {
+        "type": "object",
+        "properties": {
+          "labelAutoAssign": {
+            "enum": [
+              "off",
+              "cautious",
+              "normal"
+            ],
+            "type": "string"
+          },
+          "labelSuggestions": {
+            "enum": [
+              "few",
+              "normal",
+              "many"
+            ],
+            "type": "string"
+          },
+          "duplicateDetection": {
+            "enum": [
+              "off",
+              "exact",
+              "similar"
+            ],
+            "type": "string"
+          },
+          "fieldAcceptance": {
+            "enum": [
+              "cautious",
+              "normal",
+              "generous"
+            ],
+            "type": "string"
+          },
+          "editable": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "labelAutoAssign",
+          "labelSuggestions",
+          "duplicateDetection",
+          "fieldAcceptance",
+          "editable"
         ]
       }
     }

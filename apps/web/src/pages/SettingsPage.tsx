@@ -6,7 +6,15 @@ import type {
   ExtractionEngineInfo,
   UserSettingsDto,
 } from '@docuvate/contracts';
-import { Ban, Cable, MessageSquareText, ScanText, SlidersHorizontal, UserRound } from 'lucide-react';
+import {
+  Ban,
+  Cable,
+  MessageSquareText,
+  ScanText,
+  SlidersHorizontal,
+  UserRound,
+  Wand2,
+} from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -18,6 +26,7 @@ import { SettingsCardLink } from '../components/settings/SettingsCardLink';
 import { SettingsChatStatus } from '../components/settings/SettingsChatStatus';
 import { SettingsSectionCard } from '../components/settings/SettingsSectionCard';
 import { SettingsSectionLayout } from '../components/settings/SettingsSectionLayout';
+import { WorkspaceAutomationSection } from '../components/settings/WorkspaceAutomationSection';
 import { Button } from '../components/ui/Button';
 import { PasswordInput } from '../components/ui/PasswordInput';
 import { Select } from '../components/ui/Select';
@@ -426,6 +435,8 @@ export function SettingsPage() {
             </>
           ) : null}
         </SettingsSectionCard>
+
+        <WorkspaceAutomationSection icon={<Wand2 {...settingsIconProps} />} />
 
         <SettingsSectionCard
           icon={<SlidersHorizontal {...settingsIconProps} />}

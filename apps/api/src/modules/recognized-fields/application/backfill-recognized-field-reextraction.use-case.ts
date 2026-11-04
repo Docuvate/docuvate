@@ -5,13 +5,12 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import {
   RECOGNIZED_FIELD_REPOSITORY,
   type RecognizedFieldRepository,
-  USER_PREFERENCES_REPOSITORY,
-  type UserPreferencesRepository,
 } from '../../../shared/domain/ports.js';
 import type { RecognizedFieldEntity } from '../domain/recognized-field.entity.js';
 import { RECOGNIZED_FIELD_REEXTRACT_BATCH_LIMIT } from '../domain/recognized-field-reextract-config.js';
 import { PgRecognizedFieldExtractionAttemptRepository } from '../infrastructure/pg-recognized-field-extraction-attempt.repository.js';
 import { RecognizedFieldReextractQueueService } from '../infrastructure/recognized-field-reextract-queue.service.js';
+import { FieldGateDefaultsReader } from './field-gate-defaults.reader.js';
 
 @Injectable()
 export class BackfillRecognizedFieldReextractionUseCase {
@@ -19,7 +18,7 @@ export class BackfillRecognizedFieldReextractionUseCase {
 
   constructor(
     @Inject(RECOGNIZED_FIELD_REPOSITORY) private readonly fields: RecognizedFieldRepository,
-    @Inject(USER_PREFERENCES_REPOSITORY) private readonly prefs: UserPreferencesRepository,
+    private readonly gateDefaults: FieldGateDefaultsReader,
     private readonly attempts: PgRecognizedFieldExtractionAttemptRepository,
     private readonly queue: RecognizedFieldReextractQueueService
   ) {}
@@ -35,7 +34,7 @@ export class BackfillRecognizedFieldReextractionUseCase {
     if (defs.length === 0) {
       return;
     }
-    const preferences = await this.prefs.getForUser(userId);
+    const gateDefaults = await this.gateDefaults.read(userId);
     const defsByDoc = new Map<string, RecognizedFieldEntity[]>();
 
     for (const def of defs) {
@@ -50,10 +49,7 @@ export class BackfillRecognizedFieldReextractionUseCase {
           minLabelConfidence: def.minLabelConfidence,
           confidenceGateEnabled: def.confidenceGateEnabled,
         },
-        {
-          fieldExtractionConfidenceGateEnabled: preferences.fieldExtractionConfidenceGateEnabled,
-          labelFieldConfidenceThreshold: preferences.labelFieldConfidenceThreshold,
-        },
+        gateDefaults,
         RECOGNIZED_FIELD_REEXTRACT_BATCH_LIMIT
       );
       for (const documentId of ids) {
