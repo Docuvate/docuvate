@@ -9,10 +9,14 @@ from docuvate_worker.infrastructure.extractors.markdown import (
 
 def test_blocks_to_markdown_groups_lines_and_headings() -> None:
     blocks = [
-        ExtractionBlock(page=1, x=0.1, y=0.1, width=0.3, height=0.02, text="INVOICE", block_index=0),
+        ExtractionBlock(
+            page=1, x=0.1, y=0.1, width=0.3, height=0.02, text="INVOICE", block_index=0
+        ),
         ExtractionBlock(page=1, x=0.1, y=0.2, width=0.2, height=0.02, text="Acme", block_index=1),
         ExtractionBlock(page=1, x=0.35, y=0.2, width=0.2, height=0.02, text="GmbH", block_index=2),
-        ExtractionBlock(page=1, x=0.1, y=0.3, width=0.4, height=0.02, text="- Item one", block_index=3),
+        ExtractionBlock(
+            page=1, x=0.1, y=0.3, width=0.4, height=0.02, text="- Item one", block_index=3
+        ),
     ]
     md = blocks_to_markdown(blocks)
     assert "## INVOICE" in md

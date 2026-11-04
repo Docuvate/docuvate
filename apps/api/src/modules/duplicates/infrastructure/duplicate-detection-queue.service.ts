@@ -4,7 +4,7 @@ import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/commo
 import { Queue, Worker } from 'bullmq';
 import type IORedis from 'ioredis';
 
-import { parseString, requireRecord } from '../../../shared/infrastructure/database/row-parse.js';
+import { parseString, requireRecord } from '../../../shared/domain/row-parse.js';
 import { enqueueBullJobWithRetry } from '../../../shared/infrastructure/queue/bullmq-enqueue-retry.js';
 import {
   createValkeyConnection,
@@ -17,7 +17,7 @@ import {
   duplicateDetectionQueueConcurrency,
 } from '../domain/duplicate-detection-queue.config.js';
 
-export interface DuplicateDetectionJobData {
+interface DuplicateDetectionJobData {
   documentId: string;
   userId: string;
 }

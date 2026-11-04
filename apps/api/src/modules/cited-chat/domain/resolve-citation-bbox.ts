@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { ExtractionBlock, NormalizedBBox } from '@docuvate/contracts';
 
-import { normalizeForQuoteMatch } from './verify-citation-quote.js';
+import { normalizeForQuoteMatch } from './quote-match-normalize.js';
 
 const MAX_BBOX_HEIGHT = 0.25;
 

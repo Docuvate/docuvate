@@ -1,9 +1,9 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 
-export type SequenceOpcodeTag = 'equal' | 'replace' | 'delete' | 'insert';
+type SequenceOpcodeTag = 'equal' | 'replace' | 'delete' | 'insert';
 
-export interface SequenceOpcode {
+interface SequenceOpcode {
   tag: SequenceOpcodeTag;
   i1: number;
   i2: number;
@@ -48,7 +48,7 @@ export function longestCommonSubsequenceLength<T>(
   return prev[m];
 }
 
-export function sequenceOpcodes<T>(
+function sequenceOpcodes<T>(
   a: T[],
   b: T[],
   equals: (left: T, right: T) => boolean

@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { isRecord, parseString } from '../../database/row-parse.js';
+import { isRecord, parseString } from '../../../domain/row-parse.js';
 import { workerApiUrl } from '../../worker/worker-api-path.js';
 import type {
   DocumentChatInput,

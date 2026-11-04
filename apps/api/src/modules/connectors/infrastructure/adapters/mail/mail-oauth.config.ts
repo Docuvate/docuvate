@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { ConnectorPluginId } from '../../../domain/connector.types.js';
 
-export interface MailOAuthProviderConfig {
+interface MailOAuthProviderConfig {
   clientId: string;
   clientSecret: string;
   authorizationEndpoint: string;
@@ -29,7 +29,7 @@ const OUTLOOK_OAUTH_ENV_VARS = [
   'DOCUVATE_OUTLOOK_OAUTH_CLIENT_SECRET',
 ] as const;
 
-export function mailOAuthEnvVarNames(
+function mailOAuthEnvVarNames(
   pluginId: Extract<ConnectorPluginId, 'gmail' | 'outlook'>
 ): readonly string[] {
   return pluginId === 'gmail' ? GMAIL_OAUTH_ENV_VARS : OUTLOOK_OAUTH_ENV_VARS;

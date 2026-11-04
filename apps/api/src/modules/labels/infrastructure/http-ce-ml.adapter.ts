@@ -2,17 +2,17 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Injectable, Logger } from '@nestjs/common';
 
-import { isRecord, parseNumber, parseString } from '../../../shared/infrastructure/database/row-parse.js';
+import { isRecord, parseNumber, parseString } from '../../../shared/domain/row-parse.js';
 import { workerApiUrl } from '../../../shared/infrastructure/worker/worker-api-path.js';
 import type { CeLabelPropagationInput } from '../domain/ce-label-propagation.port.js';
 
-export interface CeLabelPropagationScore {
+interface CeLabelPropagationScore {
   documentIndex: number;
   score: number;
   tier: 'auto_assign' | 'suggest' | 'none';
 }
 
-export interface CeDiscoveredField {
+interface CeDiscoveredField {
   fieldKey: string;
   displayName: string;
   confidence: number;
@@ -200,22 +200,24 @@ export class HttpCeMlAdapter {
         },
         signal: AbortSignal.timeout(10_000),
         body: JSON.stringify({
-        targets: input.targets.map((target) => ({
-          target_document_index: target.targetDocumentIndex,
-          assigned_tag_ids: target.assignedTagIds,
-        })),
-        corpus: input.corpus.map((row) => ({
-          document_index: row.documentIndex,
-          embedding: row.embedding,
-          tag_ids: row.tagIds,
-          text: row.text,
-        })),
-        labeled_document_indices: input.labeledDocumentIndices,
-      }),
+          targets: input.targets.map((target) => ({
+            target_document_index: target.targetDocumentIndex,
+            assigned_tag_ids: target.assignedTagIds,
+          })),
+          corpus: input.corpus.map((row) => ({
+            document_index: row.documentIndex,
+            embedding: row.embedding,
+            tag_ids: row.tagIds,
+            text: row.text,
+          })),
+          labeled_document_indices: input.labeledDocumentIndices,
+        }),
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      this.logger.debug(`Worker CE missing-label batch unavailable (${message}); skipping batch hints`);
+      this.logger.debug(
+        `Worker CE missing-label batch unavailable (${message}); skipping batch hints`
+      );
       return [];
     }
     if (response.status === 404 || response.status === 405) {

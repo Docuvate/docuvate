@@ -4,11 +4,15 @@
 from unittest.mock import MagicMock, patch
 
 from docuvate_worker.domain.models import ExtractionBlock
-from docuvate_worker.infrastructure.ml.ce_ml.docai_field_suggestions import docai_kv_field_suggestions
+from docuvate_worker.infrastructure.ml.ce_ml.docai_field_suggestions import (
+    docai_kv_field_suggestions,
+)
 from docuvate_worker.infrastructure.ml.ce_ml.kv_items import KeyValueItem
 
 
-@patch("docuvate_worker.infrastructure.ml.ce_ml.docai_field_suggestions.extract_kv_items_from_blocks")
+@patch(
+    "docuvate_worker.infrastructure.ml.ce_ml.docai_field_suggestions.extract_kv_items_from_blocks"
+)
 def test_docai_kv_field_suggestions_abstains_below_threshold(mock_extract: MagicMock) -> None:
     mock_extract.return_value = [
         KeyValueItem(
@@ -27,7 +31,9 @@ def test_docai_kv_field_suggestions_abstains_below_threshold(mock_extract: Magic
     assert docai_kv_field_suggestions(blocks) == []
 
 
-@patch("docuvate_worker.infrastructure.ml.ce_ml.docai_field_suggestions.extract_kv_items_from_blocks")
+@patch(
+    "docuvate_worker.infrastructure.ml.ce_ml.docai_field_suggestions.extract_kv_items_from_blocks"
+)
 def test_docai_kv_field_suggestions_emits_suggestion_key(mock_extract: MagicMock) -> None:
     mock_extract.return_value = [
         KeyValueItem(

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { ExtractedFactDto, ExtractedFactKind } from '@docuvate/contracts';
 
-import { isRecord, parseString } from '../../../shared/infrastructure/database/row-parse.js';
+import { isRecord, parseString } from '../../../shared/domain/row-parse.js';
 
 const FACT_KINDS: ExtractedFactKind[] = ['key_value', 'amount', 'date', 'table_cell'];
 

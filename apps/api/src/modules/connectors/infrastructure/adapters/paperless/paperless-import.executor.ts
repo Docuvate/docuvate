@@ -19,9 +19,7 @@ import {
   TAXONOMY_REPOSITORY,
   type TaxonomyRepository,
 } from '../../../../../shared/domain/ports.js';
-import {
-  parseNumber,
-} from '../../../../../shared/infrastructure/database/row-parse.js';
+import { parseNumber } from '../../../../../shared/domain/row-parse.js';
 import { RunDocumentPostOcrPipelineUseCase } from '../../../../document-pipeline/application/run-document-post-ocr-pipeline.use-case.js';
 import { QueueExtractionUseCase } from '../../../../documents/application/queue-extraction.use-case.js';
 import { ScheduleDuplicateDetectionUseCase } from '../../../../duplicates/application/schedule-duplicate-detection.use-case.js';
@@ -71,7 +69,10 @@ function paperlessDocumentTitle(doc: {
   return String(doc.id);
 }
 
-function withAbsenderField(fields: ExtractedField[], absenderName: string | null): ExtractedField[] {
+function withAbsenderField(
+  fields: ExtractedField[],
+  absenderName: string | null
+): ExtractedField[] {
   const trimmed = absenderName?.trim() ?? '';
   if (!trimmed) {
     return fields;
@@ -96,9 +97,7 @@ function mapMatchingAlgorithm(value: number): MatchingAlgorithm {
   }
 }
 
-function parseCustomFieldEntries(
-  doc: PaperlessDocument
-): { fieldId: number; value: unknown }[] {
+function parseCustomFieldEntries(doc: PaperlessDocument): { fieldId: number; value: unknown }[] {
   const raw = doc.custom_fields;
   if (Array.isArray(raw)) {
     return raw.map((row) => ({ fieldId: parseNumber(row.field), value: row.value }));
@@ -523,7 +522,11 @@ export class PaperlessImportExecutor {
     if (paperlessCorrespondentId == null) {
       return Promise.resolve(null);
     }
-    return this.imports.findEntityLink(run.installationId, 'correspondent', paperlessCorrespondentId);
+    return this.imports.findEntityLink(
+      run.installationId,
+      'correspondent',
+      paperlessCorrespondentId
+    );
   }
 
   private resolveFolderId(

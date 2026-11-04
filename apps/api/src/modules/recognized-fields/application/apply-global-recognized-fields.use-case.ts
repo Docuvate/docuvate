@@ -26,7 +26,7 @@ import { resolveFieldExtractionGateConfig } from '../domain/resolve-field-extrac
 import { PgRecognizedFieldExtractionAttemptRepository } from '../infrastructure/pg-recognized-field-extraction-attempt.repository.js';
 import { FieldGateDefaultsReader } from './field-gate-defaults.reader.js';
 
-export interface ApplyGlobalRecognizedFieldsOptions {
+interface ApplyGlobalRecognizedFieldsOptions {
   scopeDefinitionIds?: readonly string[];
 }
 
@@ -65,12 +65,8 @@ export class ApplyGlobalRecognizedFieldsUseCase {
       return;
     }
 
-    const scope = options.scopeDefinitionIds
-      ? new Set(options.scopeDefinitionIds)
-      : null;
-    const scopedDefs = scope
-      ? allDefs.filter((def) => scope.has(def.id))
-      : allDefs;
+    const scope = options.scopeDefinitionIds ? new Set(options.scopeDefinitionIds) : null;
+    const scopedDefs = scope ? allDefs.filter((def) => scope.has(def.id)) : allDefs;
 
     const gateDefaults = await this.gateDefaults.read(userId);
 

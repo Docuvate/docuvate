@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from docuvate_worker.domain.extract_errors import ExtractRetryableError
-from docuvate_worker.presentation.extract_subprocess_pool import PooledExtractChild
+from docuvate_worker.infrastructure.extract_memory.extract_subprocess_pool import PooledExtractChild
 
 
 def test_run_job_raises_retryable_when_stdout_times_out(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -22,7 +22,7 @@ def test_run_job_raises_retryable_when_stdout_times_out(monkeypatch: pytest.Monk
 
     with (
         patch(
-            "docuvate_worker.presentation.extract_subprocess_pool._readline_with_timeout",
+            "docuvate_worker.infrastructure.extract_memory.extract_subprocess_pool._readline_with_timeout",
             return_value=None,
         ),
         patch.object(child, "_close"),
@@ -38,8 +38,8 @@ def test_planned_recycle_is_not_postponed_under_memory_pressure() -> None:
     old_proc = MagicMock()
     old_proc.poll.return_value = None
     child.bind_subprocess_for_testing(old_proc)
-    child._jobs_served = 5  # noqa: SLF001 - drive the recycle threshold directly
-    child._recycle_after = 1  # noqa: SLF001
+    child._jobs_served = 5
+    child._recycle_after = 1
     new_proc = MagicMock()
     new_proc.poll.return_value = None
     new_proc.stdout = MagicMock()
@@ -52,12 +52,14 @@ def test_planned_recycle_is_not_postponed_under_memory_pressure() -> None:
             return_value=True,
         ),
         patch(
-            "docuvate_worker.presentation.extract_subprocess_pool._readline_with_timeout",
+            "docuvate_worker.infrastructure.extract_memory.extract_subprocess_pool._readline_with_timeout",
             return_value=envelope,
         ),
         patch.object(child, "_close") as close,
         patch.object(child, "_spawn", return_value=new_proc) as spawn,
-        patch("docuvate_worker.presentation.extract_subprocess_pool.attach_pool_child_to_active"),
+        patch(
+            "docuvate_worker.infrastructure.extract_memory.extract_subprocess_pool.attach_pool_child_to_active"
+        ),
     ):
         child.run_job({"mime_type": "text/plain"}, timeout=1.0)
 

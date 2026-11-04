@@ -33,11 +33,7 @@ import type {
 } from '@docuvate/contracts';
 import type { ExtractedField } from '@docuvate/contracts';
 
-import {
-  DocumentExtractionImageDto,
-  ExtractedFieldDto,
-  ExtractionBlockDto,
-} from './common.dto.js';
+import { DocumentExtractionImageDto, ExtractedFieldDto, ExtractionBlockDto } from './common.dto.js';
 
 const DOCUMENT_STATUSES: DocumentStatus[] = ['uploaded', 'queued', 'extracting', 'ready', 'failed'];
 const SORT_FIELDS: DocumentSortField[] = ['updatedAt', 'createdAt', 'title', 'documentDate'];
@@ -196,7 +192,7 @@ export class UpdateDocumentRequestDto implements UpdateDocumentRequest {
   extractionBlocks?: ExtractionBlockDto[];
 }
 
-export class DocumentListLibraryUiDto {
+class DocumentListLibraryUiDto {
   @ApiProperty({
     description: 'When false, hide per-document owner lines in the library (single-user installs).',
   })
@@ -212,14 +208,17 @@ export class DocumentListResponseDto {
   @ApiProperty()
   hasMore!: boolean;
 
-  @ApiProperty({ nullable: true, description: 'Total matching documents when `cursor` was omitted.' })
+  @ApiProperty({
+    nullable: true,
+    description: 'Total matching documents when `cursor` was omitted.',
+  })
   total!: number | null;
 
   @ApiPropertyOptional({ type: DocumentListLibraryUiDto })
   libraryUi?: DocumentListLibraryUiDto;
 }
 
-export class DocumentExtractionSummaryDto {
+class DocumentExtractionSummaryDto {
   @ApiProperty()
   text!: string;
 
@@ -291,7 +290,7 @@ export class DocumentTagSuggestionsBatchRequestDto {
   documentIds!: string[];
 }
 
-export class DocumentTagSuggestionsBatchItemDto {
+class DocumentTagSuggestionsBatchItemDto {
   documentId!: string;
   suggestions!: DocumentDto['tagSuggestions'];
 }
@@ -310,7 +309,7 @@ export class MoveDocumentsRequestDto implements MoveDocumentsRequest {
   folderId?: string | null;
 }
 
-export class MoveDocumentsPreviousFolderDto {
+class MoveDocumentsPreviousFolderDto {
   documentId!: string;
   folderId!: string | null;
 }

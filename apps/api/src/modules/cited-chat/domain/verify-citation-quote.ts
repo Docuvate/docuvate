@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { normalizeExtractionSurfaceText } from './normalize-extraction-surface-text.js';
+import { normalizeForQuoteMatch, normalizeNumbersForQuoteMatch } from './quote-match-normalize.js';
 import {
   extractNumericTokens,
   fuzzyWordsMatch,
@@ -10,44 +11,19 @@ import { chunkIndexText } from './split-text-chunks-with-spans.js';
 
 const QUOTE_WORD_LIMIT = 10;
 
-export function normalizeForQuoteMatch(text: string): string {
-  return text
-    .toLowerCase()
-    .replace(/[„“"''`´]/g, '')
-    .replace(/[:;]/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-}
-
-/** Collapse German/English number formatting so 1.234,56 and 1234.56 align for matching. */
-export function normalizeNumbersForQuoteMatch(text: string): string {
-  let out = normalizeForQuoteMatch(text);
-  out = out.replace(
-    /\b(\d{1,3}(?:\.\d{3})+|\d+)(?:,(\d{1,2}))?\b/g,
-    (_match, intPart: string, frac?: string) => {
-      const digits = intPart.replace(/\./g, '');
-      return frac != null && frac !== '' ? `${digits}.${frac}` : digits;
-    }
-  );
-  out = out.replace(/\b(\d+)\.(\d{1,2})\b/g, '$1.$2');
-  return out.replace(/\s+/g, ' ').trim();
-}
-
 export function truncateQuoteWords(quote: string, maxWords = QUOTE_WORD_LIMIT): string {
   const words = quote.trim().split(/\s+/).filter(Boolean);
   return words.slice(0, maxWords).join(' ');
 }
 
 /** LLM quotes often add currency labels or "Label: value" formatting absent in OCR text. */
-export function quoteGroundingVariants(quote: string): string[] {
+function quoteGroundingVariants(quote: string): string[] {
   const trimmed = quote.trim();
   if (!trimmed) {
     return [];
   }
   const variants = new Set<string>([trimmed]);
-  const withoutCurrency = trimmed
-    .replace(/\s*(?:EUR|€|CHF|USD)\s*$/iu, '')
-    .trim();
+  const withoutCurrency = trimmed.replace(/\s*(?:EUR|€|CHF|USD)\s*$/iu, '').trim();
   if (withoutCurrency && withoutCurrency !== trimmed) {
     variants.add(withoutCurrency);
   }
@@ -109,7 +85,7 @@ function appendExpandedChar(map: NormalizedBodyMap, bodyIndex: number, ch: strin
 }
 
 /** Build lowercase normalized text while tracking original body indices (per code unit). */
-export function buildNormalizedBodyMap(chunkBody: string): NormalizedBodyMap {
+function buildNormalizedBodyMap(chunkBody: string): NormalizedBodyMap {
   const map: NormalizedBodyMap = { normalized: '', bodyIndexAt: [] };
   let i = 0;
   while (i < chunkBody.length) {
@@ -515,14 +491,7 @@ export function resolveQuoteInChunk(
     }
     const fuzzy = fuzzySpanSearchInChunk(chunkBody, trimmed);
     if (fuzzy) {
-      return acceptResolvedMatch(
-        chunkBody,
-        trimmed,
-        claimText,
-        fuzzy,
-        fuzzy.method,
-        fuzzy.score
-      );
+      return acceptResolvedMatch(chunkBody, trimmed, claimText, fuzzy, fuzzy.method, fuzzy.score);
     }
   }
 

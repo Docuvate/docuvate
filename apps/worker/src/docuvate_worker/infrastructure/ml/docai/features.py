@@ -208,9 +208,7 @@ def cand_sets(
     destination_index = classes.index(destination)
     label_count = len(labels)
     sources = [
-        index
-        for index in range(label_count)
-        if probabilities[index, source_index] >= threshold
+        index for index in range(label_count) if probabilities[index, source_index] >= threshold
     ]
     targets = [
         index
@@ -257,9 +255,8 @@ def pair_feats(
                 continue
             low = min(center_y[source_index], center_y[target_index])
             high = max(center_y[source_index], center_y[target_index])
-            vertical_overlap = (
-                min(boxes[source_index, 3], boxes[target_index, 3])
-                - max(boxes[source_index, 1], boxes[target_index, 1])
+            vertical_overlap = min(boxes[source_index, 3], boxes[target_index, 3]) - max(
+                boxes[source_index, 1], boxes[target_index, 1]
             )
             min_heights = min(
                 boxes[source_index, 3] - boxes[source_index, 1],
@@ -288,9 +285,7 @@ def pair_feats(
                             rank_value,
                             neighbors_target,
                             neighbors_source,
-                            float(
-                                embedding_matrix[source_index] @ embedding_matrix[target_index]
-                            ),
+                            float(embedding_matrix[source_index] @ embedding_matrix[target_index]),
                             np.hypot(
                                 (center_x[target_index] - center_x[source_index]) / page_width,
                                 (center_y[target_index] - center_y[source_index]) / page_height,
@@ -380,6 +375,7 @@ def dir_nbrs(
             for neighbor in range(count)
             if center_y[neighbor] > boxes[index, 3] and neighbor not in row_set
         ]
+
         def left_key(neighbor: int) -> float:
             return float(boxes[neighbor, 2])
 
@@ -437,9 +433,7 @@ def nbr_feats(
                 row_features.extend(neighbor_probabilities)
         knn_limit = min(_MAX_NEIGHBOR_KNN, count - 1)
         knn: NDArray[np.intp] = (
-            np.argsort(distances[index])[:knn_limit]
-            if count > 1
-            else np.empty(0, dtype=np.intp)
+            np.argsort(distances[index])[:knn_limit] if count > 1 else np.empty(0, dtype=np.intp)
         )
         row_features.extend(list(probabilities[knn].mean(0)) if len(knn) else [0.0] * class_count)
         row_features.extend(list(probabilities[index]))

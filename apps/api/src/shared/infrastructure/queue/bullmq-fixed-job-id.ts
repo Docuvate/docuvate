@@ -1,14 +1,14 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 /** Minimal BullMQ job surface used for fixed jobId enqueue helpers. */
-export interface BullFixedIdJob {
+interface BullFixedIdJob {
   getState(): Promise<string>;
   retry(): Promise<void>;
   remove(): Promise<void>;
 }
 
 /** Minimal BullMQ queue surface used for fixed jobId enqueue helpers. */
-export interface BullFixedIdQueue {
+interface BullFixedIdQueue {
   getJob(jobId: string): Promise<BullFixedIdJob | null | undefined>;
 }
 
@@ -68,7 +68,10 @@ export async function prepareBullFixedJobIdForAdd(
   return 'add';
 }
 
-export async function assertBullFixedJobIdQueued(queue: BullFixedIdQueue, jobId: string): Promise<void> {
+export async function assertBullFixedJobIdQueued(
+  queue: BullFixedIdQueue,
+  jobId: string
+): Promise<void> {
   const job = await queue.getJob(jobId);
   if (!job) {
     throw new Error(`BullMQ job ${jobId} missing after enqueue`);

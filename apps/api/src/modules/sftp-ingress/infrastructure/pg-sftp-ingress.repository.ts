@@ -12,7 +12,7 @@ import {
   parseString,
   parseStringArray,
   requireRecord,
-} from '../../../shared/infrastructure/database/row-parse.js';
+} from '../../../shared/domain/row-parse.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 import type {
   SftpIngressAccountRepository,
@@ -25,7 +25,11 @@ import type {
   SftpIngressEventStatus,
 } from '../domain/sftp-ingress.types.js';
 
-const SFTP_EVENT_STATUSES: readonly SftpIngressEventStatus[] = ['received', 'processed', 'rejected'];
+const SFTP_EVENT_STATUSES: readonly SftpIngressEventStatus[] = [
+  'received',
+  'processed',
+  'rejected',
+];
 
 async function loadLabelIds(client: Pool | PoolClient, accountId: string): Promise<string[]> {
   const { rows } = await client.query(
@@ -42,9 +46,7 @@ async function mapAccount(
   const id = parseString(row.id);
   const labelIdsFromRow = row.label_ids;
   const labelIds =
-    labelIdsFromRow != null
-      ? parseStringArray(labelIdsFromRow)
-      : await loadLabelIds(client, id);
+    labelIdsFromRow != null ? parseStringArray(labelIdsFromRow) : await loadLabelIds(client, id);
   return {
     id,
     userId: parseString(row.user_id),
@@ -170,8 +172,7 @@ export class PgSftpIngressAccountRepository implements SftpIngressAccountReposit
     try {
       await client.query('BEGIN');
       const sshKeyTrimmed = input.sshPublicKey?.trim();
-      const sshPublicKey =
-        sshKeyTrimmed && sshKeyTrimmed.length > 0 ? sshKeyTrimmed : null;
+      const sshPublicKey = sshKeyTrimmed && sshKeyTrimmed.length > 0 ? sshKeyTrimmed : null;
       const { rows } = await client.query(
         `INSERT INTO sftp_ingress_accounts (
            user_id, display_name, username, password_hash, ssh_public_key,

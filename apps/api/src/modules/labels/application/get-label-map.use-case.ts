@@ -16,17 +16,14 @@ import {
   USER_PREFERENCES_REPOSITORY,
   type UserPreferencesRepository,
 } from '../../../shared/domain/ports.js';
-import {
-  computeDocumentCoverage,
-  summarizeCoverage,
-  type TagCentroidRef,
-} from '../domain/label-coverage.js';
+import { computeDocumentCoverage, summarizeCoverage } from '../domain/label-coverage.js';
 import {
   computeCoverageSimilarity,
   type LabeledDocumentEmbedding,
 } from '../domain/label-coverage-score.js';
 import { MAX_VECTORS_FOR_UMAP, projectLabelMap2D } from '../domain/label-map-projection.js';
 import { buildLabelOverlapMatrix } from '../domain/label-overlap-matrix.js';
+import type { TagCentroidRef } from '../domain/tag-centroid-ref.js';
 import { BackfillDocumentEmbeddingsUseCase } from './backfill-document-embeddings.use-case.js';
 import { EnrichLabelMapMissingHintsUseCase } from './enrich-label-map-missing-hints.use-case.js';
 
@@ -189,8 +186,11 @@ export class GetLabelMapUseCase {
       text: `${row.title}\n${row.filename}`,
       embedding: row.embedding,
     }));
-    const { points: enrichedPoints, labelMissingHintCount } =
-      await this.enrichMissingHints.execute(userId, points, mapRows);
+    const { points: enrichedPoints, labelMissingHintCount } = await this.enrichMissingHints.execute(
+      userId,
+      points,
+      mapRows
+    );
     const coverageSummary = {
       ...summarizeCoverage(coverageStatuses, nearThreshold),
       labelMissingHintCount,

@@ -45,15 +45,15 @@ def _residual_shingles(
     shingle_size: int,
     delta: float,
 ) -> list[set[str]]:
-    shingles_per_doc = [character_shingles('\n'.join(doc.lines), size=shingle_size) for doc in docs]
+    shingles_per_doc = [character_shingles("\n".join(doc.lines), size=shingle_size) for doc in docs]
     counts: Counter[str] = Counter()
     for shingles in shingles_per_doc:
         counts.update(shingles)
     doc_count = len(docs)
     cutoff = _template_df_cutoff(delta, doc_count)
-    residual: list[set[str]] = []
-    for shingles in shingles_per_doc:
-        residual.append({g for g in shingles if counts[g] / doc_count < cutoff})
+    residual: list[set[str]] = [
+        {g for g in shingles if counts[g] / doc_count < cutoff} for shingles in shingles_per_doc
+    ]
     return residual
 
 

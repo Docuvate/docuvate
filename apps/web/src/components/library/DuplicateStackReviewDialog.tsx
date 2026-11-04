@@ -15,7 +15,7 @@ import {
 import { formatUserFacingError } from '../../lib/apiErrors';
 import { bufferToDataUrl } from '../../lib/documentPreview';
 import { fetchDocumentPreviewBuffer } from '../../lib/documentPreviewCache';
-import { PdfViewer } from '../documents/PdfViewer';
+import { PdfViewer } from '../documents';
 import { Button } from '../ui/Button';
 import { Dialog, DialogBody, DialogFooter, DialogHeader } from '../ui/Dialog';
 import { isImageMime, isPdfMime } from './libraryDocumentUtils';
@@ -177,12 +177,7 @@ export function DuplicateStackReviewDialog({
 
   return (
     <>
-      <Dialog
-        open
-        onCancel={onClose}
-        aria-labelledby={titleId}
-        className="dup-dialog"
-      >
+      <Dialog open onCancel={onClose} aria-labelledby={titleId} className="dup-dialog">
         <DialogHeader
           title={t('library.duplicateStackReviewTitle')}
           titleId={titleId}
@@ -206,7 +201,9 @@ export function DuplicateStackReviewDialog({
                   <select
                     id="dup-version-select"
                     value={versionId ?? ''}
-                    onChange={(e) => { setVersionId(e.target.value); }}
+                    onChange={(e) => {
+                      setVersionId(e.target.value);
+                    }}
                   >
                     {versions.map((v) => (
                       <option key={v.documentId} value={v.documentId}>
@@ -222,7 +219,9 @@ export function DuplicateStackReviewDialog({
                 {version ? (
                   <ComparePane member={version} previewData={rightPreviewData} side="rechts" />
                 ) : (
-                  <div className="dup-compare-pane muted">{t('library.duplicateStackNoVersion')}</div>
+                  <div className="dup-compare-pane muted">
+                    {t('library.duplicateStackNoVersion')}
+                  </div>
                 )}
               </div>
             </>
@@ -275,7 +274,9 @@ export function DuplicateStackReviewDialog({
               type="button"
               variant="ghost"
               disabled={busy}
-              onClick={() => { setDeleteConfirmOpen(true); }}
+              onClick={() => {
+                setDeleteConfirmOpen(true);
+              }}
             >
               {t('library.duplicateStackDeleteVersion')}
             </Button>
@@ -285,7 +286,9 @@ export function DuplicateStackReviewDialog({
       <Dialog
         open={deleteConfirmOpen}
         busy={busy}
-        onCancel={() => { setDeleteConfirmOpen(false); }}
+        onCancel={() => {
+          setDeleteConfirmOpen(false);
+        }}
         aria-labelledby="dup-stack-delete-title"
         aria-describedby="dup-stack-delete-desc"
         data-testid="dup-stack-delete-dialog"
@@ -299,7 +302,14 @@ export function DuplicateStackReviewDialog({
           </p>
         </DialogBody>
         <DialogFooter>
-          <Button type="button" variant="secondary" disabled={busy} onClick={() => { setDeleteConfirmOpen(false); }}>
+          <Button
+            type="button"
+            variant="secondary"
+            disabled={busy}
+            onClick={() => {
+              setDeleteConfirmOpen(false);
+            }}
+          >
             {t('common.cancel')}
           </Button>
           <Button

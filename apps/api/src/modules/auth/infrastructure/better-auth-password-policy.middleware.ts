@@ -3,7 +3,7 @@
 import { createAuthMiddleware } from 'better-auth/api';
 import type pg from 'pg';
 
-import { isRecord } from '../../../shared/infrastructure/database/row-parse.js';
+import { isRecord } from '../../../shared/domain/row-parse.js';
 import { enforcePasswordPolicyForBetterAuth } from '../application/enforce-password-policy.js';
 import { loadPasswordPolicyForPool } from './password-policy-runtime.js';
 

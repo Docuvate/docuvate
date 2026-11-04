@@ -20,15 +20,6 @@ import {
 
 const MATCHING_ALGORITHMS: MatchingAlgorithm[] = ['none', 'any', 'all', 'exact', 'regex'];
 
-/** Pre-RFC9457 envelope; retained for generated clients during transition. */
-export class ApiErrorEnvelopeDto {
-  @ApiProperty({ example: 'FORBIDDEN' })
-  code!: string;
-
-  @ApiProperty({ example: 'ABAC denied' })
-  message!: string;
-}
-
 export class ProblemDetailsDto {
   @ApiProperty({ example: 'about:blank' })
   type!: string;
@@ -157,7 +148,7 @@ export class MatchingAlgorithmFieldsDto {
   match?: string;
 }
 
-export class DocumentBulkActionDto {
+class DocumentBulkActionDto {
   @IsIn(['addTag', 'removeTag', 'setAbsender', 'setFolder', 'delete'])
   action!: 'addTag' | 'removeTag' | 'setAbsender' | 'setFolder' | 'delete';
 
@@ -186,7 +177,7 @@ export class DocumentBulkRequestDto {
   bulk!: DocumentBulkActionDto;
 }
 
-export class ChatMessageDto {
+class ChatMessageDto {
   @IsIn(['user', 'assistant'])
   role!: 'user' | 'assistant';
 
@@ -240,7 +231,7 @@ export class DocumentChatThreadListResponseDto {
   total!: number | null;
 }
 
-export class ChatMessageRecordDto {
+class ChatMessageRecordDto {
   id!: string;
   role!: 'user' | 'assistant';
   content!: string;
@@ -251,7 +242,7 @@ export class ChatMessageRecordDto {
   errorCode?: string | null;
 }
 
-export class DocumentChatThreadDto {
+class DocumentChatThreadDto {
   id!: string;
   title!: string;
   scope!: 'document' | 'library';

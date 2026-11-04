@@ -1,9 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import {
-  parseString,
-  recordFromUnknown,
-} from '../../../../../shared/infrastructure/database/row-parse.js';
+import { parseString, recordFromUnknown } from '../../../../../shared/domain/row-parse.js';
 import type { ConnectorConfigurationInput } from '../../../domain/connector.types.js';
 import type {
   ConnectorRuntimePorts,

@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { type KeyboardEvent,useState } from 'react';
+import { type KeyboardEvent, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -15,7 +15,7 @@ import { Button } from '../ui/Button';
 import { SegmentedControl } from '../ui/SegmentedControl';
 import { LayoutComparePageNav } from './LayoutComparePageNav';
 
-export type LayoutComparePresentation = 'split' | 'slider';
+type LayoutComparePresentation = 'split' | 'slider';
 
 interface DocumentLayoutCompareViewProps {
   documentId: string;
@@ -64,8 +64,7 @@ export function DocumentLayoutCompareView({
 
   const originalSrc = pagePayload ? pngDataUrl(pagePayload.originalPngBase64) : '';
   const reconstructionSrc = pagePayload ? pngDataUrl(pagePayload.reconstructionPngBase64) : '';
-  const heatmapSrc =
-    pagePayload?.heatmapPngBase64 ? pngDataUrl(pagePayload.heatmapPngBase64) : '';
+  const heatmapSrc = pagePayload?.heatmapPngBase64 ? pngDataUrl(pagePayload.heatmapPngBase64) : '';
 
   const onSliderKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     const next = layoutCompareSliderStep(event.key, sliderPos);
@@ -95,7 +94,10 @@ export function DocumentLayoutCompareView({
       >
         <SegmentedControl<LayoutComparePresentation>
           ariaLabel={t('documents.layoutCompareModeAria')}
-          className={segmentedToolbarClass('layout-compare-mode-switch', 'segmented-control--text-wide')}
+          className={segmentedToolbarClass(
+            'layout-compare-mode-switch',
+            'segmented-control--text-wide'
+          )}
           value={presentation}
           options={[
             { value: 'split', label: t('documents.layoutCompareSplit') },
@@ -107,7 +109,9 @@ export function DocumentLayoutCompareView({
           <input
             type="checkbox"
             checked={heatmapEnabled}
-            onChange={(event) => { setHeatmapEnabled(event.target.checked); }}
+            onChange={(event) => {
+              setHeatmapEnabled(event.target.checked);
+            }}
           />
           <span>{t('documents.layoutCompareHeatmap')}</span>
         </label>
@@ -128,7 +132,9 @@ export function DocumentLayoutCompareView({
               })}
             </span>
             {!pageReliable ? (
-              <span className="layout-compare-ssim-warn">{t('documents.layoutCompareUnreliablePage')}</span>
+              <span className="layout-compare-ssim-warn">
+                {t('documents.layoutCompareUnreliablePage')}
+              </span>
             ) : null}
           </div>
         ) : null}
@@ -145,7 +151,13 @@ export function DocumentLayoutCompareView({
       {(metricsState === 'error' || metricsTimedOut) && metricsError ? (
         <div className="layout-compare-error" role="alert">
           <p className="error">{metricsError}</p>
-          <Button type="button" variant="secondary" onClick={() => { retryMetrics(); }}>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() => {
+              retryMetrics();
+            }}
+          >
             {t('documents.layoutCompareRetry')}
           </Button>
         </div>
@@ -153,7 +165,13 @@ export function DocumentLayoutCompareView({
       {(pageState === 'error' || pageTimedOut) && pageError ? (
         <div className="layout-compare-error" role="alert">
           <p className="error">{pageError}</p>
-          <Button type="button" variant="secondary" onClick={() => { retryPage(); }}>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() => {
+              retryPage();
+            }}
+          >
             {t('documents.layoutCompareRetry')}
           </Button>
         </div>
@@ -175,14 +193,12 @@ export function DocumentLayoutCompareView({
               <figure className="layout-compare-pane">
                 <figcaption>{t('documents.layoutViewOriginal')}</figcaption>
                 <div className="layout-compare-pane-media">
-                  <img src={originalSrc} alt={t('documents.layoutCompareOriginalAlt', { page: activePage })} />
+                  <img
+                    src={originalSrc}
+                    alt={t('documents.layoutCompareOriginalAlt', { page: activePage })}
+                  />
                   {heatmapEnabled && heatmapSrc ? (
-                    <img
-                      className="layout-compare-heatmap"
-                      src={heatmapSrc}
-                      alt=""
-                      aria-hidden
-                    />
+                    <img className="layout-compare-heatmap" src={heatmapSrc} alt="" aria-hidden />
                   ) : null}
                 </div>
               </figure>
@@ -226,7 +242,9 @@ export function DocumentLayoutCompareView({
                 aria-valuemin={0}
                 aria-valuemax={100}
                 aria-label={t('documents.layoutCompareSliderAria')}
-                onChange={(event) => { setSliderPos(Number(event.target.value)); }}
+                onChange={(event) => {
+                  setSliderPos(Number(event.target.value));
+                }}
                 onKeyDown={onSliderKeyDown}
               />
             </div>

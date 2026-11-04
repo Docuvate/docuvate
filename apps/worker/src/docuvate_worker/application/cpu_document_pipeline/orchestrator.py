@@ -81,9 +81,7 @@ def run_integrated_cpu_document_pipeline(
     else:
         fields = run_fields_stage(state)
     kite_index = run_kite_index_stage(state)
-    exact_fact_index = run_exact_fact_index_stage(
-        state, enabled=run_input.build_exact_fact_index
-    )
+    exact_fact_index = run_exact_fact_index_stage(state, enabled=run_input.build_exact_fact_index)
     return IntegratedPipelineResult(
         ocr=ocr,
         rotation=rotation,

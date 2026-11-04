@@ -3,7 +3,7 @@
 import { Inject, Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
 import type pg from 'pg';
 
-import { parseString, requireRecord } from '../../../shared/infrastructure/database/row-parse.js';
+import { parseString, requireRecord } from '../../../shared/domain/row-parse.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 import { RefreshHeuristicFieldSuggestionsUseCase } from '../application/refresh-heuristic-field-suggestions.use-case.js';
 import { HEURISTIC_FIELD_EXTRACTOR_VERSION } from '../domain/heuristic-field-suggestions-fingerprint.js';

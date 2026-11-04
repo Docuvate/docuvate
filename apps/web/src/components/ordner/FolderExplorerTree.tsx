@@ -36,7 +36,7 @@ import { useFolderDropTarget } from './DocumentFolderDnD';
 const TREE_ICON_STROKE = 1.75;
 const FOLDER_TREE_ROW_ESTIMATE_PX = 36;
 
-export interface FolderDocumentTarget {
+interface FolderDocumentTarget {
   folderId: string;
   label: string;
 }
@@ -122,7 +122,9 @@ export function FolderExplorerTree({
     });
   }
 
-  const closeMenu = useCallback(() => { setContextMenu(null); }, []);
+  const closeMenu = useCallback(() => {
+    setContextMenu(null);
+  }, []);
 
   const openFolderMenu = useCallback(
     (event: React.MouseEvent, folder: FolderDto) => {
@@ -134,7 +136,9 @@ export function FolderExplorerTree({
           kind: 'item',
           id: 'add-docs',
           label: t('filesystem.contextAddDocuments'),
-          onSelect: () => { onAddDocuments({ folderId: folder.id, label: folder.name }); },
+          onSelect: () => {
+            onAddDocuments({ folderId: folder.id, label: folder.name });
+          },
         },
         {
           kind: 'item',
@@ -218,7 +222,9 @@ export function FolderExplorerTree({
         <div className="dateisystem-tree-search">
           <Input
             value={treeQuery}
-            onChange={(e) => { onTreeQueryChange(e.target.value); }}
+            onChange={(e) => {
+              onTreeQueryChange(e.target.value);
+            }}
             placeholder={t('filesystem.treeSearchPlaceholder')}
             aria-label={t('filesystem.treeSearchAria')}
           />
@@ -229,7 +235,9 @@ export function FolderExplorerTree({
           size="md"
           strokeWidth={2}
           className="dateisystem-tree-head-add"
-          onClick={() => { setRootCreateOpen((v) => !v); }}
+          onClick={() => {
+            setRootCreateOpen((v) => !v);
+          }}
         />
       </div>
 
@@ -242,7 +250,9 @@ export function FolderExplorerTree({
             ref={rootCreateInputRef}
             placeholder={t('filesystem.newRootPlaceholder')}
             value={rootCreateName}
-            onChange={(e) => { setRootCreateName(e.target.value); }}
+            onChange={(e) => {
+              setRootCreateName(e.target.value);
+            }}
             aria-label={t('filesystem.newRootAria')}
             onKeyDown={(e) => {
               if (e.key === 'Escape') {
@@ -305,7 +315,9 @@ export function FolderExplorerTree({
               ref={footerCreateInputRef}
               placeholder={t('filesystem.newRootPlaceholder')}
               value={footerCreateName}
-              onChange={(e) => { setFooterCreateName(e.target.value); }}
+              onChange={(e) => {
+                setFooterCreateName(e.target.value);
+              }}
               aria-label={t('filesystem.newRootAria')}
             />
           </form>
@@ -314,7 +326,9 @@ export function FolderExplorerTree({
             type="button"
             variant="ghost"
             className="dateisystem-tree-footer-new"
-            onClick={() => { setFooterCreateOpen(true); }}
+            onClick={() => {
+              setFooterCreateOpen(true);
+            }}
           >
             <Plus size={16} strokeWidth={2} aria-hidden />
             {t('filesystem.newRootButton')}
@@ -339,7 +353,9 @@ export function FolderExplorerTree({
         description={t('filesystem.contextDeleteDescription')}
         confirmLabel={t('common.deletePermanently')}
         tone="danger"
-        onCancel={() => { setPendingDeleteFolder(null); }}
+        onCancel={() => {
+          setPendingDeleteFolder(null);
+        }}
         onConfirm={() => {
           if (pendingDeleteFolder) void onDeleteFolder(pendingDeleteFolder.id);
           setPendingDeleteFolder(null);
@@ -439,15 +455,21 @@ function FolderFlatTreeRow({
           e.preventDefault();
           onFileDropHighlight(folderKey);
         }}
-        onDragLeave={() => { onFileDropHighlight(null); }}
-        onDrop={(e) => { onFileDrop(folder.id, e); }}
+        onDragLeave={() => {
+          onFileDropHighlight(null);
+        }}
+        onDrop={(e) => {
+          onFileDrop(folder.id, e);
+        }}
         chevron={
           <TreeExpandChevron
             hasChildren={hasChildren}
             open={open}
             collapseLabel={t('filesystem.collapseChildren')}
             expandLabel={t('filesystem.expandChildren')}
-            onToggle={() => { onSetExpandedExplicit(folderKey, !open); }}
+            onToggle={() => {
+              onSetExpandedExplicit(folderKey, !open);
+            }}
           />
         }
         icon={
@@ -475,7 +497,9 @@ function FolderFlatTreeRow({
               size="md"
               strokeWidth={2}
               className="sidebar-row-action dateisystem-tree-menu-btn"
-              onClick={(e) => { onOpenMenu(e, folder); }}
+              onClick={(e) => {
+                onOpenMenu(e, folder);
+              }}
               hasPopup="menu"
             />
           </>
@@ -590,7 +614,9 @@ function TreeAddFolderButton({
           ref={inputRef}
           className="sidebar-inline-input"
           value={name}
-          onChange={(e) => { setName(e.target.value); }}
+          onChange={(e) => {
+            setName(e.target.value);
+          }}
           placeholder={t('filesystem.folderNamePlaceholder')}
           aria-label={t('filesystem.folderNameAria')}
           onKeyDown={(e) => {
@@ -613,7 +639,9 @@ function TreeAddFolderButton({
           type="button"
           className="sidebar-icon-btn"
           aria-label={t('filesystem.cancelAria')}
-          onClick={() => { setOpen(false); }}
+          onClick={() => {
+            setOpen(false);
+          }}
         >
           ×
         </button>

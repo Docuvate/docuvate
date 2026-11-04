@@ -20,7 +20,7 @@ import {
   parseOptionalString,
   parseString,
   recordFromUnknown,
-} from '../../../shared/infrastructure/database/row-parse.js';
+} from '../../../shared/domain/row-parse.js';
 import type { TagEntity } from '../../taxonomy/domain/taxonomy.entity.js';
 import type { DocumentEntity, DocumentStatus } from '../domain/document.entity.js';
 
@@ -70,7 +70,7 @@ export function normalizeExtraction(
   };
 }
 
-export interface DocumentRowJoins {
+interface DocumentRowJoins {
   tags?: TagEntity[];
   extraction?: {
     fields: ExtractedField[];
@@ -80,7 +80,7 @@ export interface DocumentRowJoins {
 }
 
 /** Maps tag objects from Postgres `json_agg` / JSON columns (snake_case keys). */
-export function mapTagFromJson(raw: Record<string, unknown>): TagEntity {
+function mapTagFromJson(raw: Record<string, unknown>): TagEntity {
   const userIdRaw = raw.user_id ?? raw.userId;
   const matchRaw = raw.match_text ?? raw.match;
   const isInboxRaw = raw.is_inbox ?? raw.isInbox;

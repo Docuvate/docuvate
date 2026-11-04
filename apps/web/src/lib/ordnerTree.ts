@@ -6,31 +6,27 @@ import i18n from '../i18n';
 import { routes } from './routes';
 
 export type OrdnerSelection =
-  | { kind: 'root' }
-  | { kind: 'folder'; folderId: string }
-  | { kind: 'unassigned' };
+  { kind: 'root' } | { kind: 'folder'; folderId: string } | { kind: 'unassigned' };
 
 export interface OrdnerBreadcrumbSegment {
   label: string;
   to: string;
 }
 
-export function sortByNameDe<T extends { name: string }>(items: T[]): T[] {
+function sortByNameDe<T extends { name: string }>(items: T[]): T[] {
   return [...items].sort((a, b) => a.name.localeCompare(b.name, 'de'));
 }
 
 /** Direct child folders under a parent (null = workspace root). */
 export function childFolders(folders: FolderDto[], parentId: string | null): FolderDto[] {
-  return sortByNameDe(
-    folders.filter((f) => (f.parentId ?? null) === parentId)
-  );
+  return sortByNameDe(folders.filter((f) => (f.parentId ?? null) === parentId));
 }
 
 export function findFolder(folders: FolderDto[], id: string): FolderDto | undefined {
   return folders.find((f) => f.id === id);
 }
 
-export function folderAncestorChain(folders: FolderDto[], folderId: string): FolderDto[] {
+function folderAncestorChain(folders: FolderDto[], folderId: string): FolderDto[] {
   const byId = new Map(folders.map((f) => [f.id, f]));
   const chain: FolderDto[] = [];
   let current = byId.get(folderId);
@@ -128,7 +124,11 @@ export function folderDirectDocumentCount(folder: FolderDto): number {
   return folder.documentCount ?? 0;
 }
 
-export function isDescendant(folders: FolderDto[], maybeDescendantId: string, ancestorId: string): boolean {
+export function isDescendant(
+  folders: FolderDto[],
+  maybeDescendantId: string,
+  ancestorId: string
+): boolean {
   const byId = new Map(folders.map((f) => [f.id, f]));
   let current = byId.get(maybeDescendantId);
   while (current) {

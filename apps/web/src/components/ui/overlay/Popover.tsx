@@ -11,9 +11,9 @@ import {
 } from 'react';
 
 import { getOverlayPortalRoot, type OverlayPortalLayer } from './overlayPortal';
-import { useAnchoredOverlay,type UseAnchoredOverlayOptions } from './useAnchoredOverlay';
+import { useAnchoredOverlay, type UseAnchoredOverlayOptions } from './useAnchoredOverlay';
 
-export interface PopoverProps extends UseAnchoredOverlayOptions {
+interface PopoverProps extends UseAnchoredOverlayOptions {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   referenceRef: RefObject<HTMLElement>;
@@ -50,7 +50,11 @@ export function Popover({
 }: PopoverProps) {
   const generatedId = useId();
   const panelId = id ?? generatedId;
-  const { refs, floatingStyles, placement: resolvedPlacement } = useAnchoredOverlay({
+  const {
+    refs,
+    floatingStyles,
+    placement: resolvedPlacement,
+  } = useAnchoredOverlay({
     open,
     placement,
     matchReferenceWidth,
@@ -114,7 +118,9 @@ export function Popover({
   return (
     <FloatingPortal root={getOverlayPortalRoot(portalLayer)}>
       <div
-        ref={(node) => { refs.setFloating(node); }}
+        ref={(node) => {
+          refs.setFloating(node);
+        }}
         id={panelId}
         className={className}
         style={mergedStyle}

@@ -12,12 +12,12 @@ export class DocumentChatCloudUrlError extends Error {
   }
 }
 
-export function documentChatCloudHttpAllowed(): boolean {
+function documentChatCloudHttpAllowed(): boolean {
   const raw = process.env['DOCUMENT_CHAT_CLOUD_ALLOW_HTTP']?.trim().toLowerCase();
   return raw === '1' || raw === 'true' || raw === 'yes';
 }
 
-export function documentChatCloudAllowedHostnames(): Set<string> {
+function documentChatCloudAllowedHostnames(): Set<string> {
   const raw = process.env['DOCUMENT_CHAT_CLOUD_ALLOWED_HOSTS'] ?? '';
   return new Set(
     raw

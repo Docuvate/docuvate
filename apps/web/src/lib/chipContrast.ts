@@ -4,12 +4,12 @@ import type { DocuvateTheme } from '@docuvate/tokens';
 
 import { themePalette } from './themePalette';
 
-export const CHIP_FG_LIGHT = '#0f172a';
-export const CHIP_FG_DARK = '#ffffff';
+const CHIP_FG_LIGHT = '#0f172a';
+const CHIP_FG_DARK = '#ffffff';
 
 const MIN_CONTRAST = 4.5;
 
-export interface Rgb {
+interface Rgb {
   r: number;
   g: number;
   b: number;
@@ -40,7 +40,7 @@ export function rgbToHex(rgb: Rgb): string {
   return `#${part(rgb.r)}${part(rgb.g)}${part(rgb.b)}`;
 }
 
-export function relativeLuminance(r: number, g: number, b: number): number {
+function relativeLuminance(r: number, g: number, b: number): number {
   const toLinear = (c: number) => {
     const s = c / 255;
     return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;

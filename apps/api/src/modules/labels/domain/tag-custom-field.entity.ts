@@ -12,10 +12,6 @@ export interface TagCustomFieldEntity {
   sortOrder: number;
 }
 
-export function labelFieldStorageKey(tagId: string, fieldKey: string): string {
-  return `label:${tagId}:${fieldKey}`;
-}
-
 export function parseLabelFieldStorageKey(
   storageKey: string
 ): { tagId: string; fieldKey: string } | null {

@@ -8,9 +8,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import NotRequired, TypedDict, cast
 
-_ARTIFACT = (
-    Path(__file__).resolve().parent.parent / "artifacts" / "ce-ml-calibration.v1.json"
-)
+_ARTIFACT = Path(__file__).resolve().parent.parent / "artifacts" / "ce-ml-calibration.v1.json"
 
 
 class LabelTierThresholds(TypedDict):

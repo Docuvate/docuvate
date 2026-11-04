@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { MatchingAlgorithm } from '@docuvate/contracts';
 
-export interface MatchInput {
+interface MatchInput {
   algorithm: MatchingAlgorithm;
   pattern: string;
   content: string;

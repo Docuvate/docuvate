@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { LabelRecommendationDocumentPreviewDto } from '@docuvate/contracts';
 
-export function stripPdfExtension(name: string): string {
+function stripPdfExtension(name: string): string {
   return name.replace(/\.pdf$/i, '').trim();
 }
 

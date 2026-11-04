@@ -3,8 +3,6 @@
 
 from __future__ import annotations
 
-import numpy as np
-
 from docuvate_worker.infrastructure.ml.docai.features import node_geom
 
 

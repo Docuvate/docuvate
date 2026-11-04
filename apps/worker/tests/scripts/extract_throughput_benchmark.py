@@ -48,7 +48,7 @@ def _fingerprint(result_text: str, blocks: list) -> str:
 def _percentile(sorted_values: list[float], pct: float) -> float:
     if not sorted_values:
         return 0.0
-    index = min(len(sorted_values) - 1, max(0, int(round((pct / 100.0) * len(sorted_values))) - 1))
+    index = min(len(sorted_values) - 1, max(0, round((pct / 100.0) * len(sorted_values)) - 1))
     return sorted_values[index]
 
 
@@ -103,8 +103,7 @@ def main() -> int:
     with ThreadPoolExecutor(max_workers=max(1, args.concurrency)) as pool:
         futures = []
         for _round in range(args.rounds):
-            for pdf in pdfs:
-                futures.append(pool.submit(_run_one, pdf, args.keep_models == "1"))
+            futures.extend(pool.submit(_run_one, pdf, args.keep_models == "1") for pdf in pdfs)
         for future in as_completed(futures):
             doc_seconds, fp = future.result()
             per_doc_seconds.append(doc_seconds)

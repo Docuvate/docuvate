@@ -12,12 +12,13 @@ from docuvate_worker.domain.layout_ir import (
     LayoutIrWidget,
     LayoutIrWidgetKind,
 )
-from .font_map import is_italic_fontname, typst_font_and_scale
-from .render_run import run_anchor_pt, run_font_size_pt, run_scale_x
 from docuvate_worker.infrastructure.layout.widget_placement import (
     typst_align_in_box,
     widget_text_origin_pt,
 )
+
+from .font_map import is_italic_fontname, typst_font_and_scale
+from .render_run import run_anchor_pt, run_font_size_pt, run_scale_x
 
 
 def _escape_typst(text: str) -> str:
@@ -87,9 +88,7 @@ def _vector_typst(vector: LayoutIrVector, page: LayoutIrPage) -> str:
     if vector.filled:
         if vector.fill_rgb is not None:
             r, g, b = vector.fill_rgb
-            fill = (
-                f"rgb({int(r * 255)}, {int(g * 255)}, {int(b * 255)})"
-            )
+            fill = f"rgb({int(r * 255)}, {int(g * 255)}, {int(b * 255)})"
         elif vector.fill_gray is not None:
             gray = int(max(0.0, min(1.0, vector.fill_gray)) * 255)
             fill = f"rgb({gray}, {gray}, {gray})"
@@ -104,7 +103,7 @@ def _vector_typst(vector: LayoutIrVector, page: LayoutIrPage) -> str:
 
 
 def _typst_style(fontname: str | None) -> str:
-    return ", style: \"italic\"" if is_italic_fontname(fontname) else ""
+    return ', style: "italic"' if is_italic_fontname(fontname) else ""
 
 
 def _run_typst(block: LayoutIrBlock, page: LayoutIrPage, _doc: LayoutIrDocument) -> str:
@@ -116,7 +115,7 @@ def _run_typst(block: LayoutIrBlock, page: LayoutIrPage, _doc: LayoutIrDocument)
     style = _typst_style(block.font_family)
     sx = run_scale_x(block, page)
     inner = (
-        f"#text(size: {size}pt, weight: \"{weight}\", font: \"{font}\", "
+        f'#text(size: {size}pt, weight: "{weight}", font: "{font}", '
         f"hyphenate: false{style})[{text}]"
     )
     if abs(sx - 1.0) > 0.015:
@@ -131,9 +130,7 @@ def _checkbox_mark_typst(widget: LayoutIrWidget, h: float) -> str:
         return ""
     mark = _escape_typst(widget.check_mark or "8")
     fs = min(max(h * 0.85, 6.0), 12.0)
-    return (
-        f"#align(center + horizon)[#text(size: {fs:.1f}pt, font: \"Zapf Dingbats\")[{mark}]]"
-    )
+    return f'#align(center + horizon)[#text(size: {fs:.1f}pt, font: "Zapf Dingbats")[{mark}]]'
 
 
 def _widget_typst(widget: LayoutIrWidget, page: LayoutIrPage, _doc: LayoutIrDocument) -> str:
@@ -175,18 +172,15 @@ def _widget_typst(widget: LayoutIrWidget, page: LayoutIrPage, _doc: LayoutIrDocu
         parts.append(
             f"#place(top + left, dx: {wx:.2f}pt, dy: {y_adj:.2f}pt)["
             f"#box(width: {inner_w:.2f}pt, inset: 0pt)[#align({align})[{rot}"
-            f"#text(size: {size}pt, font: \"{font}\", hyphenate: false)[{body}]{end}]]"
+            f'#text(size: {size}pt, font: "{font}", hyphenate: false)[{body}]{end}]]'
             f"]"
         )
     return "\n".join(parts)
 
 
 def _page_canvas(page: LayoutIrPage, doc: LayoutIrDocument) -> str:
-    chunks: list[str] = []
-    for vector in page.vectors:
-        chunks.append(_vector_typst(vector, page))
-    for block in page.blocks:
-        chunks.append(_run_typst(block, page, doc))
+    chunks: list[str] = [_vector_typst(vector, page) for vector in page.vectors]
+    chunks.extend(_run_typst(block, page, doc) for block in page.blocks)
     for widget in page.widgets:
         part = _widget_typst(widget, page, doc)
         if part:

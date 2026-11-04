@@ -7,13 +7,15 @@ from __future__ import annotations
 
 import os
 
+from docuvate_worker.infrastructure.extract_memory.extract_subprocess_pool import (
+    evict_idle_pool_children,
+)
 from docuvate_worker.infrastructure.extract_memory.pool_memory import (
     pool_memory_registry,
     pool_resident_bytes_per_child,
 )
 from docuvate_worker.infrastructure.onnx_e5_encoder import release_onnx_encoder
 from docuvate_worker.infrastructure.worker_memory_hygiene import reclaim_process_heap
-from docuvate_worker.presentation.extract_subprocess_pool import evict_idle_pool_children
 
 _ENV_KEEP_MODELS = "DOCUVATE_EXTRACT_KEEP_MODELS"
 _ENV_CHILD_LOOP = "DOCUVATE_EXTRACT_CHILD_LOOP"

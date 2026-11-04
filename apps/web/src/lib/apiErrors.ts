@@ -80,13 +80,14 @@ function parseProblemBody(body: Record<string, unknown>): {
     (nested && typeof nested.status === 'number' ? nested.status : undefined);
 
   const code =
-    readStringField(body, 'code') ??
-    (nested ? readStringField(nested, 'code') : undefined);
+    readStringField(body, 'code') ?? (nested ? readStringField(nested, 'code') : undefined);
 
   const detail =
     readStringField(body, 'detail') ??
     readStringField(body, 'message') ??
-    (nested ? readStringField(nested, 'detail') ?? readStringField(nested, 'message') : undefined);
+    (nested
+      ? (readStringField(nested, 'detail') ?? readStringField(nested, 'message'))
+      : undefined);
 
   const requestId =
     readStringField(body, 'requestId') ??
@@ -186,7 +187,12 @@ function logRawApiError(err: unknown, fallbackKey: string): void {
   });
 }
 
-function resolveI18nKey(code: string | undefined, message: string, status: number | undefined, fallbackKey: string): string {
+function resolveI18nKey(
+  code: string | undefined,
+  message: string,
+  status: number | undefined,
+  fallbackKey: string
+): string {
   if (message && looksLikeI18nKey(message)) {
     return message;
   }
@@ -256,18 +262,6 @@ export function formatUserFacingError(err: unknown, fallbackKey: string): string
   return i18n.t(facing.i18nKey, facing.params ?? {});
 }
 
-export function apiErrorToastPayload(
-  err: unknown,
-  fallbackKey: string
-): { message: string; code?: string; requestId?: string; retry?: () => void } {
-  const facing = toUserFacingError(err, fallbackKey);
-  return {
-    message: i18n.t(facing.i18nKey, facing.params ?? {}),
-    code: facing.code,
-    requestId: facing.requestId,
-  };
-}
-
 export function throwApiRequestError(
   status: number,
   body: Record<string, unknown>,
@@ -275,10 +269,7 @@ export function throwApiRequestError(
 ): never {
   const parsed = parseProblemBody(body);
   const code = parsed.code;
-  const detail =
-    parsed.detail ??
-    readStringField(body, 'message') ??
-    `errors.generic`;
+  const detail = parsed.detail ?? readStringField(body, 'message') ?? `errors.generic`;
   const requestId = parsed.requestId ?? headerRequestId ?? undefined;
   markApiRequestFailed(new ApiRequestError(status, code, detail, requestId));
   throw new ApiRequestError(status, code, detail, requestId);

@@ -4,7 +4,7 @@ import {
   namesAreNearDuplicate,
   normalizeLabelKey,
 } from '../../../shared/domain/label-name-similarity.js';
-import { isRecord, parseString } from '../../../shared/infrastructure/database/row-parse.js';
+import { isRecord, parseString } from '../../../shared/domain/row-parse.js';
 
 const MAX_BLOCKLIST_PATTERN_LENGTH = 200;
 
@@ -44,7 +44,7 @@ export function isBlockedLabelCandidate(
   );
 }
 
-export function phrasesAreRelated(a: string, b: string): boolean {
+function phrasesAreRelated(a: string, b: string): boolean {
   if (namesAreNearDuplicate(a, b)) {
     return true;
   }

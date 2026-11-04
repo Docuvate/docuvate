@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { TFunction } from 'i18next';
 
-export type LibrarySortField = 'updatedAt' | 'createdAt' | 'title' | 'documentDate';
-export type LibrarySortOrder = 'asc' | 'desc';
+type LibrarySortField = 'updatedAt' | 'createdAt' | 'title' | 'documentDate';
+type LibrarySortOrder = 'asc' | 'desc';
 
 export function parseLibrarySortSelectValue(value: string): {
   sort: LibrarySortField;

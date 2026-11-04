@@ -10,6 +10,7 @@ import shutil
 import pytest
 
 from docuvate_worker.application.extract import extract_document
+from docuvate_worker.domain.models import ExtractionResult
 from docuvate_worker.domain.representation.encode import encode_units
 from docuvate_worker.domain.representation.units import RepresentationUnit
 from tests.public_domain_dense_scans import public_domain_dense_scan_pdf
@@ -19,7 +20,7 @@ pytestmark = pytest.mark.slow
 _LEGACY_CAP = 384
 
 
-def _field_snapshot(result) -> tuple[tuple[str, str, float | None], ...]:
+def _field_snapshot(result: ExtractionResult) -> tuple[tuple[str, str, float | None], ...]:
     return tuple(
         sorted(
             (

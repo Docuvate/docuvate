@@ -26,7 +26,7 @@ export function contextMenuTitleForSelection(
   return labels.multiple(selectedIds.length);
 }
 
-export interface ViewportRect {
+interface ViewportRect {
   top: number;
   left: number;
   right: number;

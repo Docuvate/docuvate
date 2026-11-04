@@ -3,8 +3,8 @@
 import type { DocumentDto } from '@docuvate/contracts';
 import { useMemo } from 'react';
 
-import { DocumentLabelSuggestionChips } from '../documents/DocumentLabelSuggestionChips';
-import { LabelChipRow } from '../labels/LabelChipRow';
+import { DocumentLabelSuggestionChips } from '../documents';
+import { LabelChipRow } from '../labels';
 
 interface DocumentLabelsCellProps {
   document: Pick<DocumentDto, 'id' | 'tags' | 'tagSuggestions'>;

@@ -10,7 +10,7 @@ from docuvate_worker.domain.smart_duplicates.detect import (
 )
 
 __all__ = [
-    'SmartDuplicateConfig',
-    'SmartDuplicateDocument',
-    'score_smart_duplicate_candidates',
+    "SmartDuplicateConfig",
+    "SmartDuplicateDocument",
+    "score_smart_duplicate_candidates",
 ]

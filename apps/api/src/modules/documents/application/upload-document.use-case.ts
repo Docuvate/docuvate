@@ -27,7 +27,7 @@ import type { DocumentEntity } from '../domain/document.entity.js';
 import { resolveDocumentPlacement } from '../domain/document-placement.js';
 import { QueueExtractionUseCase } from './queue-extraction.use-case.js';
 
-export interface UploadDocumentInput {
+interface UploadDocumentInput {
   userId: string;
   filename: string;
   mimeType: string;
@@ -64,11 +64,7 @@ export class UploadDocumentUseCase {
       throw new ValidationError('File is empty');
     }
 
-    const resolvedMime = resolveAllowedUploadMime(
-      input.filename,
-      input.mimeType,
-      input.buffer
-    );
+    const resolvedMime = resolveAllowedUploadMime(input.filename, input.mimeType, input.buffer);
     if (!resolvedMime) {
       throw new ValidationError(
         'This file format is not supported. Upload PDF, images, or common office documents (Word, Excel, PowerPoint, OpenDocument, RTF, CSV, text, HTML, or email).'

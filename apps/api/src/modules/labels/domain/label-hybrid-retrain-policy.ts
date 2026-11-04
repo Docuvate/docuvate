@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import type { LabelHybridDocumentRow } from './label-hybrid-training.js';
+import type { LabelHybridDocumentRow } from './label-hybrid-document-row.js';
 import {
   labelHybridRetrainMinDelta,
   labelHybridRetrainMinDeltaRatio,
@@ -13,7 +13,7 @@ export interface LabelHybridRetrainBaseline {
   hasTrainedModel: boolean;
 }
 
-export function countConfirmedLabeledExamples(rows: readonly LabelHybridDocumentRow[]): number {
+function countConfirmedLabeledExamples(rows: readonly LabelHybridDocumentRow[]): number {
   let count = 0;
   for (const row of rows) {
     if (row.embedding.length === 0) {
@@ -24,7 +24,7 @@ export function countConfirmedLabeledExamples(rows: readonly LabelHybridDocument
   return count;
 }
 
-export function confirmedLabeledTagIds(rows: readonly LabelHybridDocumentRow[]): Set<string> {
+function confirmedLabeledTagIds(rows: readonly LabelHybridDocumentRow[]): Set<string> {
   const tagIds = new Set<string>();
   for (const row of rows) {
     if (row.embedding.length === 0) {
@@ -55,7 +55,7 @@ function exampleCountDelta(baselineCount: number, pendingCount: number): number 
   return Math.abs(pendingCount - baselineCount);
 }
 
-export function hasNewConfirmedLabelClass(
+function hasNewConfirmedLabelClass(
   baseline: LabelHybridRetrainBaseline,
   pendingRows: readonly LabelHybridDocumentRow[]
 ): boolean {
@@ -74,7 +74,7 @@ export function requiredExampleDeltaForRetrain(baselineExampleCount: number): nu
   return Math.max(abs, relative);
 }
 
-export type RetrainSignificance =
+type RetrainSignificance =
   | { kind: 'cold_start' }
   | { kind: 'new_label_class' }
   | { kind: 'example_delta'; delta: number; required: number };

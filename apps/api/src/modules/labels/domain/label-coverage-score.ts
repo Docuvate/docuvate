@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { cosineSimilarity } from './cosine.js';
-import type { TagCentroidRef } from './label-coverage.js';
+import type { TagCentroidRef } from './tag-centroid-ref.js';
 
 export interface LabeledDocumentEmbedding {
   embedding: number[];

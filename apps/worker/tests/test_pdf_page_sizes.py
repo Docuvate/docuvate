@@ -1,8 +1,8 @@
-from tests.synthetic_layout_pdfs import mixed_page_sizes_pdf, rotated_mediabox_pdf
 from docuvate_worker.infrastructure.layout.pdf_page_size import (
     image_size_pt_from_pixels,
     pdf_page_sizes_pt,
 )
+from tests.synthetic_layout_pdfs import mixed_page_sizes_pdf, rotated_mediabox_pdf
 
 
 def test_pdf_page_sizes_mixed_portrait_landscape() -> None:

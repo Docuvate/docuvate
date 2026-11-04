@@ -3,18 +3,16 @@
 import type { CursorListResponse } from '@docuvate/contracts';
 import { type InfiniteData, useInfiniteQuery } from '@tanstack/react-query';
 
-export type CursorInfinitePage<Item> = CursorListResponse<Item>;
+type CursorInfinitePage<Item> = CursorListResponse<Item>;
 
-export function flattenCursorPages<Item>(
-  pages: CursorInfinitePage<Item>[] | undefined
-): Item[] {
+export function flattenCursorPages<Item>(pages: CursorInfinitePage<Item>[] | undefined): Item[] {
   if (!pages?.length) {
     return [];
   }
   return pages.flatMap((page) => page.items);
 }
 
-export interface CursorInfiniteQueryOptions<
+interface CursorInfiniteQueryOptions<
   Item,
   ExtraParams,
   Page extends CursorInfinitePage<Item> = CursorInfinitePage<Item>,
@@ -53,6 +51,6 @@ export function useCursorInfiniteQuery<
         cursor: pageParam,
       }),
     getNextPageParam: (lastPage) =>
-      lastPage.hasMore ? lastPage.nextCursor ?? undefined : undefined,
+      lastPage.hasMore ? (lastPage.nextCursor ?? undefined) : undefined,
   });
 }

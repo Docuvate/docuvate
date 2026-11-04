@@ -7,7 +7,7 @@ import {
   type IdTiebreakerCursorPayload,
 } from './id-tiebreaker-cursor.js';
 
-export function compareDescSortThenId(
+function compareDescSortThenId(
   leftSort: string | number,
   leftId: string,
   rightSort: string | number,
@@ -20,7 +20,7 @@ export function compareDescSortThenId(
   return 0;
 }
 
-export function compareAscSortThenId(
+function compareAscSortThenId(
   leftSort: string | number,
   leftId: string,
   rightSort: string | number,
@@ -42,8 +42,7 @@ export function sliceSortedCursorPage<T>(input: {
   order: 'asc' | 'desc';
   includeTotal: boolean;
 }): CursorListResponse<T> {
-  const compare =
-    input.order === 'asc' ? compareAscSortThenId : compareDescSortThenId;
+  const compare = input.order === 'asc' ? compareAscSortThenId : compareDescSortThenId;
   let startIndex = 0;
   if (input.cursor) {
     const cursorSort = input.cursor.sortValue;

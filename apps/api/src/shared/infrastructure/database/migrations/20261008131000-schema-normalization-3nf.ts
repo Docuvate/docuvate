@@ -13,10 +13,7 @@ import {
   type SqlQueryable,
   toDocumentFieldValueRow,
 } from '../../../../modules/search/infrastructure/document-field-value-index.js';
-import {
-  parseString,
-  requireRecord,
-} from '../row-parse.js';
+import { parseString, requireRecord } from '../../../domain/row-parse.js';
 
 async function loadSql(name: string): Promise<string> {
   return readFile(join(__dirname, 'sql', name), 'utf8');

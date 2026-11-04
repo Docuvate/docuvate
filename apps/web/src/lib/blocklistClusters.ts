@@ -1,14 +1,14 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 /** Client-side grouping for pattern proposal UI (mirrors API heuristics). */
-export function normalizeBlocklistKey(value: string): string {
+function normalizeBlocklistKey(value: string): string {
   return value
     .trim()
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '');
 }
 
-export function blocklistPhrasesRelated(a: string, b: string): boolean {
+function blocklistPhrasesRelated(a: string, b: string): boolean {
   const keyA = normalizeBlocklistKey(a);
   const keyB = normalizeBlocklistKey(b);
   if (!keyA || !keyB) {

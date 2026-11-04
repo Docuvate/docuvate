@@ -1,9 +1,9 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useCallback, useEffect } from 'react';
-import { type BlockerFunction,useBlocker } from 'react-router-dom';
+import { type BlockerFunction, useBlocker } from 'react-router-dom';
 
-export interface UnsavedChangesGuardState {
+interface UnsavedChangesGuardState {
   /** User tried to leave while dirty; show confirmation UI. */
   pendingNavigation: boolean;
   confirmLeave: () => void;
@@ -31,7 +31,9 @@ export function useUnsavedChangesGuard(active: boolean): UnsavedChangesGuardStat
       event.preventDefault();
     }
     window.addEventListener('beforeunload', onBeforeUnload);
-    return () => { window.removeEventListener('beforeunload', onBeforeUnload); };
+    return () => {
+      window.removeEventListener('beforeunload', onBeforeUnload);
+    };
   }, [active]);
 
   const confirmLeave = useCallback(() => {

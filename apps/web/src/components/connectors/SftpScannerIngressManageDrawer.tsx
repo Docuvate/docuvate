@@ -1,10 +1,10 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { FolderDto, SftpIngressAccountDto, SftpIngressEventDto } from '@docuvate/contracts';
-import { type RefObject,useCallback, useMemo } from 'react';
+import { type RefObject, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { SettingsCallout } from '../settings/SettingsCallout';
+import { SettingsCallout } from '../settings';
 import { Button } from '../ui/Button';
 import { CopyButton } from '../ui/CopyButton';
 import { SftpIngressManageDrawerShell } from './SftpIngressManageDrawerShell';
@@ -157,7 +157,9 @@ export function SftpScannerIngressManageDrawer({
                   type="button"
                   variant="secondary"
                   className="connector-sftp-revoke-btn"
-                  onClick={() => { onRevoke(account); }}
+                  onClick={() => {
+                    onRevoke(account);
+                  }}
                 >
                   {t('sftpIngress.revokeCta')}
                 </Button>

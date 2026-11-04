@@ -22,7 +22,7 @@ export const RECOGNIZED_FIELD_EXTRACTOR_VERSION = fingerprintToExtractorVersion(
   RECOGNIZED_FIELD_EXTRACTOR_LOGIC_SHA256
 );
 
-export function sha256HexFile(path: string): string {
+function sha256HexFile(path: string): string {
   return createHash('sha256').update(readFileSync(path)).digest('hex');
 }
 

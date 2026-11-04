@@ -10,7 +10,7 @@ const ADMIN_MESSAGE_ALIASES: Record<string, string> = {
   'Invitation link is invalid or expired': 'admin.errors.invitationInvalid',
 };
 
-export function toAdminUserFacingError(err: unknown, fallbackKey: string): UserFacingError {
+function toAdminUserFacingError(err: unknown, fallbackKey: string): UserFacingError {
   const base = toUserFacingError(err, fallbackKey);
   if (base.i18nKey.startsWith('admin.')) {
     return base;

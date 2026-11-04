@@ -5,8 +5,8 @@ import type { RefObject } from 'react';
 import type { useLibraryDocumentContextMenu } from '../pages/library/useLibraryDocumentContextMenu';
 import type { useLibraryPageData } from '../pages/library/useLibraryPageData';
 
-export type LibraryPageDataStub = ReturnType<typeof useLibraryPageData>;
-export type LibraryPageContextStub = ReturnType<typeof useLibraryDocumentContextMenu>;
+type LibraryPageDataStub = ReturnType<typeof useLibraryPageData>;
+type LibraryPageContextStub = ReturnType<typeof useLibraryDocumentContextMenu>;
 
 const stubFetchNextPage: LibraryPageDataStub['fetchNextPage'] = () => {
   return Promise.reject(new Error('fetchNextPage not implemented in library page stub'));

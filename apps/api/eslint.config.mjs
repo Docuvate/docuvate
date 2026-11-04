@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { sizeCeilingRules } from '@docuvate/eslint-config';
 import { createNodeTypeScriptConfig } from '@docuvate/eslint-config/node';
 
 const tsconfigRootDir = path.dirname(fileURLToPath(import.meta.url));
@@ -12,6 +13,15 @@ export default [
     files: ['src/**/*.ts', 'test/**/*.ts'],
     ignores: ['dist/**', 'coverage/**', 'scripts/**', 'eslint.config.mjs'],
   }),
+  {
+    // Ratchet at today's worst offenders (cited-chat-generation.service, documents.controller).
+    rules: sizeCeilingRules({
+      complexity: 133,
+      maxLines: 1095,
+      maxLinesPerFunction: 827,
+      maxParams: 41,
+    }),
+  },
   {
     files: [
       'src/test-support/**/*.ts',

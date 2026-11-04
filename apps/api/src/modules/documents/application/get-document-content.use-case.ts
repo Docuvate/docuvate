@@ -12,7 +12,7 @@ import {
   type ObjectStorage,
 } from '../../../shared/domain/ports.js';
 
-export interface DocumentContentResult {
+interface DocumentContentResult {
   buffer: Buffer;
   mimeType: string;
   filename: string;

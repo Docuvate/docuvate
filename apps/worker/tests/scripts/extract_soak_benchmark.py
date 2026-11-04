@@ -11,8 +11,10 @@ import os
 import resource
 import sys
 import time
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, wait
 from pathlib import Path
+
+from docuvate_worker.presentation.extract_subprocess_runner import run_extract_isolated
 
 _WORKER_ROOT = Path(__file__).resolve().parents[2]
 if str(_WORKER_ROOT) not in sys.path:
@@ -46,8 +48,6 @@ def _read_memory_peak_bytes() -> int | None:
 
 
 def _run_one_bytes(content: bytes) -> float:
-    from docuvate_worker.presentation.extract_subprocess_runner import run_extract_isolated
-
     started = time.perf_counter()
     run_extract_isolated(
         content=content,
@@ -71,9 +71,7 @@ def main() -> int:
     os.environ.setdefault("DOCUVATE_EXTRACT_CONCURRENCY", str(args.concurrency))
     os.environ.setdefault("DOCUVATE_EXTRACT_POOL_SIZE", str(args.concurrency))
 
-    pdfs = [
-        public_domain_dense_scan_pdf(pages, dpi=dpi) for _, pages, dpi in _CASES
-    ]
+    pdfs = [public_domain_dense_scan_pdf(pages, dpi=dpi) for _, pages, dpi in _CASES]
 
     parent_pid = os.getpid()
     print(json.dumps({"phase": "warmup", "parent_pid": parent_pid}), flush=True)
@@ -122,7 +120,9 @@ def main() -> int:
         "peak_rss_mib": round(_peak_rss_mib(), 1),
         "cgroup_memory_peak_bytes": peak_after,
         "cgroup_memory_peak_delta_bytes": (
-            (peak_after - peak_before) if peak_after is not None and peak_before is not None else None
+            (peak_after - peak_before)
+            if peak_after is not None and peak_before is not None
+            else None
         ),
     }
     print(json.dumps(result))
@@ -130,8 +130,6 @@ def main() -> int:
 
 
 def wait_one(futures: set) -> tuple[set, set]:
-    from concurrent.futures import wait
-
     done, pending = wait(futures, return_when="FIRST_COMPLETED")
     return set(done), set(pending)
 

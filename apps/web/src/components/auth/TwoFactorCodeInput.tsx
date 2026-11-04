@@ -1,11 +1,11 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { type ClipboardEvent, type KeyboardEvent,useEffect, useRef } from 'react';
+import { type ClipboardEvent, type KeyboardEvent, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 const CODE_LENGTH = 6;
 
-export interface TwoFactorCodeInputProps {
+interface TwoFactorCodeInputProps {
   value: string;
   onChange: (next: string) => void;
   onComplete?: (code: string) => void;

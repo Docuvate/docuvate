@@ -14,7 +14,7 @@ import {
   parseString,
   parseStringArray,
   requireRecord,
-} from '../../../shared/infrastructure/database/row-parse.js';
+} from '../../../shared/domain/row-parse.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 import { inferFieldCorrectionAnchorLabel } from '../domain/infer-field-correction-anchor.js';
 

@@ -3,7 +3,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { LabelHybridModel } from '../domain/label-hybrid-auto-match.js';
-import type { LabelHybridDocumentRow } from '../domain/label-hybrid-training.js';
+import type { LabelHybridDocumentRow } from '../domain/label-hybrid-document-row.js';
 import { LabelHybridModelCacheService } from './label-hybrid-model-cache.service.js';
 import {
   LabelHybridTrainBudgetExceededError,
@@ -29,11 +29,7 @@ function labeledRow(documentId: string, tagId: string, text: string): LabelHybri
   };
 }
 
-function seedLabeledCorpus(
-  tagA: number,
-  tagB: number,
-  prefix: string
-): LabelHybridDocumentRow[] {
+function seedLabeledCorpus(tagA: number, tagB: number, prefix: string): LabelHybridDocumentRow[] {
   const rows: LabelHybridDocumentRow[] = [];
   for (let i = 0; i < tagA; i += 1) {
     rows.push(labeledRow(`${prefix}-a-${String(i)}`, 'payroll', `payroll ${String(i)}`));
@@ -175,10 +171,7 @@ describe('LabelHybridModelCacheService', () => {
     await cache.resolveModel(userId, rowsV1);
     await flushHybridTrainTimers(100, 0);
 
-    const rowsV2 = [
-      ...rowsV1,
-      labeledRow('infer-new', 'brand-new-class', 'material change'),
-    ];
+    const rowsV2 = [...rowsV1, labeledRow('infer-new', 'brand-new-class', 'material change')];
     void cache.resolveModel(userId, rowsV2);
     await flushHybridTrainTimers(100, 1000);
     expect(train).toHaveBeenCalledTimes(2);
@@ -210,10 +203,7 @@ describe('LabelHybridModelCacheService', () => {
     await flushHybridTrainTimers(100, 0);
     expect(train).toHaveBeenCalledTimes(1);
 
-    const rowsV2 = [
-      ...rowsV1,
-      labeledRow('a5', 'brand-new-class', 'five labeled change'),
-    ];
+    const rowsV2 = [...rowsV1, labeledRow('a5', 'brand-new-class', 'five labeled change')];
     const stale = await cache.resolveModel(userId, rowsV2);
     expect(stale).toEqual(stubModel);
     await flushHybridTrainTimers(100, 1000);
@@ -325,10 +315,7 @@ describe('LabelHybridModelCacheService', () => {
     await flushHybridTrainTimers(100, 0);
 
     for (let i = 0; i < 50; i += 1) {
-      rows = [
-        ...rows,
-        labeledRow(`rapid-${String(i)}`, 'payroll', `rapid ${String(i)}`),
-      ];
+      rows = [...rows, labeledRow(`rapid-${String(i)}`, 'payroll', `rapid ${String(i)}`)];
       await cache.resolveModel(userId, rows);
       await vi.advanceTimersByTimeAsync(5);
     }

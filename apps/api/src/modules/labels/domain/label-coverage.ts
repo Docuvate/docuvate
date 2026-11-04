@@ -3,18 +3,14 @@
 import { cosineSimilarity } from './cosine.js';
 import { countCoverageGaps, coveredDocumentPercent } from './label-coverage-score.js';
 import { DEFAULT_LABEL_NEAR_SIMILARITY_THRESHOLD } from './label-near-threshold.js';
+import type { TagCentroidRef } from './tag-centroid-ref.js';
 
 /** Same default as embedding auto-suggestions — operational “inside label content space”. */
 export const LABEL_CONTENT_SIM_THRESHOLD = DEFAULT_LABEL_NEAR_SIMILARITY_THRESHOLD;
 
-export type LabelMapCoverageStatus = 'explained' | 'unexplained' | 'outside' | 'unlabeled_near';
+type LabelMapCoverageStatus = 'explained' | 'unexplained' | 'outside' | 'unlabeled_near';
 
-export interface TagCentroidRef {
-  tagId: string;
-  centroid: number[];
-}
-
-export interface DocumentCoverageResult {
+interface DocumentCoverageResult {
   status: LabelMapCoverageStatus;
   bestAnySimilarity: number;
   bestAssignedSimilarity: number | null;
@@ -74,7 +70,7 @@ export function computeDocumentCoverage(
   };
 }
 
-export interface LabelMapCoverageSummary {
+interface LabelMapCoverageSummary {
   explained: number;
   unexplained: number;
   outside: number;

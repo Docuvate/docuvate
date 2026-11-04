@@ -42,7 +42,7 @@ import { sourceChipPageLabel } from '../../lib/sourceChipLabel';
 import { useDocumentLayoutIr } from '../../lib/useDocumentLayoutIr';
 import { useLayoutCompare } from '../../lib/useLayoutCompare';
 import { useViewportMaxWidth } from '../../lib/useViewportMaxWidth';
-import { useToast } from '../save/ToastProvider';
+import { useToast } from '../save';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
 import { SegmentedControl } from '../ui/SegmentedControl';

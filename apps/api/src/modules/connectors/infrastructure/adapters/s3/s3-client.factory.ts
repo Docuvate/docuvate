@@ -5,7 +5,7 @@ import * as Minio from 'minio';
 import type { ConnectorConfigurationInput } from '../../../domain/connector.types.js';
 import { readConnectorConfigString } from '../shared/connector-config-string.js';
 
-export interface S3ConnectorConfig {
+interface S3ConnectorConfig {
   bucket: string;
   client: Minio.Client;
 }
@@ -51,7 +51,7 @@ export function createS3ClientConfig(credentials: ConnectorConfigurationInput): 
   return { bucket, client };
 }
 
-export interface S3SourceTreeNode {
+interface S3SourceTreeNode {
   path: string;
   label: string;
   hasChildren: boolean;
@@ -93,7 +93,9 @@ export async function listS3SourceChildNodes(
       });
     });
     stream.on('error', reject);
-    stream.on('end', () => { resolve(); });
+    stream.on('end', () => {
+      resolve();
+    });
   });
   return [...nodes.values()].sort((a, b) => a.label.localeCompare(b.label));
 }
@@ -113,8 +115,14 @@ export async function validateS3BucketAccess(client: Minio.Client, bucket: strin
       if (err) reject(err);
       else resolve();
     };
-    stream.on('data', () => { finish(); });
-    stream.on('error', (err: Error) => { finish(err); });
-    stream.on('end', () => { finish(); });
+    stream.on('data', () => {
+      finish();
+    });
+    stream.on('error', (err: Error) => {
+      finish(err);
+    });
+    stream.on('end', () => {
+      finish();
+    });
   });
 }

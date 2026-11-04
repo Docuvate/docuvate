@@ -3,8 +3,8 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 
 import { ForbiddenError } from '../../domain/errors.js';
+import { subjectIsInstanceAdministrator } from '../../domain/user-authorization-subject.js';
 import type { AuthenticatedRequest } from './auth.guard.js';
-import { subjectIsInstanceAdministrator } from './user-authorization-subject.js';
 
 @Injectable()
 export class AdminGuard implements CanActivate {

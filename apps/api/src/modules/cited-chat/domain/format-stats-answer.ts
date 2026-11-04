@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { ChatStatsOperation } from './chat-intent-prototypes.schema.js';
 
-export interface FormatStatsAnswerInput {
+interface FormatStatsAnswerInput {
   locale: 'de' | 'en';
   operation: ChatStatsOperation;
   labelName: string | null;

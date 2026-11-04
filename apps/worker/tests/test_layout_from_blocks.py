@@ -9,14 +9,19 @@ import pdfplumber
 
 from docuvate_worker.domain.models import ExtractionBlock
 from docuvate_worker.infrastructure.layout.from_blocks import layout_ir_from_extraction_blocks
+from docuvate_worker.infrastructure.layout.layout_ir_limits import MAX_LAYOUT_PAGES
 from docuvate_worker.infrastructure.layout.render_html import layout_ir_to_html
 from docuvate_worker.infrastructure.layout.render_typst import layout_ir_to_typst
 
 
 def test_from_blocks_preserves_column_order() -> None:
     blocks = [
-        ExtractionBlock(page=1, x=0.10, y=0.10, width=0.08, height=0.02, text="Label:", block_index=0),
-        ExtractionBlock(page=1, x=0.33, y=0.098, width=0.2, height=0.02, text="Value text", block_index=1),
+        ExtractionBlock(
+            page=1, x=0.10, y=0.10, width=0.08, height=0.02, text="Label:", block_index=0
+        ),
+        ExtractionBlock(
+            page=1, x=0.33, y=0.098, width=0.2, height=0.02, text="Value text", block_index=1
+        ),
     ]
     doc = layout_ir_from_extraction_blocks(blocks, width_pt=595, height_pt=842)
     assert doc is not None
@@ -52,10 +57,10 @@ def test_from_blocks_preserves_column_order() -> None:
 
 
 def test_from_blocks_truncates_pages() -> None:
-    from docuvate_worker.infrastructure.layout.layout_ir_limits import MAX_LAYOUT_PAGES
-
     blocks = [
-        ExtractionBlock(page=p, x=0.1, y=0.1, width=0.2, height=0.02, text=f"p{p}", block_index=p - 1)
+        ExtractionBlock(
+            page=p, x=0.1, y=0.1, width=0.2, height=0.02, text=f"p{p}", block_index=p - 1
+        )
         for p in range(1, MAX_LAYOUT_PAGES + 5)
     ]
     doc = layout_ir_from_extraction_blocks(blocks)

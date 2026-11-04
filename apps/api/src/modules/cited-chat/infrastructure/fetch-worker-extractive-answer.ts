@@ -1,17 +1,13 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import {
-  isRecord,
-  parseOptionalString,
-  parseString,
-} from '../../../shared/infrastructure/database/row-parse.js';
+import { isRecord, parseOptionalString, parseString } from '../../../shared/domain/row-parse.js';
 
-export interface ExtractivePassageInput {
+interface ExtractivePassageInput {
   id: string;
   text: string;
 }
 
-export interface WorkerExtractiveAnswerResult {
+interface WorkerExtractiveAnswerResult {
   reachable: boolean;
   passageId: string | null;
   answer: string | null;

@@ -43,8 +43,7 @@ def run_retrain_stub(*, job_id: str, family_id: str, correction_count: int) -> R
     tracking = mlflow_tracking_uri()
     external_run_id = f"stub-{uuid.uuid4()}" if tracking else None
     notes = (
-        "Stub retrain — no weights written. "
-        f"MLFLOW_TRACKING_URI={'set' if tracking else 'unset'}."
+        f"Stub retrain — no weights written. MLFLOW_TRACKING_URI={'set' if tracking else 'unset'}."
     )
 
     return RetrainStubResult(

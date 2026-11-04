@@ -8,7 +8,7 @@ export const COMPACT_THEME_STORAGE_KEY = 'docuvate-theme';
 
 export const THEME_PREFERENCE_CHANGE_EVENT = 'docuvate-theme-preference-change';
 
-export function isThemePreference(value: string | null | undefined): value is ThemePreference {
+function isThemePreference(value: string | null | undefined): value is ThemePreference {
   return value === 'light' || value === 'dark' || value === 'system';
 }
 

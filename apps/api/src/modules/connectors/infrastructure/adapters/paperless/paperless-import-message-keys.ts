@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { isRecord, parseOptionalNumber } from '../../../../../shared/infrastructure/database/row-parse.js';
+import { isRecord, parseOptionalNumber } from '../../../../../shared/domain/row-parse.js';
 
 export const PAPERLESS_IMPORT_MESSAGE_KEYS = {
   documentTooLarge: 'connectors.paperlessImport.documentTooLarge',
@@ -10,10 +10,7 @@ export const PAPERLESS_IMPORT_MESSAGE_KEYS = {
   retryNoFailedDocuments: 'connectors.paperlessImport.retryNoFailedDocuments',
 } as const;
 
-export type PaperlessImportMessageKey =
-  (typeof PAPERLESS_IMPORT_MESSAGE_KEYS)[keyof typeof PAPERLESS_IMPORT_MESSAGE_KEYS];
-
-export interface PaperlessImportErrorMessageParams {
+interface PaperlessImportErrorMessageParams {
   maxMb?: number;
 }
 

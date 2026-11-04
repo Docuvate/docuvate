@@ -6,7 +6,7 @@ import {
   semanticFieldKey,
 } from '@docuvate/contracts';
 
-export interface RecognizedFieldDefinitionIndex {
+interface RecognizedFieldDefinitionIndex {
   definitionIdByCatalogKey: ReadonlyMap<string, string>;
   definitionIdBySemantic: ReadonlyMap<string, string>;
 }
@@ -36,7 +36,7 @@ export function definitionIdForFieldKey(
   return index.definitionIdBySemantic.get(semantic) ?? null;
 }
 
-export function definitionIdForExtractedField(
+function definitionIdForExtractedField(
   field: ExtractedField,
   index: RecognizedFieldDefinitionIndex
 ): string | null {

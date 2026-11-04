@@ -15,7 +15,7 @@ import {
 import { diffExtractionFieldConfirmations } from '../domain/diff-extraction-field-confirmations.js';
 import { diffExtractionFieldCorrections } from '../domain/diff-extraction-field-corrections.js';
 
-export interface RecordExtractionFieldFeedbackResult {
+interface RecordExtractionFieldFeedbackResult {
   correctionsRecorded: number;
   confirmationsRecorded: number;
 }

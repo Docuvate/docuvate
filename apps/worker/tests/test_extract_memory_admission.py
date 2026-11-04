@@ -89,7 +89,7 @@ def test_production_idle_admits_first_job_despite_legacy_denial() -> None:
     legacy_available = _legacy_available_for_jobs(_PRODUCTION_IDLE, _HEADROOM, 0)
     legacy_need = _LOG_ESTIMATE_BYTES + _MIN_FREE
     assert legacy_available < legacy_need
-    assert _LOG_AVAILABLE_LEGACY < legacy_need
+    assert legacy_need > _LOG_AVAILABLE_LEGACY
     decision = decide_extract_admission(
         snapshot=_PRODUCTION_IDLE,
         estimate_bytes=_LOG_ESTIMATE_BYTES,
@@ -150,9 +150,11 @@ def test_extract_admission_slot_raises_retryable_when_concurrent_capacity_exhaus
     first = controller.try_acquire(estimate, minimum)
     assert first.admit
     try:
-        with pytest.raises(ExtractRetryableError) as exc_info:
-            with extract_admission_slot(pdf, "application/pdf"):
-                pass
+        with (
+            pytest.raises(ExtractRetryableError) as exc_info,
+            extract_admission_slot(pdf, "application/pdf"),
+        ):
+            pass
         assert exc_info.value.error_type == "ExtractResourceBusy"
     finally:
         assert first.ticket is not None
@@ -196,16 +198,14 @@ _REFERENCE_INCREMENT_MIB: dict[tuple[int, int], float] = {
 
 @pytest.mark.parametrize(
     ("pages", "dpi"),
-    ((20, 300), (35, 280), (50, 260)),
+    [(20, 300), (35, 280), (50, 260)],
 )
 def test_incremental_estimate_tracks_measured_public_scan_peaks(
     pages: int,
     dpi: int,
 ) -> None:
     pdf = public_domain_dense_scan_pdf(pages, dpi=dpi)
-    estimate_mib = estimate_extract_incremental_memory_bytes(pdf, "application/pdf") / (
-        1024 * 1024
-    )
+    estimate_mib = estimate_extract_incremental_memory_bytes(pdf, "application/pdf") / (1024 * 1024)
     reference_mib = _REFERENCE_INCREMENT_MIB[(pages, dpi)]
     assert estimate_mib >= reference_mib * 0.85
     assert estimate_mib <= reference_mib * 1.3

@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-export const MAX_FOLDER_DEPTH = 3;
-
-export interface FolderDepthNode {
+interface FolderDepthNode {
   id: string;
   parentId: string | null;
 }
@@ -38,24 +36,4 @@ export function maxSubtreeDepth(folders: FolderDepthNode[], rootId: string): num
   }
 
   return walk(rootId, 1);
-}
-
-export function assertFolderDepthAllowed(
-  folders: FolderDepthNode[],
-  options: { parentId: string | null; folderId?: string }
-): void {
-  if (options.parentId) {
-    const parentDepth = folderDepth(folders, options.parentId);
-    if (parentDepth >= MAX_FOLDER_DEPTH) {
-      throw new Error('FOLDER_MAX_DEPTH');
-    }
-    if (options.folderId) {
-      const oldDepth = folderDepth(folders, options.folderId);
-      const subtreeSpan = maxSubtreeDepth(folders, options.folderId) - oldDepth + 1;
-      const newDepth = parentDepth + 1;
-      if (newDepth + subtreeSpan - 1 > MAX_FOLDER_DEPTH) {
-        throw new Error('FOLDER_MAX_DEPTH');
-      }
-    }
-  }
 }

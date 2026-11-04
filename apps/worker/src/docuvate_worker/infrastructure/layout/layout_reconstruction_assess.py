@@ -43,17 +43,14 @@ def _iter_block_text(doc: LayoutIrDocument | None) -> str:
         return ""
     parts: list[str] = []
     for page in doc.pages:
-        for block in page.blocks:
-            parts.append(block.text)
+        parts.extend(block.text for block in page.blocks)
     return "\n".join(parts)
 
 
 def _pdf_plain_text(content: bytes, *, max_pages: int = 10) -> str:
     try:
         reader = PdfReader(io.BytesIO(content))
-        parts: list[str] = []
-        for page in reader.pages[:max_pages]:
-            parts.append(page.extract_text() or "")
+        parts: list[str] = [page.extract_text() or "" for page in reader.pages[:max_pages]]
         return "\n".join(parts)
     except Exception:
         return ""

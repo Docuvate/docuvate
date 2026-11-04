@@ -3,7 +3,7 @@
 import { ApiExtraModels, ApiProperty, getSchemaPath } from '@nestjs/swagger';
 
 /** OpenAPI DTOs for layout IR (field names aligned with `@docuvate/contracts` JSON). */
-export class LayoutIrBlockDto {
+class LayoutIrBlockDto {
   @ApiProperty()
   page!: number;
 
@@ -56,7 +56,7 @@ export class LayoutIrBlockDto {
   textOriginY?: number;
 }
 
-export class LayoutIrLineDto {
+class LayoutIrLineDto {
   @ApiProperty()
   page!: number;
 
@@ -91,7 +91,7 @@ export class LayoutIrLineDto {
   blockIndex?: number;
 }
 
-export class LayoutIrVectorDto {
+class LayoutIrVectorDto {
   @ApiProperty({ enum: ['rect', 'line', 'path'] })
   kind!: string;
 
@@ -126,7 +126,7 @@ export class LayoutIrVectorDto {
   pathD?: string;
 }
 
-export class LayoutIrWidgetDto {
+class LayoutIrWidgetDto {
   @ApiProperty({ enum: ['text', 'checkbox'] })
   kind!: string;
 
@@ -170,7 +170,7 @@ export class LayoutIrWidgetDto {
   checkMark?: string;
 }
 
-export class LayoutIrTableCellDto {
+class LayoutIrTableCellDto {
   @ApiProperty()
   text!: string;
 
@@ -200,7 +200,7 @@ export class LayoutIrTableCellDto {
 }
 
 @ApiExtraModels(LayoutIrTableCellDto)
-export class LayoutIrTableDto {
+class LayoutIrTableDto {
   @ApiProperty()
   page!: number;
 
@@ -236,7 +236,7 @@ export class LayoutIrTableDto {
   LayoutIrWidgetDto,
   LayoutIrTableDto
 )
-export class LayoutIrPageDto {
+class LayoutIrPageDto {
   @ApiProperty()
   page!: number;
 
@@ -306,7 +306,7 @@ export class LayoutCompareSummaryResponseDto {
   pageCount!: number;
 }
 
-export class LayoutComparePageMetricDto {
+class LayoutComparePageMetricDto {
   @ApiProperty()
   pageNumber!: number;
 

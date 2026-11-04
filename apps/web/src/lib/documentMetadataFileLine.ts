@@ -5,7 +5,7 @@ import type { TFunction } from 'i18next';
 
 import { formatFileSize } from './formatFileSize';
 
-export function documentPageCount(doc: DocumentDto): number | null {
+function documentPageCount(doc: DocumentDto): number | null {
   const pages = doc.extraction?.layoutIrPages;
   if (pages && pages.length > 0) {
     return pages.length;
@@ -13,7 +13,7 @@ export function documentPageCount(doc: DocumentDto): number | null {
   return null;
 }
 
-export function documentFormatLabel(doc: DocumentDto): string {
+function documentFormatLabel(doc: DocumentDto): string {
   if (doc.formatBadge?.trim()) {
     return doc.formatBadge.trim();
   }
@@ -27,10 +27,7 @@ export function documentFormatLabel(doc: DocumentDto): string {
   return mime;
 }
 
-export function documentIngestSourceLabel(
-  ingestSource: string | null | undefined,
-  t: TFunction
-): string {
+function documentIngestSourceLabel(ingestSource: string | null | undefined, t: TFunction): string {
   if (ingestSource === 'scanner_sftp') {
     return t('documents.ingestSourceScanner');
   }

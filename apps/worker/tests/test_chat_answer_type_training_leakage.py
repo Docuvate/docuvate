@@ -13,9 +13,7 @@ def _normalize_question(text: str) -> str:
 
 def test_chat_answer_type_training_excludes_smoke_manifest_questions() -> None:
     root = Path(__file__).resolve().parents[3]
-    manifest = json.loads(
-        (root / "tools/smoke-bench/manifest.json").read_text(encoding="utf-8")
-    )
+    manifest = json.loads((root / "tools/smoke-bench/manifest.json").read_text(encoding="utf-8"))
     training = json.loads(
         (root / "bench/model_gates/fixtures/chat_answer_type_training.json").read_text(
             encoding="utf-8"

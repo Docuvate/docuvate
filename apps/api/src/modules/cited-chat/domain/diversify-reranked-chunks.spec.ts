@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it } from 'vitest';
 
-import type { CitedChatChunkCandidate } from '../infrastructure/pg-cited-chat-retrieval.repository.js';
+import type { CitedChatChunkCandidate } from './cited-chat-chunk-candidate.js';
 import { diversifyLibraryRerank } from './diversify-reranked-chunks.js';
 
 function row(documentId: string, score: number, chunkId?: string) {

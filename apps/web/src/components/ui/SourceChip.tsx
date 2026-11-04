@@ -3,19 +3,25 @@
 import { Eye, FileText, type LucideIcon } from 'lucide-react';
 import type { ButtonHTMLAttributes } from 'react';
 
-export type SourceChipKind = 'document' | 'page';
+type SourceChipKind = 'document' | 'page';
 
 const KIND_ICON: Record<SourceChipKind, LucideIcon> = {
   document: FileText,
   page: Eye,
 };
 
-export interface SourceChipProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+interface SourceChipProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   kind?: SourceChipKind;
   label: string;
 }
 
-export function SourceChip({ kind = 'document', label, className = '', type = 'button', ...props }: SourceChipProps) {
+export function SourceChip({
+  kind = 'document',
+  label,
+  className = '',
+  type = 'button',
+  ...props
+}: SourceChipProps) {
   const Icon = KIND_ICON[kind];
   return (
     <button

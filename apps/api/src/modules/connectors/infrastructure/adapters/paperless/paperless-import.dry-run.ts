@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { PaperlessApiClient } from './paperless-api.client.js';
 
-export interface PaperlessDryRunSummary {
+interface PaperlessDryRunSummary {
   documentCount: number;
   tagCount: number;
   correspondentCount: number;

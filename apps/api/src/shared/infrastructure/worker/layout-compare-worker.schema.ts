@@ -8,7 +8,7 @@ export const layoutCompareSummaryWorkerSchema = z.object({
   pageCount: z.number().int().positive(),
 });
 
-export const layoutComparePageMetricWorkerSchema = z.object({
+const layoutComparePageMetricWorkerSchema = z.object({
   pageNumber: z.number().int().positive(),
   ssim: z.number().nullable(),
   inkDeviation: z.number().nullable(),

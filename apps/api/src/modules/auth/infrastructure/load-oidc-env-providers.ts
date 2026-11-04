@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { isRecord, parseBoolean, parseString } from '../../../shared/infrastructure/database/row-parse.js';
+import { isRecord, parseBoolean, parseString } from '../../../shared/domain/row-parse.js';
 
 export interface EnvOidcProviderConfig {
   providerId: string;

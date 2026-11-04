@@ -3,7 +3,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import type pg from 'pg';
 
-import { parseEnum } from '../../../shared/infrastructure/database/row-parse.js';
+import { parseEnum } from '../../../shared/domain/row-parse.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 import {
   INSTALLATION_DB_ROLE_ADMIN,

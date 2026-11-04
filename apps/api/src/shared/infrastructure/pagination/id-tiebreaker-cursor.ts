@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { ValidationError } from '../../domain/errors.js';
-import { isRecord, parseString } from '../database/row-parse.js';
+import { isRecord, parseString } from '../../domain/row-parse.js';
 
 const CURSOR_VERSION = 1;
 
@@ -58,7 +58,7 @@ export function decodeIdTiebreakerCursor(cursor: string): IdTiebreakerCursorPayl
   };
 }
 
-export interface IdTiebreakerKeysetSql {
+interface IdTiebreakerKeysetSql {
   conditionSql: string;
   params: unknown[];
 }

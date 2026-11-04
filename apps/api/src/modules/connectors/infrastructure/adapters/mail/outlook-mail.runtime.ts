@@ -4,7 +4,7 @@ import {
   parseBoolean,
   parseString,
   recordFromUnknown,
-} from '../../../../../shared/infrastructure/database/row-parse.js';
+} from '../../../../../shared/domain/row-parse.js';
 import type { ConnectorConfigurationInput } from '../../../domain/connector.types.js';
 import type {
   ConnectorRuntimePorts,

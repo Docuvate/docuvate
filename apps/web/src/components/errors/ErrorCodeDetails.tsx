@@ -12,14 +12,19 @@ import {
 } from '../../lib/errorCodes';
 import { IconButton } from '../ui/IconButton';
 
-export interface ErrorCodeDetailsProps {
+interface ErrorCodeDetailsProps {
   code: string;
   requestId: string;
   compact?: boolean;
   className?: string;
 }
 
-export function ErrorCodeDetails({ code, requestId, compact = false, className = '' }: ErrorCodeDetailsProps) {
+export function ErrorCodeDetails({
+  code,
+  requestId,
+  compact = false,
+  className = '',
+}: ErrorCodeDetailsProps) {
   const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
   const formattedId = formatErrorIdForDisplay(requestId);
@@ -35,14 +40,18 @@ export function ErrorCodeDetails({ code, requestId, compact = false, className =
     try {
       await navigator.clipboard.writeText(text);
       setCopied(true);
-      window.setTimeout(() => { setCopied(false); }, 2000);
+      window.setTimeout(() => {
+        setCopied(false);
+      }, 2000);
     } catch {
       setCopied(false);
     }
   }, [code, requestId, t]);
 
   return (
-    <div className={`ds-error-code-details${compact ? ' ds-error-code-details--compact' : ''}${className ? ` ${className}` : ''}`.trim()}>
+    <div
+      className={`ds-error-code-details${compact ? ' ds-error-code-details--compact' : ''}${className ? ` ${className}` : ''}`.trim()}
+    >
       <p className="ds-error-code-details-line">
         <span>
           {t('errors.meta.errorCode')} {code} · {t('errors.meta.errorId')} {formattedId}
@@ -53,7 +62,9 @@ export function ErrorCodeDetails({ code, requestId, compact = false, className =
           icon={Copy}
           iconSize={13}
           label={copied ? t('errors.meta.copied') : t('errors.meta.copy')}
-          onClick={() => { void onCopy(); }}
+          onClick={() => {
+            void onCopy();
+          }}
         />
       </p>
       <Link className="ds-error-code-details-link" to={errorCodeDocPath(code)}>

@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { FieldFilterValuePicker } from '../labels/FieldFilterValuePicker';
+import { FieldFilterValuePicker } from '../labels';
 
 interface LibraryLabelFilterComboboxProps {
   fieldKey: string;

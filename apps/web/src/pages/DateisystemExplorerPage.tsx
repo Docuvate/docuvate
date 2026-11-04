@@ -1,13 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import {
-  type DragEvent,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import { type DragEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Navigate, useParams } from 'react-router-dom';
 
@@ -17,10 +10,8 @@ import { DateisystemRootOverview } from '../components/ordner/DateisystemRootOve
 import { DocumentFolderDnDProvider } from '../components/ordner/DocumentFolderDnD';
 import { FolderExplorerTree } from '../components/ordner/FolderExplorerTree';
 import { FolderTargetPickerDialog } from '../components/ordner/FolderTargetPickerDialog';
-import {
-  DocumentUploadProvider,
-  useDocumentUploadContext,
-} from '../components/upload/DocumentUploadProvider';
+import { useDocumentUploadContext } from '../components/upload/documentUploadContext';
+import { DocumentUploadProvider } from '../components/upload/DocumentUploadProvider';
 import { UploadQueueList } from '../components/upload/UploadQueueList';
 import { createFolder, deleteFolder, updateFolder } from '../lib/api';
 import { formatUserFacingError } from '../lib/apiErrors';
@@ -82,10 +73,7 @@ export function DateisystemExplorerPage({ browseMode }: DateisystemExplorerPageP
         ? { kind: 'folder', folderId: routeFolderId }
         : { kind: 'root' };
 
-  const defaultHref = useMemo(
-    () => pickDefaultFilesystemHref(data.folders),
-    [data.folders]
-  );
+  const defaultHref = useMemo(() => pickDefaultFilesystemHref(data.folders), [data.folders]);
 
   const dropTarget = useMemo(
     () =>
@@ -352,7 +340,9 @@ function DateisystemExplorerLayout({
           });
         }}
         uploadDisabledTitle={dropTarget.enabled ? undefined : t('filesystem.uploadPickFolderFirst')}
-        onRequestUploadTarget={() => { setFolderPickerOpen(true); }}
+        onRequestUploadTarget={() => {
+          setFolderPickerOpen(true);
+        }}
       />
     ) : null;
 
@@ -364,10 +354,7 @@ function DateisystemExplorerLayout({
         </p>
       ) : null}
 
-      <div
-        className="dateisystem-shell"
-        style={dateisystemSidebarWidthStyle(sidebarWidth)}
-      >
+      <div className="dateisystem-shell" style={dateisystemSidebarWidthStyle(sidebarWidth)}>
         <aside className="dateisystem-sidebar" aria-label={t('filesystem.treePanelAria')}>
           <div className="dateisystem-sidebar-head">
             <h2 className="dateisystem-sidebar-title">{t('nav.folders')}</h2>
@@ -384,7 +371,9 @@ function DateisystemExplorerLayout({
             onCreateChildFolder={onCreateChildFolder}
             onRenameFolder={onRenameFolder}
             onDeleteFolder={onDeleteFolder}
-            onAddDocuments={(target) => { setAddExistingTarget(target); }}
+            onAddDocuments={(target) => {
+              setAddExistingTarget(target);
+            }}
             onUploadFilesToFolder={onUploadFilesToFolder}
           />
         </aside>
@@ -426,7 +415,9 @@ function DateisystemExplorerLayout({
             uploadDisabledTitle={
               dropTarget.enabled ? undefined : t('filesystem.uploadPickFolderFirst')
             }
-            onRequestUploadTarget={() => { setFolderPickerOpen(true); }}
+            onRequestUploadTarget={() => {
+              setFolderPickerOpen(true);
+            }}
             hideNewFolderWhenEmpty={
               showDocuments &&
               data.items.length === 0 &&
@@ -464,7 +455,9 @@ function DateisystemExplorerLayout({
       <FolderTargetPickerDialog
         open={folderPickerOpen}
         folders={data.folders}
-        onCancel={() => { setFolderPickerOpen(false); }}
+        onCancel={() => {
+          setFolderPickerOpen(false);
+        }}
         onPick={(target) => {
           setUploadOverride({
             kind: 'folder',
@@ -480,7 +473,9 @@ function DateisystemExplorerLayout({
           open
           folderId={addExistingTarget.folderId}
           folderLabel={addExistingTarget.label}
-          onClose={() => { setAddExistingTarget(null); }}
+          onClose={() => {
+            setAddExistingTarget(null);
+          }}
           onAssigned={() => {
             void data.load();
             void refreshTree();

@@ -3,12 +3,7 @@
 
 from __future__ import annotations
 
-import sys
 from pathlib import Path
-
-ROOT = Path(__file__).resolve().parents[3]
-if str(ROOT) not in sys.path:
-    sys.path.insert(0, str(ROOT))
 
 from bench.model_gates.baseline_guard import (
     JUSTIFICATION_REL_PATH,
@@ -54,7 +49,7 @@ def test_baseline_lower_allowed_with_pr_label() -> None:
     assert baseline_lower_allowed(allow_lower_label=True, changed_paths=frozenset())
 
 
-def test_check_allows_lower_with_flag() -> None:
+def test_check_allows_lower_with_flag(tmp_path: Path) -> None:
     parent = BaselineDirectionModel(
         version=1,
         metrics={"chat_extractive.latency_p95_ms": 100.0},
@@ -65,8 +60,8 @@ def test_check_allows_lower_with_flag() -> None:
         metrics={"chat_extractive.latency_p95_ms": 200.0},
         metric_direction={"chat_extractive.latency_p95_ms": "lower_is_better"},
     )
-    parent_path = Path("/tmp/parent-baseline-guard.json")
-    current_path = Path("/tmp/current-baseline-guard.json")
+    parent_path = tmp_path / "parent-baseline-guard.json"
+    current_path = tmp_path / "current-baseline-guard.json"
     parent_path.write_text(parent.model_dump_json(), encoding="utf-8")
     current_path.write_text(current.model_dump_json(), encoding="utf-8")
     assert check_baseline_not_weakened(

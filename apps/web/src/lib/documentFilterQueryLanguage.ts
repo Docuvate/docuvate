@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 /** Quote-aware tokenizer and value helpers for the library filter query mini-language. */
 
-export function unescapeFilterQuotedValue(value: string): string {
+function unescapeFilterQuotedValue(value: string): string {
   let out = '';
   for (let i = 0; i < value.length; i += 1) {
     const ch = value[i];
@@ -16,7 +16,7 @@ export function unescapeFilterQuotedValue(value: string): string {
   return out;
 }
 
-export function escapeFilterQuotedValue(value: string): string {
+function escapeFilterQuotedValue(value: string): string {
   return value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 }
 

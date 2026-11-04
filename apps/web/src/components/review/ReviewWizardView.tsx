@@ -30,8 +30,8 @@ import {
   type ReviewWizardSuggestionTask,
 } from '../../lib/review/reviewWizardPlan';
 import { routes } from '../../lib/routes';
-import { DocumentPreviewCard } from '../documents/DocumentPreviewCard';
-import { useToastNotify } from '../save/ToastProvider';
+import { DocumentPreviewCard } from '../documents';
+import { useToastNotify } from '../save';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
 import { Input } from '../ui/Input';
@@ -51,11 +51,7 @@ const STEP_LABEL_KEYS: Record<ReviewWizardStepKind, string> = {
   done: 'reviewWizard.stepDone',
 };
 
-export function ReviewWizardView({
-  items,
-  batchBusy,
-  onReload,
-}: ReviewWizardViewProps) {
+export function ReviewWizardView({ items, batchBusy, onReload }: ReviewWizardViewProps) {
   const { t, i18n } = useTranslation();
   const { pushSuccess, pushError } = useToastNotify();
   const plan = useMemo(() => buildReviewWizardPlan(items), [items]);
@@ -73,29 +69,34 @@ export function ReviewWizardView({
   const progress = reviewWizardProgress(plan, taskIndex);
   const locale = i18n.language.startsWith('de') ? 'de-DE' : 'en-US';
 
-  const loadDocumentContext = useCallback(async (documentId: string) => {
-    setPreviewLoading(true);
-    try {
-      const doc = await getDocument(documentId);
-      setDocCache(doc);
-      const blocks = doc.extraction?.blocks ?? [];
-      if (blocks.length > 0) {
-        setViewerPage(blocks[0]?.page ?? 1);
-      }
-      if (documentUsesPdfPreview(doc.mimeType, Boolean(doc.previewAvailable))) {
-        const buffer = await fetchDocumentPreviewBuffer(documentId, () => fetchDocumentPreviewBlob(documentId));
-        setPreviewData(buffer);
-      } else {
+  const loadDocumentContext = useCallback(
+    async (documentId: string) => {
+      setPreviewLoading(true);
+      try {
+        const doc = await getDocument(documentId);
+        setDocCache(doc);
+        const blocks = doc.extraction?.blocks ?? [];
+        if (blocks.length > 0) {
+          setViewerPage(blocks[0]?.page ?? 1);
+        }
+        if (documentUsesPdfPreview(doc.mimeType, Boolean(doc.previewAvailable))) {
+          const buffer = await fetchDocumentPreviewBuffer(documentId, () =>
+            fetchDocumentPreviewBlob(documentId)
+          );
+          setPreviewData(buffer);
+        } else {
+          setPreviewData(null);
+        }
+      } catch (err) {
+        pushError(formatUserFacingError(err, 'errors.loadFailed'));
+        setDocCache(null);
         setPreviewData(null);
+      } finally {
+        setPreviewLoading(false);
       }
-    } catch (err) {
-      pushError(formatUserFacingError(err, 'errors.loadFailed'));
-      setDocCache(null);
-      setPreviewData(null);
-    } finally {
-      setPreviewLoading(false);
-    }
-  }, [pushError]);
+    },
+    [pushError]
+  );
 
   useEffect(() => {
     if (plan.tasks.length === 0) return;
@@ -157,7 +158,10 @@ export function ReviewWizardView({
     }
   }
 
-  async function acceptFieldSuggestion(current: ReviewWizardSuggestionTask, valueOverride?: string) {
+  async function acceptFieldSuggestion(
+    current: ReviewWizardSuggestionTask,
+    valueOverride?: string
+  ) {
     const field = current.fieldSuggestion;
     if (!field || !docCache) return;
     const value = (valueOverride ?? field.value).trim();
@@ -217,7 +221,10 @@ export function ReviewWizardView({
   }
 
   const normalization = task.fieldSuggestion
-    ? previewFieldNormalization(task.fieldSuggestion.key, correcting ? correctionDraft : task.fieldSuggestion.value)
+    ? previewFieldNormalization(
+        task.fieldSuggestion.key,
+        correcting ? correctionDraft : task.fieldSuggestion.value
+      )
     : null;
 
   const stepStatuses = useMemo(() => {
@@ -292,7 +299,9 @@ export function ReviewWizardView({
               <p className="review-wizard-kicker">{t('reviewWizard.labelKicker')}</p>
               <p className="review-wizard-value-lg">{task.labelSuggestion.tag.name}</p>
               {confidencePct != null ? (
-                <p className="muted">{t('reviewQueue.confidenceHint', { percent: confidencePct })}</p>
+                <p className="muted">
+                  {t('reviewQueue.confidenceHint', { percent: confidencePct })}
+                </p>
               ) : null}
             </div>
           ) : null}
@@ -307,7 +316,9 @@ export function ReviewWizardView({
                     {t('reviewWizard.correctionHint')}
                     <Input
                       value={correctionDraft}
-                      onChange={(e) => { setCorrectionDraft(e.target.value); }}
+                      onChange={(e) => {
+                        setCorrectionDraft(e.target.value);
+                      }}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter' && normalization?.ok) {
                           e.preventDefault();
@@ -333,7 +344,9 @@ export function ReviewWizardView({
                 <>
                   <p className="review-wizard-value-xl">{task.fieldSuggestion.value}</p>
                   {confidencePct != null ? (
-                    <p className="muted">{t('reviewQueue.confidenceHint', { percent: confidencePct })}</p>
+                    <p className="muted">
+                      {t('reviewQueue.confidenceHint', { percent: confidencePct })}
+                    </p>
                   ) : null}
                 </>
               )}
@@ -343,11 +356,16 @@ export function ReviewWizardView({
                     doc={docCache}
                     previewData={previewData}
                     previewLoading={previewLoading}
-                    isPdf={documentUsesPdfPreview(docCache.mimeType, Boolean(docCache.previewAvailable))}
+                    isPdf={documentUsesPdfPreview(
+                      docCache.mimeType,
+                      Boolean(docCache.previewAvailable)
+                    )}
                     isImage={false}
                     highlightBlocks={
                       selectionHint && docCache.extraction?.blocks
-                        ? docCache.extraction.blocks.filter((b) => b.text.includes(selectionHint)).slice(0, 3)
+                        ? docCache.extraction.blocks
+                            .filter((b) => b.text.includes(selectionHint))
+                            .slice(0, 3)
                         : []
                     }
                     viewerPage={viewerPage}
@@ -458,7 +476,12 @@ export function ReviewWizardView({
                 </Button>
               ) : null}
               {task.stepKind === 'duplicates' ? (
-                <Button type="button" variant="secondary" disabled={actionsDisabled} onClick={advanceTask}>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  disabled={actionsDisabled}
+                  onClick={advanceTask}
+                >
                   {t('reviewWizard.continue')}
                 </Button>
               ) : null}

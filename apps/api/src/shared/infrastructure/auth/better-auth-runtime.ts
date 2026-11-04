@@ -163,7 +163,9 @@ export async function initializeAuth(): Promise<BetterAuthInstance> {
 
 export function getAuth(): BetterAuthInstance {
   if (!authInstance) {
-    throw new Error('Auth runtime is not initialized. Call initializeAuth() before handling requests.');
+    throw new Error(
+      'Auth runtime is not initialized. Call initializeAuth() before handling requests.'
+    );
   }
   return authInstance;
 }
@@ -172,8 +174,4 @@ export async function invalidateAuthRuntime(): Promise<BetterAuthInstance> {
   authInstance = null;
   initPromise = null;
   return initializeAuth();
-}
-
-export function getAuthDatabasePool(): pg.Pool {
-  return pool;
 }

@@ -1,10 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import {
-  isRecord,
-  parseNumber,
-  parseString,
-} from '../../../../../shared/infrastructure/database/row-parse.js';
+import { isRecord, parseNumber, parseString } from '../../../../../shared/domain/row-parse.js';
 
 export function parseSftpProbeResponse(value: unknown): { hostKeyFingerprintSha256: string } {
   const row = isRecord(value) ? value : null;
@@ -18,7 +14,9 @@ export function parseSftpProbeResponse(value: unknown): { hostKeyFingerprintSha2
   return { hostKeyFingerprintSha256: fingerprint };
 }
 
-function parseSftpListFileRow(value: unknown): { path: string; name: string; sizeBytes: number } | null {
+function parseSftpListFileRow(
+  value: unknown
+): { path: string; name: string; sizeBytes: number } | null {
   const row = isRecord(value) ? value : null;
   if (!row) {
     return null;

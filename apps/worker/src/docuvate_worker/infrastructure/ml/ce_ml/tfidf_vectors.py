@@ -37,7 +37,7 @@ def build_tfidf_matrix(texts: Sequence[str]) -> FloatArray:
         token
         for token, count in sorted(df.items(), key=lambda item: (-item[1], item[0]))
         if count >= _MIN_DF
-    ][: _MAX_VOCAB]
+    ][:_MAX_VOCAB]
     if not vocabulary:
         return np.zeros((len(texts), 0), dtype=np.float32)
     vocab_index = {token: idx for idx, token in enumerate(vocabulary)}

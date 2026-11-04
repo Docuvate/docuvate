@@ -2,13 +2,13 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { afterEach, describe, expect, it } from 'vitest';
 
+import type { LabelHybridDocumentRow } from './label-hybrid-document-row.js';
 import {
   baselineFromTrainedRows,
   emptyRetrainBaseline,
   evaluateRetrainSignificance,
   requiredExampleDeltaForRetrain,
 } from './label-hybrid-retrain-policy.js';
-import type { LabelHybridDocumentRow } from './label-hybrid-training.js';
 
 function labeledRow(documentId: string, tagId: string): LabelHybridDocumentRow {
   return {

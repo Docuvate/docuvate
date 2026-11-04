@@ -6,7 +6,7 @@ import { isExtractionPending } from './documentExtractionState';
 
 export type DocumentDetailLoadStepId = 'metadata' | 'preview' | 'pipeline';
 
-export interface DocumentDetailLoadStepDef {
+interface DocumentDetailLoadStepDef {
   id: DocumentDetailLoadStepId;
   labelKey: string;
 }
@@ -16,27 +16,6 @@ export const DOCUMENT_DETAIL_LOAD_STEPS: DocumentDetailLoadStepDef[] = [
   { id: 'preview', labelKey: 'documents.loadingStepPreview' },
   { id: 'pipeline', labelKey: 'documents.loadingStepPipeline' },
 ];
-
-export interface DocumentDetailLoadProgressInput {
-  metadataReady: boolean;
-  previewReady: boolean;
-  pipelinePending: boolean;
-}
-
-export function resolveDocumentDetailLoadStep(
-  input: DocumentDetailLoadProgressInput
-): DocumentDetailLoadStepId {
-  if (!input.metadataReady) {
-    return 'metadata';
-  }
-  if (!input.previewReady) {
-    return 'preview';
-  }
-  if (input.pipelinePending) {
-    return 'pipeline';
-  }
-  return 'pipeline';
-}
 
 export function isDocumentPreviewPending(
   doc: Pick<DocumentDto, 'mimeType' | 'previewAvailable'> | null | undefined,

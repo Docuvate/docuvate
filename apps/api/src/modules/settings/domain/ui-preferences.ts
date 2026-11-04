@@ -1,10 +1,10 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 export const THEME_PREFERENCES = ['light', 'dark', 'system'] as const;
-export type ThemePreference = (typeof THEME_PREFERENCES)[number];
+type ThemePreference = (typeof THEME_PREFERENCES)[number];
 
 export const UI_LOCALES = ['de', 'en'] as const;
-export type UiLocale = (typeof UI_LOCALES)[number];
+type UiLocale = (typeof UI_LOCALES)[number];
 
 export function isThemePreference(value: string): value is ThemePreference {
   for (const item of THEME_PREFERENCES) {

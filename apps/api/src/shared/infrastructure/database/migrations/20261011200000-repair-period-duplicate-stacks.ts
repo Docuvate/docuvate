@@ -8,11 +8,7 @@ import {
 } from '@docuvate/contracts';
 import type { MigrationInterface, QueryRunner } from 'typeorm';
 
-import {
-  parseOptionalString,
-  parseString,
-  requireRecord,
-} from '../row-parse.js';
+import { parseOptionalString, parseString, requireRecord } from '../../../domain/row-parse.js';
 
 async function queryRows(
   queryRunner: QueryRunner,

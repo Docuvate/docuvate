@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type {
   CustomFieldType,
-  DocumentBulkAction,
   DocumentExtractionImageDto,
   DocumentListQuery,
   DocumentRegionDto,
@@ -34,6 +33,7 @@ import type {
   TagEntity,
   TagSuggestionEntity,
 } from '../../modules/taxonomy/domain/taxonomy.entity.js';
+import type { FolderEntity } from './folder.entity.js';
 
 export interface Clock {
   now(): Date;
@@ -41,10 +41,6 @@ export interface Clock {
 
 export interface IdGenerator {
   generate(): string;
-}
-
-export interface UnitOfWork {
-  withTransaction<T>(fn: () => Promise<T>): Promise<T>;
 }
 
 export interface DocumentUpdatePatch {
@@ -322,7 +318,10 @@ export interface WorkspaceMlSettings {
 
 export interface WorkspaceMlSettingsRepository {
   get(): Promise<WorkspaceMlSettings>;
-  update(patch: Partial<WorkspaceMlSettings>, updatedByUserId: string): Promise<WorkspaceMlSettings>;
+  update(
+    patch: Partial<WorkspaceMlSettings>,
+    updatedByUserId: string
+  ): Promise<WorkspaceMlSettings>;
 }
 
 export const WORKSPACE_ML_SETTINGS_REPOSITORY = Symbol('WORKSPACE_ML_SETTINGS_REPOSITORY');
@@ -573,10 +572,6 @@ export interface SearchPort {
   ): Promise<DocumentEntity[]>;
 }
 
-export interface PaperlessImportPort {
-  startBulkImport(installationId: string, userId: string): Promise<{ runId: string }>;
-}
-
 export interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
@@ -715,21 +710,6 @@ export interface DocumentChatThreadRepository {
   touchMessageGenerationHeartbeat(messageId: string): Promise<void>;
 }
 
-export interface IdentityProviderPort {
-  getAuthorizationUrl(): Promise<string>;
-  handleCallback(): Promise<never>;
-  linkExternalIdentity(): Promise<never>;
-}
-
-export interface FolderEntity {
-  id: string;
-  userId: string;
-  name: string;
-  parentId: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
 export interface FolderListItem extends FolderEntity {
   documentCount: number;
 }
@@ -737,12 +717,7 @@ export interface FolderListItem extends FolderEntity {
 export interface FolderRepository {
   listForUser(userId: string): Promise<FolderListItem[]>;
   findByIdForUser(id: string, userId: string): Promise<FolderEntity | null>;
-  create(
-    id: string,
-    userId: string,
-    name: string,
-    parentId: string | null
-  ): Promise<FolderEntity>;
+  create(id: string, userId: string, name: string, parentId: string | null): Promise<FolderEntity>;
   update(
     id: string,
     userId: string,
@@ -886,8 +861,6 @@ export interface DuplicateStackRepository {
   handleDocumentDeleted(userId: string, documentId: string): Promise<void>;
 }
 
-export type { DocumentBulkAction };
-
 export interface DocumentLayoutIrSnapshot {
   ir: Record<string, unknown>;
   irSha256: string;
@@ -941,7 +914,10 @@ export interface InsertDocumentRegionInput {
 }
 
 export interface DocumentRegionRepository {
-  findLayoutIrSnapshot(documentId: string, userId: string): Promise<DocumentLayoutIrSnapshot | null>;
+  findLayoutIrSnapshot(
+    documentId: string,
+    userId: string
+  ): Promise<DocumentLayoutIrSnapshot | null>;
   listActiveRegions(documentId: string, role?: DocumentRegionRole): Promise<DocumentRegionRecord[]>;
   findRegionById(documentId: string, regionId: string): Promise<DocumentRegionRecord | null>;
   findActiveFieldRegion(documentId: string, fieldKey: string): Promise<DocumentRegionRecord | null>;
@@ -971,7 +947,11 @@ export interface DocumentRegionRepository {
     fieldKey: string,
     blockIndexes: readonly number[]
   ): Promise<void>;
-  remapActiveRegions(documentId: string, tokens: readonly LayoutToken[], irSha256: string): Promise<void>;
+  remapActiveRegions(
+    documentId: string,
+    tokens: readonly LayoutToken[],
+    irSha256: string
+  ): Promise<void>;
 }
 
 export const DOCUMENT_REGION_REPOSITORY = Symbol('DOCUMENT_REGION_REPOSITORY');

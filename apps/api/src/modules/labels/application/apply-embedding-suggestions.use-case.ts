@@ -18,10 +18,8 @@ import { EnsureDocumentRepresentationUseCase } from '../../representation/applic
 import { PgDocumentRepresentationRepository } from '../../representation/infrastructure/pg-document-representation.repository.js';
 import { embeddingDensityGloballyEnabled } from '../domain/embedding-density-flag.js';
 import { tagIdConflictsWithAssigned } from '../domain/filter-exclusive-tag-suggestions.js';
-import {
-  classifyWithLabelHybrid,
-  type LabelHybridDocumentRow,
-} from '../domain/label-hybrid-training.js';
+import type { LabelHybridDocumentRow } from '../domain/label-hybrid-document-row.js';
+import { classifyWithLabelHybrid } from '../domain/label-hybrid-training.js';
 import { EmbeddingDensityCalibrationQueueService } from '../infrastructure/embedding-density-calibration-queue.service.js';
 import { LabelHybridModelCacheService } from '../infrastructure/label-hybrid-model-cache.service.js';
 import { PgLabelCoOccurrenceRepository } from '../infrastructure/pg-label-co-occurrence.repository.js';

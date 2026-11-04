@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type {
   AcceptDocumentReviewBatchResponseDto,
-  AcceptDocumentReviewResponseDto,
   AcceptLabelRecommendationRequest,
   AddLabelRecommendationBlocklistRequest,
   AdminAccessResponse,
@@ -10,7 +9,6 @@ import type {
   AdminOidcProviderDto,
   AdminUserDto,
   AdminUserListResponse,
-  ApplyDuplicateSetDecisionsRequest,
   ApplyFieldCorrectionRequest,
   ApplyFieldCorrectionResponse,
   ApplyLabelCorrectionResponse,
@@ -23,10 +21,8 @@ import type {
   ConnectorCatalogResponse,
   ConnectorInstallationDto,
   ConnectorSourceTreeNodeDto,
-  CorrespondentDto,
   CreateAdminOidcProviderRequest,
   CreateConnectorInstallationRequest,
-  CreateCorrespondentRequest,
   CreateDocumentChatThreadRequest,
   CreateFolderRequest,
   CreateSavedDocumentViewRequest,
@@ -39,8 +35,6 @@ import type {
   DocumentBulkRequest,
   DocumentChatMessageRecordDto,
   DocumentChatProvidersCatalogDto,
-  DocumentChatRequest,
-  DocumentChatResponse,
   DocumentChatThreadDto,
   DocumentChatThreadListResponse,
   DocumentChatThreadMessagesResponse,
@@ -54,7 +48,6 @@ import type {
   DocumentReviewQueueSummaryDto,
   DocumentTagSuggestionsBatchRequestDto,
   DocumentTagSuggestionsBatchResponseDto,
-  DuplicateCandidateDto,
   DuplicateSetDto,
   DuplicateSetListResponse,
   DuplicateStackDto,
@@ -64,10 +57,7 @@ import type {
   FolderDto,
   GlobalChatSuggestionBootstrapDto,
   GlobalSearchResponseDto,
-  HardwareCapabilitiesDto,
   InviteAdminUserRequest,
-  LabelDocumentInventoryQuery,
-  LabelDocumentInventoryResponseDto,
   LabelDocumentInventorySummaryResponseDto,
   LabelMapResponseDto,
   LabelRecommendationBlocklistEntryDto,
@@ -91,7 +81,6 @@ import type {
   ReorderSavedDocumentViewsRequest,
   ReplaceDashboardLayoutRequest,
   ReplaceRecognizedFieldsRequest,
-  ReplaceTagCustomFieldsRequest,
   SavedDocumentViewDto,
   SavedDocumentViewListResponse,
   SendDocumentChatThreadMessageRequest,
@@ -104,13 +93,11 @@ import type {
   SftpIngressCreateAccountResponseDto,
   SftpIngressEventDto,
   SftpIngressServerInfoDto,
-  TagCustomFieldDefinitionDto,
   TagDto,
   TagSearchPageDto,
   TagSearchQuery,
   UpdateAdminOidcProviderRequest,
   UpdateConnectorInstallationRequest,
-  UpdateCorrespondentRequest,
   UpdateDocumentRequest,
   UpdateDocumentResponse,
   UpdateFolderRequest,
@@ -122,6 +109,7 @@ import type {
   WorkspaceMlSettingsDto,
 } from '@docuvate/contracts';
 
+import { apiBaseUrl } from './apiBaseUrl';
 import { isRecord, notifyApiRequestSucceeded, throwApiRequestError } from './apiErrors';
 import type {
   LayoutCompareMetrics,
@@ -129,22 +117,9 @@ import type {
   LayoutCompareSummary,
 } from './layoutCompare';
 
-function resolveApiBaseUrl(): string {
-  const configured =
-    import.meta.env.VITE_API_URL ??
-    (import.meta.env.PROD ? '/api' : 'http://localhost:3001');
-  const normalized = configured.replace(/\/$/, '');
-  if (normalized.endsWith('/v1')) {
-    return normalized;
-  }
-  return `${normalized}/v1`;
-}
+const baseURL = apiBaseUrl();
 
-const baseURL = resolveApiBaseUrl();
-
-export function apiBaseUrl(): string {
-  return baseURL;
-}
+export { apiBaseUrl };
 
 export function authHeaders(): Record<string, string> {
   return {};
@@ -157,9 +132,7 @@ async function request<T>(path: string, init?: RequestInit & { timeoutMs?: numbe
     headers.set('Content-Type', 'application/json');
   }
   const signal =
-    timeoutMs != null && timeoutMs > 0
-      ? AbortSignal.timeout(timeoutMs)
-      : fetchInit.signal;
+    timeoutMs != null && timeoutMs > 0 ? AbortSignal.timeout(timeoutMs) : fetchInit.signal;
   const response = await fetch(`${baseURL}${path}`, {
     ...fetchInit,
     credentials: 'include',
@@ -188,9 +161,7 @@ async function requestNoContent(
     headers.set('Content-Type', 'application/json');
   }
   const signal =
-    timeoutMs != null && timeoutMs > 0
-      ? AbortSignal.timeout(timeoutMs)
-      : fetchInit.signal;
+    timeoutMs != null && timeoutMs > 0 ? AbortSignal.timeout(timeoutMs) : fetchInit.signal;
   const response = await fetch(`${baseURL}${path}`, {
     ...fetchInit,
     credentials: 'include',
@@ -370,20 +341,13 @@ export async function confirmDocumentField(
   });
 }
 
-export interface LayoutRenderResponse {
-  html?: string;
-  typst?: string;
-  reconstructionReliable: boolean;
-  unreliableReason?: string | null;
-}
-
 export async function fetchDocumentLayoutHtml(
   documentId: string
 ): Promise<{ html: string; reconstructionReliable: boolean; unreliableReason?: string | null }> {
   return request(`/documents/${documentId}/layout-html`);
 }
 
-export type LayoutTypstExportMode = 'exakt' | 'semantisch';
+type LayoutTypstExportMode = 'exakt' | 'semantisch';
 
 export async function fetchDocumentLayoutTypst(
   documentId: string,
@@ -524,20 +488,6 @@ export async function getLabelDocumentInventorySummary(): Promise<LabelDocumentI
   return request<LabelDocumentInventorySummaryResponseDto>('/labels/document-inventory/summary');
 }
 
-export async function listLabelDocumentInventoryPage(
-  options: LabelDocumentInventoryQuery = {}
-): Promise<LabelDocumentInventoryResponseDto> {
-  const qs = queryString({
-    limit: options.limit != null ? String(options.limit) : undefined,
-    cursor: options.cursor,
-  });
-  return request<LabelDocumentInventoryResponseDto>(`/labels/document-inventory${qs}`);
-}
-
-export async function getLabelDocumentInventory(): Promise<LabelDocumentInventoryResponseDto> {
-  return listLabelDocumentInventoryPage();
-}
-
 export async function acceptLabelRecommendation(
   recommendationId: string,
   body: Omit<AcceptLabelRecommendationRequest, 'recommendationId'> = {}
@@ -600,29 +550,6 @@ export async function removeLabelRecommendationBlocklist(id: string): Promise<vo
   await request(`/labels/recommendation-blocklist/${id}`, { method: 'DELETE' });
 }
 
-export async function listCorrespondents(): Promise<CorrespondentDto[]> {
-  const data = await request<{ items: CorrespondentDto[] }>('/correspondents');
-  return data.items;
-}
-
-export async function createCorrespondent(body: CreateCorrespondentRequest): Promise<CorrespondentDto> {
-  return request<CorrespondentDto>('/correspondents', { method: 'POST', body: JSON.stringify(body) });
-}
-
-export async function updateCorrespondent(
-  id: string,
-  body: UpdateCorrespondentRequest
-): Promise<CorrespondentDto> {
-  return request<CorrespondentDto>(`/correspondents/${id}`, {
-    method: 'PATCH',
-    body: JSON.stringify(body),
-  });
-}
-
-export async function deleteCorrespondent(id: string): Promise<void> {
-  await request(`/correspondents/${id}`, { method: 'DELETE' });
-}
-
 export async function listRecognizedFields(): Promise<RecognizedFieldDefinitionDto[]> {
   const data = await request<{ items: RecognizedFieldDefinitionDto[] }>('/recognized-fields');
   return data.items;
@@ -647,17 +574,6 @@ export async function replaceRecognizedFields(
     method: 'PUT',
     body: JSON.stringify(body),
   });
-  return data.items;
-}
-
-export async function replaceTagCustomFields(
-  tagId: string,
-  body: ReplaceTagCustomFieldsRequest
-): Promise<TagCustomFieldDefinitionDto[]> {
-  const data = await request<{ items: TagCustomFieldDefinitionDto[] }>(
-    `/tags/${tagId}/custom-fields`,
-    { method: 'PUT', body: JSON.stringify(body) }
-  );
   return data.items;
 }
 
@@ -709,21 +625,6 @@ export async function listDocumentReviewQueuePage(options?: {
     cursor: options?.cursor,
   });
   return request<DocumentReviewQueueResponseDto>(`/review-queue${qs}`);
-}
-
-export async function listDocumentReviewQueue(options?: {
-  limit?: number;
-}): Promise<DocumentReviewQueueResponseDto> {
-  return listDocumentReviewQueuePage({ limit: options?.limit });
-}
-
-export async function acceptDocumentReviewAll(
-  documentId: string
-): Promise<AcceptDocumentReviewResponseDto> {
-  return request<AcceptDocumentReviewResponseDto>(
-    `/review-queue/documents/${documentId}/accept-all`,
-    { method: 'POST' }
-  );
 }
 
 export async function acceptDocumentReviewHighConfidenceBatch(
@@ -809,33 +710,6 @@ export async function dismissDuplicateSet(setId: string): Promise<void> {
   await request(`/duplicate-sets/${encodeURIComponent(setId)}/dismiss`, { method: 'POST' });
 }
 
-export async function applyDuplicateSetDecisions(
-  body: ApplyDuplicateSetDecisionsRequest
-): Promise<void> {
-  await request('/duplicate-sets/apply-decisions', {
-    method: 'POST',
-    body: JSON.stringify(body),
-  });
-}
-
-export async function listDuplicateCandidates(
-  documentId: string
-): Promise<DuplicateCandidateDto[]> {
-  const data = await request<{ items: DuplicateCandidateDto[] }>(
-    `/documents/${documentId}/duplicate-candidates`
-  );
-  return data.items;
-}
-
-export async function dismissDuplicateCandidate(
-  documentId: string,
-  candidateId: string
-): Promise<void> {
-  await request(`/documents/${documentId}/duplicate-candidates/${candidateId}/dismiss`, {
-    method: 'POST',
-  });
-}
-
 export async function getDuplicateStack(documentId: string): Promise<DuplicateStackDto | null> {
   const data = await request<{ stack: DuplicateStackDto | null }>(
     `/documents/${documentId}/duplicate-stack`
@@ -889,16 +763,6 @@ export async function restoreDuplicateStackPair(
   await request(`/documents/${primaryDocumentId}/duplicate-stack/restore-pair`, {
     method: 'POST',
     body: JSON.stringify({ otherDocumentId }),
-  });
-}
-
-export async function sendDocumentChat(
-  documentId: string,
-  body: DocumentChatRequest
-): Promise<DocumentChatResponse> {
-  return request(`/documents/${documentId}/chat`, {
-    method: 'POST',
-    body: JSON.stringify(body),
   });
 }
 
@@ -983,11 +847,6 @@ export async function listLibraryChatThreadsPage(options?: {
   return request<DocumentChatThreadListResponse>(`/chat/threads${qs}`);
 }
 
-export async function listLibraryChatThreads(): Promise<DocumentChatThreadDto[]> {
-  const data = await listLibraryChatThreadsPage();
-  return data.threads;
-}
-
 export async function getGlobalChatSuggestionBootstrap(): Promise<GlobalChatSuggestionBootstrapDto> {
   return request<GlobalChatSuggestionBootstrapDto>('/chat/suggestion-bootstrap');
 }
@@ -1006,13 +865,10 @@ export async function updateLibraryChatThread(
   threadId: string,
   title: string
 ): Promise<DocumentChatThreadDto> {
-  const data = await request<{ thread: DocumentChatThreadDto }>(
-    `/chat/threads/${threadId}`,
-    {
-      method: 'PATCH',
-      body: JSON.stringify({ title }),
-    }
-  );
+  const data = await request<{ thread: DocumentChatThreadDto }>(`/chat/threads/${threadId}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ title }),
+  });
   return data.thread;
 }
 
@@ -1033,23 +889,16 @@ export async function sendLibraryChatThreadMessage(
   threadId: string,
   body: SendDocumentChatThreadMessageRequest
 ): Promise<SendDocumentChatThreadMessageResponse> {
-  return request<SendDocumentChatThreadMessageResponse>(
-    `/chat/threads/${threadId}/messages`,
-    {
-      method: 'POST',
-      body: JSON.stringify(body),
-    }
-  );
+  return request<SendDocumentChatThreadMessageResponse>(`/chat/threads/${threadId}/messages`, {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
 }
 
-export async function cancelLibraryChatMessage(
-  threadId: string,
-  messageId: string
-): Promise<void> {
-  await request<{ ok: boolean }>(
-    `/chat/threads/${threadId}/messages/${messageId}/cancel`,
-    { method: 'POST' }
-  );
+export async function cancelLibraryChatMessage(threadId: string, messageId: string): Promise<void> {
+  await request<{ ok: boolean }>(`/chat/threads/${threadId}/messages/${messageId}/cancel`, {
+    method: 'POST',
+  });
 }
 
 export async function retryLibraryChatMessage(
@@ -1113,10 +962,6 @@ export async function listExtractionEngines(): Promise<ExtractionEngineInfo[]> {
 
 export async function getDocumentChatProvidersCatalog(): Promise<DocumentChatProvidersCatalogDto> {
   return request<DocumentChatProvidersCatalogDto>('/settings/chat-providers');
-}
-
-export async function getHardwareCapabilities(): Promise<HardwareCapabilitiesDto> {
-  return request<HardwareCapabilitiesDto>('/settings/hardware');
 }
 
 export async function getConnectorCatalog(): Promise<ConnectorCatalogResponse> {
@@ -1192,15 +1037,6 @@ export async function listConnectorInstallationSourceNodes(
     `/connectors/installations/${encodeURIComponent(installationId)}/source-nodes${query ? `?${query}` : ''}`
   );
   return data.nodes;
-}
-
-export async function testPaperlessConnection(
-  credentials: Record<string, string>
-): Promise<{ ok: true; apiVersion: number }> {
-  return request<{ ok: true; apiVersion: number }>('/connectors/plugins/paperless/test-connection', {
-    method: 'POST',
-    body: JSON.stringify({ credentials }),
-  });
 }
 
 export async function getPaperlessInstallation(
@@ -1363,7 +1199,9 @@ export async function getAdminPasswordPolicy(): Promise<PasswordPolicyDto> {
   return request<PasswordPolicyDto>('/admin/password-policy');
 }
 
-export async function updateAdminPasswordPolicy(body: PasswordPolicyDto): Promise<PasswordPolicyDto> {
+export async function updateAdminPasswordPolicy(
+  body: PasswordPolicyDto
+): Promise<PasswordPolicyDto> {
   return request<PasswordPolicyDto>('/admin/password-policy', {
     method: 'PUT',
     body: JSON.stringify(body),
@@ -1381,10 +1219,6 @@ export async function listAdminUsersPage(options?: {
     cursor: options?.cursor,
   });
   return request<AdminUserListResponse>(`/admin/users${qs}`);
-}
-
-export async function listAdminUsers(search?: string): Promise<AdminUserListResponse> {
-  return listAdminUsersPage({ search });
 }
 
 export async function inviteAdminUser(body: InviteAdminUserRequest): Promise<AdminUserDto> {
@@ -1528,8 +1362,6 @@ export async function getDashboardStatistics(): Promise<DashboardStatisticsDto> 
 export async function getInstallationAdminStatus(): Promise<{ isInstallationAdmin: boolean }> {
   return request<{ isInstallationAdmin: boolean }>('/dashboard/installation-admin');
 }
-
-export { baseURL };
 
 export async function getSftpIngressServer(): Promise<SftpIngressServerInfoDto> {
   return request<SftpIngressServerInfoDto>('/sftp-ingress/server');

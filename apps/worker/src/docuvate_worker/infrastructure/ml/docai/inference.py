@@ -136,9 +136,7 @@ class DocaiRuntime:
 
     def _rapidocr_engine(self) -> RapidOcrEngine:
         if self._rapidocr is None:
-            self._rapidocr = self._build_ocr(
-                self._ocr_model_dir, self._ocr_cfg, self._ocr_threads
-            )
+            self._rapidocr = self._build_ocr(self._ocr_model_dir, self._ocr_cfg, self._ocr_threads)
         return self._rapidocr
 
     def _build_ocr(self, model_dir: Path, ocr_cfg: dict[str, Any], threads: int) -> RapidOcrEngine:
@@ -290,9 +288,7 @@ class DocaiRuntime:
         geom_started = time.perf_counter()
         geometry, rows = layout_features.node_geom(payload)
         if self._cfg.get("field_ctx"):
-            node_context = layout_features.node_ctx(
-                payload, geometry, embeddings_matrix, rows
-            )
+            node_context = layout_features.node_ctx(payload, geometry, embeddings_matrix, rows)
             dense = np.hstack([geometry, node_context])
         else:
             dense = geometry

@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { DocumentChatContext } from '../../domain/ports.js';
-import { isRecord, parseString, parseStringArray } from '../database/row-parse.js';
+import { isRecord, parseString, parseStringArray } from '../../domain/row-parse.js';
 import { workerApiUrl } from '../worker/worker-api-path.js';
 
 function parseWorkerRagResponse(raw: unknown): { contextText: string; chunks: string[] } {
@@ -14,7 +14,7 @@ function parseWorkerRagResponse(raw: unknown): { contextText: string; chunks: st
   };
 }
 
-export interface WorkerRagContextResult {
+interface WorkerRagContextResult {
   contextText: string;
   chunks: string[];
   reachable: boolean;

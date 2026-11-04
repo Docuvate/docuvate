@@ -17,7 +17,7 @@ import {
   parseStringArray,
   recordFromUnknown,
   requireRecord,
-} from '../../../../../shared/infrastructure/database/row-parse.js';
+} from '../../../../../shared/domain/row-parse.js';
 import { PG_POOL } from '../../../../../shared/infrastructure/database/tokens.js';
 import type { PaperlessOcrMode } from './paperless-field-mapping.js';
 
@@ -65,7 +65,7 @@ export interface ConnectorImportRunErrorRow {
   createdAt: Date;
 }
 
-export interface PaperlessInstallationSettings {
+interface PaperlessInstallationSettings {
   keepOcrText: boolean;
   rerunOcr: boolean;
   includeArchivedPdf: boolean;

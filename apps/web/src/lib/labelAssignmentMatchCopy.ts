@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { LabelMatchAssignmentMode } from './labelAssignmentMode';
 
-export type { LabelMatchAssignmentMode };
-
 export function labelMatchPlaceholderKey(mode: LabelMatchAssignmentMode): string {
   switch (mode) {
     case 'any':

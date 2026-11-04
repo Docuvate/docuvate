@@ -7,7 +7,7 @@ import { treeDepthStyle } from '../../lib/cssCustomProperties';
 
 const TREE_ICON = 16;
 
-export interface DateisystemTreeRowProps {
+interface DateisystemTreeRowProps {
   to: string;
   isActive: boolean;
   depth?: number;

@@ -234,14 +234,17 @@ def _extract_figure_regions_pdf(
     by_page: dict[int, list[ExtractionBlock]] = {}
     for block in blocks:
         by_page.setdefault(block.page, []).append(block)
-    embedded_boxes: list[tuple[float, float, float, float]] = []
-    for img in _extract_embedded_pdf_images(content, blocks):
-        embedded_boxes.append((img.x, img.y, img.width, img.height))
+    embedded_boxes: list[tuple[float, float, float, float]] = [
+        (img.x, img.y, img.width, img.height)
+        for img in _extract_embedded_pdf_images(content, blocks)
+    ]
     out: list[ExtractedDocumentImage] = []
     for page_num in sorted(by_page):
         if len(out) >= _MAX_IMAGES_PER_DOCUMENT:
             break
-        found = _figure_regions_from_page_render(content, page_num, by_page[page_num], embedded_boxes)
+        found = _figure_regions_from_page_render(
+            content, page_num, by_page[page_num], embedded_boxes
+        )
         for img in found:
             embedded_boxes.append((img.x, img.y, img.width, img.height))
             out.append(img)

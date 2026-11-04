@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-export interface DocumentPlacement {
+interface DocumentPlacement {
   folderId: string | null;
 }
 

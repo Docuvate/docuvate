@@ -1,0 +1,54 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "workspaces": {
+    "apps/api": {
+      "entry": [
+        "src/main.ts",
+        "src/scripts/*.ts",
+        "src/**/migrations/*.ts",
+        "scripts/**/*.{mjs,mts,ts}",
+        "test/**/*.ts",
+        "src/**/*.worker.ts",
+        "src/shared/infrastructure/database/run-migrate.ts"
+      ],
+      "project": [
+        "src/**/*.ts",
+        "test/**/*.ts"
+      ]
+    },
+    "apps/web": {
+      "entry": [
+        "scripts/**/*.mjs",
+        "src/**/*.test.{ts,tsx}"
+      ],
+      "project": [
+        "src/**/*.{ts,tsx}"
+      ]
+    },
+    "packages/contracts": {
+      "project": [
+        "src/**/*.ts"
+      ]
+    },
+    "packages/otel": {
+      "project": [
+        "src/**/*.ts"
+      ]
+    }
+  },
+  "ignoreWorkspaces": [
+    "apps/site",
+    "apps/worker",
+    "apps/sftp-ingest",
+    "e2e",
+    "tools/*",
+    "packages/sdk-node",
+    "packages/sdk-flutter",
+    "packages/tokens",
+    "packages/ui-catalog",
+    "packages/testing",
+    "packages/tsconfig",
+    "packages/eslint-config",
+    "."
+  ]
+}

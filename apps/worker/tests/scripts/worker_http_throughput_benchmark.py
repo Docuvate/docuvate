@@ -94,16 +94,16 @@ def main() -> int:
     with ThreadPoolExecutor(max_workers=max(1, args.concurrency)) as pool:
         futures = []
         for _ in range(args.rounds):
-            for pdf in pdfs:
-                futures.append(
-                    pool.submit(
-                        _post_extract,
-                        base_url=args.base_url,
-                        secret=args.secret,
-                        content=pdf,
-                        timeout_seconds=args.timeout_seconds,
-                    )
+            futures.extend(
+                pool.submit(
+                    _post_extract,
+                    base_url=args.base_url,
+                    secret=args.secret,
+                    content=pdf,
+                    timeout_seconds=args.timeout_seconds,
                 )
+                for pdf in pdfs
+            )
         for future in as_completed(futures):
             try:
                 durations.append(future.result())

@@ -2,12 +2,14 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it } from 'vitest';
 
-import type { LabelHybridDocumentRow } from '../domain/label-hybrid-training.js';
+import type { LabelHybridDocumentRow } from '../domain/label-hybrid-document-row.js';
 import { trainInWorkerThread } from './label-hybrid-trainer.js';
 
 function syntheticRow(documentId: string, tagIndex: number, seed: number): LabelHybridDocumentRow {
   const tagId = `tag-${String(tagIndex)}`;
-  const embedding = Array.from({ length: 32 }, (_, i) => Math.sin(seed * (i + 1) * 0.11 + tagIndex));
+  const embedding = Array.from({ length: 32 }, (_, i) =>
+    Math.sin(seed * (i + 1) * 0.11 + tagIndex)
+  );
   const text = `invoice block ${String(tagIndex)} amount ${String(seed)} ref ${String(seed % 19)}`;
   return {
     documentId,

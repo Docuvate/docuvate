@@ -6,14 +6,12 @@ import { useMemo } from 'react';
 
 import { fetchDocumentTagSuggestionsBatch } from '../api';
 
-export function libraryDocumentTagSuggestionsQueryKey(documentIds: string[]): readonly string[] {
+function libraryDocumentTagSuggestionsQueryKey(documentIds: string[]): readonly string[] {
   const sorted = [...documentIds].sort();
   return ['library', 'documentTagSuggestions', sorted.join(',')];
 }
 
-export function useLibraryDocumentTagSuggestions(
-  documentIds: string[]
-): {
+export function useLibraryDocumentTagSuggestions(documentIds: string[]): {
   suggestionsByDocumentId: Record<string, TagSuggestionDto[]>;
   isFetching: boolean;
 } {

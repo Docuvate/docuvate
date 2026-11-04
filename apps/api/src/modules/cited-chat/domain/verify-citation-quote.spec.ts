@@ -3,10 +3,10 @@
 import { describe, expect, it } from 'vitest';
 
 import { reciprocalRankFusion } from '../../search/domain/reciprocal-rank-fusion.js';
+import { normalizeForQuoteMatch } from './quote-match-normalize.js';
 import {
   findQuoteInChunk,
   fuzzySpanSearchInChunk,
-  normalizeForQuoteMatch,
   passesFusionGate,
   passesRerankerGate,
   truncateQuoteWords,

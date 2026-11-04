@@ -4,7 +4,7 @@ import { UMAP } from 'umap-js';
 
 import { normalizePlotCoords, projectTo2D } from './pca2.js';
 
-export type LabelMapProjectionMethod = 'pca' | 'umap';
+type LabelMapProjectionMethod = 'pca' | 'umap';
 
 /** Below this count, UMAP is unstable — use linear PCA. */
 export const MIN_VECTORS_FOR_UMAP = 15;

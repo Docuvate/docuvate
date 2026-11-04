@@ -88,9 +88,10 @@ def _pdf_page_sizes_pt(content: bytes) -> list[tuple[float, float]]:
         for page in reader.pages:
             box = page.mediabox
             sizes.append((float(box.width), float(box.height)))
-        return sizes
     except Exception:
         return []
+    else:
+        return sizes
 
 
 def _megapixels_for_pdf_pages(

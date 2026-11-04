@@ -6,11 +6,11 @@ import i18n from '../i18n';
 import { isExtractionPending } from './documentExtractionState';
 
 /** Pipeline has no numeric progress; stages are inferred from status + partial extraction. */
-export type ExtractionProgressMode = 'staged';
+type ExtractionProgressMode = 'staged';
 
-export type ExtractionProgressStageId = 'queue' | 'ocr' | 'labels' | 'fields';
+type ExtractionProgressStageId = 'queue' | 'ocr' | 'labels' | 'fields';
 
-export interface ExtractionProgressSnapshot {
+interface ExtractionProgressSnapshot {
   mode: ExtractionProgressMode;
   stageId: ExtractionProgressStageId;
   stageIndex: number;
@@ -58,7 +58,7 @@ function hasLabelSignals(doc: Pick<DocumentDto, 'tags' | 'tagSuggestions'>): boo
   return (doc.tagSuggestions?.length ?? 0) > 0;
 }
 
-export function resolveExtractionProgressStage(
+function resolveExtractionProgressStage(
   doc: Pick<DocumentDto, 'status' | 'extraction' | 'tags' | 'tagSuggestions'>
 ): ExtractionProgressStageId | null {
   if (!isExtractionPending(doc.status)) {
@@ -98,15 +98,4 @@ export function extractionProgressSnapshot(
     percent: STAGE_PERCENT[stageId],
     indeterminate: stageId === 'ocr',
   };
-}
-
-/** Keep displayed percent monotonic across polls (stages only move forward). */
-export function monotonicExtractionPercent(
-  previousMax: number,
-  snapshot: ExtractionProgressSnapshot | null
-): number {
-  if (!snapshot) {
-    return previousMax;
-  }
-  return Math.max(previousMax, snapshot.percent);
 }

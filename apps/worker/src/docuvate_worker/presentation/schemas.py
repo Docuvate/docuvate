@@ -22,9 +22,7 @@ class ExtractRequest(BaseModel):
     embedding_density_state: EmbeddingDensityStateModel | None = Field(
         default=None, validation_alias="embeddingDensityState"
     )
-    build_exact_fact_index: bool = Field(
-        default=False, validation_alias="buildExactFactIndex"
-    )
+    build_exact_fact_index: bool = Field(default=False, validation_alias="buildExactFactIndex")
 
 
 class CompareRequest(BaseModel):
@@ -510,9 +508,7 @@ class LayoutRenderHtmlResponse(BaseModel):
     reconstruction_reliable: bool = Field(
         default=True, serialization_alias="reconstructionReliable"
     )
-    unreliable_reason: str | None = Field(
-        default=None, serialization_alias="unreliableReason"
-    )
+    unreliable_reason: str | None = Field(default=None, serialization_alias="unreliableReason")
 
 
 class LayoutRenderTypstRequest(BaseModel):
@@ -530,9 +526,7 @@ class LayoutRenderTypstResponse(BaseModel):
     reconstruction_reliable: bool = Field(
         default=True, serialization_alias="reconstructionReliable"
     )
-    unreliable_reason: str | None = Field(
-        default=None, serialization_alias="unreliableReason"
-    )
+    unreliable_reason: str | None = Field(default=None, serialization_alias="unreliableReason")
 
 
 class LayoutCompareSummaryRequest(BaseModel):

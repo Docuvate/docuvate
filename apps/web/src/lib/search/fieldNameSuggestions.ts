@@ -11,7 +11,7 @@ function fold(input: string): string {
     .replace(/[^a-z0-9]+/g, '');
 }
 
-export interface FieldNameSuggestion {
+interface FieldNameSuggestion {
   key: string;
   label: string;
 }

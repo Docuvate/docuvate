@@ -1,17 +1,16 @@
+import io
+
 from fastapi.testclient import TestClient
+from pypdf import PdfReader, PdfWriter
 
 from docuvate_worker.domain.layout_ir import layout_ir_document_to_json
 from docuvate_worker.domain.models import ExtractionBlock
 from docuvate_worker.infrastructure.layout.build import build_layout_ir
+from docuvate_worker.infrastructure.layout.extract import extract_layout_pdf_bytes
 from docuvate_worker.infrastructure.layout.extract_scanned import pdf_likely_scanned
 from docuvate_worker.infrastructure.layout.from_blocks import layout_ir_from_extraction_blocks
 from docuvate_worker.infrastructure.layout.layout_ir_limits import MAX_LAYOUT_PAGES
 from docuvate_worker.main import app
-import io
-
-from pypdf import PdfReader, PdfWriter
-
-from docuvate_worker.infrastructure.layout.extract import extract_layout_pdf_bytes
 from tests.synthetic_layout_pdfs import delivery_note_table_pdf
 
 client = TestClient(app)
@@ -65,5 +64,6 @@ def test_born_digital_delivery_note_not_scanned() -> None:
     page = doc.pages[0]
     assert len(page.tables) >= 1
     block_text = " ".join(b.text for b in page.blocks)
-    assert "Item" in block_text and "Qty" in block_text
+    assert "Item" in block_text
+    assert "Qty" in block_text
     assert len(page.tables) >= 1

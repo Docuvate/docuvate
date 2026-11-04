@@ -1,19 +1,14 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { ChevronRight } from 'lucide-react';
-import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
-import { type BreadcrumbPlanSegment,planBreadcrumbDisplay } from './breadcrumbDisplayPlan';
+import { type BreadcrumbPlanSegment, planBreadcrumbDisplay } from './breadcrumbDisplayPlan';
+import type { BreadcrumbItem } from './breadcrumbItem';
 import { Menu, MenuContent, MenuTrigger } from './overlay/Menu';
 
-export interface BreadcrumbItem {
-  label: string;
-  to?: string;
-}
-
-export interface BreadcrumbProps {
+interface BreadcrumbProps {
   items: BreadcrumbItem[];
   className?: string;
   /** Overrides default `ui.breadcrumb.label` for the nav landmark. */
@@ -108,10 +103,7 @@ export function Breadcrumb({
   const collapsedMenuAria = t('ui.breadcrumb.collapsedSegmentsMenu');
 
   return (
-    <nav
-      className={`breadcrumb${className ? ` ${className}` : ''}`.trim()}
-      aria-label={navLabel}
-    >
+    <nav className={`breadcrumb${className ? ` ${className}` : ''}`.trim()} aria-label={navLabel}>
       {plan.map((segment, planIndex) => {
         return (
           <span key={segmentKey(segment)} className={breadcrumbPartClass(segment)}>
@@ -122,7 +114,9 @@ export function Breadcrumb({
               </Link>
             ) : null}
             {segment.kind === 'current' ? (
-              <span className="breadcrumb-current" title={segment.label}>{segment.label}</span>
+              <span className="breadcrumb-current" title={segment.label}>
+                {segment.label}
+              </span>
             ) : null}
             {segment.kind === 'collapsed' ? (
               <BreadcrumbCollapsedMenu items={segment.items} menuAriaLabel={collapsedMenuAria} />
@@ -132,8 +126,4 @@ export function Breadcrumb({
       })}
     </nav>
   );
-}
-
-export function BreadcrumbStatic({ children }: { children: ReactNode }) {
-  return <nav className="breadcrumb">{children}</nav>;
 }

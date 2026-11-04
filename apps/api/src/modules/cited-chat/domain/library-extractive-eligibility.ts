@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import type { CitedChatChunkCandidate } from '../infrastructure/pg-cited-chat-retrieval.repository.js';
 import type { ChatAnswerType } from './chat-answer-type-prototypes.schema.js';
+import type { CitedChatChunkCandidate } from './cited-chat-chunk-candidate.js';
 
 export interface RankedChunkRow {
   chunk: CitedChatChunkCandidate;
@@ -14,7 +14,7 @@ const LIBRARY_EXTRACTIVE_CHUNK_MARGIN = 1.06;
 
 const SCOPED_FACT_MAX_DOCS = 5;
 
-export function bestRowPerDocument(top: RankedChunkRow[]): RankedChunkRow[] {
+function bestRowPerDocument(top: RankedChunkRow[]): RankedChunkRow[] {
   const byDoc = new Map<string, RankedChunkRow>();
   for (const row of top) {
     const existing = byDoc.get(row.chunk.documentId);

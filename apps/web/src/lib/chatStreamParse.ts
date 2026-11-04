@@ -1,19 +1,14 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import type {
-  DocumentChatMessageRecordDto,
-  DocumentChatMessageStreamEvent,
-} from '@docuvate/contracts';
+import type { DocumentChatMessageStreamEvent } from '@docuvate/contracts';
 
 import { isRecord } from './apiErrors';
 
-export function isDocumentChatMessageStreamEvent(
-  value: unknown
-): value is DocumentChatMessageStreamEvent {
+function isDocumentChatMessageStreamEvent(value: unknown): value is DocumentChatMessageStreamEvent {
   return isRecord(value) && typeof value.type === 'string';
 }
 
-export function parseDocumentChatMessageStreamEventJson(
+function parseDocumentChatMessageStreamEventJson(
   json: string
 ): DocumentChatMessageStreamEvent | null {
   try {
@@ -46,16 +41,4 @@ export function parseSseChatStreamChunk(buffer: string): {
     }
   }
   return { events, rest };
-}
-
-export function readChatMessagesFromListResponse(
-  value: unknown
-): DocumentChatMessageRecordDto[] {
-  if (!isRecord(value) || !Array.isArray(value.messages)) {
-    return [];
-  }
-  return value.messages.filter(
-    (item): item is DocumentChatMessageRecordDto =>
-      isRecord(item) && typeof item.id === 'string'
-  );
 }

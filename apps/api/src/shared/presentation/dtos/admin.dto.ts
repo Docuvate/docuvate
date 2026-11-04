@@ -25,7 +25,7 @@ export class AdminAccessResponseDto implements AdminAccessResponse {
   roleDescriptions!: AdminAccessResponse['roleDescriptions'];
 }
 
-export class AdminUserResponseDto implements AdminUserDto {
+class AdminUserResponseDto implements AdminUserDto {
   @ApiProperty()
   id!: string;
 

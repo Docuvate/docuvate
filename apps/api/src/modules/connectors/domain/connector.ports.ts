@@ -12,29 +12,6 @@ import type {
 } from './connector.types.js';
 import type { ConnectorRuntimePorts } from './connector-runtime.ports.js';
 
-/** Shared operations for a category (mail fetch, DMS push, …) — implemented by adapters later. */
-export interface MailConnectorCategoryPort {
-  readonly categoryId: 'mail';
-}
-
-export interface DmsConnectorCategoryPort {
-  readonly categoryId: 'dms';
-}
-
-export interface HomeAutomationConnectorCategoryPort {
-  readonly categoryId: 'home_automation';
-}
-
-export interface StorageConnectorCategoryPort {
-  readonly categoryId: 'storage';
-}
-
-export type ConnectorCategoryPort =
-  | MailConnectorCategoryPort
-  | DmsConnectorCategoryPort
-  | HomeAutomationConnectorCategoryPort
-  | StorageConnectorCategoryPort;
-
 export interface ConnectorPlugin {
   readonly descriptor: ConnectorPluginDescriptor;
   authDescriptor(): ConnectorAuthDescriptor;

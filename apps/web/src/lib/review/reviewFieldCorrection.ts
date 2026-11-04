@@ -4,7 +4,7 @@ import { semanticFieldKey } from '@docuvate/contracts';
 
 import { isoDateFromExtractedValue } from '../documentAutoDocumentDate';
 
-export interface FieldNormalizationPreview {
+interface FieldNormalizationPreview {
   ok: boolean;
   normalized: string | null;
   typeLabel: string;

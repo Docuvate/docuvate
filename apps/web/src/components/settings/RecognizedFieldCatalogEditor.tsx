@@ -122,7 +122,9 @@ export function RecognizedFieldCatalogEditor({
               type="button"
               variant="secondary"
               disabled={catalogBusy}
-              onClick={() => { setStarterConfirmOpen(true); }}
+              onClick={() => {
+                setStarterConfirmOpen(true);
+              }}
             >
               {t('recognizedFields.starterPreset')}
             </Button>
@@ -130,7 +132,9 @@ export function RecognizedFieldCatalogEditor({
               type="button"
               variant="secondary"
               disabled={catalogBusy}
-              onClick={() => { openCreate(); }}
+              onClick={() => {
+                openCreate();
+              }}
             >
               {t('recognizedFields.addField')}
             </Button>
@@ -200,7 +204,9 @@ export function RecognizedFieldCatalogEditor({
                             variant="ghost"
                             className="library-inline-action"
                             disabled={catalogBusy}
-                            onClick={() => { openEdit(row); }}
+                            onClick={() => {
+                              openEdit(row);
+                            }}
                           >
                             {t('recognizedFields.editField')}
                           </Button>
@@ -210,7 +216,9 @@ export function RecognizedFieldCatalogEditor({
                             aria-label={t('recognizedFields.removeField')}
                             title={t('recognizedFields.removeField')}
                             disabled={catalogBusy}
-                            onClick={() => { setPendingDelete(row); }}
+                            onClick={() => {
+                              setPendingDelete(row);
+                            }}
                           >
                             <Trash2 size={16} strokeWidth={2} aria-hidden />
                           </button>
@@ -228,7 +236,9 @@ export function RecognizedFieldCatalogEditor({
               type="button"
               variant="secondary"
               disabled={catalogBusy}
-              onClick={() => { openCreate(); }}
+              onClick={() => {
+                openCreate();
+              }}
             >
               {t('recognizedFields.addField')}
             </Button>
@@ -262,7 +272,9 @@ export function RecognizedFieldCatalogEditor({
         tone="danger"
         busy={catalogBusy}
         confirmLabel={t('common.delete')}
-        onCancel={() => { setPendingDelete(null); }}
+        onCancel={() => {
+          setPendingDelete(null);
+        }}
         onConfirm={() => void confirmDeleteRow()}
       />
 
@@ -272,16 +284,11 @@ export function RecognizedFieldCatalogEditor({
         description={t('recognizedFields.starterPresetConfirmDescription')}
         busy={catalogBusy}
         confirmLabel={t('recognizedFields.starterPreset')}
-        onCancel={() => { setStarterConfirmOpen(false); }}
+        onCancel={() => {
+          setStarterConfirmOpen(false);
+        }}
         onConfirm={() => void applyStarterPreset()}
       />
     </div>
   );
 }
-
-export type { RecognizedFieldDraft } from '../../lib/recognizedFieldDraft';
-export {
-  draftsFromRecognizedDefinitions,
-  emptyRecognizedFieldDraft,
-  RECOGNIZED_FIELD_STARTER_PRESETS,
-} from '../../lib/recognizedFieldDraft';

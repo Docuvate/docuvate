@@ -3,8 +3,8 @@
 /** Default cosine similarity for “near label space” (Labelraum + assign recommendations). */
 export const DEFAULT_LABEL_NEAR_SIMILARITY_THRESHOLD = 0.62;
 
-export const LABEL_NEAR_THRESHOLD_MIN = 0.5;
-export const LABEL_NEAR_THRESHOLD_MAX = 0.92;
+const LABEL_NEAR_THRESHOLD_MIN = 0.5;
+const LABEL_NEAR_THRESHOLD_MAX = 0.92;
 
 const LEARN_BLEND = 0.35;
 

@@ -3,7 +3,6 @@
 export {
   type BetterAuthInstance,
   getAuth,
-  getAuthDatabasePool,
   initializeAuth,
   invalidateAuthRuntime,
 } from './better-auth-runtime.js';

@@ -9,8 +9,6 @@ import {
 const RECENT_SEARCHES_KEY = 'docuvate.recentSearches';
 const RECENT_DOCS_KEY = 'docuvate.recentDocuments';
 
-export type { RecentDocumentEntry };
-
 export function readRecentSearches(userId: string): string[] {
   try {
     const raw = localStorage.getItem(`${RECENT_SEARCHES_KEY}:${userId}`);

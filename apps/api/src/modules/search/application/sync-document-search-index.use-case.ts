@@ -11,7 +11,7 @@ import { EnsureDocumentRepresentationUseCase } from '../../representation/applic
 import { PgDocumentRepresentationRepository } from '../../representation/infrastructure/pg-document-representation.repository.js';
 import { PgGlobalSearchRepository } from '../infrastructure/pg-global-search.repository.js';
 
-export interface SyncDocumentSearchIndexInput {
+interface SyncDocumentSearchIndexInput {
   text: string;
   title: string;
   filename: string;
@@ -41,14 +41,14 @@ function resolveSearchIndexText(input: SyncDocumentSearchIndexInput): string {
   return fromBlocks.length >= fromField.length ? fromBlocks : fromField;
 }
 
-function unitsMatchIndexText(
-  units: { body: string }[],
-  indexText: string
-): boolean {
+function unitsMatchIndexText(units: { body: string }[], indexText: string): boolean {
   if (units.length === 0) {
     return false;
   }
-  const bodies = units.map((unit) => unit.body.trim()).join('\n').trim();
+  const bodies = units
+    .map((unit) => unit.body.trim())
+    .join('\n')
+    .trim();
   return bodies === indexText.trim();
 }
 

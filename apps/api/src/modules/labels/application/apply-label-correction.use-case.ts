@@ -13,7 +13,7 @@ import { ApplySparkLabelPropagationUseCase } from './apply-spark-label-propagati
 import { AssignDocumentTagUseCase } from './document-label.use-cases.js';
 import { RecordEmbeddingDensityCorrectionUseCase } from './record-embedding-density-correction.use-case.js';
 
-export interface ApplyLabelCorrectionResult {
+interface ApplyLabelCorrectionResult {
   correctionId: string | null;
   similarDocumentsUpdated: number;
 }

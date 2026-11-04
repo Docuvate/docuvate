@@ -1,7 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { DocumentListQuery, DocumentStatus, TagDto } from '@docuvate/contracts';
-import type { TFunction } from 'i18next';
 
 import {
   parseFilterTokenValue,
@@ -9,7 +8,7 @@ import {
   tokenizeDocumentFilterQuery,
 } from './documentFilterQueryLanguage.js';
 
-export type LibraryFilterFields = Pick<
+type LibraryFilterFields = Pick<
   DocumentListQuery,
   'inbox' | 'tagIds' | 'status' | 'folderId' | 'withoutNonInboxLabel'
 > & {
@@ -26,7 +25,7 @@ export interface DocumentFilterParseIssue {
   detail?: string;
 }
 
-export interface DocumentFilterParseResult {
+interface DocumentFilterParseResult {
   fields: LibraryFilterFields;
   issues: DocumentFilterParseIssue[];
 }
@@ -46,8 +45,6 @@ const STATUS_ALIASES: Record<string, DocumentStatus> = {
   error: 'failed',
   fehler: 'failed',
 };
-
-export { tokenizeDocumentFilterQuery } from './documentFilterQueryLanguage.js';
 
 function parseInboxValue(raw: string): boolean | null {
   const v = raw.toLowerCase();
@@ -187,17 +184,6 @@ export function resolveDocumentFilterFields(
     },
     issues,
   };
-}
-
-/** Human-readable filter string for the shell search field (keeps parseable tokens internally). */
-export function formatFilterQueryForDisplay(raw: string, t: TFunction): string {
-  return raw.replace(/\blabel:none\b/gi, t('library.filter.withoutLabel'));
-}
-
-export function normalizeFilterQueryForSubmit(raw: string, t: TFunction): string {
-  const label = t('library.filter.withoutLabel');
-  const escaped = label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  return raw.replace(new RegExp(`\\b${escaped}\\b`, 'gi'), 'label:none');
 }
 
 export function serializeDocumentFilterQuery(

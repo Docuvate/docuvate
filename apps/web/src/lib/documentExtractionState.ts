@@ -16,7 +16,7 @@ export function hasExtractedContent(
   return fromBlocks.length > 0 || blocks.length > 0;
 }
 
-export interface ExtractionFailurePresentation {
+interface ExtractionFailurePresentation {
   userMessage: string;
   technicalDetail: string | null;
 }

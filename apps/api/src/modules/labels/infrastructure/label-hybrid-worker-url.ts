@@ -3,7 +3,7 @@
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 
-export interface ResolvedWorkerModule {
+interface ResolvedWorkerModule {
   filename: string;
   execArgv?: string[];
 }

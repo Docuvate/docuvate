@@ -5,7 +5,7 @@ import IORedis, { type RedisOptions } from 'ioredis';
 const DEFAULT_CONNECT_TIMEOUT_MS = 3_000;
 const DEFAULT_READY_DEADLINE_MS = 30_000;
 
-export function valkeyConnectTimeoutMs(): number {
+function valkeyConnectTimeoutMs(): number {
   const raw = process.env['VALKEY_CONNECT_TIMEOUT_MS'];
   if (!raw) {
     return DEFAULT_CONNECT_TIMEOUT_MS;
@@ -17,7 +17,7 @@ export function valkeyConnectTimeoutMs(): number {
   return parsed;
 }
 
-export function createValkeyConnectionOptions(): RedisOptions {
+function createValkeyConnectionOptions(): RedisOptions {
   return {
     maxRetriesPerRequest: null,
     connectTimeout: valkeyConnectTimeoutMs(),

@@ -15,7 +15,7 @@ import {
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 import { findExtractionImageThumbnailKey } from '../infrastructure/document-extraction-images.persistence.js';
 
-export interface DocumentExtractionImageThumbnailContent {
+interface DocumentExtractionImageThumbnailContent {
   buffer: Buffer;
 }
 

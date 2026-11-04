@@ -12,7 +12,7 @@ import {
 import { ResolveFeatureFlagsUseCase } from '../../../modules/feature-flags/application/resolve-feature-flags.use-case.js';
 import { type AuthenticatedRequest } from './auth.guard.js';
 
-export function FeatureFlagGuard(feature: FeatureFlagKey): Type<CanActivate> {
+function FeatureFlagGuard(feature: FeatureFlagKey): Type<CanActivate> {
   @Injectable()
   class FeatureFlagGuardMixin implements CanActivate {
     constructor(private readonly resolveFeatureFlags: ResolveFeatureFlagsUseCase) {}

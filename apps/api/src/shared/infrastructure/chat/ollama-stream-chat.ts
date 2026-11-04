@@ -1,16 +1,16 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { isRecord, parseString } from '../database/row-parse.js';
+import { isRecord, parseString } from '../../domain/row-parse.js';
 import { buildOllamaChatBody, ollamaChatIdleTimeoutMs } from './ollama-chat-options.js';
 import { ollamaChatBaseUrl, ollamaChatModel } from './ollama-chat-request.js';
 
-export type OllamaStreamFailure =
+type OllamaStreamFailure =
   | { kind: 'idle_timeout' }
   | { kind: 'aborted' }
   | { kind: 'http_error'; status: number; detail?: string }
   | { kind: 'network_error'; detail: string };
 
-export interface StreamOllamaChatParams {
+interface StreamOllamaChatParams {
   messages: { role: string; content: string }[];
   onToken: (token: string, fullText: string) => void | Promise<void>;
   shouldAbort: () => boolean | Promise<boolean>;
@@ -80,7 +80,9 @@ export async function streamOllamaChat(
       const readPromise = reader.read();
       const timeoutPromise = new Promise<{ done: true; value: undefined }>((resolve) => {
         const wait = Math.max(250, idleTimeoutMs - (Date.now() - lastTokenAt));
-        setTimeout(() => { resolve({ done: true, value: undefined }); }, wait);
+        setTimeout(() => {
+          resolve({ done: true, value: undefined });
+        }, wait);
       });
 
       const raced = await Promise.race([readPromise, timeoutPromise]);

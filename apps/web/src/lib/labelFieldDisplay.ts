@@ -5,7 +5,7 @@ import type { ExtractedField, TagCustomFieldDefinitionDto, TagDto } from '@docuv
 const LABEL_STORAGE_PREFIX = /^label:([0-9a-f-]{36}):(.+)$/i;
 const GLOBAL_STORAGE_PREFIX = /^global:([a-z0-9_]+)$/i;
 
-export function parseLabelFieldKey(key: string): { tagId: string; fieldKey: string } | null {
+function parseLabelFieldKey(key: string): { tagId: string; fieldKey: string } | null {
   const match = LABEL_STORAGE_PREFIX.exec(key);
   if (!match) {
     return null;

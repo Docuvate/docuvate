@@ -11,17 +11,14 @@ export function folderDropId(folderId: string): string {
 }
 
 /** Parse droppable id; `null` = Ohne Ordner, `undefined` = not a folder target. */
-export function parseFolderDropTargetId(id: string | number | null | undefined): string | null | undefined {
+export function parseFolderDropTargetId(
+  id: string | number | null | undefined
+): string | null | undefined {
   if (id == null) return undefined;
   const key = String(id);
   if (key === UNASSIGNED_FOLDER_DROP_ID) return null;
   if (key.startsWith('folder:')) return key.slice('folder:'.length);
   return undefined;
-}
-
-export function isDocumentDragId(id: string | number | null | undefined): boolean {
-  if (id == null) return false;
-  return String(id).startsWith('document:');
 }
 
 export interface DocumentDragData {

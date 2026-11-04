@@ -4,7 +4,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import type pg from 'pg';
 
 import { ValidationError } from '../../../shared/domain/errors.js';
-import { parseOptionalEnum } from '../../../shared/infrastructure/database/row-parse.js';
+import { parseOptionalEnum } from '../../../shared/domain/row-parse.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 import { hashInvitationToken } from '../../admin/domain/user-invitation.tokens.js';
 import {

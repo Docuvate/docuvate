@@ -21,7 +21,7 @@ import {
   parseOptionalString,
   parseString,
   requireRecord,
-} from '../../../shared/infrastructure/database/row-parse.js';
+} from '../../../shared/domain/row-parse.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 import {
   buildDescIdTiebreakerKeyset,
@@ -48,7 +48,10 @@ const GENERATION_PHASES: readonly DocumentChatGenerationPhase[] = [
 
 function mapThreadRow(row: Record<string, unknown>): DocumentChatThreadEntity {
   const documentIds = sanitizeChatThreadDocumentIds(row.document_ids);
-  const activeGenerationStatus = parseOptionalEnum(row.active_generation_status, GENERATION_STATUSES);
+  const activeGenerationStatus = parseOptionalEnum(
+    row.active_generation_status,
+    GENERATION_STATUSES
+  );
   return {
     id: parseString(row.id),
     userId: parseString(row.user_id),
@@ -181,9 +184,7 @@ export class PgDocumentChatThreadRepository implements DocumentChatThreadReposit
       });
     }
 
-    const total = pagination.cursor
-      ? null
-      : await this.countLibraryThreadsForUser(userId);
+    const total = pagination.cursor ? null : await this.countLibraryThreadsForUser(userId);
 
     return { threads, hasMore, nextCursor, total };
   }
@@ -380,8 +381,7 @@ export class PgDocumentChatThreadRepository implements DocumentChatThreadReposit
       values.push(patch.errorDetail);
     }
 
-    const terminal =
-      patch.generationStatus === 'done' || patch.generationStatus === 'failed';
+    const terminal = patch.generationStatus === 'done' || patch.generationStatus === 'failed';
     const inFlightGuard =
       patch.finalizeOnlyIfInFlight === true && terminal
         ? ` AND generation_status IN ('pending', 'streaming')`

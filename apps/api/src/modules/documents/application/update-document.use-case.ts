@@ -19,7 +19,7 @@ import { SyncDocumentSearchIndexUseCase } from '../../search/application/sync-do
 import type { DocumentEntity } from '../domain/document.entity.js';
 import { mergeDocumentPlacementPatch } from '../domain/document-placement.js';
 
-export interface UpdateDocumentResult {
+interface UpdateDocumentResult {
   document: DocumentEntity;
   fieldCorrectionsRecorded: number;
   fieldConfirmationsRecorded: number;

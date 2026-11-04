@@ -5,7 +5,7 @@
  * Local screenshot tooling only (`VITE_ERROR_SCREENSHOT_HARNESS=true` at dev start).
  * Never set in release image builds.
  */
-export function isErrorScreenshotHarnessBuild(): boolean {
+function isErrorScreenshotHarnessBuild(): boolean {
   return import.meta.env.VITE_ERROR_SCREENSHOT_HARNESS === 'true';
 }
 

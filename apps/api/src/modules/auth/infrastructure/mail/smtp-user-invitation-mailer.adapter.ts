@@ -12,7 +12,7 @@ import {
   userInvitationMailText,
 } from './user-invitation-mail.templates.js';
 
-export interface SmtpUserInvitationMailerOptions {
+interface SmtpUserInvitationMailerOptions {
   smtpUrl: string;
   mailFrom: string;
 }

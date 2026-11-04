@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { isRecord } from '../../../shared/infrastructure/database/row-parse.js';
+import { isRecord } from '../../../shared/domain/row-parse.js';
 
 export interface CitedClaimCitationJson {
   source: string;

@@ -2,18 +2,15 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type pg from 'pg';
 
-import { parseString } from '../../../shared/infrastructure/database/row-parse.js';
-import {
-  normalizeSearchText,
-  tokenizeSearchQuery,
-} from '../domain/normalize-search-text.js';
+import { parseString } from '../../../shared/domain/row-parse.js';
+import { normalizeSearchText, tokenizeSearchQuery } from '../domain/normalize-search-text.js';
 import type { SqlQueryExecutor } from './search-vocabulary-backfill.js';
 import { readQueryRows } from './search-vocabulary-backfill.js';
 
 /** Same advisory lock class as document_text_chunks reindex (per document_id). */
-export const DOCUMENT_VOCABULARY_LOCK_HI = 0x44544348;
+const DOCUMENT_VOCABULARY_LOCK_HI = 0x44544348;
 
-export function documentVocabularyLockKey(documentId: string): { high: number; low: number } {
+function documentVocabularyLockKey(documentId: string): { high: number; low: number } {
   const hex = documentId.replace(/-/g, '');
   const low = Number.parseInt(hex.slice(0, 8), 16) | 0;
   return { high: DOCUMENT_VOCABULARY_LOCK_HI, low };
@@ -21,7 +18,7 @@ export function documentVocabularyLockKey(documentId: string): { high: number; l
 
 const MAX_TERMS_PER_DOCUMENT = 400;
 
-export function vocabularyTermsFromTexts(texts: string[]): string[] {
+function vocabularyTermsFromTexts(texts: string[]): string[] {
   const seen = new Set<string>();
   const terms: string[] = [];
   for (const text of texts) {
@@ -64,11 +61,13 @@ SELECT coalesce(v.value_text_norm, v.value_text, '') AS body
 FROM document_field_values v
 WHERE v.document_id = $1`;
 
-export async function loadDocumentVocabularyTerms(
+async function loadDocumentVocabularyTerms(
   executor: SqlQueryExecutor,
   documentId: string
 ): Promise<string[]> {
-  const rows = readQueryRows(await executor.query(LOAD_DOCUMENT_VOCABULARY_TEXTS_SQL, [documentId]));
+  const rows = readQueryRows(
+    await executor.query(LOAD_DOCUMENT_VOCABULARY_TEXTS_SQL, [documentId])
+  );
   const texts: string[] = [];
   for (const row of rows) {
     texts.push(parseString(row.body));
@@ -212,7 +211,7 @@ export async function refreshDocumentVocabularyTerms(
   await refreshDocumentVocabularyTermsOnClient(db, userId, documentId);
 }
 
-export async function releaseDocumentVocabularyTerms(
+async function releaseDocumentVocabularyTerms(
   db: pg.Pool | pg.PoolClient,
   userId: string,
   documentId: string

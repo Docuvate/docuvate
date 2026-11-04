@@ -2,14 +2,11 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { DuplicateCompareDocumentInput, ExtractionBlock } from '@docuvate/contracts';
 
-import {
-  isRecord,
-  parseNumber,
-} from '../../../shared/infrastructure/database/row-parse.js';
+import { isRecord, parseNumber } from '../../../shared/domain/row-parse.js';
 import type { DocumentEntity } from '../../documents/domain/document.entity.js';
 import type { DuplicateEmbeddingPeerRow } from './duplicate-document-signals.js';
 
-export function pageCountFromBlocks(blocks: ExtractionBlock[] | undefined): number | null {
+function pageCountFromBlocks(blocks: ExtractionBlock[] | undefined): number | null {
   if (!blocks || blocks.length === 0) return null;
   let max = 0;
   for (const block of blocks) {
@@ -41,7 +38,9 @@ export function compareInputFromDocument(doc: DocumentEntity): DuplicateCompareD
   };
 }
 
-export function compareInputFromEmbeddingPeer(row: DuplicateEmbeddingPeerRow): DuplicateCompareDocumentInput {
+export function compareInputFromEmbeddingPeer(
+  row: DuplicateEmbeddingPeerRow
+): DuplicateCompareDocumentInput {
   return {
     documentId: row.documentId,
     filename: row.filename,

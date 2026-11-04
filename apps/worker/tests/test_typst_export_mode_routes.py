@@ -2,8 +2,8 @@
 
 from fastapi.testclient import TestClient
 
-from docuvate_worker.main import app
 from docuvate_worker.infrastructure.layout.extract import extract_layout_pdf_bytes
+from docuvate_worker.main import app
 from tests.synthetic_layout_pdfs import form_disclosure_pdf
 
 client = TestClient(app)

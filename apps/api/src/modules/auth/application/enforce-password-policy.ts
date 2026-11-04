@@ -7,7 +7,7 @@ import { isPasswordCompromised } from 'better-auth/plugins/haveibeenpwned';
 
 import { ValidationError } from '../../../shared/domain/errors.js';
 
-export class PasswordPolicyViolationError extends ValidationError {
+class PasswordPolicyViolationError extends ValidationError {
   constructor(public readonly violations: PasswordPolicyRuleId[]) {
     super('auth.passwordPolicyViolation', ERROR_CODES.AUTH_PASSWORD_POLICY_VIOLATION);
   }

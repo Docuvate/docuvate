@@ -10,7 +10,7 @@ import type {
 import type { InstallationOidcProviderRow } from '../domain/oidc-provider-row.js';
 import { isEmailChangeMailAvailable } from '../infrastructure/mail/email-change-mailer.factory.js';
 
-export function toOidcProviderPublicDto(row: InstallationOidcProviderRow): AuthOidcProviderPublicDto {
+function toOidcProviderPublicDto(row: InstallationOidcProviderRow): AuthOidcProviderPublicDto {
   return {
     providerId: row.provider_id,
     displayName: row.display_name,

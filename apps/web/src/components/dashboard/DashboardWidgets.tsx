@@ -7,7 +7,7 @@ import type {
   SavedDocumentViewDto,
 } from '@docuvate/contracts';
 import { FileText } from 'lucide-react';
-import { type ReactNode,useCallback, useEffect, useState } from 'react';
+import { type ReactNode, useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
@@ -18,7 +18,7 @@ import { routes } from '../../lib/routes';
 import { Badge } from '../ui/Badge';
 import { Chip } from '../ui/Chip';
 import { Progress } from '../ui/Progress';
-import { DocumentUploadProvider } from '../upload/DocumentUploadProvider';
+import { DocumentUploadProvider } from '../upload';
 import { UploadDropzone } from '../UploadDropzone';
 import { DashboardWidgetCard } from './DashboardWidgetCard';
 
@@ -211,7 +211,7 @@ function WidgetSlot({
     void getDashboardWidgetDocumentPreviews({
       type: widget.type === 'saved_view' ? 'saved_view' : widget.type,
       limit,
-      savedViewId: widget.type === 'saved_view' ? widget.savedViewId ?? undefined : undefined,
+      savedViewId: widget.type === 'saved_view' ? (widget.savedViewId ?? undefined) : undefined,
     })
       .then((response) => {
         if (cancelled) {
@@ -390,7 +390,10 @@ function DashboardStatisticsBody({ statistics }: { statistics: DashboardStatisti
             })}
           </ul>
           {statistics.labelsTotalCount > 5 ? (
-            <Link to={routes.structureLabels} className="dashboard-widget-link dashboard-more-labels-link">
+            <Link
+              to={routes.structureLabels}
+              className="dashboard-widget-link dashboard-more-labels-link"
+            >
               {t('dashboard.moreLabelsLink', {
                 count: statistics.labelsTotalCount - 5,
               })}
@@ -425,7 +428,10 @@ function DashboardDocumentRow({
         <span className="dashboard-doc-row-meta">
           {formatDocumentRelativeTime(timeIso, locale)}
         </span>
-        <Link to={routes.document(doc.id)} className="btn btn-secondary btn-sm dashboard-doc-row-action">
+        <Link
+          to={routes.document(doc.id)}
+          className="btn btn-secondary btn-sm dashboard-doc-row-action"
+        >
           {t('dashboard.openDocument')}
         </Link>
       </li>
@@ -439,9 +445,7 @@ function DashboardDocumentRow({
         {title}
       </Link>
       <Badge status={doc.status} />
-      <span className="dashboard-doc-row-time">
-        {formatDocumentRelativeTime(timeIso, locale)}
-      </span>
+      <span className="dashboard-doc-row-time">{formatDocumentRelativeTime(timeIso, locale)}</span>
     </li>
   );
 }

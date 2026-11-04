@@ -5,13 +5,17 @@ import type { ReactNode } from 'react';
 import { LocaleSwitcher } from '../layout/LocaleSwitcher';
 import { Logo } from '../ui/Logo';
 
-export interface FullPageErrorShellProps {
+interface FullPageErrorShellProps {
   children: ReactNode;
   testId?: string;
   embedded?: boolean;
 }
 
-export function FullPageErrorShell({ children, testId, embedded = false }: FullPageErrorShellProps) {
+export function FullPageErrorShell({
+  children,
+  testId,
+  embedded = false,
+}: FullPageErrorShellProps) {
   if (embedded) {
     return (
       <div className="full-page-error-scene full-page-error-scene--embedded" data-testid={testId}>

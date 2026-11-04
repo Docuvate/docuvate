@@ -11,7 +11,7 @@ import { Confidence } from './Confidence';
 import { IconButton } from './IconButton';
 import { SourceChip } from './SourceChip';
 
-export interface SuggestionRowProps {
+interface SuggestionRowProps {
   label: string;
   confidencePercent: number;
   sourceLabel: string;

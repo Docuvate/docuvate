@@ -17,5 +17,3 @@ export const tagSuggestionJoinRowSchema = z.looseObject({
   created_at: z.coerce.date(),
   updated_at: z.coerce.date(),
 });
-
-export type TagSuggestionJoinRow = z.infer<typeof tagSuggestionJoinRowSchema>;

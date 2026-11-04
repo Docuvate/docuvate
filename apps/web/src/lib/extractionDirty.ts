@@ -27,12 +27,3 @@ export function areBlocksDirty(
 ): boolean {
   return blocksSignature(blocks) !== blocksSignature(baselineBlocks);
 }
-
-export function isExtractionDirty(
-  fields: ExtractedField[],
-  blocks: ExtractionBlock[],
-  baselineFields: ExtractedField[],
-  baselineBlocks: ExtractionBlock[]
-): boolean {
-  return areFieldsDirty(fields, baselineFields) || areBlocksDirty(blocks, baselineBlocks);
-}

@@ -5,19 +5,19 @@ import {
   parseNumber,
   parseOptionalString,
   parseString,
-} from '../../../shared/infrastructure/database/row-parse.js';
+} from '../../../shared/domain/row-parse.js';
 
-export interface RagRetrievePassage {
+interface RagRetrievePassage {
   id: string;
   text: string;
 }
 
-export interface RagRetrieveResultItem {
+interface RagRetrieveResultItem {
   id: string;
   score: number;
 }
 
-export interface RagRetrieveResponse {
+interface RagRetrieveResponse {
   reachable: boolean;
   rerankerUsed: boolean;
   rerankerModel: string | null;

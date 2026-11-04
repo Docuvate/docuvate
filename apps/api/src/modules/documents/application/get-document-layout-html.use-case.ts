@@ -9,7 +9,7 @@ import {
   parseBoolean,
   parseOptionalString,
   parseString,
-} from '../../../shared/infrastructure/database/row-parse.js';
+} from '../../../shared/domain/row-parse.js';
 import { workerApiUrl } from '../../../shared/infrastructure/worker/worker-api-path.js';
 import {
   fetchWorkerJson,
@@ -63,9 +63,8 @@ export class GetDocumentLayoutHtmlUseCase {
     }
     return {
       html,
-      reconstructionReliable: raw.reconstructionReliable === undefined
-        ? true
-        : parseBoolean(raw.reconstructionReliable),
+      reconstructionReliable:
+        raw.reconstructionReliable === undefined ? true : parseBoolean(raw.reconstructionReliable),
       unreliableReason: parseOptionalString(raw.unreliableReason),
     };
   }

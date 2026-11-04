@@ -4,8 +4,7 @@ from docuvate_worker.domain.layout_ir import LayoutIrDocument, LayoutIrPage
 from docuvate_worker.infrastructure.layout.layout_ssim_category import infer_layout_ssim_category
 
 _BORN_DIGITAL_PDF = (
-    Path(__file__).resolve().parents[3]
-    / "tools/screenshots/layout/fixtures/layout-ws-brutto.pdf"
+    Path(__file__).resolve().parents[3] / "tools/screenshots/layout/fixtures/layout-ws-brutto.pdf"
 ).read_bytes()
 
 

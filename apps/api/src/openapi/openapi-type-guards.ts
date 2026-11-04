@@ -5,7 +5,7 @@ import type {
   PathItemObject,
 } from '@nestjs/swagger/dist/interfaces/open-api-spec.interface.js';
 
-import { isRecord } from '../shared/infrastructure/database/row-parse.js';
+import { isRecord } from '../shared/domain/row-parse.js';
 
 const OPENAPI_HTTP_METHODS = new Set([
   'get',

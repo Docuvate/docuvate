@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import { isRecord } from '../../../shared/domain/row-parse.js';
 import { getAuth } from '../../../shared/infrastructure/auth/better-auth.config.js';
-import { isRecord } from '../../../shared/infrastructure/database/row-parse.js';
 import type { AdminResetPasswordAuthContext } from './admin-reset-password.use-case.js';
 
 function isAdminResetPasswordAuthContext(value: unknown): value is AdminResetPasswordAuthContext {

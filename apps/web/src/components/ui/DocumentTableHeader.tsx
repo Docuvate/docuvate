@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Checkbox } from './Checkbox';
 
-export interface DocumentTableHeaderProps {
+interface DocumentTableHeaderProps {
   onToggleAll?: () => void;
   allSelected?: boolean;
   indeterminate?: boolean;

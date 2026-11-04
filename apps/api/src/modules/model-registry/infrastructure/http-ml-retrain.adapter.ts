@@ -7,9 +7,9 @@ import {
   parseNumber,
   parseOptionalString,
   parseString,
-} from '../../../shared/infrastructure/database/row-parse.js';
+} from '../../../shared/domain/row-parse.js';
 
-export interface WorkerRetrainResult {
+interface WorkerRetrainResult {
   versionTag: string;
   metrics: Record<string, number>;
   rowCount: number;
@@ -59,9 +59,7 @@ export class HttpMlRetrainAdapter {
     });
     if (!response.ok) {
       const text = await response.text();
-      throw new Error(
-        `Worker retrain failed (${String(response.status)}): ${text.slice(0, 500)}`
-      );
+      throw new Error(`Worker retrain failed (${String(response.status)}): ${text.slice(0, 500)}`);
     }
     const raw: unknown = await response.json();
     if (!isRecord(raw)) {

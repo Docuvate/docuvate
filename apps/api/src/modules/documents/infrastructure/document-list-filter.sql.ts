@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { DocumentListQuery } from '@docuvate/contracts';
 
-export interface DocumentListFilterSql {
+interface DocumentListFilterSql {
   whereSql: string;
   params: unknown[];
 }

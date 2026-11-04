@@ -32,9 +32,7 @@ class PromotionCalibratorsArtifact(TypedDict, total=False):
 
 
 _ARTIFACT_PATH = (
-    Path(__file__).resolve().parent.parent
-    / "artifacts"
-    / "field-promotion-calibrators.v1.json"
+    Path(__file__).resolve().parent.parent / "artifacts" / "field-promotion-calibrators.v1.json"
 )
 
 

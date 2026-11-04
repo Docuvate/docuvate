@@ -8,9 +8,16 @@ import { notifySavedViewsChanged } from '../../lib/savedViewsEvents';
 import { buildSavedViewPayload } from '../../lib/savedViewState';
 import { useInstallationRole } from '../../lib/useInstallationRole';
 import type { useLibraryPageData } from '../../pages/library/useLibraryPageData';
-import { useToastNotify } from '../save/ToastProvider';
+import { useToastNotify } from '../save';
 import { Button } from '../ui/Button';
-import { Dialog, DialogBody, DialogFieldSpan, DialogFooter, DialogFormGrid, DialogHeader } from '../ui/Dialog';
+import {
+  Dialog,
+  DialogBody,
+  DialogFieldSpan,
+  DialogFooter,
+  DialogFormGrid,
+  DialogHeader,
+} from '../ui/Dialog';
 import { Input } from '../ui/Input';
 import { Select } from '../ui/Select';
 
@@ -98,7 +105,9 @@ export function SaveViewDialog({ open, onClose, data, onSaved }: SaveViewDialogP
                 <Input
                   ref={nameInputRef}
                   value={name}
-                  onChange={(e) => { setName(e.target.value); }}
+                  onChange={(e) => {
+                    setName(e.target.value);
+                  }}
                   required
                 />
               </label>
@@ -109,7 +118,9 @@ export function SaveViewDialog({ open, onClose, data, onSaved }: SaveViewDialogP
                   {t('savedViews.visibilityLabel')}
                   <Select
                     value={visibility}
-                    onChange={(v) => { setVisibility(v === 'shared' ? 'shared' : 'private'); }}
+                    onChange={(v) => {
+                      setVisibility(v === 'shared' ? 'shared' : 'private');
+                    }}
                     options={[
                       { value: 'private', label: t('savedViews.visibilityPrivate') },
                       { value: 'shared', label: t('savedViews.visibilityShared') },
@@ -125,7 +136,9 @@ export function SaveViewDialog({ open, onClose, data, onSaved }: SaveViewDialogP
                   type="checkbox"
                   name="pinnedSidebar"
                   checked={pinned}
-                  onChange={(e) => { setPinned(e.target.checked); }}
+                  onChange={(e) => {
+                    setPinned(e.target.checked);
+                  }}
                   aria-label={t('savedViews.pinSidebar')}
                 />
                 <span>{t('savedViews.pinSidebar')}</span>

@@ -71,12 +71,7 @@ def _service_invoice(rng: random.Random, index: int) -> HoldoutDoc:
             f"Fälliger Gesamtbetrag {amount_raw} EUR\n"
             f"Zahlbar bis {date_raw}"
         ),
-        (
-            f"{vendor}\n"
-            f"Honorarnote Nr. {index:04d}\n"
-            f"Endsumme: {amount_raw} EUR\n"
-            f"Datum {date_raw}"
-        ),
+        (f"{vendor}\nHonorarnote Nr. {index:04d}\nEndsumme: {amount_raw} EUR\nDatum {date_raw}"),
     ]
     text = rng.choice(layouts)
     return HoldoutDoc(
@@ -180,11 +175,7 @@ def _letter_only(rng: random.Random, index: int) -> HoldoutDoc:
     vendor = rng.choice(PARTIES)
     street = rng.choice(STREETS)
     date_raw, date_norm = _date(rng)
-    text = (
-        f"{vendor}\n{street}\n\n"
-        f"Schreiben vom {date_raw}\n\n"
-        f"Bitte senden Sie Unterlagen."
-    )
+    text = f"{vendor}\n{street}\n\nSchreiben vom {date_raw}\n\nBitte senden Sie Unterlagen."
     return HoldoutDoc(
         id=f"frozen_letter_{index:04d}",
         category="letter",

@@ -5,7 +5,7 @@ import { DocuvateErrorPage } from './DocuvateErrorPage';
 import { FullPageErrorShell } from './FullPageErrorShell';
 import { HttpStatusErrorPage } from './HttpStatusErrorPage';
 
-export interface SessionBootErrorScreenProps {
+interface SessionBootErrorScreenProps {
   error: unknown;
   onRecovered: () => void;
 }

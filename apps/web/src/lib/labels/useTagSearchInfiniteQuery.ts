@@ -1,22 +1,20 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import {
-  TAG_SEARCH_DEFAULT_LIMIT,
-  type TagDto,
-  type TagSearchPageDto,
-} from '@docuvate/contracts';
+import { TAG_SEARCH_DEFAULT_LIMIT, type TagDto, type TagSearchPageDto } from '@docuvate/contracts';
 import { type InfiniteData, useInfiniteQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
 
 import { searchTagsPage } from '../api';
 
-export function tagSearchQueryKey(q: string): readonly ['tags', 'search', string] {
+function tagSearchQueryKey(q: string): readonly ['tags', 'search', string] {
   return ['tags', 'search', q];
 }
 
-export function flattenTagSearchPages(
-  pages: TagSearchPageDto[] | undefined
-): { tags: TagDto[]; hasMore: boolean; total: number | null } {
+export function flattenTagSearchPages(pages: TagSearchPageDto[] | undefined): {
+  tags: TagDto[];
+  hasMore: boolean;
+  total: number | null;
+} {
   if (!pages?.length) {
     return { tags: [], hasMore: false, total: null };
   }
@@ -57,6 +55,6 @@ export function useTagSearchInfiniteQuery(searchQuery: string, enabled: boolean)
         limit: TAG_SEARCH_DEFAULT_LIMIT,
       }),
     getNextPageParam: (lastPage) =>
-      lastPage.hasMore ? lastPage.nextCursor ?? undefined : undefined,
+      lastPage.hasMore ? (lastPage.nextCursor ?? undefined) : undefined,
   });
 }

@@ -3,7 +3,7 @@
 
 import type { LayoutComparePageMetric } from './layoutCompare';
 
-export type ReconstructionQualityTone = 'good' | 'review' | 'unknown';
+type ReconstructionQualityTone = 'good' | 'review' | 'unknown';
 
 export function reconstructionQualityTone(
   metricsByPage: Map<number, LayoutComparePageMetric>,

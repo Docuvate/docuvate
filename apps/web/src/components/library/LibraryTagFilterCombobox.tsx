@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useTranslation } from 'react-i18next';
 
-import { LabelPicker } from '../labels/LabelPicker';
+import { LabelPicker } from '../labels';
 
 interface LibraryTagFilterComboboxProps {
   activeTagIds: Set<string>;

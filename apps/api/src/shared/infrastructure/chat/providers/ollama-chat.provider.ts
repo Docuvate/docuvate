@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Injectable } from '@nestjs/common';
 
-import { isRecord, parseString } from '../../database/row-parse.js';
+import { isRecord, parseString } from '../../../domain/row-parse.js';
 import { buildDocumentSystemPrompt } from '../build-system-prompt.js';
 import type {
   DocumentChatInput,

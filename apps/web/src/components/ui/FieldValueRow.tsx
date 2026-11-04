@@ -11,7 +11,7 @@ import { SourceChip } from './SourceChip';
 
 export type FieldValueRowState = 'confirmed' | 'suggested' | 'corrected';
 
-export interface FieldValueRowProps {
+interface FieldValueRowProps {
   fieldName: string;
   value: string;
   state: FieldValueRowState;

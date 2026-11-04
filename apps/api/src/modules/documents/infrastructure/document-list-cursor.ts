@@ -3,11 +3,7 @@
 import type { DocumentSortField, SortOrder } from '@docuvate/contracts';
 
 import { ValidationError } from '../../../shared/domain/errors.js';
-import {
-  isRecord,
-  parseOptionalString,
-  parseString,
-} from '../../../shared/infrastructure/database/row-parse.js';
+import { isRecord, parseOptionalString, parseString } from '../../../shared/domain/row-parse.js';
 
 const CURSOR_VERSION = 1;
 

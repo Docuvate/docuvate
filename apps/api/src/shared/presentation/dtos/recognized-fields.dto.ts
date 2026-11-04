@@ -15,7 +15,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 
-export class ReplaceRecognizedFieldItemDto {
+class ReplaceRecognizedFieldItemDto {
   @IsString()
   key!: string;
 

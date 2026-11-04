@@ -22,16 +22,9 @@ import { ErrorScreenLayout } from './ErrorScreenLayout';
 import { FullPageErrorShell } from './FullPageErrorShell';
 
 export type HttpErrorScreenVariant =
-  | '401'
-  | '403'
-  | '500'
-  | '502'
-  | '503'
-  | '429'
-  | 'offline'
-  | 'preview-x2';
+  '401' | '403' | '500' | '502' | '503' | '429' | 'offline' | 'preview-x2';
 
-export interface HttpStatusErrorPageProps {
+interface HttpStatusErrorPageProps {
   variant: HttpErrorScreenVariant;
   errorCode?: string;
   requestId?: string;
@@ -62,7 +55,9 @@ export function HttpStatusErrorPage({
     const timer = window.setInterval(() => {
       setSecondsLeft((value) => Math.max(0, value - 1));
     }, 1000);
-    return () => { window.clearInterval(timer); };
+    return () => {
+      window.clearInterval(timer);
+    };
   }, [secondsLeft]);
 
   const config = useMemo(() => {
@@ -74,7 +69,13 @@ export function HttpStatusErrorPage({
           description: t('errors.pages.sessionExpired.lead'),
           code: errorCode ?? ERROR_CODES.AUTH_SESSION_EXPIRED,
           actions: (
-            <Button type="button" variant="primary" onClick={() => { navigate(`${routes.login}?reason=session_expired`); }}>
+            <Button
+              type="button"
+              variant="primary"
+              onClick={() => {
+                navigate(`${routes.login}?reason=session_expired`);
+              }}
+            >
               {t('errors.pages.sessionExpired.action')}
             </Button>
           ),
@@ -89,7 +90,13 @@ export function HttpStatusErrorPage({
           }),
           code: errorCode ?? ERROR_CODES.ACCESS_FORBIDDEN,
           actions: (
-            <Button type="button" variant="secondary" onClick={() => { navigate(routes.home); }}>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => {
+                navigate(routes.home);
+              }}
+            >
               {t('errors.pages.home')}
             </Button>
           ),
@@ -103,11 +110,20 @@ export function HttpStatusErrorPage({
           code: errorCode ?? ERROR_CODES.INTERNAL_ERROR,
           actions: (
             <>
-              <Button type="button" variant="primary" onClick={() => { window.location.reload(); }}>
+              <Button
+                type="button"
+                variant="primary"
+                onClick={() => {
+                  window.location.reload();
+                }}
+              >
                 <RefreshCw size={16} strokeWidth={2} aria-hidden />
                 {t('errors.pages.retry')}
               </Button>
-              <a className="btn btn-secondary" href="mailto:hello@docuvate.de?subject=Docuvate%20Fehler">
+              <a
+                className="btn btn-secondary"
+                href="mailto:hello@docuvate.de?subject=Docuvate%20Fehler"
+              >
                 {t('errors.pages.internal.report')}
               </a>
             </>
@@ -135,14 +151,18 @@ export function HttpStatusErrorPage({
               type="button"
               variant="primary"
               disabled={secondsLeft > 0}
-              onClick={() => { window.location.reload(); }}
+              onClick={() => {
+                window.location.reload();
+              }}
             >
               {t('errors.pages.retry')}
             </Button>
           ),
           status:
             secondsLeft > 0 ? (
-              <p className="ds-error-screen-status">{t('errors.pages.rateLimit.countdown', { seconds: secondsLeft })}</p>
+              <p className="ds-error-screen-status">
+                {t('errors.pages.rateLimit.countdown', { seconds: secondsLeft })}
+              </p>
             ) : null,
         };
       case 'offline':
@@ -152,7 +172,13 @@ export function HttpStatusErrorPage({
           description: t('errors.pages.browserOffline.lead'),
           code: errorCode ?? ERROR_CODES.SERVICE_UNAVAILABLE,
           actions: (
-            <Button type="button" variant="secondary" onClick={() => { navigate(routes.home); }}>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => {
+                navigate(routes.home);
+              }}
+            >
               {t('errors.pages.home')}
             </Button>
           ),
@@ -166,11 +192,23 @@ export function HttpStatusErrorPage({
           code: errorCode ?? ERROR_CODES.DOC_LOAD_FAILED,
           actions: (
             <>
-              <Button type="button" variant="primary" onClick={() => { window.location.reload(); }}>
+              <Button
+                type="button"
+                variant="primary"
+                onClick={() => {
+                  window.location.reload();
+                }}
+              >
                 <RefreshCw size={16} strokeWidth={2} aria-hidden />
                 {t('errors.pages.retry')}
               </Button>
-              <Button type="button" variant="secondary" onClick={() => { navigate(routes.home); }}>
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => {
+                  navigate(routes.home);
+                }}
+              >
                 {t('errors.pages.home')}
               </Button>
             </>

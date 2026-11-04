@@ -12,7 +12,7 @@ const WIDGET_TYPES: DashboardWidgetType[] = [
   'attention',
 ];
 
-export interface ParsedDashboardWidgetFields {
+interface ParsedDashboardWidgetFields {
   savedViewId: string | null;
   itemLimit: number | null;
 }

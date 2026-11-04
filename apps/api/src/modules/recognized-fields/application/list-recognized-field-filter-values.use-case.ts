@@ -8,7 +8,7 @@ import {
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import type { Pool } from 'pg';
 
-import { parseString, requireRecord } from '../../../shared/infrastructure/database/row-parse.js';
+import { parseString, requireRecord } from '../../../shared/domain/row-parse.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 import {
   decodeFieldFilterValueCursor,

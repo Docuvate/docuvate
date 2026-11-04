@@ -1,13 +1,13 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { cosineSimilarity } from './cosine.js';
-import type { TagCentroidRef } from './label-coverage.js';
 import { computeDocumentCoverage } from './label-coverage.js';
-import { type LabelHybridModel,predictLabelHybrid } from './label-hybrid-auto-match.js';
+import { type LabelHybridModel, predictLabelHybrid } from './label-hybrid-auto-match.js';
 import type { TagPairSignal } from './label-merge-rename-suggestions.js';
 import { discoverOpenSetNewLabelClusters } from './label-open-set-discovery.js';
+import type { TagCentroidRef } from './tag-centroid-ref.js';
 
-export interface AssignRecommendation {
+interface AssignRecommendation {
   id: string;
   documentId: string;
   tagId: string;
@@ -17,7 +17,7 @@ export interface AssignRecommendation {
   reason: string;
 }
 
-export interface EmbeddingClusterNewLabel {
+interface EmbeddingClusterNewLabel {
   id: string;
   proposedName: string;
   score: number;
@@ -28,7 +28,7 @@ export interface EmbeddingClusterNewLabel {
   documentIds: string[];
 }
 
-export interface EmbeddingMergeRecommendation {
+interface EmbeddingMergeRecommendation {
   id: string;
   tagIds: [string, string];
   names: [string, string];
@@ -38,9 +38,9 @@ export interface EmbeddingMergeRecommendation {
 }
 
 export const MIN_LABEL_SUPPORT_FOR_MERGE = 3;
-export const MIN_LABEL_SUPPORT_FOR_SIMILARITY_PCT = 3;
+const MIN_LABEL_SUPPORT_FOR_SIMILARITY_PCT = 3;
 
-export type SimilarityDisplayTier = 'high' | 'medium' | 'low';
+type SimilarityDisplayTier = 'high' | 'medium' | 'low';
 
 export function similarityDisplayTier(similarity: number): SimilarityDisplayTier {
   if (similarity >= 0.8) {

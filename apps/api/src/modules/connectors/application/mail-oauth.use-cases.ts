@@ -7,7 +7,7 @@ import {
   parseNumber,
   parseOptionalString,
   recordFromUnknown,
-} from '../../../shared/infrastructure/database/row-parse.js';
+} from '../../../shared/domain/row-parse.js';
 import {
   CONNECTOR_INSTALLATION_REPOSITORY,
   CONNECTOR_REGISTRY,

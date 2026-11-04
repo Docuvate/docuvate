@@ -6,8 +6,8 @@ import math
 import pytest
 
 from docuvate_worker.domain.extraction_geometry import (
-    PageDimensions,
     UNIT_INTERVAL_EPSILON,
+    PageDimensions,
     clamp_to_unit_interval,
     extraction_block_from_absolute,
     extraction_block_from_normalized,
@@ -119,12 +119,12 @@ endobj
 5 0 obj<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>endobj
 xref
 0 6
-0000000000 65535 f 
-0000000009 00000 n 
-0000000058 00000 n 
-0000000115 00000 n 
-0000000261 00000 n 
-0000000354 00000 n 
+0000000000 65535 f
+0000000009 00000 n
+0000000058 00000 n
+0000000115 00000 n
+0000000261 00000 n
+0000000354 00000 n
 trailer<< /Size 6 /Root 1 0 R >>
 startxref
 432

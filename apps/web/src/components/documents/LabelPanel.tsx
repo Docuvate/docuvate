@@ -14,9 +14,9 @@ import {
   withdrawDocumentLabelCorrection,
 } from '../../lib/api';
 import { formatUserFacingError } from '../../lib/apiErrors';
-import { LabelChipRow } from '../labels/LabelChipRow';
-import { LabelPicker } from '../labels/LabelPicker';
-import { useToast } from '../save/ToastProvider';
+import { LabelChipRow } from '../labels';
+import { LabelPicker } from '../labels';
+import { useToast } from '../save';
 import { Button } from '../ui/Button';
 import { Chip } from '../ui/Chip';
 import { DocumentLabelSuggestionChips } from './DocumentLabelSuggestionChips';
@@ -54,15 +54,17 @@ export function LabelPanel({ document, onUpdated }: LabelPanelProps) {
   const [selectedNestTagId, setSelectedNestTagId] = useState<string | null>(null);
   const [undo, setUndo] = useState<UndoState | null>(null);
 
-  const candidates = useMemo(() => nestCandidates(document.tagSuggestions), [document.tagSuggestions]);
+  const candidates = useMemo(
+    () => nestCandidates(document.tagSuggestions),
+    [document.tagSuggestions]
+  );
 
   useEffect(() => {
     if (candidates.length === 0) {
       setSelectedNestTagId(null);
       return;
     }
-    const preferred =
-      candidates.find((item) => item.decisionTier === 'confirm') ?? candidates[0];
+    const preferred = candidates.find((item) => item.decisionTier === 'confirm') ?? candidates[0];
     setSelectedNestTagId(preferred.tag.id);
   }, [document.id, candidates]);
 
@@ -80,10 +82,7 @@ export function LabelPanel({ document, onUpdated }: LabelPanelProps) {
     };
   }, [undo, dismissUndo]);
 
-  const assignedIds = useMemo(
-    () => new Set(document.tags.map((tag) => tag.id)),
-    [document.tags]
-  );
+  const assignedIds = useMemo(() => new Set(document.tags.map((tag) => tag.id)), [document.tags]);
 
   const showNestRow =
     candidates.length > 0 && candidates.every((item) => !assignedIds.has(item.tag.id));
@@ -174,9 +173,7 @@ export function LabelPanel({ document, onUpdated }: LabelPanelProps) {
       if (result.correctionId) {
         setUndo({ correctionId: result.correctionId, previousTagIds });
       }
-      toast.success(
-        t('documents.labelLearnedToast', { count: result.similarDocumentsUpdated })
-      );
+      toast.success(t('documents.labelLearnedToast', { count: result.similarDocumentsUpdated }));
     } catch (err) {
       toast.error(formatUserFacingError(err, 'errors.addFailed'));
     } finally {
@@ -220,8 +217,14 @@ export function LabelPanel({ document, onUpdated }: LabelPanelProps) {
 
       {showNestRow ? (
         <div className="label-nest-correction" data-ux="label-nest-correction">
-          <p className="muted label-nest-correction-lead">{t('documents.labelNestCandidatesLead')}</p>
-          <div className="chip-row label-nest-chip-row" role="listbox" aria-label={t('documents.labelNestCandidatesLead')}>
+          <p className="muted label-nest-correction-lead">
+            {t('documents.labelNestCandidatesLead')}
+          </p>
+          <div
+            className="chip-row label-nest-chip-row"
+            role="listbox"
+            aria-label={t('documents.labelNestCandidatesLead')}
+          >
             {candidates.map((item) => (
               <button
                 key={item.tag.id}
@@ -230,7 +233,9 @@ export function LabelPanel({ document, onUpdated }: LabelPanelProps) {
                 aria-selected={selectedNestTagId === item.tag.id}
                 className={`label-nest-chip${selectedNestTagId === item.tag.id ? ' label-nest-chip-selected' : ''}`}
                 disabled={busy !== null}
-                onClick={() => { setSelectedNestTagId(item.tag.id); }}
+                onClick={() => {
+                  setSelectedNestTagId(item.tag.id);
+                }}
               >
                 <Chip
                   label={item.tag.name}

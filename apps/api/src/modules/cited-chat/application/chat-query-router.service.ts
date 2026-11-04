@@ -8,9 +8,8 @@ import { outOfScopeReply, smallTalkReply } from '../domain/chat-smalltalk-reply.
 import { resolveFollowUpQuery } from '../domain/resolve-follow-up-query.js';
 import { ChatLibraryStatsService } from './chat-library-stats.service.js';
 
-export type ChatQueryRouteResult =
-  | { kind: 'document_qa'; resolvedQuery: string }
-  | { kind: 'answered'; content: string };
+type ChatQueryRouteResult =
+  { kind: 'document_qa'; resolvedQuery: string } | { kind: 'answered'; content: string };
 
 @Injectable()
 export class ChatQueryRouterService {
@@ -37,7 +36,7 @@ export class ChatQueryRouterService {
     }
     const { embeddings } = await this.embedding.embedTexts(texts, { inputType: 'query' });
     const currentVec = embeddings[0] ?? [];
-    const priorVec = input.priorUserMessage ? embeddings[1] ?? null : null;
+    const priorVec = input.priorUserMessage ? (embeddings[1] ?? null) : null;
 
     const intentOnCurrent = classifyChatRouteIntent(currentVec);
     if (intentOnCurrent === 'smalltalk') {
@@ -54,7 +53,9 @@ export class ChatQueryRouterService {
 
     let routeVector = currentVec;
     if (resolvedQuery !== input.userMessage.trim()) {
-      const resolvedEmbed = await this.embedding.embedTexts([resolvedQuery], { inputType: 'query' });
+      const resolvedEmbed = await this.embedding.embedTexts([resolvedQuery], {
+        inputType: 'query',
+      });
       routeVector = resolvedEmbed.embeddings[0] ?? currentVec;
     }
 

@@ -7,9 +7,9 @@ import { useTranslation } from 'react-i18next';
 import { Button } from './Button';
 import { SourceChip } from './SourceChip';
 
-export type ChatMessageRole = 'user' | 'assistant' | 'abstain';
+type ChatMessageRole = 'user' | 'assistant' | 'abstain';
 
-export interface ChatMessageProps {
+interface ChatMessageProps {
   messageRole: ChatMessageRole;
   children: ReactNode;
   sources?: { kind?: 'document' | 'page'; label: string }[];

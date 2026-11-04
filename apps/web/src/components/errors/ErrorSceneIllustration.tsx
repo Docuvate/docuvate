@@ -6,9 +6,7 @@ import { buildErrorSceneSrcSet, errorSceneFallbackSrc } from './errorSceneImages
 import type { ErrorSceneId } from './errorSceneManifest.generated';
 import { ERROR_SCENE_MANIFEST } from './errorSceneManifest.generated';
 
-export type { ErrorSceneId };
-
-export interface ErrorSceneIllustrationProps {
+interface ErrorSceneIllustrationProps {
   scene: ErrorSceneId;
   animating?: boolean;
   className?: string;
@@ -25,14 +23,23 @@ export function ErrorSceneIllustration({
   const { width, height } = ERROR_SCENE_MANIFEST[scene];
   const alt = t(`errors.pages.scene.${scene}.imageAlt`);
   const motionClass = animating ? ' error-scene-mascot--animating' : '';
-  const rootClass = `error-scene-mascot error-scene-mascot--${scene}${motionClass}${className ? ` ${className}` : ''}`.trim();
+  const rootClass =
+    `error-scene-mascot error-scene-mascot--${scene}${motionClass}${className ? ` ${className}` : ''}`.trim();
 
   return (
     <div className={rootClass}>
       <div className="error-scene-mascot__shadow" aria-hidden />
       <picture className="error-scene-mascot__picture">
-        <source type="image/avif" srcSet={buildErrorSceneSrcSet(scene, 'avif')} sizes={MASCOT_SIZES} />
-        <source type="image/webp" srcSet={buildErrorSceneSrcSet(scene, 'webp')} sizes={MASCOT_SIZES} />
+        <source
+          type="image/avif"
+          srcSet={buildErrorSceneSrcSet(scene, 'avif')}
+          sizes={MASCOT_SIZES}
+        />
+        <source
+          type="image/webp"
+          srcSet={buildErrorSceneSrcSet(scene, 'webp')}
+          sizes={MASCOT_SIZES}
+        />
         <img
           alt={alt}
           className="error-scene-mascot__img"

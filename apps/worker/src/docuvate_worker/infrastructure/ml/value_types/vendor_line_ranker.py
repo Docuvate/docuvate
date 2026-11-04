@@ -28,9 +28,7 @@ class VendorLineRankerArtifact(TypedDict):
     min_score_labeled_sender_e5: float
 
 
-_ARTIFACT_PATH = (
-    Path(__file__).resolve().parent.parent / "artifacts" / "vendor-line-ranker.v1.json"
-)
+_ARTIFACT_PATH = Path(__file__).resolve().parent.parent / "artifacts" / "vendor-line-ranker.v1.json"
 
 
 @dataclass(frozen=True)
@@ -195,12 +193,9 @@ def build_line_features(  # noqa: PLR0913
         * supplier_e5_cosine,
         digits_ratio=digits_ratio,
         addr_minus_org=addr - org,
-        doc_heading_low_org_margin=doc_heading_e5_cosine
-        * max(0.0, 25.0 - (org - free)),
+        doc_heading_low_org_margin=doc_heading_e5_cosine * max(0.0, 25.0 - (org - free)),
         labeled_recipient_over_supplier=(
-            max(0.0, recipient_e5_cosine - supplier_e5_cosine - 0.05)
-            if had_explicit_label
-            else 0.0
+            max(0.0, recipient_e5_cosine - supplier_e5_cosine - 0.05) if had_explicit_label else 0.0
         ),
         letterhead_org_margin=letterhead_band_ratio(line_index, line_count) * (org - free),
     )

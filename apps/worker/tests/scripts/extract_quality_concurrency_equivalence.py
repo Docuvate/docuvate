@@ -27,9 +27,7 @@ _CASES: tuple[tuple[str, int, int], ...] = (
 
 
 def _payload_digest(text: str, fields: list) -> str:
-    field_rows = sorted(
-        (getattr(f, "key", ""), getattr(f, "value", "")) for f in (fields or [])
-    )
+    field_rows = sorted((getattr(f, "key", ""), getattr(f, "value", "")) for f in (fields or []))
     payload = text + "\n" + repr(field_rows)
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
@@ -68,7 +66,9 @@ def main() -> int:
     diffs = []
     for index, name in enumerate([c[0] for c in _CASES]):
         if at_one[index] != at_four[index]:
-            diffs.append({"case": name, "concurrency_1": at_one[index], "concurrency_4": at_four[index]})
+            diffs.append(
+                {"case": name, "concurrency_1": at_one[index], "concurrency_4": at_four[index]}
+            )
     print(
         json.dumps(
             {

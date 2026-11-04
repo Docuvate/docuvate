@@ -5,11 +5,11 @@ import {
   tokenizeSearchQuery,
 } from '../../search/domain/normalize-search-text.js';
 
-export const HYBRID_MAX_VOCAB = 4096;
-export const HYBRID_EMBED_FEATURE_WEIGHT = 1.25;
-export const HYBRID_TFIDF_FEATURE_WEIGHT = 1.0;
+const HYBRID_MAX_VOCAB = 4096;
+const HYBRID_EMBED_FEATURE_WEIGHT = 1.25;
+const HYBRID_TFIDF_FEATURE_WEIGHT = 1.0;
 
-export interface HybridCorpusRow {
+interface HybridCorpusRow {
   text: string;
 }
 
@@ -30,7 +30,7 @@ export function l2Normalize(values: number[]): number[] {
   return values.map((v) => v / norm);
 }
 
-export function buildHybridVocabulary(rows: readonly HybridCorpusRow[]): string[] {
+function buildHybridVocabulary(rows: readonly HybridCorpusRow[]): string[] {
   const df = new Map<string, number>();
   for (const row of rows) {
     const seen = new Set<string>();
@@ -51,10 +51,7 @@ export function buildHybridVocabulary(rows: readonly HybridCorpusRow[]): string[
     .map(([token]) => token);
 }
 
-export function buildHybridIdf(
-  rows: readonly HybridCorpusRow[],
-  vocabulary: readonly string[]
-): number[] {
+function buildHybridIdf(rows: readonly HybridCorpusRow[], vocabulary: readonly string[]): number[] {
   const n = rows.length;
   const df: number[] = Array.from({ length: vocabulary.length }, () => 0);
   for (const row of rows) {
@@ -74,7 +71,7 @@ export function buildHybridFeatureModel(rows: readonly HybridCorpusRow[]): Hybri
   return { vocabulary, idf };
 }
 
-export function hybridTfidfVector(
+function hybridTfidfVector(
   text: string,
   vocabulary: readonly string[],
   idf: readonly number[]

@@ -16,6 +16,7 @@ from docuvate_worker.infrastructure.layout.layout_reconstruction_assess import (
 )
 from docuvate_worker.infrastructure.layout.layout_reconstruction_eval import (
     CATEGORY_SSIM_FLOOR,
+    LayoutReconstructionEval,
     ReconstructionUnreliableReason,
     evaluate_exact_typst_reconstruction,
     ssim_floor_for_category,
@@ -45,7 +46,8 @@ def _load_baseline() -> dict[str, float]:
     assert _BASELINE_PATH.is_file(), f"Missing SSIM baseline: {_BASELINE_PATH}"
     payload = json.loads(_BASELINE_PATH.read_text(encoding="utf-8"))
     fixtures = payload.get("fixtures")
-    assert isinstance(fixtures, dict) and fixtures, "baseline fixtures must be non-empty"
+    assert isinstance(fixtures, dict), "baseline fixtures must be a mapping"
+    assert fixtures, "baseline fixtures must be non-empty"
     out: dict[str, float] = {}
     for fixture_id, entry in fixtures.items():
         assert "before_ssim" in entry, f"baseline entry {fixture_id} missing before_ssim"
@@ -53,7 +55,7 @@ def _load_baseline() -> dict[str, float]:
     return out
 
 
-def _evaluate_fixture(fixture: LayoutSsimFixture):
+def _evaluate_fixture(fixture: LayoutSsimFixture) -> LayoutReconstructionEval:
     pdf = fixture.factory()
     if not fixture.expects_reliable and fixture.expected_unreliable_reason in {
         ReconstructionUnreliableReason.UNSUPPORTED_SCRIPT,

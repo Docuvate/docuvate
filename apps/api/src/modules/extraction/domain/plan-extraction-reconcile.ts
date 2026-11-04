@@ -15,7 +15,7 @@ export interface ExtractionReconcileJob {
   startedAtMs: number | null;
 }
 
-export interface ExtractionReconcilePlan {
+interface ExtractionReconcilePlan {
   failIds: string[];
   enqueue: { id: string; userId: string }[];
 }

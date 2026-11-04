@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { DOCUMENT_LIST_MAX_LIMIT, type DocumentListQuery } from '@docuvate/contracts';
+import { type DocumentListQuery } from '@docuvate/contracts';
 
 import type { DocumentListQueryDto } from '../../../shared/presentation/dtos/documents.dto.js';
 import { clampDocumentListLimit } from '../infrastructure/document-list-pagination.js';
@@ -38,5 +38,3 @@ export function parseDocumentListQuery(params: DocumentListQueryDto): DocumentLi
     cursor,
   };
 }
-
-export { DOCUMENT_LIST_MAX_LIMIT };

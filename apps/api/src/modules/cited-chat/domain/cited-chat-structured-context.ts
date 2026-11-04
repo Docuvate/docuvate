@@ -28,7 +28,7 @@ function formatFieldLine(field: CitedChatDocumentContextField): string {
 }
 
 /** Compact machine-readable header prepended to passage text for the cited-chat LLM. */
-export function formatStructuredDocumentHeader(meta: CitedChatDocumentContextMeta): string {
+function formatStructuredDocumentHeader(meta: CitedChatDocumentContextMeta): string {
   const parts: string[] = [`doc=${meta.title}`];
   if (meta.documentDate) {
     parts.push(`date=${meta.documentDate}`);

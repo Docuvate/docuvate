@@ -4,11 +4,11 @@ import { Injectable } from '@nestjs/common';
 import type { FastifyRequest } from 'fastify';
 
 import { ValidationError } from '../../../shared/domain/errors.js';
-import { isRecord, parseString } from '../../../shared/infrastructure/database/row-parse.js';
+import { isRecord, parseString } from '../../../shared/domain/row-parse.js';
 import type { SftpIngressEventEntity } from '../domain/sftp-ingress.types.js';
 import { IngestSftpScanUseCase } from './sftp-ingress.use-cases.js';
 
-export interface IngestSftpMultipartInput {
+interface IngestSftpMultipartInput {
   accountId: string;
   filename: string;
   remotePath: string | null;

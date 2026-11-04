@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Checkbox } from './Checkbox';
 
-export interface DocumentTileProps {
+interface DocumentTileProps {
   title: string;
   meta: string;
   selected?: boolean;
@@ -42,7 +42,9 @@ export function DocumentTile({
         <div className="document-tile-title">{title}</div>
         <div className="document-tile-meta">{meta}</div>
       </div>
-      <p className={`document-tile-hint${hintHidden ? ' document-tile-hint-hidden' : ''}`.trim()}>{resolvedHint}</p>
+      <p className={`document-tile-hint${hintHidden ? ' document-tile-hint-hidden' : ''}`.trim()}>
+        {resolvedHint}
+      </p>
     </article>
   );
 }

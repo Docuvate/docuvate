@@ -7,7 +7,7 @@ import unicodedata
 
 
 def token_has_decimal_digit(token: str) -> bool:
-    return any(unicodedata.category(char) == 'Nd' for char in token)
+    return any(unicodedata.category(char) == "Nd" for char in token)
 
 
 def value_fingerprint_tokens(lines: list[str]) -> set[str]:

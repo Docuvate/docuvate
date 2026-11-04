@@ -97,10 +97,7 @@ def _run_html(
         f"white-space:pre;font-size:{fs}pt;font-weight:{wt};font-family:{ff};"
         f"{italic}{color}{transform}"
     )
-    return (
-        f"<span class=\"run\"{idx_attr}{_style_attr(style)}>"
-        f"{escape(block.text)}</span>"
-    )
+    return f'<span class="run"{idx_attr}{_style_attr(style)}>{escape(block.text)}</span>'
 
 
 def _zapf_mark_html(mark: str) -> str:
@@ -146,8 +143,7 @@ def _widget_html(widget: LayoutIrWidget, pw: float, ph: float, _doc: LayoutIrDoc
             f"text-align:{align};white-space:pre;overflow:hidden;"
         )
         parts.append(
-            f'<div class="widget field-line"{_style_attr(line_style)}>'
-            f"{escape(line.strip())}</div>"
+            f'<div class="widget field-line"{_style_attr(line_style)}>{escape(line.strip())}</div>'
         )
     return "\n".join(parts)
 
@@ -161,12 +157,9 @@ def _page_html(
         f"position:relative;width:{pw}pt;height:{ph}pt;"
         f"margin:0 auto 12pt;background:#fff;font-family:{css_font_family(None)};"
     )
-    parts: list[str] = [
-        f'<section class="page" data-page="{page.page}"{_style_attr(page_style)}>'
-    ]
+    parts: list[str] = [f'<section class="page" data-page="{page.page}"{_style_attr(page_style)}>']
     parts.append(_vectors_svg(page))
-    for block in page.blocks:
-        parts.append(_run_html(block, page, doc))
+    parts.extend(_run_html(block, page, doc) for block in page.blocks)
     for widget in page.widgets:
         part = _widget_html(widget, pw, ph, doc)
         if part:
@@ -176,9 +169,7 @@ def _page_html(
 
 
 def layout_ir_to_html(doc: LayoutIrDocument) -> str:
-    body = "\n".join(
-        _page_html(p, doc) for p in sorted(doc.pages, key=lambda p: p.page)
-    )
+    body = "\n".join(_page_html(p, doc) for p in sorted(doc.pages, key=lambda p: p.page))
     return f"""<!DOCTYPE html>
 <html lang="de"><head><meta charset="utf-8"/>
 {LAYOUT_HTML_HEAD}

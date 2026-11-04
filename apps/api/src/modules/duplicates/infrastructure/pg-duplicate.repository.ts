@@ -17,7 +17,7 @@ import {
   parseString,
   parseStringArray,
   requireRecord,
-} from '../../../shared/infrastructure/database/row-parse.js';
+} from '../../../shared/domain/row-parse.js';
 import { withTenantPgClient } from '../../../shared/infrastructure/database/tenant-pg.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 
@@ -142,11 +142,7 @@ export class PgDuplicateRepository implements DuplicateRepository {
     );
   }
 
-  async undismiss(
-    documentId: string,
-    candidateDocumentId: string,
-    userId: string
-  ): Promise<void> {
+  async undismiss(documentId: string, candidateDocumentId: string, userId: string): Promise<void> {
     await this.pool.query(
       `UPDATE document_duplicate_candidates SET dismissed = false
        WHERE user_id = $1 AND document_id = $2 AND candidate_document_id = $3`,

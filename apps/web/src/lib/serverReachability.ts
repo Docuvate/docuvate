@@ -5,7 +5,7 @@ import { probeApiHealth } from './apiHealth';
 
 type Listener = (state: ServerReachabilityState) => void;
 
-export interface ServerReachabilityState {
+interface ServerReachabilityState {
   /** Browser reports offline (X11). */
   browserOffline: boolean;
   /** API unreachable while browser online (X4). */

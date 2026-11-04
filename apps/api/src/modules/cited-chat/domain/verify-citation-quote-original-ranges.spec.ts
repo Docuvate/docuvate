@@ -2,13 +2,12 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it } from 'vitest';
 
-import { normalizeForQuoteMatch, resolveQuoteInCandidateChunk } from './verify-citation-quote.js';
+import { normalizeForQuoteMatch } from './quote-match-normalize.js';
+import { resolveQuoteInCandidateChunk } from './verify-citation-quote.js';
 
 type QuoteHit = NonNullable<ReturnType<typeof resolveQuoteInCandidateChunk>>;
 
-function requireHit(
-  hit: ReturnType<typeof resolveQuoteInCandidateChunk>
-): QuoteHit {
+function requireHit(hit: ReturnType<typeof resolveQuoteInCandidateChunk>): QuoteHit {
   expect(hit).not.toBeNull();
   if (hit === null) {
     throw new Error('expected quote hit');

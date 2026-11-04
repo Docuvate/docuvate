@@ -1,14 +1,11 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { ValidationError } from '../../../shared/domain/errors.js';
-import {
-  isRecord,
-  parseString,
-} from '../../../shared/infrastructure/database/row-parse.js';
+import { isRecord, parseString } from '../../../shared/domain/row-parse.js';
 
 const CURSOR_VERSION = 1;
 
-export interface FieldFilterValueCursorPayload {
+interface FieldFilterValueCursorPayload {
   v: typeof CURSOR_VERSION;
   value: string;
 }

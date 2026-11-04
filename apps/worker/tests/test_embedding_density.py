@@ -18,18 +18,19 @@ from docuvate_worker.domain.embedding_density.calibration import (
     fit_temperature_and_bias,
     learn_then_test_threshold,
     posterior_log_odds,
-    softmax,
     split_embedding_density_documents,
 )
 from docuvate_worker.domain.embedding_density.constants import COARSE_TOP_GROUP_TARGET_ID
 from docuvate_worker.domain.embedding_density.kernel import (
-    KERNEL_REGULARIZER_LAMBDA,
     KernelCorrector,
     correction_log_odds_targets,
-    rbf_kernel,
 )
 from docuvate_worker.domain.embedding_density.model import EmbeddingDensityModel
-from docuvate_worker.domain.embedding_density.niw import NiwClassStats, class_log_predictive, default_hyperparameters
+from docuvate_worker.domain.embedding_density.niw import (
+    NiwClassStats,
+    class_log_predictive,
+    default_hyperparameters,
+)
 from docuvate_worker.domain.embedding_density.schemas import EmbeddingDensityStatePayload
 
 
@@ -106,7 +107,9 @@ def test_near_duplicate_corrections_stable() -> None:
     model = EmbeddingDensityModel(label_ids=["x", "y"], dim=8)
     for _ in range(30):
         model.add_training_example("x", base + rng.normal(0, 0.05, size=8))
-        model.add_training_example("y", base + rng.normal(0, 0.05, size=8) + np.array([0.3, 0, 0, 0, 0, 0, 0, 0]))
+        model.add_training_example(
+            "y", base + rng.normal(0, 0.05, size=8) + np.array([0.3, 0, 0, 0, 0, 0, 0, 0])
+        )
     p1 = base + rng.normal(0, 1e-4, size=8)
     p2 = base + rng.normal(0, 2e-4, size=8)
     model.apply_correction(p1, "x")
@@ -249,7 +252,6 @@ def test_kernel_cross_org_strength_zero_isolates_corrections() -> None:
 
 
 def test_coarse_tier_certifies_with_nonzero_coverage() -> None:
-    from docuvate_worker.domain.embedding_density import calibration as cal_mod
 
     rng = np.random.default_rng(7)
     dim = 8
@@ -277,7 +279,6 @@ def test_coarse_tier_certifies_with_nonzero_coverage() -> None:
 
 
 def test_synthetic_eval_held_out_certified_tiers() -> None:
-    from docuvate_worker.domain.embedding_density import calibration as cal_mod
 
     rng = np.random.default_rng(42)
     dim = 8

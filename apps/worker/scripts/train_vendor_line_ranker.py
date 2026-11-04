@@ -23,7 +23,9 @@ from docuvate_worker.infrastructure.ml.value_types.sender_line_e5 import sender_
 from docuvate_worker.infrastructure.ml.value_types.field_confidence_calibration import (
     get_field_confidence_calibration,
 )
-from docuvate_worker.infrastructure.ml.value_types.field_suggestions import learned_field_suggestions
+from docuvate_worker.infrastructure.ml.value_types.field_suggestions import (
+    learned_field_suggestions,
+)
 from docuvate_worker.infrastructure.ml.value_types.vendor_line_ranker import (
     VendorLineFeatures,
     VendorLineRanker,
@@ -127,7 +129,9 @@ def main() -> None:
         for doc in docs:
             expected_raw = doc.get("expected")
             expected = expected_raw if isinstance(expected_raw, dict) else {}
-            predicted = {f.key: f.value for f in learned_field_suggestions(str(doc.get("text", "")))}
+            predicted = {
+                f.key: f.value for f in learned_field_suggestions(str(doc.get("text", "")))
+            }
             if "vendor" in expected:
                 if predicted.get("vendor") == expected["vendor"]:
                     tp += 1

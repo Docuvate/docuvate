@@ -5,18 +5,15 @@ import { Inject, Injectable } from '@nestjs/common';
 import type pg from 'pg';
 
 import { ConflictError, NotFoundError } from '../../../shared/domain/errors.js';
-import type {
-  FolderEntity,
-  FolderListItem,
-  FolderRepository,
-} from '../../../shared/domain/ports.js';
+import type { FolderEntity } from '../../../shared/domain/folder.entity.js';
+import type { FolderListItem, FolderRepository } from '../../../shared/domain/ports.js';
 import {
   parseDate,
   parseNumber,
   parseOptionalString,
   parseString,
   requireRecord,
-} from '../../../shared/infrastructure/database/row-parse.js';
+} from '../../../shared/domain/row-parse.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 
 function isUniqueViolation(err: unknown): boolean {

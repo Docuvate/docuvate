@@ -17,9 +17,9 @@ def _mock_embed(texts: list[str]) -> list[list[float]]:
 
 @patch(
     "docuvate_worker.infrastructure.ml.ce_ml.label_propagation.embed_texts_onnx",
-    side_effect=_mock_embed,
+    _mock_embed,
 )
-def test_insufficient_calibration_abstains(_mock: object) -> None:
+def test_insufficient_calibration_abstains() -> None:
     vectors = np.eye(3, dtype=np.float32).tolist()
     texts = ["a", "b", "c"]
     scores = propagate_label_scores(
@@ -36,9 +36,9 @@ def test_insufficient_calibration_abstains(_mock: object) -> None:
 
 @patch(
     "docuvate_worker.infrastructure.ml.ce_ml.label_propagation.embed_texts_onnx",
-    side_effect=_mock_embed,
+    _mock_embed,
 )
-def test_hybrid_propagation_can_suggest_neighbor(_mock: object) -> None:
+def test_hybrid_propagation_can_suggest_neighbor() -> None:
     vectors = [
         [1.0, 0.0, 0.0, 0.0],
         [0.99, 0.01, 0.0, 0.0],

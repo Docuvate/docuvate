@@ -7,15 +7,10 @@ import { LocaleSwitcher } from '../layout/LocaleSwitcher';
 import { Card } from '../ui/Card';
 import { Logo } from '../ui/Logo';
 
-export type AuthCardGroup =
-  | 'signIn'
-  | 'twoFactor'
-  | 'forgotPassword'
-  | 'resetPassword'
-  | 'register'
-  | 'invite';
+type AuthCardGroup =
+  'signIn' | 'twoFactor' | 'forgotPassword' | 'resetPassword' | 'register' | 'invite';
 
-export interface AuthScreenProps {
+interface AuthScreenProps {
   title: string;
   intro?: ReactNode;
   lead?: ReactNode;
@@ -33,14 +28,7 @@ const CARD_GROUP_CLASS: Record<AuthCardGroup, string> = {
   invite: 'auth-card--invite',
 };
 
-export function AuthScreen({
-  title,
-  intro,
-  lead,
-  children,
-  footer,
-  cardGroup,
-}: AuthScreenProps) {
+export function AuthScreen({ title, intro, lead, children, footer, cardGroup }: AuthScreenProps) {
   const { t } = useTranslation();
   const cardClass = cardGroup ? CARD_GROUP_CLASS[cardGroup] : '';
   return (

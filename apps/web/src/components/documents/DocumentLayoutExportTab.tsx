@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 
 import { fetchDocumentLayoutTypst } from '../../lib/api';
 import { typstExportDegradedMessage } from '../../lib/layoutExportTypst';
-import { useToastNotify } from '../save/ToastProvider';
+import { useToastNotify } from '../save';
 import { Button } from '../ui/Button';
 
 type ExportFormat = 'typst-semantic' | 'typst-exact';
@@ -45,11 +45,15 @@ export function DocumentLayoutExportTab({
           const url = URL.createObjectURL(blob);
           const a = document.createElement('a');
           a.href = url;
-          const safeTitle = (documentTitle ?? 'document').replace(/[^\wäöüÄÖÜß.-]+/g, '-').slice(0, 80);
+          const safeTitle = (documentTitle ?? 'document')
+            .replace(/[^\wäöüÄÖÜß.-]+/g, '-')
+            .slice(0, 80);
           const suffix = mode === 'semantisch' ? '-semantisch' : '-exakt';
           a.download = `${safeTitle}-layout${suffix}.typ`;
           a.click();
-          window.setTimeout(() => { URL.revokeObjectURL(url); }, 0);
+          window.setTimeout(() => {
+            URL.revokeObjectURL(url);
+          }, 0);
         }
         if (!reconstructionReliable) {
           pushSuccess(typstExportDegradedMessage(t, unreliableReason));
@@ -119,13 +123,17 @@ export function DocumentLayoutExportTab({
               previewExpanded ? ' layout-export-preview-code-expanded' : ''
             }`}
           >
-            {previewExpanded ? previewTypst : `${previewTypst.slice(0, 480)}${previewTypst.length > 480 ? '…' : ''}`}
+            {previewExpanded
+              ? previewTypst
+              : `${previewTypst.slice(0, 480)}${previewTypst.length > 480 ? '…' : ''}`}
           </pre>
           {previewTypst.length > 480 ? (
             <Button
               type="button"
               variant="ghost"
-              onClick={() => { setPreviewExpanded((open) => !open); }}
+              onClick={() => {
+                setPreviewExpanded((open) => !open);
+              }}
             >
               {previewExpanded
                 ? t('documents.layoutExportPreviewLess')

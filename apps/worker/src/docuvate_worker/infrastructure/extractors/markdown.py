@@ -132,8 +132,7 @@ def plain_text_to_markdown(text: str) -> str:
         if len(lines) == 1:
             out.append(_format_line_as_markdown(lines[0], 0.02, 0.02))
         else:
-            for ln in lines:
-                out.append(_format_line_as_markdown(ln, 0.02, 0.02))
+            out.extend(_format_line_as_markdown(ln, 0.02, 0.02) for ln in lines)
             out.append("")
     return "\n".join(out).strip()
 
@@ -156,7 +155,13 @@ def markdown_to_plain(md: str) -> str:
             continue
         if line.startswith("#"):
             line = _strip_md_heading_prefix(line)
-        line = line.replace("**", "").replace("__", "").replace("*", "").replace("`", "").replace("~", "")
+        line = (
+            line.replace("**", "")
+            .replace("__", "")
+            .replace("*", "")
+            .replace("`", "")
+            .replace("~", "")
+        )
         lines.append(line.strip())
     plain = "\n".join(lines)
     while "\n\n\n" in plain:

@@ -13,7 +13,7 @@ import {
 } from '../../../search/infrastructure/document-field-value-index.js';
 import { isJunkReviewFieldSuggestion } from './review-field-junk-filter.js';
 
-export function fieldDisplayLabel(
+function fieldDisplayLabel(
   fieldKey: string,
   definitions: Map<string, FieldDefinitionLookup>
 ): string {

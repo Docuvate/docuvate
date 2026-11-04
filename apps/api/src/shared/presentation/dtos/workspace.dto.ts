@@ -50,7 +50,7 @@ const WIDGET_TYPES = [
   'attention',
 ] as const;
 
-export class SavedDocumentViewFieldFilterDtoClass implements SavedDocumentViewFieldFilterDto {
+class SavedDocumentViewFieldFilterDtoClass implements SavedDocumentViewFieldFilterDto {
   @IsString()
   fieldKey!: string;
 
@@ -270,7 +270,7 @@ export class ReorderSavedDocumentViewsRequestDto implements ReorderSavedDocument
   orderedIds!: string[];
 }
 
-export class DashboardWidgetInputDto {
+class DashboardWidgetInputDto {
   @IsOptional()
   @IsUUID()
   id?: string;
@@ -310,7 +310,7 @@ export class ReplaceDashboardLayoutRequestDto implements ReplaceDashboardLayoutR
   widgets!: DashboardWidgetInputDto[];
 }
 
-export class DashboardWidgetDtoClass implements DashboardWidgetDto {
+class DashboardWidgetDtoClass implements DashboardWidgetDto {
   id!: string;
   type!: DashboardWidgetType;
   position!: number;

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it } from 'vitest';
 
-import type { CitedChatChunkCandidate } from '../infrastructure/pg-cited-chat-retrieval.repository.js';
+import type { CitedChatChunkCandidate } from './cited-chat-chunk-candidate.js';
 import { verifyCitedClaims } from './verify-cited-claims.js';
 
 /** Mirrors scripts/seed-cited-chat-bench.mjs after normalizeDocumentText chunking. */
@@ -212,7 +212,10 @@ describe('cited chat bench fixtures (quote + source mapping)', () => {
       row('r-iban', 'Rechnung Nordwind GmbH', tail, docId),
     ];
     const top = [pool[0]];
-    const labels = new Map([['r-head', 'S1'], ['r-iban', 'S2']]);
+    const labels = new Map([
+      ['r-head', 'S1'],
+      ['r-iban', 'S2'],
+    ]);
     const { verified, rejected } = verifyCitedClaims({
       claims: [
         {

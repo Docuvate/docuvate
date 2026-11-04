@@ -28,7 +28,7 @@ def _peak_rss_mib() -> float:
 
 
 @pytest.mark.skipif(shutil.which("pdftoppm") is None, reason="poppler required for pdf2image")
-@pytest.mark.parametrize("label,page_count,dpi", _BENCHMARKS)
+@pytest.mark.parametrize(("label", "page_count", "dpi"), _BENCHMARKS)
 def test_public_dense_scan_peak_rss_under_budget(
     label: str,
     page_count: int,
@@ -49,4 +49,6 @@ def test_public_dense_scan_peak_rss_under_budget(
     peak = _peak_rss_mib()
     delta = peak - baseline
     assert len(result.text) > 0
-    assert delta < _PEAK_BUDGET_MIB, f"{label} peak delta {delta:.1f} MiB exceeds {_PEAK_BUDGET_MIB}"
+    assert delta < _PEAK_BUDGET_MIB, (
+        f"{label} peak delta {delta:.1f} MiB exceeds {_PEAK_BUDGET_MIB}"
+    )

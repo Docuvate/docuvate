@@ -3,7 +3,7 @@
 import type { LayoutToken } from '@docuvate/contracts';
 import { rectFromXywh } from '@docuvate/contracts';
 
-import { isRecord, parseNumber } from '../../../shared/infrastructure/database/row-parse.js';
+import { isRecord, parseNumber } from '../../../shared/domain/row-parse.js';
 
 function isFiniteNumber(value: unknown): value is number {
   return typeof value === 'number' && Number.isFinite(value);
@@ -72,9 +72,10 @@ export function layoutTokensFromIr(ir: unknown, page?: number): LayoutToken[] {
       return;
     }
     tokens.push({
-      blockIndex: nativeIndexes && block.blockIndex != null
-        ? block.blockIndex
-        : parseBlockIndex(block.blockIndex, index),
+      blockIndex:
+        nativeIndexes && block.blockIndex != null
+          ? block.blockIndex
+          : parseBlockIndex(block.blockIndex, index),
       page: block.page,
       x0: rect.x0,
       y0: rect.y0,
@@ -84,12 +85,4 @@ export function layoutTokensFromIr(ir: unknown, page?: number): LayoutToken[] {
     });
   });
   return tokens;
-}
-
-export function tokensByBlockIndex(tokens: readonly LayoutToken[]): Map<number, LayoutToken> {
-  const map = new Map<number, LayoutToken>();
-  for (const token of tokens) {
-    map.set(token.blockIndex, token);
-  }
-  return map;
 }

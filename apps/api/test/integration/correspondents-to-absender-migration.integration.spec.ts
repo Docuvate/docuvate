@@ -5,8 +5,8 @@ import { randomUUID } from 'node:crypto';
 import { DataSource } from 'typeorm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
+import { parseString, requireRecord } from '../../src/shared/domain/row-parse.js';
 import { CorrespondentsToAbsenderField20261018180000 } from '../../src/shared/infrastructure/database/migrations/20261018180000-correspondents-to-absender-field.js';
-import { parseString, requireRecord } from '../../src/shared/infrastructure/database/row-parse.js';
 import { buildTypeOrmOptions } from '../../src/shared/infrastructure/database/typeorm-options.js';
 import { closeIntegrationPool, getIntegrationPool } from './pg-pool.js';
 import {
@@ -33,10 +33,7 @@ describe('CorrespondentsToAbsenderField migration (Testcontainers Postgres)', ()
   });
 
   async function tableExists(name: string): Promise<boolean> {
-    const result = await pool.query(
-      `SELECT to_regclass($1::text) IS NOT NULL AS present`,
-      [name]
-    );
+    const result = await pool.query(`SELECT to_regclass($1::text) IS NOT NULL AS present`, [name]);
     const row = requireRecord(result.rows[0]);
     return row.present === true;
   }

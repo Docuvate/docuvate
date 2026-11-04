@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { parseOptionalEnum } from '../../../shared/infrastructure/database/row-parse.js';
+import { parseOptionalEnum } from '../../../shared/domain/row-parse.js';
 import type { ConnectorPluginId } from '../domain/connector.types.js';
 
 const CONNECTOR_PLUGIN_IDS: readonly ConnectorPluginId[] = [

@@ -52,9 +52,7 @@ def shape_one_hot(width: float, height: float) -> list[float]:
 
 def _same_page_entities(entity: LayoutEntity, entities: list[LayoutEntity]) -> list[LayoutEntity]:
     return [
-        other
-        for other in entities
-        if other.page == entity.page and other.index != entity.index
+        other for other in entities if other.page == entity.page and other.index != entity.index
     ]
 
 

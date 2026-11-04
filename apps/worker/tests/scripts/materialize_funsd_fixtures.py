@@ -12,10 +12,8 @@ from __future__ import annotations
 
 import argparse
 import json
-import sys
-from pathlib import Path
-
 import urllib.request
+from pathlib import Path
 
 HF_ROWS = (
     "https://datasets-server.huggingface.co/rows?"

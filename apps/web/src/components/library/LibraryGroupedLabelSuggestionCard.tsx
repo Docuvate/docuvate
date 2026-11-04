@@ -3,11 +3,8 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import {
-  initialSelectedDocumentIds,
-  selectedDocumentIds,
-} from '../labels/labelRecDocumentSelection';
-import { LabelRecommendationDocuments } from '../labels/LabelRecommendationDocuments';
+import { initialSelectedDocumentIds, selectedDocumentIds } from '../labels';
+import { LabelRecommendationDocuments } from '../labels';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
 import { Chip } from '../ui/Chip';

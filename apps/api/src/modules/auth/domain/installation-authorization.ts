@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { AuthorizationSubject } from '../../../shared/domain/authorization.js';
 import { ForbiddenError } from '../../../shared/domain/errors.js';
-import { subjectIsInstanceAdministrator } from '../../../shared/infrastructure/auth/user-authorization-subject.js';
+import { subjectIsInstanceAdministrator } from '../../../shared/domain/user-authorization-subject.js';
 import {
   INSTALLATION_DB_ROLE_ADMIN,
   INSTALLATION_DB_ROLE_MEMBER,
@@ -14,7 +14,7 @@ import {
   type InstanceRole,
 } from './instance-role.constants.js';
 
-export type InstallationAuthorizationAction =
+type InstallationAuthorizationAction =
   | 'installation:invite'
   | 'installation:change_member_role'
   | 'installation:suspend_member'

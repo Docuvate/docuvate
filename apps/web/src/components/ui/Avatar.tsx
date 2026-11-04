@@ -1,9 +1,9 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 
-export type AvatarSize = 'sm' | 'md' | 'lg';
+type AvatarSize = 'sm' | 'md' | 'lg';
 
-export interface AvatarProps {
+interface AvatarProps {
   initials: string;
   size?: AvatarSize;
   className?: string;

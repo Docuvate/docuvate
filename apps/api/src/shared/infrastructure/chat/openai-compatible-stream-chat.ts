@@ -1,17 +1,17 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { isRecord, parseString } from '../database/row-parse.js';
+import { isRecord, parseString } from '../../domain/row-parse.js';
 import { openAiCompatibleChatCompletionsUrl } from './document-chat-cloud-url-security.js';
 import type { DocumentChatLlmRuntimeConfig } from './document-chat-llm-config.js';
 import { ollamaChatIdleTimeoutMs } from './ollama-chat-options.js';
 
-export type OpenAiStreamFailure =
+type OpenAiStreamFailure =
   | { kind: 'idle_timeout' }
   | { kind: 'aborted' }
   | { kind: 'http_error'; status: number; detail?: string }
   | { kind: 'network_error'; detail: string };
 
-export interface StreamOpenAiCompatibleChatParams {
+interface StreamOpenAiCompatibleChatParams {
   config: DocumentChatLlmRuntimeConfig;
   messages: { role: string; content: string }[];
   onToken: (token: string, fullText: string) => void | Promise<void>;

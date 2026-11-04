@@ -42,9 +42,7 @@ def test_unlisted_model_reference_is_detected(tmp_path: Path) -> None:
     manifest["scan"]["yaml_paths"] = []
     for entry in manifest["models"]:
         entry["shipped_in_default_cpu_image"] = False
-    (root / "third-party-models.manifest.json").write_text(
-        json.dumps(manifest), encoding="utf-8"
-    )
+    (root / "third-party-models.manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
     errors = verify_third_party_models(root, root / "third-party-models.manifest.json")
     assert any("unlisted model load key" in err for err in errors)
 

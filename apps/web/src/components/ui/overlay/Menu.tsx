@@ -33,7 +33,7 @@ function useMenuContext(): MenuContextValue {
   return ctx;
 }
 
-export interface MenuProps {
+interface MenuProps {
   children: ReactNode;
   /** Controlled open state (optional). */
   open?: boolean;
@@ -72,7 +72,7 @@ export function Menu({ children, open: controlledOpen, onOpenChange }: MenuProps
   return <MenuContext.Provider value={value}>{children}</MenuContext.Provider>;
 }
 
-export interface MenuTriggerProps {
+interface MenuTriggerProps {
   children: ReactNode;
   className?: string;
   'aria-label'?: string;
@@ -97,14 +97,16 @@ export function MenuTrigger({
       aria-controls={open ? menuId : undefined}
       aria-label={ariaLabel}
       disabled={disabled}
-      onClick={() => { setOpen(!open); }}
+      onClick={() => {
+        setOpen(!open);
+      }}
     >
       {children}
     </button>
   );
 }
 
-export interface MenuContentProps {
+interface MenuContentProps {
   children: ReactNode;
   className?: string;
   align?: 'start' | 'end';
@@ -128,9 +130,7 @@ export function MenuContent({
     if (!panel) {
       return;
     }
-    const first = panel.querySelector<HTMLElement>(
-      '[role="menuitem"], [role="menuitemcheckbox"]'
-    );
+    const first = panel.querySelector<HTMLElement>('[role="menuitem"], [role="menuitemcheckbox"]');
     first?.focus();
   }, [open]);
 
@@ -149,7 +149,9 @@ export function MenuContent({
       }
     }
     panel?.addEventListener('click', onClick);
-    return () => { panel?.removeEventListener('click', onClick); };
+    return () => {
+      panel?.removeEventListener('click', onClick);
+    };
   }, [open, setOpen]);
 
   useEffect(() => {
@@ -178,7 +180,9 @@ export function MenuContent({
       items[nextIndex]?.focus();
     }
     document.addEventListener('keydown', onKeyDown);
-    return () => { document.removeEventListener('keydown', onKeyDown); };
+    return () => {
+      document.removeEventListener('keydown', onKeyDown);
+    };
   }, [open]);
 
   return (

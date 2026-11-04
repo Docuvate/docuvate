@@ -55,11 +55,12 @@ def _load_pipeline() -> Callable[..., Any] | None:
                     device=-1,
                 ),
             )
-            return _pipeline
         except Exception as exc:
             logger.warning("extractive reader unavailable: %s", exc)
             _pipeline_failed = True
             return None
+        else:
+            return _pipeline
 
 
 def read_span(question: str, context: str) -> ExtractiveSpan | None:

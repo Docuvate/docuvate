@@ -23,7 +23,9 @@ from docuvate_worker.infrastructure.ml.layout_kv_roles.model import (
     predict_link_probability,
     predict_role,
 )
-from docuvate_worker.infrastructure.ml.layout_kv_roles.suggestions import layout_kv_field_suggestions
+from docuvate_worker.infrastructure.ml.layout_kv_roles.suggestions import (
+    layout_kv_field_suggestions,
+)
 
 
 def _zero_entity(index: int, text: str, x: float, y: float) -> LayoutEntity:
@@ -80,7 +82,9 @@ def test_tiny_model_predicts_roles_and_links() -> None:
 
 def test_layout_kv_suggestions_respect_recognized_keys() -> None:
     blocks = [
-        ExtractionBlock(page=1, x=0.1, y=0.1, width=0.15, height=0.02, text="Invoice No:", block_index=0),
+        ExtractionBlock(
+            page=1, x=0.1, y=0.1, width=0.15, height=0.02, text="Invoice No:", block_index=0
+        ),
         ExtractionBlock(page=1, x=0.35, y=0.1, width=0.2, height=0.02, text="INV-9", block_index=1),
     ]
     units: list[EncodedUnit] = []
@@ -118,7 +122,10 @@ def test_layout_kv_suggestions_respect_recognized_keys() -> None:
         document_max_int8=int8,
         document_mean_float=tuple([0.0] * EMBEDDING_DIM),
     )
-    artifact_path = Path(__file__).resolve().parents[1] / "src/docuvate_worker/infrastructure/ml/artifacts/layout-kv-role-head.v1.json"
+    artifact_path = (
+        Path(__file__).resolve().parents[1]
+        / "src/docuvate_worker/infrastructure/ml/artifacts/layout-kv-role-head.v1.json"
+    )
     if not artifact_path.is_file():
         return
     model = load_layout_kv_role_head(artifact_path)

@@ -24,34 +24,3 @@ export function encodeSumXxF32(matrix: number[][]): Buffer {
   }
   return buf;
 }
-
-export function decodeSumXF32(buffer: Buffer): number[] {
-  const count = buffer.byteLength / 4;
-  const out: number[] = [];
-  for (let i = 0; i < count; i++) {
-    out.push(buffer.readFloatLE(i * 4));
-  }
-  return out;
-}
-
-export function decodeSumXxF32(buffer: Buffer, dim: number): number[][] {
-  const expected = dim * dim * 4;
-  if (buffer.byteLength !== expected) {
-    throw new Error('sum_xx_f32 byte length mismatch');
-  }
-  const matrix: number[][] = [];
-  let offset = 0;
-  for (let i = 0; i < dim; i++) {
-    const row: number[] = [];
-    for (let j = 0; j < dim; j++) {
-      row.push(buffer.readFloatLE(offset));
-      offset += 4;
-    }
-    matrix.push(row);
-  }
-  return matrix;
-}
-
-export function bytesPerLabel(dim: number): number {
-  return 4 * dim + 4 * dim * dim;
-}

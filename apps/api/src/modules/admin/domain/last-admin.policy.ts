@@ -38,7 +38,7 @@ async function lockInstallationAdministratorRows(client: pg.PoolClient): Promise
 }
 
 /** Fail if target is the sole active installation administrator (call inside a transaction). */
-export async function assertNotLastAdministratorInTransaction(
+async function assertNotLastAdministratorInTransaction(
   client: pg.PoolClient,
   targetUserId: string
 ): Promise<void> {

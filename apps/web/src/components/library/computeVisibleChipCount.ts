@@ -5,12 +5,12 @@ export const CHIP_GAP_PX = 4;
 export const OVERFLOW_CHIP_RESERVE_PX = 44;
 export const MIN_VISIBLE_CHIP_TEXT_CHARS = 6;
 
-export interface ChipFitMetrics {
+interface ChipFitMetrics {
   labelLengths: readonly number[];
   sixCharWidthPx: number;
 }
 
-export function minReadableChipWidth(
+function minReadableChipWidth(
   naturalWidth: number,
   labelLength: number,
   sixCharWidthPx: number

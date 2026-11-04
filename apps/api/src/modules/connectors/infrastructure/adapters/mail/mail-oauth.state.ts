@@ -7,10 +7,10 @@ import {
   parseOptionalString,
   parseString,
   recordFromUnknown,
-} from '../../../../../shared/infrastructure/database/row-parse.js';
+} from '../../../../../shared/domain/row-parse.js';
 import type { ConnectorPluginId } from '../../../domain/connector.types.js';
 
-export interface MailOAuthStatePayload {
+interface MailOAuthStatePayload {
   pluginId: Extract<ConnectorPluginId, 'gmail' | 'outlook'>;
   userId: string;
   displayName: string;

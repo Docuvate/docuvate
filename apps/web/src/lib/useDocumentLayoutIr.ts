@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import { fetchDocumentLayoutIr } from './api';
 import { layoutIrDocumentFromPageSummaries } from './layoutIrPages';
 
-export type LayoutIrLoadState = 'idle' | 'loading' | 'ready' | 'error';
+type LayoutIrLoadState = 'idle' | 'loading' | 'ready' | 'error';
 
 export function useDocumentLayoutIr(
   documentId: string | undefined,
@@ -31,11 +31,7 @@ export function useDocumentLayoutIr(
       return;
     }
     if (pending) {
-      setLayoutIr(
-        layoutIrPages?.length
-          ? layoutIrDocumentFromPageSummaries(layoutIrPages)
-          : null
-      );
+      setLayoutIr(layoutIrPages?.length ? layoutIrDocumentFromPageSummaries(layoutIrPages) : null);
       setState('loading');
       return;
     }
@@ -62,6 +58,8 @@ export function useDocumentLayoutIr(
   return {
     layoutIr,
     state,
-    reload: () => { setReloadToken((n) => n + 1); },
+    reload: () => {
+      setReloadToken((n) => n + 1);
+    },
   };
 }

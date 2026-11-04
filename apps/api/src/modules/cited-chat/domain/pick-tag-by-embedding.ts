@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { cosineSimilarity } from './embedding-cosine.js';
 
-export interface TagCandidate {
+interface TagCandidate {
   id: string;
   name: string;
   vector: number[];

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { ApiProperty } from '@nestjs/swagger';
 
-export class DocumentPipelineModuleDescriptorDto {
+class DocumentPipelineModuleDescriptorDto {
   @ApiProperty()
   id!: string;
 

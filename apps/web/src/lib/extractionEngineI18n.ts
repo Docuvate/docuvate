@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { TFunction } from 'i18next';
 
-const ENGINE_IDS = ['pipeline', 'paddle', 'docling', 'pdf_native', 'tesseract'] as const;
-
 function engineKey(id: string, field: 'label' | 'description'): string {
   return `settings.extractionEngines.${id}.${field}`;
 }
@@ -22,13 +20,4 @@ export function extractionEngineDescription(t: TFunction, id: string): string | 
     return t(key);
   }
   return null;
-}
-
-export function isKnownExtractionEngineId(id: string): boolean {
-  for (const engineId of ENGINE_IDS) {
-    if (engineId === id) {
-      return true;
-    }
-  }
-  return false;
 }

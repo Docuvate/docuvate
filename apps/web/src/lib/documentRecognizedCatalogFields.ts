@@ -11,9 +11,7 @@ import {
   type UserSettingsDto,
 } from '@docuvate/contracts';
 
-import { definitionIdForFieldKey } from './recognizedFieldDefinitionIndex';
-
-export interface CatalogFieldGateContext {
+interface CatalogFieldGateContext {
   assignedTagIds: string[];
   assignedNonInboxTagIds: string[];
   suggestions: { tagId: string; confidence: number; isInbox: boolean }[];
@@ -78,7 +76,10 @@ export function mergeCatalogFieldsForDocument(
   const byDefinitionId = new Map<string, ExtractedField>();
   for (const field of persisted) {
     for (const def of catalog) {
-      if (def.key === field.key || semanticFieldKey({ key: def.key, value: '' }) === semanticFieldKey(field)) {
+      if (
+        def.key === field.key ||
+        semanticFieldKey({ key: def.key, value: '' }) === semanticFieldKey(field)
+      ) {
         byDefinitionId.set(def.id, field);
         break;
       }
@@ -131,19 +132,4 @@ export function mergeCatalogFieldsForDocument(
   }
 
   return merged;
-}
-
-export function catalogDefinitionIdForKey(
-  key: string,
-  catalog: readonly RecognizedFieldDefinitionDto[]
-): string | null {
-  return definitionIdForFieldKey(
-    key,
-    {
-      definitionIdByCatalogKey: new Map(catalog.map((d) => [d.key, d.id])),
-      definitionIdBySemantic: new Map(
-        catalog.map((d) => [semanticFieldKey({ key: d.key, value: '' }), d.id])
-      ),
-    }
-  );
 }

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { sizeCeilingRules } from '@docuvate/eslint-config';
 import { createReactTypeScriptConfig } from '@docuvate/eslint-config/react';
 
 const tsconfigRootDir = path.dirname(fileURLToPath(import.meta.url));
@@ -11,6 +12,15 @@ export default [
     tsconfigRootDir,
     ignores: ['dist/**', 'coverage/**', 'public/**', 'scripts/**', 'eslint.config.mjs'],
   }),
+  {
+    // Ratchet at today's worst offenders (DocumentLayoutWorkspace, lib/api.ts, PdfViewer).
+    rules: sizeCeilingRules({
+      complexity: 94,
+      maxLines: 1245,
+      maxLinesPerFunction: 936,
+      maxParams: 10,
+    }),
+  },
   {
     files: ['src/lib/api.ts'],
     rules: {

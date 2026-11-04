@@ -11,7 +11,7 @@ export type ConnectorCapabilityRole = 'source' | 'sink';
 
 export type ConnectorAuthStrategyKind = 'oauth2' | 'bearer' | 'basic' | 'api_key' | 'custom';
 
-export type ConnectorAuthFieldType = 'text' | 'password' | 'url' | 'email';
+type ConnectorAuthFieldType = 'text' | 'password' | 'url' | 'email';
 
 export interface ConnectorAuthFieldDescriptor {
   key: string;

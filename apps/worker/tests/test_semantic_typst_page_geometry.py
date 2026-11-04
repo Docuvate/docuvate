@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 import io
+from collections.abc import Callable
 
 import pytest
-from pypdf import PdfReader
+from pypdf import PageObject, PdfReader
 
 from docuvate_worker.infrastructure.layout.extract import extract_layout_pdf_bytes
 from docuvate_worker.infrastructure.layout.pixel_compare import compile_typst_to_pdf_bytes
@@ -18,7 +19,7 @@ from tests.synthetic_layout_pdfs import (
 )
 
 
-def _page_size_pt(page) -> tuple[float, float]:
+def _page_size_pt(page: PageObject) -> tuple[float, float]:
     box = page.mediabox
     return float(box.width), float(box.height)
 
@@ -33,7 +34,7 @@ def _page_size_pt(page) -> tuple[float, float]:
     ],
 )
 def test_semantic_typst_pdf_page_sizes_match_source(
-    factory,
+    factory: Callable[[], bytes],
     fixture_id: str,
 ) -> None:
     source_pdf = factory()

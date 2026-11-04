@@ -24,7 +24,7 @@ const FIELD_TYPES: { value: CustomFieldType; labelKey: string }[] = [
   { value: 'currency', labelKey: 'recognizedFields.typeCurrency' },
 ];
 
-export interface RecognizedFieldRowFormProps {
+interface RecognizedFieldRowFormProps {
   row: RecognizedFieldDraft;
   tags: TagDto[];
   gateDefaults: RecognizedFieldGateDraft;
@@ -81,14 +81,18 @@ export function RecognizedFieldRowForm({
           <Input
             value={row.label}
             placeholder={t('recognizedFields.fieldLabelPlaceholder')}
-            onChange={(e) => { updateLabel(e.target.value); }}
+            onChange={(e) => {
+              updateLabel(e.target.value);
+            }}
           />
         </label>
         <label className="recognized-field-form-label">
           {t('recognizedFields.fieldType')}
           <Select
             value={row.fieldType}
-            onChange={(value) => { patch({ fieldType: parseCustomFieldType(value) }); }}
+            onChange={(value) => {
+              patch({ fieldType: parseCustomFieldType(value) });
+            }}
             options={FIELD_TYPES.map((type) => ({
               value: type.value,
               label: t(type.labelKey),
@@ -107,7 +111,9 @@ export function RecognizedFieldRowForm({
             { value: 'always', label: t('recognizedFields.ruleModeAlways') },
             { value: 'labels', label: t('recognizedFields.ruleModeLabels') },
           ]}
-          onChange={(next) => { setRuleMode(next); }}
+          onChange={(next) => {
+            setRuleMode(next);
+          }}
         />
 
         {mode === 'labels' ? (
@@ -124,7 +130,9 @@ export function RecognizedFieldRowForm({
                         <input
                           type="checkbox"
                           checked={row.gateLabelIds.includes(tag.id)}
-                          onChange={(e) => { toggleGateLabel(tag.id, e.target.checked); }}
+                          onChange={(e) => {
+                            toggleGateLabel(tag.id, e.target.checked);
+                          }}
                         />
                         <span>{tag.name}</span>
                       </label>
@@ -143,7 +151,9 @@ export function RecognizedFieldRowForm({
                       type="radio"
                       name={`gate-match-${row.localId}`}
                       checked={row.gateLabelMatch === 'any'}
-                      onChange={() => { patch({ gateLabelMatch: 'any' }); }}
+                      onChange={() => {
+                        patch({ gateLabelMatch: 'any' });
+                      }}
                     />
                     {t('recognizedFields.gateMatchAny')}
                   </label>
@@ -152,7 +162,9 @@ export function RecognizedFieldRowForm({
                       type="radio"
                       name={`gate-match-${row.localId}`}
                       checked={row.gateLabelMatch === 'all'}
-                      onChange={() => { patch({ gateLabelMatch: 'all' }); }}
+                      onChange={() => {
+                        patch({ gateLabelMatch: 'all' });
+                      }}
                     />
                     {t('recognizedFields.gateMatchAll')}
                   </label>
@@ -168,7 +180,9 @@ export function RecognizedFieldRowForm({
                 value={row.minLabelConfidence}
                 labelId={`recognized-field-safety-${row.localId}`}
                 ariaLabel={t('recognizedFields.gateSafetyAria')}
-                onChange={(minLabelConfidence) => { patch({ minLabelConfidence }); }}
+                onChange={(minLabelConfidence) => {
+                  patch({ minLabelConfidence });
+                }}
               />
             </div>
           </div>
@@ -179,7 +193,9 @@ export function RecognizedFieldRowForm({
         <input
           type="checkbox"
           checked={row.showInFilter}
-          onChange={(e) => { patch({ showInFilter: e.target.checked }); }}
+          onChange={(e) => {
+            patch({ showInFilter: e.target.checked });
+          }}
         />
         <span>{t('recognizedFields.showInFilter')}</span>
       </label>

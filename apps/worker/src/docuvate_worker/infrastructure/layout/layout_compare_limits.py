@@ -56,7 +56,7 @@ def validate_metrics_page_batch(page_numbers: list[int], doc: LayoutIrDocument) 
         raise LayoutCompareError(CompareErrorCode.PAGE_OUT_OF_RANGE)
     if len(page_numbers) > MAX_METRICS_BATCH:
         raise LayoutCompareError(CompareErrorCode.TOO_MANY_PAGES)
-    unique = sorted({p for p in page_numbers})
+    unique = sorted(set(page_numbers))
     for page_number in unique:
         validate_page_number(doc, page_number)
     return unique

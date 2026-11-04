@@ -4,7 +4,7 @@ const DEFAULT_NUM_CTX = 2048;
 const DEFAULT_NUM_PREDICT = 256;
 const DEFAULT_KEEP_ALIVE = '30m';
 
-export function ollamaNumCtx(): number {
+function ollamaNumCtx(): number {
   const raw = process.env['OLLAMA_NUM_CTX'];
   if (!raw) {
     return DEFAULT_NUM_CTX;
@@ -13,7 +13,7 @@ export function ollamaNumCtx(): number {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : DEFAULT_NUM_CTX;
 }
 
-export function ollamaNumPredict(): number {
+function ollamaNumPredict(): number {
   const raw = process.env['OLLAMA_NUM_PREDICT'];
   if (!raw) {
     return DEFAULT_NUM_PREDICT;
@@ -22,7 +22,7 @@ export function ollamaNumPredict(): number {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : DEFAULT_NUM_PREDICT;
 }
 
-export function ollamaKeepAlive(): string {
+function ollamaKeepAlive(): string {
   const raw = process.env['OLLAMA_KEEP_ALIVE'];
   const trimmed = raw?.trim();
   return trimmed && trimmed.length > 0 ? trimmed : DEFAULT_KEEP_ALIVE;

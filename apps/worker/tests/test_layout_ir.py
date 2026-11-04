@@ -4,12 +4,15 @@ from docuvate_worker.infrastructure.layout.anchors import anchor_layout_to_extra
 from docuvate_worker.infrastructure.layout.build import build_layout_ir
 from docuvate_worker.infrastructure.layout.from_blocks import layout_ir_from_extraction_blocks
 from docuvate_worker.infrastructure.layout.render_typst import layout_ir_to_typst
+from tests.synthetic_layout_pdfs import delivery_note_table_pdf
 
 
 def test_layout_ir_from_blocks_serializes_version() -> None:
     blocks = [
         ExtractionBlock(page=1, x=0.1, y=0.1, width=0.2, height=0.02, text="Hello", block_index=0),
-        ExtractionBlock(page=1, x=0.32, y=0.1, width=0.15, height=0.02, text="world", block_index=1),
+        ExtractionBlock(
+            page=1, x=0.32, y=0.1, width=0.15, height=0.02, text="world", block_index=1
+        ),
     ]
     doc = layout_ir_from_extraction_blocks(blocks)
     assert doc is not None
@@ -35,7 +38,9 @@ def test_anchor_layout_maps_block_index() -> None:
 
 def test_typst_renderer_includes_text() -> None:
     blocks = [
-        ExtractionBlock(page=1, x=0.1, y=0.1, width=0.5, height=0.05, text="Invoice", block_index=0),
+        ExtractionBlock(
+            page=1, x=0.1, y=0.1, width=0.5, height=0.05, text="Invoice", block_index=0
+        ),
     ]
     doc = layout_ir_from_extraction_blocks(blocks)
     assert doc is not None
@@ -45,8 +50,6 @@ def test_typst_renderer_includes_text() -> None:
 
 
 def test_build_layout_ir_from_fixture_pdf() -> None:
-    from tests.synthetic_layout_pdfs import delivery_note_table_pdf
-
     content = delivery_note_table_pdf()
     blocks = [
         ExtractionBlock(page=1, x=0.1, y=0.1, width=0.2, height=0.02, text="x", block_index=0),

@@ -5,7 +5,7 @@ import { Queue, Worker } from 'bullmq';
 import type IORedis from 'ioredis';
 import type pg from 'pg';
 
-import { isRecord, parseString } from '../../../shared/infrastructure/database/row-parse.js';
+import { isRecord, parseString } from '../../../shared/domain/row-parse.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 import { enqueueBullJobWithRetry } from '../../../shared/infrastructure/queue/bullmq-enqueue-retry.js';
 import {

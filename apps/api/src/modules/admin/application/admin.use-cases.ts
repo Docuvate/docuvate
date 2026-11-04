@@ -5,7 +5,7 @@ import type pg from 'pg';
 
 import type { AuthorizationSubject } from '../../../shared/domain/authorization.js';
 import { ForbiddenError, ValidationError } from '../../../shared/domain/errors.js';
-import { subjectIsInstanceAdministrator } from '../../../shared/infrastructure/auth/user-authorization-subject.js';
+import { subjectIsInstanceAdministrator } from '../../../shared/domain/user-authorization-subject.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 import { assertInstallationInviteRoleAllowed } from '../../auth/domain/installation-authorization.js';
 import {
@@ -28,7 +28,7 @@ import {
 } from '../domain/user-invitation.types.js';
 import { deliverUserInvitation } from './send-user-invitation.js';
 
-export interface AdminAccessDto {
+interface AdminAccessDto {
   isAdministrator: boolean;
   role: InstanceRole;
   roleDescriptions: { role: InstanceRole; summaryKey: string }[];

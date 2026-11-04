@@ -85,7 +85,7 @@ export class ListSftpIngressEventsUseCase {
   }
 }
 
-export interface CreateSftpIngressAccountResult {
+interface CreateSftpIngressAccountResult {
   account: SftpIngressAccountEntity;
   passwordPlain: string | null;
   server: ReturnType<typeof readServerInfo>;

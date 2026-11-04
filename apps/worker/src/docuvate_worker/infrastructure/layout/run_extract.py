@@ -234,9 +234,7 @@ def extract_text_runs(
     if page_width <= 0 or page_height <= 0:
         return [], start_block_index
     chars = [
-        c
-        for c in (page.chars or [])
-        if c.get("text") is not None and str(c.get("text")) != ""
+        c for c in (page.chars or []) if c.get("text") is not None and str(c.get("text")) != ""
     ]
     upright_chars = [c for c in chars if _matrix_is_upright(c.get("matrix"))]
     rotated_chars = [c for c in chars if not _matrix_is_upright(c.get("matrix"))]

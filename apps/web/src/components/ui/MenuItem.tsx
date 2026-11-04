@@ -3,7 +3,7 @@
 import type { LucideIcon } from 'lucide-react';
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
 
-export interface MenuItemProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+interface MenuItemProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   label: ReactNode;
   icon?: LucideIcon;
   shortcut?: string;

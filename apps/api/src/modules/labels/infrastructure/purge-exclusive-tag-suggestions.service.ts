@@ -3,7 +3,7 @@
 import { Inject, Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
 import type pg from 'pg';
 
-import { parseString, requireRecord } from '../../../shared/infrastructure/database/row-parse.js';
+import { parseString, requireRecord } from '../../../shared/domain/row-parse.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 import { tagIdConflictsWithAssigned } from '../domain/filter-exclusive-tag-suggestions.js';
 import { PgLabelCoOccurrenceRepository } from './pg-label-co-occurrence.repository.js';
@@ -124,9 +124,7 @@ export class PurgeExclusiveTagSuggestionsService implements OnApplicationBootstr
       `SELECT tag_id::text AS tag_id FROM document_tags WHERE document_id = $1`,
       [documentId]
     );
-    const assignedIds = new Set(
-      assigned.rows.map((row) => parseString(requireRecord(row).tag_id))
-    );
+    const assignedIds = new Set(assigned.rows.map((row) => parseString(requireRecord(row).tag_id)));
     const suggestions = await this.pool.query<{ tag_id: string }>(
       `SELECT tag_id::text AS tag_id FROM document_tag_suggestions
        WHERE document_id = $1 AND dismissed = false`,

@@ -4,7 +4,7 @@ import type { PasswordResetMailerPort } from '../../domain/password-reset-mailer
 import { LoggingPasswordResetMailerAdapter } from './logging-password-reset-mailer.adapter.js';
 import { SmtpPasswordResetMailerAdapter } from './smtp-password-reset-mailer.adapter.js';
 
-export type PasswordResetMailMode = 'auto' | 'log' | 'smtp';
+type PasswordResetMailMode = 'auto' | 'log' | 'smtp';
 
 export function resolvePasswordResetMailMode(
   env: NodeJS.ProcessEnv = process.env

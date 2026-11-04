@@ -13,7 +13,7 @@ export const LABEL_COLOR_PRESET_IDS = [
   'orange',
 ] as const;
 
-export type LabelColorPresetId = (typeof LABEL_COLOR_PRESET_IDS)[number];
+type LabelColorPresetId = (typeof LABEL_COLOR_PRESET_IDS)[number];
 
 const PRESET_HEX: Record<LabelColorPresetId, string> = {
   slate: tokens.colorLight.colorLabelPresetSlate,

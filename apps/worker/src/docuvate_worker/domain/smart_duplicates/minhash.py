@@ -10,8 +10,8 @@ _MERSENNE: Final = (1 << 61) - 1
 
 
 def _hash64(data: bytes, seed: int) -> int:
-    digest = hashlib.blake2b(data, digest_size=8, person=seed.to_bytes(2, 'little')).digest()
-    return int.from_bytes(digest, 'little') & _MERSENNE
+    digest = hashlib.blake2b(data, digest_size=8, person=seed.to_bytes(2, "little")).digest()
+    return int.from_bytes(digest, "little") & _MERSENNE
 
 
 def minhash_signature(items: set[str], *, num_perm: int) -> tuple[int, ...]:
@@ -21,7 +21,7 @@ def minhash_signature(items: set[str], *, num_perm: int) -> tuple[int, ...]:
     for seed in range(num_perm):
         minimum = _MERSENNE
         for item in items:
-            hashed = _hash64(item.encode('utf-8'), seed)
+            hashed = _hash64(item.encode("utf-8"), seed)
             minimum = min(minimum, hashed)
         signature.append(minimum)
     return tuple(signature)

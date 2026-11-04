@@ -10,7 +10,7 @@ import {
 import { validateDocumentChatCloudBaseUrlSync } from '../../infrastructure/chat/document-chat-cloud-url-security.js';
 
 @ValidatorConstraint({ name: 'DocumentChatCloudBaseUrl', async: false })
-export class DocumentChatCloudBaseUrlConstraint implements ValidatorConstraintInterface {
+class DocumentChatCloudBaseUrlConstraint implements ValidatorConstraintInterface {
   validate(value: unknown): boolean {
     if (value === null || value === undefined) {
       return true;
@@ -26,7 +26,9 @@ export class DocumentChatCloudBaseUrlConstraint implements ValidatorConstraintIn
   }
 }
 
-export function IsDocumentChatCloudBaseUrl(validationOptions?: ValidationOptions): PropertyDecorator {
+export function IsDocumentChatCloudBaseUrl(
+  validationOptions?: ValidationOptions
+): PropertyDecorator {
   return (object, propertyName) => {
     registerDecorator({
       target: object.constructor,

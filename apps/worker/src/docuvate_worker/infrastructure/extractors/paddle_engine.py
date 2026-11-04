@@ -155,9 +155,7 @@ def ocr_image_bytes(content: bytes) -> tuple[str, list[ExtractionBlock]]:
 def ocr_pdf_bytes(
     content: bytes, *, max_pages: int | None = None
 ) -> tuple[str, list[ExtractionBlock]]:
-    logger.info(
-        "Rasterizing PDF for PaddleOCR one page at a time; large files may take a while."
-    )
+    logger.info("Rasterizing PDF for PaddleOCR one page at a time; large files may take a while.")
     page_texts: list[str] = []
     all_blocks: list[ExtractionBlock] = []
     block_index = 0

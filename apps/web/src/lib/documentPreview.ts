@@ -8,7 +8,3 @@ export function bufferToDataUrl(data: ArrayBuffer, mimeType: string): string {
   }
   return `data:${mimeType};base64,${btoa(binary)}`;
 }
-
-export async function blobToArrayBuffer(blob: Blob): Promise<ArrayBuffer> {
-  return blob.arrayBuffer();
-}

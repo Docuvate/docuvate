@@ -52,26 +52,3 @@ export function resolveFieldFilters(
   }
   return resolved;
 }
-
-/** Suggest field keys/labels while typing `abs…:` in the palette. */
-export function suggestFieldNames(
-  partial: string,
-  defs: SearchFieldDefinitionRow[],
-  limit = 8
-): string[] {
-  const probe = foldKey(partial);
-  if (!probe) return [];
-  const scored = defs
-    .map((def) => {
-      const keyFold = foldKey(def.key);
-      const labelFold = foldKey(def.label);
-      let score = 0;
-      if (keyFold.startsWith(probe) || labelFold.startsWith(probe)) score += 3;
-      if (keyFold.includes(probe) || labelFold.includes(probe)) score += 1;
-      return { key: def.key, score };
-    })
-    .filter((r) => r.score > 0)
-    .sort((a, b) => b.score - a.score)
-    .slice(0, limit);
-  return scored.map((r) => r.key);
-}

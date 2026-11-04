@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { MethodNotAllowedException } from '@nestjs/common';
 
-export interface TagSuggestionsMethodReply {
+interface TagSuggestionsMethodReply {
   header(name: string, value: string): unknown;
 }
 

@@ -15,7 +15,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 
-export class LayoutTokenDto {
+class LayoutTokenDto {
   @ApiProperty()
   blockIndex!: number;
 
@@ -49,7 +49,7 @@ export class DocumentLayoutTokensResponseDto {
   tokens!: LayoutTokenDto[];
 }
 
-export class DocumentRegionFieldDto {
+class DocumentRegionFieldDto {
   @ApiProperty()
   fieldKey!: string;
 
@@ -57,7 +57,7 @@ export class DocumentRegionFieldDto {
   valueOverride!: string | null;
 }
 
-export class DocumentRegionTableRuleDto {
+class DocumentRegionTableRuleDto {
   @ApiProperty({ enum: ['row', 'col'] })
   axis!: 'row' | 'col';
 
@@ -68,7 +68,7 @@ export class DocumentRegionTableRuleDto {
   pos!: number;
 }
 
-export class DocumentRegionTableMergeDto {
+class DocumentRegionTableMergeDto {
   @ApiProperty()
   row0!: number;
 
@@ -82,7 +82,7 @@ export class DocumentRegionTableMergeDto {
   colSpan!: number;
 }
 
-export class DocumentRegionTableCellDto {
+class DocumentRegionTableCellDto {
   @ApiProperty()
   @Type(() => Number)
   @IsInt()
@@ -100,7 +100,7 @@ export class DocumentRegionTableCellDto {
   text!: string;
 }
 
-export class DocumentRegionTableDto {
+class DocumentRegionTableDto {
   @ApiProperty({ enum: ['line_items', 'key_value', 'other'] })
   tableType!: 'line_items' | 'key_value' | 'other';
 
@@ -120,7 +120,7 @@ export class DocumentRegionTableDto {
   cells!: DocumentRegionTableCellDto[];
 }
 
-export class DocumentRegionDto {
+class DocumentRegionDto {
   @ApiProperty()
   id!: string;
 
@@ -259,7 +259,7 @@ export class ApplyFieldCorrectionRequestDto {
   beforeRegionId?: string | null;
 }
 
-export class DocumentCorrectionDto {
+class DocumentCorrectionDto {
   @ApiProperty()
   id!: string;
 

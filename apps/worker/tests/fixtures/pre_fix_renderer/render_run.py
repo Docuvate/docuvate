@@ -5,6 +5,7 @@ from __future__ import annotations
 import math
 
 from docuvate_worker.domain.layout_ir import FontWeight, LayoutIrBlock, LayoutIrPage
+
 from .font_map import is_italic_fontname, typst_font_and_scale
 from .text_fit import horizontal_scale_factor
 
@@ -12,7 +13,7 @@ from .text_fit import horizontal_scale_factor
 def _is_rotated_block(block: LayoutIrBlock) -> bool:
     if block.matrix is None:
         return block.rotation_deg is not None and abs(block.rotation_deg) >= 5.0
-    a, b, _, _d, _, _ = block.matrix
+    _a, b, _, _d, _, _ = block.matrix
     if abs(b) >= 0.05 or abs(block.matrix[2]) >= 0.05:
         return True
     return block.rotation_deg is not None and abs(block.rotation_deg) >= 5.0

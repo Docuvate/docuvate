@@ -3,7 +3,7 @@
 import type { ReactNode } from 'react';
 import { useId } from 'react';
 
-export interface FormFieldProps {
+interface FormFieldProps {
   label: string;
   help?: string;
   error?: string;
@@ -28,12 +28,18 @@ export function FormField({
   const hintVisible = hintText.length > 0;
 
   return (
-    <div className={`form-field${error ? ' form-field-error' : ''}${className ? ` ${className}` : ''}`.trim()}>
+    <div
+      className={`form-field${error ? ' form-field-error' : ''}${className ? ` ${className}` : ''}`.trim()}
+    >
       <label className="form-field-label" htmlFor={fieldId}>
         {label}
       </label>
       <div className="form-field-control">{children}</div>
-      <p className="form-field-hint" role={error ? 'alert' : undefined} aria-live={error ? 'polite' : undefined}>
+      <p
+        className="form-field-hint"
+        role={error ? 'alert' : undefined}
+        aria-live={error ? 'polite' : undefined}
+      >
         {hintVisible ? hintText : '\u00a0'}
       </p>
     </div>

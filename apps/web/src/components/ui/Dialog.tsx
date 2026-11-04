@@ -1,18 +1,13 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { X } from 'lucide-react';
-import {
-  type ReactNode,
-  type RefObject,
-  useEffect,
-  useRef,
-} from 'react';
+import { type ReactNode, type RefObject, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useDialogFocusTrap } from '../../lib/useDialogFocusTrap';
 import { IconButton } from './IconButton';
 
-export interface DialogProps {
+interface DialogProps {
   open: boolean;
   children: ReactNode;
   className?: string;
@@ -67,7 +62,7 @@ export function Dialog({
   );
 }
 
-export interface DialogHeaderProps {
+interface DialogHeaderProps {
   title: ReactNode;
   titleId: string;
   description?: ReactNode;
@@ -115,19 +110,47 @@ export function DialogHeader({
   );
 }
 
-export function DialogBody({ children, className = '' }: { children: ReactNode; className?: string }) {
+export function DialogBody({
+  children,
+  className = '',
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
   return <div className={`dv-dialog-body${className ? ` ${className}` : ''}`}>{children}</div>;
 }
 
-export function DialogFooter({ children, className = '' }: { children: ReactNode; className?: string }) {
-  return <footer className={`dv-dialog-footer${className ? ` ${className}` : ''}`}>{children}</footer>;
+export function DialogFooter({
+  children,
+  className = '',
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <footer className={`dv-dialog-footer${className ? ` ${className}` : ''}`}>{children}</footer>
+  );
 }
 
-export function DialogFormGrid({ children, className = '' }: { children: ReactNode; className?: string }) {
+export function DialogFormGrid({
+  children,
+  className = '',
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
   return <div className={`dv-dialog-form-grid${className ? ` ${className}` : ''}`}>{children}</div>;
 }
 
 /** Full-width row inside {@link DialogFormGrid}. */
-export function DialogFieldSpan({ children, className = '' }: { children: ReactNode; className?: string }) {
-  return <div className={`dv-dialog-field-span${className ? ` ${className}` : ''}`}>{children}</div>;
+export function DialogFieldSpan({
+  children,
+  className = '',
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={`dv-dialog-field-span${className ? ` ${className}` : ''}`}>{children}</div>
+  );
 }

@@ -20,7 +20,7 @@ export function stubPgPool(overrides: {
   return pool;
 }
 
-export function createStubPoolClient(handlers: {
+function createStubPoolClient(handlers: {
   query: pg.PoolClient['query'];
   release?: pg.PoolClient['release'];
 }): pg.PoolClient {
@@ -36,9 +36,10 @@ export function stubPgPoolWithClient(client: pg.PoolClient): pg.Pool {
   return pool;
 }
 
-export function createStubPoolClientWithQueryMock(
-  queryMock: ReturnType<typeof vi.fn>
-): { client: pg.PoolClient; queryMock: ReturnType<typeof vi.fn> } {
+export function createStubPoolClientWithQueryMock(queryMock: ReturnType<typeof vi.fn>): {
+  client: pg.PoolClient;
+  queryMock: ReturnType<typeof vi.fn>;
+} {
   const client = createStubPoolClient({
     query: queryMock as pg.PoolClient['query'],
     release: vi.fn(),

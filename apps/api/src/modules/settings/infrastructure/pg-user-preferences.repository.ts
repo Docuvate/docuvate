@@ -7,15 +7,9 @@ import type {
   UserPreferencesEntity,
   UserPreferencesRepository,
 } from '../../../shared/domain/ports.js';
-import {
-  parseOptionalString,
-  requireRecord,
-} from '../../../shared/infrastructure/database/row-parse.js';
+import { parseOptionalString, requireRecord } from '../../../shared/domain/row-parse.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
-import {
-  decryptChatCloudApiKey,
-  encryptChatCloudApiKey,
-} from './chat-cloud-api-key.codec.js';
+import { decryptChatCloudApiKey, encryptChatCloudApiKey } from './chat-cloud-api-key.codec.js';
 
 const preferencesLogger = new Logger('PgUserPreferencesRepository');
 

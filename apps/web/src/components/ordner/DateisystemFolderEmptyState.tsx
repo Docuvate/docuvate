@@ -1,13 +1,13 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Upload } from 'lucide-react';
-import { type DragEvent,useCallback, useState } from 'react';
+import { type DragEvent, useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { isFileDrag } from '../../lib/documentUploadConstants';
 import { Button } from '../ui/Button';
-import { useDocumentUploadContext } from '../upload/DocumentUploadProvider';
-import { UploadFileTrigger } from '../upload/UploadFileTrigger';
+import { useDocumentUploadContext } from '../upload';
+import { UploadFileTrigger } from '../upload';
 import { DateisystemNewFolderButton } from './DateisystemNewFolderButton';
 
 interface DateisystemFolderEmptyStateProps {
@@ -55,7 +55,9 @@ export function DateisystemFolderEmptyState({
         e.preventDefault();
         setDragActive(true);
       }}
-      onDragLeave={() => { setDragActive(false); }}
+      onDragLeave={() => {
+        setDragActive(false);
+      }}
       onDrop={onDrop}
     >
       <Upload className="dateisystem-empty-icon" size={32} strokeWidth={1.5} aria-hidden />

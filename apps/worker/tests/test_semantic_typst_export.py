@@ -13,6 +13,7 @@ from docuvate_worker.infrastructure.layout.layout_reconstruction_assess import (
     assess_layout_reconstruction,
 )
 from docuvate_worker.infrastructure.layout.pixel_compare import compile_typst_to_pdf_bytes
+from docuvate_worker.infrastructure.layout.render_typst import layout_ir_to_typst
 from docuvate_worker.infrastructure.layout.render_typst_semantic import (
     layout_ir_to_typst_semantic,
     semantic_export_leftover_line_count,
@@ -30,6 +31,13 @@ from tests.semantic_typst_ground_truth import (
     expected_reading_order_tokens,
     interleaved_column_major_tokens,
 )
+from tests.synthetic_layout_pdfs import (
+    delivery_note_table_pdf,
+    form_disclosure_pdf,
+    layout_regression_payroll_pdf,
+    three_column_words_pdf,
+    two_column_words_pdf,
+)
 
 _SAMPLE_OUT = Path(__file__).resolve().parent / "fixtures" / "sample_semantic_payroll.typ"
 _COVERAGE_FLOOR = 0.99
@@ -45,6 +53,8 @@ _ORDER_FLOOR_BY_CATEGORY: dict[str, float] = {
     "embedded_fonts": 0.88,
 }
 _DEFAULT_ORDER_FLOOR = 0.92
+
+
 def _order_floor(fixture: LayoutSsimFixture) -> float:
     return _ORDER_FLOOR_BY_CATEGORY.get(fixture.category, _DEFAULT_ORDER_FLOOR)
 
@@ -132,8 +142,6 @@ def test_multi_column_order_metric_rejects_interleaved(fixture_id: str) -> None:
 
 
 def test_two_column_words_reading_order_in_source() -> None:
-    from tests.synthetic_layout_pdfs import two_column_words_pdf
-
     doc = extract_layout_pdf_bytes(two_column_words_pdf())
     assert doc is not None
     src = layout_ir_to_typst_semantic(doc)
@@ -145,8 +153,6 @@ def test_two_column_words_reading_order_in_source() -> None:
 
 
 def test_three_column_words_reading_order_in_source() -> None:
-    from tests.synthetic_layout_pdfs import three_column_words_pdf
-
     doc = extract_layout_pdf_bytes(three_column_words_pdf())
     assert doc is not None
     src = layout_ir_to_typst_semantic(doc)
@@ -156,13 +162,12 @@ def test_three_column_words_reading_order_in_source() -> None:
 
 
 def test_delivery_note_table_grid_in_typst() -> None:
-    from tests.synthetic_layout_pdfs import delivery_note_table_pdf
-
     doc = extract_layout_pdf_bytes(delivery_note_table_pdf())
     assert doc is not None
     src = layout_ir_to_typst_semantic(doc)
     assert "table.header" in src
-    assert "Item" in src and "Widget A" in src
+    assert "Item" in src
+    assert "Widget A" in src
     assert "Qty" in src
     body_after_table = src.split("table.header", 1)[-1]
     assert "Widget A" in body_after_table
@@ -177,15 +182,14 @@ def test_semantic_export_flags_unsupported_script(fixture_id: str) -> None:
     fixture = next(f for f in LAYOUT_SSIM_FIXTURES if f.fixture_id == fixture_id)
     pdf = fixture.factory()
     doc = extract_layout_pdf_bytes(pdf)
-    fidelity = assess_layout_reconstruction(doc, pdf, fixture_id=fixture_id, category=fixture.category)
+    fidelity = assess_layout_reconstruction(
+        doc, pdf, fixture_id=fixture_id, category=fixture.category
+    )
     assert fidelity.reconstruction_reliable is False
     assert fidelity.unreliable_reason == fixture.expected_unreliable_reason
 
 
 def test_exakt_mode_unchanged() -> None:
-    from tests.synthetic_layout_pdfs import form_disclosure_pdf
-    from docuvate_worker.infrastructure.layout.render_typst import layout_ir_to_typst
-
     doc = extract_layout_pdf_bytes(form_disclosure_pdf())
     assert doc is not None
     assert layout_ir_to_typst_for_mode(doc, TypstExportMode.EXAKT) == layout_ir_to_typst(doc)
@@ -193,9 +197,7 @@ def test_exakt_mode_unchanged() -> None:
 
 def test_semantic_typst_report(capsys: pytest.CaptureFixture[str]) -> None:
     lines = ["Semantic Typst export report (PDF multiset + PDF order vs ground truth)", ""]
-    lines.append(
-        f"{'fixture':<36} {'compile':<8} {'coverage':<10} {'order':<10} {'leftover':<8}"
-    )
+    lines.append(f"{'fixture':<36} {'compile':<8} {'coverage':<10} {'order':<10} {'leftover':<8}")
     for fixture in LAYOUT_SSIM_FIXTURES:
         pdf = fixture.factory()
         doc = extract_layout_pdf_bytes(pdf)
@@ -218,15 +220,14 @@ def test_semantic_typst_report(capsys: pytest.CaptureFixture[str]) -> None:
         except (OSError, subprocess.CalledProcessError, RuntimeError):
             compile_ok = "fail"
         lines.append(
-            f"{fixture.fixture_id:<36} {compile_ok:<8} {coverage_s:<10} {order_s:<10} {leftover_s:<8}"
+            f"{fixture.fixture_id:<36} {compile_ok:<8} "
+            f"{coverage_s:<10} {order_s:<10} {leftover_s:<8}"
         )
     print("\n".join(lines))
     assert lines
 
 
 def test_sample_semantic_payroll_fixture_matches_committed_file() -> None:
-    from tests.synthetic_layout_pdfs import layout_regression_payroll_pdf
-
     doc = extract_layout_pdf_bytes(layout_regression_payroll_pdf())
     assert doc is not None
     sample = layout_ir_to_typst_semantic(doc)

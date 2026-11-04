@@ -9,14 +9,7 @@ import type {
   UserSettingsDto,
 } from '@docuvate/contracts';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  IsArray,
-  IsBoolean,
-  IsIn,
-  IsOptional,
-  IsString,
-  ValidateIf,
-} from 'class-validator';
+import { IsArray, IsBoolean, IsIn, IsOptional, IsString, ValidateIf } from 'class-validator';
 
 import { THEME_PREFERENCES, UI_LOCALES } from '../../../modules/settings/domain/ui-preferences.js';
 import { IsDocumentChatCloudBaseUrl } from '../validators/document-chat-cloud-base-url.validator.js';
@@ -95,7 +88,7 @@ export class ExtractionEngineListResponseDto {
   engines!: ExtractionEngineInfo[];
 }
 
-export class DocumentChatProvidersCatalogMetaDto {
+class DocumentChatProvidersCatalogMetaDto {
   @ApiProperty({ type: String, nullable: true })
   ollamaModel!: string | null;
 
@@ -106,7 +99,7 @@ export class DocumentChatProvidersCatalogMetaDto {
   runsOnCpu!: boolean;
 }
 
-export class DocumentChatProviderInfoDto implements DocumentChatProviderInfo {
+class DocumentChatProviderInfoDto implements DocumentChatProviderInfo {
   @ApiProperty()
   id!: string;
 
@@ -120,7 +113,7 @@ export class DocumentChatProviderInfoDto implements DocumentChatProviderInfo {
   available!: boolean;
 }
 
-export class DocumentChatUnavailableBackendInfoDto implements DocumentChatUnavailableBackendInfo {
+class DocumentChatUnavailableBackendInfoDto implements DocumentChatUnavailableBackendInfo {
   @ApiProperty()
   id!: string;
 

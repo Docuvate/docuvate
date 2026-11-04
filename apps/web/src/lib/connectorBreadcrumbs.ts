@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { ConnectorPluginId } from '@docuvate/contracts';
 
-import type { BreadcrumbItem } from '../components/ui/Breadcrumb';
+import type { BreadcrumbItem } from '../components/ui/breadcrumbItem';
 import { routes } from './routes';
 
 export function buildConnectorBreadcrumbItems(input: {

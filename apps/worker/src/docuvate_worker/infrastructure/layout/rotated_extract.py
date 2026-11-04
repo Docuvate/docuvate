@@ -94,9 +94,7 @@ def _cluster_rotated_chars(chars: list[dict]) -> list[list[dict]]:
         for baseline_chars in baselines.values():
             remaining = list(baseline_chars)
             while remaining:
-                seed = min(
-                    remaining, key=lambda c: (_char_center(c)[1], _char_center(c)[0])
-                )
+                seed = min(remaining, key=lambda c: (_char_center(c)[1], _char_center(c)[0]))
                 remaining.remove(seed)
                 clusters.append(_expand_char_cluster(seed, remaining))
     return clusters
@@ -113,11 +111,7 @@ def extract_rotated_blocks(
     if page_width <= 0 or page_height <= 0:
         return [], start_block_index
 
-    rotated_chars = [
-        c
-        for c in page.chars or []
-        if not _matrix_is_upright(c.get("matrix"))
-    ]
+    rotated_chars = [c for c in page.chars or [] if not _matrix_is_upright(c.get("matrix"))]
     blocks: list[LayoutIrBlock] = []
     block_index = start_block_index
     for cluster in _cluster_rotated_chars(rotated_chars):

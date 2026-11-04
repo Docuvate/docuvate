@@ -5,7 +5,7 @@ import type { ReactNode } from 'react';
 
 import { ErrorCodeDetails } from './ErrorCodeDetails';
 
-export interface ErrorScreenLayoutProps {
+interface ErrorScreenLayoutProps {
   icon?: LucideIcon;
   hero?: ReactNode;
   title: string;

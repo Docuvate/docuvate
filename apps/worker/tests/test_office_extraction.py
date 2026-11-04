@@ -18,10 +18,22 @@ from tests.synthetic_office_fixtures import (
 @pytest.mark.parametrize(
     ("factory", "mime_type", "needle"),
     [
-        (synthetic_docx_bytes, "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "199,00"),
-        (synthetic_xlsx_bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Widget"),
+        (
+            synthetic_docx_bytes,
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "199,00",
+        ),
+        (
+            synthetic_xlsx_bytes,
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "Widget",
+        ),
         (synthetic_csv_bytes, "text/csv", "Widget"),
-        (synthetic_pptx_bytes, "application/vnd.openxmlformats-officedocument.presentationml.presentation", "Synthetic Slide"),
+        (
+            synthetic_pptx_bytes,
+            "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+            "Synthetic Slide",
+        ),
         (synthetic_md_bytes, "text/markdown", "Markdown"),
     ],
 )

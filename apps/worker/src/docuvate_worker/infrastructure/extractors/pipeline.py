@@ -67,9 +67,7 @@ def extract_with_cpu_pipeline(
             representation=integrated.representation.data,
         ),
         document_representation=state_representation(integrated),
-        extracted_facts=integrated.exact_fact_index.data.facts
-        if build_exact_fact_index
-        else None,
+        extracted_facts=integrated.exact_fact_index.data.facts if build_exact_fact_index else None,
     )
 
 

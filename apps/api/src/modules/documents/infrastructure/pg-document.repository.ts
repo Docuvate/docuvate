@@ -18,7 +18,7 @@ import {
   parseString,
   recordFromUnknown,
   requireRecord,
-} from '../../../shared/infrastructure/database/row-parse.js';
+} from '../../../shared/domain/row-parse.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 import { hashLayoutIrHex } from '../../document-regions/domain/ir-hash.js';
 import { layoutTokensFromIr } from '../../document-regions/domain/layout-tokens.js';
@@ -48,10 +48,7 @@ import {
   cursorPayloadFromDocumentRow,
   resolvedDocumentListSort,
 } from './document-list-keyset.js';
-import {
-  isPaginatedDocumentListQuery,
-  paginatedFetchLimit,
-} from './document-list-pagination.js';
+import { isPaginatedDocumentListQuery, paginatedFetchLimit } from './document-list-pagination.js';
 import { mapDocumentRow, parseLayoutIrPagesJson, parseTagsJson } from './document-row.mapper.js';
 import { textFromExtractionBlocks } from './extraction-text.util.js';
 
@@ -85,6 +82,36 @@ const LIST_SELECT = `
   LEFT JOIN document_tags dtag ON dtag.document_id = d.id
   LEFT JOIN tags t ON t.id = dtag.tag_id
 `;
+
+interface LayoutIrPageSize {
+  page: number;
+  widthPt: number;
+  heightPt: number;
+}
+
+/** Upsert one size row per distinct page (first occurrence wins), in page order. */
+async function upsertLayoutIrPages(
+  client: pg.PoolClient,
+  documentId: string,
+  pages: readonly LayoutIrPageSize[]
+): Promise<void> {
+  const byPage = new Map<number, LayoutIrPageSize>();
+  for (const page of pages) {
+    if (!byPage.has(page.page)) {
+      byPage.set(page.page, page);
+    }
+  }
+  for (const page of [...byPage.values()].sort((a, b) => a.page - b.page)) {
+    await client.query(
+      `INSERT INTO document_layout_ir_pages (document_id, page, width_pt, height_pt)
+       VALUES ($1, $2, $3, $4)
+       ON CONFLICT (document_id, page) DO UPDATE SET
+         width_pt = EXCLUDED.width_pt,
+         height_pt = EXCLUDED.height_pt`,
+      [documentId, page.page, page.widthPt, page.heightPt]
+    );
+  }
+}
 
 @Injectable()
 export class PgDocumentRepository implements DocumentRepository {
@@ -157,10 +184,9 @@ export class PgDocumentRepository implements DocumentRepository {
   }
 
   async findById(id: string): Promise<DocumentEntity | null> {
-    const result = await this.pool.query(
-      `${LIST_SELECT} WHERE d.id = $1 GROUP BY d.id, f.id`,
-      [id]
-    );
+    const result = await this.pool.query(`${LIST_SELECT} WHERE d.id = $1 GROUP BY d.id, f.id`, [
+      id,
+    ]);
     if (!result.rows[0]) return null;
     const entity = await this.mapListRow(requireRecord(result.rows[0]));
     const pages = await this.loadLayoutIrPageSummaries(id);
@@ -226,12 +252,7 @@ export class PgDocumentRepository implements DocumentRepository {
     if (paginated && filters.cursor) {
       const cursor = decodeDocumentListCursor(filters.cursor);
       assertCursorMatchesQuery(cursor, sortField, order);
-      const keyset = buildDocumentListKeysetSql(
-        sortField,
-        order,
-        cursor,
-        queryParams.length + 1
-      );
+      const keyset = buildDocumentListKeysetSql(sortField, order, cursor, queryParams.length + 1);
       whereWithKeyset = `${whereSql} AND ${keyset.conditionSql}`;
       queryParams.push(...keyset.params);
     }
@@ -281,12 +302,14 @@ export class PgDocumentRepository implements DocumentRepository {
       const lastRow = requireRecord(rows[rows.length - 1]);
       const cursorRow = {
         id: parseString(lastRow.id),
-        updated_at: lastRow.updated_at instanceof Date
-          ? lastRow.updated_at
-          : new Date(parseString(lastRow.updated_at)),
-        created_at: lastRow.created_at instanceof Date
-          ? lastRow.created_at
-          : new Date(parseString(lastRow.created_at)),
+        updated_at:
+          lastRow.updated_at instanceof Date
+            ? lastRow.updated_at
+            : new Date(parseString(lastRow.updated_at)),
+        created_at:
+          lastRow.created_at instanceof Date
+            ? lastRow.created_at
+            : new Date(parseString(lastRow.created_at)),
         title: parseString(lastRow.title),
         document_date:
           lastRow.document_date == null
@@ -465,25 +488,7 @@ export class PgDocumentRepository implements DocumentRepository {
             layoutTokensFromIr(result.layoutIr),
             irSha256Hex
           );
-          const pages = parseLayoutIrPagesJson(result.layoutIr.pages);
-          if (pages.length > 0) {
-            const byPage = new Map<number, { page: number; widthPt: number; heightPt: number }>();
-            for (const page of pages) {
-              if (!byPage.has(page.page)) {
-                byPage.set(page.page, page);
-              }
-            }
-            for (const page of [...byPage.values()].sort((a, b) => a.page - b.page)) {
-              await client.query(
-                `INSERT INTO document_layout_ir_pages (document_id, page, width_pt, height_pt)
-                 VALUES ($1, $2, $3, $4)
-                 ON CONFLICT (document_id, page) DO UPDATE SET
-                   width_pt = EXCLUDED.width_pt,
-                   height_pt = EXCLUDED.height_pt`,
-                [id, page.page, page.widthPt, page.heightPt]
-              );
-            }
-          }
+          await upsertLayoutIrPages(client, id, parseLayoutIrPagesJson(result.layoutIr.pages));
         }
       }
       if (userId) {

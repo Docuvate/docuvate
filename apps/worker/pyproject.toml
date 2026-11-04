@@ -48,6 +48,7 @@ dev = [
   "fpdf2>=2.8.0",
   "pyright==1.1.396",
   "mypy==1.14.1",
+  "import-linter==2.5",
   "scipy-stubs>=1.11.0,<1.18",
   "types-psutil>=6.0.0",
 ]
@@ -72,8 +73,25 @@ torch-backend = "cpu"
 line-length = 100
 target-version = "py312"
 
+[tool.ruff.format]
+# Byte-pinned by the API extractor-version fingerprints (SHA-256 of the file); reformatting would
+# bump the extractor version and trigger re-extraction. Reformat together with a logic change.
+exclude = [
+  "src/docuvate_worker/infrastructure/ml/value_types/field_suggestions.py",
+  "src/docuvate_worker/infrastructure/extractors/label_custom_fields.py",
+]
+
 [tool.ruff.lint]
-select = ["E", "F", "W", "I", "B", "UP", "SIM", "N", "RUF", "ANN", "PL", "PT"]
+select = [
+  "E", "F", "W", "I", "B", "UP", "SIM", "C4", "PT", "RUF", "PL", "N", "S", "ANN", "TRY", "PERF",
+  "C90",
+]
+# TRY003: message-in-constructor style is not worth a custom exception class per raise site.
+# TRY004: switching ValueError -> TypeError changes the public exception contract (behavior change).
+# S603: flags every subprocess call with non-literal argv; argv lists here are never shell-interpreted.
+ignore = ["TRY003", "TRY004", "S603"]
+# Greek / math glyphs are intentional multilingual + formula test data (typst escaping, fpdf fixtures).
+allowed-confusables = ["α", "γ", "ι", "−", "×", "𝑎", "𝑓"]
 
 [tool.ruff.lint.flake8-annotations]
 allow-star-arg-any = true
@@ -87,9 +105,15 @@ suppress-dummy-args = true
 "src/docuvate_worker/infrastructure/office/**/*.py" = ["PLR2004", "PLR0911", "E501"]
 "src/docuvate_worker/infrastructure/extractors/document_images.py" = ["PLR2004", "E501"]
 "src/docuvate_worker/infrastructure/extractors/markdown.py" = ["PLR2004", "E501", "SIM103"]
-"tests/scripts/**/*.py" = ["E402"]
+# Tests: plain asserts, literal expectations, fake secrets, seeded RNG and CLI tools are the point.
+"tests/**/*.py" = ["S101", "PLR2004", "S105", "S106", "S311", "S607"]
+# Local benchmark/soak scripts talk to localhost HTTP endpoints by design.
+"tests/scripts/**/*.py" = ["E402", "S310"]
 "tests/test_extract_concurrency.py" = ["ANN001", "PLR2004"]
 "tests/test_model_residency.py" = ["ANN001"]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 22
 
 [tool.ruff.lint.pylint]
 max-args = 12
@@ -167,6 +191,8 @@ exclude = ["src/docuvate_worker/infrastructure/layout"]
 stubPath = "typings"
 
 [tool.pytest.ini_options]
+# Repo root on sys.path so tests can import the shared `bench` package without sys.path hacks.
+pythonpath = ["../.."]
 markers = [
   "slow: long-running memory or model integration tests",
 ]

@@ -6,7 +6,7 @@ import { isRecord } from './apiErrors';
 
 const LINE_Y_TOLERANCE = 0.014;
 
-export function normalizeExtractionBlock(raw: unknown): ExtractionBlock | null {
+function normalizeExtractionBlock(raw: unknown): ExtractionBlock | null {
   if (!isRecord(raw)) return null;
   const page = Number(raw.page);
   const x = Number(raw.x);
@@ -61,20 +61,6 @@ export function groupBlocksIntoLines(blocks: ExtractionBlock[], page: number): E
     }
   }
   return lines;
-}
-
-export function mergeBlockHighlight(blocks: ExtractionBlock[]): ExtractionBlock {
-  const first = blocks[0];
-  const x2 = blocks.map((b) => b.x + b.width);
-  const y2 = blocks.map((b) => b.y + b.height);
-  return {
-    page: first.page,
-    x: Math.min(...blocks.map((b) => b.x)),
-    y: Math.min(...blocks.map((b) => b.y)),
-    width: Math.max(...x2) - Math.min(...blocks.map((b) => b.x)),
-    height: Math.max(...y2) - Math.min(...blocks.map((b) => b.y)),
-    text: blocks.map((b) => b.text).join(' '),
-  };
 }
 
 export function textFromExtractionBlocks(blocks: ExtractionBlock[]): string {

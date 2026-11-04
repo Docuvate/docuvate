@@ -8,6 +8,7 @@ import {
   predictLabelHybrid,
   trainLabelHybridModel,
 } from './label-hybrid-auto-match.js';
+import type { LabelHybridDocumentRow } from './label-hybrid-document-row.js';
 import type { LabelHybridTrainRuntimeOptions } from './label-hybrid-training-config.js';
 import {
   capLabelHybridTrainingExamples,
@@ -15,15 +16,7 @@ import {
   trimLabelHybridDocumentRows,
 } from './label-hybrid-training-corpus.js';
 
-
-export interface LabelHybridDocumentRow {
-  documentId: string;
-  embedding: number[];
-  nonInboxTagIds: string[];
-  text: string;
-}
-
-export function buildLabelHybridTrainingExamples(
+function buildLabelHybridTrainingExamples(
   rows: readonly LabelHybridDocumentRow[]
 ): LabelHybridTrainingExample[] {
   const out: LabelHybridTrainingExample[] = [];
@@ -61,47 +54,4 @@ export function classifyWithLabelHybrid(
   row: Pick<LabelHybridDocumentRow, 'embedding' | 'text'>
 ): LabelHybridPrediction {
   return predictLabelHybrid(model, row.embedding, row.text);
-}
-
-export function evaluateLabelHybridLeaveOneOut(
-  rows: readonly LabelHybridDocumentRow[]
-): { precision: number; coverage: number; evaluated: number } {
-  const labeledDocIds = [
-    ...new Set(
-      rows.filter((row) => row.nonInboxTagIds.length > 0).map((row) => row.documentId)
-    ),
-  ];
-  if (labeledDocIds.length === 0) {
-    return { precision: 1, coverage: 0, evaluated: 0 };
-  }
-  let predicted = 0;
-  let correct = 0;
-  let evaluated = 0;
-  for (const heldDocId of labeledDocIds) {
-    const heldRows = rows.filter((row) => row.documentId === heldDocId);
-    const trainRows = rows.filter((row) => row.documentId !== heldDocId);
-    const model = trainUserLabelHybridModel(trainRows);
-    if (!model) {
-      continue;
-    }
-    for (const held of heldRows) {
-      if (held.nonInboxTagIds.length === 0 || held.embedding.length === 0) {
-        continue;
-      }
-      for (const expectedTagId of held.nonInboxTagIds) {
-        evaluated += 1;
-        const result = predictLabelHybrid(model, held.embedding, held.text);
-        if (result.tagId == null) {
-          continue;
-        }
-        predicted += 1;
-        if (result.tagId === expectedTagId) {
-          correct += 1;
-        }
-      }
-    }
-  }
-  const precision = predicted > 0 ? correct / predicted : 1;
-  const coverage = evaluated > 0 ? predicted / evaluated : 0;
-  return { precision, coverage, evaluated };
 }

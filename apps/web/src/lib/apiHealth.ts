@@ -1,16 +1,16 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { apiBaseUrl } from './api';
+import { apiBaseUrl } from './apiBaseUrl';
 
-export interface ApiHealthFailure {
+interface ApiHealthFailure {
   ok: false;
   status?: number;
   errorType: string;
 }
 
-export type ApiHealthProbeResult = { ok: true } | ApiHealthFailure;
+type ApiHealthProbeResult = { ok: true } | ApiHealthFailure;
 
-export function apiHealthCheckUrl(): string {
+function apiHealthCheckUrl(): string {
   if (typeof window !== 'undefined' && window.location.origin) {
     return `${window.location.origin}/api/health`;
   }
