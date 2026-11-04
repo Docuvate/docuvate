@@ -1,7 +1,7 @@
 # Docuvate CE – Use cases (MVP)
 
 Scope of the MVP: **ingest → OCR → labeling → named-entity / field recognition → confirm/correct → find → export**.
-The chat (document chat and global library chat) is **removed** from the MVP (PR “remove chat”).
+The chat (document chat and global library chat) is **removed** from the MVP (#70).
 
 Status legend (audited on the reference Mac deploy, 2026-11-04, aggregates only):
 **works** · **partial** · **broken** · **unverified** (not probed live).
@@ -19,7 +19,7 @@ Status legend (audited on the reference Mac deploy, 2026-11-04, aggregates only)
 | 9 | Labels | works |
 | 10 | Label suggestions | partial |
 | 11 | Label merge suggestions | broken → fixed by #69 |
-| 12 | Recognized fields (definitions) | partial (UX, PR 4) |
+| 12 | Recognized fields (definitions) | partial (UX) → #71 |
 | 13 | Field values / suggestions (NER) | partial (low recall) |
 | 14 | Confirm / correct with region selection | broken → fixed by #68 |
 | 15 | Tables | partial (depends on #68) |
@@ -97,14 +97,14 @@ Status legend (audited on the reference Mac deploy, 2026-11-04, aggregates only)
 
 - **Expected:** define a field (name, type, which labels it applies to); edit later.
 - **Status:** partial (UX).
-- **UX note / PR 4:** the right column “Vorgaben für neue Felder” on `/structure/recognized-fields` is removed. The label-rule selection moves into the create/edit field dialog as a searchable multi-select combobox with chips, built from existing design-system components. One place to configure a field.
+- **UX note / #71:** the right column “Vorgaben für neue Felder” on `/structure/recognized-fields` is removed. The label-rule selection moves into the create/edit field dialog as a searchable multi-select combobox with chips, built from existing design-system components. One place to configure a field.
 
 ## 13. Field values / suggestions (NER)
 
 - **Expected:** for each document the configured fields (e.g. date, sender, gross amount) are extracted with value, confidence and source position; low confidence is shown as “to review”, not “confirmed”.
 - **Verify:** field attempts per document: share `found` vs `not_found`/`below_threshold`.
 - **Status:** partial. Built-in suggestion fields (vendor, date, amount) are present on most documents, but user-defined global fields are found on very few documents (e.g. date on ~6 %, sender on ~2 %); `not_found` + `below_threshold` dominate the attempts. This is the main quality gap for “good NER”.
-- **Bug:** a field value with **no** confidence renders as “Bestätigt” (`(confidence ?? 1) >= 0.85`).
+- **Bug:** a field value with **no** confidence renders as “Bestätigt” (`(confidence ?? 1) >= 0.85`) → fixed in #71 (user confirmations/corrections store confidence 1 and stay “Bestätigt”).
 
 ## 14. Confirm / correct with region selection
 
@@ -120,7 +120,7 @@ Status legend (audited on the reference Mac deploy, 2026-11-04, aggregates only)
 ## 16. Settings
 
 - **Expected:** user preferences and extraction engine options are read and saved.
-- **Status:** works; chat/LLM settings are removed by the chat-removal PR.
+- **Status:** works; chat/LLM settings are removed by #70.
 
 ## 17. Export
 
@@ -138,9 +138,9 @@ Prioritized. P0 = must ship before release.
 
 1. **P0 – Region selection broken** (14, 15) → #68.
 2. **P0 – Wrong label merge suggestions** (11) → #69.
-3. **P0 – Chat in the product although out of MVP scope** → chat-removal PR.
-4. **P0 – Recognized-fields configuration UX** (12) → PR 4.
-5. **P0 – Unconfirmed values shown as “Bestätigt”** (13) when confidence is missing.
+3. **P0 – Chat in the product although out of MVP scope** → #70.
+4. **P0 – Recognized-fields configuration UX** (12) → #71.
+5. **P0 – Unconfirmed values shown as “Bestätigt”** (13) when confidence is missing → #71.
 6. **P1 – Global search ranking** (8): exact title / rare word must rank first (lexical boost or lower embedding weight in RRF).
 7. **P1 – Low NER recall for user-defined fields** (13): needs extractor work and an evaluation set; not a small fix.
 8. **P1 – Failed ingest not retried** (2): automatic retry with backoff on transient worker fetch errors, and a bulk “retry failed” action.
