@@ -17,6 +17,10 @@ describe('classifyConnectivityFailure', () => {
     expect(classifyConnectivityFailure({ status: 503 })).toBe('server-error');
   });
 
+  it('treats rate limiting as a transient server error so session boot retries', () => {
+    expect(classifyConnectivityFailure({ status: 429 })).toBe('server-error');
+  });
+
   it('returns null for auth failures', () => {
     expect(classifyConnectivityFailure({ status: 401 })).toBeNull();
   });
