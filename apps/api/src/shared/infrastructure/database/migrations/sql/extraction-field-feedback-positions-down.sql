@@ -1,7 +1,7 @@
 DROP TABLE IF EXISTS public.extraction_field_feedback_position_tokens;
 DROP TABLE IF EXISTS public.extraction_field_feedback_positions;
 
--- Keep confirmed values recoverable through the legacy hash column before dropping the text.
+-- Keep confirmed values recoverable through value_sha256 before dropping the text.
 UPDATE public.extraction_field_confirmations
 SET value_sha256 = digest(convert_to(value_text, 'UTF8'), 'sha256')
 WHERE value_text IS NOT NULL AND value_sha256 IS NULL;

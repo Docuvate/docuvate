@@ -15,7 +15,7 @@ import {
   newIsolationUserId,
 } from './pg-test-isolation.js';
 
-const LEGACY_KEYS = [
+const STORED_KEYS = [
   'suggestion:absender',
   'global:Absender',
   'label:0b6b1d1e-8a4f-4c3e-9d2a-5b7c8e9f0a1b:rechnungs_nummer',
@@ -67,7 +67,7 @@ describe('ExtractionFieldFeedbackPositions migration (Testcontainers Postgres)',
       [documentId, userId]
     );
     await run('down');
-    for (const key of LEGACY_KEYS) {
+    for (const key of STORED_KEYS) {
       await pool.query(
         `INSERT INTO extraction_field_corrections (user_id, document_id, field_key, old_value, new_value)
          VALUES ($1, $2, $3, 'a', 'b')`,
@@ -89,7 +89,7 @@ describe('ExtractionFieldFeedbackPositions migration (Testcontainers Postgres)',
        WHERE c.user_id = $1 ORDER BY c.field_key`,
       [userId]
     );
-    expect(rows.rows).toHaveLength(LEGACY_KEYS.length);
+    expect(rows.rows).toHaveLength(STORED_KEYS.length);
     for (const row of rows.rows) {
       expect(row.name).toBe(canonicalFieldName(row.field_key));
     }
@@ -115,6 +115,6 @@ describe('ExtractionFieldFeedbackPositions migration (Testcontainers Postgres)',
       `SELECT COUNT(*)::int AS c FROM extraction_field_corrections WHERE user_id = $1`,
       [userId]
     );
-    expect(kept.rows[0]?.c).toBe(LEGACY_KEYS.length);
+    expect(kept.rows[0]?.c).toBe(STORED_KEYS.length);
   });
 });
