@@ -16,6 +16,7 @@ import { TagsEntity } from './tags.entity.js';
 import { UserEntity } from './user.entity.js';
 
 @Index('extraction_field_corrections_user_created_idx', ['createdAt', 'userId'], {})
+@Index('extraction_field_corrections_field_name_idx', ['fieldNameId'], {})
 @Index('extraction_field_corrections_document_idx', ['createdAt', 'documentId'], {})
 @Entity('extraction_field_corrections', { schema: 'public' })
 export class ExtractionFieldCorrectionsEntity {
@@ -30,6 +31,9 @@ export class ExtractionFieldCorrectionsEntity {
 
   @Column('text', { name: 'field_key' })
   fieldKey: string;
+
+  @Column('uuid', { name: 'field_name_id' })
+  fieldNameId: string;
 
   @Column('text', { name: 'old_value', default: () => "''" })
   oldValue: string;

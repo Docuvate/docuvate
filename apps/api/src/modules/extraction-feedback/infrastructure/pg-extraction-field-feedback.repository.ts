@@ -64,6 +64,7 @@ const UPSERT_FIELD_NAME_SQL = `
 
 const FEEDBACK_KINDS = ['confirmation', 'correction'] as const;
 
+/** Keyset on millisecond precision: the cursor round-trips through a JS Date. */
 const TRAINING_EXAMPLES_SQL = `
   WITH examples AS (
     SELECT 'confirmation' AS kind, c.id AS feedback_id, c.document_id, n.name AS field_name,
@@ -90,8 +91,9 @@ const TRAINING_EXAMPLES_SQL = `
     ) AS position_block_indexes
   FROM examples e
   LEFT JOIN extraction_field_feedback_positions p ON p.id = e.position_id
-  WHERE $2::timestamptz IS NULL OR (e.recorded_at, e.feedback_id) > ($2::timestamptz, $3::uuid)
-  ORDER BY e.recorded_at, e.feedback_id
+  WHERE $2::timestamptz IS NULL
+    OR (date_trunc('milliseconds', e.recorded_at), e.feedback_id) > ($2::timestamptz, $3::uuid)
+  ORDER BY date_trunc('milliseconds', e.recorded_at), e.feedback_id
   LIMIT $4
 `;
 
