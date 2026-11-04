@@ -71,12 +71,13 @@ async function waitForTableCorrectionSave(page: Page): Promise<void> {
       new URL(response.url()).pathname.endsWith('/regions'),
     { timeout: 30_000 }
   );
-  await page.waitForResponse(
+  const saved = await page.waitForResponse(
     (response) =>
       response.request().method() === 'POST' &&
       new URL(response.url()).pathname.endsWith('/table-corrections'),
     { timeout: 30_000 }
   );
+  expect(saved.ok(), `table correction save failed status=${saved.status()}`).toBeTruthy();
   await refreshed;
 }
 
@@ -135,9 +136,10 @@ test.describe('document table regions', () => {
     // A pending save re-selects its table when it resolves, which would reopen the narrow sheet
     // after the viewport loop closed it; wait for the request instead of the (already shown) toast.
     await Promise.all([waitForTableCorrectionSave(page), firstCell.blur()]);
-    await expect(page.getByText(/Tabellenkorrektur gespeichert|Table correction saved/i)).toBeVisible({
-      timeout: 30_000,
-    });
+    // The mark-as-table toast may still be on screen; the newest toast belongs to the cell save.
+    await expect(
+      page.getByText(/Tabellenkorrektur gespeichert|Table correction saved/i).last()
+    ).toBeVisible({ timeout: 30_000 });
     await assertNoHorizontalOverflow(page);
 
     for (const viewport of VIEWPORTS) {
