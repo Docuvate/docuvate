@@ -15,6 +15,8 @@ import { DatabaseMigrationReadinessService } from './modules/health/database-mig
 import { resolveRequestId } from './shared/infrastructure/http/request-id.js';
 import { API_VERSION_PREFIX } from './shared/presentation/api-version.js';
 import { ProblemDetailsExceptionFilter } from './shared/presentation/problem-exception.filter.js';
+import { requestValidationExceptionFactory } from './shared/presentation/request-validation.exception.js';
+
 async function bootstrap(): Promise<void> {
   const { isOpenApiHeadlessMode } =
     await import('./shared/infrastructure/database/typeorm-options.js');
@@ -89,6 +91,7 @@ async function bootstrap(): Promise<void> {
       whitelist: true,
       transform: true,
       forbidNonWhitelisted: true,
+      exceptionFactory: requestValidationExceptionFactory,
     })
   );
 

@@ -15,6 +15,12 @@ export interface ProblemDetails {
   code: ErrorCode | string;
   detail: string;
   requestId: string;
+  /**
+   * Request properties that failed validation, as dotted paths (for example
+   * `fieldKey` or `extractionFields.0.tagId`). Present only for
+   * `VALIDATION_FAILED`; never contains submitted values.
+   */
+  invalidParams?: string[];
 }
 
 /** Pre-RFC9457 envelope; prefer {@link ProblemDetails} for new integrations. */
