@@ -76,6 +76,7 @@ export function RecognizedFieldRowForm({
           <Input
             value={row.label}
             placeholder={t('recognizedFields.fieldLabelPlaceholder')}
+            aria-label={t('recognizedFields.fieldLabel')}
             onChange={(e) => {
               updateLabel(e.target.value);
             }}
@@ -181,6 +182,7 @@ export function RecognizedFieldRowForm({
         <input
           type="checkbox"
           checked={row.showInFilter}
+          aria-label={t('recognizedFields.showInFilter')}
           onChange={(e) => {
             patch({ showInFilter: e.target.checked });
           }}

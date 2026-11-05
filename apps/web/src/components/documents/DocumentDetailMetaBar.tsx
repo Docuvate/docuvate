@@ -19,6 +19,11 @@ interface DocumentDetailMetaBarProps {
   onShowTechnicalDetailsChange?: (open: boolean) => void;
 }
 
+export const DOCUMENT_DETAIL_TAB_PANEL_IDS: Record<DetailTab, string> = {
+  details: 'document-detail-panel-details',
+  labels: 'document-detail-panel-labels',
+};
+
 export function DocumentDetailTabStrip({
   activeTab,
   labelCount,
@@ -39,9 +44,11 @@ export function DocumentDetailTabStrip({
       {tabs.map(([tab, label]) => (
         <button
           key={tab}
+          id={`document-detail-tab-${tab}`}
           type="button"
           role="tab"
           aria-selected={activeTab === tab}
+          aria-controls={DOCUMENT_DETAIL_TAB_PANEL_IDS[tab]}
           className={`detail-tab${activeTab === tab ? ' active' : ''}`}
           onClick={() => { onTabChange(activeTab === tab ? null : tab); }}
         >
