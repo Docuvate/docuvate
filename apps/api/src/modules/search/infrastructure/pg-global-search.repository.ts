@@ -25,8 +25,14 @@ import {
   searchTextVariants,
   tokenizeSearchQuery,
 } from '../domain/normalize-search-text.js';
-import { type RankedItem, reciprocalRankFusion } from '../domain/reciprocal-rank-fusion.js';
+import {
+  idsByFusedScore,
+  type RankedItem,
+  reciprocalRankFusion,
+  type WeightedRankedList,
+} from '../domain/reciprocal-rank-fusion.js';
 import type { ResolvedFieldFilter } from '../domain/resolve-field-definition.js';
+import { SEARCH_LEG_WEIGHTS } from '../domain/search-leg-weights.js';
 import type { SearchFieldDefinitionRow } from '../domain/resolve-field-definition.js';
 import type { TextChunkSpan } from '../domain/split-text-chunks-with-spans.js';
 import {
@@ -58,6 +64,7 @@ import {
 
 const TRGM_THRESHOLD = 0.45;
 const WORD_SIM_THRESHOLD = 0.45;
+const EXACT_TITLE_PHRASE_MIN_LENGTH = 3;
 const VOCABULARY_STRICT_TRGM_THRESHOLD = 0.45;
 const PER_GROUP_LIMIT = 8;
 const EMBED_CANDIDATE_CAP = Number(process.env['GLOBAL_SEARCH_EMBED_CANDIDATE_CAP'] ?? 24);
@@ -301,6 +308,43 @@ export class PgGlobalSearchRepository {
     };
   }
 
+  /**
+   * Title legs: documents whose title equals the query, and documents whose title contains it as
+   * a phrase, each ranked by title similarity. Case-insensitive; uses the same variants as the
+   * other legs (e.g. German folding). Phrase containment needs a query of at least
+   * EXACT_TITLE_PHRASE_MIN_LENGTH characters so that one or two letters do not boost every title
+   * that contains them.
+   */
+  private async rankDocumentsByTitleMatch(
+    userId: string,
+    q: string
+  ): Promise<{ exact: RankedItem[]; phrase: RankedItem[] }> {
+    const variants = searchTextVariants(q).map((variant) => variant.toLowerCase());
+    const primaryVariant = variants[0];
+    if (primaryVariant === undefined) {
+      return { exact: [], phrase: [] };
+    }
+    const { rows } = await this.pool.query<{ id: string; is_exact: boolean }>(
+      `SELECT d.id, lower(btrim(d.title)) = ANY($2::text[]) AS is_exact
+       FROM documents d
+       WHERE d.user_id = $1
+         AND EXISTS (
+           SELECT 1
+           FROM unnest($2::text[]) AS v(term)
+           WHERE lower(btrim(d.title)) = v.term
+              OR (char_length(v.term) >= $4 AND strpos(lower(d.title), v.term) > 0)
+         )
+       ORDER BY is_exact DESC, similarity(lower(d.title), $3::text) DESC, d.updated_at DESC
+       LIMIT 20`,
+      [userId, variants, primaryVariant, EXACT_TITLE_PHRASE_MIN_LENGTH]
+    );
+    const exact = rows.filter((row) => row.is_exact);
+    const phrase = rows.filter((row) => !row.is_exact);
+    const toRanks = (list: { id: string }[]): RankedItem[] =>
+      list.map((row, i) => ({ id: row.id, rank: i + 1 }));
+    return { exact: toRanks(exact), phrase: toRanks(phrase) };
+  }
+
   private async searchDocuments(
     userId: string,
     q: string,
@@ -337,6 +381,8 @@ export class PgGlobalSearchRepository {
       fieldFilters,
       lexicalTrgmProbes
     );
+
+    const titleMatchPromise = this.rankDocumentsByTitleMatch(userId, q);
 
     const ftsPromise = tsQuery
       ? this.pool.query<{ id: string }>(
@@ -393,7 +439,12 @@ export class PgGlobalSearchRepository {
           )
         : Promise.resolve({ rows: EMPTY_CHUNK_ROWS });
 
-    const [fts, trgm, chunks] = await Promise.all([ftsPromise, trgmPromise, chunkFtsPromise]);
+    const [titleMatch, fts, trgm, chunks] = await Promise.all([
+      titleMatchPromise,
+      ftsPromise,
+      trgmPromise,
+      chunkFtsPromise,
+    ]);
     throwIfAborted(abortSignal);
 
     const ftsList: RankedItem[] = fts.rows.map((row, i) => ({ id: row.id, rank: i + 1 }));
@@ -408,11 +459,21 @@ export class PgGlobalSearchRepository {
       }
     }
 
-    let fused = reciprocalRankFusion([ftsList, trgmTitleList, chunkFtsList, fieldLeg.ranks]);
+    const lexicalLegs: WeightedRankedList[] = [
+      { items: titleMatch.exact, weight: SEARCH_LEG_WEIGHTS.exactTitle },
+      { items: titleMatch.phrase, weight: SEARCH_LEG_WEIGHTS.titlePhrase },
+      { items: ftsList, weight: SEARCH_LEG_WEIGHTS.fullText },
+      { items: trgmTitleList, weight: SEARCH_LEG_WEIGHTS.titleTrigram },
+      { items: chunkFtsList, weight: SEARCH_LEG_WEIGHTS.chunkFullText },
+      { items: fieldLeg.ranks, weight: SEARCH_LEG_WEIGHTS.fieldValue },
+    ];
+    let fused = reciprocalRankFusion(lexicalLegs);
 
     if (
       fieldFilters.length === 0 &&
       queryRelevance < MIN_QUERY_RELEVANCE_SCORE &&
+      titleMatch.exact.length === 0 &&
+      titleMatch.phrase.length === 0 &&
       ftsList.length === 0 &&
       trgmTitleList.length === 0 &&
       chunkFtsList.length === 0 &&
@@ -422,26 +483,24 @@ export class PgGlobalSearchRepository {
     }
 
     if (queryVector && queryVector.length > 0) {
-      const lexicalCandidates = [...fused.entries()]
-        .sort((a, b) => b[1] - a[1])
-        .map(([id]) => id)
-        .slice(0, embedFullScan ? 10_000 : EMBED_CANDIDATE_CAP);
+      const lexicalCandidates = idsByFusedScore(fused).slice(
+        0,
+        embedFullScan ? 10_000 : EMBED_CANDIDATE_CAP
+      );
       const vectorRanks = await this.rankDocumentsByEmbedding(
         userId,
         queryVector,
         30,
         embedFullScan ? null : lexicalCandidates
       );
-      const lexicalOrdered = [...fused.entries()]
-        .sort((a, b) => b[1] - a[1])
-        .map(([id], i) => ({ id, rank: i + 1 }));
-      fused = reciprocalRankFusion([lexicalOrdered, vectorRanks]);
+      // The embedding is one more leg next to the lexical legs, not a peer of all of them.
+      fused = reciprocalRankFusion([
+        ...lexicalLegs,
+        { items: vectorRanks, weight: SEARCH_LEG_WEIGHTS.embedding },
+      ]);
     }
 
-    const rankedIds = [...fused.entries()]
-      .sort((a, b) => b[1] - a[1])
-      .map(([id]) => id)
-      .slice(0, Math.max(limit, 50));
+    const rankedIds = idsByFusedScore(fused).slice(0, Math.max(limit, 50));
 
     if (rankedIds.length === 0) {
       return { items: [], total: 0 };
