@@ -6860,6 +6860,7 @@ mark.global-search-mark {
   background: none;
   border: none;
   padding: 0;
+  min-height: 24px;
   font: inherit;
   font-weight: 600;
   cursor: pointer;
@@ -8261,8 +8262,8 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 
 .library-table-wrap {
   --library-table-date-col-min: 6.25rem;
-  --library-table-labels-col-min: 7rem;
-  --library-table-labels-col-max: 9rem;
+  --library-table-labels-col-min: 6rem;
+  --library-table-labels-col-max: 7.5rem;
   width: 100%;
   min-width: 0;
   overflow-x: auto;
@@ -8648,6 +8649,22 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   white-space: normal;
 }
 
+/* Long titles wrap (up to three lines) instead of being cut after a few words; rows are measured. */
+.library-table.library-table-virtualized td.library-col-title .cell-title-text {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.library-table.library-table-virtualized td.library-col-status .badge {
+  white-space: normal;
+  max-width: 100%;
+  line-height: 1.2;
+}
+
 .library-table.library-table-virtualized th.library-col-status,
 .library-table.library-table-virtualized td.library-col-status,
 .library-table.library-table-virtualized th.library-col-meta,
@@ -8971,12 +8988,25 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   padding: 0 var(--dv-space-2xs);
   border-radius: var(--dv-radius-sm);
   box-sizing: border-box;
+  min-width: 24px;
+  min-height: 24px;
 }
 
 .library-row-menu-btn:hover,
 .library-row-menu-btn:focus-visible {
   color: var(--dv-color-text);
   background: var(--dv-color-bg-overlay);
+}
+
+/* Pointer-size floor (WCAG 2.5.8); the mobile rule below raises it to the touch minimum. */
+.library-check-touch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  min-height: 24px;
+  box-sizing: border-box;
+  cursor: pointer;
 }
 
 @media (max-width: 768px) {
@@ -9312,6 +9342,10 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   border-radius: 6px;
   padding: 1px 8px;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  box-sizing: border-box;
 }
 
 .stack-badge-compact {
@@ -9338,6 +9372,8 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   cursor: pointer;
   font-size: 0.85rem;
   padding: 0 var(--dv-space-2xs);
+  min-width: 24px;
+  min-height: 24px;
 }
 
 .library-row-stack-version td {
