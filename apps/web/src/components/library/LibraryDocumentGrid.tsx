@@ -107,7 +107,7 @@ export function LibraryDocumentGrid({
                   onChange={() => {
                     onToggleSelect(doc.id);
                   }}
-                  aria-label={`${doc.title} auswählen`}
+                  aria-label={t('library.selectDocument', { title: doc.title })}
                 />
               </div>
               <Link to={`/documents/${doc.id}`} className="doc-card-link">

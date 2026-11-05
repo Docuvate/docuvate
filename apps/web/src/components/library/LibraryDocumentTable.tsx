@@ -516,7 +516,7 @@ export function LibraryDocumentTable({
                               onContextMenuKeyboard(event, doc.id);
                             }
                           }}
-                          aria-label={`${doc.title} auswählen`}
+                          aria-label={t('library.selectDocument', { title: doc.title })}
                         />
                         <div className="library-doc-stack-text">
                           <div className="library-doc-stack-title">
@@ -791,7 +791,7 @@ export function LibraryDocumentTable({
                           onChange={() => {
                             onToggleSelect(doc.id);
                           }}
-                          aria-label={`${doc.title} auswählen`}
+                          aria-label={t('library.selectDocument', { title: doc.title })}
                         />
                       </td>
                       <td className="library-col-title">
