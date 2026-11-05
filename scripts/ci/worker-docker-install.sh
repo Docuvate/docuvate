@@ -38,4 +38,3 @@ python -c "from docuvate_worker.infrastructure.extractors.paddle_engine import p
 if [ "${VARIANT}" != "gpu" ]; then
   python -c "from docuvate_worker.infrastructure.fastembed_model import get_embedding_model; get_embedding_model()"
 fi
-python -c "from docuvate_worker.infrastructure.chat.rag_rerank import rerank_passages; from docuvate_worker.infrastructure.chat.rag_rerank import RagPassage; rerank_passages('ping', [RagPassage(id='1', text='ping response')], top_k=1)"

@@ -118,10 +118,6 @@ interface DocumentLayoutWorkspaceProps {
   onRequeueExtraction?: () => void;
   textEditOpen: boolean;
   onTextEditOpenChange: (open: boolean) => void;
-  documentChatAvailable?: boolean;
-  documentChatUiEnabled?: boolean;
-  documentChatLocalModelEnabled?: boolean;
-  documentChatLocalModelReady?: boolean;
   showTechnicalDetails?: boolean;
   layoutSideTab: LayoutSideTab;
   onLayoutSideTabChange: (tab: LayoutSideTab) => void;
@@ -158,10 +154,6 @@ export function DocumentLayoutWorkspace({
   onRequeueExtraction,
   textEditOpen,
   onTextEditOpenChange,
-  documentChatAvailable = false,
-  documentChatUiEnabled = true,
-  documentChatLocalModelEnabled = false,
-  documentChatLocalModelReady = false,
   showTechnicalDetails = false,
   layoutSideTab,
   onLayoutSideTabChange,
@@ -888,7 +880,6 @@ export function DocumentLayoutWorkspace({
 
       {layoutIr ? (
         <DocumentLayoutSidePanel
-          documentId={doc.id}
           layoutIr={layoutIr}
           fields={fields}
           knownFieldKeys={knownFieldKeys}
@@ -967,10 +958,6 @@ export function DocumentLayoutWorkspace({
           onSelectField={selectField}
           hideInlineFieldList={Boolean(correctionSheetViewport && selectedFieldKey)}
           hideInlineTableList={tableSheetOpen}
-          documentChatAvailable={documentChatAvailable}
-          documentChatUiEnabled={documentChatUiEnabled}
-          documentChatLocalModelEnabled={documentChatLocalModelEnabled}
-          documentChatLocalModelReady={documentChatLocalModelReady}
         />
       ) : (
         <aside className="layout-side-panel layout-side-panel-loading">

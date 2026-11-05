@@ -29,6 +29,5 @@ export function readFeatureFlagDefaultsFromEnv(): FeatureFlagsDto {
     answerAbstention: envFlagEnabled('DOCUVATE_FEATURE_ANSWER_ABSTENTION'),
     learnedValueTypes: envFlagEnabledDefaultTrue('DOCUVATE_FEATURE_LEARNED_VALUE_TYPES'),
     layoutKeyValueRoles: envFlagEnabled('DOCUVATE_FEATURE_LAYOUT_KEY_VALUE_ROLES'),
-    localChatModel: envFlagEnabled('DOCUVATE_FEATURE_LOCAL_CHAT_MODEL'),
   };
 }

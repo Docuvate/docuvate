@@ -36,25 +36,6 @@
       "training_data_summary": "Microsoft E5 contrastive pre-training on public web data; not fine-tuned on FUNSD, XFUND, or DocVQA."
     },
     {
-      "id": "bge-reranker-v2-m3-int8",
-      "display_name": "BAAI/bge-reranker-v2-m3-int8",
-      "load_keys": [
-        "BAAI/bge-reranker-v2-m3-int8",
-        "BAAI/bge-reranker-v2-m3",
-        "BAAI/bge-reranker-base",
-        "Xenova/ms-marco-MiniLM-L-6-v2",
-        "Xenova/ms-marco-MiniLM-L-12-v2"
-      ],
-      "source": "https://huggingface.co/BAAI/bge-reranker-v2-m3",
-      "revision": "default",
-      "content_sha256": null,
-      "license_spdx": "Apache-2.0",
-      "size_bytes_approx": 230686720,
-      "purpose": "Multilingual cross-encoder reranking for cited document chat RAG retrieval.",
-      "shipped_in_default_cpu_image": true,
-      "training_data_summary": "BGE reranker family; permissive-license variants only are allowlisted in worker code."
-    },
-    {
       "id": "paddle-pp-ocrv4-mobile-latin",
       "display_name": "PaddleOCR PP-OCRv4 mobile (Latin / German)",
       "load_keys": [
@@ -99,70 +80,6 @@
       "purpose": "Vocabulary-free 2D-layout NER ONNX (int8) for value candidate typing (PER/ORG/LOC/DATE/MONEY).",
       "shipped_in_default_cpu_image": true,
       "training_data_summary": "GermEval 2014 Shared Task (CC-BY-4.0) plus Docuvate synthetic layout documents."
-    },
-    {
-      "id": "ollama-qwen2.5-3b",
-      "display_name": "Qwen2.5 3B Instruct (GGUF via Ollama)",
-      "load_keys": [
-        "qwen2.5:3b"
-      ],
-      "source": "https://ollama.com/library/qwen2.5",
-      "revision": "qwen2.5:3b",
-      "content_sha256": null,
-      "license_spdx": "Apache-2.0",
-      "size_bytes_approx": 2013265920,
-      "purpose": "Optional larger local LLM when Ollama is enabled and OLLAMA_MODEL is set to qwen2.5:3b.",
-      "shipped_in_default_cpu_image": false,
-      "training_data_summary": "Alibaba Qwen2.5 instruct tuning; pulled at deploy time via Ollama, not baked into the worker image."
-    },
-    {
-      "id": "ollama-eval-candidates",
-      "display_name": "Optional Ollama chat models (memory catalog)",
-      "load_keys": [
-        "llama3.2:3b",
-        "gemma3:4b",
-        "qwen3:4b",
-        "phi4-mini:3.8b-q4_K_M",
-        "qwen2.5:7b"
-      ],
-      "source": "https://ollama.com/library",
-      "revision": "tags-vary",
-      "content_sha256": null,
-      "license_spdx": "Apache-2.0",
-      "size_bytes_approx": 3221225472,
-      "purpose": "Documented Ollama tags for compose memory guidance; not pulled unless configured.",
-      "shipped_in_default_cpu_image": false,
-      "training_data_summary": "Third-party GGUF artifacts; see each model card on ollama.com."
-    },
-    {
-      "id": "ollama-qwen2.5-1.5b",
-      "display_name": "Qwen2.5 1.5B Instruct (GGUF via Ollama)",
-      "load_keys": [
-        "qwen2.5:1.5b"
-      ],
-      "source": "https://ollama.com/library/qwen2.5",
-      "revision": "qwen2.5:1.5b",
-      "content_sha256": null,
-      "license_spdx": "Apache-2.0",
-      "size_bytes_approx": 1006632960,
-      "purpose": "Default local LLM for the Compose chat-local profile (Qwen2.5-1.5B Q4 via Ollama).",
-      "shipped_in_default_cpu_image": false,
-      "training_data_summary": "Alibaba Qwen2.5 instruct tuning; pulled at deploy time via Ollama."
-    },
-    {
-      "id": "xlm-roberta-extractive-reader",
-      "display_name": "deepset/xlm-roberta-base-squad2-distilled",
-      "load_keys": [
-        "deepset/xlm-roberta-base-squad2-distilled"
-      ],
-      "source": "https://huggingface.co/deepset/xlm-roberta-base-squad2-distilled",
-      "revision": "default",
-      "content_sha256": null,
-      "license_spdx": "MIT",
-      "size_bytes_approx": 1124073472,
-      "purpose": "Optional extractive QA reader span selection before generative chat (lazy-loaded transformers pipeline).",
-      "shipped_in_default_cpu_image": false,
-      "training_data_summary": "Distilled XLM-RoBERTa on SQuAD 2.0; not DocVQA."
     },
     {
       "id": "donut-docvqa-optional",

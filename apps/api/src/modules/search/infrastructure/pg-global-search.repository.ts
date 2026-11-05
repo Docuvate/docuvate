@@ -11,7 +11,6 @@ import {
   requireRecord,
 } from '../../../shared/domain/row-parse.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
-import type { TextChunkSpan } from '../../cited-chat/domain/split-text-chunks-with-spans.js';
 import { cosineSimilarity } from '../domain/cosine-similarity.js';
 import { expandQueryTerms, MIN_QUERY_RELEVANCE_SCORE } from '../domain/expand-query-terms.js';
 import type { GlobalSearchRepositoryResult } from '../domain/global-search.types.js';
@@ -29,6 +28,7 @@ import {
 import { type RankedItem, reciprocalRankFusion } from '../domain/reciprocal-rank-fusion.js';
 import type { ResolvedFieldFilter } from '../domain/resolve-field-definition.js';
 import type { SearchFieldDefinitionRow } from '../domain/resolve-field-definition.js';
+import type { TextChunkSpan } from '../domain/split-text-chunks-with-spans.js';
 import {
   filterChunkFtsTermsByVocabulary,
   filterLexicalTermsByVocabularyGate,

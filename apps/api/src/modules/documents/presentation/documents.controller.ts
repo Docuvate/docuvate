@@ -26,20 +26,13 @@ import {
   Session,
 } from '../../../shared/infrastructure/auth/auth.guard.js';
 import {
-  CreateDocumentChatThreadRequestDto,
   DocumentBulkRequestDto,
-  DocumentChatRequestDto,
-  DocumentChatResponseDto,
-  DocumentChatThreadListResponseDto,
-  DocumentChatThreadMessagesResponseDto,
   DuplicateStackKeepVersionRequestDto,
   DuplicateStackNotDuplicateRequestDto,
   DuplicateStackSetPrimaryRequestDto,
   ExtractionArenaRatingRequestDto,
   ExtractionCompareRequestDto,
   OkResponseDto,
-  SendDocumentChatThreadMessageRequestDto,
-  SendDocumentChatThreadMessageResponseDto,
 } from '../../../shared/presentation/dtos/common.dto.js';
 import {
   DocumentListQueryDto,
@@ -83,11 +76,8 @@ import { toTagSuggestionDto } from '../../taxonomy/presentation/taxonomy.mapper.
 import { ApplyArenaWinnerExtractionUseCase } from '../application/apply-arena-winner-extraction.use-case.js';
 import { BatchDocumentTagSuggestionsUseCase } from '../application/batch-document-tag-suggestions.use-case.js';
 import { BulkDocumentsUseCase } from '../application/bulk-documents.use-case.js';
-import { CancelDocumentChatGenerationUseCase } from '../application/cancel-document-chat-generation.use-case.js';
 import { CompareDocumentExtractionUseCase } from '../application/compare-extraction.use-case.js';
-import { CreateDocumentChatThreadUseCase } from '../application/create-document-chat-thread.use-case.js';
 import { DeleteDocumentUseCase } from '../application/delete-document.use-case.js';
-import { DocumentChatUseCase } from '../application/document-chat.use-case.js';
 import { GetDocumentUseCase } from '../application/get-document.use-case.js';
 import { GetDocumentContentUseCase } from '../application/get-document-content.use-case.js';
 import { GetDocumentExtractionImageThumbnailUseCase } from '../application/get-document-extraction-image-thumbnail.use-case.js';
@@ -98,19 +88,13 @@ import { GetDocumentLayoutHtmlUseCase } from '../application/get-document-layout
 import { GetDocumentLayoutIrUseCase } from '../application/get-document-layout-ir.use-case.js';
 import { GetDocumentLayoutTypstUseCase } from '../application/get-document-layout-typst.use-case.js';
 import { GetDocumentPreviewUseCase } from '../application/get-document-preview.use-case.js';
-import { ListDocumentChatThreadMessagesUseCase } from '../application/list-document-chat-thread-messages.use-case.js';
-import { ListDocumentChatThreadsUseCase } from '../application/list-document-chat-threads.use-case.js';
 import { ListDocumentsUseCase } from '../application/list-documents.use-case.js';
 import { MoveDocumentsUseCase } from '../application/move-documents.use-case.js';
 import { RequeueDocumentExtractionUseCase } from '../application/requeue-document-extraction.use-case.js';
-import { RetryDocumentChatMessageUseCase } from '../application/retry-document-chat-message.use-case.js';
-import { SendDocumentChatThreadMessageUseCase } from '../application/send-document-chat-thread-message.use-case.js';
-import { StreamDocumentChatMessageUseCase } from '../application/stream-document-chat-message.use-case.js';
 import { UpdateDocumentUseCase } from '../application/update-document.use-case.js';
 import { UploadDocumentUseCase } from '../application/upload-document.use-case.js';
 import { PgInstallationUserCountReader } from '../infrastructure/pg-installation-user-count.reader.js';
 import { toDocumentBulkRequest, toDocumentDto, toDocumentListResponse } from './document.mapper.js';
-import { toDocumentChatMessageRecordDto, toDocumentChatThreadDto } from './document-chat.mapper.js';
 import { parseDocumentListQuery } from './document-list-query.js';
 import { throwTagSuggestionsGetNotAllowed } from './tag-suggestions-get-not-allowed.js';
 
@@ -133,14 +117,6 @@ export class DocumentsController {
     private readonly getDocumentExtractionImageThumbnail: GetDocumentExtractionImageThumbnailUseCase,
     private readonly loadSuggestions: LoadDocumentLabelSuggestionsUseCase,
     private readonly refreshEmbeddings: RefreshEmbeddingSuggestionsUseCase,
-    private readonly documentChat: DocumentChatUseCase,
-    private readonly listDocumentChatThreads: ListDocumentChatThreadsUseCase,
-    private readonly createDocumentChatThread: CreateDocumentChatThreadUseCase,
-    private readonly listDocumentChatThreadMessages: ListDocumentChatThreadMessagesUseCase,
-    private readonly sendDocumentChatThreadMessage: SendDocumentChatThreadMessageUseCase,
-    private readonly streamDocumentChatMessage: StreamDocumentChatMessageUseCase,
-    private readonly cancelDocumentChatGeneration: CancelDocumentChatGenerationUseCase,
-    private readonly retryDocumentChatMessage: RetryDocumentChatMessageUseCase,
     private readonly listDuplicateCandidates: ListDuplicateCandidatesUseCase,
     private readonly dismissDuplicateCandidate: DismissDuplicateCandidateUseCase,
     private readonly compareExtraction: CompareDocumentExtractionUseCase,
@@ -446,171 +422,6 @@ export class DocumentsController {
     const doc = await this.getDocument.execute(id, session.user.id, subject);
     const suggestions = await this.loadSuggestions.execute(id, session.user.id);
     return toDocumentDto(doc, suggestions);
-  }
-
-  @Get(':id/chat/threads')
-  @ApiDocuvateRoute({ operationId: 'listChatThreads', summary: 'listChatThreads' })
-  async listChatThreads(
-    @Session() session: AuthSession,
-    @AuthSubject() subject: AuthorizationSubject,
-    @Param('id') id: string
-  ): Promise<DocumentChatThreadListResponseDto> {
-    const threads = await this.listDocumentChatThreads.execute(id, session.user.id, subject);
-    return {
-      threads: threads.map(toDocumentChatThreadDto),
-      nextCursor: null,
-      hasMore: false,
-      total: null,
-    };
-  }
-
-  @Post(':id/chat/threads')
-  @ApiDocuvateRoute({ operationId: 'createChatThread', summary: 'createChatThread' })
-  async createChatThread(
-    @Session() session: AuthSession,
-    @AuthSubject() subject: AuthorizationSubject,
-    @Param('id') id: string,
-    @Body() body: CreateDocumentChatThreadRequestDto
-  ) {
-    const thread = await this.createDocumentChatThread.execute(
-      id,
-      session.user.id,
-      subject,
-      body.title
-    );
-    return { thread: toDocumentChatThreadDto(thread) };
-  }
-
-  @Get(':id/chat/threads/:threadId/messages')
-  @ApiDocuvateRoute({ operationId: 'listChatThreadMessages', summary: 'listChatThreadMessages' })
-  async listChatThreadMessages(
-    @Session() session: AuthSession,
-    @AuthSubject() subject: AuthorizationSubject,
-    @Param('id') id: string,
-    @Param('threadId') threadId: string
-  ): Promise<DocumentChatThreadMessagesResponseDto> {
-    const messages = await this.listDocumentChatThreadMessages.execute(
-      id,
-      threadId,
-      session.user.id,
-      subject
-    );
-    return { messages: messages.map(toDocumentChatMessageRecordDto) };
-  }
-
-  @Post(':id/chat/threads/:threadId/messages')
-  @ApiDocuvateRoute({ operationId: 'sendChatThreadMessage', summary: 'sendChatThreadMessage' })
-  async sendChatThreadMessage(
-    @Session() session: AuthSession,
-    @AuthSubject() subject: AuthorizationSubject,
-    @Param('id') id: string,
-    @Param('threadId') threadId: string,
-    @Body() body: SendDocumentChatThreadMessageRequestDto
-  ): Promise<SendDocumentChatThreadMessageResponseDto> {
-    const result = await this.sendDocumentChatThreadMessage.execute(
-      id,
-      threadId,
-      session.user.id,
-      subject,
-      body.message
-    );
-    return {
-      reply: result.reply,
-      configured: result.configured,
-      provider: result.provider,
-      setupHint: result.setupHint ?? null,
-      userMessage: toDocumentChatMessageRecordDto(result.userMessage),
-      assistantMessage: toDocumentChatMessageRecordDto(result.assistantMessage),
-      asyncGeneration: result.asyncGeneration,
-    };
-  }
-
-  @Get(':id/chat/threads/:threadId/messages/:messageId/stream')
-  @ApiDocuvateRoute({
-    operationId: 'streamChatThreadMessage',
-    summary: 'SSE stream for async assistant message generation',
-  })
-  async streamChatThreadMessage(
-    @Session() session: AuthSession,
-    @AuthSubject() _subject: AuthorizationSubject,
-    @Param('id') id: string,
-    @Param('threadId') threadId: string,
-    @Param('messageId') messageId: string,
-    @Req() req: FastifyRequest,
-    @Res({ passthrough: false }) reply: FastifyReply
-  ): Promise<void> {
-    let closed = false;
-    req.raw.on('close', () => {
-      closed = true;
-    });
-    await this.streamDocumentChatMessage.execute(
-      id,
-      threadId,
-      messageId,
-      session.user.id,
-      reply.raw,
-      () => closed
-    );
-  }
-
-  @Post(':id/chat/threads/:threadId/messages/:messageId/cancel')
-  @ApiDocuvateRoute({
-    operationId: 'cancelChatThreadMessage',
-    summary: 'Cancel in-flight async chat generation',
-  })
-  async cancelChatThreadMessage(
-    @Session() session: AuthSession,
-    @AuthSubject() _subject: AuthorizationSubject,
-    @Param('id') id: string,
-    @Param('threadId') threadId: string,
-    @Param('messageId') messageId: string
-  ): Promise<OkResponseDto> {
-    await this.cancelDocumentChatGeneration.execute(id, threadId, messageId, session.user.id);
-    return { ok: true };
-  }
-
-  @Post(':id/chat/threads/:threadId/messages/:messageId/retry')
-  @ApiDocuvateRoute({
-    operationId: 'retryChatThreadMessage',
-    summary: 'Retry failed async chat message generation',
-  })
-  async retryChatThreadMessage(
-    @Session() session: AuthSession,
-    @AuthSubject() _subject: AuthorizationSubject,
-    @Param('id') id: string,
-    @Param('threadId') threadId: string,
-    @Param('messageId') messageId: string
-  ) {
-    const message = await this.retryDocumentChatMessage.execute(
-      id,
-      threadId,
-      messageId,
-      session.user.id
-    );
-    return { message: toDocumentChatMessageRecordDto(message) };
-  }
-
-  @Post(':id/chat')
-  @ApiDocuvateRoute({ operationId: 'chat', summary: 'chat' })
-  async chat(
-    @Session() session: AuthSession,
-    @AuthSubject() subject: AuthorizationSubject,
-    @Param('id') id: string,
-    @Body() body: DocumentChatRequestDto
-  ): Promise<DocumentChatResponseDto> {
-    const result = await this.documentChat.execute(
-      id,
-      session.user.id,
-      subject,
-      body.message,
-      body.history ?? []
-    );
-    return {
-      reply: result.reply,
-      configured: result.configured,
-      provider: result.provider,
-      setupHint: result.setupHint ?? null,
-    };
   }
 
   @Get(':id/duplicate-candidates')

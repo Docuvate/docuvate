@@ -11,7 +11,6 @@ import 'package:docuvate/src/generated/src/auth/bearer_auth.dart';
 import 'package:docuvate/src/generated/src/auth/oauth.dart';
 import 'package:docuvate/src/generated/src/api/api_metadata_api.dart';
 import 'package:docuvate/src/generated/src/api/admin_api.dart';
-import 'package:docuvate/src/generated/src/api/chat_api.dart';
 import 'package:docuvate/src/generated/src/api/connectors_api.dart';
 import 'package:docuvate/src/generated/src/api/documents_api.dart';
 import 'package:docuvate/src/generated/src/api/duplicates_api.dart';
@@ -90,12 +89,6 @@ class DocuvateApi {
   /// by doing that all interceptors will not be executed
   AdminApi getAdminApi() {
     return AdminApi(dio, serializers);
-  }
-
-  /// Get ChatApi instance, base route and serializer can be overridden by a given but be careful,
-  /// by doing that all interceptors will not be executed
-  ChatApi getChatApi() {
-    return ChatApi(dio, serializers);
   }
 
   /// Get ConnectorsApi instance, base route and serializer can be overridden by a given but be careful,

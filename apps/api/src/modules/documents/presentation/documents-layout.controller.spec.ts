@@ -24,11 +24,8 @@ import { RecordExtractionArenaRatingUseCase } from '../../settings/application/s
 import { ApplyArenaWinnerExtractionUseCase } from '../application/apply-arena-winner-extraction.use-case.js';
 import { BatchDocumentTagSuggestionsUseCase } from '../application/batch-document-tag-suggestions.use-case.js';
 import { BulkDocumentsUseCase } from '../application/bulk-documents.use-case.js';
-import { CancelDocumentChatGenerationUseCase } from '../application/cancel-document-chat-generation.use-case.js';
 import { CompareDocumentExtractionUseCase } from '../application/compare-extraction.use-case.js';
-import { CreateDocumentChatThreadUseCase } from '../application/create-document-chat-thread.use-case.js';
 import { DeleteDocumentUseCase } from '../application/delete-document.use-case.js';
-import { DocumentChatUseCase } from '../application/document-chat.use-case.js';
 import { GetDocumentUseCase } from '../application/get-document.use-case.js';
 import { GetDocumentContentUseCase } from '../application/get-document-content.use-case.js';
 import { GetDocumentExtractionImageThumbnailUseCase } from '../application/get-document-extraction-image-thumbnail.use-case.js';
@@ -39,14 +36,9 @@ import { GetDocumentLayoutHtmlUseCase } from '../application/get-document-layout
 import { GetDocumentLayoutIrUseCase } from '../application/get-document-layout-ir.use-case.js';
 import { GetDocumentLayoutTypstUseCase } from '../application/get-document-layout-typst.use-case.js';
 import { GetDocumentPreviewUseCase } from '../application/get-document-preview.use-case.js';
-import { ListDocumentChatThreadMessagesUseCase } from '../application/list-document-chat-thread-messages.use-case.js';
-import { ListDocumentChatThreadsUseCase } from '../application/list-document-chat-threads.use-case.js';
 import { ListDocumentsUseCase } from '../application/list-documents.use-case.js';
 import { MoveDocumentsUseCase } from '../application/move-documents.use-case.js';
 import { RequeueDocumentExtractionUseCase } from '../application/requeue-document-extraction.use-case.js';
-import { RetryDocumentChatMessageUseCase } from '../application/retry-document-chat-message.use-case.js';
-import { SendDocumentChatThreadMessageUseCase } from '../application/send-document-chat-thread-message.use-case.js';
-import { StreamDocumentChatMessageUseCase } from '../application/stream-document-chat-message.use-case.js';
 import { UpdateDocumentUseCase } from '../application/update-document.use-case.js';
 import { UploadDocumentUseCase } from '../application/upload-document.use-case.js';
 import { PgInstallationUserCountReader } from '../infrastructure/pg-installation-user-count.reader.js';
@@ -121,14 +113,6 @@ describe('DocumentsController layout routes', () => {
             getDocumentExtractionImageThumbnail: GetDocumentExtractionImageThumbnailUseCase,
             loadSuggestions: LoadDocumentLabelSuggestionsUseCase,
             refreshEmbeddings: RefreshEmbeddingSuggestionsUseCase,
-            documentChat: DocumentChatUseCase,
-            listDocumentChatThreads: ListDocumentChatThreadsUseCase,
-            createDocumentChatThread: CreateDocumentChatThreadUseCase,
-            listDocumentChatThreadMessages: ListDocumentChatThreadMessagesUseCase,
-            sendDocumentChatThreadMessage: SendDocumentChatThreadMessageUseCase,
-            streamDocumentChatMessage: StreamDocumentChatMessageUseCase,
-            cancelDocumentChatGeneration: CancelDocumentChatGenerationUseCase,
-            retryDocumentChatMessage: RetryDocumentChatMessageUseCase,
             listDuplicateCandidates: ListDuplicateCandidatesUseCase,
             dismissDuplicateCandidate: DismissDuplicateCandidateUseCase,
             compareExtraction: CompareDocumentExtractionUseCase,
@@ -164,14 +148,6 @@ describe('DocumentsController layout routes', () => {
             getDocumentExtractionImageThumbnail,
             loadSuggestions,
               refreshEmbeddings,
-              documentChat,
-              listDocumentChatThreads,
-              createDocumentChatThread,
-              listDocumentChatThreadMessages,
-              sendDocumentChatThreadMessage,
-              streamDocumentChatMessage,
-              cancelDocumentChatGeneration,
-              retryDocumentChatMessage,
               listDuplicateCandidates,
               dismissDuplicateCandidate,
               compareExtraction,
@@ -207,14 +183,6 @@ describe('DocumentsController layout routes', () => {
             GetDocumentExtractionImageThumbnailUseCase,
             LoadDocumentLabelSuggestionsUseCase,
             RefreshEmbeddingSuggestionsUseCase,
-            DocumentChatUseCase,
-            ListDocumentChatThreadsUseCase,
-            CreateDocumentChatThreadUseCase,
-            ListDocumentChatThreadMessagesUseCase,
-            SendDocumentChatThreadMessageUseCase,
-            StreamDocumentChatMessageUseCase,
-            CancelDocumentChatGenerationUseCase,
-            RetryDocumentChatMessageUseCase,
             ListDuplicateCandidatesUseCase,
             DismissDuplicateCandidateUseCase,
             CompareDocumentExtractionUseCase,
@@ -258,14 +226,6 @@ describe('DocumentsController layout routes', () => {
         { provide: GetDocumentExtractionImageThumbnailUseCase, useValue: useCaseExecuteMock() },
         { provide: LoadDocumentLabelSuggestionsUseCase, useValue: useCaseExecuteMock() },
         { provide: RefreshEmbeddingSuggestionsUseCase, useValue: useCaseExecuteMock() },
-        { provide: DocumentChatUseCase, useValue: useCaseExecuteMock() },
-        { provide: ListDocumentChatThreadsUseCase, useValue: useCaseExecuteMock() },
-        { provide: CreateDocumentChatThreadUseCase, useValue: useCaseExecuteMock() },
-        { provide: ListDocumentChatThreadMessagesUseCase, useValue: useCaseExecuteMock() },
-        { provide: SendDocumentChatThreadMessageUseCase, useValue: useCaseExecuteMock() },
-        { provide: StreamDocumentChatMessageUseCase, useValue: useCaseExecuteMock() },
-        { provide: CancelDocumentChatGenerationUseCase, useValue: useCaseExecuteMock() },
-        { provide: RetryDocumentChatMessageUseCase, useValue: useCaseExecuteMock() },
         { provide: ListDuplicateCandidatesUseCase, useValue: useCaseExecuteMock() },
         { provide: DismissDuplicateCandidateUseCase, useValue: useCaseExecuteMock() },
         { provide: CompareDocumentExtractionUseCase, useValue: useCaseExecuteMock() },

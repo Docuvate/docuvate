@@ -16,7 +16,6 @@ const ACTION_CLAIM: Record<AuthorizationAction, string> = {
   'document:write': 'document:write',
   'document:delete': 'document:delete',
   'document:content:read': 'document:content:read',
-  'document:chat': 'document:chat',
 };
 
 function parseDeniedStatuses(): Set<string> {
@@ -89,8 +88,7 @@ export class AbacAuthorizationAdapter implements AuthorizationPort {
     return (
       action === 'document:read' ||
       action === 'document:list' ||
-      action === 'document:content:read' ||
-      action === 'document:chat'
+      action === 'document:content:read'
     );
   }
 }

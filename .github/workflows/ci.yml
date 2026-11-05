@@ -159,7 +159,7 @@ jobs:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
           DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
         run: bash scripts/ci/docker-login-hub.sh
-      - name: Compose smoke profile (CPU extractive cited-chat)
+      - name: Compose smoke profile (synthetic fixtures)
         env:
           DOCUVATE_API_IMAGE: docuvate-api
           DOCUVATE_WEB_IMAGE: docuvate-web

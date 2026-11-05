@@ -26,17 +26,20 @@ import 'package:docuvate/src/generated/src/model/admin_auth_sign_in_settings_res
 import 'package:docuvate/src/generated/src/model/admin_oidc_provider_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/admin_user_list_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/admin_user_response_dto.dart';
+import 'package:docuvate/src/generated/src/model/apply_field_correction_request_dto.dart';
+import 'package:docuvate/src/generated/src/model/apply_field_correction_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/apply_label_correction_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/apply_label_correction_response_dto.dart';
+import 'package:docuvate/src/generated/src/model/apply_table_correction_request_dto.dart';
+import 'package:docuvate/src/generated/src/model/apply_table_correction_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/auth_oidc_provider_public_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/auth_sign_in_options_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/ban_admin_user_request_dto.dart';
-import 'package:docuvate/src/generated/src/model/chat_message_dto.dart';
-import 'package:docuvate/src/generated/src/model/chat_message_record_dto.dart';
+import 'package:docuvate/src/generated/src/model/confirm_document_field_request_dto.dart';
+import 'package:docuvate/src/generated/src/model/confirm_document_field_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/confirm_label_recommendation_blocklist_pattern_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/create_admin_oidc_provider_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/create_connector_installation_request_dto.dart';
-import 'package:docuvate/src/generated/src/model/create_document_chat_thread_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/create_folder_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/create_saved_document_view_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/create_tag_request_dto.dart';
@@ -50,23 +53,23 @@ import 'package:docuvate/src/generated/src/model/dismiss_label_recommendation_re
 import 'package:docuvate/src/generated/src/model/dismiss_tag_suggestion_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/document_bulk_action_dto.dart';
 import 'package:docuvate/src/generated/src/model/document_bulk_request_dto.dart';
-import 'package:docuvate/src/generated/src/model/document_chat_provider_info_dto.dart';
-import 'package:docuvate/src/generated/src/model/document_chat_provider_list_response_dto.dart';
-import 'package:docuvate/src/generated/src/model/document_chat_providers_catalog_meta_dto.dart';
-import 'package:docuvate/src/generated/src/model/document_chat_request_dto.dart';
-import 'package:docuvate/src/generated/src/model/document_chat_response_dto.dart';
-import 'package:docuvate/src/generated/src/model/document_chat_thread_dto.dart';
-import 'package:docuvate/src/generated/src/model/document_chat_thread_list_response_dto.dart';
-import 'package:docuvate/src/generated/src/model/document_chat_thread_messages_response_dto.dart';
-import 'package:docuvate/src/generated/src/model/document_chat_unavailable_backend_info_dto.dart';
+import 'package:docuvate/src/generated/src/model/document_correction_dto.dart';
 import 'package:docuvate/src/generated/src/model/document_duplicate_stack_summary_dto_class.dart';
 import 'package:docuvate/src/generated/src/model/document_extraction_image_dto.dart';
 import 'package:docuvate/src/generated/src/model/document_extraction_summary_dto.dart';
 import 'package:docuvate/src/generated/src/model/document_extraction_summary_dto_layout_ir_pages_inner.dart';
+import 'package:docuvate/src/generated/src/model/document_layout_tokens_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/document_list_library_ui_dto.dart';
 import 'package:docuvate/src/generated/src/model/document_list_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/document_pipeline_module_descriptor_dto.dart';
 import 'package:docuvate/src/generated/src/model/document_pipeline_modules_response_dto.dart';
+import 'package:docuvate/src/generated/src/model/document_region_dto.dart';
+import 'package:docuvate/src/generated/src/model/document_region_field_dto.dart';
+import 'package:docuvate/src/generated/src/model/document_region_list_response_dto.dart';
+import 'package:docuvate/src/generated/src/model/document_region_table_cell_dto.dart';
+import 'package:docuvate/src/generated/src/model/document_region_table_dto.dart';
+import 'package:docuvate/src/generated/src/model/document_region_table_merge_dto.dart';
+import 'package:docuvate/src/generated/src/model/document_region_table_rule_dto.dart';
 import 'package:docuvate/src/generated/src/model/document_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/document_review_field_suggestion_dto_class.dart';
 import 'package:docuvate/src/generated/src/model/document_review_queue_item_dto_class.dart';
@@ -88,8 +91,6 @@ import 'package:docuvate/src/generated/src/model/extraction_compare_request_dto.
 import 'package:docuvate/src/generated/src/model/extraction_engine_list_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/feature_flags_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/folder_list_response_dto.dart';
-import 'package:docuvate/src/generated/src/model/global_chat_suggestion_bootstrap_dto_class.dart';
-import 'package:docuvate/src/generated/src/model/global_chat_suggestion_bootstrap_dto_class_contract_end_sample.dart';
 import 'package:docuvate/src/generated/src/model/import_from_connector_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/installation_dashboard_default_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/invite_admin_user_request_dto.dart';
@@ -110,6 +111,7 @@ import 'package:docuvate/src/generated/src/model/layout_ir_table_cell_dto.dart';
 import 'package:docuvate/src/generated/src/model/layout_ir_table_dto.dart';
 import 'package:docuvate/src/generated/src/model/layout_ir_vector_dto.dart';
 import 'package:docuvate/src/generated/src/model/layout_ir_widget_dto.dart';
+import 'package:docuvate/src/generated/src/model/layout_token_dto.dart';
 import 'package:docuvate/src/generated/src/model/layout_typst_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/library_table_column_id.dart';
 import 'package:docuvate/src/generated/src/model/ml_model_family_dto.dart';
@@ -125,7 +127,6 @@ import 'package:docuvate/src/generated/src/model/ok_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/password_policy_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/preview_connector_source_nodes_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/problem_details_dto.dart';
-import 'package:docuvate/src/generated/src/model/propose_label_recommendation_blocklist_pattern_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/recognized_field_filter_values_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/remote_config_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/reorder_saved_document_views_request_dto.dart';
@@ -137,8 +138,6 @@ import 'package:docuvate/src/generated/src/model/replace_tag_custom_fields_reque
 import 'package:docuvate/src/generated/src/model/saved_document_view_dto_class.dart';
 import 'package:docuvate/src/generated/src/model/saved_document_view_field_filter_dto_class.dart';
 import 'package:docuvate/src/generated/src/model/saved_document_view_list_response_dto.dart';
-import 'package:docuvate/src/generated/src/model/send_document_chat_thread_message_request_dto.dart';
-import 'package:docuvate/src/generated/src/model/send_document_chat_thread_message_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/set_admin_user_feature_flag_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/set_admin_user_role_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/set_ml_model_lifecycle_request_dto.dart';
@@ -152,7 +151,6 @@ import 'package:docuvate/src/generated/src/model/test_paperless_installation_con
 import 'package:docuvate/src/generated/src/model/trigger_ml_retrain_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/update_admin_oidc_provider_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/update_connector_installation_request_dto.dart';
-import 'package:docuvate/src/generated/src/model/update_document_chat_thread_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/update_document_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/update_folder_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/update_paperless_installation_request_dto.dart';
@@ -160,7 +158,9 @@ import 'package:docuvate/src/generated/src/model/update_password_policy_request_
 import 'package:docuvate/src/generated/src/model/update_saved_document_view_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/update_tag_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/update_user_settings_request_dto.dart';
+import 'package:docuvate/src/generated/src/model/update_workspace_ml_settings_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/user_settings_response_dto.dart';
+import 'package:docuvate/src/generated/src/model/workspace_ml_settings_response_dto.dart';
 
 part 'serializers.g.dart';
 
@@ -177,17 +177,20 @@ part 'serializers.g.dart';
   AdminOidcProviderResponseDto,
   AdminUserListResponseDto,
   AdminUserResponseDto,
+  ApplyFieldCorrectionRequestDto,
+  ApplyFieldCorrectionResponseDto,
   ApplyLabelCorrectionRequestDto,
   ApplyLabelCorrectionResponseDto,
+  ApplyTableCorrectionRequestDto,
+  ApplyTableCorrectionResponseDto,
   AuthOidcProviderPublicResponseDto,
   AuthSignInOptionsResponseDto,
   BanAdminUserRequestDto,
-  ChatMessageDto,
-  ChatMessageRecordDto,
+  ConfirmDocumentFieldRequestDto,
+  ConfirmDocumentFieldResponseDto,
   ConfirmLabelRecommendationBlocklistPatternRequestDto,
   CreateAdminOidcProviderRequestDto,
   CreateConnectorInstallationRequestDto,
-  CreateDocumentChatThreadRequestDto,
   CreateFolderRequestDto,
   CreateSavedDocumentViewRequestDto,
   CreateTagRequestDto,
@@ -201,23 +204,23 @@ part 'serializers.g.dart';
   DismissTagSuggestionRequestDto,
   DocumentBulkActionDto,
   DocumentBulkRequestDto,
-  DocumentChatProviderInfoDto,
-  DocumentChatProviderListResponseDto,
-  DocumentChatProvidersCatalogMetaDto,
-  DocumentChatRequestDto,
-  DocumentChatResponseDto,
-  DocumentChatThreadDto,
-  DocumentChatThreadListResponseDto,
-  DocumentChatThreadMessagesResponseDto,
-  DocumentChatUnavailableBackendInfoDto,
+  DocumentCorrectionDto,
   DocumentDuplicateStackSummaryDtoClass,
   DocumentExtractionImageDto,
   DocumentExtractionSummaryDto,
   DocumentExtractionSummaryDtoLayoutIrPagesInner,
+  DocumentLayoutTokensResponseDto,
   DocumentListLibraryUiDto,
   DocumentListResponseDto,
   DocumentPipelineModuleDescriptorDto,
   DocumentPipelineModulesResponseDto,
+  DocumentRegionDto,
+  DocumentRegionFieldDto,
+  DocumentRegionListResponseDto,
+  DocumentRegionTableCellDto,
+  DocumentRegionTableDto,
+  DocumentRegionTableMergeDto,
+  DocumentRegionTableRuleDto,
   DocumentResponseDto,
   DocumentReviewFieldSuggestionDtoClass,
   DocumentReviewQueueItemDtoClass,
@@ -239,8 +242,6 @@ part 'serializers.g.dart';
   ExtractionEngineListResponseDto,
   FeatureFlagsResponseDto,
   FolderListResponseDto,
-  GlobalChatSuggestionBootstrapDtoClass,
-  GlobalChatSuggestionBootstrapDtoClassContractEndSample,
   ImportFromConnectorRequestDto,
   InstallationDashboardDefaultResponseDto,
   InviteAdminUserRequestDto,
@@ -261,6 +262,7 @@ part 'serializers.g.dart';
   LayoutIrTableDto,
   LayoutIrVectorDto,
   LayoutIrWidgetDto,
+  LayoutTokenDto,
   LayoutTypstResponseDto,
   LibraryTableColumnId,
   MlModelFamilyDto,
@@ -276,7 +278,6 @@ part 'serializers.g.dart';
   PasswordPolicyResponseDto,
   PreviewConnectorSourceNodesRequestDto,
   ProblemDetailsDto,
-  ProposeLabelRecommendationBlocklistPatternRequestDto,
   RecognizedFieldFilterValuesResponseDto,
   RemoteConfigResponseDto,
   ReorderSavedDocumentViewsRequestDto,
@@ -288,8 +289,6 @@ part 'serializers.g.dart';
   SavedDocumentViewDtoClass,
   SavedDocumentViewFieldFilterDtoClass,
   SavedDocumentViewListResponseDto,
-  SendDocumentChatThreadMessageRequestDto,
-  SendDocumentChatThreadMessageResponseDto,
   SetAdminUserFeatureFlagRequestDto,
   SetAdminUserRoleRequestDto,
   SetMlModelLifecycleRequestDto,
@@ -303,7 +302,6 @@ part 'serializers.g.dart';
   TriggerMlRetrainRequestDto,
   UpdateAdminOidcProviderRequestDto,
   UpdateConnectorInstallationRequestDto,
-  UpdateDocumentChatThreadRequestDto,
   UpdateDocumentRequestDto,
   UpdateFolderRequestDto,
   UpdatePaperlessInstallationRequestDto,
@@ -311,7 +309,9 @@ part 'serializers.g.dart';
   UpdateSavedDocumentViewRequestDto,
   UpdateTagRequestDto,
   UpdateUserSettingsRequestDto,
+  UpdateWorkspaceMlSettingsRequestDto,
   UserSettingsResponseDto,
+  WorkspaceMlSettingsResponseDto,
 ])
 Serializers serializers = (_$serializers.toBuilder()
       ..add(const OneOfSerializer())

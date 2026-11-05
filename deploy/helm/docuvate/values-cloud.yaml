@@ -45,9 +45,6 @@ postgres:
 minio:
   enabled: false
 
-ollama:
-  enabled: false
-
 networkPolicies:
   # k3s Traefik runs in kube-system; use ingress-nginx here if you install that controller instead.
   ingressNamespace: kube-system

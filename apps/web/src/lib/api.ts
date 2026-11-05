@@ -17,13 +17,11 @@ import type {
   AuthSignInOptionsDto,
   BanAdminUserRequest,
   ConfirmDocumentFieldResponse,
-  ConfirmLabelRecommendationBlocklistPatternRequest,
   ConnectorCatalogResponse,
   ConnectorInstallationDto,
   ConnectorSourceTreeNodeDto,
   CreateAdminOidcProviderRequest,
   CreateConnectorInstallationRequest,
-  CreateDocumentChatThreadRequest,
   CreateFolderRequest,
   CreateSavedDocumentViewRequest,
   CreateTagRequest,
@@ -33,11 +31,6 @@ import type {
   DashboardWidgetDocumentPreviewsResponseDto,
   DismissLabelRecommendationRequest,
   DocumentBulkRequest,
-  DocumentChatMessageRecordDto,
-  DocumentChatProvidersCatalogDto,
-  DocumentChatThreadDto,
-  DocumentChatThreadListResponse,
-  DocumentChatThreadMessagesResponse,
   DocumentDto,
   DocumentLayoutTokensResponse,
   DocumentListQuery,
@@ -55,13 +48,11 @@ import type {
   ExtractionCompareResponse,
   ExtractionEngineInfo,
   FolderDto,
-  GlobalChatSuggestionBootstrapDto,
   GlobalSearchResponseDto,
   InviteAdminUserRequest,
   LabelDocumentInventorySummaryResponseDto,
   LabelMapResponseDto,
   LabelRecommendationBlocklistEntryDto,
-  LabelRecommendationBlocklistPatternDto,
   LabelRecommendationBlocklistResponse,
   LabelRecommendationListResponse,
   LayoutIrDocument,
@@ -72,8 +63,6 @@ import type {
   PaperlessImportRunErrorDto,
   PaperlessInstallationDto,
   PasswordPolicyDto,
-  ProposeLabelRecommendationBlocklistPatternRequest,
-  ProposeLabelRecommendationBlocklistPatternResponse,
   RecognizedFieldDefinitionDto,
   RecognizedFieldFilterValuesPageDto,
   RecognizedFieldFilterValuesQuery,
@@ -83,8 +72,6 @@ import type {
   ReplaceRecognizedFieldsRequest,
   SavedDocumentViewDto,
   SavedDocumentViewListResponse,
-  SendDocumentChatThreadMessageRequest,
-  SendDocumentChatThreadMessageResponse,
   SetAdminUserRoleRequest,
   SftpFetchHostProbeRequest,
   SftpFetchHostProbeResponse,
@@ -120,10 +107,6 @@ import type {
 const baseURL = apiBaseUrl();
 
 export { apiBaseUrl };
-
-export function authHeaders(): Record<string, string> {
-  return {};
-}
 
 async function request<T>(path: string, init?: RequestInit & { timeoutMs?: number }): Promise<T> {
   const { timeoutMs, ...fetchInit } = init ?? {};
@@ -189,12 +172,8 @@ export function documentContentUrl(id: string, download = false): string {
   return `${baseURL}/documents/${id}/content${download ? '?download=1' : ''}`;
 }
 
-export function documentPreviewUrl(id: string): string {
+function documentPreviewUrl(id: string): string {
   return `${baseURL}/documents/${id}/preview`;
-}
-
-export function documentExtractionImageThumbnailUrl(documentId: string, imageId: string): string {
-  return `${baseURL}/documents/${documentId}/extraction-images/${imageId}/thumbnail`;
 }
 
 export async function fetchDocumentPreviewBlob(id: string): Promise<Blob> {
@@ -512,26 +491,6 @@ export async function listLabelRecommendationBlocklist(): Promise<LabelRecommend
   return request<LabelRecommendationBlocklistResponse>('/labels/recommendation-blocklist');
 }
 
-export async function proposeLabelRecommendationBlocklistPattern(
-  phrases: string[]
-): Promise<ProposeLabelRecommendationBlocklistPatternResponse> {
-  const body: ProposeLabelRecommendationBlocklistPatternRequest = { phrases };
-  return request<ProposeLabelRecommendationBlocklistPatternResponse>(
-    '/labels/recommendation-blocklist/propose-pattern',
-    { method: 'POST', body: JSON.stringify(body) }
-  );
-}
-
-export async function confirmLabelRecommendationBlocklistPattern(
-  pattern: string
-): Promise<LabelRecommendationBlocklistPatternDto> {
-  const body: ConfirmLabelRecommendationBlocklistPatternRequest = { pattern };
-  return request<LabelRecommendationBlocklistPatternDto>(
-    '/labels/recommendation-blocklist/patterns',
-    { method: 'POST', body: JSON.stringify(body) }
-  );
-}
-
 export async function removeLabelRecommendationBlocklistPattern(id: string): Promise<void> {
   await request(`/labels/recommendation-blocklist/patterns/${id}`, { method: 'DELETE' });
 }
@@ -766,152 +725,6 @@ export async function restoreDuplicateStackPair(
   });
 }
 
-export async function listDocumentChatThreads(
-  documentId: string
-): Promise<DocumentChatThreadDto[]> {
-  const data = await request<DocumentChatThreadListResponse>(
-    `/documents/${documentId}/chat/threads`
-  );
-  return data.threads;
-}
-
-export async function createDocumentChatThread(
-  documentId: string,
-  body: CreateDocumentChatThreadRequest = {}
-): Promise<DocumentChatThreadDto> {
-  const data = await request<{ thread: DocumentChatThreadDto }>(
-    `/documents/${documentId}/chat/threads`,
-    {
-      method: 'POST',
-      body: JSON.stringify(body),
-    }
-  );
-  return data.thread;
-}
-
-export async function listDocumentChatThreadMessages(
-  documentId: string,
-  threadId: string
-): Promise<DocumentChatMessageRecordDto[]> {
-  const data = await request<DocumentChatThreadMessagesResponse>(
-    `/documents/${documentId}/chat/threads/${threadId}/messages`
-  );
-  return data.messages;
-}
-
-export async function sendDocumentChatThreadMessage(
-  documentId: string,
-  threadId: string,
-  body: SendDocumentChatThreadMessageRequest
-): Promise<SendDocumentChatThreadMessageResponse> {
-  return request<SendDocumentChatThreadMessageResponse>(
-    `/documents/${documentId}/chat/threads/${threadId}/messages`,
-    {
-      method: 'POST',
-      body: JSON.stringify(body),
-    }
-  );
-}
-
-export async function cancelDocumentChatMessage(
-  documentId: string,
-  threadId: string,
-  messageId: string
-): Promise<void> {
-  await request<{ ok: boolean }>(
-    `/documents/${documentId}/chat/threads/${threadId}/messages/${messageId}/cancel`,
-    { method: 'POST' }
-  );
-}
-
-export async function retryDocumentChatMessage(
-  documentId: string,
-  threadId: string,
-  messageId: string
-): Promise<DocumentChatMessageRecordDto> {
-  const data = await request<{ message: DocumentChatMessageRecordDto }>(
-    `/documents/${documentId}/chat/threads/${threadId}/messages/${messageId}/retry`,
-    { method: 'POST' }
-  );
-  return data.message;
-}
-
-export async function listLibraryChatThreadsPage(options?: {
-  limit?: number;
-  cursor?: string;
-}): Promise<DocumentChatThreadListResponse> {
-  const qs = queryString({
-    limit: options?.limit != null ? String(options.limit) : undefined,
-    cursor: options?.cursor,
-  });
-  return request<DocumentChatThreadListResponse>(`/chat/threads${qs}`);
-}
-
-export async function getGlobalChatSuggestionBootstrap(): Promise<GlobalChatSuggestionBootstrapDto> {
-  return request<GlobalChatSuggestionBootstrapDto>('/chat/suggestion-bootstrap');
-}
-
-export async function createLibraryChatThread(
-  body: CreateDocumentChatThreadRequest = {}
-): Promise<DocumentChatThreadDto> {
-  const data = await request<{ thread: DocumentChatThreadDto }>('/chat/threads', {
-    method: 'POST',
-    body: JSON.stringify(body),
-  });
-  return data.thread;
-}
-
-export async function updateLibraryChatThread(
-  threadId: string,
-  title: string
-): Promise<DocumentChatThreadDto> {
-  const data = await request<{ thread: DocumentChatThreadDto }>(`/chat/threads/${threadId}`, {
-    method: 'PATCH',
-    body: JSON.stringify({ title }),
-  });
-  return data.thread;
-}
-
-export async function deleteLibraryChatThread(threadId: string): Promise<void> {
-  await request<{ ok: boolean }>(`/chat/threads/${threadId}`, { method: 'DELETE' });
-}
-
-export async function listLibraryChatThreadMessages(
-  threadId: string
-): Promise<DocumentChatMessageRecordDto[]> {
-  const data = await request<DocumentChatThreadMessagesResponse>(
-    `/chat/threads/${threadId}/messages`
-  );
-  return data.messages;
-}
-
-export async function sendLibraryChatThreadMessage(
-  threadId: string,
-  body: SendDocumentChatThreadMessageRequest
-): Promise<SendDocumentChatThreadMessageResponse> {
-  return request<SendDocumentChatThreadMessageResponse>(`/chat/threads/${threadId}/messages`, {
-    method: 'POST',
-    body: JSON.stringify(body),
-  });
-}
-
-export async function cancelLibraryChatMessage(threadId: string, messageId: string): Promise<void> {
-  await request<{ ok: boolean }>(`/chat/threads/${threadId}/messages/${messageId}/cancel`, {
-    method: 'POST',
-  });
-}
-
-export async function retryLibraryChatMessage(
-  threadId: string,
-  messageId: string
-): Promise<DocumentChatMessageRecordDto> {
-  const data = await request<{ message: DocumentChatMessageRecordDto }>(
-    `/chat/threads/${threadId}/messages/${messageId}/retry`,
-    { method: 'POST' }
-  );
-  return data.message;
-}
-
 export async function getUserSettings(): Promise<UserSettingsDto> {
   return request<UserSettingsDto>('/settings');
 }
@@ -958,10 +771,6 @@ export async function updateUserSettings(
 export async function listExtractionEngines(): Promise<ExtractionEngineInfo[]> {
   const data = await request<{ engines: ExtractionEngineInfo[] }>('/settings/extraction-engines');
   return data.engines;
-}
-
-export async function getDocumentChatProvidersCatalog(): Promise<DocumentChatProvidersCatalogDto> {
-  return request<DocumentChatProvidersCatalogDto>('/settings/chat-providers');
 }
 
 export async function getConnectorCatalog(): Promise<ConnectorCatalogResponse> {

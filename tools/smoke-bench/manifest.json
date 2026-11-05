@@ -36,43 +36,6 @@
     "anchorTitle": "Smart duplicate receipt A",
     "expectPairTitle": "Smart duplicate receipt B"
   },
-  "chatChecks": [
-    {
-      "id": "fact",
-      "question": "Welche Gesamtsumme steht auf der Rechnung Nordwind?",
-      "expectCitationTitleContains": "Rechnung Nordwind",
-      "expectAbstention": false
-    },
-    {
-      "id": "count",
-      "question": "In wie vielen meiner Dokumente wird eine Jahresgebuehr fuer die Hundesteuer genannt?",
-      "expectMinCitations": 1,
-      "expectAnswerContainsAny": ["1", "ein", "eine", "einem"],
-      "expectAbstention": false
-    },
-    {
-      "id": "out-of-scope",
-      "question": "Wie wird das Wetter morgen in Berlin?",
-      "expectAbstention": true,
-      "expectMinCitations": 0
-    },
-    {
-      "id": "payslip-gross-oct-2024",
-      "newThread": true,
-      "question": "Wie hoch war das Gesamtbrutto im Entgeltnachweis Oktober 2024?",
-      "expectAnswerContainsAny": ["5.432,10"],
-      "expectMinCitations": 1,
-      "expectAbstention": false
-    },
-    {
-      "id": "lohnsteuer-2024",
-      "newThread": true,
-      "question": "Wie viel Lohnsteuer wurde mir laut Lohnsteuerbescheinigung 2024 insgesamt einbehalten?",
-      "expectAnswerContainsAny": ["12.345,67"],
-      "expectMinCitations": 1,
-      "expectAbstention": false
-    }
-  ],
   "payrollFieldLearning": {
     "correctionTitles": [
       "Entgeltnachweis 03/2024",

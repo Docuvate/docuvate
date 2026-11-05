@@ -52,12 +52,6 @@ const ROUTES: RouteProbe[] = [
     aggregatePathPattern: /\/v1\/labels\/document-inventory\/summary$/,
   },
   {
-    route: '/chat',
-    listPathPattern: /\/v1\/chat\/threads$/,
-    readySelector: '.global-chat-page',
-    domRootSelector: '[data-ux="page"]',
-  },
-  {
     route: '/documents/views',
     listPathPattern: /\/v1\/saved-views$/,
     readySelector: '.saved-views-page',

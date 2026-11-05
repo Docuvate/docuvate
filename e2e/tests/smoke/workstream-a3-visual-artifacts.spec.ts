@@ -163,16 +163,6 @@ test.describe('Workstream A3 visual artifacts', () => {
         await shot(page, `saved-views-sidebar-${viewport.label}.png`, viewport.width);
       }
 
-      await page.goto('/chat');
-      await page.locator('.global-chat-page').waitFor({ state: 'visible', timeout: 60_000 });
-      await shot(page, `global-chat-threads-${viewport.label}-initial.png`, viewport.width);
-      const threadScroll = page.locator('.doc-chat-thread-list-scroll');
-      if (await threadScroll.count()) {
-        await scrollVirtualList(page, '.doc-chat-thread-list-scroll', 0.5);
-        await page.waitForTimeout(300);
-        await shot(page, `global-chat-threads-${viewport.label}-scrolled.png`, viewport.width);
-      }
-
       await page.goto('/settings/admin/users');
       await page.locator('.settings-page').waitFor({ state: 'visible', timeout: 60_000 });
       const adminReady = await page

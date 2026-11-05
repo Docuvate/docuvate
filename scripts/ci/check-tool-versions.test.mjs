@@ -47,7 +47,6 @@ const FIXTURE_COPY = [
   'scripts/ci/run-local-ci-jobs.sh',
   'scripts/ci/lib-ephemeral-postgres.sh',
   'tools/docs/check-mermaid.mjs',
-  'packages/testing/src/containers/ollama-stub.ts',
   ...serviceImageScanPaths(TOOL_VERSIONS_ROOT).filter(
     (p) =>
       p.startsWith('deploy/') ||

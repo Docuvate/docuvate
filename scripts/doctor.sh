@@ -17,7 +17,6 @@ COMPOSE=(docker compose -f docker-compose.yml)
 WEB_URL="${DOCUVATE_DOCTOR_WEB_URL:-http://localhost:5173}"
 API_READY_URL="${DOCUVATE_DOCTOR_API_READY_URL:-http://localhost:3001/health/ready}"
 WORKER_HEALTH_URL="${DOCUVATE_DOCTOR_WORKER_URL:-http://localhost:8000/v1/health}"
-OLLAMA_MODEL="${OLLAMA_MODEL:-qwen2.5:1.5b}"
 
 failures=0
 warn() { echo "WARN: $*"; }
@@ -95,17 +94,6 @@ else
   bad "could not query embedding coverage (is postgres up?)"
 fi
 
-section "Ollama model"
-if "${COMPOSE[@]}" ps --status running ollama --format '{{.Name}}' 2>/dev/null | grep -q ollama; then
-  if "${COMPOSE[@]}" exec -T ollama ollama list 2>/dev/null | grep -q "$OLLAMA_MODEL"; then
-    ok "Ollama model pulled: $OLLAMA_MODEL"
-  else
-    bad "Ollama running but model $OLLAMA_MODEL not listed (wait for ollama-init or run: docker compose logs ollama-init)"
-  fi
-else
-  warn "ollama service not running (chat may be unavailable)"
-fi
-
 section "Host resources"
 if command -v df >/dev/null 2>&1; then
   df -h . | tail -n 1 | awk '{print "Disk (workspace mount): " $4 " free on " $1}' || true
@@ -116,7 +104,7 @@ fi
 
 section "Feature flag defaults (API env)"
 if docker compose ps api --status running -q 2>/dev/null | grep -q .; then
-  for key in DOCUVATE_FEATURE_LAYOUT_RECONSTRUCTION_COMPARE DOCUVATE_FEATURE_SOURCE_CONNECTORS DOCUVATE_FEATURE_EXPERIMENTAL_RESEARCH_MODELS DOCUVATE_FEATURE_EXACT_ANSWERS DOCUVATE_FEATURE_SMART_DUPLICATES DOCUVATE_FEATURE_ANSWER_ABSTENTION DOCUVATE_FEATURE_LEARNED_VALUE_TYPES DOCUVATE_FEATURE_LAYOUT_KEY_VALUE_ROLES DOCUVATE_FEATURE_LOCAL_CHAT_MODEL; do
+  for key in DOCUVATE_FEATURE_LAYOUT_RECONSTRUCTION_COMPARE DOCUVATE_FEATURE_SOURCE_CONNECTORS DOCUVATE_FEATURE_EXPERIMENTAL_RESEARCH_MODELS DOCUVATE_FEATURE_EXACT_ANSWERS DOCUVATE_FEATURE_SMART_DUPLICATES DOCUVATE_FEATURE_ANSWER_ABSTENTION DOCUVATE_FEATURE_LEARNED_VALUE_TYPES DOCUVATE_FEATURE_LAYOUT_KEY_VALUE_ROLES; do
     val="$(docker compose exec -T api printenv "$key" 2>/dev/null || true)"
     ok "${key}=${val:-<unset>}"
   done

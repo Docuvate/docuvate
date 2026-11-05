@@ -5,7 +5,7 @@ import { randomUUID } from 'node:crypto';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { buildSyntheticUser } from '../../../../packages/testing/src/factories/index.js';
-import { splitTextChunksWithSpans } from '../../src/modules/cited-chat/domain/split-text-chunks-with-spans.js';
+import { splitTextChunksWithSpans } from '../../src/modules/search/domain/split-text-chunks-with-spans.js';
 import { PgGlobalSearchRepository } from '../../src/modules/search/infrastructure/pg-global-search.repository.js';
 import { closeIntegrationPool, getIntegrationPool } from './pg-pool.js';
 import { deleteSyntheticUser, insertSyntheticUser, newIsolationUserId } from './pg-test-isolation.js';

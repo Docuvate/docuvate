@@ -93,7 +93,6 @@ describe('Document layout jump sync', () => {
     const onOverlaySelect = vi.fn();
     render(
       <DocumentLayoutSidePanel
-        documentId="doc-1"
         layoutIr={layoutIr}
         fields={[]}
         knownFieldKeys={new Set()}
@@ -116,7 +115,6 @@ describe('Document layout jump sync', () => {
     const onTabChange = vi.fn();
     render(
       <DocumentLayoutSidePanel
-        documentId="doc-1"
         layoutIr={layoutIr}
         fields={[]}
         knownFieldKeys={new Set()}

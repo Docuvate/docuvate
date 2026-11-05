@@ -142,11 +142,7 @@ class _$UpdateUserSettingsRequestDto extends UpdateUserSettingsRequestDto {
   @override
   final String? preferredExtractorEngine;
   @override
-  final String? preferredChatProvider;
-  @override
   final bool? useArenaWinnerAsDefault;
-  @override
-  final num? labelFieldConfidenceThreshold;
   @override
   final bool? fieldExtractionConfidenceGateEnabled;
   @override
@@ -154,15 +150,9 @@ class _$UpdateUserSettingsRequestDto extends UpdateUserSettingsRequestDto {
   @override
   final bool? advancedFeaturesEnabled;
   @override
-  final bool? fuzzyDuplicateDetectionEnabled;
-  @override
   final UpdateUserSettingsRequestDtoThemePreferenceEnum? themePreference;
   @override
   final UpdateUserSettingsRequestDtoLocaleEnum? locale;
-  @override
-  final String? documentChatCloudBaseUrl;
-  @override
-  final String? documentChatCloudApiKey;
 
   factory _$UpdateUserSettingsRequestDto(
           [void Function(UpdateUserSettingsRequestDtoBuilder)? updates]) =>
@@ -170,17 +160,12 @@ class _$UpdateUserSettingsRequestDto extends UpdateUserSettingsRequestDto {
 
   _$UpdateUserSettingsRequestDto._(
       {this.preferredExtractorEngine,
-      this.preferredChatProvider,
       this.useArenaWinnerAsDefault,
-      this.labelFieldConfidenceThreshold,
       this.fieldExtractionConfidenceGateEnabled,
       this.fieldExtractionRequiredLabelIds,
       this.advancedFeaturesEnabled,
-      this.fuzzyDuplicateDetectionEnabled,
       this.themePreference,
-      this.locale,
-      this.documentChatCloudBaseUrl,
-      this.documentChatCloudApiKey})
+      this.locale})
       : super._();
 
   @override
@@ -197,37 +182,26 @@ class _$UpdateUserSettingsRequestDto extends UpdateUserSettingsRequestDto {
     if (identical(other, this)) return true;
     return other is UpdateUserSettingsRequestDto &&
         preferredExtractorEngine == other.preferredExtractorEngine &&
-        preferredChatProvider == other.preferredChatProvider &&
         useArenaWinnerAsDefault == other.useArenaWinnerAsDefault &&
-        labelFieldConfidenceThreshold == other.labelFieldConfidenceThreshold &&
         fieldExtractionConfidenceGateEnabled ==
             other.fieldExtractionConfidenceGateEnabled &&
         fieldExtractionRequiredLabelIds ==
             other.fieldExtractionRequiredLabelIds &&
         advancedFeaturesEnabled == other.advancedFeaturesEnabled &&
-        fuzzyDuplicateDetectionEnabled ==
-            other.fuzzyDuplicateDetectionEnabled &&
         themePreference == other.themePreference &&
-        locale == other.locale &&
-        documentChatCloudBaseUrl == other.documentChatCloudBaseUrl &&
-        documentChatCloudApiKey == other.documentChatCloudApiKey;
+        locale == other.locale;
   }
 
   @override
   int get hashCode {
     var _$hash = 0;
     _$hash = $jc(_$hash, preferredExtractorEngine.hashCode);
-    _$hash = $jc(_$hash, preferredChatProvider.hashCode);
     _$hash = $jc(_$hash, useArenaWinnerAsDefault.hashCode);
-    _$hash = $jc(_$hash, labelFieldConfidenceThreshold.hashCode);
     _$hash = $jc(_$hash, fieldExtractionConfidenceGateEnabled.hashCode);
     _$hash = $jc(_$hash, fieldExtractionRequiredLabelIds.hashCode);
     _$hash = $jc(_$hash, advancedFeaturesEnabled.hashCode);
-    _$hash = $jc(_$hash, fuzzyDuplicateDetectionEnabled.hashCode);
     _$hash = $jc(_$hash, themePreference.hashCode);
     _$hash = $jc(_$hash, locale.hashCode);
-    _$hash = $jc(_$hash, documentChatCloudBaseUrl.hashCode);
-    _$hash = $jc(_$hash, documentChatCloudApiKey.hashCode);
     _$hash = $jf(_$hash);
     return _$hash;
   }
@@ -236,20 +210,14 @@ class _$UpdateUserSettingsRequestDto extends UpdateUserSettingsRequestDto {
   String toString() {
     return (newBuiltValueToStringHelper(r'UpdateUserSettingsRequestDto')
           ..add('preferredExtractorEngine', preferredExtractorEngine)
-          ..add('preferredChatProvider', preferredChatProvider)
           ..add('useArenaWinnerAsDefault', useArenaWinnerAsDefault)
-          ..add('labelFieldConfidenceThreshold', labelFieldConfidenceThreshold)
           ..add('fieldExtractionConfidenceGateEnabled',
               fieldExtractionConfidenceGateEnabled)
           ..add('fieldExtractionRequiredLabelIds',
               fieldExtractionRequiredLabelIds)
           ..add('advancedFeaturesEnabled', advancedFeaturesEnabled)
-          ..add(
-              'fuzzyDuplicateDetectionEnabled', fuzzyDuplicateDetectionEnabled)
           ..add('themePreference', themePreference)
-          ..add('locale', locale)
-          ..add('documentChatCloudBaseUrl', documentChatCloudBaseUrl)
-          ..add('documentChatCloudApiKey', documentChatCloudApiKey))
+          ..add('locale', locale))
         .toString();
   }
 }
@@ -265,21 +233,10 @@ class UpdateUserSettingsRequestDtoBuilder
   set preferredExtractorEngine(String? preferredExtractorEngine) =>
       _$this._preferredExtractorEngine = preferredExtractorEngine;
 
-  String? _preferredChatProvider;
-  String? get preferredChatProvider => _$this._preferredChatProvider;
-  set preferredChatProvider(String? preferredChatProvider) =>
-      _$this._preferredChatProvider = preferredChatProvider;
-
   bool? _useArenaWinnerAsDefault;
   bool? get useArenaWinnerAsDefault => _$this._useArenaWinnerAsDefault;
   set useArenaWinnerAsDefault(bool? useArenaWinnerAsDefault) =>
       _$this._useArenaWinnerAsDefault = useArenaWinnerAsDefault;
-
-  num? _labelFieldConfidenceThreshold;
-  num? get labelFieldConfidenceThreshold =>
-      _$this._labelFieldConfidenceThreshold;
-  set labelFieldConfidenceThreshold(num? labelFieldConfidenceThreshold) =>
-      _$this._labelFieldConfidenceThreshold = labelFieldConfidenceThreshold;
 
   bool? _fieldExtractionConfidenceGateEnabled;
   bool? get fieldExtractionConfidenceGateEnabled =>
@@ -301,12 +258,6 @@ class UpdateUserSettingsRequestDtoBuilder
   set advancedFeaturesEnabled(bool? advancedFeaturesEnabled) =>
       _$this._advancedFeaturesEnabled = advancedFeaturesEnabled;
 
-  bool? _fuzzyDuplicateDetectionEnabled;
-  bool? get fuzzyDuplicateDetectionEnabled =>
-      _$this._fuzzyDuplicateDetectionEnabled;
-  set fuzzyDuplicateDetectionEnabled(bool? fuzzyDuplicateDetectionEnabled) =>
-      _$this._fuzzyDuplicateDetectionEnabled = fuzzyDuplicateDetectionEnabled;
-
   UpdateUserSettingsRequestDtoThemePreferenceEnum? _themePreference;
   UpdateUserSettingsRequestDtoThemePreferenceEnum? get themePreference =>
       _$this._themePreference;
@@ -319,16 +270,6 @@ class UpdateUserSettingsRequestDtoBuilder
   set locale(UpdateUserSettingsRequestDtoLocaleEnum? locale) =>
       _$this._locale = locale;
 
-  String? _documentChatCloudBaseUrl;
-  String? get documentChatCloudBaseUrl => _$this._documentChatCloudBaseUrl;
-  set documentChatCloudBaseUrl(String? documentChatCloudBaseUrl) =>
-      _$this._documentChatCloudBaseUrl = documentChatCloudBaseUrl;
-
-  String? _documentChatCloudApiKey;
-  String? get documentChatCloudApiKey => _$this._documentChatCloudApiKey;
-  set documentChatCloudApiKey(String? documentChatCloudApiKey) =>
-      _$this._documentChatCloudApiKey = documentChatCloudApiKey;
-
   UpdateUserSettingsRequestDtoBuilder() {
     UpdateUserSettingsRequestDto._defaults(this);
   }
@@ -337,19 +278,14 @@ class UpdateUserSettingsRequestDtoBuilder
     final $v = _$v;
     if ($v != null) {
       _preferredExtractorEngine = $v.preferredExtractorEngine;
-      _preferredChatProvider = $v.preferredChatProvider;
       _useArenaWinnerAsDefault = $v.useArenaWinnerAsDefault;
-      _labelFieldConfidenceThreshold = $v.labelFieldConfidenceThreshold;
       _fieldExtractionConfidenceGateEnabled =
           $v.fieldExtractionConfidenceGateEnabled;
       _fieldExtractionRequiredLabelIds =
           $v.fieldExtractionRequiredLabelIds?.toBuilder();
       _advancedFeaturesEnabled = $v.advancedFeaturesEnabled;
-      _fuzzyDuplicateDetectionEnabled = $v.fuzzyDuplicateDetectionEnabled;
       _themePreference = $v.themePreference;
       _locale = $v.locale;
-      _documentChatCloudBaseUrl = $v.documentChatCloudBaseUrl;
-      _documentChatCloudApiKey = $v.documentChatCloudApiKey;
       _$v = null;
     }
     return this;
@@ -375,19 +311,14 @@ class UpdateUserSettingsRequestDtoBuilder
       _$result = _$v ??
           new _$UpdateUserSettingsRequestDto._(
               preferredExtractorEngine: preferredExtractorEngine,
-              preferredChatProvider: preferredChatProvider,
               useArenaWinnerAsDefault: useArenaWinnerAsDefault,
-              labelFieldConfidenceThreshold: labelFieldConfidenceThreshold,
               fieldExtractionConfidenceGateEnabled:
                   fieldExtractionConfidenceGateEnabled,
               fieldExtractionRequiredLabelIds:
                   _fieldExtractionRequiredLabelIds?.build(),
               advancedFeaturesEnabled: advancedFeaturesEnabled,
-              fuzzyDuplicateDetectionEnabled: fuzzyDuplicateDetectionEnabled,
               themePreference: themePreference,
-              locale: locale,
-              documentChatCloudBaseUrl: documentChatCloudBaseUrl,
-              documentChatCloudApiKey: documentChatCloudApiKey);
+              locale: locale);
     } catch (_) {
       late String _$failedField;
       try {

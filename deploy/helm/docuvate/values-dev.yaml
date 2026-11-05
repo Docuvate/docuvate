@@ -7,7 +7,6 @@ config:
   publicWebUrl: http://localhost:8080
   publicApiUrl: http://localhost:8080/api
   smtpUrl: smtp://docuvate-mailpit:1025
-  documentChatProvider: context
   sftpPublicHost: localhost
   sftpPublicPort: "30222"
 
@@ -26,9 +25,6 @@ mailpit:
 sftpIngest:
   enabled: true
   exposeSftp: true
-
-ollama:
-  enabled: false
 
 migrate:
   enabled: true

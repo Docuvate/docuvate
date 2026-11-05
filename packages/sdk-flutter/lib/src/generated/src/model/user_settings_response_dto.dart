@@ -13,81 +13,26 @@ part 'user_settings_response_dto.g.dart';
 ///
 /// Properties:
 /// * [preferredExtractorEngine] 
-/// * [preferredChatProvider] 
-/// * [effectiveChatProvider] 
-/// * [customerChatProvider] 
-/// * [documentChatUiEnabled] 
-/// * [documentChatAvailable] 
-/// * [documentChatReadiness] 
-/// * [documentChatReadinessReason] 
-/// * [documentChatOllamaModel] 
-/// * [documentChatRunsOnCpu] 
-/// * [documentChatLocalModelEnabled] 
-/// * [documentChatLocalModelReady] 
 /// * [advancedFeaturesEnabled] 
-/// * [fuzzyDuplicateDetectionEnabled] 
 /// * [useArenaWinnerAsDefault] 
 /// * [arenaWinnerEngine] 
-/// * [labelFieldConfidenceThreshold] 
 /// * [fieldExtractionConfidenceGateEnabled] 
 /// * [fieldExtractionRequiredLabelIds] 
 /// * [themePreference] 
 /// * [locale] 
-/// * [documentChatCloudBaseUrl] 
-/// * [documentChatCloudApiKeyConfigured] 
 @BuiltValue()
 abstract class UserSettingsResponseDto implements Built<UserSettingsResponseDto, UserSettingsResponseDtoBuilder> {
   @BuiltValueField(wireName: r'preferredExtractorEngine')
   String get preferredExtractorEngine;
 
-  @BuiltValueField(wireName: r'preferredChatProvider')
-  String? get preferredChatProvider;
-
-  @BuiltValueField(wireName: r'effectiveChatProvider')
-  String? get effectiveChatProvider;
-
-  @BuiltValueField(wireName: r'customerChatProvider')
-  String? get customerChatProvider;
-
-  @BuiltValueField(wireName: r'documentChatUiEnabled')
-  bool? get documentChatUiEnabled;
-
-  @BuiltValueField(wireName: r'documentChatAvailable')
-  bool? get documentChatAvailable;
-
-  @BuiltValueField(wireName: r'documentChatReadiness')
-  UserSettingsResponseDtoDocumentChatReadinessEnum? get documentChatReadiness;
-  // enum documentChatReadinessEnum {  ready,  off,  unavailable,  starting,  };
-
-  @BuiltValueField(wireName: r'documentChatReadinessReason')
-  String? get documentChatReadinessReason;
-
-  @BuiltValueField(wireName: r'documentChatOllamaModel')
-  String? get documentChatOllamaModel;
-
-  @BuiltValueField(wireName: r'documentChatRunsOnCpu')
-  bool? get documentChatRunsOnCpu;
-
-  @BuiltValueField(wireName: r'documentChatLocalModelEnabled')
-  bool? get documentChatLocalModelEnabled;
-
-  @BuiltValueField(wireName: r'documentChatLocalModelReady')
-  bool? get documentChatLocalModelReady;
-
   @BuiltValueField(wireName: r'advancedFeaturesEnabled')
   bool? get advancedFeaturesEnabled;
-
-  @BuiltValueField(wireName: r'fuzzyDuplicateDetectionEnabled')
-  bool? get fuzzyDuplicateDetectionEnabled;
 
   @BuiltValueField(wireName: r'useArenaWinnerAsDefault')
   bool get useArenaWinnerAsDefault;
 
   @BuiltValueField(wireName: r'arenaWinnerEngine')
   String? get arenaWinnerEngine;
-
-  @BuiltValueField(wireName: r'labelFieldConfidenceThreshold')
-  num? get labelFieldConfidenceThreshold;
 
   @BuiltValueField(wireName: r'fieldExtractionConfidenceGateEnabled')
   bool? get fieldExtractionConfidenceGateEnabled;
@@ -102,12 +47,6 @@ abstract class UserSettingsResponseDto implements Built<UserSettingsResponseDto,
   @BuiltValueField(wireName: r'locale')
   UserSettingsResponseDtoLocaleEnum? get locale;
   // enum localeEnum {  de,  en,  };
-
-  @BuiltValueField(wireName: r'documentChatCloudBaseUrl')
-  String? get documentChatCloudBaseUrl;
-
-  @BuiltValueField(wireName: r'documentChatCloudApiKeyConfigured')
-  bool? get documentChatCloudApiKeyConfigured;
 
   UserSettingsResponseDto._();
 
@@ -137,94 +76,10 @@ class _$UserSettingsResponseDtoSerializer implements PrimitiveSerializer<UserSet
       object.preferredExtractorEngine,
       specifiedType: const FullType(String),
     );
-    if (object.preferredChatProvider != null) {
-      yield r'preferredChatProvider';
-      yield serializers.serialize(
-        object.preferredChatProvider,
-        specifiedType: const FullType(String),
-      );
-    }
-    if (object.effectiveChatProvider != null) {
-      yield r'effectiveChatProvider';
-      yield serializers.serialize(
-        object.effectiveChatProvider,
-        specifiedType: const FullType(String),
-      );
-    }
-    if (object.customerChatProvider != null) {
-      yield r'customerChatProvider';
-      yield serializers.serialize(
-        object.customerChatProvider,
-        specifiedType: const FullType(String),
-      );
-    }
-    if (object.documentChatUiEnabled != null) {
-      yield r'documentChatUiEnabled';
-      yield serializers.serialize(
-        object.documentChatUiEnabled,
-        specifiedType: const FullType(bool),
-      );
-    }
-    if (object.documentChatAvailable != null) {
-      yield r'documentChatAvailable';
-      yield serializers.serialize(
-        object.documentChatAvailable,
-        specifiedType: const FullType(bool),
-      );
-    }
-    if (object.documentChatReadiness != null) {
-      yield r'documentChatReadiness';
-      yield serializers.serialize(
-        object.documentChatReadiness,
-        specifiedType: const FullType(UserSettingsResponseDtoDocumentChatReadinessEnum),
-      );
-    }
-    if (object.documentChatReadinessReason != null) {
-      yield r'documentChatReadinessReason';
-      yield serializers.serialize(
-        object.documentChatReadinessReason,
-        specifiedType: const FullType(String),
-      );
-    }
-    if (object.documentChatOllamaModel != null) {
-      yield r'documentChatOllamaModel';
-      yield serializers.serialize(
-        object.documentChatOllamaModel,
-        specifiedType: const FullType(String),
-      );
-    }
-    if (object.documentChatRunsOnCpu != null) {
-      yield r'documentChatRunsOnCpu';
-      yield serializers.serialize(
-        object.documentChatRunsOnCpu,
-        specifiedType: const FullType(bool),
-      );
-    }
-    if (object.documentChatLocalModelEnabled != null) {
-      yield r'documentChatLocalModelEnabled';
-      yield serializers.serialize(
-        object.documentChatLocalModelEnabled,
-        specifiedType: const FullType(bool),
-      );
-    }
-    if (object.documentChatLocalModelReady != null) {
-      yield r'documentChatLocalModelReady';
-      yield serializers.serialize(
-        object.documentChatLocalModelReady,
-        specifiedType: const FullType(bool),
-      );
-    }
     if (object.advancedFeaturesEnabled != null) {
       yield r'advancedFeaturesEnabled';
       yield serializers.serialize(
         object.advancedFeaturesEnabled,
-        specifiedType: const FullType(bool),
-      );
-    }
-    if (object.fuzzyDuplicateDetectionEnabled != null) {
-      yield r'fuzzyDuplicateDetectionEnabled';
-      yield serializers.serialize(
-        object.fuzzyDuplicateDetectionEnabled,
         specifiedType: const FullType(bool),
       );
     }
@@ -238,13 +93,6 @@ class _$UserSettingsResponseDtoSerializer implements PrimitiveSerializer<UserSet
       yield serializers.serialize(
         object.arenaWinnerEngine,
         specifiedType: const FullType(String),
-      );
-    }
-    if (object.labelFieldConfidenceThreshold != null) {
-      yield r'labelFieldConfidenceThreshold';
-      yield serializers.serialize(
-        object.labelFieldConfidenceThreshold,
-        specifiedType: const FullType(num),
       );
     }
     if (object.fieldExtractionConfidenceGateEnabled != null) {
@@ -273,20 +121,6 @@ class _$UserSettingsResponseDtoSerializer implements PrimitiveSerializer<UserSet
       yield serializers.serialize(
         object.locale,
         specifiedType: const FullType(UserSettingsResponseDtoLocaleEnum),
-      );
-    }
-    if (object.documentChatCloudBaseUrl != null) {
-      yield r'documentChatCloudBaseUrl';
-      yield serializers.serialize(
-        object.documentChatCloudBaseUrl,
-        specifiedType: const FullType(String),
-      );
-    }
-    if (object.documentChatCloudApiKeyConfigured != null) {
-      yield r'documentChatCloudApiKeyConfigured';
-      yield serializers.serialize(
-        object.documentChatCloudApiKeyConfigured,
-        specifiedType: const FullType(bool),
       );
     }
   }
@@ -319,96 +153,12 @@ class _$UserSettingsResponseDtoSerializer implements PrimitiveSerializer<UserSet
           ) as String;
           result.preferredExtractorEngine = valueDes;
           break;
-        case r'preferredChatProvider':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(String),
-          ) as String;
-          result.preferredChatProvider = valueDes;
-          break;
-        case r'effectiveChatProvider':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(String),
-          ) as String;
-          result.effectiveChatProvider = valueDes;
-          break;
-        case r'customerChatProvider':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(String),
-          ) as String;
-          result.customerChatProvider = valueDes;
-          break;
-        case r'documentChatUiEnabled':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(bool),
-          ) as bool;
-          result.documentChatUiEnabled = valueDes;
-          break;
-        case r'documentChatAvailable':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(bool),
-          ) as bool;
-          result.documentChatAvailable = valueDes;
-          break;
-        case r'documentChatReadiness':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(UserSettingsResponseDtoDocumentChatReadinessEnum),
-          ) as UserSettingsResponseDtoDocumentChatReadinessEnum;
-          result.documentChatReadiness = valueDes;
-          break;
-        case r'documentChatReadinessReason':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(String),
-          ) as String;
-          result.documentChatReadinessReason = valueDes;
-          break;
-        case r'documentChatOllamaModel':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(String),
-          ) as String;
-          result.documentChatOllamaModel = valueDes;
-          break;
-        case r'documentChatRunsOnCpu':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(bool),
-          ) as bool;
-          result.documentChatRunsOnCpu = valueDes;
-          break;
-        case r'documentChatLocalModelEnabled':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(bool),
-          ) as bool;
-          result.documentChatLocalModelEnabled = valueDes;
-          break;
-        case r'documentChatLocalModelReady':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(bool),
-          ) as bool;
-          result.documentChatLocalModelReady = valueDes;
-          break;
         case r'advancedFeaturesEnabled':
           final valueDes = serializers.deserialize(
             value,
             specifiedType: const FullType(bool),
           ) as bool;
           result.advancedFeaturesEnabled = valueDes;
-          break;
-        case r'fuzzyDuplicateDetectionEnabled':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(bool),
-          ) as bool;
-          result.fuzzyDuplicateDetectionEnabled = valueDes;
           break;
         case r'useArenaWinnerAsDefault':
           final valueDes = serializers.deserialize(
@@ -423,13 +173,6 @@ class _$UserSettingsResponseDtoSerializer implements PrimitiveSerializer<UserSet
             specifiedType: const FullType(String),
           ) as String;
           result.arenaWinnerEngine = valueDes;
-          break;
-        case r'labelFieldConfidenceThreshold':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(num),
-          ) as num;
-          result.labelFieldConfidenceThreshold = valueDes;
           break;
         case r'fieldExtractionConfidenceGateEnabled':
           final valueDes = serializers.deserialize(
@@ -459,20 +202,6 @@ class _$UserSettingsResponseDtoSerializer implements PrimitiveSerializer<UserSet
           ) as UserSettingsResponseDtoLocaleEnum;
           result.locale = valueDes;
           break;
-        case r'documentChatCloudBaseUrl':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(String),
-          ) as String;
-          result.documentChatCloudBaseUrl = valueDes;
-          break;
-        case r'documentChatCloudApiKeyConfigured':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(bool),
-          ) as bool;
-          result.documentChatCloudApiKeyConfigured = valueDes;
-          break;
         default:
           unhandled.add(key);
           unhandled.add(value);
@@ -500,25 +229,6 @@ class _$UserSettingsResponseDtoSerializer implements PrimitiveSerializer<UserSet
     );
     return result.build();
   }
-}
-
-class UserSettingsResponseDtoDocumentChatReadinessEnum extends EnumClass {
-
-  @BuiltValueEnumConst(wireName: r'ready')
-  static const UserSettingsResponseDtoDocumentChatReadinessEnum ready = _$userSettingsResponseDtoDocumentChatReadinessEnum_ready;
-  @BuiltValueEnumConst(wireName: r'off')
-  static const UserSettingsResponseDtoDocumentChatReadinessEnum off = _$userSettingsResponseDtoDocumentChatReadinessEnum_off;
-  @BuiltValueEnumConst(wireName: r'unavailable')
-  static const UserSettingsResponseDtoDocumentChatReadinessEnum unavailable = _$userSettingsResponseDtoDocumentChatReadinessEnum_unavailable;
-  @BuiltValueEnumConst(wireName: r'starting')
-  static const UserSettingsResponseDtoDocumentChatReadinessEnum starting = _$userSettingsResponseDtoDocumentChatReadinessEnum_starting;
-
-  static Serializer<UserSettingsResponseDtoDocumentChatReadinessEnum> get serializer => _$userSettingsResponseDtoDocumentChatReadinessEnumSerializer;
-
-  const UserSettingsResponseDtoDocumentChatReadinessEnum._(String name): super(name);
-
-  static BuiltSet<UserSettingsResponseDtoDocumentChatReadinessEnum> get values => _$userSettingsResponseDtoDocumentChatReadinessEnumValues;
-  static UserSettingsResponseDtoDocumentChatReadinessEnum valueOf(String name) => _$userSettingsResponseDtoDocumentChatReadinessEnumValueOf(name);
 }
 
 class UserSettingsResponseDtoThemePreferenceEnum extends EnumClass {

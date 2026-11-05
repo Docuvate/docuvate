@@ -2,7 +2,6 @@ import { randomUUID } from 'node:crypto';
 
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
-import { PgDocumentChatThreadRepository } from '../../src/modules/documents/infrastructure/pg-document-chat-thread.repository.js';
 import { PgDuplicateStackRepository } from '../../src/modules/duplicates/infrastructure/pg-duplicate-stack.repository.js';
 import { PgLabelEmbeddingRepository } from '../../src/modules/labels/infrastructure/pg-label-embedding.repository.js';
 import { EnsureDocumentRepresentationUseCase } from '../../src/modules/representation/application/ensure-document-representation.use-case.js';
@@ -23,7 +22,6 @@ describe('junction ownership via parent joins (Testcontainers Postgres)', () => 
   let userB: string;
   const docA = randomUUID();
   const tagA = randomUUID();
-  const threadId = randomUUID();
 
   beforeAll(async () => {
     userA = newIsolationUserId();
@@ -72,16 +70,8 @@ describe('junction ownership via parent joins (Testcontainers Postgres)', () => 
       `INSERT INTO document_stack_members (stack_id, document_id, role) VALUES ($1, $2, 'primary')`,
       [stack.rows[0].id, docA]
     );
-    await pool.query(
-      `INSERT INTO chat_threads (id, user_id, title, scope) VALUES ($1, $2, 'x', 'document')`,
-      [threadId, userA]
-    );
-    await pool.query(`INSERT INTO chat_thread_documents (thread_id, document_id) VALUES ($1, $2)`, [
-      threadId,
-      docA,
-    ]);
     const { splitTextChunksWithSpans } =
-      await import('../../src/modules/cited-chat/domain/split-text-chunks-with-spans.js');
+      await import('../../src/modules/search/domain/split-text-chunks-with-spans.js');
     await new PgGlobalSearchRepository(pool).indexDocumentChunks(
       userA,
       docA,
@@ -95,19 +85,17 @@ describe('junction ownership via parent joins (Testcontainers Postgres)', () => 
     await closeIntegrationPool();
   });
 
-  it('hides embeddings, stacks, chat links and centroids from other users', async () => {
+  it('hides embeddings, stacks and centroids from other users', async () => {
     const representationRepo = new PgDocumentRepresentationRepository(pool);
     const ensureStub: EnsureDocumentRepresentationUseCase = {
       execute: () => Promise.resolve(true),
     };
     const embeddings = new PgLabelEmbeddingRepository(pool, representationRepo, ensureStub);
     const stacks = new PgDuplicateStackRepository(pool);
-    const chat = new PgDocumentChatThreadRepository(pool);
 
     expect(await embeddings.getDocumentEmbedding(docA)).not.toBeNull();
     expect(await embeddings.listDocumentEmbeddingsForUser(userB)).toHaveLength(0);
     expect(await stacks.getMembership(docA, userB)).toBeNull();
-    expect(await chat.listThreadsForDocument(docA, userB)).toHaveLength(0);
 
     const centroids = await embeddings.getTagCentroids(userA);
     expect(centroids.find((c) => c.tagId === tagA)?.sampleCount).toBe(3);

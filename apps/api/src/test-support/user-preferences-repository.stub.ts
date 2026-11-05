@@ -10,7 +10,6 @@ export function createUserPreferencesEntity(
   return {
     userId: 'user',
     preferredExtractorEngine: 'default',
-    preferredChatProvider: null,
     useArenaWinnerAsDefault: false,
     arenaWinnerEngine: null,
     labelNearSimilarityThreshold: 0.7,
@@ -19,8 +18,6 @@ export function createUserPreferencesEntity(
     advancedFeaturesEnabled: false,
     themePreference: 'system',
     locale: null,
-    documentChatCloudBaseUrl: null,
-    documentChatCloudApiKey: null,
     updatedAt: new Date('2026-01-01T00:00:00.000Z'),
     ...overrides,
   };

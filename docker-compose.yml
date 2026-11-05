@@ -1,6 +1,5 @@
 # Docuvate CE Compose — default images: ghcr.io/docuvate/docuvate-{api,web,worker}:edge
 # Minimum host RAM: 6 GiB base profile (sum of mem_limit below + OS; see README#quickstart).
-# Optional profile chat-local adds Ollama (~2 GiB); use >= 8 GiB host RAM with that profile.
 # Local source builds: docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build
 name: docuvate
 
@@ -117,37 +116,6 @@ services:
       timeout: 3s
       retries: 10
 
-  ollama:
-    profiles: [chat-local]
-    image: ollama/ollama:latest
-    restart: unless-stopped
-    mem_limit: ${OLLAMA_MEM_LIMIT:-2g}
-    volumes:
-      - ollamadata:/root/.ollama
-    ports:
-      - '127.0.0.1:11434:11434'
-    healthcheck:
-      test: ['CMD', 'ollama', 'list']
-      interval: 5s
-      timeout: 10s
-      retries: 30
-      start_period: 15s
-
-  ollama-init:
-    profiles: [chat-local]
-    image: ollama/ollama:latest
-    depends_on:
-      ollama:
-        condition: service_healthy
-    entrypoint: >
-      /bin/sh -c "
-      set -e;
-      ollama pull ${OLLAMA_MODEL:-qwen2.5:1.5b};
-      "
-    environment:
-      OLLAMA_HOST: http://ollama:11434
-    restart: 'no'
-
   sftp-ingest-data-init:
     image: alpine:3.20@sha256:c64c687cbea9300178b30c95835354e34c4e4febc4badfe27102879de0483b5e
     user: '0:0'
@@ -227,19 +195,7 @@ services:
       WORKER_URL: http://worker:8000
       WORKER_SECRET: worker-shared-secret
       WORKER_COMPARE_TIMEOUT_MS: '600000'
-      DOCUMENT_CHAT_PROVIDER: rag-ollama
-      OLLAMA_URL: ${OLLAMA_URL:-}
-      OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen2.5:1.5b}
-      OLLAMA_CHAT_TIMEOUT_MS: '180000'
-      OLLAMA_CHAT_IDLE_TIMEOUT_MS: '120000'
-      OLLAMA_NUM_CTX: '2048'
-      OLLAMA_NUM_PREDICT: '256'
-      OLLAMA_KEEP_ALIVE: '30m'
-      WORKER_RAG_CONTEXT_TIMEOUT_MS: '120000'
-      DOCUMENT_CHAT_GENERATION_CONCURRENCY: '1'
       DOCUVATE_AI_PROFILE: ${DOCUVATE_AI_PROFILE:-cpu-small}
-      RAG_RERANKER_GATE_MIN: '0.21'
-      RAG_FUSION_GATE_MIN: '0.02'
       OTEL_SDK_DISABLED: 'true'
       NODE_ENV: production
       WEB_ORIGIN: http://localhost:5173
@@ -260,7 +216,6 @@ services:
       DOCUVATE_FEATURE_ANSWER_ABSTENTION: ${DOCUVATE_FEATURE_ANSWER_ABSTENTION:-false}
       DOCUVATE_FEATURE_LEARNED_VALUE_TYPES: ${DOCUVATE_FEATURE_LEARNED_VALUE_TYPES:-true}
       DOCUVATE_FEATURE_LAYOUT_KEY_VALUE_ROLES: ${DOCUVATE_FEATURE_LAYOUT_KEY_VALUE_ROLES:-false}
-      DOCUVATE_FEATURE_LOCAL_CHAT_MODEL: ${DOCUVATE_FEATURE_LOCAL_CHAT_MODEL:-false}
     healthcheck:
       test:
         [
@@ -311,7 +266,6 @@ services:
       PADDLE_OCR_LANG: german
       PADDLE_PREWARM_ON_START: ${PADDLE_PREWARM_ON_START:-0}
       DOCUVATE_AI_PROFILE: ${DOCUVATE_AI_PROFILE:-cpu-small}
-      DOCUVATE_RERANKER_MODEL: BAAI/bge-reranker-v2-m3-int8
     volumes:
       - workermlcache:/var/lib/docuvate-ml
     healthcheck:
@@ -375,6 +329,5 @@ services:
 volumes:
   pgdata:
   miniodata:
-  ollamadata:
   workermlcache:
   sftpingestdata:

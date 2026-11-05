@@ -23,22 +23,27 @@ Serializers _$serializers = (new Serializers().toBuilder()
       ..add(AdminUserResponseDto.serializer)
       ..add(AdminUserResponseDtoAccountStatusEnum.serializer)
       ..add(AdminUserResponseDtoRoleEnum.serializer)
+      ..add(ApplyFieldCorrectionRequestDto.serializer)
+      ..add(ApplyFieldCorrectionRequestDtoOpEnum.serializer)
+      ..add(ApplyFieldCorrectionRequestDtoScopeEnum.serializer)
+      ..add(ApplyFieldCorrectionRequestDtoShapeEnum.serializer)
+      ..add(ApplyFieldCorrectionResponseDto.serializer)
       ..add(ApplyLabelCorrectionRequestDto.serializer)
       ..add(ApplyLabelCorrectionResponseDto.serializer)
+      ..add(ApplyTableCorrectionRequestDto.serializer)
+      ..add(ApplyTableCorrectionRequestDtoOpEnum.serializer)
+      ..add(ApplyTableCorrectionRequestDtoShapeEnum.serializer)
+      ..add(ApplyTableCorrectionRequestDtoTableTypeEnum.serializer)
+      ..add(ApplyTableCorrectionResponseDto.serializer)
       ..add(AuthOidcProviderPublicResponseDto.serializer)
       ..add(AuthSignInOptionsResponseDto.serializer)
       ..add(BanAdminUserRequestDto.serializer)
-      ..add(ChatMessageDto.serializer)
-      ..add(ChatMessageDtoRoleEnum.serializer)
-      ..add(ChatMessageRecordDto.serializer)
-      ..add(ChatMessageRecordDtoGenerationPhaseEnum.serializer)
-      ..add(ChatMessageRecordDtoGenerationStatusEnum.serializer)
-      ..add(ChatMessageRecordDtoRoleEnum.serializer)
+      ..add(ConfirmDocumentFieldRequestDto.serializer)
+      ..add(ConfirmDocumentFieldResponseDto.serializer)
       ..add(ConfirmLabelRecommendationBlocklistPatternRequestDto.serializer)
       ..add(CreateAdminOidcProviderRequestDto.serializer)
       ..add(CreateConnectorInstallationRequestDto.serializer)
       ..add(CreateConnectorInstallationRequestDtoPluginIdEnum.serializer)
-      ..add(CreateDocumentChatThreadRequestDto.serializer)
       ..add(CreateFolderRequestDto.serializer)
       ..add(CreateSavedDocumentViewRequestDto.serializer)
       ..add(CreateSavedDocumentViewRequestDtoFilterModeEnum.serializer)
@@ -63,26 +68,30 @@ Serializers _$serializers = (new Serializers().toBuilder()
       ..add(DocumentBulkActionDto.serializer)
       ..add(DocumentBulkActionDtoActionEnum.serializer)
       ..add(DocumentBulkRequestDto.serializer)
-      ..add(DocumentChatProviderInfoDto.serializer)
-      ..add(DocumentChatProviderListResponseDto.serializer)
-      ..add(DocumentChatProvidersCatalogMetaDto.serializer)
-      ..add(DocumentChatRequestDto.serializer)
-      ..add(DocumentChatResponseDto.serializer)
-      ..add(DocumentChatThreadDto.serializer)
-      ..add(DocumentChatThreadDtoActiveGenerationStatusEnum.serializer)
-      ..add(DocumentChatThreadDtoScopeEnum.serializer)
-      ..add(DocumentChatThreadListResponseDto.serializer)
-      ..add(DocumentChatThreadMessagesResponseDto.serializer)
-      ..add(DocumentChatUnavailableBackendInfoDto.serializer)
+      ..add(DocumentCorrectionDto.serializer)
+      ..add(DocumentCorrectionDtoKindEnum.serializer)
+      ..add(DocumentCorrectionDtoStatusEnum.serializer)
       ..add(DocumentDuplicateStackSummaryDtoClass.serializer)
       ..add(DocumentExtractionImageDto.serializer)
       ..add(DocumentExtractionImageDtoKindEnum.serializer)
       ..add(DocumentExtractionSummaryDto.serializer)
       ..add(DocumentExtractionSummaryDtoLayoutIrPagesInner.serializer)
+      ..add(DocumentLayoutTokensResponseDto.serializer)
       ..add(DocumentListLibraryUiDto.serializer)
       ..add(DocumentListResponseDto.serializer)
       ..add(DocumentPipelineModuleDescriptorDto.serializer)
       ..add(DocumentPipelineModulesResponseDto.serializer)
+      ..add(DocumentRegionDto.serializer)
+      ..add(DocumentRegionDtoRoleEnum.serializer)
+      ..add(DocumentRegionDtoShapeEnum.serializer)
+      ..add(DocumentRegionFieldDto.serializer)
+      ..add(DocumentRegionListResponseDto.serializer)
+      ..add(DocumentRegionTableCellDto.serializer)
+      ..add(DocumentRegionTableDto.serializer)
+      ..add(DocumentRegionTableDtoTableTypeEnum.serializer)
+      ..add(DocumentRegionTableMergeDto.serializer)
+      ..add(DocumentRegionTableRuleDto.serializer)
+      ..add(DocumentRegionTableRuleDtoAxisEnum.serializer)
       ..add(DocumentResponseDto.serializer)
       ..add(DocumentResponseDtoStatusEnum.serializer)
       ..add(DocumentReviewFieldSuggestionDtoClass.serializer)
@@ -105,8 +114,6 @@ Serializers _$serializers = (new Serializers().toBuilder()
       ..add(ExtractionEngineListResponseDto.serializer)
       ..add(FeatureFlagsResponseDto.serializer)
       ..add(FolderListResponseDto.serializer)
-      ..add(GlobalChatSuggestionBootstrapDtoClass.serializer)
-      ..add(GlobalChatSuggestionBootstrapDtoClassContractEndSample.serializer)
       ..add(ImportFromConnectorRequestDto.serializer)
       ..add(InstallationDashboardDefaultResponseDto.serializer)
       ..add(InviteAdminUserRequestDto.serializer)
@@ -134,6 +141,7 @@ Serializers _$serializers = (new Serializers().toBuilder()
       ..add(LayoutIrVectorDtoKindEnum.serializer)
       ..add(LayoutIrWidgetDto.serializer)
       ..add(LayoutIrWidgetDtoKindEnum.serializer)
+      ..add(LayoutTokenDto.serializer)
       ..add(LayoutTypstResponseDto.serializer)
       ..add(LayoutTypstResponseDtoExportModeEnum.serializer)
       ..add(LibraryTableColumnId.serializer)
@@ -154,7 +162,6 @@ Serializers _$serializers = (new Serializers().toBuilder()
       ..add(PasswordPolicyResponseDto.serializer)
       ..add(PreviewConnectorSourceNodesRequestDto.serializer)
       ..add(ProblemDetailsDto.serializer)
-      ..add(ProposeLabelRecommendationBlocklistPatternRequestDto.serializer)
       ..add(RecognizedFieldFilterValuesResponseDto.serializer)
       ..add(RemoteConfigResponseDto.serializer)
       ..add(ReorderSavedDocumentViewsRequestDto.serializer)
@@ -176,8 +183,6 @@ Serializers _$serializers = (new Serializers().toBuilder()
       ..add(SavedDocumentViewDtoClassVisibilityEnum.serializer)
       ..add(SavedDocumentViewFieldFilterDtoClass.serializer)
       ..add(SavedDocumentViewListResponseDto.serializer)
-      ..add(SendDocumentChatThreadMessageRequestDto.serializer)
-      ..add(SendDocumentChatThreadMessageResponseDto.serializer)
       ..add(SetAdminUserFeatureFlagRequestDto.serializer)
       ..add(SetAdminUserFeatureFlagRequestDtoFlagEnum.serializer)
       ..add(SetAdminUserRoleRequestDto.serializer)
@@ -194,7 +199,6 @@ Serializers _$serializers = (new Serializers().toBuilder()
       ..add(TriggerMlRetrainRequestDto.serializer)
       ..add(UpdateAdminOidcProviderRequestDto.serializer)
       ..add(UpdateConnectorInstallationRequestDto.serializer)
-      ..add(UpdateDocumentChatThreadRequestDto.serializer)
       ..add(UpdateDocumentRequestDto.serializer)
       ..add(UpdateFolderRequestDto.serializer)
       ..add(UpdatePaperlessInstallationRequestDto.serializer)
@@ -212,10 +216,20 @@ Serializers _$serializers = (new Serializers().toBuilder()
       ..add(UpdateUserSettingsRequestDto.serializer)
       ..add(UpdateUserSettingsRequestDtoLocaleEnum.serializer)
       ..add(UpdateUserSettingsRequestDtoThemePreferenceEnum.serializer)
+      ..add(UpdateWorkspaceMlSettingsRequestDto.serializer)
+      ..add(
+          UpdateWorkspaceMlSettingsRequestDtoDuplicateDetectionEnum.serializer)
+      ..add(UpdateWorkspaceMlSettingsRequestDtoFieldAcceptanceEnum.serializer)
+      ..add(UpdateWorkspaceMlSettingsRequestDtoLabelAutoAssignEnum.serializer)
+      ..add(UpdateWorkspaceMlSettingsRequestDtoLabelSuggestionsEnum.serializer)
       ..add(UserSettingsResponseDto.serializer)
-      ..add(UserSettingsResponseDtoDocumentChatReadinessEnum.serializer)
       ..add(UserSettingsResponseDtoLocaleEnum.serializer)
       ..add(UserSettingsResponseDtoThemePreferenceEnum.serializer)
+      ..add(WorkspaceMlSettingsResponseDto.serializer)
+      ..add(WorkspaceMlSettingsResponseDtoDuplicateDetectionEnum.serializer)
+      ..add(WorkspaceMlSettingsResponseDtoFieldAcceptanceEnum.serializer)
+      ..add(WorkspaceMlSettingsResponseDtoLabelAutoAssignEnum.serializer)
+      ..add(WorkspaceMlSettingsResponseDtoLabelSuggestionsEnum.serializer)
       ..addBuilderFactory(
           const FullType(
               BuiltList, const [const FullType(AdminOidcProviderResponseDto)]),
@@ -235,13 +249,6 @@ Serializers _$serializers = (new Serializers().toBuilder()
           ]),
           () => new ListBuilder<BuiltList<LayoutIrTableCellDto>>())
       ..addBuilderFactory(
-          const FullType(BuiltList, const [const FullType(ChatMessageDto)]),
-          () => new ListBuilder<ChatMessageDto>())
-      ..addBuilderFactory(
-          const FullType(
-              BuiltList, const [const FullType(ChatMessageRecordDto)]),
-          () => new ListBuilder<ChatMessageRecordDto>())
-      ..addBuilderFactory(
           const FullType(
               BuiltList, const [const FullType(DashboardWidgetDtoClass)]),
           () => new ListBuilder<DashboardWidgetDtoClass>())
@@ -254,25 +261,24 @@ Serializers _$serializers = (new Serializers().toBuilder()
               BuiltList, const [const FullType(DashboardWidgetInputDto)]),
           () => new ListBuilder<DashboardWidgetInputDto>())
       ..addBuilderFactory(
-          const FullType(
-              BuiltList, const [const FullType(DocumentChatProviderInfoDto)]),
-          () => new ListBuilder<DocumentChatProviderInfoDto>())
-      ..addBuilderFactory(
-          const FullType(BuiltList,
-              const [const FullType(DocumentChatUnavailableBackendInfoDto)]),
-          () => new ListBuilder<DocumentChatUnavailableBackendInfoDto>())
-      ..addBuilderFactory(
-          const FullType(
-              BuiltList, const [const FullType(DocumentChatProviderInfoDto)]),
-          () => new ListBuilder<DocumentChatProviderInfoDto>())
-      ..addBuilderFactory(
-          const FullType(
-              BuiltList, const [const FullType(DocumentChatThreadDto)]),
-          () => new ListBuilder<DocumentChatThreadDto>())
-      ..addBuilderFactory(
           const FullType(BuiltList,
               const [const FullType(DocumentPipelineModuleDescriptorDto)]),
           () => new ListBuilder<DocumentPipelineModuleDescriptorDto>())
+      ..addBuilderFactory(
+          const FullType(BuiltList, const [const FullType(DocumentRegionDto)]),
+          () => new ListBuilder<DocumentRegionDto>())
+      ..addBuilderFactory(
+          const FullType(
+              BuiltList, const [const FullType(DocumentRegionTableRuleDto)]),
+          () => new ListBuilder<DocumentRegionTableRuleDto>())
+      ..addBuilderFactory(
+          const FullType(
+              BuiltList, const [const FullType(DocumentRegionTableMergeDto)]),
+          () => new ListBuilder<DocumentRegionTableMergeDto>())
+      ..addBuilderFactory(
+          const FullType(
+              BuiltList, const [const FullType(DocumentRegionTableCellDto)]),
+          () => new ListBuilder<DocumentRegionTableCellDto>())
       ..addBuilderFactory(
           const FullType(BuiltList,
               const [const FullType(DocumentReviewQueueItemDtoClass)]),
@@ -372,6 +378,9 @@ Serializers _$serializers = (new Serializers().toBuilder()
           const FullType(BuiltList, const [const FullType(LayoutIrPageDto)]),
           () => new ListBuilder<LayoutIrPageDto>())
       ..addBuilderFactory(
+          const FullType(BuiltList, const [const FullType(LayoutTokenDto)]),
+          () => new ListBuilder<LayoutTokenDto>())
+      ..addBuilderFactory(
           const FullType(
               BuiltList, const [const FullType(LibraryTableColumnId)]),
           () => new ListBuilder<LibraryTableColumnId>())
@@ -469,15 +478,6 @@ Serializers _$serializers = (new Serializers().toBuilder()
           const FullType(BuiltList, const [const FullType(String)]),
           () => new ListBuilder<String>())
       ..addBuilderFactory(
-          const FullType(BuiltList, const [const FullType(String)]),
-          () => new ListBuilder<String>())
-      ..addBuilderFactory(
-          const FullType(BuiltList, const [const FullType(String)]),
-          () => new ListBuilder<String>())
-      ..addBuilderFactory(
-          const FullType(BuiltList, const [const FullType(String)]),
-          () => new ListBuilder<String>())
-      ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(ExtractedFieldDto)]),
           () => new ListBuilder<ExtractedFieldDto>())
       ..addBuilderFactory(
@@ -489,6 +489,15 @@ Serializers _$serializers = (new Serializers().toBuilder()
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(String)]),
           () => new ListBuilder<String>())
+      ..addBuilderFactory(
+          const FullType(BuiltList, const [const FullType(num)]),
+          () => new ListBuilder<num>())
+      ..addBuilderFactory(
+          const FullType(BuiltList, const [const FullType(num)]),
+          () => new ListBuilder<num>())
+      ..addBuilderFactory(
+          const FullType(BuiltList, const [const FullType(num)]),
+          () => new ListBuilder<num>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(num)]),
           () => new ListBuilder<num>())

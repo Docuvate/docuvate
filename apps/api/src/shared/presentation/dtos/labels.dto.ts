@@ -13,7 +13,6 @@ import type {
   LabelRecommendationDto,
   LabelRecommendationListResponse,
   LabelRecommendationsLoadState,
-  ProposeLabelRecommendationBlocklistPatternRequest,
 } from '@docuvate/contracts';
 import { IsArray, IsBoolean, IsOptional, IsString, IsUUID } from 'class-validator';
 
@@ -111,12 +110,6 @@ export class AddLabelRecommendationBlocklistRequestDto implements AddLabelRecomm
 export class LabelRecommendationBlocklistListResponseDto {
   items!: LabelRecommendationBlocklistEntryDto[];
   patterns!: LabelRecommendationBlocklistPatternDto[];
-}
-
-export class ProposeLabelRecommendationBlocklistPatternRequestDto implements ProposeLabelRecommendationBlocklistPatternRequest {
-  @IsArray()
-  @IsString({ each: true })
-  phrases!: string[];
 }
 
 export class ConfirmLabelRecommendationBlocklistPatternRequestDto implements ConfirmLabelRecommendationBlocklistPatternRequest {
