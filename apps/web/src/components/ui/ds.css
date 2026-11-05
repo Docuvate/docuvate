@@ -189,7 +189,7 @@
 .confidence-track {
   width: 3.5rem;
   height: 0.25rem;
-  border-radius: 0.125rem;
+  border-radius: var(--dv-radius-xs);
   background: var(--dv-color-header-control-bg);
   overflow: hidden;
 }
@@ -252,17 +252,29 @@
 
 .tab {
   display: inline-flex;
-  align-items: flex-start;
+  align-items: center;
   gap: var(--dv-space-xs);
-  padding-top: var(--dv-space-xs);
+  min-height: var(--dv-control-height);
+  padding: 0;
   border: none;
   background: transparent;
   cursor: pointer;
   font-size: var(--dv-font-size-sm);
   color: var(--dv-color-text-muted);
   font-weight: var(--dv-font-weight-medium);
-  border-bottom: 2px solid transparent;
-  margin-bottom: -1px;
+  border-bottom: var(--dv-border-width-thick) solid transparent;
+  margin-bottom: calc(-1 * var(--dv-border-width-hairline));
+  transition:
+    color var(--dv-motion-duration-fast) var(--dv-motion-easing-standard),
+    border-color var(--dv-motion-duration-fast) var(--dv-motion-easing-standard);
+}
+
+.tab:hover:not(.tab-active) {
+  color: var(--dv-color-text);
+}
+
+.tab:focus-visible {
+  outline-offset: var(--dv-focus-ring-offset-inset);
 }
 
 .tab-active {
@@ -355,7 +367,7 @@
 }
 
 .breadcrumb-ellipsis-trigger:hover {
-  background: var(--dv-color-surface-hover);
+  background: var(--dv-color-bg-overlay);
 }
 
 .breadcrumb-collapsed-menu {
@@ -1011,7 +1023,7 @@
 }
 
 .ds-connectivity-hero-question {
-  font-size: 1.25rem;
+  font-size: var(--dv-font-size-lg);
   font-weight: 600;
   fill: var(--dv-color-accent);
   font-family: var(--dv-font-family-sans, system-ui, sans-serif);
@@ -1099,7 +1111,7 @@
   stroke: var(--dv-color-accent);
   stroke-width: 3;
   stroke-linecap: round;
-  transition: stroke-dashoffset 0.35s ease;
+  transition: stroke-dashoffset var(--dv-motion-duration-slow) var(--dv-motion-easing-standard);
 }
 
 .ds-reconnect-progress-seconds {

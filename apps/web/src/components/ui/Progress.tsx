@@ -8,8 +8,8 @@ interface ProgressProps {
   max?: number;
   tone?: ProgressTone;
   className?: string;
-  /** Accessible label for the bar. */
-  label?: string;
+  /** Accessible name for the bar (required: role="progressbar" needs a name). */
+  label: string;
 }
 
 export function Progress({

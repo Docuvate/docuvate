@@ -89,6 +89,7 @@ export function ExtractionProgressBar({
       <div
         className="extraction-progress-track"
         role="progressbar"
+        aria-label={snapshot.stageLabel}
         aria-valuemin={0}
         aria-valuemax={100}
         aria-valuenow={ariaValueNow}

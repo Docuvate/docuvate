@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { useToastNotify } from '../components/save/ToastProvider';
 import { SavedViewsManageTable } from '../components/saved-views/SavedViewsManageTable';
 import { Button } from '../components/ui/Button';
+import { PageHeader } from '../components/ui/PageHeader';
 import {
   deleteSavedDocumentView,
   reorderSavedDocumentViews,
@@ -98,20 +99,20 @@ export function SavedViewsPage() {
 
   return (
     <div className="page saved-views-page" data-ux="page">
-      <header className="page-header">
-        <div>
-          <h1 data-ux="page-title">{t('savedViews.manageTitle')}</h1>
-          <p className="muted">{t('savedViews.manageLead')}</p>
-        </div>
-        <Button
-          type="button"
-          variant="secondary"
-          className="saved-views-open-library-btn"
-          onClick={() => { navigate(routes.documents); }}
-        >
-          {t('savedViews.openLibrary')}
-        </Button>
-      </header>
+      <PageHeader
+        title={t('savedViews.manageTitle')}
+        description={t('savedViews.manageLead')}
+        actions={
+          <Button
+            type="button"
+            variant="secondary"
+            className="saved-views-open-library-btn"
+            onClick={() => { navigate(routes.documents); }}
+          >
+            {t('savedViews.openLibrary')}
+          </Button>
+        }
+      />
 
       {loading ? <p className="muted">{t('dashboard.loading')}</p> : null}
 

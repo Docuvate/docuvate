@@ -18,7 +18,7 @@
   ],
   "scripts": {
     "build": "node ./build.mjs",
-    "test": "node ./contrast.test.mjs",
+    "test": "node ./contrast.test.mjs && node ./governance.test.mjs",
     "clean": "rm -rf dist"
   },
   "devDependencies": {

@@ -1,13 +1,16 @@
 {
   "motion": {
     "duration": {
-      "fast": { "value": "120ms" },
-      "normal": { "value": "200ms" },
-      "slow": { "value": "320ms" }
+      "instant": { "value": "80ms", "comment": "Colour/opacity feedback on press." },
+      "fast": { "value": "120ms", "comment": "Hover and focus transitions." },
+      "normal": { "value": "200ms", "comment": "Expand / collapse, menus." },
+      "slow": { "value": "320ms", "comment": "Drawers, dialogs, page-level transitions." }
     },
     "easing": {
       "standard": { "value": "cubic-bezier(0.4, 0, 0.2, 1)" },
-      "emphasized": { "value": "cubic-bezier(0.2, 0, 0, 1)" }
+      "emphasized": { "value": "cubic-bezier(0.2, 0, 0, 1)" },
+      "enter": { "value": "cubic-bezier(0, 0, 0.2, 1)", "comment": "Elements entering the screen." },
+      "exit": { "value": "cubic-bezier(0.4, 0, 1, 1)", "comment": "Elements leaving the screen." }
     }
   }
 }

@@ -3,34 +3,23 @@
 import '@docuvate/ui-catalog/styles.css';
 
 import { StylesCatalog, type StylesCatalogComponents } from '@docuvate/ui-catalog';
-import type { ButtonHTMLAttributes, ComponentProps, ReactNode } from 'react';
+import type { ComponentProps, ReactNode } from 'react';
 
 import { Button } from '../components/ui/Button';
-import { Card } from '../components/ui/Card';
+import { Card, CardHeader } from '../components/ui/Card';
 import { Chip } from '../components/ui/Chip';
+import { InlineStatus } from '../components/ui/InlineStatus';
 import { Input } from '../components/ui/Input';
+import { PageHeader } from '../components/ui/PageHeader';
 import { Select } from '../components/ui/Select';
+import { Tab, TabBar } from '../components/ui/Tab';
+import { type BadgeTone, ToneBadge } from '../components/ui/ToneBadge';
+import { Toolbar,ToolGroup } from '../components/ui/Toolbar';
 import { useDocuvateTheme } from '../lib/useDocuvateTheme';
 import { DesignSystemShowcase } from './DesignSystemShowcase';
 
-function CatalogButton({
-  variant = 'primary',
-  size,
-  children,
-  ...props
-}: ButtonHTMLAttributes<HTMLButtonElement> & {
-  variant?: 'primary' | 'secondary' | 'ghost' | 'danger';
-  size?: 'md' | 'sm';
-}) {
-  return (
-    <Button variant={variant} size={size} {...props}>
-      {children}
-    </Button>
-  );
-}
-
-function CatalogBadge({ children }: { children: ReactNode }) {
-  return <span className="badge badge-ready">{children}</span>;
+function CatalogBadge({ children, tone = 'neutral' }: { children: ReactNode; tone?: BadgeTone }) {
+  return <ToneBadge tone={tone}>{children}</ToneBadge>;
 }
 
 function CatalogAlert({
@@ -51,17 +40,48 @@ function CatalogAlert({
   return <div className={className}>{children}</div>;
 }
 
-function CatalogCard({ children, title }: { children?: ReactNode; title?: string }) {
+function CatalogCard({
+  children,
+  title,
+  description,
+  actions,
+}: {
+  children?: ReactNode;
+  title?: string;
+  description?: string;
+  actions?: ReactNode;
+}) {
   return (
     <Card>
-      {title ? <h4 className="card-title">{title}</h4> : null}
+      {title ? <CardHeader as="h4" title={title} description={description} actions={actions} /> : null}
       {children}
     </Card>
   );
 }
 
-function CatalogTabs({ children }: { children: ReactNode }) {
-  return <div className="detail-tabs-bar">{children}</div>;
+function CatalogTabs({ items, activeIndex }: { items: readonly string[]; activeIndex: number }) {
+  return (
+    <TabBar>
+      {items.map((item, index) => (
+        <Tab key={item} active={index === activeIndex}>
+          {item}
+        </Tab>
+      ))}
+    </TabBar>
+  );
+}
+
+function CatalogPageHeader(props: { title: string; description?: string; actions?: ReactNode }) {
+  return <PageHeader {...props} titleAs="h2" markAsPageTitle={false} />;
+}
+
+function CatalogToolbar({ label, groups }: { label: string; groups: readonly ReactNode[] }) {
+  return (
+    <Toolbar aria-label={label} justify="between">
+      <ToolGroup>{groups.slice(0, 1)}</ToolGroup>
+      <ToolGroup>{groups.slice(1)}</ToolGroup>
+    </Toolbar>
+  );
 }
 
 function CatalogSelect(props: ComponentProps<typeof Select>) {
@@ -69,7 +89,7 @@ function CatalogSelect(props: ComponentProps<typeof Select>) {
 }
 
 const catalogComponents: StylesCatalogComponents = {
-  Button: CatalogButton,
+  Button,
   Input,
   Select: CatalogSelect,
   Chip,
@@ -77,6 +97,9 @@ const catalogComponents: StylesCatalogComponents = {
   Card: CatalogCard,
   Alert: CatalogAlert,
   Tabs: CatalogTabs,
+  PageHeader: CatalogPageHeader,
+  Toolbar: CatalogToolbar,
+  InlineStatus,
 };
 
 export function StylesDocsPage() {
@@ -84,7 +107,9 @@ export function StylesDocsPage() {
   return (
     <div data-ux="page" data-ux-scope="dev">
       <StylesCatalog components={catalogComponents} theme={theme} onThemeChange={setTheme} />
-      <DesignSystemShowcase />
+      <div className="styles-catalog">
+        <DesignSystemShowcase />
+      </div>
     </div>
   );
 }

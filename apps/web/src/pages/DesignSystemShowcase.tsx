@@ -55,7 +55,7 @@ export function DesignSystemShowcase() {
       <div className="styles-component-grid">
         <Checkbox label={t('designSystem.showcase.checkboxLabel')} defaultChecked />
         <Radio name="ocr" label={t('designSystem.showcase.radioLabel')} defaultChecked />
-        <Progress value={62} />
+        <Progress value={62} label={t('designSystem.showcase.progressLabel')} />
         <Confidence value={88} />
       </div>
 
@@ -147,7 +147,11 @@ export function DesignSystemShowcase() {
       </div>
 
       <Divider />
-      <FormField label={t('designSystem.showcase.noteLabel')} help={t('designSystem.showcase.noteHelp')}>
+      <FormField
+        label={t('designSystem.showcase.noteLabel')}
+        help={t('designSystem.showcase.noteHelp')}
+        htmlFor="ds-note"
+      >
         <Textarea id="ds-note" defaultValue={t('designSystem.showcase.noteValue')} />
       </FormField>
     </div>

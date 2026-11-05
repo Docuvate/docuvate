@@ -1,22 +1,41 @@
 {
   "space": {
-    "2xs": { "value": "0.25rem" },
-    "xs": { "value": "0.5rem" },
-    "sm": { "value": "0.75rem" },
-    "md": { "value": "1rem" },
-    "lg": { "value": "1.5rem" },
-    "xl": { "value": "2rem" },
-    "2xl": { "value": "3rem" },
-    "3xl": { "value": "4.5rem" }
+    "3xs": { "value": "0.125rem", "comment": "Hairline nudges only (icon/text optical alignment)." },
+    "2xs": { "value": "0.25rem", "comment": "Tight gaps inside a control (icon + label)." },
+    "xs": { "value": "0.5rem", "comment": "Gap between related controls in a tool group." },
+    "sm": { "value": "0.75rem", "comment": "Padding inside compact surfaces, list rows." },
+    "md": { "value": "1rem", "comment": "Default padding and gap between groups." },
+    "lg": { "value": "1.5rem", "comment": "Card padding, gap between page sections." },
+    "xl": { "value": "2rem", "comment": "Page-level separation." },
+    "2xl": { "value": "3rem", "comment": "Hero / empty-state breathing room." },
+    "3xl": { "value": "4.5rem", "comment": "Marketing / docs layouts only." }
   },
   "control": {
-    "height": { "value": "2.5rem" },
+    "height-sm": { "value": "2rem", "comment": "Compact controls in dense tables and toolbars (desktop only)." },
+    "height": { "value": "2.5rem", "comment": "Default height of buttons, inputs, selects, tabs." },
+    "height-lg": { "value": "2.75rem", "comment": "Prominent single actions; equals the touch target." },
+    "touch-target": { "value": "2.75rem", "comment": "Minimum hit area (44px) on coarse pointers / mobile." },
     "icon-btn-sm": { "value": "1.75rem" },
-    "icon-btn-md": { "value": "2.25rem" }
+    "icon-btn-md": { "value": "2.25rem" },
+    "icon-sm": { "value": "1rem", "comment": "Inline icon size next to sm/compact text." },
+    "icon-md": { "value": "1.25rem", "comment": "Default icon size in buttons and navigation." },
+    "padding-x": { "value": "{space.md}", "comment": "Horizontal padding of default buttons." },
+    "padding-x-sm": { "value": "{space.sm}", "comment": "Horizontal padding of small buttons and inputs." }
   },
   "layout": {
     "library-filter-min": { "value": "15rem" },
-    "library-filter-max": { "value": "17.5rem" }
+    "library-filter-max": { "value": "17.5rem" },
+    "page-max": { "value": "73.75rem", "comment": "Max content width of standard pages (1180px)." },
+    "page-wide-max": { "value": "100rem", "comment": "Max width for viewer / explorer pages (1600px)." },
+    "page-pad": { "value": "{space.lg}", "comment": "Page padding on tablet and desktop." },
+    "page-pad-mobile": { "value": "{space.md}", "comment": "Page padding below 768px." },
+    "topbar-height": { "value": "3.25rem" },
+    "sidebar-width": { "value": "13.75rem", "comment": "Expanded navigation rail (220px)." },
+    "sidebar-collapsed-width": { "value": "3.25rem" },
+    "dialog-width": { "value": "35rem", "comment": "All standard dialogs share one width." },
+    "readable-max": { "value": "42rem", "comment": "Max line length for leads and help text." },
+    "section-gap": { "value": "{space.lg}", "comment": "Vertical gap between page sections." },
+    "stack-gap": { "value": "{space.sm}", "comment": "Vertical gap between stacked fields." }
   },
   "grid": {
     "desktop": {
@@ -34,5 +53,9 @@
       "gutter": { "value": "1rem" },
       "margin": { "value": "1rem" }
     }
+  },
+  "breakpoint": {
+    "tablet": { "value": "768px", "comment": "min-width for tablet layouts (media queries cannot read vars; keep CSS in sync)." },
+    "desktop": { "value": "1280px", "comment": "min-width for desktop layouts." }
   }
 }

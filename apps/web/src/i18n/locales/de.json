@@ -2273,6 +2273,7 @@
       "serverUrlValue": "https://paperless.home.lan",
       "checkboxLabel": "Rechnung (42)",
       "radioLabel": "Automatisch (empfohlen)",
+      "progressLabel": "Upload-Fortschritt",
       "breadcrumbSettings": "Einstellungen",
       "breadcrumbConnectors": "Verbindungen",
       "tabDetails": "Details",

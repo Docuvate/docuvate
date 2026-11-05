@@ -3,12 +3,14 @@
 import { Menu } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 
 import { writeAdvancedFeaturesEnabled } from '../lib/advancedFeatures';
 import { getUserSettings } from '../lib/api';
 import { authClient, authSessionUserId } from '../lib/auth-client';
 import { markAuthenticatedSessionHint } from '../lib/authSessionHint';
 import { ensureRemoteConfigLoaded } from '../lib/remoteConfig';
+import { routes } from '../lib/routes';
 import { applyUserSettingsUiPreferences } from '../lib/syncUserUiPreferences';
 import { useNarrowTopbar } from '../lib/useNarrowTopbar';
 import { ConnectionStatusBanners } from './errors/ConnectionStatusBanners';
@@ -18,6 +20,7 @@ import { UserAccountMenu } from './layout/UserAccountMenu';
 import { SaveBarLayoutSync } from './save/SaveBarLayoutSync';
 import { ToastGlobalBridge, ToastProvider } from './save/ToastProvider';
 import { GlobalSearch } from './search/GlobalSearch';
+import { Logo } from './ui/Logo';
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const { t } = useTranslation();
@@ -94,7 +97,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 <Menu size={20} strokeWidth={2} aria-hidden />
               </button>
             ) : null}
-            <strong>Docuvate</strong>
+            <Link to={routes.home} className="topbar-brand-link">
+              <Logo type="full" />
+            </Link>
           </div>
           {narrowTopbar ? (
             <div className="topbar-search-slot">
