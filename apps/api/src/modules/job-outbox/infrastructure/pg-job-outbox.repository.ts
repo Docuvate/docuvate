@@ -186,12 +186,13 @@ export class PgJobOutboxRepository implements JobOutboxRepository {
   }
 
   async markEnqueued(outboxId: string): Promise<boolean> {
+    // Race-safe: the BullMQ worker may markRunning between enqueue and this update.
     const result = await this.pool.query(
       `UPDATE job_outbox
-       SET status = 'enqueued',
-           enqueued_at = now(),
+       SET status = CASE WHEN status = 'pending' THEN 'enqueued' ELSE status END,
+           enqueued_at = COALESCE(enqueued_at, now()),
            updated_at = now()
-       WHERE id = $1 AND status = 'pending'`,
+       WHERE id = $1 AND status IN ('pending', 'enqueued', 'running')`,
       [outboxId]
     );
     return (result.rowCount ?? 0) > 0;

@@ -1,5 +1,6 @@
 -- Transactional job outbox: Postgres is source of truth; Valkey/BullMQ is a cache.
-CREATE TABLE public.job_types (
+-- IF NOT EXISTS: baseline stamp may re-run this after global setup already applied it.
+CREATE TABLE IF NOT EXISTS public.job_types (
     code text NOT NULL,
     queue_name text NOT NULL,
     description text NOT NULL,
@@ -7,9 +8,10 @@ CREATE TABLE public.job_types (
 );
 
 INSERT INTO public.job_types (code, queue_name, description) VALUES
-    ('document-extraction', 'document-extraction', 'OCR and field extraction for one document');
+    ('document-extraction', 'document-extraction', 'OCR and field extraction for one document')
+ON CONFLICT (code) DO NOTHING;
 
-CREATE TABLE public.job_outbox (
+CREATE TABLE IF NOT EXISTS public.job_outbox (
     id uuid DEFAULT gen_random_uuid() NOT NULL,
     job_type text NOT NULL,
     document_id uuid NOT NULL,
@@ -42,11 +44,11 @@ CREATE TABLE public.job_outbox (
     CONSTRAINT job_outbox_max_attempts_positive CHECK (max_attempts > 0)
 );
 
-CREATE INDEX job_outbox_relay_idx
+CREATE INDEX IF NOT EXISTS job_outbox_relay_idx
     ON public.job_outbox USING btree (status, next_attempt_at, updated_at);
 
-CREATE INDEX job_outbox_document_id_idx
+CREATE INDEX IF NOT EXISTS job_outbox_document_id_idx
     ON public.job_outbox USING btree (document_id);
 
-CREATE INDEX job_outbox_user_id_idx
+CREATE INDEX IF NOT EXISTS job_outbox_user_id_idx
     ON public.job_outbox USING btree (user_id);
