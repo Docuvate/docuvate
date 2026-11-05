@@ -223,6 +223,56 @@ export function snapRectToTokenHull(tokens: readonly LayoutToken[]): NormalizedR
   return normalizeRect({ x0, y0, x1, y1 });
 }
 
+export function normalizeSelectionText(value: string): string {
+  return value.replace(/\s+/g, ' ').trim().toLowerCase();
+}
+
+/**
+ * Resolve IR tokens from a DOM text selection string when geometry misses
+ * (common on /Rotate pages where PDF.js textLayer boxes ≠ pdfplumber boxes).
+ * Prefers whole-word matches contained in the selection; ranks by distance to
+ * the selection rect center when one is provided.
+ */
+export function tokensMatchingSelectedText(
+  tokens: readonly LayoutToken[],
+  selectedText: string,
+  nearRect?: NormalizedRect | null
+): LayoutToken[] {
+  const normalized = normalizeSelectionText(selectedText);
+  if (normalized.length === 0) {
+    return [];
+  }
+  const selectedWords = new Set(
+    normalized.split(' ').filter((word) => word.length > 0)
+  );
+  const matched = tokens.filter((token) => {
+    const piece = normalizeSelectionText(token.text);
+    if (piece.length === 0) {
+      return false;
+    }
+    if (selectedWords.has(piece)) {
+      return true;
+    }
+    // Multi-word tokens / punctuation-stripped containment
+    if (piece.length >= 2 && normalized.includes(piece)) {
+      return true;
+    }
+    return false;
+  });
+  if (matched.length <= 1 || nearRect == null) {
+    return matched;
+  }
+  const cx = (nearRect.x0 + nearRect.x1) / 2;
+  const cy = (nearRect.y0 + nearRect.y1) / 2;
+  return [...matched].sort((a, b) => {
+    const da =
+      ((a.x0 + a.x1) / 2 - cx) ** 2 + ((a.y0 + a.y1) / 2 - cy) ** 2;
+    const db =
+      ((b.x0 + b.x1) / 2 - cx) ** 2 + ((b.y0 + b.y1) / 2 - cy) ** 2;
+    return da - db;
+  });
+}
+
 export function joinedTokenText(tokens: readonly LayoutToken[]): string {
   return tokens
     .map((token) => token.text.trim())

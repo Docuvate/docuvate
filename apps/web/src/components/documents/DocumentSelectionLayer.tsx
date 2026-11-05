@@ -3,9 +3,11 @@
 import type { LayoutToken, NormalizedRect } from '@docuvate/contracts';
 import {
   joinedTokenText,
+  normalizeRect,
   selectionRectForTokenSpace,
   snapRectToTokenHull,
   tokensInsideRect,
+  tokensMatchingSelectedText,
 } from '@docuvate/contracts';
 import { useCallback, useEffect, useState } from 'react';
 
@@ -26,21 +28,34 @@ interface DocumentSelectionLayerProps {
 }
 
 function pageWrapForEvent(target: EventTarget | null): HTMLElement | null {
-  if (!(target instanceof Element)) {
-    return null;
+  let node: Node | null = null;
+  if (target instanceof Node) {
+    node = target;
   }
-  const wrap = target.closest('.pdf-page-wrap');
-  return wrap instanceof HTMLElement ? wrap : null;
+  while (node != null) {
+    if (node instanceof HTMLElement && node.classList.contains('pdf-page-wrap')) {
+      return node;
+    }
+    if (node instanceof Element) {
+      const wrap = node.closest('.pdf-page-wrap');
+      if (wrap instanceof HTMLElement) {
+        return wrap;
+      }
+      return null;
+    }
+    node = node.parentNode;
+  }
+  return null;
 }
 
 function pageWrapForPage(page: number): HTMLElement | null {
   const wraps = document.querySelectorAll('.pdf-page-wrap');
-  for (const node of wraps) {
-    if (!(node instanceof HTMLElement)) {
+  for (const candidate of wraps) {
+    if (!(candidate instanceof HTMLElement)) {
       continue;
     }
-    if (node.dataset.page === String(page)) {
-      return node;
+    if (candidate.dataset.page === String(page)) {
+      return candidate;
     }
   }
   const first = wraps.item(0);
@@ -78,19 +93,62 @@ function clientToNormalized(
   };
 }
 
+function clientRectToNormalized(wrap: HTMLElement, client: DOMRect): NormalizedRect | null {
+  const bounds = wrap.getBoundingClientRect();
+  const width = bounds.width || 1;
+  const height = bounds.height || 1;
+  return normalizeRect({
+    x0: (client.left - bounds.left) / width,
+    y0: (client.top - bounds.top) / height,
+    x1: (client.right - bounds.left) / width,
+    y1: (client.bottom - bounds.top) / height,
+  });
+}
+
+function unionClientRects(wrap: HTMLElement, rects: DOMRectList): NormalizedRect | null {
+  let x0 = Number.POSITIVE_INFINITY;
+  let y0 = Number.POSITIVE_INFINITY;
+  let x1 = Number.NEGATIVE_INFINITY;
+  let y1 = Number.NEGATIVE_INFINITY;
+  let any = false;
+  for (let i = 0; i < rects.length; i += 1) {
+    const client = rects.item(i);
+    if (client == null || client.width <= 0 || client.height <= 0) {
+      continue;
+    }
+    const part = clientRectToNormalized(wrap, client);
+    if (part == null) {
+      continue;
+    }
+    any = true;
+    x0 = Math.min(x0, part.x0);
+    y0 = Math.min(y0, part.y0);
+    x1 = Math.max(x1, part.x1);
+    y1 = Math.max(y1, part.y1);
+  }
+  if (!any) {
+    return null;
+  }
+  return normalizeRect({ x0, y0, x1, y1 });
+}
+
 function draftFromViewerRect(
   page: number,
   tokens: LayoutToken[],
   viewerRect: NormalizedRect,
   pageRotationDeg: number,
-  unrotatedMediaBox: boolean
+  unrotatedMediaBox: boolean,
+  selectedText?: string
 ): DocumentSelectionDraft {
   const mapped =
     selectionRectForTokenSpace(viewerRect, pageRotationDeg, unrotatedMediaBox) ?? viewerRect;
-  const selected = tokensInsideRect(
-    tokens.filter((token) => token.page === page),
-    mapped
-  );
+  const pageTokens = tokens.filter((token) => token.page === page);
+  let selected = tokensInsideRect(pageTokens, mapped);
+  // PDF.js textLayer boxes often diverge from pdfplumber IR on /Rotate pages;
+  // fall back to matching the selected string against IR word tokens.
+  if (selected.length === 0 && selectedText != null && selectedText.trim().length > 0) {
+    selected = tokensMatchingSelectedText(pageTokens, selectedText, mapped);
+  }
   return {
     page,
     rect: snapRectToTokenHull(selected) ?? mapped,
@@ -191,24 +249,22 @@ export function DocumentSelectionLayer({
       if (!wrap) {
         return;
       }
-      const bounds = wrap.getBoundingClientRect();
+      const fromRects = unionClientRects(wrap, range.getClientRects());
       const client = range.getBoundingClientRect();
-      if (client.width <= 0 || client.height <= 0) {
+      const fromBounds =
+        client.width > 0 && client.height > 0 ? clientRectToNormalized(wrap, client) : null;
+      const viewerRect = fromRects ?? fromBounds;
+      if (viewerRect == null) {
         return;
       }
-      const viewerRect: NormalizedRect = {
-        x0: Math.min(1, Math.max(0, (client.left - bounds.left) / (bounds.width || 1))),
-        y0: Math.min(1, Math.max(0, (client.top - bounds.top) / (bounds.height || 1))),
-        x1: Math.min(1, Math.max(0, (client.right - bounds.left) / (bounds.width || 1))),
-        y1: Math.min(1, Math.max(0, (client.bottom - bounds.top) / (bounds.height || 1))),
-      };
       onDraftChange(
         draftFromViewerRect(
           page,
           tokens,
           viewerRect,
           readPageRotationDeg(wrap),
-          tokensUseUnrotatedMediaBox(wrap)
+          tokensUseUnrotatedMediaBox(wrap),
+          selection.toString()
         )
       );
     }

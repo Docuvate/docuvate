@@ -9,6 +9,7 @@ import {
   tokenBelongsToRect,
   tokenCoverageRatio,
   tokensInsideRect,
+  tokensMatchingSelectedText,
   viewerPointToUnrotatedPage,
 } from '@docuvate/contracts';
 import { describe, expect, it } from 'vitest';
@@ -126,5 +127,27 @@ describe('viewer ↔ unrotated page mapping', () => {
     expect(remapped).not.toBeNull();
     expect(remapped?.x0).toBeCloseTo(0.5);
     expect(remapped?.y0).toBeCloseTo(0.1);
+  });
+});
+
+describe('tokensMatchingSelectedText', () => {
+  it('matches IR words contained in the DOM selection string', () => {
+    const tokens: LayoutToken[] = [
+      token(0, 0.1, 0.1, 0.2, 0.15, '©'),
+      token(1, 0.2, 0.1, 0.45, 0.15, 'Provadis'),
+      token(2, 0.5, 0.1, 0.7, 0.15, 'Elsewhere'),
+    ];
+    const matched = tokensMatchingSelectedText(tokens, 'Provadis');
+    expect(matched.map((t) => t.text)).toEqual(['Provadis']);
+  });
+
+  it('ranks matches near the selection rect when several words hit', () => {
+    const tokens: LayoutToken[] = [
+      token(0, 0.1, 0.1, 0.2, 0.2, 'Alex'),
+      token(1, 0.7, 0.7, 0.9, 0.9, 'Alex'),
+    ];
+    const near: NormalizedRect = { x0: 0.05, y0: 0.05, x1: 0.3, y1: 0.3 };
+    const matched = tokensMatchingSelectedText(tokens, 'Alex', near);
+    expect(matched[0]?.blockIndex).toBe(0);
   });
 });

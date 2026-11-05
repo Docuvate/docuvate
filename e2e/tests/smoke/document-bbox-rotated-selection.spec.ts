@@ -127,6 +127,9 @@ test.describe('rotated page bounding-box selection', () => {
 
     const bar = page.getByTestId('field-context-bar');
     await expect(bar).toBeVisible({ timeout: 30_000 });
-    await expect(bar).toContainText(/Alex|Testmann|Compose|E2E_SYNTHETIC|fixture/i);
+    await expect(bar).toContainText(/Alex|Testmann|Compose|E2E_SYNTHETIC|fixture/i, {
+      timeout: 30_000,
+    });
+    await expect(bar).not.toContainText(/0 Wörter|0 words/i);
   });
 });

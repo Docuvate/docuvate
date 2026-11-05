@@ -1562,6 +1562,8 @@ export {
   tokensInsideRect,
   snapRectToTokenHull,
   joinedTokenText,
+  normalizeSelectionText,
+  tokensMatchingSelectedText,
   remapRegionTokens,
   roundGeometry,
   canonicalRegionPayload,
