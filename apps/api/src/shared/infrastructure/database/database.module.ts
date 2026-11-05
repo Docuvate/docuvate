@@ -21,6 +21,7 @@ import {
   TAG_CUSTOM_FIELD_REPOSITORY,
   LABEL_FIELD_EXTRACTION_PORT,
   RECOGNIZED_FIELD_REPOSITORY,
+  JOB_OUTBOX_REPOSITORY,
 } from '../../domain/ports.js';
 import { PgTagCustomFieldRepository } from '../../../modules/labels/infrastructure/pg-tag-custom-field.repository.js';
 import { HttpLabelFieldExtractionAdapter } from '../../../modules/labels/infrastructure/http-label-field-extraction.adapter.js';
@@ -33,6 +34,7 @@ import { PgTaxonomyRepository } from '../../../modules/taxonomy/infrastructure/p
 import { SystemClock } from '../time/system-clock.js';
 import { UuidIdGenerator } from '../ids/uuid-id-generator.js';
 import { PgDocumentRepository } from '../../../modules/documents/infrastructure/pg-document.repository.js';
+import { PgJobOutboxRepository } from '../../../modules/job-outbox/infrastructure/pg-job-outbox.repository.js';
 import { MinioObjectStorage } from '../storage/minio-object.storage.js';
 import { HttpExtractionAdapter } from '../../../modules/extraction/infrastructure/http-extraction.adapter.js';
 import { PostgresSearchAdapter } from '../../../modules/documents/infrastructure/postgres-search.adapter.js';
@@ -74,6 +76,7 @@ const typeOrmRootImports = isOpenApiHeadlessMode() || isOpenApiContractTestMode(
     { provide: TAG_CUSTOM_FIELD_REPOSITORY, useClass: PgTagCustomFieldRepository },
     { provide: LABEL_FIELD_EXTRACTION_PORT, useClass: HttpLabelFieldExtractionAdapter },
     { provide: RECOGNIZED_FIELD_REPOSITORY, useClass: PgRecognizedFieldRepository },
+    { provide: JOB_OUTBOX_REPOSITORY, useClass: PgJobOutboxRepository },
   ],
   exports: [
     PG_POOL,
@@ -91,6 +94,7 @@ const typeOrmRootImports = isOpenApiHeadlessMode() || isOpenApiContractTestMode(
     TAG_CUSTOM_FIELD_REPOSITORY,
     LABEL_FIELD_EXTRACTION_PORT,
     RECOGNIZED_FIELD_REPOSITORY,
+    JOB_OUTBOX_REPOSITORY,
   ],
 })
 export class DatabaseModule {}

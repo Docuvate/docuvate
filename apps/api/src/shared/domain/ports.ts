@@ -10,6 +10,11 @@ import type {
 } from '@docuvate/contracts';
 import type { DocumentEntity, DocumentStatus } from '../../modules/documents/domain/document.entity.js';
 import type {
+  JobOutboxRecord,
+  JobOutboxStatus,
+  ScheduleDocumentExtractionResult,
+} from '../../modules/job-outbox/domain/job-outbox.types.js';
+import type {
   CorrespondentEntity,
   TagEntity,
   TagSuggestionEntity,
@@ -676,6 +681,32 @@ export interface DuplicateStackRepository {
 }
 
 export type { DocumentBulkAction };
+
+
+export interface JobOutboxRepository {
+  /** Inserts or reactivates an outbox row and sets the document status to queued in one transaction. */
+  scheduleDocumentExtraction(
+    documentId: string,
+    options?: { maxAttempts?: number }
+  ): Promise<ScheduleDocumentExtractionResult>;
+  /** Claims due/stuck rows for relay (SKIP LOCKED). */
+  claimForRelay(limit: number, leaseOlderThan: Date): Promise<JobOutboxRecord[]>;
+  markEnqueued(outboxId: string): Promise<boolean>;
+  markRunning(outboxId: string): Promise<boolean>;
+  markDone(outboxId: string): Promise<boolean>;
+  markFailedOrRetry(outboxId: string, errorMessage: string, retryDelayMs: number): Promise<JobOutboxStatus>;
+  findById(outboxId: string): Promise<JobOutboxRecord | null>;
+  findActiveByDocumentId(documentId: string): Promise<JobOutboxRecord | null>;
+}
+
+export const JOB_OUTBOX_REPOSITORY = Symbol('JOB_OUTBOX_REPOSITORY');
+
+/** Pushes due outbox rows into Valkey/BullMQ. */
+export interface JobOutboxRelay {
+  relayOnce(): Promise<number>;
+}
+
+export const JOB_OUTBOX_RELAY = Symbol('JOB_OUTBOX_RELAY');
 
 export const CLOCK = Symbol('CLOCK');
 export const ID_GENERATOR = Symbol('ID_GENERATOR');

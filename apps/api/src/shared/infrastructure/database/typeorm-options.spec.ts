@@ -1,4 +1,10 @@
 import { afterEach, describe, expect, it } from 'vitest';
+import { DocumentFieldValuesBackfill20261008130600 } from './migrations/20261008130600-document-field-values-backfill.js';
+import { GlobalSearchSchema20261008130500 } from './migrations/20261008130500-global-search-schema.js';
+import { InitialSchema20261008120000 } from './migrations/20261008120000-initial-schema.js';
+import { JobOutbox20261105080000 } from './migrations/20261105080000-job-outbox.js';
+import { SchemaNormalization3nf20261008131000 } from './migrations/20261008131000-schema-normalization-3nf.js';
+import { SearchIndexBackfill20261008130700 } from './migrations/20261008130700-search-index-backfill.js';
 import {
   TYPEORM_INITIAL_MIGRATION_NAME,
   buildTypeOrmOptions,
@@ -20,15 +26,18 @@ describe('buildTypeOrmOptions', () => {
     expect(() => buildTypeOrmOptions()).toThrow(/DATABASE_URL/);
   });
 
-  it('registers initial schema, global search and 3NF migrations in order', () => {
+  it('registers initial schema, global search, 3NF and job-outbox migrations in order', () => {
     process.env['DATABASE_URL'] = 'postgresql://docuvate:docuvate@127.0.0.1:5432/docuvate';
     const opts = buildTypeOrmOptions();
-    const migrations = opts.migrations as Array<{ name: string }>;
-    expect(migrations).toHaveLength(5);
-    expect(migrations[0]?.name).toBe(TYPEORM_INITIAL_MIGRATION_NAME);
-    expect(migrations[1]?.name).toBe('GlobalSearchSchema20261008130500');
-    expect(migrations[2]?.name).toBe('DocumentFieldValuesBackfill20261008130600');
-    expect(migrations[3]?.name).toBe('SearchIndexBackfill20261008130700');
-    expect(migrations[4]?.name).toBe('SchemaNormalization3nf20261008131000');
+    expect(opts.migrations).toEqual([
+      InitialSchema20261008120000,
+      GlobalSearchSchema20261008130500,
+      DocumentFieldValuesBackfill20261008130600,
+      SearchIndexBackfill20261008130700,
+      SchemaNormalization3nf20261008131000,
+      JobOutbox20261105080000,
+    ]);
+    expect(TYPEORM_INITIAL_MIGRATION_NAME).toBe('InitialSchema20261008120000');
+    expect(new JobOutbox20261105080000().name).toBe('JobOutbox20261105080000');
   });
 });

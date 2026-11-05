@@ -1,36 +1,110 @@
 import { describe, expect, it, vi } from 'vitest';
+import type {
+  DocumentRepository,
+  JobOutboxRelay,
+  JobOutboxRepository,
+} from '../../../shared/domain/ports.js';
+import type { DocumentEntity } from '../domain/document.entity.js';
 import { QueueExtractionUseCase } from './queue-extraction.use-case.js';
 
+function unused(name: string): () => Promise<never> {
+  return async () => {
+    throw new Error(`unexpected DocumentRepository call: ${name}`);
+  };
+}
+
+function sampleDocument(id: string, userId: string): DocumentEntity {
+  return {
+    id,
+    userId,
+    filename: 'x.pdf',
+    title: 'x',
+    mimeType: 'application/pdf',
+    storageKey: 'k',
+    status: 'uploaded',
+    tags: [],
+    createdAt: new Date('2026-01-01T00:00:00.000Z'),
+    updatedAt: new Date('2026-01-01T00:00:00.000Z'),
+  };
+}
+
+function documentStub(partial: {
+  findByIdForUser: DocumentRepository['findByIdForUser'];
+  updateStatus: DocumentRepository['updateStatus'];
+}): DocumentRepository {
+  return {
+    create: unused('create'),
+    findById: unused('findById'),
+    findByIdForUser: partial.findByIdForUser,
+    listForUser: unused('listForUser'),
+    updateStatus: partial.updateStatus,
+    saveExtraction: unused('saveExtraction'),
+    updateForUser: unused('updateForUser'),
+    deleteForUser: unused('deleteForUser'),
+    setTagsForDocument: unused('setTagsForDocument'),
+    addTagToDocuments: unused('addTagToDocuments'),
+    removeTagFromDocuments: unused('removeTagFromDocuments'),
+    setCorrespondentForDocuments: unused('setCorrespondentForDocuments'),
+    deleteDocuments: unused('deleteDocuments'),
+    setContentHash: unused('setContentHash'),
+    setFolderForDocuments: unused('setFolderForDocuments'),
+  };
+}
+
+function outboxStub(partial: {
+  scheduleDocumentExtraction: JobOutboxRepository['scheduleDocumentExtraction'];
+}): JobOutboxRepository {
+  return {
+    scheduleDocumentExtraction: partial.scheduleDocumentExtraction,
+    claimForRelay: unused('claimForRelay'),
+    markEnqueued: unused('markEnqueued'),
+    markRunning: unused('markRunning'),
+    markDone: unused('markDone'),
+    markFailedOrRetry: unused('markFailedOrRetry'),
+    findById: unused('findById'),
+    findActiveByDocumentId: unused('findActiveByDocumentId'),
+  };
+}
+
 describe('QueueExtractionUseCase', () => {
-  it('marks document queued after successful enqueue', async () => {
-    const documents = {
-      findByIdForUser: vi.fn(async () => ({ id: 'd1', userId: 'u1' })),
+  it('schedules outbox and kicks the relay after auth checks', async () => {
+    const documents = documentStub({
+      findByIdForUser: vi.fn(async () => sampleDocument('d1', 'u1')),
       updateStatus: vi.fn(),
+    });
+    const outbox = outboxStub({
+      scheduleDocumentExtraction: vi.fn(async () => ({ outboxId: 'o1', created: true })),
+    });
+    const relay: JobOutboxRelay = {
+      relayOnce: vi.fn(async () => 1),
     };
-    const queue = { enqueue: vi.fn(async () => undefined) };
-    const useCase = new QueueExtractionUseCase(documents as never, queue as never);
+    const useCase = new QueueExtractionUseCase(documents, outbox, relay);
 
     await useCase.execute('d1', 'u1');
 
-    expect(queue.enqueue).toHaveBeenCalledWith('d1', 'u1');
-    expect(documents.updateStatus).toHaveBeenCalledWith('d1', 'queued');
+    expect(outbox.scheduleDocumentExtraction).toHaveBeenCalledWith('d1');
+    expect(relay.relayOnce).toHaveBeenCalled();
+    expect(documents.updateStatus).not.toHaveBeenCalled();
   });
 
-  it('marks document failed when enqueue exhausts retries', async () => {
-    const documents = {
-      findByIdForUser: vi.fn(async () => ({ id: 'd1', userId: 'u1' })),
+  it('marks document failed when outbox schedule throws', async () => {
+    const documents = documentStub({
+      findByIdForUser: vi.fn(async () => sampleDocument('d1', 'u1')),
       updateStatus: vi.fn(),
-    };
-    const queue = {
-      enqueue: vi.fn(async () => {
-        throw new Error('document-extraction enqueue failed after 5 attempts: ECONNREFUSED');
+    });
+    const outbox = outboxStub({
+      scheduleDocumentExtraction: vi.fn(async () => {
+        throw new Error('db down');
       }),
+    });
+    const relay: JobOutboxRelay = {
+      relayOnce: vi.fn(async () => 0),
     };
-    const useCase = new QueueExtractionUseCase(documents as never, queue as never);
+    const useCase = new QueueExtractionUseCase(documents, outbox, relay);
 
     await useCase.execute('d1', 'u1');
 
     expect(documents.updateStatus).toHaveBeenCalledWith('d1', 'failed');
-    expect(documents.updateStatus).not.toHaveBeenCalledWith('d1', 'queued');
+    expect(relay.relayOnce).not.toHaveBeenCalled();
   });
 });

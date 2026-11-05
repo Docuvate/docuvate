@@ -23,6 +23,8 @@ import { StreamDocumentChatMessageUseCase } from './application/stream-document-
 import { PgDocumentChatThreadRepository } from './infrastructure/pg-document-chat-thread.repository.js';
 import { DOCUMENT_CHAT_THREAD_REPOSITORY } from '../../shared/domain/ports.js';
 import { ExtractionQueueService } from '../extraction/infrastructure/extraction-queue.service.js';
+import { OutboxRelayService } from '../job-outbox/infrastructure/outbox-relay.service.js';
+import { JOB_OUTBOX_RELAY } from '../../shared/domain/ports.js';
 import { LabelsModule } from '../labels/labels.module.js';
 import { DuplicatesModule } from '../duplicates/duplicates.module.js';
 import { SettingsModule } from '../settings/settings.module.js';
@@ -57,6 +59,8 @@ import { SearchModule } from '../search/search.module.js';
     QueueExtractionUseCase,
     RunExtractionUseCase,
     ExtractionQueueService,
+    OutboxRelayService,
+    { provide: JOB_OUTBOX_RELAY, useExisting: OutboxRelayService },
     DocumentChatUseCase,
     ListDocumentChatThreadsUseCase,
     CreateDocumentChatThreadUseCase,

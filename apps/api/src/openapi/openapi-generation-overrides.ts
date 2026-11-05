@@ -2,6 +2,7 @@ import type { TestingModuleBuilder } from '@nestjs/testing';
 import { DocumentChatGenerationCancelRegistry } from '../modules/documents/infrastructure/document-chat-generation-cancel.registry.js';
 import { DocumentChatGenerationQueueService } from '../modules/documents/infrastructure/document-chat-generation-queue.service.js';
 import { ExtractionQueueService } from '../modules/extraction/infrastructure/extraction-queue.service.js';
+import { OutboxRelayService } from '../modules/job-outbox/infrastructure/outbox-relay.service.js';
 import { MlRetrainQueueService } from '../modules/model-registry/infrastructure/ml-retrain-queue.service.js';
 import { PG_POOL } from '../shared/infrastructure/database/tokens.js';
 
@@ -9,7 +10,15 @@ const noopQueue = {
   onModuleInit: (): void => undefined,
   onModuleDestroy: (): void => undefined,
   enqueue: async (): Promise<void> => undefined,
+  enqueueFromOutbox: async (): Promise<void> => undefined,
   enqueueJob: async (): Promise<void> => undefined,
+  maybeEnqueueArenaSample: async (): Promise<void> => undefined,
+};
+
+const noopRelay = {
+  onModuleInit: async (): Promise<void> => undefined,
+  onModuleDestroy: async (): Promise<void> => undefined,
+  relayOnce: async (): Promise<number> => 0,
 };
 
 const noopCancelRegistry = {
@@ -36,6 +45,8 @@ export function applyOpenApiGenerationOverrides(builder: TestingModuleBuilder): 
     .useValue(mockPool)
     .overrideProvider(ExtractionQueueService)
     .useValue(noopQueue)
+    .overrideProvider(OutboxRelayService)
+    .useValue(noopRelay)
     .overrideProvider(MlRetrainQueueService)
     .useValue(noopQueue)
     .overrideProvider(DocumentChatGenerationQueueService)

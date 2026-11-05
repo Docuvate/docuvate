@@ -20,6 +20,8 @@ import { ExtractionArenaRatingsEntity } from './extraction-arena-ratings.entity.
 import { ExtractionFieldCorrectionLabelsEntity } from './extraction-field-correction-labels.entity.js';
 import { ExtractionFieldCorrectionsEntity } from './extraction-field-corrections.entity.js';
 import { FoldersEntity } from './folders.entity.js';
+import { JobOutboxEntity } from './job-outbox.entity.js';
+import { JobTypesEntity } from './job-types.entity.js';
 import { LabelRecommendationBlocklistEntity } from './label-recommendation-blocklist.entity.js';
 import { LabelRecommendationBlocklistPatternsEntity } from './label-recommendation-blocklist-patterns.entity.js';
 import { LabelRecommendationDismissalsEntity } from './label-recommendation-dismissals.entity.js';
@@ -63,6 +65,8 @@ export const TYPEORM_ENTITIES = [
   ExtractionFieldCorrectionLabelsEntity,
   ExtractionFieldCorrectionsEntity,
   FoldersEntity,
+  JobOutboxEntity,
+  JobTypesEntity,
   LabelRecommendationBlocklistEntity,
   LabelRecommendationBlocklistPatternsEntity,
   LabelRecommendationDismissalsEntity,
@@ -107,6 +111,8 @@ export {
   ExtractionFieldCorrectionLabelsEntity,
   ExtractionFieldCorrectionsEntity,
   FoldersEntity,
+  JobOutboxEntity,
+  JobTypesEntity,
   LabelRecommendationBlocklistEntity,
   LabelRecommendationBlocklistPatternsEntity,
   LabelRecommendationDismissalsEntity,

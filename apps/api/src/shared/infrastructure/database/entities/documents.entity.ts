@@ -11,6 +11,7 @@ import { MappenEntity } from './mappen.entity.js';
 import { UserEntity } from './user.entity.js';
 import { ExtractionArenaRatingsEntity } from './extraction-arena-ratings.entity.js';
 import { ExtractionFieldCorrectionsEntity } from './extraction-field-corrections.entity.js';
+import { JobOutboxEntity } from './job-outbox.entity.js';
 import { TagEmbeddingFeedbackEntity } from './tag-embedding-feedback.entity.js';
 
 @Index("documents_content_hash_idx", ["contentHash", "userId"], {})
@@ -164,4 +165,7 @@ export class DocumentsEntity {
     (tagEmbeddingFeedback) => tagEmbeddingFeedback.document
   )
   tagEmbeddingFeedbacks: TagEmbeddingFeedbackEntity[];
+
+  @OneToMany(() => JobOutboxEntity, (jobOutbox) => jobOutbox.document)
+  jobOutboxes: JobOutboxEntity[];
 }
