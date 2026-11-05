@@ -20,11 +20,13 @@ import { useToastNotify } from '../../components/save/ToastProvider';
 import {
   acceptDocumentTagSuggestion,
   bulkDocuments,
+  exportDocumentFieldValues,
   getSavedDocumentView,
   listFolders,
   listRecognizedFields,
   listTags,
   removeDocumentTag,
+  requeueDocumentExtraction,
   updateSavedDocumentView,
 } from '../../lib/api';
 import { formatUserFacingError } from '../../lib/apiErrors';
@@ -76,6 +78,8 @@ export function useLibraryPageData(mode: 'all' | 'folder' | 'unassigned' | 'ordn
   const [bulkTagId, setBulkTagId] = useState('');
   const [bulkFolderId, setBulkFolderId] = useState('');
   const [bulkBusy, setBulkBusy] = useState(false);
+  const [exportBusy, setExportBusy] = useState(false);
+  const [requeueBusyIds, setRequeueBusyIds] = useState<ReadonlySet<string>>(() => new Set());
   const [groupedLabelBusy, setGroupedLabelBusy] = useState(false);
   const [viewMode, setViewMode] = useState<LibraryViewMode>(() => readLibraryViewMode());
   const [filterMode, setFilterModeState] = useState<LibraryFilterMode>(() =>
@@ -547,8 +551,68 @@ export function useLibraryPageData(mode: 'all' | 'folder' | 'unassigned' | 'ordn
     });
   }
 
+  const exportFieldValues = useCallback(
+    async (format: 'csv' | 'json') => {
+      setExportBusy(true);
+      setError(null);
+      try {
+        const selectedIds = [...selected];
+        const blob = await exportDocumentFieldValues(
+          format,
+          listFilters ?? {},
+          selectedIds.length > 0 ? selectedIds : undefined
+        );
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement('a');
+        const stamp = new Date().toISOString().slice(0, 10);
+        anchor.href = url;
+        anchor.download = `docuvate-field-values-${stamp}.${format}`;
+        anchor.rel = 'noopener';
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+        URL.revokeObjectURL(url);
+        pushSuccess(t('library.exportFieldValuesDone'));
+      } catch (err) {
+        setError(formatUserFacingError(err, 'library.exportFieldValuesFailed'));
+      } finally {
+        setExportBusy(false);
+      }
+    },
+    [listFilters, pushSuccess, selected, t]
+  );
+
+  const requeueDocument = useCallback(
+    async (documentId: string) => {
+      setRequeueBusyIds((prev) => {
+        const next = new Set(prev);
+        next.add(documentId);
+        return next;
+      });
+      setError(null);
+      try {
+        await requeueDocumentExtraction(documentId);
+        pushSuccess(t('documents.reprocessPending'));
+        await refetchDocuments();
+      } catch (err) {
+        setError(formatUserFacingError(err, 'documents.reprocessFailed'));
+      } finally {
+        setRequeueBusyIds((prev) => {
+          const next = new Set(prev);
+          next.delete(documentId);
+          return next;
+        });
+      }
+    },
+    [pushSuccess, refetchDocuments, t]
+  );
+
   return {
     items,
+    exportFieldValues,
+    exportBusy,
+    requeueDocument,
+    requeueBusyIds,
     folders,
     childFoldersForView,
     folderDocumentCounts,

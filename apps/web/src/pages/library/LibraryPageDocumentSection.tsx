@@ -260,6 +260,10 @@ export function LibraryPageDocumentSection({
                 onRefresh={() => {
                   void data.load();
                 }}
+                onRequeueDocument={(documentId) => {
+                  void data.requeueDocument(documentId);
+                }}
+                requeueBusyIds={data.requeueBusyIds}
                 onContextMenu={ctx.openDocumentContextMenu}
                 onRowMenu={ctx.openDocumentContextMenuFromRowAction}
                 onContextMenuKeyboard={ctx.openDocumentContextMenuFromKeyboard}
@@ -282,6 +286,10 @@ export function LibraryPageDocumentSection({
                 onRefresh={() => {
                   void data.load();
                 }}
+                onRequeueDocument={(documentId) => {
+                  void data.requeueDocument(documentId);
+                }}
+                requeueBusyIds={data.requeueBusyIds}
                 onReviewStack={(primaryId, versionId) => {
                   ctx.setStackReview({ primaryId, versionId: versionId ?? null });
                 }}
@@ -295,6 +303,10 @@ export function LibraryPageDocumentSection({
                 selected={data.selected}
                 onToggleSelect={data.toggleSelect}
                 onContextMenu={ctx.openDocumentContextMenu}
+                onRequeueDocument={(documentId) => {
+                  void data.requeueDocument(documentId);
+                }}
+                requeueBusyIds={data.requeueBusyIds}
               />
             ) : null}
           </div>

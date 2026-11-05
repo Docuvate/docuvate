@@ -16,6 +16,8 @@ import {
   showLegacyDuplicateHint,
 } from './duplicateStackLabel';
 import { DuplicateStackQuickReview } from './DuplicateStackQuickReview';
+import { LayoutMissingBadge } from './LayoutMissingBadge';
+import { showLayoutMissingBadge } from './layoutMissingBadge';
 import { documentDisplayDate } from './libraryDocumentUtils';
 import { useLibraryDocumentVirtualizer } from './useLibraryDocumentVirtualizer';
 
@@ -25,6 +27,8 @@ interface LibraryDocumentGridProps {
   onToggleSelect: (id: string) => void;
   onContextMenu: (event: MouseEvent, documentId: string) => void;
   onRefresh?: () => void;
+  onRequeueDocument?: (documentId: string) => void;
+  requeueBusyIds?: ReadonlySet<string>;
   onReviewStack?: (primaryId: string, versionId?: string | null) => void;
   enableDocumentDrag?: boolean;
   hasNextPage?: boolean;
@@ -39,6 +43,8 @@ export function LibraryDocumentGrid({
   onToggleSelect,
   onContextMenu,
   onRefresh,
+  onRequeueDocument,
+  requeueBusyIds,
   onReviewStack,
   enableDocumentDrag,
   hasNextPage = false,
@@ -147,6 +153,19 @@ export function LibraryDocumentGrid({
                   </p>
                   <div className="doc-card-meta">
                     <Badge status={doc.status} />
+                    {showLayoutMissingBadge(doc) ? (
+                      <LayoutMissingBadge
+                        compact
+                        requeueBusy={requeueBusyIds?.has(doc.id) === true}
+                        onRequeue={
+                          onRequeueDocument
+                            ? () => {
+                                onRequeueDocument(doc.id);
+                              }
+                            : undefined
+                        }
+                      />
+                    ) : null}
                     <time dateTime={doc.documentDate ?? doc.updatedAt}>
                       {documentDisplayDate(doc, i18n.language)}
                     </time>

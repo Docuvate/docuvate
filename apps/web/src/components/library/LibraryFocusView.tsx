@@ -20,6 +20,8 @@ import { ExtractionProgressBar } from '../documents';
 import { Badge } from '../ui/Badge';
 import { Chip } from '../ui/Chip';
 import { duplicateStackVersionLabel, showDuplicateStackBadge } from './duplicateStackLabel';
+import { LayoutMissingBadge } from './LayoutMissingBadge';
+import { showLayoutMissingBadge } from './layoutMissingBadge';
 import { documentDisplayDate, isImageMime, isPdfMime } from './libraryDocumentUtils';
 
 interface LibraryFocusViewProps {
@@ -27,6 +29,8 @@ interface LibraryFocusViewProps {
   selected: Set<string>;
   onToggleSelect: (id: string) => void;
   onContextMenu: (event: MouseEvent, documentId: string) => void;
+  onRequeueDocument?: (documentId: string) => void;
+  requeueBusyIds?: ReadonlySet<string>;
 }
 
 export function LibraryFocusView({
@@ -34,6 +38,8 @@ export function LibraryFocusView({
   selected,
   onToggleSelect,
   onContextMenu,
+  onRequeueDocument,
+  requeueBusyIds,
 }: LibraryFocusViewProps) {
   const { t } = useTranslation();
   const [focusId, setFocusId] = useState<string | null>(null);
@@ -146,6 +152,19 @@ export function LibraryFocusView({
                   ) : (
                     <Badge status={doc.status} />
                   )}
+                  {showLayoutMissingBadge(doc) ? (
+                    <LayoutMissingBadge
+                      compact
+                      requeueBusy={requeueBusyIds?.has(doc.id) === true}
+                      onRequeue={
+                        onRequeueDocument
+                          ? () => {
+                              onRequeueDocument(doc.id);
+                            }
+                          : undefined
+                      }
+                    />
+                  ) : null}
                   <span className="muted">{documentDisplayDate(doc)}</span>
                 </span>
               </button>
@@ -178,9 +197,23 @@ export function LibraryFocusView({
                   </div>
                 ) : null}
               </div>
-              <Link to={`/documents/${focused.id}`} className="btn btn-secondary">
-                {t('library.openDocumentDetails')}
-              </Link>
+              <div className="library-focus-pane-actions">
+                {showLayoutMissingBadge(focused) ? (
+                  <LayoutMissingBadge
+                    requeueBusy={requeueBusyIds?.has(focused.id) === true}
+                    onRequeue={
+                      onRequeueDocument
+                        ? () => {
+                            onRequeueDocument(focused.id);
+                          }
+                        : undefined
+                    }
+                  />
+                ) : null}
+                <Link to={`/documents/${focused.id}`} className="btn btn-secondary">
+                  {t('library.openDocumentDetails')}
+                </Link>
+              </div>
             </div>
             {previewError ? (
               <p className="error" role="alert">

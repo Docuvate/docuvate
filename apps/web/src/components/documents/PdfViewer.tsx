@@ -54,6 +54,9 @@ interface PdfViewerProps {
   onLayoutOverlayClear?: () => void;
   /** Renders in the PDF chrome row (e.g. layout overlay toggle on narrow viewports). */
   toolbarAccessory?: ReactNode;
+  /** Client-only preview rotation in degrees (0/90/180/270). */
+  displayRotationDeg?: 0 | 90 | 180 | 270;
+  onRotateClockwise?: () => void;
 }
 
 const DEFAULT_PAGE_SCALE = 1.25;
@@ -253,6 +256,8 @@ export function PdfViewer({
   onPageChange,
   onPageClick,
   toolbarAccessory,
+  displayRotationDeg = 0,
+  onRotateClockwise,
 }: PdfViewerProps) {
   const { t } = useTranslation();
   const pagesRef = useRef<HTMLDivElement>(null);
@@ -659,6 +664,18 @@ export function PdfViewer({
         {toolbarAccessory ? (
           <div className="pdf-viewer-toolbar-accessory">{toolbarAccessory}</div>
         ) : null}
+        {onRotateClockwise ? (
+          <Button
+            type="button"
+            variant="ghost"
+            className="pdf-viewer-rotate-btn"
+            onClick={onRotateClockwise}
+            data-testid="pdf-viewer-rotate-clockwise"
+            aria-label={t('documents.pdfRotateClockwise')}
+          >
+            {t('documents.pdfRotateClockwise')}
+          </Button>
+        ) : null}
         {paginated && pageCount > 0 ? (
           <div className="pdf-viewer-pager">
             <Button
@@ -709,8 +726,18 @@ export function PdfViewer({
       <div
         className={`pdf-viewer-scroll${fitWidth ? ' pdf-viewer-scroll-fit-width' : ''}`}
         ref={scrollRef}
+        data-testid="pdf-viewer-display-rotation"
+        data-rotation-deg={String(displayRotationDeg)}
       >
-        <div className={`pdf-pages${paginated ? ' pdf-pages-single' : ''}`} ref={pagesRef} />
+        <div
+          className={`pdf-pages${paginated ? ' pdf-pages-single' : ''}${displayRotationDeg !== 0 ? ' pdf-pages-display-rotated' : ''}`}
+          ref={pagesRef}
+          style={
+            displayRotationDeg === 0
+              ? undefined
+              : { transform: `rotate(${String(displayRotationDeg)}deg)` }
+          }
+        />
       </div>
     </div>
   );

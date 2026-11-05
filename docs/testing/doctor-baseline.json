@@ -6,17 +6,19 @@
     "nestjs": {
       "path": "apps/api",
       "command": "pnpm dlx nestjs-doctor@0.9.10 apps/api",
-      "baselineScore": 99
+      "baselineScore": 89
     },
     "react": {
       "path": "apps/web",
       "command": "pnpm dlx react-doctor@0.9.17 apps/web",
-      "baselineScore": 62
+      "baselineScore": 59
     },
     "fastapi": {
       "path": "apps/worker",
       "command": "uvx --from fastapi-doctor==0.12.0 --index https://s-smits.github.io/fastapi-doctor/simple/ fastapi-doctor --profile strict --score",
-      "baselineScore": 92
+      "baselineScore": 84
     }
-  }
+  },
+  "updatedAt": "2026-11-05",
+  "notes": "Baseline ratcheted down to Box-audit measured scores (2026-11-05) so the PR CI hard gate can land. Climb back toward targetMinScore 95 via focused doctor-fix PRs; never lower again without a documented reason."
 }

@@ -460,6 +460,10 @@ export type DocumentResponseDto = {
     }>;
     createdAt: string;
     updatedAt: string;
+    /**
+     * True when persisted layout IR exists (list convenience).
+     */
+    layoutIrAvailable?: boolean;
     extraction?: DocumentExtractionSummaryDto;
 };
 
@@ -2430,6 +2434,76 @@ export type BulkError = BulkErrors[keyof BulkErrors];
 
 export type BulkResponses = {
     201: unknown;
+};
+
+export type ExportDocumentFieldValuesData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * JSON array of { fieldKey, valueText } recognized field filters (AND).
+         */
+        fieldFilters?: string;
+        /**
+         * When true, only documents without a non-inbox label are returned.
+         */
+        withoutNonInboxLabel?: boolean;
+        /**
+         * When true, only documents without a folder assignment are returned.
+         */
+        unfiled?: boolean;
+        /**
+         * When true, only documents in the inbox label are returned.
+         */
+        inbox?: boolean;
+        /**
+         * When true, include open tag suggestions on each document.
+         */
+        includeTagSuggestions?: boolean;
+        /**
+         * Maximum documents per page (default 50, max 200).
+         */
+        limit?: number;
+        /**
+         * Opaque cursor from a previous response `nextCursor` for the next page.
+         */
+        cursor?: string;
+        /**
+         * Download format for field values.
+         */
+        format: 'csv' | 'json';
+        /**
+         * Optional comma-separated document UUIDs; when set, list filters are ignored.
+         */
+        ids?: string;
+        q?: string;
+        status?: 'uploaded' | 'queued' | 'extracting' | 'ready' | 'failed';
+        tagId?: string;
+        tags?: string;
+        recognizedFieldKey?: string;
+        recognizedFieldValue?: string;
+        fieldFilterKey?: string;
+        fieldFilterValue?: string;
+        folderId?: string;
+        documentDateFrom?: string;
+        documentDateTo?: string;
+        sort?: 'updatedAt' | 'createdAt' | 'title' | 'documentDate';
+        order?: 'asc' | 'desc';
+    };
+    url: '/documents/export';
+};
+
+export type ExportDocumentFieldValuesErrors = {
+    401: ProblemDetailsDto;
+    403: ProblemDetailsDto;
+    404: ProblemDetailsDto;
+    422: ProblemDetailsDto;
+};
+
+export type ExportDocumentFieldValuesError = ExportDocumentFieldValuesErrors[keyof ExportDocumentFieldValuesErrors];
+
+export type ExportDocumentFieldValuesResponses = {
+    200: unknown;
 };
 
 export type MoveDocumentsData = {

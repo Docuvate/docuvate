@@ -50,3 +50,4 @@ else
 fi
 emit_if_match migrations '^apps/api/.*migrations/'
 emit_if_match api '^(apps/api/|packages/contracts/|packages/otel/)'
+emit_if_match doctors '^(apps/api/|apps/web/|apps/worker/|scripts/testing/doctor|docs/testing/doctor|scripts/doctors\.sh|package\.json|pnpm-lock\.yaml|apps/worker/(pyproject\.toml|uv\.lock))'

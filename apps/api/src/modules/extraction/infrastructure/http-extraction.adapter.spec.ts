@@ -96,4 +96,39 @@ describe('HttpExtractionAdapter.extract', () => {
     expect(failure.code).toBe('resource_exhausted');
     expect(failure.retryable).toBe(false);
   });
+
+  it('keeps worker text blocks so the text view and click-linking have per-page boxes', async () => {
+    const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          text: 'Seite eins\nSeite zwei',
+          fields: [],
+          blocks: [
+            {
+              page: 1,
+              x: 0.1,
+              y: 0.1,
+              width: 0.5,
+              height: 0.05,
+              text: 'Seite eins',
+              blockIndex: 0,
+            },
+            { page: 2, x: 0.1, y: 0.2, width: 0.4, height: 0.05, text: 'Seite zwei' },
+            { page: 0, x: 0.1, y: 0.2, width: 0.4, height: 0.05, text: 'invalid page' },
+            { page: 3, x: '0.1', y: 0.2, width: 0.4, height: 0.05, text: 'invalid box' },
+            'not a block',
+          ],
+        }),
+        { status: 200 }
+      )
+    );
+    vi.stubGlobal('fetch', fetchMock);
+    const adapter = new HttpExtractionAdapter(new WorkerExtractCapacityCoordinator());
+
+    const { result } = await adapter.extract(Buffer.from('x'), 'application/pdf');
+    expect(result.blocks).toEqual([
+      { page: 1, x: 0.1, y: 0.1, width: 0.5, height: 0.05, text: 'Seite eins', blockIndex: 0 },
+      { page: 2, x: 0.1, y: 0.2, width: 0.4, height: 0.05, text: 'Seite zwei' },
+    ]);
+  });
 });

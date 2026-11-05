@@ -26,6 +26,7 @@ import { ArchiveHashIdenticalDuplicateSetsUseCase } from './application/document
 import { AutoAcceptCalibratedReviewUseCase } from './application/document-review/auto-accept-calibrated-review.use-case.js';
 import { ListDocumentReviewQueueUseCase } from './application/document-review/list-document-review-queue.use-case.js';
 import { PromoteHighConfidenceExtractionSuggestionsUseCase } from './application/document-review/promote-extraction-suggestions.use-case.js';
+import { ExportDocumentFieldValuesUseCase } from './application/export-document-field-values.use-case.js';
 import { GetDocumentUseCase } from './application/get-document.use-case.js';
 import { GetDocumentContentUseCase } from './application/get-document-content.use-case.js';
 import { GetDocumentExtractionImageThumbnailUseCase } from './application/get-document-extraction-image-thumbnail.use-case.js';
@@ -82,6 +83,7 @@ import { ReviewQueueController } from './presentation/review-queue.controller.js
     UploadDocumentUseCase,
     GetDocumentUseCase,
     ListDocumentsUseCase,
+    ExportDocumentFieldValuesUseCase,
     PgInstallationUserCountReader,
     BatchDocumentTagSuggestionsUseCase,
     UpdateDocumentUseCase,
