@@ -55,6 +55,15 @@ function parseReactScore(output) {
   return m ? Number(m[1]) : NaN;
 }
 
+/** React Doctor prints `Bugs: N errors` and share URLs with `e=N`. */
+function parseReactErrorCount(output) {
+  const bugs = output.match(/Bugs:\s*(\d+)\s*errors/i);
+  if (bugs) return Number(bugs[1]);
+  const share = output.match(/[?&]e=(\d+)/);
+  if (share) return Number(share[1]);
+  return null;
+}
+
 function run(name, cfg) {
   const cwd = name === 'fastapi' ? resolve(process.cwd(), cfg.path) : process.cwd();
   const res = runCommand(cfg.command, cwd);
@@ -64,6 +73,14 @@ function run(name, cfg) {
     score = parseNestjsScore(out);
   } else if (name === 'react') {
     score = parseReactScore(out);
+    const errorCount = parseReactErrorCount(out);
+    if (errorCount != null && errorCount > 0) {
+      console.error(
+        `react doctor reported ${errorCount} error(s); PR gate requires error count === 0`
+      );
+      printDiagnostics(name, cfg.command, cwd, res);
+      process.exit(1);
+    }
   } else {
     // `--score` prints only the number on stdout; uvx writes install progress
     // ("Installed 1 package in 4ms") to stderr on a cold cache, so read stdout.
