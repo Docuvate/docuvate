@@ -31,7 +31,16 @@ interface LibraryContextMenuState {
 
 export function useLibraryDocumentContextMenu(data: LibraryData) {
   const { t } = useTranslation();
-  const { selectForContextMenu, runBulk, selected, items, tags, folders, bulkBusy } = data;
+  const {
+    selectForContextMenu,
+    runBulk,
+    selected,
+    items,
+    tags,
+    folders,
+    bulkBusy,
+    requeueDocument,
+  } = data;
   const navigate = useNavigate();
   const contextMenuAnchorRef = useRef<HTMLElement | null>(null);
   const [contextMenu, setContextMenu] = useState<LibraryContextMenuState | null>(null);
@@ -141,10 +150,14 @@ export function useLibraryDocumentContextMenu(data: LibraryData) {
           closeContextMenu();
           setBulkDeleteConfirmCount(count);
         },
+        onRequeueDocument: (documentId: string) => {
+          closeContextMenu();
+          void requeueDocument(documentId);
+        },
       },
       t
     );
-  }, [contextMenu, items, tags, folders, runBulk, navigate, closeContextMenu, t]);
+  }, [contextMenu, items, tags, folders, runBulk, requeueDocument, navigate, closeContextMenu, t]);
 
   const requestBulkDelete = useCallback((count: number) => {
     setBulkDeleteConfirmCount(count);

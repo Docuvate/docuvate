@@ -8447,6 +8447,15 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   min-width: 0;
 }
 
+
+.library-focus-pane-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  max-width: 100%;
+}
+
 .library-focus-pane-head {
   display: flex;
   flex-wrap: wrap;
@@ -16451,4 +16460,39 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   margin: 0 0 var(--dv-space-2xs);
   font-size: var(--dv-font-caption-xs-size);
   font-variant-numeric: tabular-nums;
+}
+
+.layout-missing-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+  max-width: 100%;
+}
+.layout-missing-badge-label {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.1rem 0.4rem;
+  border-radius: var(--dv-radius-sm, 4px);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--dv-color-warning-fg, #7a4a00);
+  background: color-mix(in srgb, var(--dv-color-warning, #f5a524) 22%, transparent);
+  border: 1px solid color-mix(in srgb, var(--dv-color-warning, #f5a524) 45%, var(--dv-color-border));
+}
+.layout-missing-badge--compact .layout-missing-reprocess-btn {
+  padding: 0.15rem 0.45rem;
+  font-size: 0.75rem;
+}
+.layout-missing-reprocess-btn {
+  white-space: nowrap;
+}
+@media (max-width: 480px) {
+  .layout-missing-badge {
+    gap: 0.25rem;
+  }
+  .layout-missing-reprocess-btn {
+    max-width: 100%;
+  }
 }

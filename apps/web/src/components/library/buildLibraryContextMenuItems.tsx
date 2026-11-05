@@ -6,6 +6,7 @@ import type { TFunction } from 'i18next';
 import { routes } from '../../lib/routes';
 import type { ContextMenuEntry } from '../ui/ContextMenu';
 import { showDuplicateStackBadge } from './duplicateStackLabel';
+import { showLayoutMissingBadge } from './layoutMissingBadge';
 import { buildFolderContextMenuEntries } from './folderContextMenuEntries';
 
 interface BuildLibraryContextMenuItemsArgs {
@@ -18,6 +19,7 @@ interface BuildLibraryContextMenuItemsArgs {
   onReviewStack: (primaryId: string) => void;
   onRunBulk: (action: DocumentBulkAction, options?: { keepMenuOpen?: boolean }) => void;
   onRequestBulkDelete: (count: number) => void;
+  onRequeueDocument?: (documentId: string) => void;
 }
 
 export function buildLibraryLabelToggleEntries(
@@ -72,6 +74,7 @@ export function buildLibraryContextMenuItems(
     onReviewStack,
     onRunBulk,
     onRequestBulkDelete,
+    onRequeueDocument,
   } = args;
   const single = selectedIds.length === 1;
   const anchorInSelection = selectedIds.includes(anchorDoc.id);
@@ -145,6 +148,17 @@ export function buildLibraryContextMenuItems(
       label: t('library.contextReviewStack'),
       onSelect: () => {
         onReviewStack(focusDoc.id);
+      },
+    });
+  }
+
+  if (single && onRequeueDocument && showLayoutMissingBadge(focusDoc)) {
+    menu.push({
+      kind: 'item',
+      id: 'reprocess',
+      label: t('library.contextReprocess'),
+      onSelect: () => {
+        onRequeueDocument(focusDoc.id);
       },
     });
   }

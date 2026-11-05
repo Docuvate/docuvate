@@ -28,6 +28,8 @@ import { useNarrowTopbar } from '../../lib/useNarrowTopbar';
 import { ExtractionProgressBar } from '../documents';
 import { DocumentDraggableTableRow } from '../ordner';
 import { Badge } from '../ui/Badge';
+import { LayoutMissingBadge } from './LayoutMissingBadge';
+import { showLayoutMissingBadge } from './layoutMissingBadge';
 import { Button } from '../ui/Button';
 import { Dialog, DialogBody, DialogFooter, DialogHeader } from '../ui/Dialog';
 import { DocumentLabelsCell } from './DocumentLabelsCell';
@@ -65,6 +67,8 @@ interface LibraryDocumentTableProps {
   onLoadMore?: () => void;
   listScrollStorageKey?: string;
   showDocumentOwnerLine?: boolean;
+  onRequeueDocument?: (documentId: string) => void;
+  requeueBusyIds?: ReadonlySet<string>;
 }
 
 function showColumn(
@@ -95,6 +99,8 @@ export function LibraryDocumentTable({
   onLoadMore,
   listScrollStorageKey,
   showDocumentOwnerLine = false,
+  onRequeueDocument,
+  requeueBusyIds,
 }: LibraryDocumentTableProps) {
   const { t, i18n } = useTranslation();
   const dateLocale = i18n.language.startsWith('de') ? 'de-DE' : 'en-US';
@@ -581,6 +587,19 @@ export function LibraryDocumentTable({
                             />
                           ) : (
                             <Badge status={doc.status} />
+                          {showLayoutMissingBadge(doc) ? (
+                            <LayoutMissingBadge
+                              compact
+                              requeueBusy={requeueBusyIds?.has(doc.id) === true}
+                              onRequeue={
+                                onRequeueDocument
+                                  ? () => {
+                                      onRequeueDocument(doc.id);
+                                    }
+                                  : undefined
+                              }
+                            />
+                          ) : null}
                           )}
                           {hasStack ? (
                             <>
@@ -859,6 +878,19 @@ export function LibraryDocumentTable({
                               />
                             ) : (
                               <Badge status={doc.status} />
+                          {showLayoutMissingBadge(doc) ? (
+                            <LayoutMissingBadge
+                              compact
+                              requeueBusy={requeueBusyIds?.has(doc.id) === true}
+                              onRequeue={
+                                onRequeueDocument
+                                  ? () => {
+                                      onRequeueDocument(doc.id);
+                                    }
+                                  : undefined
+                              }
+                            />
+                          ) : null}
                             )}
                           </div>
                         ) : null}
@@ -901,6 +933,19 @@ export function LibraryDocumentTable({
                               }
                             >
                               <Badge status={doc.status} />
+                          {showLayoutMissingBadge(doc) ? (
+                            <LayoutMissingBadge
+                              compact
+                              requeueBusy={requeueBusyIds?.has(doc.id) === true}
+                              onRequeue={
+                                onRequeueDocument
+                                  ? () => {
+                                      onRequeueDocument(doc.id);
+                                    }
+                                  : undefined
+                              }
+                            />
+                          ) : null}
                             </span>
                           )}
                         </td>

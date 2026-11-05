@@ -627,6 +627,8 @@ export interface DocumentDto {
   recognizedFieldAttempts?: RecognizedFieldExtractionAttemptDto[];
   /** Absender / owner preview for library rows (from indexed field values). */
   ownerLine?: string | null;
+  /** True when persisted layout IR exists (list convenience; detail also uses extraction.layoutIrAvailable). */
+  layoutIrAvailable?: boolean;
 }
 
 export interface DocumentListLibraryUiDto {

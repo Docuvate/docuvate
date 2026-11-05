@@ -292,6 +292,11 @@ export class DocumentResponseDto implements DocumentDto {
   @ApiProperty()
   updatedAt!: string;
 
+  @ApiPropertyOptional({
+    description: 'True when persisted layout IR exists (list convenience).',
+  })
+  layoutIrAvailable?: boolean;
+
   @ApiPropertyOptional({ type: DocumentExtractionSummaryDto })
   extraction?: DocumentExtractionSummaryDto;
 }

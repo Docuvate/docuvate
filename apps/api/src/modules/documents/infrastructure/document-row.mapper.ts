@@ -183,6 +183,7 @@ export function mapDocumentRow(
     notes: parseOptionalString(row.notes),
     ingestSource: parseOptionalString(row.ingest_source),
     ownerLine: parseOptionalString(row.absender_preview),
+    layoutIrAvailable,
     folderId,
     folder:
       folderId != null && folderName != null
