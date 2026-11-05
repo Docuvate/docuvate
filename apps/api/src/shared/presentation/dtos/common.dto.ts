@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import type { MatchingAlgorithm } from '@docuvate/contracts';
+import type { ExtractedField, MatchingAlgorithm } from '@docuvate/contracts';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
@@ -45,7 +45,7 @@ export class OkResponseDto {
   ok!: true;
 }
 
-export class ExtractedFieldDto {
+export class ExtractedFieldDto implements ExtractedField {
   @IsString()
   key!: string;
 
