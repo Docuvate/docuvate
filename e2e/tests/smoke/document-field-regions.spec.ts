@@ -74,7 +74,17 @@ async function openFieldCorrectionSheet(page: Page): Promise<void> {
     .locator('.layout-side-tabs')
     .getByRole('tab', { name: /Übersicht|Overview/i })
     .click({ force: true });
-  const row = page.getByTestId('field-value-row-select').first();
+  // Confirmed fields without a region (e.g. Betrag) can sort first; open a row that
+  // has a page source chip so the sheet carries "Seite N" for the assertion below.
+  const rowWithChip = page
+    .locator('.layout-field-row')
+    .filter({ has: page.locator('.source-chip') })
+    .getByTestId('field-value-row-select')
+    .first();
+  const row =
+    (await rowWithChip.count()) > 0
+      ? rowWithChip
+      : page.getByTestId('field-value-row-select').first();
   await expect(row).toBeVisible({ timeout: 15_000 });
   await row.click();
   await expect(page.locator('.layout-workspace')).not.toHaveAttribute('data-selected-field', '');
