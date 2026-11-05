@@ -118,7 +118,7 @@ export function LibraryFocusView({
                 onChange={() => {
                   onToggleSelect(doc.id);
                 }}
-                aria-label={`${doc.title} auswählen`}
+                aria-label={t('library.selectDocument', { title: doc.title })}
                 onClick={(e) => {
                   e.stopPropagation();
                 }}
