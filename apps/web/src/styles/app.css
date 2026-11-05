@@ -17179,3 +17179,62 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 .library-page .library-toolbar-sort .custom-select-trigger {
   gap: var(--dv-space-2xs);
 }
+
+/* Review queue: bulk actions get their own explained section instead of crowding the title. */
+.review-queue-bulk {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--dv-space-sm) var(--dv-space-md);
+  margin-block-end: var(--dv-space-md);
+  padding: var(--dv-space-sm) var(--dv-space-md);
+  border: 1px solid var(--dv-color-border);
+  border-radius: var(--dv-radius-md);
+}
+
+.review-queue-bulk-text {
+  flex: 1 1 18rem;
+  min-width: 0;
+}
+
+.review-queue-bulk-title {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.review-queue-bulk-lead {
+  margin: var(--dv-space-2xs) 0 0;
+}
+
+.review-queue-bulk-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--dv-space-xs);
+}
+
+.review-wizard-actions-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--dv-space-2xs);
+}
+
+@media (max-width: 600px) {
+  .review-queue-bulk-actions,
+  .review-queue-bulk-actions > * {
+    width: 100%;
+  }
+}
+
+/* Keyboard shortcuts mean nothing on touch-only devices. */
+@media (hover: none) and (pointer: coarse) {
+  .review-wizard-keyboard-hint {
+    display: none;
+  }
+}
+
+.review-wizard-progress-label {
+  margin: 0 0 var(--dv-space-2xs);
+  font-size: var(--dv-font-caption-xs-size);
+  font-variant-numeric: tabular-nums;
+}

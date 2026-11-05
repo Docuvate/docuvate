@@ -2151,7 +2151,8 @@
     "allDoneTitle": "All done",
     "allDoneLead": "No open suggestions. New items appear here after uploads or extraction.",
     "backHome": "Back to home",
-    "uploadDocuments": "Upload documents"
+    "uploadDocuments": "Upload documents",
+    "back": "Back"
   },
   "reviewQueue": {
     "title": "Review",
@@ -2174,7 +2175,13 @@
     "archiveHashIdenticalConfirmBody": "For each byte-identical group the newest document is kept; other copies are archived.",
     "archiveHashIdenticalSuccess": "Cleaned up {{count}} duplicate group(s).",
     "rejectLabel": "Dismiss “{{name}}”",
-    "keyboardHint": "Enter: accept all · Arrow keys: next document"
+    "keyboardHint": "Enter: accept all · Arrow keys: next document",
+    "bulkTitle": "Handle many suggestions at once",
+    "bulkTitleCount_one": "{{count}} document waiting for review",
+    "bulkTitleCount_other": "{{count}} documents waiting for review",
+    "bulkLead": "Confident suggestions can be accepted in one go; review the rest below step by step.",
+    "batchConfirmTitle": "Accept all confident suggestions?",
+    "batchConfirmBody": "Applies to every waiting document, not only the ones shown: labels and fields with at least 90 % confidence are saved. All other suggestions stay for review."
   },
   "dashboard": {
     "title": "Start",
