@@ -2151,7 +2151,8 @@
     "allDoneTitle": "Alles erledigt",
     "allDoneLead": "Keine offenen Vorschläge. Nach Uploads oder Extraktion erscheinen hier neue Einträge.",
     "backHome": "Zur Startseite",
-    "uploadDocuments": "Dokumente hochladen"
+    "uploadDocuments": "Dokumente hochladen",
+    "back": "Zurück"
   },
   "reviewQueue": {
     "title": "Prüfen",
@@ -2174,7 +2175,13 @@
     "archiveHashIdenticalConfirmBody": "In jeder byte-identischen Gruppe bleibt das neueste Dokument erhalten; alle anderen Versionen werden archiviert.",
     "archiveHashIdenticalSuccess": "{{count}} Duplikatgruppe(n) bereinigt.",
     "rejectLabel": "„{{name}}“ verwerfen",
-    "keyboardHint": "Enter: Alle übernehmen · Pfeiltasten: nächstes Dokument"
+    "keyboardHint": "Enter: Alle übernehmen · Pfeiltasten: nächstes Dokument",
+    "bulkTitle": "Viele Vorschläge auf einmal erledigen",
+    "bulkTitleCount_one": "{{count}} Dokument wartet auf Prüfung",
+    "bulkTitleCount_other": "{{count}} Dokumente warten auf Prüfung",
+    "bulkLead": "Sichere Vorschläge lassen sich gesammelt übernehmen; den Rest prüfen Sie unten Schritt für Schritt.",
+    "batchConfirmTitle": "Alle sicheren Vorschläge übernehmen?",
+    "batchConfirmBody": "Gilt für alle wartenden Dokumente, nicht nur die angezeigten: Labels und Felder mit mindestens 90 % Sicherheit werden gespeichert. Alle anderen Vorschläge bleiben zur Prüfung."
   },
   "dashboard": {
     "title": "Start",

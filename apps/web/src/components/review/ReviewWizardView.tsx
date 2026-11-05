@@ -41,6 +41,27 @@ interface ReviewWizardViewProps {
   items: DocumentReviewQueueItemDto[];
   batchBusy: boolean;
   onReload: () => Promise<void>;
+  /** Documents waiting in the whole queue (server count); falls back to the loaded ones. */
+  totalDocuments?: number;
+  canLoadMore: boolean;
+  loadingMore: boolean;
+  onLoadMore: () => void;
+}
+
+/** Load the next queue page this many tasks before the loaded ones run out. */
+const PREFETCH_TASKS_AHEAD = 3;
+
+/** Shortcuts stay out of the way of typing, focused controls and open dialogs. */
+function shouldIgnoreShortcut(target: EventTarget | null): boolean {
+  if (!(target instanceof HTMLElement)) return false;
+  if (target.isContentEditable || target.closest('[role="dialog"]') !== null) return true;
+  return (
+    target instanceof HTMLInputElement ||
+    target instanceof HTMLTextAreaElement ||
+    target instanceof HTMLSelectElement ||
+    target instanceof HTMLButtonElement ||
+    target instanceof HTMLAnchorElement
+  );
 }
 
 const STEP_LABEL_KEYS: Record<ReviewWizardStepKind, string> = {
@@ -51,7 +72,15 @@ const STEP_LABEL_KEYS: Record<ReviewWizardStepKind, string> = {
   done: 'reviewWizard.stepDone',
 };
 
-export function ReviewWizardView({ items, batchBusy, onReload }: ReviewWizardViewProps) {
+export function ReviewWizardView({
+  items,
+  batchBusy,
+  onReload,
+  totalDocuments,
+  canLoadMore,
+  loadingMore,
+  onLoadMore,
+}: ReviewWizardViewProps) {
   const { t, i18n } = useTranslation();
   const { pushSuccess, pushError } = useToastNotify();
   const plan = useMemo(() => buildReviewWizardPlan(items), [items]);
@@ -64,6 +93,8 @@ export function ReviewWizardView({ items, batchBusy, onReload }: ReviewWizardVie
   const [previewLoading, setPreviewLoading] = useState(false);
   const [viewerPage, setViewerPage] = useState(1);
   const [selectionHint, setSelectionHint] = useState<string | null>(null);
+  /** Task to show once a decision has reloaded the queue (the decided task drops out of the plan). */
+  const [nextTaskId, setNextTaskId] = useState<string | null>(null);
 
   const task = plan.tasks[taskIndex];
   const progress = reviewWizardProgress(plan, taskIndex);
@@ -114,16 +145,40 @@ export function ReviewWizardView({ items, batchBusy, onReload }: ReviewWizardVie
   }, [plan.tasks, taskIndex, loadDocumentContext]);
 
   useEffect(() => {
+    if (nextTaskId == null) return;
+    setNextTaskId(null);
+    const anchorIndex = plan.tasks.findIndex((candidate) => candidate.id === nextTaskId);
+    if (anchorIndex >= 0) setTaskIndex(anchorIndex);
+  }, [nextTaskId, plan.tasks]);
+
+  useEffect(() => {
     if (taskIndex >= plan.tasks.length && plan.tasks.length > 0) {
       setTaskIndex(plan.tasks.length - 1);
     }
   }, [plan.tasks.length, taskIndex]);
 
+  useEffect(() => {
+    if (canLoadMore && !loadingMore && taskIndex >= plan.tasks.length - PREFETCH_TASKS_AHEAD) {
+      onLoadMore();
+    }
+  }, [canLoadMore, loadingMore, onLoadMore, plan.tasks.length, taskIndex]);
+
   function advanceTask() {
     setTaskIndex((prev) => Math.min(prev + 1, Math.max(plan.tasks.length - 1, 0)));
-    if (taskIndex >= plan.tasks.length - 1) {
+    if (taskIndex >= plan.tasks.length - 1 && !canLoadMore) {
       void onReload();
     }
+  }
+
+  function goBack() {
+    setTaskIndex((prev) => Math.max(prev - 1, 0));
+  }
+
+  /** After a saved decision: keep the position, the reload removes the decided task. */
+  async function continueAfterDecision() {
+    const upcomingId = plan.tasks[taskIndex + 1]?.id ?? null;
+    await onReload();
+    setNextTaskId(upcomingId);
   }
 
   async function acceptLabelSuggestion(current: ReviewWizardSuggestionTask) {
@@ -133,8 +188,7 @@ export function ReviewWizardView({ items, batchBusy, onReload }: ReviewWizardVie
     try {
       await acceptDocumentTagSuggestion(current.documentId, tagId);
       pushSuccess(t('common.saved'));
-      advanceTask();
-      await onReload();
+      await continueAfterDecision();
     } catch (err) {
       pushError(formatUserFacingError(err, 'errors.generic'));
     } finally {
@@ -149,8 +203,7 @@ export function ReviewWizardView({ items, batchBusy, onReload }: ReviewWizardVie
     try {
       await dismissDocumentTagSuggestion(current.documentId, tagId);
       pushSuccess(t('common.saved'));
-      advanceTask();
-      await onReload();
+      await continueAfterDecision();
     } catch (err) {
       pushError(formatUserFacingError(err, 'errors.generic'));
     } finally {
@@ -186,8 +239,7 @@ export function ReviewWizardView({ items, batchBusy, onReload }: ReviewWizardVie
       await updateDocument(current.documentId, patch);
       pushSuccess(t('common.saved'));
       setCorrecting(false);
-      advanceTask();
-      await onReload();
+      await continueAfterDecision();
     } catch (err) {
       pushError(formatUserFacingError(err, 'errors.generic'));
     } finally {
@@ -202,8 +254,7 @@ export function ReviewWizardView({ items, batchBusy, onReload }: ReviewWizardVie
     try {
       await updateDocument(current.documentId, { documentDate: raw });
       pushSuccess(t('common.saved'));
-      advanceTask();
-      await onReload();
+      await continueAfterDecision();
     } catch (err) {
       pushError(formatUserFacingError(err, 'errors.generic'));
     } finally {
@@ -236,6 +287,35 @@ export function ReviewWizardView({ items, batchBusy, onReload }: ReviewWizardVie
     });
   }, [plan.documents, task.documentId, task.stepIndex]);
 
+  useEffect(() => {
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey) return;
+      if (shouldIgnoreShortcut(event.target) || busy || batchBusy) return;
+      if (plan.tasks.length === 0) return;
+      if (event.key === 'ArrowRight') {
+        event.preventDefault();
+        advanceTask();
+      } else if (event.key === 'ArrowLeft') {
+        event.preventDefault();
+        goBack();
+      } else if (event.key === 'Enter') {
+        event.preventDefault();
+        if (task.stepKind === 'labels') void acceptLabelSuggestion(task);
+        else if (task.stepKind === 'fields' && !correcting) void acceptFieldSuggestion(task);
+        else if (task.stepKind === 'date') void acceptSuggestedDate(task);
+        else if (task.stepKind === 'duplicates') advanceTask();
+      } else if ((event.key === 'k' || event.key === 'K') && task.stepKind === 'fields') {
+        event.preventDefault();
+        setCorrecting(true);
+        setCorrectionDraft(task.fieldSuggestion?.value ?? '');
+      }
+    }
+    window.addEventListener('keydown', onKeyDown);
+    return () => {
+      window.removeEventListener('keydown', onKeyDown);
+    };
+  });
+
   if (plan.tasks.length === 0) {
     return null;
   }
@@ -248,17 +328,19 @@ export function ReviewWizardView({ items, batchBusy, onReload }: ReviewWizardVie
         : null;
 
   const actionsDisabled = busy || batchBusy;
+  const documentTotal = Math.max(totalDocuments ?? 0, progress.documentCount, 1);
+  const progressLabel = t('reviewWizard.documentProgress', {
+    current: progress.documentIndex + 1,
+    total: documentTotal,
+  });
 
   return (
     <div className="review-wizard">
       <div className="review-wizard-progress">
-        <Progress
-          value={progress.taskCount > 0 ? ((progress.taskIndex + 1) / progress.taskCount) * 100 : 0}
-          label={t('reviewWizard.documentProgress', {
-            current: progress.documentIndex + 1,
-            total: Math.max(progress.documentCount, 1),
-          })}
-        />
+        <p className="review-wizard-progress-label" aria-hidden="true">
+          {progressLabel}
+        </p>
+        <Progress value={((progress.documentIndex + 1) / documentTotal) * 100} label={progressLabel} />
       </div>
       <div className="review-wizard-layout">
         <Card className="review-wizard-steps" aria-label={t('reviewWizard.stepsAria')}>
@@ -402,9 +484,19 @@ export function ReviewWizardView({ items, batchBusy, onReload }: ReviewWizardVie
           ) : null}
 
           <div className="review-wizard-actions">
-            <Button type="button" variant="ghost" disabled={actionsDisabled} onClick={advanceTask}>
-              {t('reviewWizard.skip')}
-            </Button>
+            <div className="review-wizard-actions-nav">
+              <Button
+                type="button"
+                variant="ghost"
+                disabled={actionsDisabled || taskIndex === 0}
+                onClick={goBack}
+              >
+                {t('reviewWizard.back')}
+              </Button>
+              <Button type="button" variant="ghost" disabled={actionsDisabled} onClick={advanceTask}>
+                {t('reviewWizard.skip')}
+              </Button>
+            </div>
             <div className="review-wizard-actions-primary">
               {task.stepKind === 'labels' ? (
                 <>
