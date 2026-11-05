@@ -681,6 +681,7 @@ jobs:
       - sftp-integration
       - kubernetes-manifests
       - site-e2e
+      - design-system-e2e
       - worker-unit
       - worker-load
       - doctor-ratchet
@@ -698,6 +699,7 @@ jobs:
           SFTP: ${{ needs.sftp-integration.result }}
           K8S: ${{ needs.kubernetes-manifests.result }}
           SITE: ${{ needs.site-e2e.result }}
+          DESIGN_SYSTEM: ${{ needs.design-system-e2e.result }}
           WORKER: ${{ needs.worker-unit.result }}
           WORKER_LOAD: ${{ needs.worker-load.result }}
           DOCTORS: ${{ needs.doctor-ratchet.result }}
@@ -710,7 +712,7 @@ jobs:
               fail=1
             fi
           done
-          for r in "$DB" "$INTEGRATION" "$GO_SFTP" "$SFTP" "$K8S" "$SITE" "$WORKER" "$WORKER_LOAD" "$DOCTORS"; do
+          for r in "$DB" "$INTEGRATION" "$GO_SFTP" "$SFTP" "$K8S" "$SITE" "$DESIGN_SYSTEM" "$WORKER" "$WORKER_LOAD" "$DOCTORS"; do
             if [ "$r" != "success" ] && [ "$r" != "skipped" ]; then
               echo "Job failed with result: $r"
               fail=1
