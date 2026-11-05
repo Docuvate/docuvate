@@ -20,6 +20,7 @@ import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 
 import { DocumentDetailLoadingShell } from '../components/documents/DocumentDetailLoadingShell';
 import {
+  DOCUMENT_DETAIL_TAB_PANEL_IDS,
   DocumentDetailMetaBar,
   DocumentDetailTabStrip,
 } from '../components/documents/DocumentDetailMetaBar';
@@ -615,9 +616,10 @@ export function DocumentDetailPage() {
         />
         {activeTab === 'details' ? (
           <div
+            id={DOCUMENT_DETAIL_TAB_PANEL_IDS.details}
             className="detail-tab-panel-surface"
             role="tabpanel"
-            aria-label={t('documents.tabDetails')}
+            aria-labelledby="document-detail-tab-details"
           >
             <DocumentMetadataForm
               doc={doc}
@@ -699,9 +701,10 @@ export function DocumentDetailPage() {
 
         {activeTab === 'labels' ? (
           <div
+            id={DOCUMENT_DETAIL_TAB_PANEL_IDS.labels}
             className="detail-tab-panel-surface"
             role="tabpanel"
-            aria-label={t('documents.tabLabels')}
+            aria-labelledby="document-detail-tab-labels"
           >
             <LabelPanel document={doc} onUpdated={setDoc} />
             <LabelPlacementHints document={doc} />

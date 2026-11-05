@@ -57,7 +57,7 @@ export function Dialog({
         if (!busy) onCancel?.();
       }}
     >
-      {children}
+      {open ? children : null}
     </dialog>
   );
 }
