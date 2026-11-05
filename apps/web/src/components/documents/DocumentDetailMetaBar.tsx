@@ -5,7 +5,8 @@ import { MoreVertical } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { documentContentUrl } from '../../lib/api';
-import { Badge } from '../ui/Badge';
+import { documentStageState } from '../../lib/documentPipeline';
+import { StagePill } from '../pipeline';
 import { Menu, MenuContent, MenuTrigger } from '../ui/overlay/Menu';
 
 type DetailTab = 'details' | 'labels';
@@ -79,7 +80,7 @@ export function DocumentDetailMetaBar({
     <header className="document-detail-meta">
       <div className="document-detail-meta-top">
         <div className="document-detail-meta-primary">
-          <Badge status={doc.status} />
+          <StagePill state={documentStageState(doc)} status={doc.status} />
           <h1
             className="document-detail-title"
             data-ux="page-title"

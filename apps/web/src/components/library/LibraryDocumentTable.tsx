@@ -314,7 +314,7 @@ export function LibraryDocumentTable({
       );
     }
     if (showStatusCol) {
-      columns.push('5.5rem');
+      columns.push('6.5rem');
     }
     if (showDateCol) {
       columns.push('6.5rem');

@@ -6,6 +6,7 @@ import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
+import { DocumentStageTrack } from '../components/pipeline';
 import { ReviewWizardView } from '../components/review/ReviewWizardView';
 import { useToastNotify } from '../components/save/ToastProvider';
 import { Button } from '../components/ui/Button';
@@ -80,6 +81,13 @@ export function ReviewQueuePage() {
     <div className="page review-queue-page" data-ux="page">
       <PageHeader
         className="review-queue-header"
+        eyebrow={
+          <DocumentStageTrack
+            state="review"
+            className="review-queue-pipeline"
+            ariaLabel={t('pipeline.railAria')}
+          />
+        }
         title={t('reviewQueue.title')}
         description={t('reviewQueue.lead')}
         actions={

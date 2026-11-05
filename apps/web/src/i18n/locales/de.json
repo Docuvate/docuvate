@@ -2325,5 +2325,147 @@
     "sectionFrequent": "Häufig",
     "sectionAll": "Alle",
     "empty": "Keine Treffer"
+  },
+  "pipeline": {
+    "railAria": "Strukturierungs-Pipeline",
+    "stage": {
+      "upload": "Hochladen",
+      "structure": "Strukturieren",
+      "review": "Prüfen",
+      "export": "Exportieren"
+    },
+    "stageHint": {
+      "upload": "PDFs, Scans und Fotos per Upload oder Importquelle",
+      "structure": "Texterkennung, Layout und Felder, automatisch",
+      "review": "Labels und Felder mit einem Klick bestätigen",
+      "export": "Feldwerte als CSV oder JSON weitergeben"
+    },
+    "stepStatus": {
+      "done": "erledigt",
+      "current": "aktueller Schritt",
+      "error": "fehlgeschlagen",
+      "todo": "ausstehend"
+    },
+    "state": {
+      "intake": "Wartet",
+      "structuring": "Wird strukturiert",
+      "failed": "Fehler",
+      "review": "Zu prüfen",
+      "structured": "Strukturiert"
+    },
+    "rail": {
+      "waiting_one": "{{count}} wartet",
+      "waiting_other": "{{count}} warten",
+      "waitingNone": "Keine Warteschlange",
+      "structuring_one": "{{count}} in Arbeit",
+      "structuring_other": "{{count}} in Arbeit",
+      "structuringNone": "Nichts in Arbeit",
+      "failed_one": "{{count}} fehlgeschlagen",
+      "failed_other": "{{count}} fehlgeschlagen",
+      "review_one": "{{count}} Dokument offen",
+      "review_other": "{{count}} Dokumente offen",
+      "reviewNone": "Alles geprüft",
+      "ready_one": "{{count}} Dokument bereit",
+      "ready_other": "{{count}} Dokumente bereit",
+      "readyNone": "Noch nichts bereit"
+    },
+    "hub": {
+      "eyebrow": "Dokumente strukturieren",
+      "title": "Aus Dokumenten werden Daten.",
+      "lead": "Laden Sie Dokumente hoch. Docuvate erkennt Text, Felder und Labels, Sie bestätigen mit einem Klick und exportieren strukturierte Werte.",
+      "importSources": "Importquelle verbinden",
+      "openReview": "Prüfen starten",
+      "progressTitle": "Fortschritt",
+      "progressLead": "{{ready}} von {{total}} Dokumenten fertig erkannt",
+      "workspaceTitle": "Ihr Überblick",
+      "loadError": "Die Übersicht konnte nicht geladen werden.",
+      "retry": "Erneut versuchen"
+    },
+    "tasks": {
+      "title": "Nächste Schritte",
+      "lead": "Was Ihre Entscheidung braucht, Wichtigstes zuerst.",
+      "empty": "Alles strukturiert. Neue Aufgaben erscheinen hier, sobald Dokumente Ihre Entscheidung brauchen.",
+      "review": {
+        "title_one": "{{count}} Dokument prüfen",
+        "title_other": "{{count}} Dokumente prüfen",
+        "text": "Vorgeschlagene Labels und Felder übernehmen oder korrigieren.",
+        "action": "Prüfen"
+      },
+      "failed": {
+        "title_one": "{{count}} Dokument fehlgeschlagen",
+        "title_other": "{{count}} Dokumente fehlgeschlagen",
+        "text": "Texterkennung erneut starten oder die Datei ersetzen.",
+        "action": "Beheben"
+      },
+      "unlabeled": {
+        "title_one": "{{count}} Dokument ohne Label",
+        "title_other": "{{count}} Dokumente ohne Label",
+        "text": "Ohne Label fehlt das Dokument in Ansichten und gefilterten Exporten.",
+        "action": "Labels vergeben"
+      },
+      "structuring": {
+        "title_one": "{{count}} Dokument wird strukturiert",
+        "title_other": "{{count}} Dokumente werden strukturiert",
+        "text": "Läuft automatisch, Sie müssen nichts tun.",
+        "action": "Ansehen"
+      },
+      "waiting": {
+        "title_one": "{{count}} Dokument in der Warteschlange",
+        "title_other": "{{count}} Dokumente in der Warteschlange",
+        "text": "Die Strukturierung startet automatisch.",
+        "action": "Ansehen"
+      }
+    },
+    "library": {
+      "lead": "Nach Pipeline-Schritt filtern, prüfen und exportieren.",
+      "tabsAria": "Nach Pipeline-Schritt filtern",
+      "tab": {
+        "all": "Alle",
+        "review": "Zu prüfen",
+        "unlabeled": "Ohne Label",
+        "structuring": "In Arbeit",
+        "failed": "Fehler",
+        "ready": "Bereit"
+      },
+      "intakeTitle": "Neue Dokumente",
+      "importSources": "Importquellen",
+      "export": "Exportieren",
+      "exportMenuAria": "Feldwerte exportieren",
+      "exportScopeSelected_one": "Feldwerte von {{count}} ausgewähltem Dokument",
+      "exportScopeSelected_other": "Feldwerte von {{count}} ausgewählten Dokumenten",
+      "exportScopeFiltered": "Feldwerte aller Dokumente dieser Ansicht",
+      "exportCsv": "CSV für Tabellenkalkulation",
+      "exportJson": "JSON für Integrationen"
+    },
+    "viewer": {
+      "trackAria": "Fortschritt dieses Dokuments",
+      "nextLabel": "Nächster Schritt",
+      "wait": {
+        "title": "Wird strukturiert",
+        "text": "Texterkennung und Felder laufen automatisch. Danach erscheint das Dokument unter „Zu prüfen“."
+      },
+      "retry": {
+        "title": "Strukturierung fehlgeschlagen",
+        "action": "Erneut verarbeiten"
+      },
+      "review": {
+        "title": "Prüfen und bestätigen",
+        "fields_one": "{{count}} Feld mit niedriger Sicherheit.",
+        "fields_other": "{{count}} Felder mit niedriger Sicherheit.",
+        "labels_one": "{{count}} Labelvorschlag wartet.",
+        "labels_other": "{{count}} Labelvorschläge warten.",
+        "inbox": "Das Dokument liegt noch im Posteingang.",
+        "fieldsAction": "Felder prüfen",
+        "labelsAction": "Labels prüfen",
+        "queueAction": "In der Prüfwarteschlange öffnen"
+      },
+      "export": {
+        "title": "Strukturiert und bereit zum Export",
+        "text": "Exportieren Sie die erkannten Feldwerte dieses Dokuments.",
+        "csv": "Als CSV exportieren",
+        "json": "Als JSON exportieren",
+        "busy": "Export läuft…"
+      }
+    }
   }
 }

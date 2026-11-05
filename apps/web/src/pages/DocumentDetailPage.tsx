@@ -36,6 +36,7 @@ import { DuplicateCandidatesPanel } from '../components/documents/DuplicateCandi
 import { ExtractedFieldsPanel } from '../components/documents/ExtractedFieldsPanel';
 import { LabelPanel } from '../components/documents/LabelPanel';
 import { LabelPlacementHints } from '../components/documents/LabelPlacementHints';
+import { DocumentPipelineHeader } from '../components/pipeline';
 import { PageFormSaveKit } from '../components/save/PageFormSaveKit';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import {
@@ -600,6 +601,21 @@ export function DocumentDetailPage() {
         requeueBusy={requeueBusy}
         showTechnicalDetails={showTechnicalDetails}
         onShowTechnicalDetailsChange={layoutWorkspace ? setShowTechnicalDetails : undefined}
+      />
+
+      <DocumentPipelineHeader
+        doc={doc}
+        fields={recognizedFields}
+        requeueBusy={requeueBusy}
+        onRequeue={() => void onRequeueExtraction()}
+        onOpenPanel={(panel) => {
+          setActiveTab(panel);
+          window.requestAnimationFrame(() => {
+            document
+              .getElementById(DOCUMENT_DETAIL_TAB_PANEL_IDS[panel])
+              ?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+          });
+        }}
       />
 
       {error ? (

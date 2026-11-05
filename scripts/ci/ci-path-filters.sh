@@ -51,4 +51,4 @@ fi
 emit_if_match migrations '^apps/api/.*migrations/'
 emit_if_match api '^(apps/api/|packages/contracts/|packages/otel/)'
 emit_if_match doctors '^(apps/api/|apps/web/|apps/worker/|scripts/testing/doctor|docs/testing/doctor|scripts/doctors\.sh|package\.json|pnpm-lock\.yaml|apps/worker/(pyproject\.toml|uv\.lock))'
-emit_if_match design_system '^(apps/web/|packages/(tokens|ui-catalog|contracts)/|e2e/(tests/design-system/|tests/helpers/|playwright\.design-system\.config\.ts|package\.json)|package\.json|pnpm-lock\.yaml|\.github/workflows/ci\.yml|scripts/ci/ci-path-filters\.sh)'
+emit_if_match design_system '^(apps/web/|packages/(tokens|ui-catalog|contracts)/|e2e/(tests/design-system/|tests/structuring/|tests/helpers/|fixtures/synthetic-upload\.pdf|playwright\.(design-system|structuring)\.config\.ts|package\.json)|package\.json|pnpm-lock\.yaml|\.github/workflows/ci\.yml|scripts/ci/ci-path-filters\.sh)'

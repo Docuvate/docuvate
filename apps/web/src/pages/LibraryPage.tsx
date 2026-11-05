@@ -9,8 +9,8 @@ import { LibraryFilterPanel } from '../components/library/LibraryFilterPanel';
 import { LibrarySavedViewsMenu } from '../components/library/LibrarySavedViewsMenu';
 import { LibraryViewSwitcher } from '../components/library/LibraryViewSwitcher';
 import { SaveViewDialog } from '../components/library/SaveViewDialog';
+import { LibraryExportMenu, LibraryStageTabs, usePipelineOverview } from '../components/pipeline';
 import { useToastNotify } from '../components/save/ToastProvider';
-import { Button } from '../components/ui/Button';
 import { Select } from '../components/ui/Select';
 import { DocumentUploadProvider } from '../components/upload/DocumentUploadProvider';
 import { UploadDropzone } from '../components/UploadDropzone';
@@ -58,17 +58,22 @@ export function LibraryPage() {
     [mode, folderId, data.filters, data.folders]
   );
 
+  const [overviewKey, setOverviewKey] = useState(0);
+  const overview = usePipelineOverview(overviewKey);
+
   const onUploaded = () => {
     void data.load();
     void data.loadTaxonomy();
+    setOverviewKey((key) => key + 1);
   };
 
+  const pipelineLead = t('pipeline.library.lead');
   const subtitle = data.filters.withoutNonInboxLabel
     ? t('library.withoutLabelFilter')
     : data.activeLabelNames.length > 0
       ? t('library.labelFilter', { labels: data.activeLabelNames.join(' + ') })
       : data.hasDocuments
-        ? ''
+        ? pipelineLead
         : t('library.hintEmpty');
 
   return (
@@ -82,7 +87,9 @@ export function LibraryPage() {
                 {t('savedViews.activeViewLead', { name: data.activeViewName })}
               </p>
             ) : subtitle ? (
-              <p className="muted">{subtitle}</p>
+              <p className={`muted${data.hasDocuments && subtitle === pipelineLead ? ' library-page-lead' : ''}`}>
+                {subtitle}
+              </p>
             ) : null}
           </div>
           <div className="library-toolbar">
@@ -110,30 +117,24 @@ export function LibraryPage() {
               options={[...sortOptions]}
               aria-label={t('library.sortLabel')}
             />
-            <Button
-              type="button"
-              variant="secondary"
-              className="library-export-btn"
-              disabled={data.exportBusy || !data.hasDocuments}
-              onClick={() => {
-                void data.exportFieldValues('csv');
+            <LibraryExportMenu
+              busy={data.exportBusy}
+              disabled={!data.hasDocuments}
+              selectedCount={data.bulkSelectedCount}
+              onExport={(format) => {
+                void data.exportFieldValues(format);
               }}
-            >
-              {data.exportBusy ? t('library.exportFieldValuesPending') : t('library.exportFieldValuesCsv')}
-            </Button>
-            <Button
-              type="button"
-              variant="secondary"
-              className="library-export-btn"
-              disabled={data.exportBusy || !data.hasDocuments}
-              onClick={() => {
-                void data.exportFieldValues('json');
-              }}
-            >
-              {data.exportBusy ? t('library.exportFieldValuesPending') : t('library.exportFieldValuesJson')}
-            </Button>
+            />
           </div>
         </header>
+
+        <LibraryStageTabs
+          filters={data.filters}
+          overview={overview}
+          onSelect={(patch) => {
+            data.toggleFilter(patch);
+          }}
+        />
 
         <UploadDropzone compact={data.hasDocuments} />
 

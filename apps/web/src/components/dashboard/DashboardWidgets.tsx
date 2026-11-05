@@ -12,13 +12,11 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
 import { getDashboardWidgetDocumentPreviews } from '../../lib/api';
-import { resolveLibraryDropTarget } from '../../lib/documentUploadAssignment';
 import { formatDocumentRelativeTime } from '../../lib/formatDocumentRelativeTime';
 import { routes } from '../../lib/routes';
 import { Badge } from '../ui/Badge';
 import { Chip } from '../ui/Chip';
 import { Progress } from '../ui/Progress';
-import { DocumentUploadProvider } from '../upload';
 import { UploadDropzone } from '../UploadDropzone';
 import { DashboardWidgetCard } from './DashboardWidgetCard';
 
@@ -27,7 +25,6 @@ interface DashboardWidgetsProps {
   editMode: boolean;
   onWidgetsChange: (widgets: DashboardWidgetDto[]) => void;
   savedViews: SavedDocumentViewDto[];
-  onRefreshViews: () => void;
   statistics: DashboardStatisticsDto | null;
 }
 
@@ -103,7 +100,6 @@ export function DashboardWidgets({
   editMode,
   onWidgetsChange,
   savedViews,
-  onRefreshViews,
   statistics,
 }: DashboardWidgetsProps) {
   const sorted = [...widgets].sort((a, b) => a.position - b.position);
@@ -143,33 +139,22 @@ export function DashboardWidgets({
   };
 
   return (
-    <DocumentUploadProvider
-      dropTarget={resolveLibraryDropTarget({
-        mode: 'all',
-        filters: {},
-        folders: [],
-      })}
-      onUploaded={() => {
-        onRefreshViews();
-      }}
-    >
-      <div className={`dashboard-grid${editMode ? ' dashboard-grid--edit' : ''}`}>
-        {sorted.map((widget, index) => (
-          <WidgetSlot
-            key={widget.id}
-            widget={widget}
-            index={index}
-            editMode={editMode}
-            savedViews={savedViews}
-            statistics={statistics}
-            moveWidget={moveWidget}
-            removeWidget={removeWidget}
-            onDragStart={onDragStart}
-            onDrop={onDrop}
-          />
-        ))}
-      </div>
-    </DocumentUploadProvider>
+    <div className={`dashboard-grid${editMode ? ' dashboard-grid--edit' : ''}`}>
+      {sorted.map((widget, index) => (
+        <WidgetSlot
+          key={widget.id}
+          widget={widget}
+          index={index}
+          editMode={editMode}
+          savedViews={savedViews}
+          statistics={statistics}
+          moveWidget={moveWidget}
+          removeWidget={removeWidget}
+          onDragStart={onDragStart}
+          onDrop={onDrop}
+        />
+      ))}
+    </div>
   );
 }
 

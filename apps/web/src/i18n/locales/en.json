@@ -2325,5 +2325,147 @@
     "sectionFrequent": "Frequent",
     "sectionAll": "All",
     "empty": "No matches"
+  },
+  "pipeline": {
+    "railAria": "Structuring pipeline",
+    "stage": {
+      "upload": "Upload",
+      "structure": "Structure",
+      "review": "Review",
+      "export": "Export"
+    },
+    "stageHint": {
+      "upload": "PDFs, scans and photos via upload or an import source",
+      "structure": "Text recognition, layout and fields, automatic",
+      "review": "Confirm labels and fields in one click",
+      "export": "Hand off field values as CSV or JSON"
+    },
+    "stepStatus": {
+      "done": "done",
+      "current": "current step",
+      "error": "failed",
+      "todo": "pending"
+    },
+    "state": {
+      "intake": "Waiting",
+      "structuring": "Structuring",
+      "failed": "Failed",
+      "review": "To review",
+      "structured": "Structured"
+    },
+    "rail": {
+      "waiting_one": "{{count}} waiting",
+      "waiting_other": "{{count}} waiting",
+      "waitingNone": "Queue is empty",
+      "structuring_one": "{{count}} in progress",
+      "structuring_other": "{{count}} in progress",
+      "structuringNone": "Nothing in progress",
+      "failed_one": "{{count}} failed",
+      "failed_other": "{{count}} failed",
+      "review_one": "{{count}} document open",
+      "review_other": "{{count}} documents open",
+      "reviewNone": "All reviewed",
+      "ready_one": "{{count}} document ready",
+      "ready_other": "{{count}} documents ready",
+      "readyNone": "Nothing ready yet"
+    },
+    "hub": {
+      "eyebrow": "Structure documents",
+      "title": "Turn documents into data.",
+      "lead": "Upload documents. Docuvate recognizes text, fields and labels, you confirm in one click and export structured values.",
+      "importSources": "Connect an import source",
+      "openReview": "Start review",
+      "progressTitle": "Progress",
+      "progressLead": "{{ready}} of {{total}} documents fully recognized",
+      "workspaceTitle": "Your overview",
+      "loadError": "The overview could not be loaded.",
+      "retry": "Try again"
+    },
+    "tasks": {
+      "title": "Next steps",
+      "lead": "What needs your decision, most important first.",
+      "empty": "Everything is structured. New tasks show up here as soon as documents need your decision.",
+      "review": {
+        "title_one": "Review {{count}} document",
+        "title_other": "Review {{count}} documents",
+        "text": "Accept or correct suggested labels and fields.",
+        "action": "Review"
+      },
+      "failed": {
+        "title_one": "{{count}} document failed",
+        "title_other": "{{count}} documents failed",
+        "text": "Restart text recognition or replace the file.",
+        "action": "Fix"
+      },
+      "unlabeled": {
+        "title_one": "{{count}} document without a label",
+        "title_other": "{{count}} documents without a label",
+        "text": "Without a label the document is missing from views and filtered exports.",
+        "action": "Add labels"
+      },
+      "structuring": {
+        "title_one": "{{count}} document is being structured",
+        "title_other": "{{count}} documents are being structured",
+        "text": "Runs automatically, nothing to do.",
+        "action": "View"
+      },
+      "waiting": {
+        "title_one": "{{count}} document in the queue",
+        "title_other": "{{count}} documents in the queue",
+        "text": "Structuring starts automatically.",
+        "action": "View"
+      }
+    },
+    "library": {
+      "lead": "Filter by pipeline step, review and export.",
+      "tabsAria": "Filter by pipeline step",
+      "tab": {
+        "all": "All",
+        "review": "To review",
+        "unlabeled": "No label",
+        "structuring": "In progress",
+        "failed": "Failed",
+        "ready": "Ready"
+      },
+      "intakeTitle": "New documents",
+      "importSources": "Import sources",
+      "export": "Export",
+      "exportMenuAria": "Export field values",
+      "exportScopeSelected_one": "Field values of {{count}} selected document",
+      "exportScopeSelected_other": "Field values of {{count}} selected documents",
+      "exportScopeFiltered": "Field values of all documents in this view",
+      "exportCsv": "CSV for spreadsheets",
+      "exportJson": "JSON for integrations"
+    },
+    "viewer": {
+      "trackAria": "Progress of this document",
+      "nextLabel": "Next step",
+      "wait": {
+        "title": "Being structured",
+        "text": "Text recognition and fields run automatically. Afterwards the document appears under “To review”."
+      },
+      "retry": {
+        "title": "Structuring failed",
+        "action": "Reprocess"
+      },
+      "review": {
+        "title": "Review and confirm",
+        "fields_one": "{{count}} field with low confidence.",
+        "fields_other": "{{count}} fields with low confidence.",
+        "labels_one": "{{count}} label suggestion waiting.",
+        "labels_other": "{{count}} label suggestions waiting.",
+        "inbox": "The document is still in the inbox.",
+        "fieldsAction": "Review fields",
+        "labelsAction": "Review labels",
+        "queueAction": "Open in review queue"
+      },
+      "export": {
+        "title": "Structured and ready to export",
+        "text": "Export the recognized field values of this document.",
+        "csv": "Export as CSV",
+        "json": "Export as JSON",
+        "busy": "Exporting…"
+      }
+    }
   }
 }

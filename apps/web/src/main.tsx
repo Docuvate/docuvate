@@ -18,6 +18,7 @@ import './components/ui/components.css';
 import './components/ui/ds.css';
 import './components/errors/error-scenes.css';
 import './styles/app.css';
+import './components/pipeline/pipeline.css';
 
 declare global {
   interface Window {
