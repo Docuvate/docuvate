@@ -29,7 +29,10 @@ export class AutoAcceptCalibratedReviewUseCase {
     });
     const minConfidence = this.resolveAutoAcceptMinConfidence();
     try {
-      await this.acceptReview.execute(documentId, userId, subject, { minConfidence });
+      await this.acceptReview.execute(documentId, userId, subject, {
+        minConfidence,
+        confirmedByUser: false,
+      });
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : String(error);
       this.logger.warn(`Auto-accept review skipped for ${documentId}: ${message}`);

@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import type { AcceptDocumentReviewResponseDto } from '@docuvate/contracts';
+import type { AcceptDocumentReviewResponseDto, ExtractedField } from '@docuvate/contracts';
 import {
   dedupeExtractedFields,
   parseSuggestionStorageKey,
@@ -35,6 +35,12 @@ import {
 import { isJunkReviewFieldSuggestion } from './review-field-junk-filter.js';
 import { selectAcceptableLabelSuggestions } from './select-review-label-suggestions.js';
 
+interface AcceptDocumentReviewOptions {
+  minConfidence?: number;
+  /** False when the system accepts on its own after extraction; defaults to a person's accept. */
+  confirmedByUser?: boolean;
+}
+
 @Injectable()
 export class AcceptDocumentReviewUseCase {
   constructor(
@@ -55,9 +61,10 @@ export class AcceptDocumentReviewUseCase {
     documentId: string,
     userId: string,
     subject: AuthorizationSubject,
-    options: { minConfidence?: number } = {}
+    options: AcceptDocumentReviewOptions = {}
   ): Promise<AcceptDocumentReviewResponseDto> {
     const minConfidence = options.minConfidence ?? 0;
+    const confirmedByUser = options.confirmedByUser ?? true;
     await this.getDocument.execute(documentId, userId, subject);
 
     const assignedTagIds = new Set(
@@ -143,12 +150,14 @@ export class AcceptDocumentReviewUseCase {
           semanticFieldKey(row) !== semantic
       );
       if (!nextFields.some((row) => semanticFieldKey(row) === semantic)) {
-        nextFields.push({
+        const accepted: ExtractedField = {
           key: semantic,
           value,
           confidence: suggestion.confidence ?? 0.9,
-          userConfirmed: true,
-        });
+        };
+        // Only a person's accept marks the value as confirmed (UC12/13); an automatic accept
+        // keeps it a suggestion so it neither shows as confirmed nor feeds learning.
+        nextFields.push(confirmedByUser ? { ...accepted, userConfirmed: true } : accepted);
         acceptedFields += 1;
       }
       if (semantic === 'date' && !doc.documentDate) {
