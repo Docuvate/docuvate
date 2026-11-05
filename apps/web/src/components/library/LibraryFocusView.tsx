@@ -21,7 +21,7 @@ import { Badge } from '../ui/Badge';
 import { Chip } from '../ui/Chip';
 import { duplicateStackVersionLabel, showDuplicateStackBadge } from './duplicateStackLabel';
 import { LayoutMissingBadge } from './LayoutMissingBadge';
-import { showLayoutMissingBadge } from './layoutMissingBadge';
+import { showLayoutMissingBadge } from './layoutMissingBadgeVisibility';
 import { documentDisplayDate, isImageMime, isPdfMime } from './libraryDocumentUtils';
 
 interface LibraryFocusViewProps {

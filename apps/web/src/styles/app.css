@@ -3606,7 +3606,6 @@ mark.global-search-mark {
   margin-top: var(--dv-space-md);
 }
 
-
 .review-wizard {
   display: grid;
   gap: var(--dv-space-lg);
@@ -7291,7 +7290,6 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   white-space: pre;
 }
 
-
 .library-export-btn {
   flex: 0 1 auto;
   max-width: 100%;
@@ -8447,7 +8445,6 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   min-width: 0;
 }
 
-
 .library-focus-pane-actions {
   display: flex;
   flex-wrap: wrap;
@@ -8862,7 +8859,6 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   background: var(--dv-color-text-subtle);
   overflow: hidden;
 }
-
 
 .pdf-pages-display-rotated {
   transform-origin: center center;
@@ -15530,6 +15526,44 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 .labels-vocabulary-filter {
   width: 20rem;
   max-width: 100%;
+}
+
+.labels-vocabulary-filter-control {
+  display: flex;
+  align-items: center;
+  gap: var(--dv-space-xs);
+  min-height: var(--dv-control-height);
+  width: 100%;
+  border: 1px solid var(--dv-color-border);
+  border-radius: var(--dv-radius-md);
+  background: var(--dv-color-bg);
+  box-sizing: border-box;
+}
+
+.labels-vocabulary-filter-icon {
+  flex: none;
+  color: var(--dv-color-text-muted);
+  margin-left: var(--dv-space-sm);
+}
+
+.labels-vocabulary-filter-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  border: none;
+  box-shadow: none;
+  background: transparent;
+  padding-left: 0;
+}
+
+.labels-vocabulary-filter-input:focus,
+.labels-vocabulary-filter-input:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+.labels-vocabulary-filter-control:focus-within {
+  border-color: var(--dv-color-accent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--dv-color-accent) 55%, transparent);
 }
 
 .labels-vocabulary-grid {

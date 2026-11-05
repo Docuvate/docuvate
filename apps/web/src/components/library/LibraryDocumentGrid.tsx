@@ -17,7 +17,7 @@ import {
 } from './duplicateStackLabel';
 import { DuplicateStackQuickReview } from './DuplicateStackQuickReview';
 import { LayoutMissingBadge } from './LayoutMissingBadge';
-import { showLayoutMissingBadge } from './layoutMissingBadge';
+import { showLayoutMissingBadge } from './layoutMissingBadgeVisibility';
 import { documentDisplayDate } from './libraryDocumentUtils';
 import { useLibraryDocumentVirtualizer } from './useLibraryDocumentVirtualizer';
 

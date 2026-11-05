@@ -52,12 +52,13 @@ import { DocumentFieldMarkHint, useDocumentFieldMarking } from './DocumentFieldM
 import { DocumentLayoutCompareView } from './DocumentLayoutCompareView';
 import { DocumentLayoutExportTab } from './DocumentLayoutExportTab';
 import { DocumentLayoutPaneTabs, useLayoutMobilePane } from './DocumentLayoutPaneTabs';
-import { DocumentLayoutSidePanel, type LayoutSideTab, overlayRegionById } from './DocumentLayoutSidePanel';
-import { DocumentLayoutViewerToolbar, type LeftDocumentMode } from './DocumentLayoutViewerToolbar';
 import {
-  type DocumentSelectionDraft,
-  DocumentSelectionLayer,
-} from './DocumentSelectionLayer';
+  DocumentLayoutSidePanel,
+  type LayoutSideTab,
+  overlayRegionById,
+} from './DocumentLayoutSidePanel';
+import { DocumentLayoutViewerToolbar, type LeftDocumentMode } from './DocumentLayoutViewerToolbar';
+import { type DocumentSelectionDraft, DocumentSelectionLayer } from './DocumentSelectionLayer';
 import type { DocumentSelectionTool } from './DocumentSelectionTools';
 import { DocumentTableCorrectionSheet } from './DocumentTableCorrectionSheet';
 import { ExtractedLayoutHtmlFrame, type LayoutIrZoomStep } from './ExtractedLayoutHtmlFrame';
@@ -201,14 +202,32 @@ export function DocumentLayoutWorkspace({
     layoutIrRevision
   );
 
-  const fieldOptions = useMemo(
-    () =>
-      [...knownFieldKeys].map((key) => ({
+  const fieldOptions = useMemo(() => {
+    const keys = new Set<string>(knownFieldKeys);
+    for (const field of fields) {
+      if (field.key.startsWith('suggestion:')) {
+        continue;
+      }
+      keys.add(field.key);
+    }
+    return [...keys]
+      .map((key) => ({
         value: key,
         label: fieldLabelForKey(key),
-      })),
-    [fieldLabelForKey, knownFieldKeys]
-  );
+      }))
+      .sort((a, b) => a.label.localeCompare(b.label, 'de-DE'));
+  }, [fieldLabelForKey, fields, knownFieldKeys]);
+
+  const existingFieldValues = useMemo(() => {
+    const values = new Map<string, string>();
+    for (const field of fields) {
+      if (field.key.startsWith('suggestion:')) {
+        continue;
+      }
+      values.set(field.key, field.value);
+    }
+    return values;
+  }, [fields]);
 
   const highlightRegion = useCallback(
     (key: string) => {
@@ -247,7 +266,9 @@ export function DocumentLayoutWorkspace({
   );
 
   const tableSheetOpen = Boolean(correctionSheetViewport && selectedTableId);
-  const correctionSheetOpen = Boolean(correctionSheetViewport && (selectedFieldKey ?? selectedTableId));
+  const correctionSheetOpen = Boolean(
+    correctionSheetViewport && (selectedFieldKey ?? selectedTableId)
+  );
   const mobilePane = useLayoutMobilePane(correctionSheetOpen);
   const fieldMarking = useDocumentFieldMarking({
     setReanchorFieldKey,
@@ -255,7 +276,9 @@ export function DocumentLayoutWorkspace({
     setSelectionTool,
     highlightRegion,
     sheetFieldKey: selectedFieldKey,
-    closeSheet: () => { setSelectedFieldKey(null); },
+    closeSheet: () => {
+      setSelectedFieldKey(null);
+    },
     onSaveFieldValue,
     revealViewer: mobilePane.showDocument,
   });
@@ -295,13 +318,15 @@ export function DocumentLayoutWorkspace({
             exists
               ? fields.map((field) =>
                   field.key === fieldKey
-                    ? { ...field, value: nextValue || field.value, confidence: 1, userConfirmed: true }
+                    ? {
+                        ...field,
+                        value: nextValue || field.value,
+                        confidence: 1,
+                        userConfirmed: true,
+                      }
                     : field
                 )
-              : [
-                  ...fields,
-                  { key: fieldKey, value: nextValue, confidence: 1, userConfirmed: true },
-                ]
+              : [...fields, { key: fieldKey, value: nextValue, confidence: 1, userConfirmed: true }]
           );
         }
       }
@@ -371,19 +396,15 @@ export function DocumentLayoutWorkspace({
     }
   }, [leftMode, onTextEditOpenChange, textEditOpen]);
 
-  const setLeftDocumentMode = useCallback(
-    (mode: LeftDocumentMode) => {
-      setLeftMode(mode);
-      if (mode === 'text') {
-        setAdvancedOpen(false);
-      }
-    },
-    []
-  );
+  const setLeftDocumentMode = useCallback((mode: LeftDocumentMode) => {
+    setLeftMode(mode);
+    if (mode === 'text') {
+      setAdvancedOpen(false);
+    }
+  }, []);
 
   const frameLayoutIr =
-    layoutIr ??
-    (layoutIrPages?.length ? layoutIrDocumentFromPageSummaries(layoutIrPages) : null);
+    layoutIr ?? (layoutIrPages?.length ? layoutIrDocumentFromPageSummaries(layoutIrPages) : null);
 
   const overlays = useMemo(() => {
     const base = layoutIr ? buildLayoutOverlays(layoutIr) : [];
@@ -521,17 +542,15 @@ export function DocumentLayoutWorkspace({
         setSelectionTool('rect');
         return;
       }
-      if (event.key === 'Enter' && selectionDraft) {
-        const fieldKey = reanchorFieldKey ?? fieldOptions[0]?.value;
-        if (!fieldKey) {
-          return;
-        }
+      if (event.key === 'Enter' && selectionDraft && reanchorFieldKey) {
+        // Free-form create/assign goes through DocumentFieldContextBar so the user
+        // picks the target field explicitly (and confirms overwrites).
         event.preventDefault();
         void runFieldCorrection(
           {
             id: crypto.randomUUID(),
-            op: reanchorFieldKey ? 'reanchor' : 'create',
-            fieldKey,
+            op: 'reanchor',
+            fieldKey: reanchorFieldKey,
             page: selectionDraft.page,
             shape: 'rect',
             x0: selectionDraft.rect.x0,
@@ -543,18 +562,19 @@ export function DocumentLayoutWorkspace({
               ? { valueOverride: selectionDraft.text }
               : {}),
           },
-          t('documents.fieldCorrectionSaved', { name: fieldLabelForKey(fieldKey) })
+          t('documents.fieldCorrectionSaved', { name: fieldLabelForKey(reanchorFieldKey) })
         ).catch((err: unknown) => {
           toast.error(formatUserFacingError(err, 'errors.generic'));
         });
       }
     };
     window.addEventListener('keydown', onKey);
-    return () => { window.removeEventListener('keydown', onKey); };
+    return () => {
+      window.removeEventListener('keydown', onKey);
+    };
   }, [
     activeOverlayId,
     fieldLabelForKey,
-    fieldOptions,
     reanchorFieldKey,
     runFieldCorrection,
     selectionDraft,
@@ -603,11 +623,9 @@ export function DocumentLayoutWorkspace({
   );
 
   const pending = layoutIrAvailable && layoutIrState === 'loading';
-  const showAdvancedStage =
-    layoutAdvancedEnabled && advancedOpen && leftMode === 'original';
+  const showAdvancedStage = layoutAdvancedEnabled && advancedOpen && leftMode === 'original';
   const failed = doc.status === 'failed';
-  const showRecovery =
-    (failed || isExtractionPending(doc.status)) && onRequeueExtraction != null;
+  const showRecovery = (failed || isExtractionPending(doc.status)) && onRequeueExtraction != null;
   const selectedField = selectedFieldKey
     ? fields.find((field) => field.key === selectedFieldKey)
     : undefined;
@@ -663,7 +681,11 @@ export function DocumentLayoutWorkspace({
             hasDraft={selectionDraft !== null}
             onCancel={fieldMarking.cancelMarkingField}
           />
-          <div className="layout-viewer-stage" data-testid="layout-viewer-stage" ref={fieldMarking.viewerStageRef}>
+          <div
+            className="layout-viewer-stage"
+            data-testid="layout-viewer-stage"
+            ref={fieldMarking.viewerStageRef}
+          >
             {leftMode === 'text' ? (
               <div className="layout-text-stage">
                 <ExtractedTextPanel
@@ -687,7 +709,12 @@ export function DocumentLayoutWorkspace({
                 />
                 {blocksDirty ? (
                   <div className="layout-text-edit-save">
-                    <Button type="button" variant="secondary" disabled={saving} onClick={onSaveBlocks}>
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      disabled={saving}
+                      onClick={onSaveBlocks}
+                    >
                       {saving ? t('documents.saving') : t('documents.save')}
                     </Button>
                   </div>
@@ -701,7 +728,10 @@ export function DocumentLayoutWorkspace({
                 onPageChange={onViewerPageChange}
                 showTechnicalDetails={showTechnicalDetails}
               />
-            ) : showAdvancedStage && advancedView === 'reconstruction' && frameLayoutIr && doc.id ? (
+            ) : showAdvancedStage &&
+              advancedView === 'reconstruction' &&
+              frameLayoutIr &&
+              doc.id ? (
               <ExtractedLayoutHtmlFrame
                 documentId={doc.id}
                 layoutIr={frameLayoutIr}
@@ -726,9 +756,13 @@ export function DocumentLayoutWorkspace({
                     layoutOverlays={pdfOverlays}
                     layoutOverlayEnabled={overlayEnabled && pdfOverlays.length > 0}
                     activeLayoutOverlayId={activeOverlayId}
-                    onLayoutOverlaySelect={(id) => { onOverlaySelect(id); }}
+                    onLayoutOverlaySelect={(id) => {
+                      onOverlaySelect(id);
+                    }}
                     onLayoutOverlayHover={setHoverOverlay}
-                    onLayoutOverlayClear={() => { setActiveOverlayId(null); }}
+                    onLayoutOverlayClear={() => {
+                      setActiveOverlayId(null);
+                    }}
                     page={viewerPage}
                     onPageChange={onViewerPageChange}
                     paginated
@@ -755,7 +789,9 @@ export function DocumentLayoutWorkspace({
                           <input
                             type="checkbox"
                             checked={overlayEnabled}
-                            onChange={(e) => { setOverlayEnabled(e.target.checked); }}
+                            onChange={(e) => {
+                              setOverlayEnabled(e.target.checked);
+                            }}
                           />
                           <span>{t('documents.layoutOverlayToggle')}</span>
                         </label>
@@ -784,6 +820,7 @@ export function DocumentLayoutWorkspace({
                           ]
                         : fieldOptions
                     }
+                    existingFieldValues={existingFieldValues}
                     onMarkTable={
                       reanchorFieldKey
                         ? undefined
@@ -798,15 +835,17 @@ export function DocumentLayoutWorkspace({
                                 y0: selectionDraft.rect.y0,
                                 x1: selectionDraft.rect.x1,
                                 y1: selectionDraft.rect.y1,
-                                blockIndexes: selectionDraft.tokens.map((token) => token.blockIndex),
+                                blockIndexes: selectionDraft.tokens.map(
+                                  (token) => token.blockIndex
+                                ),
                               },
                               t('documents.tableCorrectionSaved')
                             ).catch((err: unknown) => {
-                                toast.error(formatUserFacingError(err, 'errors.generic'));
-                              });
+                              toast.error(formatUserFacingError(err, 'errors.generic'));
+                            });
                           }
                     }
-                    onCreate={(fieldKey) => {
+                    onConfirm={(fieldKey) => {
                       void runFieldCorrection(
                         {
                           id: crypto.randomUUID(),
@@ -836,7 +875,9 @@ export function DocumentLayoutWorkspace({
                 ) : null}
                 {hoverOverlay && overlayEnabled ? (
                   <div className="layout-overlay-popover" role="tooltip">
-                    <span className={`layout-overlay-kind layout-overlay-kind-${hoverOverlay.kind}`}>
+                    <span
+                      className={`layout-overlay-kind layout-overlay-kind-${hoverOverlay.kind}`}
+                    >
                       {t(`documents.layoutOverlayKind.${hoverOverlay.kind}`)}
                     </span>
                     <p className="layout-overlay-popover-label">{hoverOverlay.label}</p>
@@ -861,11 +902,16 @@ export function DocumentLayoutWorkspace({
                 }
               }}
             >
-              <summary className="layout-advanced-summary">{t('documents.layoutAdvancedSummary')}</summary>
+              <summary className="layout-advanced-summary">
+                {t('documents.layoutAdvancedSummary')}
+              </summary>
               <div className="layout-advanced-body">
                 <SegmentedControl<AdvancedViewerMode>
                   ariaLabel={t('documents.layoutAdvancedViewAria')}
-                  className={segmentedToolbarClass('layout-advanced-view-switch', 'segmented-control--text-wide')}
+                  className={segmentedToolbarClass(
+                    'layout-advanced-view-switch',
+                    'segmented-control--text-wide'
+                  )}
                   value={advancedView}
                   options={advancedViewOptions}
                   onChange={setAdvancedView}
@@ -893,7 +939,12 @@ export function DocumentLayoutWorkspace({
           activeTab={layoutSideTab}
           onTabChange={(tab) => {
             onLayoutSideTabChange(tab);
-            if (tab === 'tables' && correctionSheetViewport && tableRegions.length > 0 && !selectedTableId) {
+            if (
+              tab === 'tables' &&
+              correctionSheetViewport &&
+              tableRegions.length > 0 &&
+              !selectedTableId
+            ) {
               setSelectedTableId(tableRegions[0].id);
               setSelectedFieldKey(null);
             }
@@ -904,8 +955,9 @@ export function DocumentLayoutWorkspace({
             onAcceptFieldSuggestion(key, value);
             setDismissedSuggestions((prev) => new Set(prev).add(key));
           }}
-          onDismissSuggestion={(key) => { setDismissedSuggestions((prev) => new Set(prev).add(key)); }
-          }
+          onDismissSuggestion={(key) => {
+            setDismissedSuggestions((prev) => new Set(prev).add(key));
+          }}
           dismissedSuggestions={dismissedSuggestions}
           heuristicSuggestions={heuristicSuggestions}
           recognizedCatalog={recognizedCatalog}
@@ -959,7 +1011,9 @@ export function DocumentLayoutWorkspace({
           sourceLabel={
             selectedRegion ? sourceChipPageLabel(selectedRegion.page, i18n.language) : undefined
           }
-          onClose={() => { setSelectedFieldKey(null); }}
+          onClose={() => {
+            setSelectedFieldKey(null);
+          }}
           onConfirm={
             selectedField
               ? () => {
@@ -971,7 +1025,11 @@ export function DocumentLayoutWorkspace({
           onCorrect={fieldMarking.sheetMarkInDocument}
           onSaveValue={fieldMarking.sheetSaveValue}
           onSourceClick={
-            selectedFieldKey ? () => { highlightRegion(selectedFieldKey); } : undefined
+            selectedFieldKey
+              ? () => {
+                  highlightRegion(selectedFieldKey);
+                }
+              : undefined
           }
         />
       ) : null}
@@ -979,8 +1037,13 @@ export function DocumentLayoutWorkspace({
         <DocumentTableCorrectionSheet
           open={selectedTableId != null}
           region={tableRegions.find((item) => item.id === selectedTableId) ?? null}
-          index={Math.max(0, tableRegions.findIndex((item) => item.id === selectedTableId))}
-          onClose={() => { setSelectedTableId(null); }}
+          index={Math.max(
+            0,
+            tableRegions.findIndex((item) => item.id === selectedTableId)
+          )}
+          onClose={() => {
+            setSelectedTableId(null);
+          }}
           onSelect={() => {
             if (selectedTableId) {
               setActiveOverlayId(regionTableOverlayId(selectedTableId));

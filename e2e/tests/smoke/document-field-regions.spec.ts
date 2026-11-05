@@ -3,7 +3,10 @@
 import { expect, test, type Page } from '@playwright/test';
 
 import { applyDocuvateLocale } from '../../helpers/docuvate-theme';
-import { openLayoutDocumentPage, uploadLayoutTableDocument } from '../../helpers/layout-document-fixture';
+import {
+  openLayoutDocumentPage,
+  uploadLayoutTableDocument,
+} from '../../helpers/layout-document-fixture';
 import { showLayoutPane } from '../../helpers/layout-pane';
 import { assignLongLabels, longLabelNames } from '../../helpers/long-label-fixture';
 import {
@@ -18,11 +21,20 @@ import {
   captureLoadedScreenshot,
   captureViewportScreenshot,
 } from '../../helpers/overflow-check';
+import {
+  listFields,
+  replaceFields,
+  type RecognizedFieldPayload,
+} from '../../helpers/recognized-fields-catalog';
 import { smokeFixtureStoragePath } from '../../helpers/smoke-fixture-auth';
 import { findReadyLayoutDocument } from '../../helpers/wait-for-layout-ir';
 
 const apiBase = process.env['E2E_API_URL'] ?? 'http://localhost:3001';
 const webOrigin = process.env['E2E_WEB_URL'] ?? 'http://localhost:5173';
+
+/** Seeded for this suite: workstream-e config has no globalSetup, so smoke users start with an empty catalog. */
+const SEEDED_FIELD_KEY = 'e2e_field_regions_assign';
+const SEEDED_FIELD_LABEL = 'E2E Zuweisen';
 
 test.use({ storageState: smokeFixtureStoragePath() });
 
@@ -92,9 +104,12 @@ async function openFieldCorrectionSheet(page: Page): Promise<void> {
 }
 
 async function startRectangle(page: Page): Promise<void> {
-  const word = page.locator('.pdf-page-wrap .textLayer span').filter({
-    hasText: /Widget|Alex|Testmann|FIXTURE|Compose/i,
-  }).first();
+  const word = page
+    .locator('.pdf-page-wrap .textLayer span')
+    .filter({
+      hasText: /Widget|Alex|Testmann|FIXTURE|Compose/i,
+    })
+    .first();
   if ((await word.count()) > 0) {
     await expect(word).toBeVisible({ timeout: 60_000 });
     const box = await word.boundingBox();
@@ -132,8 +147,85 @@ async function dismissOverlaySheets(page: Page): Promise<void> {
       return;
     }
     await page.keyboard.press('Escape');
-    await expect(open).toHaveCount(0, { timeout: 5_000 }).catch(() => undefined);
+    await expect(open)
+      .toHaveCount(0, { timeout: 5_000 })
+      .catch(() => undefined);
   }
+}
+
+/**
+ * Real-user assign path for an existing catalog field.
+ * With a single option the bar auto-selects it (Accept already Zuweisen) — verify that selection.
+ * With multiple options the bar starts empty — type the label and choose the matching option.
+ */
+async function selectExistingFieldInContextBar(page: Page, fieldLabel: string): Promise<void> {
+  const bar = page.getByTestId('field-context-bar');
+  const accept = bar.getByTestId('field-context-bar-accept');
+  const combobox = bar.getByRole('combobox', {
+    name: /Feld für diese Auswahl|Field for this selection/i,
+  });
+
+  const acceptText = (await accept.innerText()).trim();
+  const alreadyAssigned =
+    (await accept.isEnabled()) && /Feld zuweisen|Assign field/i.test(acceptText);
+
+  if (alreadyAssigned) {
+    // Single-option convenience: closed combobox already shows the selected label.
+    await expect(combobox).toHaveValue(fieldLabel);
+    await expect(accept).toHaveText(/Feld zuweisen|Assign field/i);
+    return;
+  }
+
+  await expect(accept).toBeDisabled();
+  await expect(accept).toHaveText(/Feld anlegen|Create field/i);
+
+  await combobox.click();
+  await expect(combobox).toHaveAttribute('aria-expanded', 'true');
+  await combobox.fill(fieldLabel);
+
+  const option = page.getByRole('option', { name: fieldLabel, exact: true });
+  await expect(option).toBeVisible({ timeout: 15_000 });
+  await option.click();
+
+  await expect(accept).toBeEnabled();
+  await expect(accept).toHaveText(/Feld zuweisen|Assign field/i);
+}
+
+async function confirmAssignedFieldInContextBar(page: Page): Promise<void> {
+  const accept = page.getByTestId('field-context-bar-accept');
+  await expect(accept).toBeEnabled();
+  await expect(accept).toHaveText(/Feld zuweisen|Assign field/i);
+  await accept.click();
+
+  // Assigning onto a field that already holds a different value opens overwrite confirm.
+  const overwriteDialog = page.getByRole('dialog', {
+    name: /Vorhandenes Feld überschreiben|Overwrite existing field/i,
+  });
+  const overwriteAppeared = await overwriteDialog
+    .waitFor({ state: 'visible', timeout: 2_000 })
+    .then(() => true)
+    .catch(() => false);
+  if (overwriteAppeared) {
+    await overwriteDialog.getByRole('button', { name: /Überschreiben|Overwrite/i }).click();
+  }
+}
+
+/**
+ * Create path: open the field combobox, type a new name, confirm via the create-option row (auto-submits).
+ * Do not require Accept to start disabled — a single seeded catalog field auto-selects and enables Zuweisen.
+ */
+async function createFieldViaContextBarOption(page: Page, fieldName: string): Promise<void> {
+  const bar = page.getByTestId('field-context-bar');
+  const combobox = bar.getByRole('combobox', {
+    name: /Feld für diese Auswahl|Field for this selection/i,
+  });
+  await combobox.click();
+  await expect(combobox).toHaveAttribute('aria-expanded', 'true');
+  await combobox.fill(fieldName);
+
+  const createOption = page.locator('.combobox-create-option').filter({ hasText: fieldName });
+  await expect(createOption).toBeVisible({ timeout: 15_000 });
+  await createOption.click();
 }
 
 test.describe('document field regions', () => {
@@ -143,9 +235,28 @@ test.describe('document field regions', () => {
   let ownedLayoutDoc = false;
   const labels = longLabelNames(25);
   const createdTagIds: string[] = [];
+  let originalRecognizedFields: RecognizedFieldPayload[] | null = null;
 
   test.beforeAll(async ({ request }) => {
     test.setTimeout(420_000);
+    // Capture first so afterAll can restore even if later steps fail.
+    originalRecognizedFields = await listFields(request);
+    const alreadySeeded = originalRecognizedFields.some((field) => field.key === SEEDED_FIELD_KEY);
+    if (!alreadySeeded) {
+      const seed: RecognizedFieldPayload = {
+        key: SEEDED_FIELD_KEY,
+        label: SEEDED_FIELD_LABEL,
+        fieldType: 'text',
+        sortOrder: originalRecognizedFields.length,
+        extractForAllDocuments: false,
+        gateLabelIds: [],
+        gateLabelMatch: 'any',
+        minLabelConfidence: null,
+        confidenceGateEnabled: null,
+        showInFilter: false,
+      };
+      await replaceFields(request, [...originalRecognizedFields, seed]);
+    }
     const existing = await findReadyLayoutDocument(request, apiBase, webOrigin);
     if (existing) {
       layoutDocId = existing;
@@ -160,6 +271,9 @@ test.describe('document field regions', () => {
 
   test.afterAll(async ({ request }) => {
     test.setTimeout(60_000);
+    if (originalRecognizedFields !== null) {
+      await replaceFields(request, originalRecognizedFields);
+    }
     for (const tagId of createdTagIds) {
       await request.delete(`${apiBase}/v1/tags/${tagId}`, {
         headers: { origin: webOrigin },
@@ -178,7 +292,10 @@ test.describe('document field regions', () => {
     await applyGermanLocale(page);
     await openLayoutDocumentPage(page, layoutDocId);
 
-    await page.locator('.layout-side-tabs').getByRole('tab', { name: /Übersicht|Overview/i }).click();
+    await page
+      .locator('.layout-side-tabs')
+      .getByRole('tab', { name: /Übersicht|Overview/i })
+      .click();
     await expect(page.getByTestId('document-selection-layer')).toHaveAttribute(
       'data-token-count',
       /^(?!0$)\d+$/,
@@ -196,7 +313,9 @@ test.describe('document field regions', () => {
 
     const bar = page.getByTestId('field-context-bar');
     await expect(bar).toBeVisible({ timeout: 30_000 });
-    await bar.getByRole('button', { name: /Feld anlegen|Create field/i }).click();
+    // Bar starts with no field selected — Accept stays disabled until an existing field is chosen.
+    await selectExistingFieldInContextBar(page, SEEDED_FIELD_LABEL);
+    await confirmAssignedFieldInContextBar(page);
     await expect(page.getByText(/Korrektur gespeichert|Correction saved/i)).toBeVisible({
       timeout: 30_000,
     });
@@ -271,7 +390,9 @@ test.describe('document field regions', () => {
         await assertNoHorizontalOverflow(page);
         if (scheme === 'light') {
           await more.click();
-          const popover = page.locator('.label-chip-row-overflow-popover, .overflow-chip-popover, [data-testid="label-overflow-sheet"]');
+          const popover = page.locator(
+            '.label-chip-row-overflow-popover, .overflow-chip-popover, [data-testid="label-overflow-sheet"]'
+          );
           await expect(popover).toBeVisible();
           await assertOverflowMissesHeader(page);
           await captureViewportScreenshot(
@@ -302,7 +423,8 @@ test.describe('document field regions', () => {
       document.dispatchEvent(new Event('selectionchange'));
     });
     await expect(page.getByTestId('field-context-bar')).toBeVisible({ timeout: 30_000 });
-    await page.getByTestId('field-context-bar').getByRole('button', { name: /Feld anlegen|Create field/i }).click();
+    const fieldName = `e2e_text_sel_${Date.now().toString(36)}`;
+    await createFieldViaContextBarOption(page, fieldName);
     await expect(page.getByText(/Korrektur gespeichert|Correction saved/i)).toBeVisible({
       timeout: 30_000,
     });

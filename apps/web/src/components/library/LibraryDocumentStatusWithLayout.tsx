@@ -6,7 +6,7 @@ import { isExtractionPending } from '../../lib/documentExtractionState';
 import { ExtractionProgressBar } from '../documents';
 import { Badge } from '../ui/Badge';
 import { LayoutMissingBadge } from './LayoutMissingBadge';
-import { showLayoutMissingBadge } from './layoutMissingBadge';
+import { showLayoutMissingBadge } from './layoutMissingBadgeVisibility';
 
 interface LibraryDocumentStatusWithLayoutProps {
   doc: DocumentDto;
