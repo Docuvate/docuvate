@@ -14308,6 +14308,10 @@
           "updatedAt": {
             "type": "string"
           },
+          "layoutIrAvailable": {
+            "type": "boolean",
+            "description": "True when persisted layout IR exists (list convenience)."
+          },
           "extraction": {
             "$ref": "#/components/schemas/DocumentExtractionSummaryDto"
           }

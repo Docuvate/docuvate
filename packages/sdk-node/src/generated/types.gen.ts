@@ -460,6 +460,10 @@ export type DocumentResponseDto = {
     }>;
     createdAt: string;
     updatedAt: string;
+    /**
+     * True when persisted layout IR exists (list convenience).
+     */
+    layoutIrAvailable?: boolean;
     extraction?: DocumentExtractionSummaryDto;
 };
 

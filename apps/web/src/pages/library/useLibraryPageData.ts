@@ -26,6 +26,7 @@ import {
   listRecognizedFields,
   listTags,
   removeDocumentTag,
+  requeueDocumentExtraction,
   updateSavedDocumentView,
 } from '../../lib/api';
 import { formatUserFacingError } from '../../lib/apiErrors';
@@ -78,6 +79,7 @@ export function useLibraryPageData(mode: 'all' | 'folder' | 'unassigned' | 'ordn
   const [bulkFolderId, setBulkFolderId] = useState('');
   const [bulkBusy, setBulkBusy] = useState(false);
   const [exportBusy, setExportBusy] = useState(false);
+  const [requeueBusyIds, setRequeueBusyIds] = useState<ReadonlySet<string>>(() => new Set());
   const [groupedLabelBusy, setGroupedLabelBusy] = useState(false);
   const [viewMode, setViewMode] = useState<LibraryViewMode>(() => readLibraryViewMode());
   const [filterMode, setFilterModeState] = useState<LibraryFilterMode>(() =>
@@ -580,11 +582,37 @@ export function useLibraryPageData(mode: 'all' | 'folder' | 'unassigned' | 'ordn
     [listFilters, pushSuccess, selected, t]
   );
 
+  const requeueDocument = useCallback(
+    async (documentId: string) => {
+      setRequeueBusyIds((prev) => {
+        const next = new Set(prev);
+        next.add(documentId);
+        return next;
+      });
+      setError(null);
+      try {
+        await requeueDocumentExtraction(documentId);
+        pushSuccess(t('documents.reprocessPending'));
+        await refetchDocuments();
+      } catch (err) {
+        setError(formatUserFacingError(err, 'documents.reprocessFailed'));
+      } finally {
+        setRequeueBusyIds((prev) => {
+          const next = new Set(prev);
+          next.delete(documentId);
+          return next;
+        });
+      }
+    },
+    [pushSuccess, refetchDocuments, t]
+  );
 
   return {
     items,
     exportFieldValues,
     exportBusy,
+    requeueDocument,
+    requeueBusyIds,
     folders,
     childFoldersForView,
     folderDocumentCounts,

@@ -28,6 +28,8 @@ export interface DocumentEntity {
   tags: TagEntity[];
   ingestSource?: string | null;
   ownerLine?: string | null;
+  /** List join: EXISTS(document_layout_ir). */
+  layoutIrAvailable?: boolean;
   createdAt: Date;
   updatedAt: Date;
   extraction?: DocumentExtractionDto;
