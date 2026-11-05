@@ -820,6 +820,7 @@ export function DocumentDetailPage() {
             activeBlockIndex={activeBlockIndex}
             requeueBusy={requeueBusy}
             onRequeueExtraction={() => void onRequeueExtraction()}
+            sourceFileMissing={previewUnavailable}
             onViewerPageChange={setViewerPage}
             onActiveBlockIndexChange={setActiveBlockIndex}
             onBlocksChange={setBlocks}

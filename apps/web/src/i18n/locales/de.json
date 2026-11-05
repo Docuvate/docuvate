@@ -995,6 +995,7 @@
     "editExtractedText": "Bearbeiten",
     "doneEditingExtractedText": "Fertig",
     "extractionNoTextRecognized": "Für dieses Dokument wurde kein Text erkannt.",
+    "extractionNoTextNoFile": "Kein Text erkannt. Die Originaldatei ist nicht verfügbar, daher hilft eine erneute Erkennung meist nicht.",
     "extractionRetryText": "Text erneut erkennen",
     "previewTitle": "Vorschau",
     "documentChat": {
