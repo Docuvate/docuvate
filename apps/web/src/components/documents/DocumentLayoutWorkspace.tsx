@@ -201,14 +201,32 @@ export function DocumentLayoutWorkspace({
     layoutIrRevision
   );
 
-  const fieldOptions = useMemo(
-    () =>
-      [...knownFieldKeys].map((key) => ({
+  const fieldOptions = useMemo(() => {
+    const keys = new Set<string>(knownFieldKeys);
+    for (const field of fields) {
+      if (field.key.startsWith('suggestion:')) {
+        continue;
+      }
+      keys.add(field.key);
+    }
+    return [...keys]
+      .map((key) => ({
         value: key,
         label: fieldLabelForKey(key),
-      })),
-    [fieldLabelForKey, knownFieldKeys]
-  );
+      }))
+      .sort((a, b) => a.label.localeCompare(b.label, 'de-DE'));
+  }, [fieldLabelForKey, fields, knownFieldKeys]);
+
+  const existingFieldValues = useMemo(() => {
+    const values = new Map<string, string>();
+    for (const field of fields) {
+      if (field.key.startsWith('suggestion:')) {
+        continue;
+      }
+      values.set(field.key, field.value);
+    }
+    return values;
+  }, [fields]);
 
   const highlightRegion = useCallback(
     (key: string) => {
@@ -521,17 +539,15 @@ export function DocumentLayoutWorkspace({
         setSelectionTool('rect');
         return;
       }
-      if (event.key === 'Enter' && selectionDraft) {
-        const fieldKey = reanchorFieldKey ?? fieldOptions[0]?.value;
-        if (!fieldKey) {
-          return;
-        }
+      if (event.key === 'Enter' && selectionDraft && reanchorFieldKey) {
+        // Free-form create/assign goes through DocumentFieldContextBar so the user
+        // picks the target field explicitly (and confirms overwrites).
         event.preventDefault();
         void runFieldCorrection(
           {
             id: crypto.randomUUID(),
-            op: reanchorFieldKey ? 'reanchor' : 'create',
-            fieldKey,
+            op: 'reanchor',
+            fieldKey: reanchorFieldKey,
             page: selectionDraft.page,
             shape: 'rect',
             x0: selectionDraft.rect.x0,
@@ -543,7 +559,7 @@ export function DocumentLayoutWorkspace({
               ? { valueOverride: selectionDraft.text }
               : {}),
           },
-          t('documents.fieldCorrectionSaved', { name: fieldLabelForKey(fieldKey) })
+          t('documents.fieldCorrectionSaved', { name: fieldLabelForKey(reanchorFieldKey) })
         ).catch((err: unknown) => {
           toast.error(formatUserFacingError(err, 'errors.generic'));
         });
@@ -554,7 +570,6 @@ export function DocumentLayoutWorkspace({
   }, [
     activeOverlayId,
     fieldLabelForKey,
-    fieldOptions,
     reanchorFieldKey,
     runFieldCorrection,
     selectionDraft,
@@ -784,6 +799,7 @@ export function DocumentLayoutWorkspace({
                           ]
                         : fieldOptions
                     }
+                    existingFieldValues={existingFieldValues}
                     onMarkTable={
                       reanchorFieldKey
                         ? undefined
@@ -806,7 +822,7 @@ export function DocumentLayoutWorkspace({
                               });
                           }
                     }
-                    onCreate={(fieldKey) => {
+                    onConfirm={(fieldKey) => {
                       void runFieldCorrection(
                         {
                           id: crypto.randomUUID(),
