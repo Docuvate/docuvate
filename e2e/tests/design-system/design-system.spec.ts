@@ -13,6 +13,7 @@ import { expect, type Page, test } from '@playwright/test';
 import fs from 'node:fs';
 import path from 'node:path';
 
+import { setTheme } from '../../helpers/ce-ui-audit';
 import { collectUndersizedTouchTargetsInPage } from '../helpers/browser-layout-scans';
 import { installDesignSystemMocks } from './designSystemMocks';
 
@@ -129,6 +130,18 @@ test.describe('design system', () => {
     }
     expect(new Set(Object.values(sizes)).size, JSON.stringify(sizes)).toBe(1);
     expect(Object.values(sizes)[0]).toBe('24px/600');
+  });
+
+  test('runtime theme switch with motion enabled settles to AA contrast', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await openSurface(page, 'light', SURFACES[3]);
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
+    await setTheme(page, 'dark');
+    const axe = await new AxeBuilder({ page })
+      .withRules(['color-contrast'])
+      .include('#root')
+      .analyze();
+    expect(axe.violations.flatMap((v) => v.nodes.map((n) => n.target.join(' ')))).toEqual([]);
   });
 
   test('labels text links: 24px inline target on desktop rows, 44px touch target on mobile', async ({

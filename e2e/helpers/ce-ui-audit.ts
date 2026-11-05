@@ -44,6 +44,13 @@ export async function setTheme(page: Page, theme: 'light' | 'dark'): Promise<voi
     document.documentElement.setAttribute('data-docuvate-theme', next);
     window.dispatchEvent(new CustomEvent('docuvate-theme-preference-change'));
   }, theme);
+  // Colour transitions (design-system motion tokens) must settle before contrast is sampled.
+  await page.evaluate(async () => {
+    const running = document
+      .getAnimations()
+      .filter((animation) => animation instanceof CSSTransition);
+    await Promise.all(running.map((animation) => animation.finished.catch(() => undefined)));
+  });
 }
 
 export function auditArtifactRoot(): string {

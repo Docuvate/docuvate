@@ -258,3 +258,10 @@
   background: var(--dv-color-inbox-soft);
   border-color: var(--dv-color-inbox-border);
 }
+
+/* Theme switches repaint at once instead of fading each control (see lib/docuvateTheme.ts). */
+:root[data-docuvate-theme-switching] *,
+:root[data-docuvate-theme-switching] *::before,
+:root[data-docuvate-theme-switching] *::after {
+  transition: none !important;
+}
