@@ -5,7 +5,7 @@
   "description": "Docuvate — Document management with structured extraction",
   "license": "LicenseRef-Docuvate-SUL-1.0",
   "engines": {
-    "node": ">=24.21.0"
+    "node": ">=24.22.2"
   },
   "packageManager": "pnpm@10.34.6",
   "scripts": {
