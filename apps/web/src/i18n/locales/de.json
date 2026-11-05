@@ -803,6 +803,7 @@
     "layoutCompareOriginalAlt": "Original, Seite {{page}}",
     "layoutCompareReconstructionAlt": "Nachbau, Seite {{page}}",
     "layoutOverlayToggle": "Layout-Overlay",
+    "pdfRotateClockwise": "Im Uhrzeigersinn drehen",
     "layoutTextEdit": "Text",
     "layoutTextEditDone": "Fertig",
     "layoutTextEditHint": "Korrigieren Sie extrahierten Text unten. Änderungen speichern Sie mit „Speichern“.",
