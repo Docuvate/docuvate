@@ -1244,7 +1244,8 @@
       "subfoldersHint": "Neue Unterordner in ausgewählten Pfaden werden mit importiert.",
       "rootMailbox": "Gesamtes Postfach",
       "rootBucket": "Gesamter Bucket „{{name}}“",
-      "rootBucketFallback": "Bucket"
+      "rootBucketFallback": "Bucket",
+      "rootServer": "Gesamter Server"
     },
     "tierCommercial": "Kostenpflichtig",
     "capabilities": {
@@ -1308,7 +1309,8 @@
           "notFound": "Die Paperless API wurde unter dieser URL nicht gefunden.",
           "timeout": "Paperless antwortet nicht rechtzeitig. Bitte später erneut versuchen.",
           "versionUnsupported": "Diese Paperless-ngx-Version wird nicht unterstützt. Bitte Paperless-ngx 2.x oder 3.x nutzen.",
-          "unreachable": "Paperless ist nicht erreichbar. URL und Netzwerk prüfen."
+          "unreachable": "Paperless ist nicht erreichbar. URL und Netzwerk prüfen.",
+          "urlInvalid": "Geben Sie eine gültige Paperless-URL ein, zum Beispiel https://paperless.example.com."
         },
         "pipelineTitle": "Verarbeitung",
         "keepOcr": "Paperless-OCR-Text behalten und Docuvate-Felder extrahieren",
@@ -1353,7 +1355,11 @@
         "description": "Benachrichtigungen und Aktionen auf Ihrem Smart-Home-Hub auslösen.",
         "baseUrlPlaceholder": "https://homeassistant.local:8123",
         "baseUrlHelp": "Externe URL Ihrer Home-Assistant-Instanz (HTTPS empfohlen).",
-        "accessTokenHelp": "Long-lived Access Token aus dem HA-Benutzerprofil (nicht Ihr Login-Passwort)."
+        "accessTokenHelp": "Long-lived Access Token aus dem HA-Benutzerprofil (nicht Ihr Login-Passwort).",
+        "errors": {
+          "urlInvalid": "Geben Sie eine gültige Home-Assistant-URL ein, zum Beispiel https://homeassistant.local:8123.",
+          "unreachable": "Home Assistant ist nicht erreichbar. URL und Netzwerk prüfen."
+        }
       },
       "amazonS3": {
         "label": "Amazon S3",
@@ -1388,7 +1394,7 @@
         "apiToken": "API-Token",
         "username": "Benutzername",
         "password": "Passwort",
-        "accessToken": "Long-lived Access Token",
+        "accessToken": "Access-Token",
         "bucket": "Bucket-Name",
         "region": "Region",
         "accessKeyId": "Access-Key-ID",
@@ -1440,7 +1446,8 @@
       "sinkNotSupported": "Diese Verbindung unterstützt keine Weitergabe.",
       "importRefRequired": "Import-Referenz fehlt.",
       "importEmpty": "Importiertes Objekt ist leer.",
-      "installationDisabled": "Neue Verbindungen sind auf diesem Server deaktiviert."
+      "installationDisabled": "Neue Verbindungen sind auf diesem Server deaktiviert.",
+      "urlInvalid": "Geben Sie eine gültige http(s)-URL ein, zum Beispiel https://example.com."
     },
     "sftpProbeCta": "Verbindung testen",
     "sftpProbePending": "Test läuft…",

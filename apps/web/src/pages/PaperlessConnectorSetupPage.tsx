@@ -30,6 +30,7 @@ import {
 import { formatUserFacingError } from '../lib/apiErrors';
 import { formatConnectorError } from '../lib/connectorErrors';
 import { formatPaperlessImportRunError } from '../lib/formatPaperlessImportRunError';
+import { validateHttpUrlInput } from '../lib/httpUrlInput';
 import { routes } from '../lib/routes';
 
 interface FormState {
@@ -104,6 +105,7 @@ export function PaperlessConnectorSetupPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [urlError, setUrlError] = useState<string | null>(null);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
   const [testBusy, setTestBusy] = useState(false);
   const [dryRun, setDryRun] = useState<PaperlessImportDryRunSummaryDto | null>(null);
@@ -189,8 +191,19 @@ export function PaperlessConnectorSetupPage() {
     return () => { window.clearInterval(timer); };
   }, [installationId, run]);
 
+  function validateBaseUrl(): boolean {
+    const result = validateHttpUrlInput(form.baseUrl);
+    if (!result.ok) {
+      setUrlError(t('connectors.plugins.paperless.errors.urlInvalid'));
+      return false;
+    }
+    setUrlError(null);
+    return true;
+  }
+
   async function handleSave() {
     if (!installationMeta) return;
+    if (!validateBaseUrl()) return;
     setSaving(true);
     setSaveError(null);
     try {
@@ -230,6 +243,7 @@ export function PaperlessConnectorSetupPage() {
   }
 
   async function handleTestConnection() {
+    if (!validateBaseUrl()) return;
     setTestBusy(true);
     setActionMessage(null);
     try {
@@ -356,17 +370,34 @@ export function PaperlessConnectorSetupPage() {
                   }
                 />
               </label>
-              <label className="settings-field">
-                <span>{t('connectors.auth.fields.baseUrl')}</span>
+              <div className="settings-field">
+                <label className="settings-field-label" htmlFor="paperless-base-url">
+                  <span>{t('connectors.auth.fields.baseUrl')}</span>
+                  <span className="settings-field-required" aria-hidden="true">
+                    {' '}
+                    *
+                  </span>
+                </label>
                 <Input
+                  id="paperless-base-url"
                   className="paperless-control"
                   type="url"
+                  required
                   value={form.baseUrl}
                   placeholder={t('connectors.plugins.paperless.baseUrlPlaceholder')}
-                  onChange={(event) => { setForm((prev) => ({ ...prev, baseUrl: event.target.value })); }
-                  }
+                  aria-invalid={urlError ? true : undefined}
+                  aria-describedby={urlError ? 'paperless-base-url-error' : undefined}
+                  onChange={(event) => {
+                    setUrlError(null);
+                    setForm((prev) => ({ ...prev, baseUrl: event.target.value }));
+                  }}
                 />
-              </label>
+                {urlError ? (
+                  <p id="paperless-base-url-error" className="error" role="alert">
+                    {urlError}
+                  </p>
+                ) : null}
+              </div>
               <label className="settings-field">
                 <span>{t('connectors.auth.fields.apiToken')}</span>
                 <PasswordInput

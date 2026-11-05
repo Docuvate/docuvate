@@ -170,9 +170,8 @@ export function ConnectorsPage() {
       setConnectPlugin(null);
       pushSuccess();
     } catch (err) {
-      const message = formatConnectorError(err, 'connectors.connectFailed');
-      setError(message);
-      pushError(message);
+      // Keep the failure inside the open dialog; a toast would sit behind the modal.
+      setError(formatConnectorError(err, 'connectors.connectFailed'));
     } finally {
       setConnectBusy(false);
     }
@@ -374,7 +373,7 @@ export function ConnectorsPage() {
 
   return (
     <SettingsSectionLayout sectionTitle={t('connectors.title')} sectionLead={t('connectors.lead')}>
-      {error ? (
+      {error && connectPlugin == null ? (
         <p className="error" role="alert">
           {error}
         </p>
@@ -438,10 +437,14 @@ export function ConnectorsPage() {
         plugin={connectPlugin}
         busy={connectBusy}
         viewerIsServerAdmin={catalog?.viewerIsServerAdmin ?? false}
+        submitError={connectPlugin ? error : null}
         onSubmit={(payload) => void submitConnect(payload)}
         onOAuthStart={(payload) => void submitOAuthConnect(payload)}
         onCancel={() => {
-          if (!connectBusy) setConnectPlugin(null);
+          if (!connectBusy) {
+            setConnectPlugin(null);
+            setError(null);
+          }
         }}
       />
 

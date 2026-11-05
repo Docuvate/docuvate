@@ -1244,7 +1244,8 @@
       "subfoldersHint": "New subfolders under selected paths are included automatically.",
       "rootMailbox": "Entire mailbox",
       "rootBucket": "Entire bucket “{{name}}”",
-      "rootBucketFallback": "bucket"
+      "rootBucketFallback": "bucket",
+      "rootServer": "Entire server"
     },
     "tierCommercial": "Commercial",
     "capabilities": {
@@ -1345,7 +1346,8 @@
           "notFound": "The Paperless API was not found at this URL.",
           "timeout": "Paperless is not responding in time. Please try again later.",
           "versionUnsupported": "This Paperless-ngx version is not supported. Please use Paperless-ngx 2.x or 3.x.",
-          "unreachable": "Paperless cannot be reached. Check the URL and network."
+          "unreachable": "Paperless cannot be reached. Check the URL and network.",
+          "urlInvalid": "Enter a valid Paperless URL, for example https://paperless.example.com."
         }
       },
       "homeAssistant": {
@@ -1353,7 +1355,11 @@
         "description": "Send notifications and trigger actions on your smart home hub.",
         "baseUrlPlaceholder": "https://homeassistant.local:8123",
         "baseUrlHelp": "External URL of your Home Assistant instance (HTTPS recommended).",
-        "accessTokenHelp": "Long-lived access token from your HA user profile (not your login password)."
+        "accessTokenHelp": "Long-lived access token from your HA user profile (not your login password).",
+        "errors": {
+          "urlInvalid": "Enter a valid Home Assistant URL, for example https://homeassistant.local:8123.",
+          "unreachable": "Home Assistant cannot be reached. Check the URL and network."
+        }
       },
       "amazonS3": {
         "label": "Amazon S3",
@@ -1388,7 +1394,7 @@
         "apiToken": "API token",
         "username": "Username",
         "password": "Password",
-        "accessToken": "Long-lived access token",
+        "accessToken": "Access token",
         "bucket": "Bucket name",
         "region": "Region",
         "accessKeyId": "Access key ID",
@@ -1440,7 +1446,8 @@
       "sinkNotSupported": "This connection does not support export.",
       "importRefRequired": "Import reference is missing.",
       "importEmpty": "Imported object is empty.",
-      "installationDisabled": "New connections are disabled on this server."
+      "installationDisabled": "New connections are disabled on this server.",
+      "urlInvalid": "Enter a valid http(s) URL, for example https://example.com."
     },
     "sftpProbeCta": "Test connection",
     "sftpProbePending": "Testing…",
