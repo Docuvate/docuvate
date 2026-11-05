@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 
 /** Fusion weight of each document search leg. */
-export interface SearchLegWeights {
+interface SearchLegWeights {
   /** Title equals the query (case-insensitive). */
   readonly exactTitle: number;
   /** Title contains the query as a phrase. */
