@@ -29,7 +29,10 @@ export function useApiHealthReconnect({
   const [isProbing, setIsProbing] = useState(false);
   const attemptRef = useRef(1);
   const onRecoveredRef = useRef(onRecovered);
-  onRecoveredRef.current = onRecovered;
+
+  useEffect(() => {
+    onRecoveredRef.current = onRecovered;
+  }, [onRecovered]);
 
   const scheduleNextBackoff = useCallback((nextAttempt: number) => {
     attemptRef.current = nextAttempt;

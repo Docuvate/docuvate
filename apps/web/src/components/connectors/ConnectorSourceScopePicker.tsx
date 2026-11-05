@@ -95,16 +95,19 @@ export function ConnectorSourceScopePicker({
     if (!node.hasChildren) {
       return;
     }
+    const willExpand = !expanded.has(node.path);
     setExpanded((prev) => {
       const next = new Set(prev);
       if (next.has(node.path)) {
         next.delete(node.path);
       } else {
         next.add(node.path);
-        void ensureChildren(node.path);
       }
       return next;
     });
+    if (willExpand) {
+      void ensureChildren(node.path);
+    }
   }
 
   function togglePath(path: string) {
