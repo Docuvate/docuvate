@@ -48,6 +48,10 @@ import {
   writeLibraryFilterMode,
 } from '../../lib/libraryFilterMode';
 import {
+  readLibrarySortFromSearchParams,
+  writeLibrarySortToSearchParams,
+} from '../../lib/librarySortUrl';
+import {
   type LibraryViewMode,
   readLibraryViewMode,
   writeLibraryViewMode,
@@ -116,6 +120,7 @@ export function useLibraryPageData(mode: 'all' | 'folder' | 'unassigned' | 'ordn
       next.delete('q');
       if (serialized.trim()) next.set('filter', serialized);
       else next.delete('filter');
+      writeLibrarySortToSearchParams(next, nextFilters.sort, nextFilters.order);
       setSearchParams(next, { replace: true });
     },
     [mode, searchParams, setSearchParams]
@@ -162,6 +167,15 @@ export function useLibraryPageData(mode: 'all' | 'folder' | 'unassigned' | 'ordn
   const hydrateFromUrl = useCallback(
     (tagList: TagDto[]) => {
       if (mode !== 'all') return;
+      const sortFromUrl = readLibrarySortFromSearchParams(searchParams);
+      const withSort: DocumentListQuery = {
+        ...filtersRef.current,
+        sort: sortFromUrl.sort,
+        order: sortFromUrl.order,
+      };
+      filtersRef.current = withSort;
+      setFilters(withSort);
+
       const filterParam = searchParams.get('filter');
       const raw = filterParam ?? '';
       if (!raw.trim()) {
@@ -225,9 +239,18 @@ export function useLibraryPageData(mode: 'all' | 'folder' | 'unassigned' | 'ordn
         .catch(() => undefined);
       return;
     }
+    if (!urlHydratedRef.current) return;
+
+    const sortFromUrl = readLibrarySortFromSearchParams(searchParams);
+    setFilters((prev) => {
+      if (prev.sort === sortFromUrl.sort && prev.order === sortFromUrl.order) {
+        return prev;
+      }
+      return { ...prev, sort: sortFromUrl.sort, order: sortFromUrl.order };
+    });
+
     const filterParam = searchParams.get('filter');
     if (filterParam === null) return;
-    if (!urlHydratedRef.current) return;
     const raw = filterParam;
     const parsed = resolveDocumentFilterFields(parseDocumentFilterQuery(raw), tags);
     applyParsedFilter(parsed, tags, false, { applyFreeText: filterMode !== 'ui' });
@@ -487,11 +510,8 @@ export function useLibraryPageData(mode: 'all' | 'folder' | 'unassigned' | 'ordn
   }
 
   function setSort(field: SortField) {
-    setFilters((prev) => ({
-      ...prev,
-      sort: field,
-      order: prev.sort === field && prev.order === 'desc' ? 'asc' : 'desc',
-    }));
+    const order = filters.sort === field && filters.order === 'desc' ? 'asc' : 'desc';
+    patchFilters({ sort: field, order });
   }
 
   function onViewModeChange(next: LibraryViewMode) {
