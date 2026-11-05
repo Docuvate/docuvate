@@ -55,3 +55,14 @@ def test_multiline_address_stops_at_next_label() -> None:
         stop_labels=("Betrag",),
     )
     assert value == "Muster GmbH Hauptstraße 12 12345 Berlin"
+
+
+def test_label_with_leading_whitespace() -> None:
+    text = "Kopfzeile\n   Rechnungsdatum: 15.03.2026\nBetrag: 1,00"
+    value = extract_multiline_value_after_label(
+        text,
+        "Rechnungsdatum",
+        stop_labels=("Betrag",),
+        allow_continuation=False,
+    )
+    assert value == "15.03.2026"

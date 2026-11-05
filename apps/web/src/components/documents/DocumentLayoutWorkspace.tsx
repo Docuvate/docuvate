@@ -18,6 +18,7 @@ import {
   withdrawDocumentFieldCorrection,
   withdrawDocumentTableCorrection,
 } from '../../lib/api';
+import { findFieldRegion } from '../../lib/findFieldRegion';
 import { formatUserFacingError } from '../../lib/apiErrors';
 import { isExtractionPending } from '../../lib/documentExtractionState';
 import { withSavedFieldValue } from '../../lib/documentFieldValueRowState';
@@ -211,7 +212,7 @@ export function DocumentLayoutWorkspace({
 
   const highlightRegion = useCallback(
     (key: string) => {
-      const region = fieldRegions.find((item) => item.field?.fieldKey === key);
+      const region = findFieldRegion(key, fieldRegions);
       if (!region) {
         return;
       }
@@ -611,7 +612,7 @@ export function DocumentLayoutWorkspace({
     ? fields.find((field) => field.key === selectedFieldKey)
     : undefined;
   const selectedRegion = selectedFieldKey
-    ? fieldRegions.find((item) => item.field?.fieldKey === selectedFieldKey)
+    ? findFieldRegion(selectedFieldKey, fieldRegions)
     : undefined;
 
   return (

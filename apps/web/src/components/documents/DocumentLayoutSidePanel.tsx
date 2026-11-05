@@ -26,6 +26,7 @@ import {
   groupLayoutPanelFields,
   LAYOUT_FIELD_FILTER_MIN_FIELDS,
 } from '../../lib/layoutPanelFieldGroups';
+import { findFieldRegion } from '../../lib/findFieldRegion';
 import { fieldsForLayoutPanel } from '../../lib/layoutPanelFields';
 import {
   buildRecognizedFieldDefinitionIndex,
@@ -276,19 +277,8 @@ export function DocumentLayoutSidePanel({
     root.removeAttribute('aria-hidden');
   }, [hideInlineFieldList]);
 
-  const regionByFieldKey = useMemo(() => {
-    const map = new Map<string, DocumentRegionDto>();
-    for (const region of fieldRegions) {
-      const key = region.field?.fieldKey;
-      if (key) {
-        map.set(key, region);
-      }
-    }
-    return map;
-  }, [fieldRegions]);
-
   const renderFieldRow = (field: ExtractedField, missing: boolean) => {
-    const region = regionByFieldKey.get(field.key);
+    const region = findFieldRegion(field.key, fieldRegions);
     const sourceLabel = region ? sourceChipPageLabel(region.page, locale) : undefined;
     return (
       <li

@@ -67,3 +67,57 @@ describe('mergeCatalogFieldsForDocument', () => {
     expect(merged).toEqual([]);
   });
 });
+
+  it('does not add empty absender when global:vendor already fills that semantic slot', () => {
+    const merged = mergeCatalogFieldsForDocument(
+      [
+        { key: 'amount', value: '12,00', userConfirmed: true },
+        { key: 'global:vendor', value: 'Demo Absender GmbH', userConfirmed: true },
+      ],
+      [
+        {
+          id: 'f-datum',
+          key: 'datum',
+          label: 'Datum',
+          fieldType: 'date',
+          sortOrder: 0,
+          extractForAllDocuments: true,
+          gateLabelIds: [],
+          gateLabelMatch: 'any',
+          minLabelConfidence: null,
+          confidenceGateEnabled: null,
+          showInFilter: true,
+        },
+        {
+          id: 'f-absender',
+          key: 'absender',
+          label: 'Absender',
+          fieldType: 'text',
+          sortOrder: 1,
+          extractForAllDocuments: true,
+          gateLabelIds: [],
+          gateLabelMatch: 'any',
+          minLabelConfidence: null,
+          confidenceGateEnabled: null,
+          showInFilter: true,
+        },
+      ],
+      {
+        assignedTagIds: [],
+        assignedNonInboxTagIds: [],
+        suggestions: [],
+      },
+      {
+        fieldExtractionConfidenceGateEnabled: true,
+        labelFieldConfidenceThreshold: 0.62,
+        fieldExtractionRequiredLabelIds: [],
+      }
+    );
+    const absenderLike = merged.filter(
+      (row) => row.key === 'absender' || row.key === 'global:vendor' || row.key === 'vendor'
+    );
+    expect(absenderLike).toHaveLength(1);
+    expect(absenderLike[0]?.key).toBe('global:vendor');
+    expect(absenderLike[0]?.value).toBe('Demo Absender GmbH');
+    expect(merged.some((row) => row.key === 'datum' && row.value === '')).toBe(true);
+  });
