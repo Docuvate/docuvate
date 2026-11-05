@@ -31,9 +31,11 @@ import {
   reciprocalRankFusion,
   type WeightedRankedList,
 } from '../domain/reciprocal-rank-fusion.js';
-import type { ResolvedFieldFilter } from '../domain/resolve-field-definition.js';
+import type {
+  ResolvedFieldFilter,
+  SearchFieldDefinitionRow,
+} from '../domain/resolve-field-definition.js';
 import { SEARCH_LEG_WEIGHTS } from '../domain/search-leg-weights.js';
-import type { SearchFieldDefinitionRow } from '../domain/resolve-field-definition.js';
 import type { TextChunkSpan } from '../domain/split-text-chunks-with-spans.js';
 import {
   filterChunkFtsTermsByVocabulary,
@@ -320,7 +322,7 @@ export class PgGlobalSearchRepository {
     q: string
   ): Promise<{ exact: RankedItem[]; phrase: RankedItem[] }> {
     const variants = searchTextVariants(q).map((variant) => variant.toLowerCase());
-    const primaryVariant = variants[0];
+    const primaryVariant = variants.at(0);
     if (primaryVariant === undefined) {
       return { exact: [], phrase: [] };
     }
