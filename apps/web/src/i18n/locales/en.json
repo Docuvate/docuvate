@@ -808,6 +808,7 @@
     "layoutCompareOriginalAlt": "Original, page {{page}}",
     "layoutCompareReconstructionAlt": "Reconstruction, page {{page}}",
     "layoutOverlayToggle": "Layout overlay",
+    "pdfRotateClockwise": "Rotate clockwise",
     "layoutTextEdit": "Text",
     "layoutTextEditDone": "Done",
     "layoutTextEditHint": "Edit extracted text below. Save changes with Save.",
