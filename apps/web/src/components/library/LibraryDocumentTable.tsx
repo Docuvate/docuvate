@@ -313,7 +313,7 @@ export function LibraryDocumentTable({
       columns.push('5.5rem');
     }
     if (showDateCol) {
-      columns.push('7.25rem');
+      columns.push('6.5rem');
     }
     columns.push('4.5rem');
     return { gridTemplateColumns: columns.join(' ') };
