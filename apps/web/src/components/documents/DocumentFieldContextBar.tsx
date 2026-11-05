@@ -37,9 +37,7 @@ export function DocumentFieldContextBar({
   const { t } = useTranslation();
   const options = useMemo(() => fieldOptions, [fieldOptions]);
   const existingKeys = useMemo(() => optionValues(options), [options]);
-  const [fieldKey, setFieldKey] = useState(() =>
-    options.length === 1 ? options[0].value : ''
-  );
+  const [fieldKey, setFieldKey] = useState(() => (options.length === 1 ? options[0].value : ''));
   const [overwriteOpen, setOverwriteOpen] = useState(false);
   const [pendingFieldKey, setPendingFieldKey] = useState<string | null>(null);
 

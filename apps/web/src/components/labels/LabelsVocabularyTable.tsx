@@ -9,7 +9,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
-import { flattenTagSearchPages, useTagSearchInfiniteQuery } from '../../lib/labels/useTagSearchInfiniteQuery';
+import {
+  flattenTagSearchPages,
+  useTagSearchInfiniteQuery,
+} from '../../lib/labels/useTagSearchInfiniteQuery';
 import { routes } from '../../lib/routes';
 import { useStackedTableLayout } from '../../lib/useStackedTableLayout';
 import { Button } from '../ui/Button';
@@ -69,7 +72,8 @@ interface RowSharedProps {
 }
 
 function VocabularyGridRow(props: RowSharedProps) {
-  const { tag, count, style, measureRef, dataIndex, menuOpen, menuTagId, onEdit, onOpenMenu, t } = props;
+  const { tag, count, style, measureRef, dataIndex, menuOpen, menuTagId, onEdit, onOpenMenu, t } =
+    props;
   return (
     <div
       ref={measureRef}
@@ -94,7 +98,13 @@ function VocabularyGridRow(props: RowSharedProps) {
         {describeLabelAutoAssignment(tag, t)}
       </span>
       <span role="cell" className="labels-vocabulary-grid__actions">
-        <Button type="button" variant="secondary" onClick={() => { onEdit(tag); }}>
+        <Button
+          type="button"
+          variant="secondary"
+          onClick={() => {
+            onEdit(tag);
+          }}
+        >
           {t('labels.editAction')}
         </Button>
         <IconButton
@@ -103,7 +113,9 @@ function VocabularyGridRow(props: RowSharedProps) {
           hasPopup="menu"
           expanded={menuOpen && menuTagId === tag.id}
           className="labels-overflow-btn"
-          onClick={(e) => { onOpenMenu(tag.id, e.currentTarget); }}
+          onClick={(e) => {
+            onOpenMenu(tag.id, e.currentTarget);
+          }}
         />
       </span>
     </div>
@@ -111,7 +123,8 @@ function VocabularyGridRow(props: RowSharedProps) {
 }
 
 function VocabularyCompactRow(props: RowSharedProps) {
-  const { tag, count, style, measureRef, dataIndex, menuOpen, menuTagId, onEdit, onOpenMenu, t } = props;
+  const { tag, count, style, measureRef, dataIndex, menuOpen, menuTagId, onEdit, onOpenMenu, t } =
+    props;
   return (
     <div
       ref={measureRef}
@@ -141,7 +154,13 @@ function VocabularyCompactRow(props: RowSharedProps) {
         </div>
       </div>
       <div className="labels-vocabulary-card-row__actions">
-        <Button type="button" variant="secondary" onClick={() => { onEdit(tag); }}>
+        <Button
+          type="button"
+          variant="secondary"
+          onClick={() => {
+            onEdit(tag);
+          }}
+        >
           {t('labels.editAction')}
         </Button>
         <IconButton
@@ -150,26 +169,27 @@ function VocabularyCompactRow(props: RowSharedProps) {
           hasPopup="menu"
           expanded={menuOpen && menuTagId === tag.id}
           className="labels-overflow-btn"
-          onClick={(e) => { onOpenMenu(tag.id, e.currentTarget); }}
+          onClick={(e) => {
+            onOpenMenu(tag.id, e.currentTarget);
+          }}
         />
       </div>
     </div>
   );
 }
 
-
 export function LabelsVocabularyTable(props: Props) {
   const { t } = useTranslation();
   const stackedLayout = useStackedTableLayout();
-  const vocabularyTags = useMemo(
-    () => props.tags.filter((tag) => !tag.isInbox),
-    [props.tags]
-  );
+  const vocabularyTags = useMemo(() => props.tags.filter((tag) => !tag.isInbox), [props.tags]);
   const [filterQuery, setFilterQuery] = useState('');
   const debouncedFilterQuery = useDebouncedValue(filterQuery, FILTER_DEBOUNCE_MS);
   const filterActive = debouncedFilterQuery.trim().length > 0;
   const search = useTagSearchInfiniteQuery(debouncedFilterQuery, filterActive);
-  const searched = useMemo(() => flattenTagSearchPages(search.data?.pages).tags, [search.data?.pages]);
+  const searched = useMemo(
+    () => flattenTagSearchPages(search.data?.pages).tags,
+    [search.data?.pages]
+  );
   const displayTags = useMemo(() => {
     if (!filterActive) {
       return vocabularyTags;
@@ -187,9 +207,7 @@ export function LabelsVocabularyTable(props: Props) {
     count: displayTags.length,
     getScrollElement: () => scrollRef.current,
     estimateSize: () => (stackedLayout ? COMPACT_ROW_ESTIMATE : GRID_ROW_HEIGHT),
-    measureElement: useVirtual
-      ? (element) => element.getBoundingClientRect().height
-      : undefined,
+    measureElement: useVirtual ? (element) => element.getBoundingClientRect().height : undefined,
     overscan: 8,
   });
 
@@ -247,7 +265,11 @@ export function LabelsVocabularyTable(props: Props) {
   };
 
   const showFilterEmpty =
-    !props.loading && filterActive && !search.isFetching && !search.isError && displayTags.length === 0;
+    !props.loading &&
+    filterActive &&
+    !search.isFetching &&
+    !search.isError &&
+    displayTags.length === 0;
   const showFilterLoading = filterActive && search.isFetching && displayTags.length === 0;
   const showFilterError = filterActive && search.isError;
 
@@ -257,7 +279,12 @@ export function LabelsVocabularyTable(props: Props) {
       <div className="labels-vocabulary-toolbar">
         <div className="labels-vocabulary-filter">
           <div className="labels-vocabulary-filter-control">
-            <Search className="labels-vocabulary-filter-icon" size={16} strokeWidth={2} aria-hidden />
+            <Search
+              className="labels-vocabulary-filter-icon"
+              size={16}
+              strokeWidth={2}
+              aria-hidden
+            />
             <Input
               type="search"
               value={filterQuery}
@@ -344,7 +371,9 @@ export function LabelsVocabularyTable(props: Props) {
         x={menuPos.x}
         y={menuPos.y}
         anchorRef={menuAnchorRef}
-        onClose={() => { setMenuOpen(false); }}
+        onClose={() => {
+          setMenuOpen(false);
+        }}
         items={[
           {
             kind: 'item',
@@ -368,7 +397,9 @@ export function LabelsVocabularyTable(props: Props) {
         confirmLabel={t('common.delete')}
         tone="danger"
         busy={deleteBusy}
-        onCancel={() => { setConfirmTag(null); }}
+        onCancel={() => {
+          setConfirmTag(null);
+        }}
         onConfirm={() => void runDelete()}
       />
     </Card>

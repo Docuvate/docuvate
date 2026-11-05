@@ -3606,7 +3606,6 @@ mark.global-search-mark {
   margin-top: var(--dv-space-md);
 }
 
-
 .review-wizard {
   display: grid;
   gap: var(--dv-space-lg);
@@ -7291,7 +7290,6 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   white-space: pre;
 }
 
-
 .library-export-btn {
   flex: 0 1 auto;
   max-width: 100%;
@@ -8447,7 +8445,6 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   min-width: 0;
 }
 
-
 .library-focus-pane-actions {
   display: flex;
   flex-wrap: wrap;
@@ -8862,7 +8859,6 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   background: var(--dv-color-text-subtle);
   overflow: hidden;
 }
-
 
 .pdf-pages-display-rotated {
   transform-origin: center center;

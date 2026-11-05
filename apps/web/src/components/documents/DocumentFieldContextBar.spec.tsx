@@ -52,7 +52,8 @@ function renderBar(args?: {
       draft={DRAFT}
       fieldOptions={OPTIONS}
       existingFieldValues={
-        args?.existing ?? new Map([
+        args?.existing ??
+        new Map([
           ['betrag', '1.000,00'],
           ['absender', 'ACME GmbH'],
         ])
