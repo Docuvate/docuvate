@@ -2,12 +2,14 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Module } from '@nestjs/common';
 
+import { JOB_OUTBOX_RELAY } from '../../shared/domain/ports.js';
 import { DocumentPipelineModule } from '../document-pipeline/document-pipeline.module.js';
 import { DuplicatesModule } from '../duplicates/duplicates.module.js';
 import { ExactFactsModule } from '../exact-facts/exact-facts.module.js';
 import { ExtractionQueueService } from '../extraction/infrastructure/extraction-queue.service.js';
 import { ExtractionFeedbackModule } from '../extraction-feedback/extraction-feedback.module.js';
 import { FeatureFlagsModule } from '../feature-flags/feature-flags.module.js';
+import { OutboxRelayService } from '../job-outbox/infrastructure/outbox-relay.service.js';
 import { LabelsModule } from '../labels/labels.module.js';
 import { RecognizedFieldsModule } from '../recognized-fields/recognized-fields.module.js';
 import { RepresentationModule } from '../representation/representation.module.js';
@@ -92,6 +94,8 @@ import { ReviewQueueController } from './presentation/review-queue.controller.js
     QueueExtractionUseCase,
     RunExtractionUseCase,
     ExtractionQueueService,
+    OutboxRelayService,
+    { provide: JOB_OUTBOX_RELAY, useExisting: OutboxRelayService },
     { provide: DOCUMENT_EXTRACTION_ENQUEUE, useExisting: ExtractionQueueService },
     FailedDocumentExtractionReconcileService,
     StaleDocumentExtractionReconcileService,

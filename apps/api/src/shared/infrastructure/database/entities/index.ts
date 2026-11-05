@@ -53,6 +53,8 @@ import { FoldersEntity } from './folders.entity.js';
 import { InstallationDashboardWidgetsEntity } from './installation-dashboard-widgets.entity.js';
 import { InstallationUserRolesEntity } from './installation-user-roles.entity.js';
 import { InstallationUserSuspensionsEntity } from './installation-user-suspensions.entity.js';
+import { JobOutboxEntity } from './job-outbox.entity.js';
+import { JobTypesEntity } from './job-types.entity.js';
 import { LabelRecommendationBlocklistEntity } from './label-recommendation-blocklist.entity.js';
 import { LabelRecommendationBlocklistPatternsEntity } from './label-recommendation-blocklist-patterns.entity.js';
 import { LabelRecommendationClusterExclusionsEntity } from './label-recommendation-cluster-exclusions.entity.js';
@@ -131,6 +133,8 @@ export const TYPEORM_ENTITIES = [
   DocumentTagSuggestionsEntity,
   DocumentTagsEntity,
   DocumentsEntity,
+  JobOutboxEntity,
+  JobTypesEntity,
   ExtractionArenaRatingComparedEnginesEntity,
   ExtractionArenaRatingsEntity,
   ExtractionFieldCorrectionLabelsEntity,

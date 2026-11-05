@@ -8,6 +8,7 @@ import { HeuristicFieldSuggestionsBackfillService } from '../modules/documents/i
 import { DuplicateDetectionQueueService } from '../modules/duplicates/infrastructure/duplicate-detection-queue.service.js';
 import { DocumentFactIndexQueueService } from '../modules/exact-facts/infrastructure/document-fact-index-queue.service.js';
 import { ExtractionQueueService } from '../modules/extraction/infrastructure/extraction-queue.service.js';
+import { OutboxRelayService } from '../modules/job-outbox/infrastructure/outbox-relay.service.js';
 import { EmbeddingDensityCalibrationQueueService } from '../modules/labels/infrastructure/embedding-density-calibration-queue.service.js';
 import { PurgeExclusiveTagSuggestionsService } from '../modules/labels/infrastructure/purge-exclusive-tag-suggestions.service.js';
 import { MlRetrainQueueService } from '../modules/model-registry/infrastructure/ml-retrain-queue.service.js';
@@ -26,6 +27,8 @@ const noopQueue = {
   ensureQueued: (): Promise<void> => Promise.resolve(),
   recordExtractionStart: (): Promise<void> => Promise.resolve(),
   isJobQueuedOrActive: (): Promise<boolean> => Promise.resolve(false),
+  enqueueFromOutbox: (): Promise<void> => Promise.resolve(),
+  recordOrphanRequeue: (): Promise<number> => Promise.resolve(0),
 };
 
 const mockPool: Record<string, unknown> = {
@@ -68,6 +71,12 @@ export function applyOpenApiGenerationOverrides(
     .useValue(mockPool)
     .overrideProvider(ExtractionQueueService)
     .useValue(noopQueue)
+    .overrideProvider(OutboxRelayService)
+    .useValue({
+      onModuleInit: (): Promise<void> => Promise.resolve(),
+      onModuleDestroy: (): void => undefined,
+      relayOnce: (): Promise<number> => Promise.resolve(0),
+    })
     .overrideProvider(MlRetrainQueueService)
     .useValue(noopQueue)
     .overrideProvider(PaperlessImportQueueService)

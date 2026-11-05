@@ -21,6 +21,7 @@ import { DocumentTagsEntity } from './document-tags.entity.js';
 import { ExtractionArenaRatingsEntity } from './extraction-arena-ratings.entity.js';
 import { ExtractionFieldCorrectionsEntity } from './extraction-field-corrections.entity.js';
 import { FoldersEntity } from './folders.entity.js';
+import { JobOutboxEntity } from './job-outbox.entity.js';
 import { TagEmbeddingFeedbackEntity } from './tag-embedding-feedback.entity.js';
 import { UserEntity } from './user.entity.js';
 
@@ -172,4 +173,7 @@ export class DocumentsEntity {
     (tagEmbeddingFeedback) => tagEmbeddingFeedback.document
   )
   tagEmbeddingFeedbacks: TagEmbeddingFeedbackEntity[];
+
+  @OneToMany(() => JobOutboxEntity, (jobOutbox) => jobOutbox.document)
+  jobOutboxes: JobOutboxEntity[];
 }
