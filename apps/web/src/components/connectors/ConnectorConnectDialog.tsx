@@ -62,6 +62,8 @@ export function ConnectorConnectDialog({
   const fields = useMemo(() => plugin?.auth.fields ?? [], [plugin]);
   const isOAuth = plugin?.auth.strategy === 'oauth2';
   const hasSelectionStep = plugin != null && !isOAuth && connectorPluginSupportsSourceSelection(plugin.id);
+  /** Credentials are reset in an effect, so the first render after a plugin switch still sees the previous map. */
+  const credential = (key: string): string => credentials[key] ?? '';
 
   useEffect(() => {
     if (!plugin) {
@@ -103,11 +105,11 @@ export function ConnectorConnectDialog({
     setProbeMessage(null);
     try {
       const result = await probeSftpFetchHostKey({
-        host: credentials.host,
-        port: Number(credentials.port) || 22,
-        username: credentials.username,
-        password: credentials.password || undefined,
-        privateKey: credentials.private_key || undefined,
+        host: credential('host'),
+        port: Number(credential('port')) || 22,
+        username: credential('username'),
+        password: credential('password') || undefined,
+        privateKey: credential('private_key') || undefined,
       });
       setProbeMessage(
         t('connectors.sftpProbeSuccess', { fingerprint: result.hostKeyFingerprintSha256 })
@@ -140,7 +142,7 @@ export function ConnectorConnectDialog({
     if (plugin.auth.strategy === 'oauth2') {
       onOAuthStart?.({
         displayName: displayName.trim(),
-        accountHint: credentials.account_hint.trim() || undefined,
+        accountHint: credential('account_hint').trim() || undefined,
       });
       return;
     }
@@ -163,8 +165,8 @@ export function ConnectorConnectDialog({
   const rootSourceLabel =
     plugin?.id === 'amazon_s3'
       ? t('connectors.sources.rootBucket', {
-          name: credentials.bucket.trim().length > 0
-            ? credentials.bucket.trim()
+          name: credential('bucket').trim().length > 0
+            ? credential('bucket').trim()
             : t('connectors.sources.rootBucketFallback'),
         })
       : t('connectors.sources.rootMailbox');
@@ -278,7 +280,7 @@ export function ConnectorConnectDialog({
                     <label className="settings-field">
                       {t('connectors.auth.fields.afterImport')} *
                       <Select
-                        value={credentials.after_import}
+                        value={credential('after_import')}
                         onChange={(value) => {
                           setCredentials((prev) => ({ ...prev, after_import: value }));
                         }}
@@ -297,7 +299,7 @@ export function ConnectorConnectDialog({
                         step={60}
                         required
                         disabled={busy}
-                        value={credentials.poll_interval_seconds}
+                        value={credential('poll_interval_seconds')}
                         onChange={(e) => {
                           setCredentials((prev) => ({
                             ...prev,
@@ -310,7 +312,7 @@ export function ConnectorConnectDialog({
                     <label className="settings-field">
                       {t('connectors.auth.fields.targetFolderId')}
                       <Select
-                        value={credentials.target_folder_id}
+                        value={credential('target_folder_id')}
                         onChange={(value) => {
                           setCredentials((prev) => ({ ...prev, target_folder_id: value }));
                         }}
@@ -326,7 +328,7 @@ export function ConnectorConnectDialog({
                       <select
                         className="input"
                         multiple
-                        value={credentials.label_ids.split(',').filter(Boolean)}
+                        value={credential('label_ids').split(',').filter(Boolean)}
                         disabled={busy}
                         onChange={(e) => {
                           const selected = Array.from(e.target.selectedOptions).map((o) => o.value);
