@@ -2,7 +2,11 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it } from 'vitest';
 
-import { fieldValueRowState, isConfirmedFieldConfidence } from './documentFieldValueRowState';
+import {
+  fieldValueRowState,
+  isConfirmedFieldConfidence,
+  withSavedFieldValue,
+} from './documentFieldValueRowState';
 
 describe('fieldValueRowState', () => {
   it('treats a value without confidence as a suggestion, not as confirmed', () => {
@@ -23,5 +27,17 @@ describe('fieldValueRowState', () => {
     expect(
       fieldValueRowState({ key: 'datum', value: 'neu' }, { key: 'datum', value: 'alt' })
     ).toBe('corrected');
+  });
+});
+
+describe('withSavedFieldValue', () => {
+  it('replaces an existing value and marks it confirmed', () => {
+    const next = withSavedFieldValue([{ key: 'iban', value: '', confidence: 0.4 }], 'iban', 'DE00');
+    expect(next).toEqual([{ key: 'iban', value: 'DE00', confidence: 1 }]);
+  });
+
+  it('appends a field that was not present', () => {
+    const next = withSavedFieldValue([], 'iban', 'DE00');
+    expect(next).toEqual([{ key: 'iban', value: 'DE00', confidence: 1 }]);
   });
 });

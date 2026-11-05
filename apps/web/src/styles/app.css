@@ -725,11 +725,13 @@
 .global-search-result-title {
   font-weight: 600;
   line-height: 1.35;
+  overflow-wrap: anywhere;
 }
 
 .global-search-result-meta {
   font-size: 0.8125rem;
   line-height: 1.3;
+  overflow-wrap: anywhere;
 }
 
 .global-search-snippet {
@@ -1212,12 +1214,12 @@ mark.global-search-mark {
 .border-rail-toggle {
   position: absolute;
   top: var(--dv-space-sm);
-  right: -11px;
+  right: -12px;
   z-index: var(--dv-z-sticky);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 22px;
+  width: 24px;
   height: 28px;
   padding: 0;
   border: 1px solid var(--dv-color-border);
@@ -3163,6 +3165,32 @@ mark.global-search-mark {
   font-size: 0.9rem;
 }
 
+.layout-side-subsection-title {
+  margin: var(--dv-space-sm) 0 var(--dv-space-2xs);
+  font-size: var(--dv-font-size-xs);
+  font-weight: var(--dv-font-weight-semibold);
+  color: var(--dv-color-text-muted);
+}
+
+.layout-field-filter {
+  width: 100%;
+  margin-bottom: var(--dv-space-xs);
+}
+
+.layout-field-mark-hint {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--dv-space-xs);
+  margin-bottom: var(--dv-space-xs);
+  padding: var(--dv-space-xs) var(--dv-space-sm);
+  border: 1px solid var(--dv-color-accent);
+  border-radius: var(--dv-radius-md);
+  background: var(--dv-color-bg-raised);
+  font-size: var(--dv-font-size-sm);
+}
+
 .layout-field-list,
 .layout-field-suggestion-list,
 .layout-outline-list {
@@ -4126,6 +4154,83 @@ mark.global-search-mark {
   outline-offset: 2px;
 }
 
+/* Small screens: one card per field instead of a squeezed four-column table, so field names
+   wrap at word boundaries and the rule reads in full. */
+@media (max-width: 767px) {
+  .recognized-fields-table,
+  .recognized-fields-table tbody {
+    display: block;
+    width: 100%;
+  }
+
+  .recognized-fields-table colgroup,
+  .recognized-fields-table thead {
+    display: none;
+  }
+
+  .recognized-fields-table tbody tr {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      'label actions'
+      'type actions'
+      'rule rule';
+    column-gap: var(--dv-space-sm);
+    row-gap: var(--dv-space-2xs);
+    padding: var(--dv-space-sm) 0;
+    border-bottom: 1px solid var(--dv-color-border);
+  }
+
+  .recognized-fields-table tbody td {
+    display: block;
+    width: auto;
+    min-width: 0;
+    max-width: none;
+    padding: 0;
+    border-bottom: none;
+  }
+
+  .recognized-fields-table__cell--label {
+    grid-area: label;
+    overflow-wrap: break-word;
+    hyphens: auto;
+  }
+
+  .recognized-fields-table__cell--type {
+    grid-area: type;
+    font-size: var(--dv-font-size-sm);
+    color: var(--dv-color-text-muted);
+  }
+
+  .recognized-fields-table__cell--rule {
+    grid-area: rule;
+    font-size: var(--dv-font-size-sm);
+  }
+
+  .recognized-fields-table__cell--type .recognized-fields-table__truncate,
+  .recognized-fields-table__cell--rule .recognized-fields-table__truncate {
+    white-space: normal;
+    overflow-wrap: break-word;
+  }
+
+  /* The hidden column headers become inline captions ("Typ: Datum"). */
+  .recognized-fields-table__cell--type::before,
+  .recognized-fields-table__cell--rule::before {
+    content: attr(data-label) ': ';
+    color: var(--dv-color-text-subtle);
+  }
+
+  .recognized-fields-table__cell--type .recognized-fields-table__truncate,
+  .recognized-fields-table__cell--rule .recognized-fields-table__truncate {
+    display: inline;
+  }
+
+  .recognized-fields-table .recognized-fields-table__actions {
+    grid-area: actions;
+    align-self: start;
+  }
+}
+
 .recognized-fields-table__editor-row td {
   padding: 0;
   border-bottom: 1px solid var(--dv-color-border);
@@ -4181,7 +4286,6 @@ mark.global-search-mark {
   font-weight: 600;
   color: var(--dv-color-text-subtle);
 }
-
 
 .segmented-control {
   --segmented-inset: 2px;
@@ -4949,10 +5053,9 @@ mark.global-search-mark {
 
 .library-layout {
   display: grid;
-  grid-template-columns: minmax(
-      var(--dv-layout-library-filter-min),
-      var(--dv-layout-library-filter-max)
-    ) minmax(0, 1fr);
+  grid-template-columns:
+    minmax(var(--dv-layout-library-filter-min), var(--dv-layout-library-filter-max))
+    minmax(0, 1fr);
   gap: var(--dv-space-md);
   align-items: start;
   min-width: 0;
@@ -5001,13 +5104,12 @@ mark.global-search-mark {
 }
 
 .library-table-wrap.library-table-virtual-with-folder .library-table-virtualized {
-  --library-virtual-grid-cols:
-    2rem 2.5rem minmax(0, 1fr) minmax(0, 7.5rem) minmax(7rem, 9rem) 8.75rem 6.25rem 4.5rem;
+  --library-virtual-grid-cols: 2rem 2.5rem minmax(0, 1fr) minmax(0, 7.5rem) minmax(7rem, 9rem)
+    8.75rem 6.25rem 4.5rem;
 }
 
 .library-table-wrap.library-table-virtual-no-folder .library-table-virtualized {
-  --library-virtual-grid-cols:
-    2rem 2.5rem minmax(0, 1fr) minmax(7rem, 9rem) 8.75rem 6.25rem 4.5rem;
+  --library-virtual-grid-cols: 2rem 2.5rem minmax(0, 1fr) minmax(7rem, 9rem) 8.75rem 6.25rem 4.5rem;
 }
 
 .library-doc-list-scroll.library-table-scroll {
@@ -5080,7 +5182,10 @@ mark.global-search-mark {
   cursor: pointer;
 }
 
-.library-table.library-table-virtualized td.library-col-labels .document-label-suggestion-chip-btn .chip {
+.library-table.library-table-virtualized
+  td.library-col-labels
+  .document-label-suggestion-chip-btn
+  .chip {
   --chip-max-width: 100%;
   box-sizing: border-box;
   max-width: 100%;
@@ -5361,6 +5466,33 @@ mark.global-search-mark {
 .filter-chip-inbox svg {
   flex-shrink: 0;
   display: block;
+}
+
+.filter-more-fields-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--dv-space-xs);
+  min-height: 32px;
+  cursor: pointer;
+  list-style-position: inside;
+}
+
+.filter-more-fields-summary .filter-label {
+  display: inline;
+}
+
+.filter-more-fields-active {
+  font-size: var(--dv-font-size-xs);
+  color: var(--dv-color-accent-text);
+  white-space: nowrap;
+}
+
+.filter-more-fields-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dv-space-sm);
+  margin-top: var(--dv-space-xs);
 }
 
 .filter-group {
@@ -5893,6 +6025,7 @@ mark.global-search-mark {
   background: none;
   border: none;
   padding: 0;
+  min-height: 24px;
   font: inherit;
   font-weight: 600;
   cursor: pointer;
@@ -7269,8 +7402,8 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 
 .library-table-wrap {
   --library-table-date-col-min: 6.25rem;
-  --library-table-labels-col-min: 7rem;
-  --library-table-labels-col-max: 9rem;
+  --library-table-labels-col-min: 6rem;
+  --library-table-labels-col-max: 7.5rem;
   width: 100%;
   min-width: 0;
   overflow-x: auto;
@@ -7656,6 +7789,22 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   white-space: normal;
 }
 
+/* Long titles wrap (up to three lines) instead of being cut after a few words; rows are measured. */
+.library-table.library-table-virtualized td.library-col-title .cell-title-text {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.library-table.library-table-virtualized td.library-col-status .badge {
+  white-space: normal;
+  max-width: 100%;
+  line-height: 1.2;
+}
+
 .library-table.library-table-virtualized th.library-col-status,
 .library-table.library-table-virtualized td.library-col-status,
 .library-table.library-table-virtualized th.library-col-meta,
@@ -7979,12 +8128,25 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   padding: 0 var(--dv-space-2xs);
   border-radius: var(--dv-radius-sm);
   box-sizing: border-box;
+  min-width: 24px;
+  min-height: 24px;
 }
 
 .library-row-menu-btn:hover,
 .library-row-menu-btn:focus-visible {
   color: var(--dv-color-text);
   background: var(--dv-color-bg-overlay);
+}
+
+/* Pointer-size floor (WCAG 2.5.8); the mobile rule below raises it to the touch minimum. */
+.library-check-touch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  min-height: 24px;
+  box-sizing: border-box;
+  cursor: pointer;
 }
 
 @media (max-width: 768px) {
@@ -8320,6 +8482,10 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   border-radius: 6px;
   padding: 1px 8px;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  box-sizing: border-box;
 }
 
 .stack-badge-compact {
@@ -8346,6 +8512,8 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   cursor: pointer;
   font-size: 0.85rem;
   padding: 0 var(--dv-space-2xs);
+  min-width: 24px;
+  min-height: 24px;
 }
 
 .library-row-stack-version td {
@@ -11084,7 +11252,8 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
     max-width: 100%;
   }
 
-  .library-list-search.library-search-row:not(.library-list-search--compact) .library-list-search-actions {
+  .library-list-search.library-search-row:not(.library-list-search--compact)
+    .library-list-search-actions {
     grid-column: 1;
     display: flex;
     flex-wrap: wrap;
@@ -11276,6 +11445,20 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   transition: opacity 0.12s ease;
 }
 
+/* On pointer devices idle rows (the selected one too) hide their actions entirely, so folder
+   names get the full row width; hovered, focused or menu-open rows show them in flow, never on
+   top of the name. */
+@media (hover: hover) and (pointer: fine) {
+  .dateisystem-tree-row:not(
+      :hover,
+      :focus-within,
+      :has(.dateisystem-tree-actions [aria-expanded='true'])
+    )
+    .dateisystem-tree-actions {
+    display: none;
+  }
+}
+
 .dateisystem-tree-actions {
   display: flex;
   align-items: center;
@@ -11461,8 +11644,8 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   list-style: none;
   margin: 0;
   padding: 0;
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(13rem, 100%), 1fr));
   gap: var(--dv-space-xs);
 }
 
@@ -11475,7 +11658,8 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   display: flex;
   align-items: center;
   gap: var(--dv-space-xs);
-  width: 9.5rem;
+  width: 100%;
+  height: 100%;
   min-height: 3.5rem;
   padding: var(--dv-space-xs) var(--dv-space-sm);
   border: 1px solid var(--dv-color-border);
@@ -11494,8 +11678,12 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   flex: 1;
   min-width: 0;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  overflow-wrap: anywhere;
+  line-height: 1.3;
   font-weight: 500;
   font-size: var(--dv-font-size-sm);
 }
@@ -11698,6 +11886,13 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
     border-bottom: 1px solid var(--dv-color-border);
   }
 
+  /* Stacked layout: the tree scrolls inside a bounded box so the folder content stays within reach
+     and the virtualized tree only renders the rows in view. */
+  .dateisystem-sidebar .dateisystem-tree-nav-scroll {
+    max-height: min(40vh, 320px);
+    overscroll-behavior: contain;
+  }
+
   .dateisystem-split-handle {
     display: none;
   }
@@ -11815,7 +12010,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   }
 
   .document-detail-page:has(.layout-workspace--correction-sheet) .extracted-fields-section,
-  .document-detail-page[data-correction-sheet-open="1"] .extracted-fields-section {
+  .document-detail-page[data-correction-sheet-open='1'] .extracted-fields-section {
     display: none;
   }
 }
@@ -12184,6 +12379,16 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 
 .labels-vocabulary-doc-link {
   font-weight: 600;
+}
+
+/* Inline text actions on the Labels page keep a 24 px target (WCAG 2.5.8) on touch screens. */
+.labels-coverage-filter-link,
+.labels-coverage-threshold-toggle,
+.labels-todo-review-link,
+.labels-vocabulary-doc-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
 }
 
 .labels-vocabulary-table th.labels-vocabulary-col-actions,
@@ -13279,24 +13484,43 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   gap: var(--dv-space-sm);
 }
 
+/* Name and count share the first line, the bar spans the full width below, so label names get
+   the whole card width instead of a fixed 10rem column. */
 .dashboard-top-label-row {
   display: grid;
-  grid-template-columns: 10rem minmax(0, 1fr) 3rem;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    'chip count'
+    'bar bar';
   align-items: center;
-  gap: var(--dv-space-sm);
-  min-height: 2.5rem;
+  column-gap: var(--dv-space-sm);
+  row-gap: var(--dv-space-2xs);
 }
 
 .dashboard-top-label-chip {
+  grid-area: chip;
   min-width: 0;
-  max-width: 10rem;
+  max-width: 100%;
+}
+
+.dashboard-top-label-chip .chip {
+  --chip-max-width: 100%;
+  max-width: 100%;
+}
+
+/* Wrap long label names instead of truncating them; break inside a word only as a last resort. */
+.dashboard-top-label-chip .chip-label {
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .dashboard-top-label-progress {
+  grid-area: bar;
   height: 0.25rem;
 }
 
 .dashboard-top-label-count {
+  grid-area: count;
   text-align: right;
   font-variant-numeric: tabular-nums;
   font-size: var(--dv-font-size-sm);
@@ -13653,7 +13877,8 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   .saved-views-manage-name-link {
     display: block;
     white-space: normal;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
+    hyphens: auto;
     word-break: break-word;
     text-overflow: unset;
     overflow: visible;
@@ -15527,17 +15752,17 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 
 .labels-vocabulary-card-row__line1 {
   min-width: 0;
-  overflow: hidden;
 }
 
 .labels-vocabulary-card-row__line1 .chip {
   max-width: 100%;
 }
 
+/* Wrap long label names instead of truncating them; break inside a word only as a last resort. */
 .labels-vocabulary-card-row__line1 .chip-label {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .labels-vocabulary-card-row__line2 {
@@ -15552,9 +15777,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 .labels-vocabulary-card-row__count,
 .labels-vocabulary-card-row__auto {
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: break-word;
 }
 
 .labels-vocabulary-card-row__actions {
@@ -15859,4 +16082,317 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
     min-width: var(--dv-touch-target-min);
     justify-content: center;
   }
+}
+
+/* ── Responsive document view (UX scale audit P0-3, P0-4) ───────────────── */
+
+.document-detail-meta-primary {
+  min-width: 0;
+}
+
+.document-detail-title {
+  min-width: 0;
+}
+
+@media (max-width: 767px) {
+  .document-detail-meta-top {
+    flex-wrap: nowrap;
+    align-items: flex-start;
+  }
+
+  .document-detail-meta-primary {
+    flex: 1 1 0;
+  }
+
+  .document-detail-title {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    hyphens: auto;
+  }
+
+  .document-detail-meta-actions {
+    flex: 0 0 auto;
+    flex-wrap: nowrap;
+  }
+
+  .layout-viewer-toolbar {
+    flex: 0 0 auto;
+    height: auto;
+    flex-wrap: wrap;
+    overflow: visible;
+    row-gap: var(--dv-space-xs);
+  }
+
+  .layout-viewer-toolbar > .segmented-control,
+  .layout-viewer-toolbar > [data-testid='document-selection-tools'],
+  .layout-viewer-toolbar [data-testid='document-selection-tools'] > .segmented-control {
+    flex: 1 1 100%;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .layout-viewer-toolbar > [data-testid='document-selection-tools'] {
+    display: flex;
+  }
+
+  .layout-viewer-toolbar .segmented-control__option,
+  .layout-pane-tabs .segmented-control__option {
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 2.5rem;
+    padding-inline: var(--dv-space-2xs);
+  }
+
+  .document-detail-page .layout-workspace[data-mobile-pane] {
+    flex: 0 0 auto;
+    grid-template-rows: auto auto;
+    min-height: 0;
+  }
+
+  .document-detail-page .layout-workspace[data-mobile-pane='panel'] > .layout-side-panel {
+    min-height: 60vh;
+    max-height: none;
+  }
+
+  .layout-pane-tabs {
+    width: 100%;
+    position: sticky;
+    top: 0;
+    z-index: calc(var(--dv-z-base) + 2);
+  }
+
+  .layout-workspace[data-mobile-pane='document'] > .layout-side-panel,
+  .layout-workspace[data-mobile-pane='panel'] > .layout-workspace-main {
+    display: none;
+  }
+
+  .document-detail-page .layout-workspace[data-mobile-pane='document'] .layout-viewer-stage {
+    min-height: min(70vh, 640px);
+  }
+}
+
+/* Compact document list toolbar (UX scale audit P0-5). */
+/* Filters live in a drawer below 1280px: the list takes the full width instead of the filter column. */
+.library-layout.library-layout--drawer-filters {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.library-saved-views-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--dv-space-2xs);
+}
+
+@media (max-width: 768px) {
+  .library-page .library-page-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--dv-space-xs) var(--dv-space-sm);
+  }
+
+  .library-page .library-page-header .library-toolbar {
+    display: contents;
+  }
+
+  .library-page .library-page-heading {
+    grid-column: 1;
+    grid-row: 1;
+    min-width: 0;
+  }
+
+  .library-page .library-page-heading h1 {
+    overflow-wrap: anywhere;
+  }
+
+  .library-page .library-saved-views-trigger {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: end;
+    min-height: var(--dv-touch-target-min);
+    min-width: var(--dv-touch-target-min);
+    justify-content: center;
+  }
+
+  .library-page .library-saved-views-trigger-label {
+    display: none;
+  }
+
+  .library-page .library-page-header .library-toolbar > .segmented-control {
+    grid-column: 1;
+    grid-row: 2;
+    flex-wrap: nowrap;
+    min-width: 0;
+    width: 100%;
+  }
+
+  .library-page
+    .library-page-header
+    .library-toolbar
+    > .segmented-control
+    .segmented-control__option {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding-inline: var(--dv-space-2xs);
+    font-size: 0.8rem;
+  }
+
+  .library-page .library-page-header .library-toolbar-sort {
+    grid-column: 2;
+    grid-row: 2;
+    min-width: 0;
+    max-width: 9.5rem;
+  }
+
+  .library-page .library-toolbar .custom-select.library-toolbar-sort {
+    min-width: 0;
+  }
+
+  .library-page .library-toolbar-sort .custom-select-trigger > span:first-child {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .library-list-toolbar .library-list-search.library-list-search--compact.library-search-row,
+  .library-list-toolbar .library-list-search.library-list-search--compact {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+  }
+
+  .library-list-toolbar
+    .library-list-search.library-list-search--compact
+    .library-list-search-actions {
+    display: flex;
+    flex-direction: row;
+    grid-column: 2;
+    width: auto;
+    gap: var(--dv-space-xs);
+  }
+
+  .library-list-toolbar
+    .library-list-search.library-list-search--compact
+    .library-list-search-actions
+    .btn {
+    width: auto;
+    white-space: nowrap;
+  }
+
+  .library-search-submit-icon {
+    min-height: var(--dv-touch-target-min);
+    min-width: var(--dv-touch-target-min);
+  }
+
+  .upload-section-compact .upload-compact-bar {
+    flex-wrap: nowrap;
+  }
+
+  .upload-section-compact .upload-compact-hint {
+    flex: 1 1 0;
+    min-width: 0;
+    font-size: 0.8rem;
+  }
+
+  /* The checkboxes explain themselves on phones; the idle hint row only cost space. */
+  .library-doc-table-card .bulk-bar-slot-idle {
+    display: none;
+  }
+}
+
+/* With the list at full width, search, filter and submit fit on one row on tablets. */
+@media (min-width: 769px) and (max-width: 1279px) {
+  .library-page .library-toolbar .custom-select.library-toolbar-sort {
+    min-width: 0;
+  }
+
+  .library-page .library-list-search.library-search-row:not(.library-list-search--compact) {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+  }
+
+  .library-page
+    .library-list-search.library-search-row:not(.library-list-search--compact)
+    .library-list-search-actions {
+    grid-column: 2;
+    flex-wrap: nowrap;
+    width: auto;
+  }
+
+  .library-page
+    .library-list-search.library-search-row:not(.library-list-search--compact)
+    .library-filter-toggle,
+  .library-page
+    .library-list-search.library-search-row:not(.library-list-search--compact)
+    button[type='submit'] {
+    flex: 0 0 auto;
+  }
+}
+
+.library-page .library-toolbar-sort .custom-select-trigger {
+  gap: var(--dv-space-2xs);
+}
+
+/* Review queue: bulk actions get their own explained section instead of crowding the title. */
+.review-queue-bulk {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--dv-space-sm) var(--dv-space-md);
+  margin-block-end: var(--dv-space-md);
+  padding: var(--dv-space-sm) var(--dv-space-md);
+  border: 1px solid var(--dv-color-border);
+  border-radius: var(--dv-radius-md);
+}
+
+.review-queue-bulk-text {
+  flex: 1 1 18rem;
+  min-width: 0;
+}
+
+.review-queue-bulk-title {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.review-queue-bulk-lead {
+  margin: var(--dv-space-2xs) 0 0;
+}
+
+.review-queue-bulk-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--dv-space-xs);
+}
+
+.review-wizard-actions-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--dv-space-2xs);
+}
+
+@media (max-width: 600px) {
+  .review-queue-bulk-actions,
+  .review-queue-bulk-actions > * {
+    width: 100%;
+  }
+}
+
+/* Keyboard shortcuts mean nothing on touch-only devices. */
+@media (hover: none) and (pointer: coarse) {
+  .review-wizard-keyboard-hint {
+    display: none;
+  }
+}
+
+.review-wizard-progress-label {
+  margin: 0 0 var(--dv-space-2xs);
+  font-size: var(--dv-font-caption-xs-size);
+  font-variant-numeric: tabular-nums;
 }

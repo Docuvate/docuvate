@@ -18,6 +18,7 @@ import { useNavigate } from 'react-router-dom';
 import { addWindowKeydownListener } from '../../lib/addWindowKeydownListener';
 import { getConnectorCatalog, globalSearch, listRecognizedFields } from '../../lib/api';
 import { authClient, authSessionUserId } from '../../lib/auth-client';
+import { formatCalendarDate } from '../../lib/formatCustomerDate';
 import { routes } from '../../lib/routes';
 import { suggestFieldNames } from '../../lib/search/fieldNameSuggestions';
 import {
@@ -630,9 +631,13 @@ function findHitByFlatId(
 }
 
 function GlobalSearchResultRow({ hit }: { hit: GlobalSearchHitDto }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   if (hit.type === 'document') {
-    const meta = [hit.folderPath, hit.documentDate].filter(Boolean).join(' · ');
+    const filename = hit.filename && hit.filename !== hit.title ? hit.filename : null;
+    const date = hit.documentDate ? formatCalendarDate(hit.documentDate, i18n.language) : null;
+    const meta = [hit.folderPath, filename, date].filter(Boolean).join(' · ');
+    /* The snippet falls back to the title when a document has no text; do not repeat it. */
+    const showSnippet = hit.snippet.trim() !== '' && hit.snippet.trim() !== hit.title.trim();
     return (
       <div className="global-search-result">
         <span className="global-search-result-icon" aria-hidden>
@@ -642,16 +647,18 @@ function GlobalSearchResultRow({ hit }: { hit: GlobalSearchHitDto }) {
           <span className="global-search-result-title">
             <GlobalSearchHighlight text={hit.title} spans={hit.highlightSpans} />
           </span>
-          <span className="global-search-snippet muted">
-            {hit.matchedFieldLabel ? (
-              <>
-                <span>{hit.matchedFieldLabel}: </span>
+          {showSnippet || hit.matchedFieldLabel ? (
+            <span className="global-search-snippet muted">
+              {hit.matchedFieldLabel ? (
+                <>
+                  <span>{hit.matchedFieldLabel}: </span>
+                  <GlobalSearchHighlight text={hit.snippet} spans={hit.snippetHighlightSpans} />
+                </>
+              ) : (
                 <GlobalSearchHighlight text={hit.snippet} spans={hit.snippetHighlightSpans} />
-              </>
-            ) : (
-              <GlobalSearchHighlight text={hit.snippet} spans={hit.snippetHighlightSpans} />
-            )}
-          </span>
+              )}
+            </span>
+          ) : null}
           {meta ? <span className="global-search-result-meta muted">{meta}</span> : null}
         </span>
       </div>

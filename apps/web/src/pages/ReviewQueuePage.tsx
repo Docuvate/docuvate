@@ -1,5 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import { useQuery } from '@tanstack/react-query';
 import { Check } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -13,6 +14,7 @@ import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import {
   acceptDocumentReviewHighConfidenceBatch,
   archiveHashIdenticalDuplicateSets,
+  getDocumentReviewQueueSummary,
 } from '../lib/api';
 import { formatUserFacingError } from '../lib/apiErrors';
 import { flattenCursorPages } from '../lib/pagination/useCursorInfiniteQuery';
@@ -25,6 +27,7 @@ export function ReviewQueuePage() {
   const { pushSuccess, pushError } = useToastNotify();
   const [batchBusy, setBatchBusy] = useState(false);
   const [archiveConfirmOpen, setArchiveConfirmOpen] = useState(false);
+  const [batchConfirmOpen, setBatchConfirmOpen] = useState(false);
 
   const {
     data,
@@ -36,10 +39,20 @@ export function ReviewQueuePage() {
     refetch,
   } = useDocumentReviewQueueInfiniteQuery();
   const items = flattenCursorPages(data?.pages);
+  const summary = useQuery({
+    queryKey: ['document-review-queue-summary'],
+    queryFn: getDocumentReviewQueueSummary,
+  });
+  const refetchSummary = summary.refetch;
+  const pendingCount = summary.data?.pendingCount;
 
   const reload = useCallback(async () => {
-    await refetch();
-  }, [refetch]);
+    await Promise.all([refetch(), refetchSummary()]);
+  }, [refetch, refetchSummary]);
+
+  const loadMore = useCallback(() => {
+    void fetchNextPage();
+  }, [fetchNextPage]);
 
   async function onBatchHighConfidence() {
     setBatchBusy(true);
@@ -69,30 +82,49 @@ export function ReviewQueuePage() {
           <h1 data-ux="page-title">{t('reviewQueue.title')}</h1>
           <p className="muted">{t('reviewQueue.lead')}</p>
         </div>
-        <div className="review-queue-header-actions">
-          <Button
-            type="button"
-            variant="secondary"
-            disabled={batchBusy || loading}
-            onClick={() => { setArchiveConfirmOpen(true); }}
-          >
-            {t('reviewQueue.archiveHashIdenticalDuplicates')}
-          </Button>
-          <Button
-            type="button"
-            variant="secondary"
-            disabled={batchBusy || loading || items.length === 0}
-            onClick={() => void onBatchHighConfidence()}
-          >
-            {t('reviewQueue.batchHighConfidence')}
-          </Button>
-          {showWizard ? (
+        {showWizard ? (
+          <div className="review-queue-header-actions">
             <Button type="button" variant="ghost" onClick={() => { navigate(routes.home); }}>
               {t('reviewWizard.exit')}
             </Button>
-          ) : null}
-        </div>
+          </div>
+        ) : null}
       </header>
+
+      {showWizard ? (
+        <section
+          className="review-queue-bulk"
+          aria-labelledby="review-queue-bulk-title"
+          data-testid="review-queue-bulk"
+        >
+          <div className="review-queue-bulk-text">
+            <h2 id="review-queue-bulk-title" className="review-queue-bulk-title">
+              {pendingCount != null
+                ? t('reviewQueue.bulkTitleCount', { count: pendingCount })
+                : t('reviewQueue.bulkTitle')}
+            </h2>
+            <p className="muted review-queue-bulk-lead">{t('reviewQueue.bulkLead')}</p>
+          </div>
+          <div className="review-queue-bulk-actions">
+            <Button
+              type="button"
+              variant="primary"
+              disabled={batchBusy}
+              onClick={() => { setBatchConfirmOpen(true); }}
+            >
+              {t('reviewQueue.batchHighConfidence')}
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              disabled={batchBusy}
+              onClick={() => { setArchiveConfirmOpen(true); }}
+            >
+              {t('reviewQueue.archiveHashIdenticalDuplicates')}
+            </Button>
+          </div>
+        </section>
+      ) : null}
 
       {loading ? <p className="muted">{t('reviewQueue.loading')}</p> : null}
       {loadError ? (
@@ -123,24 +155,28 @@ export function ReviewQueuePage() {
       ) : null}
 
       {showWizard ? (
-        <>
-          <ReviewWizardView items={items} batchBusy={batchBusy} onReload={reload} />
-          {hasNextPage ? (
-            <div className="review-queue-load-more">
-              <Button
-                type="button"
-                variant="secondary"
-                disabled={isFetchingNextPage}
-                onClick={() => {
-                  void fetchNextPage();
-                }}
-              >
-                {isFetchingNextPage ? t('common.loading') : t('ui.pagination.nextPage')}
-              </Button>
-            </div>
-          ) : null}
-        </>
+          <ReviewWizardView
+            items={items}
+            batchBusy={batchBusy}
+            onReload={reload}
+            totalDocuments={pendingCount}
+            canLoadMore={hasNextPage}
+            loadingMore={isFetchingNextPage}
+            onLoadMore={loadMore}
+          />
       ) : null}
+
+      <ConfirmDialog
+        open={batchConfirmOpen}
+        title={t('reviewQueue.batchConfirmTitle')}
+        description={t('reviewQueue.batchConfirmBody')}
+        confirmLabel={t('reviewQueue.batchHighConfidence')}
+        onCancel={() => { setBatchConfirmOpen(false); }}
+        onConfirm={() => {
+          setBatchConfirmOpen(false);
+          void onBatchHighConfidence();
+        }}
+      />
 
       <ConfirmDialog
         open={archiveConfirmOpen}

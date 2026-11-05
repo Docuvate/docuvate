@@ -3,6 +3,8 @@
 
 import type { AuthClientErrorLike } from './authErrors';
 
+const HTTP_TOO_MANY_REQUESTS = 429;
+
 export type ConnectivityFailureKind = 'browser-offline' | 'server-unreachable' | 'server-error';
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -55,6 +57,11 @@ export function classifyConnectivityFailure(error: unknown): ConnectivityFailure
     return 'server-unreachable';
   }
   if (typeof parsed.status === 'number' && parsed.status >= 500) {
+    return 'server-error';
+  }
+  // Rate limiting is transient: retry with the reconnect countdown instead of stranding the user
+  // on a dead "unexpected error" page during session boot.
+  if (parsed.status === HTTP_TOO_MANY_REQUESTS) {
     return 'server-error';
   }
   return null;

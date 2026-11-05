@@ -28,6 +28,8 @@ interface DocumentExtractionSectionProps {
   onExtractionRefresh?: () => void | Promise<void>;
   requeueBusy?: boolean;
   onRequeueExtraction?: () => void;
+  /** The original file could not be loaded, so re-running recognition is a secondary action. */
+  sourceFileMissing?: boolean;
   /** Kept for API compatibility; fields live in Details tab only. */
   fields?: ExtractedField[];
   onFieldsChange?: (fields: ExtractedField[]) => void;
@@ -49,6 +51,7 @@ export function DocumentExtractionSection({
   onExtractionRefresh,
   requeueBusy = false,
   onRequeueExtraction,
+  sourceFileMissing = false,
 }: DocumentExtractionSectionProps) {
   const { t } = useTranslation();
   const { advancedFeaturesEnabled } = useAdvancedFeaturesEnabled();
@@ -117,8 +120,17 @@ export function DocumentExtractionSection({
 
       {showReadyNoText ? (
         <div className="extraction-empty-ready" role="status">
-          <p className="muted">{t('documents.extractionNoTextRecognized')}</p>
-          <Button type="button" disabled={requeueBusy} onClick={onRequeueExtraction}>
+          <p className="muted">
+            {sourceFileMissing
+              ? t('documents.extractionNoTextNoFile')
+              : t('documents.extractionNoTextRecognized')}
+          </p>
+          <Button
+            type="button"
+            variant={sourceFileMissing ? 'ghost' : 'primary'}
+            disabled={requeueBusy}
+            onClick={onRequeueExtraction}
+          >
             {requeueBusy ? t('documents.reprocessPending') : t('documents.extractionRetryText')}
           </Button>
         </div>

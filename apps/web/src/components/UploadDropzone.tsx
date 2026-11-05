@@ -4,6 +4,7 @@ import { useCallback, useId, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { UPLOAD_ACCEPT } from '../lib/documentUploadConstants';
+import { useNarrowTopbar } from '../lib/useNarrowTopbar';
 import { Button } from './ui/Button';
 import { useDocumentUploadContext } from './upload/documentUploadContext';
 import { UploadFeedbackBanner } from './upload/UploadFeedbackBanner';
@@ -22,6 +23,8 @@ export function UploadDropzone({ compact = false }: UploadDropzoneProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  // Touch screens have no drag-and-drop: the compact upload button opens the file picker directly.
+  const narrowViewport = useNarrowTopbar();
 
   const processFiles = useCallback(
     (files: FileList | File[]) => {
@@ -51,10 +54,29 @@ export function UploadDropzone({ compact = false }: UploadDropzoneProps) {
       {compact && !showFullDropzone ? (
         <UploadCompactBar
           onExpand={() => {
+            if (narrowViewport) {
+              inputRef.current?.click();
+              return;
+            }
             setExpanded(true);
           }}
         />
       ) : null}
+      <input
+        ref={inputRef}
+        id={inputId}
+        type="file"
+        accept={UPLOAD_ACCEPT}
+        multiple
+        className="sr-only"
+        aria-label={t('upload.chooseFilesAria')}
+        onChange={(e) => {
+          if (e.target.files?.length) {
+            processFiles(e.target.files);
+          }
+          e.target.value = '';
+        }}
+      />
       {showFullDropzone ? (
         <div
           className={`dropzone${active ? ' dropzone-active' : ''}${compact ? ' dropzone-compact-mode' : ''}`}
@@ -80,21 +102,6 @@ export function UploadDropzone({ compact = false }: UploadDropzoneProps) {
           >
             {t('upload.chooseFiles')}
           </Button>
-          <input
-            ref={inputRef}
-            id={inputId}
-            type="file"
-            accept={UPLOAD_ACCEPT}
-            multiple
-            className="sr-only"
-            aria-label={t('upload.chooseFilesAria')}
-            onChange={(e) => {
-              if (e.target.files?.length) {
-                processFiles(e.target.files);
-              }
-              e.target.value = '';
-            }}
-          />
         </div>
       ) : null}
 

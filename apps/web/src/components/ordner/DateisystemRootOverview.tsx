@@ -1,10 +1,16 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { FolderDto } from '@docuvate/contracts';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
-import { childFolders, folderDirectDocumentCount, folderHref } from '../../lib/ordnerTree';
+import {
+  childFolders,
+  folderDocumentCountsFor,
+  folderDocumentCountsWithSubfolders,
+  folderHref,
+} from '../../lib/ordnerTree';
 import { DateisystemRootEmptyState } from './DateisystemRootEmptyState';
 
 interface DateisystemRootOverviewProps {
@@ -15,6 +21,7 @@ interface DateisystemRootOverviewProps {
 export function DateisystemRootOverview({ folders, onCreateRoot }: DateisystemRootOverviewProps) {
   const { t } = useTranslation();
   const roots = childFolders(folders, null);
+  const documentCounts = useMemo(() => folderDocumentCountsWithSubfolders(folders), [folders]);
 
   return (
     <div className="dateisystem-root-overview">
@@ -25,7 +32,7 @@ export function DateisystemRootOverview({ folders, onCreateRoot }: DateisystemRo
         <ul className="dateisystem-root-folder-list">
           {roots.map((folder) => {
             const childCount = childFolders(folders, folder.id).length;
-            const docCount = folderDirectDocumentCount(folder);
+            const docCount = folderDocumentCountsFor(documentCounts, folder).total;
             return (
               <li key={folder.id}>
                 <Link to={folderHref(folder.id)} className="dateisystem-root-folder-card">

@@ -6,6 +6,7 @@ import type {
   RecognizedFieldDefinitionDto,
 } from '@docuvate/contracts';
 import { Filter, Inbox } from 'lucide-react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import type { DocumentFilterParseIssue } from '../../lib/documentFilterQuery';
@@ -55,6 +56,10 @@ export function LibraryFilterPanel({
   const withoutLabel = Boolean(filters.withoutNonInboxLabel);
   const absenderField = filterableFields.find((field) => field.key === 'absender');
   const otherFilterableFields = filterableFields.filter((field) => field.key !== 'absender');
+  const activeOtherFieldCount = otherFilterableFields.filter(
+    (field) => fieldFilterValueForKey(filters.fieldFilters, field.key) !== ''
+  ).length;
+  const [moreFieldsOpen, setMoreFieldsOpen] = useState(activeOtherFieldCount > 0);
 
   return (
     <aside className="filter-panel" aria-label={t('library.filter.panelAria')} data-testid="library-filter-panel">
@@ -186,34 +191,6 @@ export function LibraryFilterPanel({
                 />
               </div>
             ) : null}
-            {otherFilterableFields.map((field) => (
-              <div
-                key={field.key}
-                className="filter-group filter-group-field"
-                data-testid={`library-filter-field-${field.key}`}
-              >
-                {field.fieldType === 'text' ? (
-                  <LibraryLabelFilterCombobox
-                    fieldKey={field.key}
-                    label={field.label}
-                    value={fieldFilterValueForKey(filters.fieldFilters, field.key)}
-                    onChange={(next) => { onFieldFilterChange(field.key, next); }}
-                  />
-                ) : (
-                  <>
-                    <label className="filter-label" htmlFor={`library-field-filter-${field.key}`}>
-                      {field.label}
-                    </label>
-                    <Input
-                      id={`library-field-filter-${field.key}`}
-                      type={field.fieldType === 'date' ? 'date' : 'text'}
-                      value={fieldFilterValueForKey(filters.fieldFilters, field.key)}
-                      onChange={(e) => { onFieldFilterChange(field.key, e.target.value); }}
-                    />
-                  </>
-                )}
-              </div>
-            ))}
             <div className="filter-group filter-group-labels">
               <LibraryTagFilterCombobox
                 activeTagIds={activeTagIds}
@@ -240,6 +217,57 @@ export function LibraryFilterPanel({
                 }}
               />
             </div>
+            {otherFilterableFields.length > 0 ? (
+              <details
+                className="filter-group filter-more-fields"
+                data-testid="library-filter-more-fields"
+                open={moreFieldsOpen}
+                onToggle={(e) => {
+                  setMoreFieldsOpen(e.currentTarget.open);
+                }}
+              >
+                <summary className="filter-more-fields-summary">
+                  <span className="filter-label">
+                    {t('library.filter.moreFields', { count: otherFilterableFields.length })}
+                  </span>
+                  {activeOtherFieldCount > 0 ? (
+                    <span className="filter-more-fields-active">
+                      {t('library.filter.moreFieldsActive', { count: activeOtherFieldCount })}
+                    </span>
+                  ) : null}
+                </summary>
+                <div className="filter-more-fields-body">
+              {otherFilterableFields.map((field) => (
+                <div
+                  key={field.key}
+                  className="filter-group filter-group-field"
+                  data-testid={`library-filter-field-${field.key}`}
+                >
+                  {field.fieldType === 'text' ? (
+                    <LibraryLabelFilterCombobox
+                      fieldKey={field.key}
+                      label={field.label}
+                      value={fieldFilterValueForKey(filters.fieldFilters, field.key)}
+                      onChange={(next) => { onFieldFilterChange(field.key, next); }}
+                    />
+                  ) : (
+                    <>
+                      <label className="filter-label" htmlFor={`library-field-filter-${field.key}`}>
+                        {field.label}
+                      </label>
+                      <Input
+                        id={`library-field-filter-${field.key}`}
+                        type={field.fieldType === 'date' ? 'date' : 'text'}
+                        value={fieldFilterValueForKey(filters.fieldFilters, field.key)}
+                        onChange={(e) => { onFieldFilterChange(field.key, e.target.value); }}
+                      />
+                    </>
+                  )}
+                </div>
+              ))}
+                </div>
+              </details>
+            ) : null}
           </>
         )}
       </div>

@@ -3,21 +3,19 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { Link } from 'react-router-dom';
 
 import { LibraryFilterDrawer } from '../components/library/LibraryFilterDrawer';
 import { LibraryFilterPanel } from '../components/library/LibraryFilterPanel';
+import { LibrarySavedViewsMenu } from '../components/library/LibrarySavedViewsMenu';
 import { LibraryViewSwitcher } from '../components/library/LibraryViewSwitcher';
 import { SaveViewDialog } from '../components/library/SaveViewDialog';
 import { useToastNotify } from '../components/save/ToastProvider';
-import { Button } from '../components/ui/Button';
 import { Select } from '../components/ui/Select';
 import { DocumentUploadProvider } from '../components/upload/DocumentUploadProvider';
 import { UploadDropzone } from '../components/UploadDropzone';
 import { resolveLibraryDropTarget } from '../lib/documentUploadAssignment';
 import { countLibraryActiveFilters } from '../lib/libraryActiveFilterCount';
 import { librarySortSelectOptions, parseLibrarySortSelectValue } from '../lib/librarySortOptions';
-import { routes } from '../lib/routes';
 import { LibraryPageDocumentSection } from './library/LibraryPageDocumentSection';
 import { useLibraryDocumentContextMenu } from './library/useLibraryDocumentContextMenu';
 import { useLibraryPageData } from './library/useLibraryPageData';
@@ -75,8 +73,8 @@ export function LibraryPage() {
   return (
     <DocumentUploadProvider dropTarget={dropTarget} onUploaded={onUploaded}>
       <div className="page library-page" data-ux="page">
-        <header className="page-header">
-          <div>
+        <header className="page-header library-page-header">
+          <div className="library-page-heading">
             <h1 data-ux="page-title">{data.activeViewName ?? data.pageTitle}</h1>
             {data.activeViewName ? (
               <p className="muted">
@@ -87,29 +85,22 @@ export function LibraryPage() {
             ) : null}
           </div>
           <div className="library-toolbar">
-            <Button type="button" variant="secondary" onClick={() => { setSaveViewOpen(true); }}>
-              {t('savedViews.saveAction')}
-            </Button>
-            {data.activeViewId ? (
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={() => {
-                  void data
-                    .updateActiveSavedView()
-                    .then(() => { pushSuccess(t('common.saved')); })
-                    .catch((err: unknown) => { pushError(err instanceof Error ? err.message : t('errors.generic')); }
-                    );
-                }}
-              >
-                {t('savedViews.updateFromFilters')}
-              </Button>
-            ) : null}
-            <Link className="btn btn-secondary" to={routes.savedViews}>
-              {t('savedViews.manageNav')}
-            </Link>
+            <LibrarySavedViewsMenu
+              onSaveView={() => { setSaveViewOpen(true); }}
+              onUpdateActiveView={
+                data.activeViewId
+                  ? () => {
+                      void data
+                        .updateActiveSavedView()
+                        .then(() => { pushSuccess(t('common.saved')); })
+                        .catch((err: unknown) => { pushError(err instanceof Error ? err.message : t('errors.generic')); });
+                    }
+                  : undefined
+              }
+            />
             <LibraryViewSwitcher value={data.viewMode} onChange={data.onViewModeChange} />
             <Select
+              className="library-toolbar-sort"
               value={`${data.filters.sort ?? 'updatedAt'}:${data.filters.order ?? 'desc'}`}
               onChange={(value) => {
                 const { sort, order } = parseLibrarySortSelectValue(value);
@@ -123,7 +114,9 @@ export function LibraryPage() {
 
         <UploadDropzone compact={data.hasDocuments} />
 
-        <div className={`library-layout${filtersOpen ? ' library-layout--filters-open' : ''}`}>
+        <div
+          className={`library-layout${filtersOpen ? ' library-layout--filters-open' : ''}${narrowFilters ? ' library-layout--drawer-filters' : ''}`}
+        >
           {!narrowFilters ? (
             <LibraryFilterPanel
               filters={data.filters}

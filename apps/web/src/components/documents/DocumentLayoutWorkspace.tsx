@@ -46,20 +46,22 @@ import { SegmentedControl } from '../ui/SegmentedControl';
 import { DocumentExtractionRecovery } from './DocumentExtractionRecovery';
 import { DocumentFieldContextBar } from './DocumentFieldContextBar';
 import { DocumentFieldCorrectionSheet } from './DocumentFieldCorrectionSheet';
+import { DocumentFieldMarkHint, useDocumentFieldMarking } from './DocumentFieldMarkHint';
 import { DocumentLayoutCompareView } from './DocumentLayoutCompareView';
 import { DocumentLayoutExportTab } from './DocumentLayoutExportTab';
+import { DocumentLayoutPaneTabs, useLayoutMobilePane } from './DocumentLayoutPaneTabs';
 import { DocumentLayoutSidePanel, type LayoutSideTab, overlayRegionById } from './DocumentLayoutSidePanel';
+import { DocumentLayoutViewerToolbar, type LeftDocumentMode } from './DocumentLayoutViewerToolbar';
 import {
   type DocumentSelectionDraft,
   DocumentSelectionLayer,
 } from './DocumentSelectionLayer';
-import { type DocumentSelectionTool, DocumentSelectionTools } from './DocumentSelectionTools';
+import type { DocumentSelectionTool } from './DocumentSelectionTools';
 import { DocumentTableCorrectionSheet } from './DocumentTableCorrectionSheet';
-import { ExtractedLayoutHtmlFrame, LAYOUT_IR_ZOOM_STEPS, type LayoutIrZoomStep } from './ExtractedLayoutHtmlFrame';
+import { ExtractedLayoutHtmlFrame, type LayoutIrZoomStep } from './ExtractedLayoutHtmlFrame';
 import { ExtractedTextPanel } from './ExtractedTextPanel';
 import { type PdfLayoutOverlay, PdfViewer } from './PdfViewer';
 
-type LeftDocumentMode = 'original' | 'text';
 type AdvancedViewerMode = 'reconstruction' | 'compare';
 
 const REGION_FIELD_OVERLAY_PREFIX = 'region-field-';
@@ -106,7 +108,8 @@ interface DocumentLayoutWorkspaceProps {
   onHighlightBlocks: (blocks: ExtractionBlock[]) => void;
   onBlocksChange: (blocks: ExtractionBlock[]) => void;
   onAcceptFieldSuggestion: (key: string, value: string) => void;
-  onFieldValueChange?: (key: string, value: string) => void;
+  /** Saves a typed field value (recorded as a correction). */
+  onSaveFieldValue?: (key: string, value: string) => void;
   onFieldsChange?: (fields: ExtractedField[]) => void;
   recognizedCatalog?: RecognizedFieldDefinitionDto[];
   editMode: boolean;
@@ -142,7 +145,7 @@ export function DocumentLayoutWorkspace({
   onHighlightBlocks,
   onBlocksChange,
   onAcceptFieldSuggestion,
-  onFieldValueChange,
+  onSaveFieldValue,
   onFieldsChange,
   recognizedCatalog = [],
   editMode,
@@ -225,6 +228,20 @@ export function DocumentLayoutWorkspace({
     [blocks, fieldRegions, onHighlightBlocks, onViewerPageChange]
   );
 
+  const tableSheetOpen = Boolean(correctionSheetViewport && selectedTableId);
+  const correctionSheetOpen = Boolean(correctionSheetViewport && (selectedFieldKey ?? selectedTableId));
+  const mobilePane = useLayoutMobilePane(correctionSheetOpen);
+  const fieldMarking = useDocumentFieldMarking({
+    setReanchorFieldKey,
+    setSelectionDraft,
+    setSelectionTool,
+    highlightRegion,
+    sheetFieldKey: selectedFieldKey,
+    closeSheet: () => { setSelectedFieldKey(null); },
+    onSaveFieldValue,
+    revealViewer: mobilePane.showDocument,
+  });
+
   const selectField = useCallback(
     (key: string) => {
       setSelectedFieldKey(key);
@@ -234,8 +251,6 @@ export function DocumentLayoutWorkspace({
     [highlightRegion, onLayoutSideTabChange]
   );
 
-  const tableSheetOpen = Boolean(correctionSheetViewport && selectedTableId);
-  const correctionSheetOpen = Boolean(correctionSheetViewport && (selectedFieldKey ?? selectedTableId));
   useEffect(() => {
     onCorrectionSheetOpenChange?.(correctionSheetOpen);
     return () => {
@@ -561,29 +576,12 @@ export function DocumentLayoutWorkspace({
     [highlightBlocks]
   );
 
-  const leftModeOptions = useMemo(
-    () => [
-      { value: 'original' as const, label: t('documents.layoutViewOriginal') },
-      { value: 'text' as const, label: t('documents.layoutViewText') },
-    ],
-    [t]
-  );
-
   const advancedViewOptions = useMemo(
     () => [
       { value: 'reconstruction' as const, label: t('documents.layoutViewReconstruction') },
       { value: 'compare' as const, label: t('documents.layoutViewCompare') },
     ],
     [t]
-  );
-
-  const layoutZoomOptions = useMemo(
-    () =>
-      LAYOUT_IR_ZOOM_STEPS.map((step) => ({
-        value: String(step),
-        label: `${String(step)}%`,
-      })),
-    []
   );
 
   const pending = layoutIrAvailable && layoutIrState === 'loading';
@@ -609,7 +607,11 @@ export function DocumentLayoutWorkspace({
       data-correction-sheet-viewport={correctionSheetViewport ? '1' : '0'}
       data-selected-field={selectedFieldKey ?? ''}
       data-selected-table={selectedTableId ?? ''}
+      data-mobile-pane={mobilePane.narrow ? mobilePane.pane : undefined}
     >
+      {mobilePane.narrow ? (
+        <DocumentLayoutPaneTabs pane={mobilePane.pane} onPaneChange={mobilePane.setPane} />
+      ) : null}
       <div className="layout-workspace-main">
         <Card className="preview-card preview-card-pdf layout-viewer-card">
           {showRecovery ? (
@@ -621,58 +623,29 @@ export function DocumentLayoutWorkspace({
             />
           ) : null}
 
-          <div className="layout-viewer-toolbar" data-testid="layout-viewer-toolbar">
-            <SegmentedControl<LeftDocumentMode>
-              ariaLabel={t('documents.layoutViewModeAria')}
-              className={segmentedToolbarClass('layout-view-mode-switch', 'segmented-control--text-wide')}
-              value={leftMode}
-              options={leftModeOptions}
-              onChange={setLeftDocumentMode}
-            />
-            {leftMode === 'original' && !showAdvancedStage ? (
-              <DocumentSelectionTools value={selectionTool} onChange={setSelectionTool} />
-            ) : null}
-            {showAdvancedStage || leftMode === 'text' ? (
-              <SegmentedControl
-                ariaLabel={t('documents.layoutZoomAria')}
-                className={segmentedToolbarClass('layout-zoom-switch', 'segmented-control--zoom')}
-                value={String(layoutZoom)}
-                options={layoutZoomOptions}
-                onChange={(value) => {
-                  const next = LAYOUT_IR_ZOOM_STEPS.find((step) => String(step) === value);
-                  if (next !== undefined) {
-                    setLayoutZoom(next);
-                  }
-                }}
-              />
-            ) : null}
-            {showTechnicalDetails && qualityTone !== 'unknown' ? (
-              <span
-                className={`layout-quality-badge layout-quality-badge-technical layout-quality-badge-${qualityTone}`}
-                title={t('documents.layoutQualityTooltip')}
-              >
-                {qualityTone === 'good'
-                  ? t('documents.layoutQualityGood')
-                  : t('documents.layoutQualityReviewPlain', {
-                      page: qualityReviewPage ?? viewerPage,
-                    })}
-              </span>
-            ) : null}
-            {leftMode === 'text' ? (
-              <div className="layout-viewer-toolbar-actions">
-                <Button
-                  type="button"
-                  variant={editMode ? 'secondary' : 'ghost'}
-                  aria-pressed={editMode}
-                  onClick={() => { onEditModeChange(!editMode); }}
-                >
-                  {editMode ? t('documents.layoutTextEditDone') : t('documents.layoutTextEdit')}
-                </Button>
-              </div>
-            ) : null}
-          </div>
+          <DocumentLayoutViewerToolbar
+            leftMode={leftMode}
+            onLeftModeChange={setLeftDocumentMode}
+            showAdvancedStage={showAdvancedStage}
+            selectionTool={selectionTool}
+            onSelectionToolChange={setSelectionTool}
+            zoom={layoutZoom}
+            onZoomChange={setLayoutZoom}
+            showTechnicalDetails={showTechnicalDetails}
+            qualityTone={qualityTone}
+            qualityPage={qualityReviewPage ?? viewerPage}
+            editMode={editMode}
+            onEditModeChange={onEditModeChange}
+          />
 
-          <div className="layout-viewer-stage" data-testid="layout-viewer-stage">
+          <DocumentFieldMarkHint
+            fieldKey={reanchorFieldKey}
+            fieldLabelForKey={fieldLabelForKey}
+            selectionTool={selectionTool}
+            hasDraft={selectionDraft !== null}
+            onCancel={fieldMarking.cancelMarkingField}
+          />
+          <div className="layout-viewer-stage" data-testid="layout-viewer-stage" ref={fieldMarking.viewerStageRef}>
             {leftMode === 'text' ? (
               <div className="layout-text-stage">
                 <ExtractedTextPanel
@@ -949,11 +922,8 @@ export function DocumentLayoutWorkspace({
                 toast.error(formatUserFacingError(err, 'errors.generic'));
               });
           }}
-          onCorrectField={(key) => {
-            setReanchorFieldKey(key);
-            setSelectionTool('rect');
-            highlightRegion(key);
-          }}
+          onCorrectField={fieldMarking.startMarkingField}
+          onSaveFieldValue={onSaveFieldValue}
           onHighlightField={highlightRegion}
           onSelectField={selectField}
           hideInlineFieldList={Boolean(correctionSheetViewport && selectedFieldKey)}
@@ -995,21 +965,8 @@ export function DocumentLayoutWorkspace({
                 }
               : undefined
           }
-          onCorrect={
-            selectedFieldKey
-              ? () => {
-                  setReanchorFieldKey(selectedFieldKey);
-                  setSelectionTool('rect');
-                  highlightRegion(selectedFieldKey);
-                  setSelectedFieldKey(null);
-                }
-              : undefined
-          }
-          onValueChange={
-            selectedFieldKey && onFieldValueChange
-              ? (value) => { onFieldValueChange(selectedFieldKey, value); }
-              : undefined
-          }
+          onCorrect={fieldMarking.sheetMarkInDocument}
+          onSaveValue={fieldMarking.sheetSaveValue}
           onSourceClick={
             selectedFieldKey ? () => { highlightRegion(selectedFieldKey); } : undefined
           }

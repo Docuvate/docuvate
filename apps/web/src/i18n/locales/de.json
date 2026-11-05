@@ -469,6 +469,7 @@
     "searchPlaceholderShort": "Suchen…",
     "searchDocsAria": "Dokumente suchen",
     "filterToggle": "Filter einblenden",
+    "filterToggleShort": "Filter",
     "filterToggleCollapse": "Filter ausblenden",
     "filterToggleActive": "Filter ({{count}})",
     "moreLabelsAria": "{{count}} weitere Labels: {{names}}",
@@ -494,6 +495,8 @@
       "status": "Status",
       "statusAll": "Alle Status",
       "labelsAndHint": "Mehrere Labels = alle müssen passen (UND).",
+      "moreFields": "Weitere Felder ({{count}})",
+      "moreFieldsActive": "{{count}} aktiv",
       "labelSearchPlaceholder": "Label suchen…",
       "labelSearchEmpty": "Keine Labels gefunden.",
       "withoutLabel": "Ohne Label",
@@ -520,8 +523,7 @@
   "filesystem": {
     "title": "Dateisystem",
     "pathAria": "Pfad",
-    "folderDocCountTooltip": "{{count}} Dokumente direkt in diesem Ordner (ohne Unterordner)",
-    "treeDocCountTooltip": "{{count}} Dokumente in diesem Ordner",
+    "folderDocCountTooltip": "{{count}} Dokumente inkl. Unterordner, davon {{direct}} direkt in diesem Ordner",
     "treePanelAria": "Ordnerbaum",
     "contentPaneAria": "Ordnerinhalt",
     "treeSearchPlaceholder": "Ordner suchen…",
@@ -751,6 +753,9 @@
     "layoutZoomAria": "Layout-Zoom",
     "layoutZoomPercent": "{{value}} %",
     "layoutViewModeAria": "Ansichtsmodus",
+    "layoutPaneDocument": "Dokument",
+    "layoutPanePanel": "Felder",
+    "layoutPaneAria": "Ansicht wählen",
     "layoutViewOriginal": "Original",
     "layoutViewText": "Text",
     "layoutViewReconstruction": "Nachbau",
@@ -815,6 +820,7 @@
     "layoutTabExport": "Export",
     "layoutFieldsDetected": "Erkannte Felder",
     "layoutFieldsEmpty": "Noch keine Felder erkannt. Nach der Extraktion erscheinen Werte hier.",
+    "fieldRegionEmptyHint": "Kein Text im Bereich - als Bildbereich gespeichert",
     "layoutFieldSuggestions": "Vorschläge",
     "layoutSuggestionTag": "Vorschlag",
     "layoutSuggestionNotInSchema": "Nicht im Schema definiert",
@@ -860,7 +866,6 @@
     "selectionFieldCreateOption": "Feld „{{name}}“ anlegen",
     "selectionAccept": "Feld anlegen",
     "fieldCorrectionSaved": "Korrektur gespeichert · {{name}}",
-    "fieldRegionEmptyHint": "Kein Text im Bereich - als Bildbereich gespeichert",
     "fieldCorrectionSheetTitle": "{{name}} korrigieren",
     "fieldValueInputLabel": "Feldwert",
     "fieldValueInputAria": "Wert für {{name}}",
@@ -879,7 +884,7 @@
     "labelPanelLoadingTags": "Lade Labels…",
     "labelAddPlaceholder": "Label-Name eingeben…",
     "labelAddInputAria": "Label-Name für Zuweisung oder Neuanlage",
-    "labelAddHint": "Eingeben und mit Enter oder „Hinzufügen“ bestätigen. Bestehende Labels können Sie darunter anklicken.",
+    "labelAddHint": "Namen eingeben und ein vorhandenes Label aus der Liste wählen oder mit Enter als neues Label anlegen.",
     "labelSuggestionAcceptHint": "Klicken, um Label „{{name}}“ zu übernehmen. Rechtsklick zum Verwerfen.",
     "labelSuggestionChipPrefix": "Vorschlag",
     "labelAddSubmitAssign": "Hinzufügen",
@@ -949,6 +954,7 @@
     "editExtractedText": "Bearbeiten",
     "doneEditingExtractedText": "Fertig",
     "extractionNoTextRecognized": "Für dieses Dokument wurde kein Text erkannt.",
+    "extractionNoTextNoFile": "Kein Text erkannt. Die Originaldatei ist nicht verfügbar, daher hilft eine erneute Erkennung meist nicht.",
     "extractionRetryText": "Text erneut erkennen",
     "previewTitle": "Vorschau",
     "extractedTextCopy": "Kopieren",
@@ -971,7 +977,13 @@
       "claim_busy": "Die Extraktion für dieses Dokument lief bereits.",
       "internal_error": "Die Extraktion ist wegen eines internen Fehlers fehlgeschlagen.",
       "orphan_requeue_exhausted": "Die Extraktion wurde zu oft neu gestartet, ohne abzuschließen, und wurde beendet."
-    }
+    },
+    "layoutFieldsMissing": "Nicht gefunden ({{count}})",
+    "layoutFieldsFilterPlaceholder": "Felder filtern…",
+    "layoutFieldsFilterAria": "Erkannte Felder filtern",
+    "layoutFieldsFilterEmpty": "Kein Feld passt zu „{{query}}“.",
+    "fieldMarkHint": "Ziehen Sie auf dem Dokument einen Rahmen um den Wert für „{{name}}“.",
+    "fieldMarkHintCancel": "Markieren abbrechen"
   },
   "settings": {
     "title": "Einstellungen",
@@ -1931,6 +1943,8 @@
     }
   },
   "savedViews": {
+    "menuLabel": "Ansichten",
+    "menuAria": "Gespeicherte Ansichten: speichern, aktualisieren, verwalten",
     "saveAction": "Ansicht speichern",
     "saveConfirm": "Speichern",
     "saveDialogTitle": "Ansicht speichern",
@@ -1999,7 +2013,8 @@
     "allDoneTitle": "Alles erledigt",
     "allDoneLead": "Keine offenen Vorschläge. Nach Uploads oder Extraktion erscheinen hier neue Einträge.",
     "backHome": "Zur Startseite",
-    "uploadDocuments": "Dokumente hochladen"
+    "uploadDocuments": "Dokumente hochladen",
+    "back": "Zurück"
   },
   "reviewQueue": {
     "title": "Prüfen",
@@ -2022,7 +2037,13 @@
     "archiveHashIdenticalConfirmBody": "In jeder byte-identischen Gruppe bleibt das neueste Dokument erhalten; alle anderen Versionen werden archiviert.",
     "archiveHashIdenticalSuccess": "{{count}} Duplikatgruppe(n) bereinigt.",
     "rejectLabel": "„{{name}}“ verwerfen",
-    "keyboardHint": "Enter: Alle übernehmen · Pfeiltasten: nächstes Dokument"
+    "keyboardHint": "Enter: Alle übernehmen · Pfeiltasten: nächstes Dokument",
+    "bulkTitle": "Viele Vorschläge auf einmal erledigen",
+    "bulkTitleCount_one": "{{count}} Dokument wartet auf Prüfung",
+    "bulkTitleCount_other": "{{count}} Dokumente warten auf Prüfung",
+    "bulkLead": "Sichere Vorschläge lassen sich gesammelt übernehmen; den Rest prüfen Sie unten Schritt für Schritt.",
+    "batchConfirmTitle": "Alle sicheren Vorschläge übernehmen?",
+    "batchConfirmBody": "Gilt für alle wartenden Dokumente, nicht nur die angezeigten: Labels und Felder mit mindestens 90 % Sicherheit werden gespeichert. Alle anderen Vorschläge bleiben zur Prüfung."
   },
   "dashboard": {
     "title": "Start",
@@ -2182,7 +2203,13 @@
     "fieldValue": {
       "confirmed": "Bestätigt",
       "correct": "Korrigieren",
-      "moreActions": "Weitere Aktionen"
+      "moreActions": "Weitere Aktionen",
+      "missing": "Nicht gefunden",
+      "enterValue": "Wert eingeben",
+      "markInDocument": "Im Dokument markieren",
+      "inputPlaceholder": "Wert eingeben…",
+      "inputAria": "Wert für {{name}}",
+      "save": "Speichern"
     },
     "suggestion": {
       "accept": "Übernehmen",

@@ -469,6 +469,7 @@
     "searchPlaceholderShort": "Search…",
     "searchDocsAria": "Search documents",
     "filterToggle": "Show filters",
+    "filterToggleShort": "Filters",
     "filterToggleCollapse": "Hide filters",
     "filterToggleActive": "Filters ({{count}})",
     "moreLabelsAria": "{{count}} more labels: {{names}}",
@@ -494,6 +495,8 @@
       "status": "Status",
       "statusAll": "All statuses",
       "labelsAndHint": "Multiple labels = all must match (AND).",
+      "moreFields": "More fields ({{count}})",
+      "moreFieldsActive": "{{count}} active",
       "labelSearchPlaceholder": "Search labels…",
       "labelSearchEmpty": "No labels found.",
       "withoutLabel": "Without label",
@@ -520,8 +523,7 @@
   "filesystem": {
     "title": "Filesystem",
     "pathAria": "Path",
-    "folderDocCountTooltip": "{{count}} documents directly in this folder (not in subfolders)",
-    "treeDocCountTooltip": "{{count}} documents in this folder",
+    "folderDocCountTooltip": "{{count}} documents including subfolders, {{direct}} directly in this folder",
     "treePanelAria": "Folder tree",
     "contentPaneAria": "Folder contents",
     "treeSearchPlaceholder": "Search folders…",
@@ -751,6 +753,9 @@
     "layoutZoomAria": "Layout zoom",
     "layoutZoomPercent": "{{value}}%",
     "layoutViewModeAria": "View mode",
+    "layoutPaneDocument": "Document",
+    "layoutPanePanel": "Fields",
+    "layoutPaneAria": "Choose view",
     "layoutViewOriginal": "Original",
     "layoutViewText": "Text",
     "layoutViewReconstruction": "Reconstruction",
@@ -815,6 +820,7 @@
     "layoutTabExport": "Export",
     "layoutFieldsDetected": "Detected fields",
     "layoutFieldsEmpty": "No fields detected yet. Values appear here after extraction.",
+    "fieldRegionEmptyHint": "No text in this region - saved as an image area",
     "layoutFieldSuggestions": "Suggestions",
     "layoutSuggestionTag": "Suggestion",
     "layoutSuggestionNotInSchema": "Not defined in schema",
@@ -860,7 +866,6 @@
     "selectionFieldCreateOption": "Create field “{{name}}”",
     "selectionAccept": "Create field",
     "fieldCorrectionSaved": "Correction saved · {{name}}",
-    "fieldRegionEmptyHint": "No text in this region - saved as an image area",
     "fieldCorrectionSheetTitle": "Correct {{name}}",
     "fieldValueInputLabel": "Field value",
     "fieldValueInputAria": "Value for {{name}}",
@@ -879,7 +884,7 @@
     "labelPanelLoadingTags": "Loading labels…",
     "labelAddPlaceholder": "Enter label name…",
     "labelAddInputAria": "Label name to assign or create",
-    "labelAddHint": "Type a name, then press Enter or Add. You can also click an existing label below.",
+    "labelAddHint": "Type a name and pick an existing label from the list, or press Enter to create it as a new label.",
     "labelSuggestionAcceptHint": "Click to accept label “{{name}}”. Right-click to dismiss.",
     "labelSuggestionChipPrefix": "Suggested",
     "labelAddSubmitAssign": "Add",
@@ -949,6 +954,7 @@
     "editExtractedText": "Edit",
     "doneEditingExtractedText": "Done",
     "extractionNoTextRecognized": "No text was detected for this document.",
+    "extractionNoTextNoFile": "No text was detected. The original file is not available, so recognizing the text again usually does not help.",
     "extractionRetryText": "Recognize text again",
     "previewTitle": "Preview",
     "extractedTextCopy": "Copy",
@@ -971,7 +977,13 @@
       "claim_busy": "Extraction for this document was already in progress.",
       "internal_error": "Extraction failed due to an internal error.",
       "orphan_requeue_exhausted": "Extraction was restarted too often without finishing and was stopped."
-    }
+    },
+    "layoutFieldsMissing": "Not found ({{count}})",
+    "layoutFieldsFilterPlaceholder": "Filter fields…",
+    "layoutFieldsFilterAria": "Filter recognized fields",
+    "layoutFieldsFilterEmpty": "No field matches “{{query}}”.",
+    "fieldMarkHint": "Drag a box around the value for “{{name}}” on the document.",
+    "fieldMarkHintCancel": "Cancel marking"
   },
   "settings": {
     "title": "Settings",
@@ -1931,6 +1943,8 @@
     }
   },
   "savedViews": {
+    "menuLabel": "Views",
+    "menuAria": "Saved views: save, update, manage",
     "saveAction": "Save view",
     "saveConfirm": "Save",
     "saveDialogTitle": "Save view",
@@ -1999,7 +2013,8 @@
     "allDoneTitle": "All done",
     "allDoneLead": "No open suggestions. New items appear here after uploads or extraction.",
     "backHome": "Back to home",
-    "uploadDocuments": "Upload documents"
+    "uploadDocuments": "Upload documents",
+    "back": "Back"
   },
   "reviewQueue": {
     "title": "Review",
@@ -2022,7 +2037,13 @@
     "archiveHashIdenticalConfirmBody": "For each byte-identical group the newest document is kept; other copies are archived.",
     "archiveHashIdenticalSuccess": "Cleaned up {{count}} duplicate group(s).",
     "rejectLabel": "Dismiss “{{name}}”",
-    "keyboardHint": "Enter: accept all · Arrow keys: next document"
+    "keyboardHint": "Enter: accept all · Arrow keys: next document",
+    "bulkTitle": "Handle many suggestions at once",
+    "bulkTitleCount_one": "{{count}} document waiting for review",
+    "bulkTitleCount_other": "{{count}} documents waiting for review",
+    "bulkLead": "Confident suggestions can be accepted in one go; review the rest below step by step.",
+    "batchConfirmTitle": "Accept all confident suggestions?",
+    "batchConfirmBody": "Applies to every waiting document, not only the ones shown: labels and fields with at least 90 % confidence are saved. All other suggestions stay for review."
   },
   "dashboard": {
     "title": "Start",
@@ -2182,7 +2203,13 @@
     "fieldValue": {
       "confirmed": "Confirmed",
       "correct": "Correct",
-      "moreActions": "More actions"
+      "moreActions": "More actions",
+      "missing": "Not found",
+      "enterValue": "Enter value",
+      "markInDocument": "Mark in document",
+      "inputPlaceholder": "Enter value…",
+      "inputAria": "Value for {{name}}",
+      "save": "Save"
     },
     "suggestion": {
       "accept": "Apply",

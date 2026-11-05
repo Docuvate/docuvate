@@ -107,7 +107,8 @@ function VocabularyCompactRow(props: RowSharedProps) {
     >
       <div className="labels-vocabulary-card-row__main">
         <div className="labels-vocabulary-card-row__line1">
-          <Chip label={tag.name} variant="assigned" color={tag.color} truncateLabel />
+          {/* Small screens show the full name: names with a shared prefix must stay distinguishable. */}
+          <Chip label={tag.name} variant="assigned" color={tag.color} />
         </div>
         <div className="labels-vocabulary-card-row__line2 muted">
           <span className="labels-vocabulary-card-row__count">
