@@ -143,7 +143,17 @@ function draftFromViewerRect(
   const mapped =
     selectionRectForTokenSpace(viewerRect, pageRotationDeg, unrotatedMediaBox) ?? viewerRect;
   const pageTokens = tokens.filter((token) => token.page === page);
-  let selected = tokensInsideRect(pageTokens, mapped);
+  // Slightly inflate DOM text boxes — PDF.js glyph AABBs are tighter than IR words.
+  const padded =
+    selectedText != null
+      ? (normalizeRect({
+          x0: mapped.x0 - 0.03,
+          y0: mapped.y0 - 0.03,
+          x1: mapped.x1 + 0.03,
+          y1: mapped.y1 + 0.03,
+        }) ?? mapped)
+      : mapped;
+  let selected = tokensInsideRect(pageTokens, padded);
   // PDF.js textLayer boxes often diverge from pdfplumber IR on /Rotate pages;
   // fall back to matching the selected string against IR word tokens.
   if (selected.length === 0 && selectedText != null && selectedText.trim().length > 0) {

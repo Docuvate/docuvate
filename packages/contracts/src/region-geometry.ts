@@ -227,37 +227,34 @@ export function normalizeSelectionText(value: string): string {
   return value.replace(/\s+/g, ' ').trim().toLowerCase();
 }
 
+function selectionWords(value: string): string[] {
+  return normalizeSelectionText(value)
+    .split(/[^a-z0-9äöüäß]+/u)
+    .map((word) => word.trim())
+    .filter((word) => word.length >= 2);
+}
+
 /**
  * Resolve IR tokens from a DOM text selection string when geometry misses
  * (common on /Rotate pages where PDF.js textLayer boxes ≠ pdfplumber boxes).
- * Prefers whole-word matches contained in the selection; ranks by distance to
- * the selection rect center when one is provided.
+ * Matches on alphanumeric words only (exact), so OCR fragments like
+ * "E2E_SYNTHETI" do not hitch a ride on "E2E_SYNTHETIC_FIXTURE…".
  */
 export function tokensMatchingSelectedText(
   tokens: readonly LayoutToken[],
   selectedText: string,
   nearRect?: NormalizedRect | null
 ): LayoutToken[] {
-  const normalized = normalizeSelectionText(selectedText);
-  if (normalized.length === 0) {
+  const words = new Set(selectionWords(selectedText));
+  if (words.size === 0) {
     return [];
   }
-  const selectedWords = new Set(
-    normalized.split(' ').filter((word) => word.length > 0)
-  );
   const matched = tokens.filter((token) => {
-    const piece = normalizeSelectionText(token.text);
-    if (piece.length === 0) {
+    const pieceWords = selectionWords(token.text);
+    if (pieceWords.length === 0) {
       return false;
     }
-    if (selectedWords.has(piece)) {
-      return true;
-    }
-    // Multi-word tokens / punctuation-stripped containment
-    if (piece.length >= 2 && normalized.includes(piece)) {
-      return true;
-    }
-    return false;
+    return pieceWords.every((word) => words.has(word));
   });
   if (matched.length <= 1 || nearRect == null) {
     return matched;

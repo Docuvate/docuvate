@@ -109,11 +109,10 @@ test.describe('rotated page bounding-box selection', () => {
       .getByTestId('document-selection-tools')
       .getByRole('radio', { name: /Text \(T\)/i })
       .click();
+    // Prefer a clean name span — the SYNTHETIC_FIXTURE line OCRs into fragments on /Rotate.
     const word = page
       .locator('.pdf-page-wrap .textLayer span')
-      .filter({
-        hasText: /Alex|Testmann|Compose|E2E_SYNTHETIC/i,
-      })
+      .filter({ hasText: /Alex|Testmann/i })
       .first();
     await expect(word).toBeVisible({ timeout: 60_000 });
     await word.evaluate((node) => {
@@ -127,9 +126,7 @@ test.describe('rotated page bounding-box selection', () => {
 
     const bar = page.getByTestId('field-context-bar');
     await expect(bar).toBeVisible({ timeout: 30_000 });
-    await expect(bar).toContainText(/Alex|Testmann|Compose|E2E_SYNTHETIC|fixture/i, {
-      timeout: 30_000,
-    });
+    await expect(bar).toContainText(/Alex|Testmann/i, { timeout: 30_000 });
     await expect(bar).not.toContainText(/0 Wörter|0 words/i);
   });
 });

@@ -150,4 +150,20 @@ describe('tokensMatchingSelectedText', () => {
     const matched = tokensMatchingSelectedText(tokens, 'Alex', near);
     expect(matched[0]?.blockIndex).toBe(0);
   });
+
+  it('does not match OCR fragments hitchhiking on a longer PDF.js string', () => {
+    const tokens: LayoutToken[] = [
+      token(0, 0.1, 0.1, 0.3, 0.15, 'E2E_SYNTHETI'),
+      token(1, 0.3, 0.1, 0.5, 0.15, 'XTURE_PHRASE_'),
+      token(2, 0.1, 0.2, 0.25, 0.25, 'Alex'),
+    ];
+    const matched = tokensMatchingSelectedText(
+      tokens,
+      'E2E_SYNTHETIC_FIXTURE_PHRASE_Q1'
+    );
+    expect(matched.map((t) => t.text)).toEqual([]);
+    expect(tokensMatchingSelectedText(tokens, 'Alex Testmann').map((t) => t.text)).toEqual([
+      'Alex',
+    ]);
+  });
 });
