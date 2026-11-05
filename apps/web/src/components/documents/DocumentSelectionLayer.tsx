@@ -4,6 +4,7 @@ import type { LayoutToken, NormalizedRect } from '@docuvate/contracts';
 import {
   joinedTokenText,
   normalizeRect,
+  padTextSelectionRect,
   selectionRectForTokenSpace,
   snapRectToTokenHull,
   tokensInsideRect,
@@ -143,16 +144,9 @@ function draftFromViewerRect(
   const mapped =
     selectionRectForTokenSpace(viewerRect, pageRotationDeg, unrotatedMediaBox) ?? viewerRect;
   const pageTokens = tokens.filter((token) => token.page === page);
-  // Slightly inflate DOM text boxes — PDF.js glyph AABBs are tighter than IR words.
-  const padded =
-    selectedText != null
-      ? (normalizeRect({
-          x0: mapped.x0 - 0.03,
-          y0: mapped.y0 - 0.03,
-          x1: mapped.x1 + 0.03,
-          y1: mapped.y1 + 0.03,
-        }) ?? mapped)
-      : mapped;
+  // Slightly inflate DOM text boxes — PDF.js glyph AABBs are tighter than IR words —
+  // but never by more than half the box per axis, or a one-line pick swallows its neighbours.
+  const padded = selectedText != null ? padTextSelectionRect(mapped, 0.03) : mapped;
   let selected = tokensInsideRect(pageTokens, padded);
   // PDF.js textLayer boxes often diverge from pdfplumber IR on /Rotate pages;
   // fall back to matching the selected string against IR word tokens.

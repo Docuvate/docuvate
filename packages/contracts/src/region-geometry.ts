@@ -177,6 +177,24 @@ export function selectionRectForTokenSpace(
   return viewerRectToUnrotatedPage(normalized, pageRotationDeg);
 }
 
+/**
+ * Inflate a DOM text-selection box so slightly offset IR word boxes still hit,
+ * without reaching into neighbouring lines: each axis grows by at most half of
+ * its own extent (a one-line selection stays thinner than the line pitch).
+ */
+export function padTextSelectionRect(rect: NormalizedRect, maxPad: number): NormalizedRect {
+  const padX = Math.min(maxPad, (rect.x1 - rect.x0) / 2);
+  const padY = Math.min(maxPad, (rect.y1 - rect.y0) / 2);
+  return (
+    normalizeRect({
+      x0: rect.x0 - padX,
+      y0: rect.y0 - padY,
+      x1: rect.x1 + padX,
+      y1: rect.y1 + padY,
+    }) ?? rect
+  );
+}
+
 export function tokenBelongsToRect(
   token: LayoutToken,
   rect: NormalizedRect,

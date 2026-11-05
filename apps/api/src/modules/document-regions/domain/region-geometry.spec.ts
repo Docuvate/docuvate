@@ -3,6 +3,7 @@
 import type { LayoutToken, NormalizedRect } from '@docuvate/contracts';
 import {
   inferTableGrid,
+  padTextSelectionRect,
   remapRegionTokens,
   selectionRectForTokenSpace,
   snapRectToTokenHull,
@@ -165,5 +166,37 @@ describe('tokensMatchingSelectedText', () => {
     expect(tokensMatchingSelectedText(tokens, 'Alex Testmann').map((t) => t.text)).toEqual([
       'Alex',
     ]);
+  });
+});
+
+describe('text-tool selection padding', () => {
+  // Three vertical (90° rotated) lines, pitch ≈ 0.037 of the page width, each split into words.
+  const lines = [0.925, 0.888, 0.851].map((x0, line) =>
+    ['one', 'two', 'three'].map((word, index) =>
+      token(line * 10 + index, x0, 0.1 + index * 0.12, x0 + 0.023, 0.2 + index * 0.12, `${word}${String(line)}`)
+    )
+  );
+  const tokens = lines.flat();
+  // DOM selection box of the middle line only.
+  const middleLine: NormalizedRect = { x0: 0.888, y0: 0.1, x1: 0.911, y1: 0.44 };
+
+  it('keeps a one-line selection on that line', () => {
+    const selected = tokensInsideRect(tokens, padTextSelectionRect(middleLine, 0.03));
+    expect(selected.map((item) => item.text)).toEqual(['one1', 'two1', 'three1']);
+  });
+
+  it('still tolerates IR boxes slightly offset from the DOM box', () => {
+    const shifted: NormalizedRect = { x0: 0.895, y0: 0.1, x1: 0.918, y1: 0.44 };
+    const selected = tokensInsideRect(tokens, padTextSelectionRect(shifted, 0.03));
+    expect(selected.map((item) => item.text)).toEqual(['one1', 'two1', 'three1']);
+  });
+
+  it('pads long axes by the full amount', () => {
+    expect(padTextSelectionRect({ x0: 0.2, y0: 0.2, x1: 0.6, y1: 0.6 }, 0.03)).toEqual({
+      x0: 0.17,
+      y0: 0.17,
+      x1: 0.63,
+      y1: 0.63,
+    });
   });
 });
