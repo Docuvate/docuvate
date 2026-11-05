@@ -4,6 +4,7 @@ import { expect, test, type Page } from '@playwright/test';
 
 import { applyDocuvateLocale } from '../../helpers/docuvate-theme';
 import { openLayoutDocumentPage, uploadLayoutTableDocument } from '../../helpers/layout-chat-fixture';
+import { showLayoutPane } from '../../helpers/layout-pane';
 import { assignLongLabels, longLabelNames } from '../../helpers/long-label-fixture';
 import {
   assertCorrectionsBottomSheet,
@@ -68,6 +69,7 @@ async function openFieldCorrectionSheet(page: Page): Promise<void> {
     return;
   }
   await setLabelsTabOpen(page, false);
+  await showLayoutPane(page, 'panel');
   await page
     .locator('.layout-side-tabs')
     .getByRole('tab', { name: /Übersicht|Overview/i })

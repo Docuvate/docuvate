@@ -7,6 +7,7 @@ import path from 'node:path';
 import { type APIRequestContext, expect, type Page, test } from '@playwright/test';
 
 import { applyDocuvateLocale } from '../../helpers/docuvate-theme';
+import { showLayoutPane } from '../../helpers/layout-pane';
 import { assertNoHorizontalOverflow } from '../../helpers/overflow-check';
 import { smokeFixtureStoragePath } from '../../helpers/smoke-fixture-auth';
 import { waitForDocumentLayoutIrReady } from '../../helpers/wait-for-layout-ir';
@@ -69,6 +70,7 @@ async function openOverview(page: Page, docId: string): Promise<void> {
   await page.goto(`/documents/${docId}`, { waitUntil: 'domcontentloaded' });
   await applyDocuvateLocale(page, 'de');
   await page.locator('.layout-workspace').waitFor({ state: 'visible', timeout: 300_000 });
+  await showLayoutPane(page, 'panel');
   await page
     .locator('.layout-side-tabs')
     .getByRole('tab', { name: /Übersicht|Overview/i })
@@ -147,6 +149,8 @@ test.describe('document field correction flow', () => {
     await expect(sheet).toContainText('Nicht gefunden');
     await expect(sheet.getByRole('button', { name: /^Bestätigen$/ })).toHaveCount(0);
     await expect(sheet.getByRole('button', { name: 'Im Dokument markieren' })).toBeVisible();
+    // The document stays visible behind the sheet.
+    await expect(page.locator('.layout-viewer-card')).toBeVisible();
 
     await sheet.getByRole('textbox').fill(TYPED_IBAN);
     await sheet.getByRole('button', { name: 'Speichern' }).click();

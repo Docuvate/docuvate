@@ -14540,7 +14540,8 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   .saved-views-manage-name-link {
     display: block;
     white-space: normal;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
+    hyphens: auto;
     word-break: break-word;
     text-overflow: unset;
     overflow: visible;
@@ -16759,5 +16760,96 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   .document-detail-page .button-link {
     min-width: var(--dv-touch-target-min);
     justify-content: center;
+  }
+}
+
+/* ── Responsive document view (UX scale audit P0-3, P0-4) ───────────────── */
+
+.document-detail-meta-primary {
+  min-width: 0;
+}
+
+.document-detail-title {
+  min-width: 0;
+}
+
+@media (max-width: 767px) {
+  .document-detail-meta-top {
+    flex-wrap: nowrap;
+    align-items: flex-start;
+  }
+
+  .document-detail-meta-primary {
+    flex: 1 1 0;
+  }
+
+  .document-detail-title {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    hyphens: auto;
+  }
+
+  .document-detail-meta-actions {
+    flex: 0 0 auto;
+    flex-wrap: nowrap;
+  }
+
+  .layout-viewer-toolbar {
+    flex: 0 0 auto;
+    height: auto;
+    flex-wrap: wrap;
+    overflow: visible;
+    row-gap: var(--dv-space-xs);
+  }
+
+  .layout-viewer-toolbar > .segmented-control,
+  .layout-viewer-toolbar > [data-testid='document-selection-tools'],
+  .layout-viewer-toolbar [data-testid='document-selection-tools'] > .segmented-control {
+    flex: 1 1 100%;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .layout-viewer-toolbar > [data-testid='document-selection-tools'] {
+    display: flex;
+  }
+
+  .layout-viewer-toolbar .segmented-control__option,
+  .layout-pane-tabs .segmented-control__option {
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 2.5rem;
+    padding-inline: var(--dv-space-2xs);
+  }
+
+  .document-detail-page .layout-workspace[data-mobile-pane] {
+    flex: 0 0 auto;
+    grid-template-rows: auto auto;
+    min-height: 0;
+  }
+
+  .document-detail-page .layout-workspace[data-mobile-pane='panel'] > .layout-side-panel {
+    min-height: 60vh;
+    max-height: none;
+  }
+
+  .layout-pane-tabs {
+    width: 100%;
+    position: sticky;
+    top: 0;
+    z-index: calc(var(--dv-z-base) + 2);
+  }
+
+  .layout-workspace[data-mobile-pane='document'] > .layout-side-panel,
+  .layout-workspace[data-mobile-pane='panel'] > .layout-workspace-main {
+    display: none;
+  }
+
+  .document-detail-page .layout-workspace[data-mobile-pane='document'] .layout-viewer-stage {
+    min-height: min(70vh, 640px);
   }
 }

@@ -16,6 +16,8 @@ interface FieldMarkingSetters {
   sheetFieldKey: string | null;
   closeSheet: () => void;
   onSaveFieldValue?: (key: string, value: string) => void;
+  /** Makes the viewer visible first (e.g. switches the small-screen pane tabs to the document). */
+  revealViewer?: () => void;
 }
 
 interface FieldMarking {
@@ -36,6 +38,7 @@ export function useDocumentFieldMarking({
   sheetFieldKey,
   closeSheet,
   onSaveFieldValue,
+  revealViewer,
 }: FieldMarkingSetters): FieldMarking {
   const viewerStageRef = useRef<HTMLDivElement>(null);
   const startMarkingField = useCallback(
@@ -44,9 +47,12 @@ export function useDocumentFieldMarking({
       setSelectionDraft(null);
       setSelectionTool('rect');
       highlightRegion(key);
-      viewerStageRef.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      revealViewer?.();
+      requestAnimationFrame(() => {
+        viewerStageRef.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      });
     },
-    [highlightRegion, setReanchorFieldKey, setSelectionDraft, setSelectionTool]
+    [highlightRegion, revealViewer, setReanchorFieldKey, setSelectionDraft, setSelectionTool]
   );
   const cancelMarkingField = useCallback(() => {
     setReanchorFieldKey(null);
