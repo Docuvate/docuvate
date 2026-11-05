@@ -31,7 +31,7 @@ import {
   type DocumentRegionRepository,
   type DocumentRepository,
 } from '../../../shared/domain/ports.js';
-import { layoutTokensFromIr } from '../domain/layout-tokens.js';
+import { layoutTokensFromIr, uniqueBlockIndexes } from '../domain/layout-tokens.js';
 import { isUuid } from '../domain/parse-uuid.js';
 
 const TABLE_OPS = new Set<TableCorrectionOp>(['create', 'set_headers', 'edit_cell', 'remove']);
@@ -82,7 +82,9 @@ function stripSuperseded(region: DocumentRegionRecord): DocumentRegionDto {
   };
 }
 
-function tableAttributes(table: DocumentRegionTableDto): Record<string, string | number | boolean | null> {
+function tableAttributes(
+  table: DocumentRegionTableDto
+): Record<string, string | number | boolean | null> {
   const cells = [...table.cells]
     .sort((left, right) => (left.row === right.row ? left.col - right.col : left.row - right.row))
     .map((cell) => `${String(cell.row)},${String(cell.col)}:${cell.text}`)
@@ -187,11 +189,15 @@ export class ApplyTableCorrectionUseCase {
             role: 'table',
             page: resolved.page,
             rect: resolved.rect,
-            blockIndexes: resolved.tokens.map((token) => token.blockIndex),
+            blockIndexes: uniqueBlockIndexes(resolved.tokens),
             attributes: tableAttributes(nextTable),
           });
     if (beforePayload === afterPayload) {
-      return { noChange: true, correction: null, region: existing ? stripSuperseded(existing) : null };
+      return {
+        noChange: true,
+        correction: null,
+        region: existing ? stripSuperseded(existing) : null,
+      };
     }
 
     let afterRegion: DocumentRegionRecord | null = null;
@@ -210,7 +216,7 @@ export class ApplyTableCorrectionUseCase {
         x1: resolved.rect.x1,
         y1: resolved.rect.y1,
         irSha256: snapshot.irSha256,
-        blockIndexes: resolved.tokens.map((token) => token.blockIndex),
+        blockIndexes: uniqueBlockIndexes(resolved.tokens),
         boundText: joinedTokenText(resolved.tokens),
         table: nextTable,
       });
@@ -221,7 +227,9 @@ export class ApplyTableCorrectionUseCase {
       await this.regions.supersedeRegion(existing.id, null);
     }
 
-    const oldValue = existing ? JSON.stringify(tableAttributes(existing.table ?? emptyTable())) : null;
+    const oldValue = existing
+      ? JSON.stringify(tableAttributes(existing.table ?? emptyTable()))
+      : null;
     const newValue = body.op === 'remove' ? null : JSON.stringify(tableAttributes(nextTable));
     const inserted = await this.regions.insertTableCorrection({
       id: body.id,
@@ -251,7 +259,11 @@ export class ApplyTableCorrectionUseCase {
           },
           new Date().toISOString()
         ),
-        region: replay ? stripSuperseded(replay) : afterRegion ? stripSuperseded(afterRegion) : null,
+        region: replay
+          ? stripSuperseded(replay)
+          : afterRegion
+            ? stripSuperseded(afterRegion)
+            : null,
       };
     }
 
@@ -284,16 +296,15 @@ export class ApplyTableCorrectionUseCase {
     body: ApplyTableCorrectionRequest,
     existing: DocumentRegionRecord | null,
     tokens: LayoutToken[]
-  ): { page: number; rect: { x0: number; y0: number; x1: number; y1: number }; tokens: LayoutToken[] } {
+  ): {
+    page: number;
+    rect: { x0: number; y0: number; x1: number; y1: number };
+    tokens: LayoutToken[];
+  } {
     const page = body.page ?? existing?.page ?? 1;
     const pageTokens = tokens.filter((token) => token.page === page);
-    if (body.blockIndexes && body.blockIndexes.length > 0) {
-      const selected = pageTokens.filter((token) => body.blockIndexes?.includes(token.blockIndex));
-      const hull = snapRectToTokenHull(selected);
-      if (hull) {
-        return { page, rect: hull, tokens: selected };
-      }
-    }
+    // Prefer the drawn rectangle so word-level tokens that share a blockIndex are not
+    // expanded back to the whole IR run (e.g. selecting "Provadis" must not re-include "©").
     const drawn = normalizeRect({
       x0: body.x0 ?? existing?.x0 ?? 0,
       y0: body.y0 ?? existing?.y0 ?? 0,
@@ -304,6 +315,13 @@ export class ApplyTableCorrectionUseCase {
       const selected = tokensInsideRect(pageTokens, drawn);
       const snapped = snapRectToTokenHull(selected) ?? drawn;
       return { page, rect: snapped, tokens: selected };
+    }
+    if (body.blockIndexes && body.blockIndexes.length > 0) {
+      const selected = pageTokens.filter((token) => body.blockIndexes?.includes(token.blockIndex));
+      const hull = snapRectToTokenHull(selected);
+      if (hull) {
+        return { page, rect: hull, tokens: selected };
+      }
     }
     if (existing) {
       return {

@@ -31,6 +31,7 @@ import {
 } from '../../../shared/domain/row-parse.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 import { bufferToHex } from '../domain/ir-hash.js';
+import { uniqueBlockIndexes } from '../domain/layout-tokens.js';
 
 function parseRole(value: unknown): DocumentRegionRole {
   const role = parseString(value);
@@ -337,7 +338,7 @@ export async function remapActiveRegionsOnClient(
       await client.query(
         `INSERT INTO document_region_tokens (region_id, block_index)
          SELECT $1, unnest($2::int[])`,
-        [regionId, remapped.tokens.map((token) => token.blockIndex)]
+        [regionId, uniqueBlockIndexes(remapped.tokens)]
       );
     }
     const snapped = remapped.snappedRect;
@@ -493,7 +494,7 @@ export class PgDocumentRegionRepository implements DocumentRegionRepository {
         await client.query(
           `INSERT INTO document_region_tokens (region_id, block_index)
            SELECT $1, unnest($2::int[])`,
-          [input.id, [...input.blockIndexes]]
+          [input.id, [...new Set(input.blockIndexes)]]
         );
       }
       if (input.fieldKey) {

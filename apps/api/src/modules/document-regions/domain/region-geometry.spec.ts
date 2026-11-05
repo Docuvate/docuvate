@@ -4,10 +4,13 @@ import type { LayoutToken, NormalizedRect } from '@docuvate/contracts';
 import {
   inferTableGrid,
   remapRegionTokens,
+  selectionRectForTokenSpace,
   snapRectToTokenHull,
   tokenBelongsToRect,
   tokenCoverageRatio,
   tokensInsideRect,
+  tokensMatchingSelectedText,
+  viewerPointToUnrotatedPage,
 } from '@docuvate/contracts';
 import { describe, expect, it } from 'vitest';
 
@@ -102,5 +105,65 @@ describe('inferTableGrid', () => {
     const grid = inferTableGrid([], { x0: 0.2, y0: 0.2, x1: 0.5, y1: 0.4 });
     expect(grid.cells).toEqual([{ row: 0, col: 0, text: '' }]);
     expect(grid.headerRows).toBe(0);
+  });
+});
+
+describe('viewer ↔ unrotated page mapping', () => {
+  it('is identity for upright pages', () => {
+    expect(viewerPointToUnrotatedPage(0.25, 0.75, 0)).toEqual({ x: 0.25, y: 0.75 });
+  });
+
+  it('inverts 90° clockwise viewer space', () => {
+    // Viewer top-left (0,0) came from unrotated (1,0) after 90° CW.
+    expect(viewerPointToUnrotatedPage(0, 0, 90)).toEqual({ x: 1, y: 0 });
+    expect(viewerPointToUnrotatedPage(1, 0, 90)).toEqual({ x: 1, y: 1 });
+    expect(viewerPointToUnrotatedPage(0, 1, 90)).toEqual({ x: 0, y: 0 });
+  });
+
+  it('only remaps selection when tokens live in the unrotated MediaBox', () => {
+    const viewer = { x0: 0.1, y0: 0.2, x1: 0.4, y1: 0.5 };
+    expect(selectionRectForTokenSpace(viewer, 90, false)).toEqual(viewer);
+    const remapped = selectionRectForTokenSpace(viewer, 90, true);
+    expect(remapped).not.toBeNull();
+    expect(remapped?.x0).toBeCloseTo(0.5);
+    expect(remapped?.y0).toBeCloseTo(0.1);
+  });
+});
+
+describe('tokensMatchingSelectedText', () => {
+  it('matches IR words contained in the DOM selection string', () => {
+    const tokens: LayoutToken[] = [
+      token(0, 0.1, 0.1, 0.2, 0.15, '©'),
+      token(1, 0.2, 0.1, 0.45, 0.15, 'Provadis'),
+      token(2, 0.5, 0.1, 0.7, 0.15, 'Elsewhere'),
+    ];
+    const matched = tokensMatchingSelectedText(tokens, 'Provadis');
+    expect(matched.map((t) => t.text)).toEqual(['Provadis']);
+  });
+
+  it('ranks matches near the selection rect when several words hit', () => {
+    const tokens: LayoutToken[] = [
+      token(0, 0.1, 0.1, 0.2, 0.2, 'Alex'),
+      token(1, 0.7, 0.7, 0.9, 0.9, 'Alex'),
+    ];
+    const near: NormalizedRect = { x0: 0.05, y0: 0.05, x1: 0.3, y1: 0.3 };
+    const matched = tokensMatchingSelectedText(tokens, 'Alex', near);
+    expect(matched[0]?.blockIndex).toBe(0);
+  });
+
+  it('does not match OCR fragments hitchhiking on a longer PDF.js string', () => {
+    const tokens: LayoutToken[] = [
+      token(0, 0.1, 0.1, 0.3, 0.15, 'E2E_SYNTHETI'),
+      token(1, 0.3, 0.1, 0.5, 0.15, 'XTURE_PHRASE_'),
+      token(2, 0.1, 0.2, 0.25, 0.25, 'Alex'),
+    ];
+    const matched = tokensMatchingSelectedText(
+      tokens,
+      'E2E_SYNTHETIC_FIXTURE_PHRASE_Q1'
+    );
+    expect(matched.map((t) => t.text)).toEqual([]);
+    expect(tokensMatchingSelectedText(tokens, 'Alex Testmann').map((t) => t.text)).toEqual([
+      'Alex',
+    ]);
   });
 });

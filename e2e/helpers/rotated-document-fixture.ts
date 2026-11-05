@@ -34,10 +34,16 @@ function readLayoutIrBlockTextSample(body: unknown): string {
   }
   const texts: string[] = [];
   for (const page of body.pages) {
-    if (typeof page !== 'object' || page === null) continue;
-    if (!('blocks' in page) || !Array.isArray(page.blocks)) continue;
+    if (typeof page !== 'object' || page === null) {
+      continue;
+    }
+    if (!('blocks' in page) || !Array.isArray(page.blocks)) {
+      continue;
+    }
     for (const block of page.blocks) {
-      if (typeof block !== 'object' || block === null) continue;
+      if (typeof block !== 'object' || block === null) {
+        continue;
+      }
       if ('text' in block && typeof block.text === 'string' && block.text.trim().length > 0) {
         texts.push(block.text.trim());
       }
@@ -94,6 +100,15 @@ export async function uploadRotatedDocument(
   throw lastError ?? new Error('rotated fixture upload failed');
 }
 
+/** Upload a /Rotate 90 synthetic fixture (bounding-box selection E2E). */
+export async function uploadRotatedLayoutDocument(
+  request: APIRequestContext,
+  apiBase: string,
+  webOrigin: string
+): Promise<string> {
+  return uploadRotatedDocument(request, apiBase, webOrigin, 90);
+}
+
 export async function assertLayoutIrReadable(
   request: APIRequestContext,
   apiBase: string,
@@ -115,4 +130,6 @@ export async function openRotatedDocumentPage(page: Page, docId: string): Promis
     state: 'visible',
     timeout: 300_000,
   });
+  const wrap = page.locator('.pdf-page-wrap').first();
+  await expect(wrap).toHaveAttribute('data-pdf-rotate', /^(90|180|270)$/, { timeout: 60_000 });
 }
