@@ -81,7 +81,7 @@ describe('ABAC matrix (integration seed + adapter)', () => {
     ).resolves.toBe('deny');
   });
 
-  it('matrix row: service integrator × document:chat → deny without claim', async () => {
+  it('matrix row: service integrator × document:write → deny without claim', async () => {
     const loaded = await documents.findById(documentId);
     if (!loaded) {
       throw new Error('expected document');
@@ -95,7 +95,7 @@ describe('ABAC matrix (integration seed + adapter)', () => {
       claims: ['document:read', 'document:list'],
     };
     await expect(
-      abac.authorize({ subject: service, action: 'document:chat', resource })
+      abac.authorize({ subject: service, action: 'document:write', resource })
     ).resolves.toBe('deny');
   });
 });

@@ -156,22 +156,6 @@ export type BanAdminUserRequestDto = {
     reason?: string;
 };
 
-export type ChatMessageDto = {
-    role: 'user' | 'assistant';
-    content: string;
-};
-
-export type ChatMessageRecordDto = {
-    id: string;
-    role: 'user' | 'assistant';
-    content: string;
-    createdAt: string;
-    updatedAt?: string;
-    generationStatus?: 'failed' | 'pending' | 'streaming' | 'done';
-    generationPhase?: 'retrieving' | 'generating' | 'verifying';
-    errorCode?: string;
-};
-
 export type ConfirmDocumentFieldRequestDto = {
     fieldKey: string;
     value: string;
@@ -206,10 +190,6 @@ export type CreateConnectorInstallationRequestDto = {
     sourceScope?: {
         [key: string]: unknown;
     };
-};
-
-export type CreateDocumentChatThreadRequestDto = {
-    title?: string;
 };
 
 export type CreateFolderRequestDto = {
@@ -313,67 +293,6 @@ export type DocumentBulkActionDto = {
 export type DocumentBulkRequestDto = {
     ids: Array<string>;
     bulk: DocumentBulkActionDto;
-};
-
-export type DocumentChatProviderInfoDto = {
-    id: string;
-    label: string;
-    description: string;
-    available: boolean;
-};
-
-export type DocumentChatProviderListResponseDto = {
-    selectable: Array<DocumentChatProviderInfoDto>;
-    unavailable: Array<DocumentChatUnavailableBackendInfoDto>;
-    development?: Array<DocumentChatProviderInfoDto>;
-    meta: DocumentChatProvidersCatalogMetaDto;
-};
-
-export type DocumentChatProvidersCatalogMetaDto = {
-    ollamaModel: string;
-    ollamaConfigured: boolean;
-    runsOnCpu: boolean;
-};
-
-export type DocumentChatRequestDto = {
-    message: string;
-    history?: Array<ChatMessageDto>;
-};
-
-export type DocumentChatResponseDto = {
-    reply: ChatMessageDto;
-    configured: boolean;
-    provider?: string;
-    setupHint?: string;
-};
-
-export type DocumentChatThreadDto = {
-    id: string;
-    title: string;
-    scope: 'document' | 'library';
-    documentIds: Array<string>;
-    createdAt: string;
-    updatedAt: string;
-    lastMessagePreview?: string;
-    activeGenerationStatus?: 'failed' | 'pending' | 'streaming' | 'done';
-};
-
-export type DocumentChatThreadListResponseDto = {
-    nextCursor: string;
-    hasMore: boolean;
-    total: number;
-    threads: Array<DocumentChatThreadDto>;
-};
-
-export type DocumentChatThreadMessagesResponseDto = {
-    messages: Array<ChatMessageRecordDto>;
-};
-
-export type DocumentChatUnavailableBackendInfoDto = {
-    id: string;
-    label: string;
-    reason: string;
-    setupHint: string;
 };
 
 export type DocumentCorrectionDto = {
@@ -672,25 +591,12 @@ export type FeatureFlagsResponseDto = {
     answerAbstention: boolean;
     learnedValueTypes: boolean;
     layoutKeyValueRoles: boolean;
-    localChatModel: boolean;
 };
 
 export type FolderListResponseDto = {
     items: Array<{
         [key: string]: unknown;
     }>;
-};
-
-export type GlobalChatSuggestionBootstrapDtoClass = {
-    topTagId: string;
-    topTagName: string;
-    topTagDocumentCount: number;
-    amountTaggedDocumentCount: number;
-    contractEndSample?: {
-        label: string;
-        value: string;
-    };
-    recentQuestions: Array<string>;
 };
 
 export type ImportFromConnectorRequestDto = {
@@ -957,7 +863,7 @@ export type MlRetrainJobDto = {
     id: string;
     familyId: string;
     triggerKind: 'manual' | 'threshold' | 'cron';
-    status: 'queued' | 'failed' | 'cancelled' | 'running' | 'succeeded';
+    status: 'queued' | 'failed' | 'running' | 'cancelled' | 'succeeded';
     trainingSnapshotId: string;
     resultVersionId: string;
     errorMessage: string;
@@ -1012,10 +918,6 @@ export type ProblemDetailsDto = {
     code: string;
     detail: string;
     requestId: string;
-};
-
-export type ProposeLabelRecommendationBlocklistPatternRequestDto = {
-    phrases: Array<string>;
 };
 
 export type RecognizedFieldFilterValuesResponseDto = {
@@ -1106,22 +1008,8 @@ export type SavedDocumentViewListResponseDto = {
     items: Array<SavedDocumentViewDtoClass>;
 };
 
-export type SendDocumentChatThreadMessageRequestDto = {
-    message: string;
-};
-
-export type SendDocumentChatThreadMessageResponseDto = {
-    userMessage: ChatMessageRecordDto;
-    assistantMessage: ChatMessageRecordDto;
-    asyncGeneration?: boolean;
-    reply: ChatMessageDto;
-    configured: boolean;
-    provider?: string;
-    setupHint?: string;
-};
-
 export type SetAdminUserFeatureFlagRequestDto = {
-    flag: 'layoutReconstructionCompare' | 'sourceConnectors' | 'experimentalResearchModels' | 'exactAnswers' | 'smartDuplicates' | 'answerAbstention' | 'learnedValueTypes' | 'layoutKeyValueRoles' | 'localChatModel';
+    flag: 'layoutReconstructionCompare' | 'sourceConnectors' | 'experimentalResearchModels' | 'exactAnswers' | 'smartDuplicates' | 'answerAbstention' | 'learnedValueTypes' | 'layoutKeyValueRoles';
     enabled: boolean;
 };
 
@@ -1204,10 +1092,6 @@ export type UpdateConnectorInstallationRequestDto = {
     };
 };
 
-export type UpdateDocumentChatThreadRequestDto = {
-    title: string;
-};
-
 export type UpdateDocumentRequestDto = {
     title?: string;
     documentDate?: string;
@@ -1274,15 +1158,12 @@ export type UpdateTagRequestDto = {
 
 export type UpdateUserSettingsRequestDto = {
     preferredExtractorEngine?: string;
-    preferredChatProvider?: string;
     useArenaWinnerAsDefault?: boolean;
     fieldExtractionConfidenceGateEnabled?: boolean;
     fieldExtractionRequiredLabelIds?: Array<string>;
     advancedFeaturesEnabled?: boolean;
     themePreference?: 'light' | 'dark' | 'system';
     locale?: 'de' | 'en';
-    documentChatCloudBaseUrl?: string;
-    documentChatCloudApiKey?: string;
 };
 
 export type UpdateWorkspaceMlSettingsRequestDto = {
@@ -1294,17 +1175,6 @@ export type UpdateWorkspaceMlSettingsRequestDto = {
 
 export type UserSettingsResponseDto = {
     preferredExtractorEngine: string;
-    preferredChatProvider?: string;
-    effectiveChatProvider?: string;
-    customerChatProvider?: string;
-    documentChatUiEnabled?: boolean;
-    documentChatAvailable?: boolean;
-    documentChatReadiness?: 'ready' | 'off' | 'unavailable' | 'starting';
-    documentChatReadinessReason?: string;
-    documentChatOllamaModel?: string;
-    documentChatRunsOnCpu?: boolean;
-    documentChatLocalModelEnabled?: boolean;
-    documentChatLocalModelReady?: boolean;
     advancedFeaturesEnabled?: boolean;
     useArenaWinnerAsDefault: boolean;
     arenaWinnerEngine?: string;
@@ -1312,8 +1182,6 @@ export type UserSettingsResponseDto = {
     fieldExtractionRequiredLabelIds?: Array<string>;
     themePreference?: 'light' | 'dark' | 'system';
     locale?: 'de' | 'en';
-    documentChatCloudBaseUrl?: string;
-    documentChatCloudApiKeyConfigured?: boolean;
 };
 
 export type WorkspaceMlSettingsResponseDto = {
@@ -1687,237 +1555,6 @@ export type UnbanAdminUserError = UnbanAdminUserErrors[keyof UnbanAdminUserError
 
 export type UnbanAdminUserResponses = {
     201: unknown;
-};
-
-export type GetGlobalChatSuggestionBootstrapData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/chat/suggestion-bootstrap';
-};
-
-export type GetGlobalChatSuggestionBootstrapErrors = {
-    401: ProblemDetailsDto;
-    403: ProblemDetailsDto;
-    404: ProblemDetailsDto;
-    422: ProblemDetailsDto;
-};
-
-export type GetGlobalChatSuggestionBootstrapError = GetGlobalChatSuggestionBootstrapErrors[keyof GetGlobalChatSuggestionBootstrapErrors];
-
-export type GetGlobalChatSuggestionBootstrapResponses = {
-    200: GlobalChatSuggestionBootstrapDtoClass;
-};
-
-export type GetGlobalChatSuggestionBootstrapResponse = GetGlobalChatSuggestionBootstrapResponses[keyof GetGlobalChatSuggestionBootstrapResponses];
-
-export type ListLibraryChatThreadsData = {
-    body?: never;
-    path?: never;
-    query?: {
-        limit?: number;
-        /**
-         * Opaque keyset cursor from a previous response
-         */
-        cursor?: string;
-    };
-    url: '/chat/threads';
-};
-
-export type ListLibraryChatThreadsErrors = {
-    401: ProblemDetailsDto;
-    403: ProblemDetailsDto;
-    404: ProblemDetailsDto;
-    422: ProblemDetailsDto;
-};
-
-export type ListLibraryChatThreadsError = ListLibraryChatThreadsErrors[keyof ListLibraryChatThreadsErrors];
-
-export type ListLibraryChatThreadsResponses = {
-    200: DocumentChatThreadListResponseDto;
-};
-
-export type ListLibraryChatThreadsResponse = ListLibraryChatThreadsResponses[keyof ListLibraryChatThreadsResponses];
-
-export type CreateLibraryChatThreadData = {
-    body: CreateDocumentChatThreadRequestDto;
-    path?: never;
-    query?: never;
-    url: '/chat/threads';
-};
-
-export type CreateLibraryChatThreadErrors = {
-    401: ProblemDetailsDto;
-    403: ProblemDetailsDto;
-    404: ProblemDetailsDto;
-    422: ProblemDetailsDto;
-};
-
-export type CreateLibraryChatThreadError = CreateLibraryChatThreadErrors[keyof CreateLibraryChatThreadErrors];
-
-export type CreateLibraryChatThreadResponses = {
-    201: unknown;
-};
-
-export type DeleteLibraryChatThreadData = {
-    body?: never;
-    path: {
-        threadId: string;
-    };
-    query?: never;
-    url: '/chat/threads/{threadId}';
-};
-
-export type DeleteLibraryChatThreadErrors = {
-    401: ProblemDetailsDto;
-    403: ProblemDetailsDto;
-    404: ProblemDetailsDto;
-    422: ProblemDetailsDto;
-};
-
-export type DeleteLibraryChatThreadError = DeleteLibraryChatThreadErrors[keyof DeleteLibraryChatThreadErrors];
-
-export type DeleteLibraryChatThreadResponses = {
-    200: unknown;
-};
-
-export type UpdateLibraryChatThreadData = {
-    body: UpdateDocumentChatThreadRequestDto;
-    path: {
-        threadId: string;
-    };
-    query?: never;
-    url: '/chat/threads/{threadId}';
-};
-
-export type UpdateLibraryChatThreadErrors = {
-    401: ProblemDetailsDto;
-    403: ProblemDetailsDto;
-    404: ProblemDetailsDto;
-    422: ProblemDetailsDto;
-};
-
-export type UpdateLibraryChatThreadError = UpdateLibraryChatThreadErrors[keyof UpdateLibraryChatThreadErrors];
-
-export type UpdateLibraryChatThreadResponses = {
-    200: unknown;
-};
-
-export type ListLibraryChatThreadMessagesData = {
-    body?: never;
-    path: {
-        threadId: string;
-    };
-    query?: never;
-    url: '/chat/threads/{threadId}/messages';
-};
-
-export type ListLibraryChatThreadMessagesErrors = {
-    401: ProblemDetailsDto;
-    403: ProblemDetailsDto;
-    404: ProblemDetailsDto;
-    422: ProblemDetailsDto;
-};
-
-export type ListLibraryChatThreadMessagesError = ListLibraryChatThreadMessagesErrors[keyof ListLibraryChatThreadMessagesErrors];
-
-export type ListLibraryChatThreadMessagesResponses = {
-    200: DocumentChatThreadMessagesResponseDto;
-};
-
-export type ListLibraryChatThreadMessagesResponse = ListLibraryChatThreadMessagesResponses[keyof ListLibraryChatThreadMessagesResponses];
-
-export type SendLibraryChatThreadMessageData = {
-    body: SendDocumentChatThreadMessageRequestDto;
-    path: {
-        threadId: string;
-    };
-    query?: never;
-    url: '/chat/threads/{threadId}/messages';
-};
-
-export type SendLibraryChatThreadMessageErrors = {
-    401: ProblemDetailsDto;
-    403: ProblemDetailsDto;
-    404: ProblemDetailsDto;
-    422: ProblemDetailsDto;
-};
-
-export type SendLibraryChatThreadMessageError = SendLibraryChatThreadMessageErrors[keyof SendLibraryChatThreadMessageErrors];
-
-export type SendLibraryChatThreadMessageResponses = {
-    201: SendDocumentChatThreadMessageResponseDto;
-};
-
-export type SendLibraryChatThreadMessageResponse = SendLibraryChatThreadMessageResponses[keyof SendLibraryChatThreadMessageResponses];
-
-export type CancelLibraryChatGenerationData = {
-    body?: never;
-    path: {
-        threadId: string;
-        messageId: string;
-    };
-    query?: never;
-    url: '/chat/threads/{threadId}/messages/{messageId}/cancel';
-};
-
-export type CancelLibraryChatGenerationErrors = {
-    401: ProblemDetailsDto;
-    403: ProblemDetailsDto;
-    404: ProblemDetailsDto;
-    422: ProblemDetailsDto;
-};
-
-export type CancelLibraryChatGenerationError = CancelLibraryChatGenerationErrors[keyof CancelLibraryChatGenerationErrors];
-
-export type CancelLibraryChatGenerationResponses = {
-    201: unknown;
-};
-
-export type RetryLibraryChatMessageData = {
-    body?: never;
-    path: {
-        threadId: string;
-        messageId: string;
-    };
-    query?: never;
-    url: '/chat/threads/{threadId}/messages/{messageId}/retry';
-};
-
-export type RetryLibraryChatMessageErrors = {
-    401: ProblemDetailsDto;
-    403: ProblemDetailsDto;
-    404: ProblemDetailsDto;
-    422: ProblemDetailsDto;
-};
-
-export type RetryLibraryChatMessageError = RetryLibraryChatMessageErrors[keyof RetryLibraryChatMessageErrors];
-
-export type RetryLibraryChatMessageResponses = {
-    201: unknown;
-};
-
-export type StreamLibraryChatMessageData = {
-    body?: never;
-    path: {
-        threadId: string;
-        messageId: string;
-    };
-    query?: never;
-    url: '/chat/threads/{threadId}/messages/{messageId}/stream';
-};
-
-export type StreamLibraryChatMessageErrors = {
-    401: ProblemDetailsDto;
-    403: ProblemDetailsDto;
-    404: ProblemDetailsDto;
-    422: ProblemDetailsDto;
-};
-
-export type StreamLibraryChatMessageError = StreamLibraryChatMessageErrors[keyof StreamLibraryChatMessageErrors];
-
-export type StreamLibraryChatMessageResponses = {
-    200: unknown;
 };
 
 export type GetConnectorCatalogData = {
@@ -3055,200 +2692,6 @@ export type PatchResponses = {
     200: unknown;
 };
 
-export type ChatData = {
-    body: DocumentChatRequestDto;
-    path: {
-        id: string;
-    };
-    query?: never;
-    url: '/documents/{id}/chat';
-};
-
-export type ChatErrors = {
-    401: ProblemDetailsDto;
-    403: ProblemDetailsDto;
-    404: ProblemDetailsDto;
-    422: ProblemDetailsDto;
-};
-
-export type ChatError = ChatErrors[keyof ChatErrors];
-
-export type ChatResponses = {
-    201: DocumentChatResponseDto;
-};
-
-export type ChatResponse = ChatResponses[keyof ChatResponses];
-
-export type ListChatThreadsData = {
-    body?: never;
-    path: {
-        id: string;
-    };
-    query?: never;
-    url: '/documents/{id}/chat/threads';
-};
-
-export type ListChatThreadsErrors = {
-    401: ProblemDetailsDto;
-    403: ProblemDetailsDto;
-    404: ProblemDetailsDto;
-    422: ProblemDetailsDto;
-};
-
-export type ListChatThreadsError = ListChatThreadsErrors[keyof ListChatThreadsErrors];
-
-export type ListChatThreadsResponses = {
-    200: DocumentChatThreadListResponseDto;
-};
-
-export type ListChatThreadsResponse = ListChatThreadsResponses[keyof ListChatThreadsResponses];
-
-export type CreateChatThreadData = {
-    body: CreateDocumentChatThreadRequestDto;
-    path: {
-        id: string;
-    };
-    query?: never;
-    url: '/documents/{id}/chat/threads';
-};
-
-export type CreateChatThreadErrors = {
-    401: ProblemDetailsDto;
-    403: ProblemDetailsDto;
-    404: ProblemDetailsDto;
-    422: ProblemDetailsDto;
-};
-
-export type CreateChatThreadError = CreateChatThreadErrors[keyof CreateChatThreadErrors];
-
-export type CreateChatThreadResponses = {
-    201: unknown;
-};
-
-export type ListChatThreadMessagesData = {
-    body?: never;
-    path: {
-        id: string;
-        threadId: string;
-    };
-    query?: never;
-    url: '/documents/{id}/chat/threads/{threadId}/messages';
-};
-
-export type ListChatThreadMessagesErrors = {
-    401: ProblemDetailsDto;
-    403: ProblemDetailsDto;
-    404: ProblemDetailsDto;
-    422: ProblemDetailsDto;
-};
-
-export type ListChatThreadMessagesError = ListChatThreadMessagesErrors[keyof ListChatThreadMessagesErrors];
-
-export type ListChatThreadMessagesResponses = {
-    200: DocumentChatThreadMessagesResponseDto;
-};
-
-export type ListChatThreadMessagesResponse = ListChatThreadMessagesResponses[keyof ListChatThreadMessagesResponses];
-
-export type SendChatThreadMessageData = {
-    body: SendDocumentChatThreadMessageRequestDto;
-    path: {
-        id: string;
-        threadId: string;
-    };
-    query?: never;
-    url: '/documents/{id}/chat/threads/{threadId}/messages';
-};
-
-export type SendChatThreadMessageErrors = {
-    401: ProblemDetailsDto;
-    403: ProblemDetailsDto;
-    404: ProblemDetailsDto;
-    422: ProblemDetailsDto;
-};
-
-export type SendChatThreadMessageError = SendChatThreadMessageErrors[keyof SendChatThreadMessageErrors];
-
-export type SendChatThreadMessageResponses = {
-    201: SendDocumentChatThreadMessageResponseDto;
-};
-
-export type SendChatThreadMessageResponse = SendChatThreadMessageResponses[keyof SendChatThreadMessageResponses];
-
-export type CancelChatThreadMessageData = {
-    body?: never;
-    path: {
-        id: string;
-        threadId: string;
-        messageId: string;
-    };
-    query?: never;
-    url: '/documents/{id}/chat/threads/{threadId}/messages/{messageId}/cancel';
-};
-
-export type CancelChatThreadMessageErrors = {
-    401: ProblemDetailsDto;
-    403: ProblemDetailsDto;
-    404: ProblemDetailsDto;
-    422: ProblemDetailsDto;
-};
-
-export type CancelChatThreadMessageError = CancelChatThreadMessageErrors[keyof CancelChatThreadMessageErrors];
-
-export type CancelChatThreadMessageResponses = {
-    201: OkResponseDto;
-};
-
-export type CancelChatThreadMessageResponse = CancelChatThreadMessageResponses[keyof CancelChatThreadMessageResponses];
-
-export type RetryChatThreadMessageData = {
-    body?: never;
-    path: {
-        id: string;
-        threadId: string;
-        messageId: string;
-    };
-    query?: never;
-    url: '/documents/{id}/chat/threads/{threadId}/messages/{messageId}/retry';
-};
-
-export type RetryChatThreadMessageErrors = {
-    401: ProblemDetailsDto;
-    403: ProblemDetailsDto;
-    404: ProblemDetailsDto;
-    422: ProblemDetailsDto;
-};
-
-export type RetryChatThreadMessageError = RetryChatThreadMessageErrors[keyof RetryChatThreadMessageErrors];
-
-export type RetryChatThreadMessageResponses = {
-    201: unknown;
-};
-
-export type StreamChatThreadMessageData = {
-    body?: never;
-    path: {
-        id: string;
-        threadId: string;
-        messageId: string;
-    };
-    query?: never;
-    url: '/documents/{id}/chat/threads/{threadId}/messages/{messageId}/stream';
-};
-
-export type StreamChatThreadMessageErrors = {
-    401: ProblemDetailsDto;
-    403: ProblemDetailsDto;
-    404: ProblemDetailsDto;
-    422: ProblemDetailsDto;
-};
-
-export type StreamChatThreadMessageError = StreamChatThreadMessageErrors[keyof StreamChatThreadMessageErrors];
-
-export type StreamChatThreadMessageResponses = {
-    200: unknown;
-};
-
 export type ContentData = {
     body?: never;
     path: {
@@ -4306,30 +3749,6 @@ export type RemovePatternResponses = {
 
 export type RemovePatternResponse = RemovePatternResponses[keyof RemovePatternResponses];
 
-export type ProposePatternData = {
-    body: ProposeLabelRecommendationBlocklistPatternRequestDto;
-    path?: never;
-    query?: never;
-    url: '/labels/recommendation-blocklist/propose-pattern';
-};
-
-export type ProposePatternErrors = {
-    401: ProblemDetailsDto;
-    403: ProblemDetailsDto;
-    404: ProblemDetailsDto;
-    422: ProblemDetailsDto;
-};
-
-export type ProposePatternError = ProposePatternErrors[keyof ProposePatternErrors];
-
-export type ProposePatternResponses = {
-    201: {
-        [key: string]: unknown;
-    };
-};
-
-export type ProposePatternResponse = ProposePatternResponses[keyof ProposePatternResponses];
-
 export type RemoveBlocklistEntryData = {
     body?: never;
     path: {
@@ -4997,28 +4416,6 @@ export type UpdateUserSettingsResponses = {
 };
 
 export type UpdateUserSettingsResponse = UpdateUserSettingsResponses[keyof UpdateUserSettingsResponses];
-
-export type ListChatProvidersData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/settings/chat-providers';
-};
-
-export type ListChatProvidersErrors = {
-    401: ProblemDetailsDto;
-    403: ProblemDetailsDto;
-    404: ProblemDetailsDto;
-    422: ProblemDetailsDto;
-};
-
-export type ListChatProvidersError = ListChatProvidersErrors[keyof ListChatProvidersErrors];
-
-export type ListChatProvidersResponses = {
-    200: DocumentChatProviderListResponseDto;
-};
-
-export type ListChatProvidersResponse = ListChatProvidersResponses[keyof ListChatProvidersResponses];
 
 export type GetEncoderReindexProgressData = {
     body?: never;

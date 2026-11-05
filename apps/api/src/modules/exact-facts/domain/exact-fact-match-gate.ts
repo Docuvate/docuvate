@@ -3,29 +3,12 @@
 
 import {
   EXACT_FACT_MATCH_CALIBRATION,
-  EXACT_FACT_MATCH_DEFAULT_THRESHOLD,
   exactFactMatchScoreTokens,
   fellegiSunterExactFactMatchScore,
 } from '@docuvate/contracts';
 
 import type { ParsedExactFactQuery } from './exact-fact-query.types.js';
 import type { ExactFactRow } from './exact-fact-row.js';
-
-export function resolveExactFactMatchScoreThreshold(
-  tenantOverride: number | null | undefined
-): number {
-  if (tenantOverride != null && Number.isFinite(tenantOverride)) {
-    return Math.min(Math.max(tenantOverride, 0), 1);
-  }
-  const envRaw = process.env['DOCUVATE_EXACT_FACT_MATCH_THRESHOLD'];
-  if (envRaw) {
-    const parsed = Number.parseFloat(envRaw);
-    if (Number.isFinite(parsed)) {
-      return Math.min(Math.max(parsed, 0), 1);
-    }
-  }
-  return EXACT_FACT_MATCH_DEFAULT_THRESHOLD;
-}
 
 export function bestExactFactMatchScore(
   query: ParsedExactFactQuery,

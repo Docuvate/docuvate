@@ -2,8 +2,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { buildSyntheticUser } from '../../../../packages/testing/src/factories/index.js';
-import { splitTextChunksWithSpans } from '../../src/modules/cited-chat/domain/split-text-chunks-with-spans.js';
 import { GlobalSearchUseCase } from '../../src/modules/search/application/global-search.use-case.js';
+import { splitTextChunksWithSpans } from '../../src/modules/search/domain/split-text-chunks-with-spans.js';
 import { replaceDocumentFieldValues } from '../../src/modules/search/infrastructure/document-field-value-index.js';
 import { PgGlobalSearchRepository } from '../../src/modules/search/infrastructure/pg-global-search.repository.js';
 import type { EmbeddingPort } from '../../src/shared/domain/ports.js';

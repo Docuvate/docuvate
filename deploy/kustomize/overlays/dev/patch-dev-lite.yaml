@@ -3,7 +3,6 @@ kind: ConfigMap
 metadata:
   name: docuvate-config
 data:
-  DOCUMENT_CHAT_PROVIDER: context
   PASSWORD_RESET_MAIL_MODE: smtp
   SMTP_URL: smtp://docuvate-mailpit:1025
   DOCUVATE_PUBLIC_WEB_URL: http://localhost:8080

@@ -23,7 +23,6 @@ describe('ListExtractionEnginesUseCase', () => {
           answerAbstention: false,
           learnedValueTypes: true,
           layoutKeyValueRoles: false,
-          localChatModel: false,
         })
       ),
       assertEnabled: vi.fn(() => Promise.resolve()),

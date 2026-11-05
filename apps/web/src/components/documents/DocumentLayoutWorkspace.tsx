@@ -4,10 +4,8 @@ import type {
   ApplyFieldCorrectionRequest,
   ApplyTableCorrectionRequest,
   DocumentDto,
-  DocumentRegionDto,
   ExtractedField,
   ExtractionBlock,
-  LayoutToken,
   RecognizedFieldDefinitionDto,
 } from '@docuvate/contracts';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -17,8 +15,6 @@ import {
   applyDocumentFieldCorrection,
   applyDocumentTableCorrection,
   confirmDocumentField,
-  listDocumentLayoutTokens,
-  listDocumentRegions,
   withdrawDocumentFieldCorrection,
   withdrawDocumentTableCorrection,
 } from '../../lib/api';
@@ -40,6 +36,7 @@ import { useFeatureFlags } from '../../lib/remoteConfig';
 import { segmentedToolbarClass } from '../../lib/segmentedControlClasses';
 import { sourceChipPageLabel } from '../../lib/sourceChipLabel';
 import { useDocumentLayoutIr } from '../../lib/useDocumentLayoutIr';
+import { useDocumentRegionLayers } from '../../lib/useDocumentRegionLayers';
 import { useLayoutCompare } from '../../lib/useLayoutCompare';
 import { useViewportMaxWidth } from '../../lib/useViewportMaxWidth';
 import { useToast } from '../save';
@@ -124,10 +121,6 @@ interface DocumentLayoutWorkspaceProps {
   onRequeueExtraction?: () => void;
   textEditOpen: boolean;
   onTextEditOpenChange: (open: boolean) => void;
-  documentChatAvailable?: boolean;
-  documentChatUiEnabled?: boolean;
-  documentChatLocalModelEnabled?: boolean;
-  documentChatLocalModelReady?: boolean;
   showTechnicalDetails?: boolean;
   layoutSideTab: LayoutSideTab;
   onLayoutSideTabChange: (tab: LayoutSideTab) => void;
@@ -164,10 +157,6 @@ export function DocumentLayoutWorkspace({
   onRequeueExtraction,
   textEditOpen,
   onTextEditOpenChange,
-  documentChatAvailable = false,
-  documentChatUiEnabled = true,
-  documentChatLocalModelEnabled = false,
-  documentChatLocalModelReady = false,
   showTechnicalDetails = false,
   layoutSideTab,
   onLayoutSideTabChange,
@@ -197,31 +186,17 @@ export function DocumentLayoutWorkspace({
   const [dismissedSuggestions, setDismissedSuggestions] = useState<Set<string>>(() => new Set());
   const [selectionTool, setSelectionTool] = useState<DocumentSelectionTool>('none');
   const [selectionDraft, setSelectionDraft] = useState<DocumentSelectionDraft | null>(null);
-  const [layoutTokens, setLayoutTokens] = useState<LayoutToken[]>([]);
-  const [fieldRegions, setFieldRegions] = useState<DocumentRegionDto[]>([]);
-  const [tableRegions, setTableRegions] = useState<DocumentRegionDto[]>([]);
   const [reanchorFieldKey, setReanchorFieldKey] = useState<string | null>(null);
   const [selectedFieldKey, setSelectedFieldKey] = useState<string | null>(null);
   const [selectedTableId, setSelectedTableId] = useState<string | null>(null);
 
-  const refreshRegions = useCallback(async () => {
-    const [tokenPage, fields, tables] = await Promise.all([
-      listDocumentLayoutTokens(doc.id, viewerPage),
-      listDocumentRegions(doc.id, 'field'),
-      listDocumentRegions(doc.id, 'table'),
-    ]);
-    setLayoutTokens(tokenPage.tokens);
-    setFieldRegions(fields.items);
-    setTableRegions(tables.items);
-  }, [doc.id, viewerPage]);
-
-  useEffect(() => {
-    void refreshRegions().catch(() => {
-      setLayoutTokens([]);
-      setFieldRegions([]);
-      setTableRegions([]);
-    });
-  }, [refreshRegions]);
+  /** Changes whenever the stored layout IR can have changed (reprocess finished, status flip). */
+  const layoutIrRevision = `${doc.status}:${doc.updatedAt}:${String(layoutIrAvailable)}`;
+  const { layoutTokens, fieldRegions, tableRegions, refreshRegions } = useDocumentRegionLayers(
+    doc.id,
+    viewerPage,
+    layoutIrRevision
+  );
 
   const fieldOptions = useMemo(
     () =>
@@ -878,7 +853,6 @@ export function DocumentLayoutWorkspace({
 
       {layoutIr ? (
         <DocumentLayoutSidePanel
-          documentId={doc.id}
           layoutIr={layoutIr}
           fields={fields}
           knownFieldKeys={knownFieldKeys}
@@ -954,10 +928,6 @@ export function DocumentLayoutWorkspace({
           onSelectField={selectField}
           hideInlineFieldList={Boolean(correctionSheetViewport && selectedFieldKey)}
           hideInlineTableList={tableSheetOpen}
-          documentChatAvailable={documentChatAvailable}
-          documentChatUiEnabled={documentChatUiEnabled}
-          documentChatLocalModelEnabled={documentChatLocalModelEnabled}
-          documentChatLocalModelReady={documentChatLocalModelReady}
         />
       ) : (
         <aside className="layout-side-panel layout-side-panel-loading">

@@ -1362,20 +1362,6 @@
   text-decoration: line-through;
 }
 
-.chat-message-abstain-head {
-  display: flex;
-  align-items: center;
-  gap: var(--dv-space-xs);
-  margin: 0 0 var(--dv-space-xs);
-}
-
-.chat-message-sources-label {
-  width: 100%;
-  font-size: var(--dv-font-size-xs);
-  font-weight: var(--dv-font-weight-semibold);
-  color: var(--dv-color-text-muted);
-}
-
 .ds-banner-body {
   flex: 1 1 auto;
   min-width: 0;
@@ -1383,36 +1369,6 @@
 
 .ds-banner-action {
   flex-shrink: 0;
-}
-
-.chat-message-user {
-  margin-left: auto;
-  max-width: 30rem;
-  padding: var(--dv-space-xs) var(--dv-space-md);
-  border-radius: var(--dv-radius-lg);
-  background: var(--dv-color-accent-soft);
-  font-size: var(--dv-font-size-sm);
-}
-
-.chat-message-assistant {
-  max-width: 40rem;
-  padding: var(--dv-space-md);
-  border-radius: var(--dv-radius-lg);
-  border: 1px solid var(--dv-color-border);
-  background: var(--dv-color-bg-raised);
-  font-size: var(--dv-font-size-sm);
-}
-
-.chat-message-abstain {
-  border-color: var(--dv-color-warn);
-  background: var(--dv-color-warn-soft);
-}
-
-.chat-message-sources {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--dv-space-xs);
-  margin-top: var(--dv-space-sm);
 }
 
 .search-field {

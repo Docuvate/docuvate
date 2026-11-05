@@ -10,7 +10,6 @@ import 'package:dio/dio.dart';
 
 import 'package:built_value/json_object.dart';
 import 'package:docuvate/src/generated/src/api_util.dart';
-import 'package:docuvate/src/generated/src/model/document_chat_provider_list_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/document_pipeline_modules_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/encoder_reindex_progress_dto.dart';
 import 'package:docuvate/src/generated/src/model/extraction_engine_list_response_dto.dart';
@@ -18,7 +17,9 @@ import 'package:docuvate/src/generated/src/model/problem_details_dto.dart';
 import 'package:docuvate/src/generated/src/model/recognized_field_filter_values_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/replace_recognized_fields_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/update_user_settings_request_dto.dart';
+import 'package:docuvate/src/generated/src/model/update_workspace_ml_settings_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/user_settings_response_dto.dart';
+import 'package:docuvate/src/generated/src/model/workspace_ml_settings_response_dto.dart';
 
 class SettingsApi {
 
@@ -280,7 +281,7 @@ class SettingsApi {
     );
   }
 
-  /// List document chat providers
+  /// Get workspace automation and recognition settings
   /// 
   ///
   /// Parameters:
@@ -291,9 +292,9 @@ class SettingsApi {
   /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// Returns a [Future] containing a [Response] with a [DocumentChatProviderListResponseDto] as data
+  /// Returns a [Future] containing a [Response] with a [WorkspaceMlSettingsResponseDto] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<DocumentChatProviderListResponseDto>> listChatProviders({ 
+  Future<Response<WorkspaceMlSettingsResponseDto>> getWorkspaceMlSettings({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -301,7 +302,7 @@ class SettingsApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/settings/chat-providers';
+    final _path = r'/settings/workspace-ml';
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{
@@ -333,14 +334,14 @@ class SettingsApi {
       onReceiveProgress: onReceiveProgress,
     );
 
-    DocumentChatProviderListResponseDto? _responseData;
+    WorkspaceMlSettingsResponseDto? _responseData;
 
     try {
       final rawResponse = _response.data;
       _responseData = rawResponse == null ? null : _serializers.deserialize(
         rawResponse,
-        specifiedType: const FullType(DocumentChatProviderListResponseDto),
-      ) as DocumentChatProviderListResponseDto;
+        specifiedType: const FullType(WorkspaceMlSettingsResponseDto),
+      ) as WorkspaceMlSettingsResponseDto;
 
     } catch (error, stackTrace) {
       throw DioException(
@@ -352,7 +353,7 @@ class SettingsApi {
       );
     }
 
-    return Response<DocumentChatProviderListResponseDto>(
+    return Response<WorkspaceMlSettingsResponseDto>(
       data: _responseData,
       headers: _response.headers,
       isRedirect: _response.isRedirect,
@@ -930,6 +931,112 @@ class SettingsApi {
     }
 
     return Response<UserSettingsResponseDto>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
+  }
+
+  /// Update workspace automation and recognition settings (installation admins)
+  /// 
+  ///
+  /// Parameters:
+  /// * [updateWorkspaceMlSettingsRequestDto] 
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
+  ///
+  /// Returns a [Future] containing a [Response] with a [WorkspaceMlSettingsResponseDto] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<WorkspaceMlSettingsResponseDto>> updateWorkspaceMlSettings({ 
+    required UpdateWorkspaceMlSettingsRequestDto updateWorkspaceMlSettingsRequestDto,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/settings/workspace-ml';
+    final _options = Options(
+      method: r'PATCH',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'apiKeyAuth',
+            'keyName': 'X-Docuvate-Api-Key',
+            'where': 'header',
+          },{
+            'type': 'http',
+            'scheme': 'bearer',
+            'name': 'bearerAuth',
+          },
+        ],
+        ...?extra,
+      },
+      contentType: 'application/json',
+      validateStatus: validateStatus,
+    );
+
+    dynamic _bodyData;
+
+    try {
+      const _type = FullType(UpdateWorkspaceMlSettingsRequestDto);
+      _bodyData = _serializers.serialize(updateWorkspaceMlSettingsRequestDto, specifiedType: _type);
+
+    } catch(error, stackTrace) {
+      throw DioException(
+         requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    final _response = await _dio.request<Object>(
+      _path,
+      data: _bodyData,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    WorkspaceMlSettingsResponseDto? _responseData;
+
+    try {
+      final rawResponse = _response.data;
+      _responseData = rawResponse == null ? null : _serializers.deserialize(
+        rawResponse,
+        specifiedType: const FullType(WorkspaceMlSettingsResponseDto),
+      ) as WorkspaceMlSettingsResponseDto;
+
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<WorkspaceMlSettingsResponseDto>(
       data: _responseData,
       headers: _response.headers,
       isRedirect: _response.isRedirect,

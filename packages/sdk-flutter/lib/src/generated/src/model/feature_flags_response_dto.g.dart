@@ -23,8 +23,6 @@ class _$FeatureFlagsResponseDto extends FeatureFlagsResponseDto {
   final bool learnedValueTypes;
   @override
   final bool layoutKeyValueRoles;
-  @override
-  final bool localChatModel;
 
   factory _$FeatureFlagsResponseDto(
           [void Function(FeatureFlagsResponseDtoBuilder)? updates]) =>
@@ -38,8 +36,7 @@ class _$FeatureFlagsResponseDto extends FeatureFlagsResponseDto {
       required this.smartDuplicates,
       required this.answerAbstention,
       required this.learnedValueTypes,
-      required this.layoutKeyValueRoles,
-      required this.localChatModel})
+      required this.layoutKeyValueRoles})
       : super._() {
     BuiltValueNullFieldError.checkNotNull(layoutReconstructionCompare,
         r'FeatureFlagsResponseDto', 'layoutReconstructionCompare');
@@ -57,8 +54,6 @@ class _$FeatureFlagsResponseDto extends FeatureFlagsResponseDto {
         learnedValueTypes, r'FeatureFlagsResponseDto', 'learnedValueTypes');
     BuiltValueNullFieldError.checkNotNull(
         layoutKeyValueRoles, r'FeatureFlagsResponseDto', 'layoutKeyValueRoles');
-    BuiltValueNullFieldError.checkNotNull(
-        localChatModel, r'FeatureFlagsResponseDto', 'localChatModel');
   }
 
   @override
@@ -81,8 +76,7 @@ class _$FeatureFlagsResponseDto extends FeatureFlagsResponseDto {
         smartDuplicates == other.smartDuplicates &&
         answerAbstention == other.answerAbstention &&
         learnedValueTypes == other.learnedValueTypes &&
-        layoutKeyValueRoles == other.layoutKeyValueRoles &&
-        localChatModel == other.localChatModel;
+        layoutKeyValueRoles == other.layoutKeyValueRoles;
   }
 
   @override
@@ -96,7 +90,6 @@ class _$FeatureFlagsResponseDto extends FeatureFlagsResponseDto {
     _$hash = $jc(_$hash, answerAbstention.hashCode);
     _$hash = $jc(_$hash, learnedValueTypes.hashCode);
     _$hash = $jc(_$hash, layoutKeyValueRoles.hashCode);
-    _$hash = $jc(_$hash, localChatModel.hashCode);
     _$hash = $jf(_$hash);
     return _$hash;
   }
@@ -111,8 +104,7 @@ class _$FeatureFlagsResponseDto extends FeatureFlagsResponseDto {
           ..add('smartDuplicates', smartDuplicates)
           ..add('answerAbstention', answerAbstention)
           ..add('learnedValueTypes', learnedValueTypes)
-          ..add('layoutKeyValueRoles', layoutKeyValueRoles)
-          ..add('localChatModel', localChatModel))
+          ..add('layoutKeyValueRoles', layoutKeyValueRoles))
         .toString();
   }
 }
@@ -161,11 +153,6 @@ class FeatureFlagsResponseDtoBuilder
   set layoutKeyValueRoles(bool? layoutKeyValueRoles) =>
       _$this._layoutKeyValueRoles = layoutKeyValueRoles;
 
-  bool? _localChatModel;
-  bool? get localChatModel => _$this._localChatModel;
-  set localChatModel(bool? localChatModel) =>
-      _$this._localChatModel = localChatModel;
-
   FeatureFlagsResponseDtoBuilder() {
     FeatureFlagsResponseDto._defaults(this);
   }
@@ -181,7 +168,6 @@ class FeatureFlagsResponseDtoBuilder
       _answerAbstention = $v.answerAbstention;
       _learnedValueTypes = $v.learnedValueTypes;
       _layoutKeyValueRoles = $v.layoutKeyValueRoles;
-      _localChatModel = $v.localChatModel;
       _$v = null;
     }
     return this;
@@ -218,8 +204,7 @@ class FeatureFlagsResponseDtoBuilder
                 answerAbstention, r'FeatureFlagsResponseDto', 'answerAbstention'),
             learnedValueTypes: BuiltValueNullFieldError.checkNotNull(
                 learnedValueTypes, r'FeatureFlagsResponseDto', 'learnedValueTypes'),
-            layoutKeyValueRoles: BuiltValueNullFieldError.checkNotNull(layoutKeyValueRoles, r'FeatureFlagsResponseDto', 'layoutKeyValueRoles'),
-            localChatModel: BuiltValueNullFieldError.checkNotNull(localChatModel, r'FeatureFlagsResponseDto', 'localChatModel'));
+            layoutKeyValueRoles: BuiltValueNullFieldError.checkNotNull(layoutKeyValueRoles, r'FeatureFlagsResponseDto', 'layoutKeyValueRoles'));
     replace(_$result);
     return _$result;
   }

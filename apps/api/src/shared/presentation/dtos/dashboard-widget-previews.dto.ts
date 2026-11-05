@@ -40,23 +40,3 @@ export class DashboardWidgetDocumentPreviewsResponseDtoClass
   @ApiPropertyOptional()
   attentionCount?: number;
 }
-
-export class GlobalChatSuggestionBootstrapDtoClass {
-  @ApiProperty({ nullable: true })
-  topTagId!: string | null;
-
-  @ApiProperty({ nullable: true })
-  topTagName!: string | null;
-
-  @ApiProperty()
-  topTagDocumentCount!: number;
-
-  @ApiProperty()
-  amountTaggedDocumentCount!: number;
-
-  @ApiPropertyOptional()
-  contractEndSample?: { label: string; value: string };
-
-  @ApiProperty({ type: [String] })
-  recentQuestions!: string[];
-}

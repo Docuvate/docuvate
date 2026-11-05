@@ -10,8 +10,6 @@ import json
 import os
 from pathlib import Path
 
-from bench.model_gates.gates.chat_extractive import run_chat_extractive_gate
-from bench.model_gates.gates.chat_routing import run_chat_routing_gate
 from bench.model_gates.gates.classification import run_classification_gate
 from bench.model_gates.gates.layout_ssim import run_layout_ssim_gate
 from bench.model_gates.gates.spark import run_spark_gates
@@ -38,10 +36,6 @@ def _default_baseline_path() -> Path:
     return Path(__file__).resolve().parent / "baseline.json"
 
 
-def _chat_fixtures_path() -> Path:
-    return Path(__file__).resolve().parent / "fixtures" / "chat_extractive_cases.json"
-
-
 def _excluded_gate_ids() -> frozenset[str]:
     raw = os.environ.get("MODEL_GATES_EXCLUDE", "").strip()
     if not raw:
@@ -53,10 +47,6 @@ def run_harness(excluded: frozenset[str] | None = None) -> HarnessResult:
     skip = excluded if excluded is not None else _excluded_gate_ids()
     root = _repo_root()
     gates: list[GateRunResult] = []
-    if "chat_extractive" not in skip:
-        gates.append(run_chat_extractive_gate(_chat_fixtures_path()))
-    if "chat_routing" not in skip:
-        gates.append(run_chat_routing_gate())
     if "classification" not in skip:
         gates.append(run_classification_gate())
     if "layout_ssim" not in skip:

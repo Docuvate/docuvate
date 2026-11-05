@@ -4,12 +4,8 @@ import { describe, expect, it } from 'vitest';
 
 import {
   formatAssignRecommendationReason,
-  formatMergeRecommendationReason,
-  MIN_LABEL_SUPPORT_FOR_MERGE,
-  scoreLabelPairForMerge,
   similarityDisplayTier,
   suggestAssignRecommendations,
-  suggestEmbeddingMergeRecommendations,
 } from './label-recommendation-scoring.js';
 
 describe('similarity display', () => {
@@ -34,7 +30,7 @@ describe('similarity display', () => {
     const reason = formatAssignRecommendationReason({
       tagName: 'Bilanz',
       similarity: 0.991,
-      labelSupportCount: MIN_LABEL_SUPPORT_FOR_MERGE,
+      labelSupportCount: 3,
     });
     expect(reason).toMatch(/99 %/);
   });
@@ -43,17 +39,6 @@ describe('similarity display', () => {
     expect(similarityDisplayTier(0.85)).toBe('high');
     expect(similarityDisplayTier(0.7)).toBe('medium');
     expect(similarityDisplayTier(0.5)).toBe('low');
-  });
-
-  it('avoids percent merge reasons on thin support', () => {
-    const reason = formatMergeRecommendationReason({
-      nameA: 'Rechnung',
-      nameB: 'Rechnungen',
-      similarity: 0.7,
-      supportCount: 2,
-    });
-    expect(reason).toContain('mittlere');
-    expect(reason).not.toContain('100');
   });
 });
 
@@ -159,112 +144,5 @@ describe('suggestAssignRecommendations', () => {
     expect(byDoc.get('kontoauszug')).toBe('Finanzen');
     expect(byDoc.get('lohnsteuer')).toBe('Steuern');
     expect(byDoc.get('mietvertrag-garage')).toBe('Vertrag');
-  });
-});
-
-describe('merge scoring', () => {
-  it('combines centroid and cross-document similarity', () => {
-    const scored = scoreLabelPairForMerge(
-      {
-        tagId: 'a',
-        name: 'A',
-        centroid: [1, 0, 0],
-        docEmbeddings: [
-          [0.98, 0.02, 0],
-          [0.97, 0.03, 0],
-        ],
-      },
-      {
-        tagId: 'b',
-        name: 'B',
-        centroid: [0.92, 0.08, 0],
-        docEmbeddings: [
-          [0.9, 0.1, 0],
-          [0.88, 0.12, 0],
-        ],
-      }
-    );
-    expect(scored).not.toBeNull();
-    if (scored === null) {
-      throw new Error('expected merge score');
-    }
-    expect(scored.similarity).toBeGreaterThan(0.78);
-  });
-
-  it('does not merge Rechnung and SEPA with one document each', () => {
-    const merges = suggestEmbeddingMergeRecommendations({
-      tags: [
-        { tagId: 'a', name: 'Rechnung', centroid: [0, 1, 0] },
-        { tagId: 'b', name: 'SEPA Lastschriftmandat', centroid: [0, 0.93, 0.07] },
-      ],
-      docEmbeddingsByTagId: new Map([
-        ['a', [[0, 1, 0]]],
-        ['b', [[0, 0.93, 0.07]]],
-      ]),
-      dismissedKeys: new Set(),
-      nameNearDuplicate: () => false,
-    });
-    expect(merges).toHaveLength(0);
-  });
-
-  it('does not merge Auftrag and Vertrag without near-duplicate names', () => {
-    const merges = suggestEmbeddingMergeRecommendations({
-      tags: [
-        { tagId: 'a', name: 'Vertrag', centroid: [1, 0, 0] },
-        { tagId: 'b', name: 'Auftragsbestätigung', centroid: [0.9, 0.1, 0] },
-      ],
-      docEmbeddingsByTagId: new Map([
-        [
-          'a',
-          [
-            [0.99, 0.01, 0],
-            [0.98, 0.02, 0],
-            [0.97, 0.03, 0],
-          ],
-        ],
-        [
-          'b',
-          [
-            [0.91, 0.09, 0],
-            [0.89, 0.11, 0],
-            [0.88, 0.12, 0],
-          ],
-        ],
-      ]),
-      dismissedKeys: new Set(),
-      nameNearDuplicate: () => false,
-    });
-    expect(merges).toHaveLength(0);
-  });
-
-  it('surfaces merge when names are near duplicates and support is sufficient', () => {
-    const merges = suggestEmbeddingMergeRecommendations({
-      tags: [
-        { tagId: 'a', name: 'Rechnung', centroid: [0, 1, 0] },
-        { tagId: 'b', name: 'Rechnungen', centroid: [0, 0.98, 0.02] },
-      ],
-      docEmbeddingsByTagId: new Map([
-        [
-          'a',
-          [
-            [0, 1, 0],
-            [0, 0.99, 0.01],
-            [0, 0.98, 0.02],
-          ],
-        ],
-        [
-          'b',
-          [
-            [0, 0.97, 0.03],
-            [0, 0.96, 0.04],
-            [0, 0.95, 0.05],
-          ],
-        ],
-      ]),
-      dismissedKeys: new Set(),
-      nameNearDuplicate: (x, y) => x.startsWith('Rechnung') && y.startsWith('Rechnung'),
-    });
-    expect(merges.length).toBeGreaterThanOrEqual(1);
-    expect(merges[0]?.similarity).toBeGreaterThan(0.75);
   });
 });

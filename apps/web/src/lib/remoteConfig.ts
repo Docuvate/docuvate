@@ -15,7 +15,6 @@ const FEATURE_FLAGS_DEFAULT: FeatureFlagsDto = {
   answerAbstention: false,
   learnedValueTypes: true,
   layoutKeyValueRoles: false,
-  localChatModel: false,
 };
 
 let cachedFlags: FeatureFlagsDto = FEATURE_FLAGS_DEFAULT;

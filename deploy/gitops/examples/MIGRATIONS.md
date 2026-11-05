@@ -14,7 +14,7 @@ That updates Kustomize Job names, Helm hook Job names, and `Chart.yaml` `appVers
 
 ## Argo CD sync order
 
-Apply infrastructure (Postgres, MinIO, Valkey, Ollama) before application Deployments. Example Flux/Argo ordering is in `deploy/gitops/examples/`. Migrate and init Jobs should complete before API and worker rollouts.
+Apply infrastructure (Postgres, MinIO, Valkey) before application Deployments. Example Flux/Argo ordering is in `deploy/gitops/examples/`. Migrate and init Jobs should complete before API and worker rollouts.
 
 ## Helm
 

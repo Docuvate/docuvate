@@ -19,7 +19,6 @@ part 'feature_flags_response_dto.g.dart';
 /// * [answerAbstention] 
 /// * [learnedValueTypes] 
 /// * [layoutKeyValueRoles] 
-/// * [localChatModel] 
 @BuiltValue()
 abstract class FeatureFlagsResponseDto implements Built<FeatureFlagsResponseDto, FeatureFlagsResponseDtoBuilder> {
   @BuiltValueField(wireName: r'layoutReconstructionCompare')
@@ -45,9 +44,6 @@ abstract class FeatureFlagsResponseDto implements Built<FeatureFlagsResponseDto,
 
   @BuiltValueField(wireName: r'layoutKeyValueRoles')
   bool get layoutKeyValueRoles;
-
-  @BuiltValueField(wireName: r'localChatModel')
-  bool get localChatModel;
 
   FeatureFlagsResponseDto._();
 
@@ -110,11 +106,6 @@ class _$FeatureFlagsResponseDtoSerializer implements PrimitiveSerializer<Feature
     yield r'layoutKeyValueRoles';
     yield serializers.serialize(
       object.layoutKeyValueRoles,
-      specifiedType: const FullType(bool),
-    );
-    yield r'localChatModel';
-    yield serializers.serialize(
-      object.localChatModel,
       specifiedType: const FullType(bool),
     );
   }
@@ -195,13 +186,6 @@ class _$FeatureFlagsResponseDtoSerializer implements PrimitiveSerializer<Feature
             specifiedType: const FullType(bool),
           ) as bool;
           result.layoutKeyValueRoles = valueDes;
-          break;
-        case r'localChatModel':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(bool),
-          ) as bool;
-          result.localChatModel = valueDes;
           break;
         default:
           unhandled.add(key);

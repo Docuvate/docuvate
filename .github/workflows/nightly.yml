@@ -171,11 +171,11 @@ jobs:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
           DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
         run: bash scripts/ci/docker-login-hub.sh
-      - name: Start compose stack (CI override, no Ollama)
+      - name: Start compose stack (CI override)
         run: |
           set -euo pipefail
           docker compose -f docker-compose.yml -f docker-compose.ci.yml up -d --build \
-            postgres migrate db-storage-guard minio minio-init valkey mailpit ollama-init api worker web
+            postgres migrate db-storage-guard minio minio-init valkey mailpit api worker web
       - name: Wait for API and web
         run: |
           set -euo pipefail
@@ -205,9 +205,6 @@ jobs:
           AUTH_BASE=http://localhost:3001 \
           WEB_ORIGIN=http://localhost:5173 \
           node scripts/seed-e2e-smoke-user.mjs
-          AUTH_BASE=http://localhost:3001 \
-          WEB_ORIGIN=http://localhost:5173 \
-          node scripts/seed-cited-chat-bench.mjs
       - name: Playwright full e2e (@docuvate/e2e)
         env:
           E2E_WEB_URL: http://localhost:5173

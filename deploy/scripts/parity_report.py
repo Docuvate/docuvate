@@ -17,7 +17,6 @@ ALLOWLIST_PATH = ROOT / "deploy/scripts/parity-allowlist.yaml"
 JOB_PREFIXES = (
     "docuvate-db-migrate-",
     "docuvate-minio-init-",
-    "docuvate-ollama-init-",
 )
 
 SKIP_KINDS = frozenset({"Namespace", "Secret"})
@@ -107,7 +106,6 @@ def norm_command(cmd: list[Any] | None) -> str:
         return ""
     text = " ".join(str(x) for x in cmd).strip()
     text = re.sub(r"\s+", " ", text)
-    text = text.replace('"${OLLAMA_MODEL}"', '"$OLLAMA_MODEL"')
     return text
 
 

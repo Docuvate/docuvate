@@ -27,9 +27,6 @@ export class FeatureFlagsResponseDto {
 
   @ApiProperty()
   layoutKeyValueRoles!: boolean;
-
-  @ApiProperty()
-  localChatModel!: boolean;
 }
 
 export class RemoteConfigResponseDto implements RemoteConfigDto {

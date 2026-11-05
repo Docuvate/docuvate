@@ -50,7 +50,6 @@ vi.mock('./lib/remoteConfig', () => ({
     answerAbstention: false,
     learnedValueTypes: true,
     layoutKeyValueRoles: false,
-    localChatModel: false,
   }),
   ensureRemoteConfigLoaded: vi.fn(() => Promise.resolve({})),
   readFeatureFlags: vi.fn(),

@@ -4,7 +4,6 @@ import { randomUUID } from 'node:crypto';
 
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
-import { PgCitedChatRetrievalRepository } from '../../src/modules/cited-chat/infrastructure/pg-cited-chat-retrieval.repository.js';
 import { PgDuplicateRepository } from '../../src/modules/duplicates/infrastructure/pg-duplicate.repository.js';
 import { PgGlobalSearchRepository } from '../../src/modules/search/infrastructure/pg-global-search.repository.js';
 import { PgTaxonomyRepository } from '../../src/modules/taxonomy/infrastructure/pg-taxonomy.repository.js';
@@ -109,7 +108,6 @@ describe('tenant representation cross-tenant leak (blocking, Testcontainers Post
   let docB: string;
 
   let searchRepo: PgGlobalSearchRepository;
-  let retrievalRepo: PgCitedChatRetrievalRepository;
   let taxonomyRepo: PgTaxonomyRepository;
   let duplicateRepo: PgDuplicateRepository;
 
@@ -175,7 +173,6 @@ describe('tenant representation cross-tenant leak (blocking, Testcontainers Post
     );
 
     searchRepo = new PgGlobalSearchRepository(pool);
-    retrievalRepo = new PgCitedChatRetrievalRepository(pool);
     taxonomyRepo = new PgTaxonomyRepository(pool);
     duplicateRepo = new PgDuplicateRepository(pool);
   }, 120_000);
@@ -193,7 +190,6 @@ describe('tenant representation cross-tenant leak (blocking, Testcontainers Post
       includeLabels: false,
       perGroupLimit: 10,
     });
-    const chat = await retrievalRepo.hybridRetrieveChunks(userA, 'Gesamtsumme Nordwind', {});
     const suggestions = await taxonomyRepo.listSuggestions(docA, userA);
     const duplicates = await duplicateRepo.listForDocument(docA, userA);
     const sqlScoped = await withRlsEnforcedPgClient(pool, userA, async (client) => {
@@ -217,7 +213,6 @@ describe('tenant representation cross-tenant leak (blocking, Testcontainers Post
     );
     return {
       searchDocIds: search.documents.map((d) => d.id).sort(),
-      chatChunkIds: chat.map((c) => c.chunkId).sort(),
       suggestionTagIds: suggestions.map((s) => s.tag.id).sort(),
       suggestionConfidences: suggestions.map((s) => s.confidence ?? 0),
       duplicateCandidateIds: duplicates.map((d) => d.candidateDocumentId).sort(),

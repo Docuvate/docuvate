@@ -3,12 +3,12 @@
 import type { ExtractionBlock } from '@docuvate/contracts';
 import { Injectable } from '@nestjs/common';
 
+import { EnsureDocumentRepresentationUseCase } from '../../representation/application/ensure-document-representation.use-case.js';
+import { PgDocumentRepresentationRepository } from '../../representation/infrastructure/pg-document-representation.repository.js';
 import {
   attachPagesToChunks,
   splitTextChunksWithSpans,
-} from '../../cited-chat/domain/split-text-chunks-with-spans.js';
-import { EnsureDocumentRepresentationUseCase } from '../../representation/application/ensure-document-representation.use-case.js';
-import { PgDocumentRepresentationRepository } from '../../representation/infrastructure/pg-document-representation.repository.js';
+} from '../domain/split-text-chunks-with-spans.js';
 import { PgGlobalSearchRepository } from '../infrastructure/pg-global-search.repository.js';
 
 interface SyncDocumentSearchIndexInput {

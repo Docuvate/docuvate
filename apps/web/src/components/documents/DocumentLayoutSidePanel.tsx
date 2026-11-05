@@ -39,14 +39,12 @@ import { FieldValueRow } from '../ui/FieldValueRow';
 import { Input } from '../ui/Input';
 import { SourceChip } from '../ui/SourceChip';
 import { CorrectedTableCard } from './CorrectedTableCard';
-import { DocumentChatPanel } from './DocumentChatPanel';
 
-export type LayoutSideTab = 'fields' | 'tables' | 'outline' | 'chat';
+export type LayoutSideTab = 'fields' | 'tables' | 'outline';
 
-const LAYOUT_SIDE_TAB_ORDER: LayoutSideTab[] = ['fields', 'tables', 'outline', 'chat'];
+const LAYOUT_SIDE_TAB_ORDER: LayoutSideTab[] = ['fields', 'tables', 'outline'];
 
 interface DocumentLayoutSidePanelProps {
-  documentId: string;
   layoutIr: LayoutIrDocument;
   fields: ExtractedField[];
   knownFieldKeys: Set<string>;
@@ -60,11 +58,6 @@ interface DocumentLayoutSidePanelProps {
   dismissedSuggestions: Set<string>;
   heuristicSuggestions?: { key: string; value: string }[];
   recognizedCatalog?: RecognizedFieldDefinitionDto[];
-  documentChatAvailable?: boolean;
-  documentChatUiEnabled?: boolean;
-  documentChatLocalModelEnabled?: boolean;
-  documentChatLocalModelReady?: boolean;
-  showChatTab?: boolean;
   fieldRegions?: DocumentRegionDto[];
   tableRegions?: DocumentRegionDto[];
   onTableHeaderChange?: (regionId: string, headerRows: number, headerCols: number) => void;
@@ -81,7 +74,6 @@ interface DocumentLayoutSidePanelProps {
 }
 
 export function DocumentLayoutSidePanel({
-  documentId,
   layoutIr,
   fields,
   knownFieldKeys,
@@ -95,11 +87,6 @@ export function DocumentLayoutSidePanel({
   dismissedSuggestions,
   heuristicSuggestions = [],
   recognizedCatalog = [],
-  documentChatAvailable = false,
-  documentChatUiEnabled = true,
-  documentChatLocalModelEnabled = false,
-  documentChatLocalModelReady = false,
-  showChatTab = true,
   fieldRegions = [],
   tableRegions = [],
   onTableHeaderChange,
@@ -210,29 +197,19 @@ export function DocumentLayoutSidePanel({
     persistedDefinitionIds,
   ]);
 
-  const tabOrder = useMemo(
-    () =>
-      showChatTab && documentChatUiEnabled
-        ? LAYOUT_SIDE_TAB_ORDER
-        : LAYOUT_SIDE_TAB_ORDER.filter((id) => id !== 'chat'),
-    [documentChatUiEnabled, showChatTab]
-  );
-
   const tabs = useMemo(
     () =>
-      tabOrder.map((id) => ({
+      LAYOUT_SIDE_TAB_ORDER.map((id) => ({
         id,
         label: t(
           id === 'fields'
             ? 'documents.layoutTabOverview'
             : id === 'tables'
               ? 'documents.layoutTabTables'
-              : id === 'outline'
-                ? 'documents.layoutTabOutline'
-                : 'documents.tabChat'
+              : 'documents.layoutTabOutline'
         ),
       })),
-    [t, tabOrder]
+    [t]
   );
 
   const activeTabMeta = tabs.find((tab) => tab.id === activeTab) ?? tabs[0];
@@ -249,10 +226,10 @@ export function DocumentLayoutSidePanel({
 
   const onTabListKeyDown = useCallback(
     (event: KeyboardEvent<HTMLDivElement>) => {
-      const idx = tabOrder.indexOf(activeTab);
+      const idx = LAYOUT_SIDE_TAB_ORDER.indexOf(activeTab);
       if (idx < 0) return;
       let nextIdx: number | null = null;
-      const tabCount = tabOrder.length;
+      const tabCount = LAYOUT_SIDE_TAB_ORDER.length;
       switch (event.key) {
         case 'ArrowRight':
           nextIdx = (idx + 1) % tabCount;
@@ -270,16 +247,10 @@ export function DocumentLayoutSidePanel({
           return;
       }
       event.preventDefault();
-      focusTab(tabOrder[nextIdx]);
+      focusTab(LAYOUT_SIDE_TAB_ORDER[nextIdx]);
     },
-    [activeTab, focusTab, tabOrder]
+    [activeTab, focusTab]
   );
-
-  useEffect(() => {
-    if (!tabOrder.includes(activeTab)) {
-      onTabChange(tabOrder[0] ?? 'fields');
-    }
-  }, [activeTab, onTabChange, tabOrder]);
 
   useEffect(() => {
     if (!activeOverlayId) return;
@@ -327,7 +298,13 @@ export function DocumentLayoutSidePanel({
       >
         <FieldValueRow
           fieldName={fieldLabelForKey(field.key)}
-          value={missing ? '' : formatFieldValue(field.key, field.value)}
+          value={
+            missing
+              ? ''
+              : field.value.trim().length > 0
+                ? formatFieldValue(field.key, field.value)
+                : t('documents.fieldRegionEmptyHint')
+          }
           state={
             missing
               ? 'missing'
@@ -357,7 +334,7 @@ export function DocumentLayoutSidePanel({
 
   return (
     <aside
-      className={`layout-side-panel${activeTab === 'chat' ? ' layout-side-panel--chat' : ''}`}
+      className="layout-side-panel"
       aria-label={t('documents.layoutSidePanelAria')}
     >
       <div
@@ -575,19 +552,6 @@ export function DocumentLayoutSidePanel({
           </div>
         ) : null}
 
-        {activeTab === 'chat' ? (
-          <div className="layout-side-chat">
-            <DocumentChatPanel
-              documentId={documentId}
-              compact
-              sidePanel
-              chatAvailable={documentChatAvailable}
-              chatUiEnabled={documentChatUiEnabled}
-              localChatModelEnabled={documentChatLocalModelEnabled}
-              localChatModelReady={documentChatLocalModelReady}
-            />
-          </div>
-        ) : null}
       </div>
     </aside>
   );

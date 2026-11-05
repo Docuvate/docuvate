@@ -1,39 +1,32 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type {
-  DocumentChatProviderInfo,
-  DocumentChatProvidersCatalogDto,
   ExtractionEngineInfo,
   UserSettingsDto,
 } from '@docuvate/contracts';
 import {
   Ban,
   Cable,
-  MessageSquareText,
   ScanText,
   SlidersHorizontal,
   UserRound,
   Wand2,
 } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 
-import { PageFormSaveKit } from '../components/save/PageFormSaveKit';
 import { useToast } from '../components/save/ToastProvider';
 import { SettingsCallout } from '../components/settings/SettingsCallout';
 import { SettingsCardLink } from '../components/settings/SettingsCardLink';
-import { SettingsChatStatus } from '../components/settings/SettingsChatStatus';
 import { SettingsSectionCard } from '../components/settings/SettingsSectionCard';
 import { SettingsSectionLayout } from '../components/settings/SettingsSectionLayout';
 import { WorkspaceAutomationSection } from '../components/settings/WorkspaceAutomationSection';
 import { Button } from '../components/ui/Button';
-import { PasswordInput } from '../components/ui/PasswordInput';
 import { Select } from '../components/ui/Select';
 import { Switch } from '../components/ui/Switch';
 import { useAdvancedFeaturesEnabled, writeAdvancedFeaturesEnabled } from '../lib/advancedFeatures';
 import {
-  getDocumentChatProvidersCatalog,
   getUserSettings,
   listExtractionEngines,
   listLabelRecommendationBlocklist,
@@ -42,16 +35,9 @@ import {
 import { formatUserFacingError } from '../lib/apiErrors';
 import { authClient, authSessionUserEmail } from '../lib/auth-client';
 import { performSignOut } from '../lib/authSignOut';
-import { chatProviderLabel } from '../lib/chatProviderLabels';
 import { extractionEngineDescription } from '../lib/extractionEngineI18n';
 import { readLocationStateBoolean } from '../lib/routerLocationState';
 import { routes } from '../lib/routes';
-import {
-  patchForSettingsChatMode,
-  resolveSettingsChatMode,
-  type SettingsChatMode,
-} from '../lib/settingsChatMode';
-import { settingsChatStatusPresentation } from '../lib/settingsChatStatus';
 import {
   buildExtractionEngineSelectOptions,
   shouldShowExtractionOfflineCallout,
@@ -59,12 +45,6 @@ import {
 
 const SETTINGS_ICON_SIZE = 20;
 
-function parseSimpleChatMode(value: string): SettingsChatMode {
-  if (value === 'cloud' || value === 'off') {
-    return value;
-  }
-  return 'local';
-}
 const settingsIconProps = {
   size: SETTINGS_ICON_SIZE,
   strokeWidth: 1.75,
@@ -82,12 +62,9 @@ export function SettingsPage() {
   const [settings, setSettings] = useState<UserSettingsDto | null>(null);
   const [engines, setEngines] = useState<ExtractionEngineInfo[]>([]);
   const [enginesLoadFailed, setEnginesLoadFailed] = useState(false);
-  const [chatCatalog, setChatCatalog] = useState<DocumentChatProvidersCatalogDto | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [blockedLabelCount, setBlockedLabelCount] = useState<number | null>(null);
-  const [chatCloudBaseUrl, setChatCloudBaseUrl] = useState('');
-  const [chatCloudApiKeyDraft, setChatCloudApiKeyDraft] = useState('');
 
   useEffect(() => {
     if (readLocationStateBoolean(location.state, 'adminDenied')) {
@@ -99,13 +76,10 @@ export function SettingsPage() {
   useEffect(() => {
     void Promise.all([
       getUserSettings(),
-      getDocumentChatProvidersCatalog(),
       listLabelRecommendationBlocklist(),
     ])
-      .then(([s, chat, blocklist]) => {
+      .then(([s, blocklist]) => {
         setSettings(s);
-        setChatCloudBaseUrl(s.documentChatCloudBaseUrl ?? '');
-        setChatCatalog(chat);
         setBlockedLabelCount(blocklist.items.length);
         writeAdvancedFeaturesEnabled(s.advancedFeaturesEnabled === true);
       })
@@ -123,68 +97,6 @@ export function SettingsPage() {
         setEnginesLoadFailed(true);
       });
   }, []);
-
-  async function saveChatCloudSettings(baseUrl: string, apiKey: string) {
-    setSaving(true);
-    setError(null);
-    try {
-      const patch: {
-        documentChatCloudBaseUrl: string | null;
-        documentChatCloudApiKey?: string | null;
-      } = {
-        documentChatCloudBaseUrl: baseUrl.trim().length > 0 ? baseUrl.trim() : null,
-      };
-      if (apiKey.trim().length > 0) {
-        patch.documentChatCloudApiKey = apiKey.trim();
-      }
-      const updated = await updateUserSettings(patch);
-      setSettings(updated);
-      setChatCloudBaseUrl(updated.documentChatCloudBaseUrl ?? '');
-      setChatCloudApiKeyDraft('');
-      toast.success(t('save.saved'));
-    } catch (err) {
-      const message = formatUserFacingError(err, 'errors.saveFailed');
-      setError(message);
-      toast.error(message);
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  async function saveSimpleChatMode(mode: SettingsChatMode) {
-    setSaving(true);
-    setError(null);
-    try {
-      const patch = patchForSettingsChatMode(mode, selectable);
-      const updated = await updateUserSettings(patch);
-      setSettings(updated);
-      toast.success();
-    } catch (err) {
-      const message = formatUserFacingError(err, 'errors.saveFailed');
-      setError(message);
-      toast.error(message);
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  async function saveChatProvider(nextProvider: string) {
-    setSaving(true);
-    setError(null);
-    try {
-      const updated = await updateUserSettings({
-        preferredChatProvider: nextProvider === 'default' ? null : nextProvider,
-      });
-      setSettings(updated);
-      toast.success();
-    } catch (err) {
-      const message = formatUserFacingError(err, 'errors.saveFailed');
-      setError(message);
-      toast.error(message, () => void saveChatProvider(nextProvider));
-    } finally {
-      setSaving(false);
-    }
-  }
 
   async function saveEngine(nextEngine: string) {
     setSaving(true);
@@ -239,54 +151,15 @@ export function SettingsPage() {
 
   const selectedEngine = settings?.preferredExtractorEngine ?? 'pipeline';
   const engineHelp = extractionEngineDescription(t, selectedEngine);
-  const selectable = chatCatalog?.selectable ?? [];
-  const preferredChat = settings?.preferredChatProvider;
-  const selectedChat =
-    preferredChat === 'off' || settings?.customerChatProvider === 'off'
-      ? 'off'
-      : preferredChat && preferredChat.length > 0
-        ? preferredChat
-        : selectable.length === 1
-          ? selectable[0].id
-          : selectable.length > 0
-            ? 'default'
-            : 'off';
-  const showProviderSelect = chatCatalog !== null;
-  const chatProviderOptions = [
-    { value: 'off', label: chatProviderLabel('off') },
-    ...(selectable.length > 1
-      ? [{ value: 'default', label: t('settings.chatDefaultAutomatic') }]
-      : []),
-    ...selectable.map((provider: DocumentChatProviderInfo) => ({
-      value: provider.id,
-      label: chatProviderLabel(provider.id),
-    })),
-  ];
   const showExtractionOfflineCallout = shouldShowExtractionOfflineCallout(
     enginesLoadFailed,
     engines,
     selectedEngine
   );
-  const chatStatus = settingsChatStatusPresentation(t, settings);
   const engineOptions =
     advancedFeaturesEnabled || engines.length === 0
       ? buildExtractionEngineSelectOptions(t, engines, { hideUnavailableSuffix: showExtractionOfflineCallout })
       : [{ value: 'pipeline', label: t('settings.engineDefaultAutomatic') }];
-
-  const storedCloudBase = settings?.documentChatCloudBaseUrl ?? '';
-  const cloudFormDirty =
-    advancedFeaturesEnabled &&
-    (chatCloudBaseUrl.trim() !== storedCloudBase.trim() || chatCloudApiKeyDraft.trim().length > 0);
-
-  const simpleChatMode = resolveSettingsChatMode(settings, selectable);
-  const simpleChatOptions = useMemo(
-    () => [
-      { value: 'local', label: t('settings.chatModeLocal') },
-      { value: 'cloud', label: t('settings.chatModeCloud') },
-      { value: 'off', label: t('settings.chatModeOff') },
-    ],
-    [t]
-  );
 
   return (
     <SettingsSectionLayout
@@ -299,19 +172,6 @@ export function SettingsPage() {
         />
       }
     >
-      <PageFormSaveKit
-        dirty={cloudFormDirty}
-        saving={saving}
-        error={error}
-        onSave={() => {
-          void saveChatCloudSettings(chatCloudBaseUrl, chatCloudApiKeyDraft);
-        }}
-        onDiscard={() => {
-          setChatCloudBaseUrl(storedCloudBase);
-          setChatCloudApiKeyDraft('');
-          setError(null);
-        }}
-      />
       {error ? (
         <p className="error" role="alert">
           {error}
@@ -356,83 +216,6 @@ export function SettingsPage() {
             </label>
           ) : advancedFeaturesEnabled ? (
             <p className="muted settings-hint">{t('settings.arenaNoWinner')}</p>
-          ) : null}
-        </SettingsSectionCard>
-
-        <SettingsSectionCard
-          compact
-          id="settings-document-chat"
-          icon={<MessageSquareText {...settingsIconProps} />}
-          title={t('settings.chatTitle')}
-          description={t('settings.chatLeadShort')}
-        >
-          <SettingsChatStatus status={chatStatus} />
-          {!advancedFeaturesEnabled ? (
-            <label className="settings-field">
-              {t('settings.chatModeSimple')}
-              <Select
-                value={simpleChatMode}
-                disabled={saving || !settings}
-                onChange={(value) => {
-                  void saveSimpleChatMode(parseSimpleChatMode(value));
-                }}
-                options={simpleChatOptions}
-                aria-label={t('settings.chatModeSimpleAria')}
-              />
-            </label>
-          ) : null}
-          {advancedFeaturesEnabled && showProviderSelect ? (
-            <label className="settings-field">
-              {t('settings.chatProvider')}
-              <Select
-                value={selectedChat}
-                disabled={saving || !settings}
-                onChange={(value) => void saveChatProvider(value)}
-                options={chatProviderOptions}
-                aria-label={t('settings.chatProviderAria')}
-              />
-            </label>
-          ) : null}
-          {advancedFeaturesEnabled ? (
-            <>
-              <label className="settings-field">
-                {t('settings.chatCloudBaseUrl')}
-                <input
-                  type="url"
-                  className="settings-input"
-                  disabled={saving || !settings}
-                  value={chatCloudBaseUrl}
-                  placeholder={t('settings.chatCloudBaseUrlPlaceholder')}
-                  onChange={(e) => {
-                    setChatCloudBaseUrl(e.target.value);
-                  }}
-                />
-                {chatCloudBaseUrl.trim() !== storedCloudBase.trim() ? (
-                  <p className="muted settings-field-changed">{t('settings.cloudChangedHint')}</p>
-                ) : (
-                  <p className="settings-hint-slot muted" aria-hidden="true">
-                    {' '}
-                  </p>
-                )}
-              </label>
-              <label className="settings-field">
-                {t('settings.chatCloudApiKey')}
-                <PasswordInput
-                  className="settings-input"
-                  disabled={saving || !settings}
-                  value={chatCloudApiKeyDraft}
-                  placeholder={
-                    settings?.documentChatCloudApiKeyConfigured
-                      ? t('settings.chatCloudApiKeyConfigured')
-                      : t('settings.chatCloudApiKeyPlaceholder')
-                  }
-                  onChange={(e) => {
-                    setChatCloudApiKeyDraft(e.target.value);
-                  }}
-                />
-                <p className="settings-hint-slot muted">{t('settings.chatCloudHint')}</p>
-              </label>
-            </>
           ) : null}
         </SettingsSectionCard>
 

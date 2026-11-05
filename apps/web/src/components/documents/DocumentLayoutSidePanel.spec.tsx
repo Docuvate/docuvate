@@ -66,7 +66,6 @@ const fieldRegion: DocumentRegionDto = {
 function renderFieldsPanel(hideInlineFieldList = false) {
   return render(
     <DocumentLayoutSidePanel
-      documentId="doc-1"
       layoutIr={layoutIr}
       fields={[{ key: 'datum', value: '01.01.2026' }]}
       knownFieldKeys={new Set()}
@@ -88,7 +87,6 @@ describe('DocumentLayoutSidePanel', () => {
   it('renders layout tab labels', () => {
     render(
       <DocumentLayoutSidePanel
-        documentId="doc-1"
         layoutIr={layoutIr}
         fields={[{ key: 'datum', value: '01.01.2026' }]}
         knownFieldKeys={new Set()}
@@ -109,7 +107,6 @@ describe('DocumentLayoutSidePanel', () => {
   it('shows empty fields hint when no values are present', () => {
     render(
       <DocumentLayoutSidePanel
-        documentId="doc-1"
         layoutIr={layoutIr}
         fields={[]}
         knownFieldKeys={new Set()}

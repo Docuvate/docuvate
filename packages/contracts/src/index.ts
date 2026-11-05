@@ -591,118 +591,6 @@ export interface PaperlessImportRunErrorDto {
   createdAt: string;
 }
 
-export interface ChatMessageDto {
-  role: 'user' | 'assistant';
-  content: string;
-}
-
-export interface DocumentChatRequest {
-  message: string;
-  history?: ChatMessageDto[];
-}
-
-export interface DocumentChatResponse {
-  reply: ChatMessageDto;
-  configured: boolean;
-  provider?: string;
-  setupHint?: string | null;
-}
-
-export type ChatThreadScope = 'document' | 'library';
-
-export interface DocumentChatThreadDto {
-  id: string;
-  title: string;
-  scope: ChatThreadScope;
-  documentIds: string[];
-  createdAt: string;
-  updatedAt: string;
-  lastMessagePreview?: string | null;
-  /** Set when the latest assistant turn is still generating. */
-  activeGenerationStatus?: DocumentChatGenerationStatus | null;
-}
-
-export interface DocumentChatThreadListResponse {
-  threads: DocumentChatThreadDto[];
-  nextCursor: string | null;
-  hasMore: boolean;
-  total: number | null;
-}
-
-export interface CreateDocumentChatThreadRequest {
-  title?: string;
-}
-
-export type DocumentChatGenerationStatus = 'pending' | 'streaming' | 'done' | 'failed';
-
-export type DocumentChatGenerationPhase = 'retrieving' | 'generating' | 'verifying';
-
-export interface ChatMessageCitationDto {
-  ordinal: number;
-  documentId: string;
-  documentTitle: string;
-  page: number | null;
-  charStart: number;
-  charEnd: number;
-  quote: string;
-  blocks: ExtractionBlock[];
-  bbox?: NormalizedBBox | null;
-  documentImage?: DocumentExtractionImageDto | null;
-}
-
-export type DocumentChatGenerationErrorCode =
-  | 'generation_timeout'
-  | 'worker_unreachable'
-  | 'ollama_error'
-  | 'cancelled'
-  | 'provider_unavailable'
-  | 'unknown';
-
-/** Written when API runs with DOCUVATE_CITED_CHAT_BENCH_STATS=1 (bench harness). */
-export interface CitedChatBenchStatsDto {
-  citedRejectedClaims: number;
-  timingMs?: {
-    embedMs: number;
-    retrieveMs: number;
-    rerankMs: number;
-    llmMs: number;
-    verifyMs: number;
-    totalMs: number;
-    promptChars: number;
-  };
-}
-
-export interface DocumentChatMessageRecordDto extends ChatMessageDto {
-  id: string;
-  createdAt: string;
-  updatedAt?: string;
-  generationStatus?: DocumentChatGenerationStatus | null;
-  generationPhase?: DocumentChatGenerationPhase | null;
-  errorCode?: DocumentChatGenerationErrorCode | string | null;
-  citations?: ChatMessageCitationDto[];
-  citedBenchStats?: CitedChatBenchStatsDto;
-}
-
-export interface DocumentChatThreadMessagesResponse {
-  messages: DocumentChatMessageRecordDto[];
-}
-
-export interface SendDocumentChatThreadMessageRequest {
-  message: string;
-}
-
-export interface SendDocumentChatThreadMessageResponse extends DocumentChatResponse {
-  userMessage: DocumentChatMessageRecordDto;
-  assistantMessage: DocumentChatMessageRecordDto;
-  /** True when the assistant reply is generated asynchronously (poll or SSE). */
-  asyncGeneration?: boolean;
-}
-
-export interface DocumentChatMessageStreamEvent {
-  type: 'snapshot' | 'token' | 'phase' | 'done' | 'failed' | 'cancelled';
-  message: DocumentChatMessageRecordDto;
-}
-
 export interface DocumentDto {
   id: string;
   filename: string;
@@ -974,20 +862,6 @@ export interface LabelRecommendationBlocklistResponse {
   patterns: LabelRecommendationBlocklistPatternDto[];
 }
 
-export interface ProposeLabelRecommendationBlocklistPatternRequest {
-  phrases: string[];
-}
-
-export interface ProposeLabelRecommendationBlocklistPatternResponse {
-  configured: boolean;
-  setupHint?: string;
-  proposal?: {
-    pattern: string;
-    explanation: string;
-    phrases: string[];
-  };
-}
-
 export interface ConfirmLabelRecommendationBlocklistPatternRequest {
   pattern: string;
 }
@@ -1096,37 +970,6 @@ export interface ExtractionEngineInfo {
   arenaEligible?: boolean;
 }
 
-export type DocumentChatProviderId =
-  'mock' | 'context' | 'rag-ollama' | 'ollama' | 'donut-ml' | 'off';
-
-export interface DocumentChatProviderInfo {
-  id: DocumentChatProviderId | string;
-  label: string;
-  description: string;
-  available: boolean;
-}
-
-export interface DocumentChatUnavailableBackendInfo {
-  id: string;
-  label: string;
-  reason: string;
-  setupHint: string;
-  /** Stable code for UI i18n (e.g. model_loading, worker_offline). */
-  reasonCode?: string;
-}
-
-export interface DocumentChatProvidersCatalogDto {
-  selectable: DocumentChatProviderInfo[];
-  unavailable: DocumentChatUnavailableBackendInfo[];
-  development?: DocumentChatProviderInfo[];
-  meta: {
-    ollamaModel: string | null;
-    ollamaConfigured: boolean;
-    ollamaModelReady?: boolean;
-    runsOnCpu: boolean;
-  };
-}
-
 export type InferenceDeviceKind = 'cuda' | 'mps' | 'rocm' | 'cpu';
 
 export interface HardwareCapabilitiesDto {
@@ -1157,23 +1000,6 @@ export type UiLocale = 'de' | 'en';
 
 export interface UserSettingsDto {
   preferredExtractorEngine: ExtractorEngineId | string;
-  preferredChatProvider?: DocumentChatProviderId | string | null;
-  effectiveChatProvider?: DocumentChatProviderId | string;
-  /** LLM provider used for document chat in the product UI (never context-only). */
-  customerChatProvider?: DocumentChatProviderId | string;
-  documentChatUiEnabled?: boolean;
-  /** True when the customer-facing LLM chat path can run (RAG+Ollama or Donut). */
-  documentChatAvailable?: boolean;
-  /** ready | starting | unavailable | off — customer-facing readiness for document chat. */
-  documentChatReadiness?: 'ready' | 'starting' | 'unavailable' | 'off';
-  /** Customer reason code when chat is starting or unavailable (maps to settings.chatUnavailableReason.*). */
-  documentChatReadinessReason?: string | null;
-  documentChatOllamaModel?: string | null;
-  documentChatRunsOnCpu?: boolean;
-  /** Tenant flag: local Ollama LLM allowed (requires Compose chat-local or external Ollama). */
-  documentChatLocalModelEnabled?: boolean;
-  /** Local model loaded and ready for open-ended LLM answers. */
-  documentChatLocalModelReady?: boolean;
   advancedFeaturesEnabled?: boolean;
   useArenaWinnerAsDefault: boolean;
   arenaWinnerEngine?: string | null;
@@ -1183,23 +1009,16 @@ export interface UserSettingsDto {
   fieldExtractionRequiredLabelIds?: string[];
   themePreference?: ThemePreference;
   locale?: UiLocale | null;
-  /** Optional OpenAI-compatible chat endpoint (Ollama remains default when unset). */
-  documentChatCloudBaseUrl?: string | null;
-  documentChatCloudApiKeyConfigured?: boolean;
 }
 
 export interface UpdateUserSettingsRequest {
   preferredExtractorEngine?: ExtractorEngineId | string;
-  preferredChatProvider?: DocumentChatProviderId | string | null;
   useArenaWinnerAsDefault?: boolean;
   fieldExtractionConfidenceGateEnabled?: boolean;
   fieldExtractionRequiredLabelIds?: string[];
   advancedFeaturesEnabled?: boolean;
   themePreference?: ThemePreference;
   locale?: UiLocale | null;
-  documentChatCloudBaseUrl?: string | null;
-  /** Set to empty string to clear a stored key. */
-  documentChatCloudApiKey?: string | null;
 }
 
 export type LabelAutoAssignPreset = 'off' | 'cautious' | 'normal';
@@ -1616,7 +1435,6 @@ export type {
   DashboardWidgetPreviewType,
 } from './dashboard-widget-previews.js';
 
-export type { GlobalChatSuggestionBootstrapDto } from './global-chat-suggestion-bootstrap.js';
 
 export type {
   SavedViewVisibility,

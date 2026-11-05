@@ -37,14 +37,6 @@ function buildRegistry(t: TFunction, isAdmin: boolean) {
     },
     {
       type: 'setting',
-      id: 'settings-chat',
-      title: t('search.registry.documentChat'),
-      description: t('search.registry.documentChatDesc'),
-      route: routes.settings,
-      keywords: ['chat', 'assistent'],
-    },
-    {
-      type: 'setting',
       id: 'settings-dark',
       title: t('search.registry.darkMode'),
       description: t('search.registry.darkModeDesc'),

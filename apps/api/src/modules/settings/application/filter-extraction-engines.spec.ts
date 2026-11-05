@@ -21,7 +21,6 @@ describe('filterExtractionEngines', () => {
         answerAbstention: false,
         learnedValueTypes: true,
         layoutKeyValueRoles: false,
-        localChatModel: false,
       })
     ).toEqual([{ id: 'pipeline', label: 'Pipeline', description: 'Default pipeline' }]);
   });
@@ -37,7 +36,6 @@ describe('filterExtractionEngines', () => {
         answerAbstention: false,
         learnedValueTypes: true,
         layoutKeyValueRoles: false,
-        localChatModel: false,
       })
     ).toEqual(engines);
   });

@@ -10,7 +10,6 @@ export const RAW_I18N_KEY = /\b[a-z][a-zA-Z]*\.[a-zA-Z]+(\.[a-zA-Z]+)+\b/;
 export const CE_AUTHENTICATED_ROUTES: { path: string; slug: string }[] = [
   { path: '/', slug: 'start' },
   { path: '/documents', slug: 'documents' },
-  { path: '/chat', slug: 'chat' },
   { path: '/structure/labels', slug: 'labels' },
   { path: '/structure/recognized-fields', slug: 'recognized-fields' },
   { path: '/filesystem', slug: 'filesystem' },

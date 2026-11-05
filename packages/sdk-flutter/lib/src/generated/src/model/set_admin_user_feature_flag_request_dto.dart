@@ -18,7 +18,7 @@ part 'set_admin_user_feature_flag_request_dto.g.dart';
 abstract class SetAdminUserFeatureFlagRequestDto implements Built<SetAdminUserFeatureFlagRequestDto, SetAdminUserFeatureFlagRequestDtoBuilder> {
   @BuiltValueField(wireName: r'flag')
   SetAdminUserFeatureFlagRequestDtoFlagEnum get flag;
-  // enum flagEnum {  layoutReconstructionCompare,  sourceConnectors,  experimentalResearchModels,  exactAnswers,  smartDuplicates,  answerAbstention,  learnedValueTypes,  layoutKeyValueRoles,  localChatModel,  };
+  // enum flagEnum {  layoutReconstructionCompare,  sourceConnectors,  experimentalResearchModels,  exactAnswers,  smartDuplicates,  answerAbstention,  learnedValueTypes,  layoutKeyValueRoles,  };
 
   @BuiltValueField(wireName: r'enabled')
   bool get enabled;
@@ -140,8 +140,6 @@ class SetAdminUserFeatureFlagRequestDtoFlagEnum extends EnumClass {
   static const SetAdminUserFeatureFlagRequestDtoFlagEnum learnedValueTypes = _$setAdminUserFeatureFlagRequestDtoFlagEnum_learnedValueTypes;
   @BuiltValueEnumConst(wireName: r'layoutKeyValueRoles')
   static const SetAdminUserFeatureFlagRequestDtoFlagEnum layoutKeyValueRoles = _$setAdminUserFeatureFlagRequestDtoFlagEnum_layoutKeyValueRoles;
-  @BuiltValueEnumConst(wireName: r'localChatModel')
-  static const SetAdminUserFeatureFlagRequestDtoFlagEnum localChatModel = _$setAdminUserFeatureFlagRequestDtoFlagEnum_localChatModel;
 
   static Serializer<SetAdminUserFeatureFlagRequestDtoFlagEnum> get serializer => _$setAdminUserFeatureFlagRequestDtoFlagEnumSerializer;
 

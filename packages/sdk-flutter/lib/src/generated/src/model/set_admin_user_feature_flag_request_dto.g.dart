@@ -32,9 +32,6 @@ const SetAdminUserFeatureFlagRequestDtoFlagEnum
 const SetAdminUserFeatureFlagRequestDtoFlagEnum
     _$setAdminUserFeatureFlagRequestDtoFlagEnum_layoutKeyValueRoles =
     const SetAdminUserFeatureFlagRequestDtoFlagEnum._('layoutKeyValueRoles');
-const SetAdminUserFeatureFlagRequestDtoFlagEnum
-    _$setAdminUserFeatureFlagRequestDtoFlagEnum_localChatModel =
-    const SetAdminUserFeatureFlagRequestDtoFlagEnum._('localChatModel');
 
 SetAdminUserFeatureFlagRequestDtoFlagEnum
     _$setAdminUserFeatureFlagRequestDtoFlagEnumValueOf(String name) {
@@ -55,8 +52,6 @@ SetAdminUserFeatureFlagRequestDtoFlagEnum
       return _$setAdminUserFeatureFlagRequestDtoFlagEnum_learnedValueTypes;
     case 'layoutKeyValueRoles':
       return _$setAdminUserFeatureFlagRequestDtoFlagEnum_layoutKeyValueRoles;
-    case 'localChatModel':
-      return _$setAdminUserFeatureFlagRequestDtoFlagEnum_localChatModel;
     default:
       throw new ArgumentError(name);
   }
@@ -73,7 +68,6 @@ final BuiltSet<SetAdminUserFeatureFlagRequestDtoFlagEnum>
   _$setAdminUserFeatureFlagRequestDtoFlagEnum_answerAbstention,
   _$setAdminUserFeatureFlagRequestDtoFlagEnum_learnedValueTypes,
   _$setAdminUserFeatureFlagRequestDtoFlagEnum_layoutKeyValueRoles,
-  _$setAdminUserFeatureFlagRequestDtoFlagEnum_localChatModel,
 ]);
 
 Serializer<SetAdminUserFeatureFlagRequestDtoFlagEnum>
@@ -91,7 +85,6 @@ class _$SetAdminUserFeatureFlagRequestDtoFlagEnumSerializer
     'answerAbstention': 'answerAbstention',
     'learnedValueTypes': 'learnedValueTypes',
     'layoutKeyValueRoles': 'layoutKeyValueRoles',
-    'localChatModel': 'localChatModel',
   };
   static const Map<Object, String> _fromWire = const <Object, String>{
     'layoutReconstructionCompare': 'layoutReconstructionCompare',
@@ -102,7 +95,6 @@ class _$SetAdminUserFeatureFlagRequestDtoFlagEnumSerializer
     'answerAbstention': 'answerAbstention',
     'learnedValueTypes': 'learnedValueTypes',
     'layoutKeyValueRoles': 'layoutKeyValueRoles',
-    'localChatModel': 'localChatModel',
   };
 
   @override

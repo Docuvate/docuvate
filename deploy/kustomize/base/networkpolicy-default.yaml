@@ -104,13 +104,6 @@ spec:
     - to:
         - podSelector:
             matchLabels:
-              app.kubernetes.io/name: docuvate-ollama
-      ports:
-        - port: 11434
-          protocol: TCP
-    - to:
-        - podSelector:
-            matchLabels:
               app.kubernetes.io/name: docuvate-mailpit
       ports:
         - port: 1025
@@ -197,31 +190,6 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: docuvate-ollama
-spec:
-  podSelector:
-    matchLabels:
-      app.kubernetes.io/name: docuvate-ollama
-  policyTypes: [Ingress, Egress]
-  ingress:
-    - from:
-        - podSelector:
-            matchLabels:
-              app.kubernetes.io/name: docuvate-api
-        - podSelector:
-            matchLabels:
-              app.kubernetes.io/name: docuvate-ollama-init
-      ports:
-        - port: 11434
-          protocol: TCP
-  egress:
-    - ports:
-        - port: 443
-          protocol: TCP
----
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
   name: docuvate-db-migrate
 spec:
   podSelector:
@@ -253,25 +221,4 @@ spec:
               app.kubernetes.io/name: docuvate-minio
       ports:
         - port: 9000
-          protocol: TCP
----
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: docuvate-ollama-init
-spec:
-  podSelector:
-    matchLabels:
-      app.kubernetes.io/name: docuvate-ollama-init
-  policyTypes: [Egress]
-  egress:
-    - ports:
-        - port: 443
-          protocol: TCP
-    - to:
-        - podSelector:
-            matchLabels:
-              app.kubernetes.io/name: docuvate-ollama
-      ports:
-        - port: 11434
           protocol: TCP

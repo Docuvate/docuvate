@@ -18,7 +18,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 
-import { DocumentChatPanel } from '../components/documents/DocumentChatPanel';
 import { DocumentDetailLoadingShell } from '../components/documents/DocumentDetailLoadingShell';
 import {
   DocumentDetailMetaBar,
@@ -91,7 +90,7 @@ import { routes } from '../lib/routes';
 import { notifySaved, notifySaveError } from '../lib/saveNotify';
 import { pushRecentDocument } from '../lib/search/searchRecent';
 
-type DetailTab = 'details' | 'labels' | 'chat';
+type DetailTab = 'details' | 'labels';
 
 interface DocumentMetadataBaseline {
   title: string;
@@ -151,10 +150,6 @@ export function DocumentDetailPage() {
   const [highlightBlocks, setHighlightBlocks] = useState<ExtractionBlock[]>([]);
   const [folderId, setFolderId] = useState('');
   const [requeueBusy, setRequeueBusy] = useState(false);
-  const [documentChatAvailable, setDocumentChatAvailable] = useState(false);
-  const [documentChatUiEnabled, setDocumentChatUiEnabled] = useState(true);
-  const [documentChatLocalModelEnabled, setDocumentChatLocalModelEnabled] = useState(false);
-  const [documentChatLocalModelReady, setDocumentChatLocalModelReady] = useState(false);
   const [fieldFeedback, setFieldFeedback] = useState<FieldExtractionFeedbackCounts | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteBusy, setDeleteBusy] = useState(false);
@@ -231,24 +226,10 @@ export function DocumentDetailPage() {
 
   useEffect(() => {
     const tabParam = new URLSearchParams(window.location.search).get('tab');
-    if (tabParam === 'chat') {
-      setLayoutSideTab('chat');
-      setActiveTab(null);
-      return;
-    }
     if (tabParam === 'details' || tabParam === 'labels') {
       setActiveTab(tabParam);
     }
   }, [id]);
-
-  useEffect(() => {
-    const usesLayoutWorkspace =
-      doc?.mimeType === 'application/pdf' && doc.extraction?.layoutIrAvailable === true;
-    if (usesLayoutWorkspace && activeTab === 'chat') {
-      setLayoutSideTab('chat');
-      setActiveTab(null);
-    }
-  }, [doc?.mimeType, doc?.extraction?.layoutIrAvailable, activeTab]);
 
   useEffect(() => {
     if (!id) return;
@@ -269,10 +250,6 @@ export function DocumentDetailPage() {
         setRecognizedCatalog(recognized);
         setGlobalFieldLabels(buildGlobalFieldLabelMap(recognized));
         setFolders(f);
-        setDocumentChatAvailable(settings.documentChatAvailable === true);
-        setDocumentChatUiEnabled(settings.documentChatUiEnabled !== false);
-        setDocumentChatLocalModelEnabled(settings.documentChatLocalModelEnabled === true);
-        setDocumentChatLocalModelReady(settings.documentChatLocalModelReady === true);
         setFieldGateSettings({
           fieldExtractionConfidenceGateEnabled: settings.fieldExtractionConfidenceGateEnabled !== false,
           labelFieldConfidenceThreshold:
@@ -634,7 +611,6 @@ export function DocumentDetailPage() {
         <DocumentDetailTabStrip
           activeTab={activeTab}
           labelCount={doc.tags.length}
-          showChatTab={documentChatUiEnabled && !layoutWorkspace}
           onTabChange={setActiveTab}
         />
         {activeTab === 'details' ? (
@@ -730,30 +706,10 @@ export function DocumentDetailPage() {
           </div>
         ) : null}
 
-        {activeTab === 'chat' && !layoutWorkspace ? (
-          <div
-            className="detail-tab-panel-surface"
-            role="tabpanel"
-            aria-label={t('documents.tabChat')}
-          >
-            <DocumentChatPanel
-              documentId={doc.id}
-              compact
-              chatAvailable={documentChatAvailable}
-              chatUiEnabled={documentChatUiEnabled}
-              localChatModelEnabled={documentChatLocalModelEnabled}
-              localChatModelReady={documentChatLocalModelReady}
-            />
-          </div>
-        ) : null}
       </div>
 
       {layoutWorkspace ? (
         <DocumentLayoutWorkspace
-          documentChatAvailable={documentChatAvailable}
-          documentChatUiEnabled={documentChatUiEnabled}
-          documentChatLocalModelEnabled={documentChatLocalModelEnabled}
-          documentChatLocalModelReady={documentChatLocalModelReady}
           showTechnicalDetails={showTechnicalDetails}
           layoutSideTab={layoutSideTab}
           onLayoutSideTabChange={setLayoutSideTab}

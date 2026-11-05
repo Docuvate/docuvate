@@ -3,7 +3,7 @@
 import { expect, test, type Page } from '@playwright/test';
 
 import { applyDocuvateLocale } from '../../helpers/docuvate-theme';
-import { openLayoutDocumentPage, uploadLayoutTableDocument } from '../../helpers/layout-chat-fixture';
+import { openLayoutDocumentPage, uploadLayoutTableDocument } from '../../helpers/layout-document-fixture';
 import { showLayoutPane } from '../../helpers/layout-pane';
 import { assignLongLabels, longLabelNames } from '../../helpers/long-label-fixture';
 import {

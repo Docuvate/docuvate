@@ -73,8 +73,7 @@ const OPENAPI_TAG_CATALOG = [
   {
     key: 'settings',
     name: 'Settings',
-    description:
-      'User preferences, document-chat provider selection, and extraction engine options.',
+    description: 'User preferences and extraction engine options.',
   },
   {
     key: 'connectors',
