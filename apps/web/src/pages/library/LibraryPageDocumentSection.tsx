@@ -1,5 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import { Search } from 'lucide-react';
 import type { ReactNode, RefObject } from 'react';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -18,6 +19,7 @@ import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { ContextMenu } from '../../components/ui/ContextMenu';
+import { IconButton } from '../../components/ui/IconButton';
 import { Input } from '../../components/ui/Input';
 import { Select } from '../../components/ui/Select';
 import { moveDocuments } from '../../lib/api';
@@ -77,8 +79,11 @@ export function LibraryPageDocumentSection({
       ? t('library.filterToggleCollapse')
       : filterToggle.activeCount > 0
         ? t('library.filterToggleActive', { count: filterToggle.activeCount })
-        : t('library.filterToggle')
+        : compactLibrarySearch
+          ? t('library.filterToggleShort')
+          : t('library.filterToggle')
     : null;
+  const iconSearchSubmit = compactLibrarySearch && !filesystemLayout;
   const showBulkBar = data.visibleSelectedCount > 0 || (!data.loading && data.items.length > 0);
   const showTableArea =
     data.loading || data.items.length > 0 || (data.viewMode !== 'klassisch' && !data.error);
@@ -130,6 +135,7 @@ export function LibraryPageDocumentSection({
               value={data.query}
               onChange={(e) => { data.setQuery(e.target.value); }}
               aria-label={t('library.searchDocsAria')}
+              enterKeyHint="search"
             />
             <div className="library-list-search-actions">
               {filterToggle && filterToggleLabel ? (
@@ -144,9 +150,18 @@ export function LibraryPageDocumentSection({
                   {filterToggleLabel}
                 </Button>
               ) : null}
-              <Button type="submit" variant="secondary">
-                {t('shell.search')}
-              </Button>
+              {iconSearchSubmit ? (
+                <IconButton
+                  type="submit"
+                  icon={Search}
+                  label={t('shell.search')}
+                  className="library-search-submit-icon"
+                />
+              ) : (
+                <Button type="submit" variant="secondary">
+                  {t('shell.search')}
+                </Button>
+              )}
             </div>
           </form>
           {filesystemLayout ? (
