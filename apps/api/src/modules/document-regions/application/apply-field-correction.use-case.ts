@@ -398,14 +398,14 @@ export class ApplyFieldCorrectionUseCase {
     let found = false;
     for (const field of fields) {
       if (field.key === fieldKey) {
-        next.push({ ...field, value, confidence: 1 });
+        next.push({ ...field, value, confidence: 1, userConfirmed: true });
         found = true;
       } else {
         next.push(field);
       }
     }
     if (!found) {
-      next.push({ key: fieldKey, value, confidence: 1 });
+      next.push({ key: fieldKey, value, confidence: 1, userConfirmed: true });
     }
     return next;
   }

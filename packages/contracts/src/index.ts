@@ -93,6 +93,11 @@ export interface ExtractedField {
   confidence?: number;
   /** Set for label-scoped custom fields (storage key remains `label:{tagId}:{key}`). */
   tagId?: string;
+  /**
+   * True once a person confirmed or corrected the value. Model confidence alone never marks a
+   * field as confirmed.
+   */
+  userConfirmed?: boolean;
 }
 
 /** Normalized bounding box (0-1 relative to page width/height). */

@@ -57,6 +57,16 @@ export class ExtractedFieldDto {
   @Min(0)
   @Max(1)
   confidence?: number;
+
+  /** Label id for label-scoped custom fields (`label:{tagId}:{key}`). */
+  @IsOptional()
+  @IsUUID()
+  tagId?: string;
+
+  /** True once a person confirmed or corrected the value. */
+  @IsOptional()
+  @IsBoolean()
+  userConfirmed?: boolean;
 }
 
 export class ExtractionBlockDto {

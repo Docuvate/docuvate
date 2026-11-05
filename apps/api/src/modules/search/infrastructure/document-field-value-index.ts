@@ -8,6 +8,7 @@ import {
 } from '@docuvate/contracts';
 
 import {
+  parseBoolean,
   parseEnum,
   parseOptionalNumber,
   parseString,
@@ -97,6 +98,7 @@ interface DocumentFieldValueRow {
   fieldStorageKey: string;
   valueText: string;
   confidence: number | null;
+  userConfirmed: boolean;
   valueTextNorm: string | null;
   valueNumeric: number | null;
   valueDate: string | null;
@@ -110,7 +112,8 @@ export function toDocumentFieldValueRow(
   storageKey: string,
   value: string,
   confidence: number | null,
-  defs: Map<string, FieldDefinitionLookup>
+  defs: Map<string, FieldDefinitionLookup>,
+  userConfirmed = false
 ): DocumentFieldValueRow {
   const fieldType = defs.get(storageKey)?.fieldType ?? 'text';
   const normalized = normalizeFieldValue(value, fieldType);
@@ -118,6 +121,7 @@ export function toDocumentFieldValueRow(
     fieldStorageKey: storageKey,
     valueText: value,
     confidence,
+    userConfirmed,
     valueTextNorm: fieldType === 'text' ? normalized.textNorm : null,
     valueNumeric: normalized.numeric,
     valueDate: normalized.dateIso,
@@ -131,12 +135,13 @@ async function insertFieldValueRow(
 ): Promise<void> {
   await db.query(
     `INSERT INTO document_field_values (
-       document_id, field_storage_key, value_text, confidence,
+       document_id, field_storage_key, value_text, confidence, user_confirmed,
        value_text_norm, value_numeric, value_date
-     ) VALUES ($1, $2, $3, $4, $5, $6, $7::date)
+     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8::date)
      ON CONFLICT (document_id, field_storage_key) DO UPDATE SET
        value_text = EXCLUDED.value_text,
        confidence = EXCLUDED.confidence,
+       user_confirmed = EXCLUDED.user_confirmed,
        value_text_norm = EXCLUDED.value_text_norm,
        value_numeric = EXCLUDED.value_numeric,
        value_date = EXCLUDED.value_date`,
@@ -145,6 +150,7 @@ async function insertFieldValueRow(
       row.fieldStorageKey,
       row.valueText,
       row.confidence,
+      row.userConfirmed,
       row.valueTextNorm,
       row.valueNumeric,
       row.valueDate,
@@ -173,7 +179,13 @@ export async function upsertDocumentFieldValue(
   await insertFieldValueRow(
     db,
     documentId,
-    toDocumentFieldValueRow(storageKey, value, field.confidence ?? null, defs)
+    toDocumentFieldValueRow(
+      storageKey,
+      value,
+      field.confidence ?? null,
+      defs,
+      field.userConfirmed === true
+    )
   );
 }
 
@@ -192,7 +204,13 @@ export async function replaceDocumentFieldValues(
     await insertFieldValueRow(
       db,
       documentId,
-      toDocumentFieldValueRow(storageKey, field.value, field.confidence ?? null, defs)
+      toDocumentFieldValueRow(
+        storageKey,
+        field.value,
+        field.confidence ?? null,
+        defs,
+        field.userConfirmed === true
+      )
     );
   }
 }
@@ -203,6 +221,9 @@ function rowToExtractedField(row: Record<string, unknown>): ExtractedField {
   const confidence = parseOptionalNumber(row.confidence);
   if (confidence != null) {
     field.confidence = confidence;
+  }
+  if (parseBoolean(row.user_confirmed)) {
+    field.userConfirmed = true;
   }
   const label = parseLabelFieldStorageKey(key);
   if (label) {
@@ -219,7 +240,7 @@ export async function loadDocumentFieldValues(
   const out = new Map<string, ExtractedField[]>();
   if (documentIds.length === 0) return out;
   const result = await db.query(
-    `SELECT document_id, field_storage_key, value_text, confidence
+    `SELECT document_id, field_storage_key, value_text, confidence, user_confirmed
      FROM document_field_values
      WHERE document_id = ANY($1::uuid[])
      ORDER BY document_id, field_storage_key`,

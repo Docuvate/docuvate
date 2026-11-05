@@ -70,6 +70,7 @@ export const BASELINE_MARKER_MIGRATION_NAMES = [
   'WorkspaceMlSettings20261104090000',
   'ExtractionFieldFeedbackPositions20261104120000',
   'JobOutbox20261105080000',
+  'DocumentFieldValuesUserConfirmed20261105120000',
 ] as const;
 
 async function featureFlagMlKeysConstraintPresent(runner: QueryRunner): Promise<boolean> {
@@ -280,6 +281,8 @@ export async function migrationSchemaPresent(
       return columnExists(runner, 'extraction_field_confirmations', 'field_name_id');
     case 'JobOutbox20261105080000':
       return regClassExists(runner, 'public.job_outbox');
+    case 'DocumentFieldValuesUserConfirmed20261105120000':
+      return columnExists(runner, 'document_field_values', 'user_confirmed');
     default:
       return false;
   }

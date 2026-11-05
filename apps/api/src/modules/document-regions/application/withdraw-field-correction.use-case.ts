@@ -48,14 +48,14 @@ export class WithdrawFieldCorrectionUseCase {
     let found = false;
     for (const field of fields) {
       if (field.key === correction.fieldKey) {
-        nextFields.push({ ...field, value: correction.oldValue });
+        nextFields.push({ ...field, value: correction.oldValue, userConfirmed: false });
         found = true;
       } else {
         nextFields.push(field);
       }
     }
     if (!found && correction.op !== 'create') {
-      nextFields.push({ key: correction.fieldKey, value: correction.oldValue, confidence: 1 });
+      nextFields.push({ key: correction.fieldKey, value: correction.oldValue });
     }
     if (correction.op === 'create') {
       await this.documents.updateForUser(documentId, userId, {
