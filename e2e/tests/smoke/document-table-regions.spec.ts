@@ -163,7 +163,26 @@ test.describe('document table regions', () => {
         .getByRole('tab', { name: /Tabellen|Tables/i })
         .click({ force: true });
       if (viewport.width < 1024) {
-        await expect(page.getByTestId('table-correction-sheet')).toBeVisible({ timeout: 15_000 });
+        const sheet = page.getByTestId('table-correction-sheet');
+        // Tab change auto-selects the first table when none is selected. If selection
+        // did not stick after Escape, open the sheet via the corrected-table card.
+        await expect
+          .poll(
+            async () => {
+              if (await sheet.isVisible()) {
+                return 'open';
+              }
+              const cardHead = page.locator(
+                '[data-testid="corrected-table-card"] .layout-table-card-head'
+              );
+              if ((await cardHead.count()) > 0 && (await cardHead.first().isVisible())) {
+                await cardHead.first().click();
+              }
+              return (await sheet.isVisible()) ? 'open' : 'closed';
+            },
+            { timeout: 15_000 }
+          )
+          .toBe('open');
       } else {
         await expect(page.getByTestId('corrected-table-card')).toBeVisible({ timeout: 15_000 });
       }
