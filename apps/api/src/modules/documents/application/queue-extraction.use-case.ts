@@ -2,9 +2,15 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable, Logger } from '@nestjs/common';
 
-import { ForbiddenError,NotFoundError } from '../../../shared/domain/errors.js';
-import { DOCUMENT_REPOSITORY, type DocumentRepository } from '../../../shared/domain/ports.js';
-import { ExtractionQueueService } from '../../extraction/infrastructure/extraction-queue.service.js';
+import { ForbiddenError, NotFoundError } from '../../../shared/domain/errors.js';
+import {
+  DOCUMENT_REPOSITORY,
+  type DocumentRepository,
+  JOB_OUTBOX_RELAY,
+  JOB_OUTBOX_REPOSITORY,
+  type JobOutboxRelay,
+  type JobOutboxRepository,
+} from '../../../shared/domain/ports.js';
 
 @Injectable()
 export class QueueExtractionUseCase {
@@ -12,7 +18,8 @@ export class QueueExtractionUseCase {
 
   constructor(
     @Inject(DOCUMENT_REPOSITORY) private readonly documents: DocumentRepository,
-    private readonly queue: ExtractionQueueService
+    @Inject(JOB_OUTBOX_REPOSITORY) private readonly outbox: JobOutboxRepository,
+    @Inject(JOB_OUTBOX_RELAY) private readonly relay: JobOutboxRelay
   ) {}
 
   async execute(
@@ -28,11 +35,19 @@ export class QueueExtractionUseCase {
       throw new ForbiddenError();
     }
     try {
-      await this.queue.enqueue(documentId, userId);
-      await this.documents.updateStatus(documentId, 'queued');
+      await this.outbox.scheduleDocumentExtraction(documentId, userId);
+      try {
+        await this.relay.relayOnce();
+      } catch (relayError: unknown) {
+        this.logger.warn(
+          `Outbox relay after schedule failed for ${documentId}: ${
+            relayError instanceof Error ? relayError.message : String(relayError)
+          }`
+        );
+      }
     } catch (error: unknown) {
       this.logger.error(
-        `Extraction enqueue failed for ${documentId}: ${
+        `Extraction outbox schedule failed for ${documentId}: ${
           error instanceof Error ? error.message : String(error)
         }`
       );

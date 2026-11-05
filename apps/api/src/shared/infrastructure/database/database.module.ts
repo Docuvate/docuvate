@@ -12,6 +12,7 @@ import { PgDuplicateStackRepository } from '../../../modules/duplicates/infrastr
 import { HttpExtractionAdapter } from '../../../modules/extraction/infrastructure/http-extraction.adapter.js';
 import { WorkerExtractCapacityCoordinator } from '../../../modules/extraction/infrastructure/worker-extract-capacity.coordinator.js';
 import { PgFolderRepository } from '../../../modules/folders/infrastructure/pg-folder.repository.js';
+import { PgJobOutboxRepository } from '../../../modules/job-outbox/infrastructure/pg-job-outbox.repository.js';
 import { HttpLabelFieldExtractionAdapter } from '../../../modules/labels/infrastructure/http-label-field-extraction.adapter.js';
 import { PgTagCustomFieldRepository } from '../../../modules/labels/infrastructure/pg-tag-custom-field.repository.js';
 import { PgRecognizedFieldRepository } from '../../../modules/recognized-fields/infrastructure/pg-recognized-field.repository.js';
@@ -25,6 +26,7 @@ import {
   EXTRACTION_PORT,
   FOLDER_REPOSITORY,
   ID_GENERATOR,
+  JOB_OUTBOX_REPOSITORY,
   LABEL_FIELD_EXTRACTION_PORT,
   OBJECT_STORAGE,
   RECOGNIZED_FIELD_REPOSITORY,
@@ -67,6 +69,7 @@ const typeOrmRootImports =
     { provide: CLOCK, useClass: SystemClock },
     { provide: ID_GENERATOR, useClass: UuidIdGenerator },
     { provide: DOCUMENT_REPOSITORY, useClass: PgDocumentRepository },
+    { provide: JOB_OUTBOX_REPOSITORY, useClass: PgJobOutboxRepository },
     { provide: TAXONOMY_REPOSITORY, useClass: PgTaxonomyRepository },
     { provide: OBJECT_STORAGE, useClass: MinioObjectStorage },
     WorkerExtractCapacityCoordinator,
@@ -85,6 +88,7 @@ const typeOrmRootImports =
     CLOCK,
     ID_GENERATOR,
     DOCUMENT_REPOSITORY,
+    JOB_OUTBOX_REPOSITORY,
     TAXONOMY_REPOSITORY,
     OBJECT_STORAGE,
     WorkerExtractCapacityCoordinator,

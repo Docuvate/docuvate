@@ -4,7 +4,12 @@ import { Inject, Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nest
 import { type Job, Queue, UnrecoverableError, Worker } from 'bullmq';
 import type IORedis from 'ioredis';
 
-import { DOCUMENT_REPOSITORY, type DocumentRepository } from '../../../shared/domain/ports.js';
+import {
+  DOCUMENT_REPOSITORY,
+  type DocumentRepository,
+  JOB_OUTBOX_REPOSITORY,
+  type JobOutboxRepository,
+} from '../../../shared/domain/ports.js';
 import { parseString, requireRecord } from '../../../shared/domain/row-parse.js';
 import { arenaSampleRate } from '../../../shared/infrastructure/arena/arena-sample-config.js';
 import { enqueueBullJobWithRetry } from '../../../shared/infrastructure/queue/bullmq-enqueue-retry.js';
@@ -20,6 +25,7 @@ import {
 import { RunArenaSampleCompareUseCase } from '../../documents/application/run-arena-sample-compare.use-case.js';
 import { RunExtractionUseCase } from '../../documents/application/run-extraction.use-case.js';
 import { ResolveFeatureFlagsUseCase } from '../../feature-flags/application/resolve-feature-flags.use-case.js';
+import { computeRetryDelayMs } from '../../job-outbox/domain/job-outbox.types.js';
 import { extractionDeadlineMaxRetries } from '../domain/extraction-deadline.config.js';
 import { toExtractionFailure } from '../domain/extraction-failure.js';
 import {
@@ -36,6 +42,12 @@ import {
 import type { ExtractionReconcileJob } from '../domain/plan-extraction-reconcile.js';
 import { WorkerExtractCapacityCoordinator } from './worker-extract-capacity.coordinator.js';
 
+export interface ExtractionOutboxJobPayload {
+  outboxId: string;
+  documentId: string;
+  userId: string;
+}
+
 function parseExtractionJobDocumentId(data: unknown): string {
   const row = requireRecord(data);
   const documentId = parseString(row.documentId).trim();
@@ -43,6 +55,17 @@ function parseExtractionJobDocumentId(data: unknown): string {
     throw new Error('document-extraction job missing documentId');
   }
   return documentId;
+}
+
+function readOutboxPayload(data: unknown): ExtractionOutboxJobPayload | null {
+  const row = requireRecord(data);
+  const outboxId = parseString(row.outboxId).trim();
+  const documentId = parseString(row.documentId).trim();
+  const userId = parseString(row.userId).trim();
+  if (!outboxId || !documentId || !userId) {
+    return null;
+  }
+  return { outboxId, documentId, userId };
 }
 
 const QUEUE_NAME = 'document-extraction';
@@ -61,6 +84,7 @@ function isLiveExtractionJobState(state: string): boolean {
     case 'delayed':
     case 'paused':
     case 'waiting-children':
+    case 'prioritized':
       return true;
     case 'completed':
     case 'failed':
@@ -90,7 +114,8 @@ export class ExtractionQueueService implements OnModuleInit, OnModuleDestroy {
     private readonly runArenaSample: RunArenaSampleCompareUseCase,
     private readonly resolveFeatureFlags: ResolveFeatureFlagsUseCase,
     private readonly extractCapacity: WorkerExtractCapacityCoordinator,
-    @Inject(DOCUMENT_REPOSITORY) private readonly documents: DocumentRepository
+    @Inject(DOCUMENT_REPOSITORY) private readonly documents: DocumentRepository,
+    @Inject(JOB_OUTBOX_REPOSITORY) private readonly outbox: JobOutboxRepository
   ) {}
 
   async onModuleInit(): Promise<void> {
@@ -107,11 +132,39 @@ export class ExtractionQueueService implements OnModuleInit, OnModuleDestroy {
           await this.runArenaSample.execute(documentId);
           return;
         }
-        const userId = parseString(requireRecord(job.data).userId).trim();
+        const payload = readOutboxPayload(job.data);
+        const userIdRaw = payload?.userId ?? parseString(requireRecord(job.data).userId).trim();
+        const userId = userIdRaw.length > 0 ? userIdRaw : null;
         await this.extractCapacity.runWithSlot(async () => {
+          const outboxId = await this.resolveOutboxId(payload, documentId);
+          if (outboxId) {
+            const existing = await this.outbox.findById(outboxId);
+            if (existing?.status === 'done' || existing?.status === 'failed') {
+              this.logger.debug(`Skipping terminal outbox ${outboxId} (${existing.status})`);
+              return;
+            }
+            const started = await this.outbox.markRunning(outboxId);
+            if (!started) {
+              const again = await this.outbox.findById(outboxId);
+              if (
+                again?.status === 'done' ||
+                again?.status === 'failed' ||
+                again?.status === 'running'
+              ) {
+                return;
+              }
+              throw new Error(
+                `Unable to mark outbox ${outboxId} running (status=${again?.status ?? 'missing'})`
+              );
+            }
+          }
+
           try {
             await this.recordExtractionStart(documentId);
             await this.runExtraction.execute(documentId);
+            if (outboxId) {
+              await this.outbox.markDone(outboxId);
+            }
           } catch (error: unknown) {
             const failure = toExtractionFailure(error);
             const plan = planProcessorFailure({
@@ -119,7 +172,22 @@ export class ExtractionQueueService implements OnModuleInit, OnModuleDestroy {
               attemptsMade: job.attemptsMade,
               deadlineMaxRetries: extractionDeadlineMaxRetries(),
             });
-            if (plan.kind === 'fail_document') {
+            if (outboxId) {
+              const after = await this.outbox.findById(outboxId);
+              const attempts = after?.attempts ?? 1;
+              const delayMs = computeRetryDelayMs(attempts);
+              const nextStatus = await this.outbox.markFailedOrRetry(
+                outboxId,
+                failure.message,
+                delayMs
+              );
+              if (nextStatus === 'pending') {
+                this.logger.warn(
+                  `Extraction ${documentId} will retry via outbox ${outboxId}: ${failure.message}`
+                );
+                throw new UnrecoverableError(failure.message);
+              }
+            } else if (plan.kind === 'fail_document') {
               await this.documents.updateStatus(documentId, 'failed', {
                 failureReason: plan.failureReason,
               });
@@ -130,7 +198,9 @@ export class ExtractionQueueService implements OnModuleInit, OnModuleDestroy {
             throw failure;
           }
           await this.connection.del(orphanRequeueKey(documentId));
-          await this.maybeEnqueueArenaSample(documentId, userId);
+          if (userId) {
+            await this.maybeEnqueueArenaSample(documentId, userId);
+          }
         });
       },
       {
@@ -154,6 +224,17 @@ export class ExtractionQueueService implements OnModuleInit, OnModuleDestroy {
       this.worker.concurrency = documentExtractionConcurrency(slots);
     });
     this.ready = true;
+  }
+
+  private async resolveOutboxId(
+    payload: ExtractionOutboxJobPayload | null,
+    documentId: string
+  ): Promise<string | null> {
+    if (payload?.outboxId) {
+      return payload.outboxId;
+    }
+    const active = await this.outbox.findActiveByDocumentId(documentId);
+    return active?.id ?? null;
   }
 
   isReady(): boolean {
@@ -206,15 +287,13 @@ export class ExtractionQueueService implements OnModuleInit, OnModuleDestroy {
     if (!this.isReady()) {
       throw new Error('document-extraction queue is not ready');
     }
-    const existing = await this.queue.getJob(extractionJobId(documentId));
-    if (existing) {
-      const state = await existing.getState();
-      if (isLiveExtractionJobState(state)) {
-        return;
-      }
-      await existing.remove();
-    }
-    await this.enqueue(documentId, userId);
+    const scheduled = await this.outbox.scheduleDocumentExtraction(documentId, userId);
+    await this.enqueueFromOutbox({
+      outboxId: scheduled.outboxId,
+      documentId,
+      userId,
+    });
+    await this.outbox.markEnqueued(scheduled.outboxId);
   }
 
   async isJobQueuedOrActive(documentId: string): Promise<boolean> {
@@ -251,19 +330,41 @@ export class ExtractionQueueService implements OnModuleInit, OnModuleDestroy {
     await this.documents.updateStatus(documentId, 'failed', { failureReason });
   }
 
-  async enqueue(documentId: string, _userId: string): Promise<void> {
-    const jobId = extractionJobId(documentId);
+  /**
+   * Schedules durability in Postgres then pushes to Valkey.
+   * Prefer QueueExtractionUseCase for the HTTP path (same-txn schedule + relay).
+   */
+  async enqueue(documentId: string, userId: string): Promise<void> {
+    const scheduled = await this.outbox.scheduleDocumentExtraction(documentId, userId);
+    await this.enqueueFromOutbox({
+      outboxId: scheduled.outboxId,
+      documentId,
+      userId,
+    });
+    await this.outbox.markEnqueued(scheduled.outboxId);
+  }
+
+  /** Push one claimed/scheduled outbox row into BullMQ (idempotent on document job id). */
+  async enqueueFromOutbox(payload: ExtractionOutboxJobPayload): Promise<void> {
+    if (!this.isReady()) {
+      throw new Error('document-extraction queue is not ready');
+    }
+    const jobId = extractionJobId(payload.documentId);
     const prep = await prepareBullFixedJobIdForAdd(this.queue, jobId);
     if (prep === 'add') {
       await enqueueBullJobWithRetry(
         () =>
           this.queue.add(
             'extract',
-            { documentId, userId: _userId },
+            {
+              documentId: payload.documentId,
+              userId: payload.userId,
+              outboxId: payload.outboxId,
+            },
             {
               jobId,
-              attempts: 5,
-              backoff: { type: 'exponential', delay: 5_000 },
+              // Outbox owns retries; BullMQ runs each attempt once.
+              attempts: 1,
               removeOnComplete: 1_000,
               removeOnFail: 500,
             }
@@ -272,7 +373,9 @@ export class ExtractionQueueService implements OnModuleInit, OnModuleDestroy {
       );
     }
     await assertBullFixedJobIdQueued(this.queue, jobId);
-    this.logger.debug(`Enqueued extraction for document ${documentId}`);
+    this.logger.debug(
+      `Enqueued extraction for document ${payload.documentId} (outbox ${payload.outboxId})`
+    );
   }
 
   async maybeEnqueueArenaSample(documentId: string, tenantId: string): Promise<void> {

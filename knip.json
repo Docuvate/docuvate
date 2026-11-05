@@ -9,7 +9,8 @@
         "scripts/**/*.{mjs,mts,ts}",
         "test/**/*.ts",
         "src/**/*.worker.ts",
-        "src/shared/infrastructure/database/run-migrate.ts"
+        "src/shared/infrastructure/database/run-migrate.ts",
+        "src/openapi/openapi-generation-overrides.ts"
       ],
       "project": [
         "src/**/*.ts",
