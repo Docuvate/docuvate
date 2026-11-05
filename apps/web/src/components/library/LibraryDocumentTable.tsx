@@ -931,26 +931,28 @@ export function LibraryDocumentTable({
                               className="library-row-progress"
                             />
                           ) : (
-                            <span
-                              title={
-                                doc.status === 'failed' ? extractionFailureMessage(doc) : undefined
-                              }
-                            >
-                              <Badge status={doc.status} />
-                          {showLayoutMissingBadge(doc) ? (
-                            <LayoutMissingBadge
-                              compact
-                              requeueBusy={requeueBusyIds?.has(doc.id) === true}
-                              onRequeue={
-                                onRequeueDocument
-                                  ? () => {
-                                      onRequeueDocument(doc.id);
-                                    }
-                                  : undefined
-                              }
-                            />
-                          ) : null}
-                            </span>
+                            <>
+                              <span
+                                title={
+                                  doc.status === 'failed' ? extractionFailureMessage(doc) : undefined
+                                }
+                              >
+                                <Badge status={doc.status} />
+                              </span>
+                              {showLayoutMissingBadge(doc) ? (
+                                <LayoutMissingBadge
+                                  compact
+                                  requeueBusy={requeueBusyIds?.has(doc.id) === true}
+                                  onRequeue={
+                                    onRequeueDocument
+                                      ? () => {
+                                          onRequeueDocument(doc.id);
+                                        }
+                                      : undefined
+                                  }
+                                />
+                              ) : null}
+                            </>
                           )}
                         </td>
                       ) : null}
