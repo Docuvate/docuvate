@@ -21,15 +21,12 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
 import { deleteDocument, getDuplicateStack } from '../../lib/api';
-import { extractionFailureMessage, isExtractionPending } from '../../lib/documentExtractionState';
+import { extractionFailureMessage } from '../../lib/documentExtractionState';
 import { useLibraryDocumentTagSuggestions } from '../../lib/documents/useLibraryDocumentTagSuggestions';
 import { useFilesystemCompactDocs } from '../../lib/useFilesystemCompactDocs';
 import { useNarrowTopbar } from '../../lib/useNarrowTopbar';
-import { ExtractionProgressBar } from '../documents';
 import { DocumentDraggableTableRow } from '../ordner';
 import { Badge } from '../ui/Badge';
-import { LayoutMissingBadge } from './LayoutMissingBadge';
-import { showLayoutMissingBadge } from './layoutMissingBadge';
 import { Button } from '../ui/Button';
 import { Dialog, DialogBody, DialogFooter, DialogHeader } from '../ui/Dialog';
 import { DocumentLabelsCell } from './DocumentLabelsCell';
@@ -40,6 +37,7 @@ import {
 } from './duplicateStackLabel';
 import { DuplicateStackQuickReview } from './DuplicateStackQuickReview';
 import { LibraryCheckTouch } from './LibraryCheckTouch';
+import { LibraryDocumentStatusWithLayout } from './LibraryDocumentStatusWithLayout';
 import { documentDisplayDateParts } from './libraryDocumentUtils';
 import { useLibraryDocumentVirtualizer } from './useLibraryDocumentVirtualizer';
 
@@ -577,32 +575,19 @@ export function LibraryDocumentTable({
                           onRefresh={onRefresh}
                         />
                         <div className="library-doc-stack-meta-end">
-                          {doc.duplicateStack?.pendingReview ? (
-                            <span className="badge badge-warn">{t('library.reviewPending')}</span>
-                          ) : isExtractionPending(doc.status) ? (
-                            <ExtractionProgressBar
-                              doc={doc}
-                              compact
-                              className="library-row-progress"
-                            />
-                          ) : (
-                            <>
-                              <Badge status={doc.status} />
-                              {showLayoutMissingBadge(doc) ? (
-                                <LayoutMissingBadge
-                                  compact
-                                  requeueBusy={requeueBusyIds?.has(doc.id) === true}
-                                  onRequeue={
-                                    onRequeueDocument
-                                      ? () => {
-                                          onRequeueDocument(doc.id);
-                                        }
-                                      : undefined
+                          <LibraryDocumentStatusWithLayout
+                            doc={doc}
+                            pendingReview={doc.duplicateStack?.pendingReview === true}
+                            pendingReviewLabel={t('library.reviewPending')}
+                            requeueBusy={requeueBusyIds?.has(doc.id) === true}
+                            onRequeue={
+                              onRequeueDocument
+                                ? () => {
+                                    onRequeueDocument(doc.id);
                                   }
-                                />
-                              ) : null}
-                            </>
-                          )}
+                                : undefined
+                            }
+                          />
                           {hasStack ? (
                             <>
                               <Button
@@ -872,30 +857,19 @@ export function LibraryDocumentTable({
                         ) : null}
                         {!showColumn(visibleColumns, 'status') && doc.status !== 'ready' ? (
                           <div className="library-title-status-fallback">
-                            {isExtractionPending(doc.status) ? (
-                              <ExtractionProgressBar
-                                doc={doc}
-                                compact
-                                className="library-row-progress"
-                              />
-                            ) : (
-                              <>
-                                <Badge status={doc.status} />
-                                {showLayoutMissingBadge(doc) ? (
-                                  <LayoutMissingBadge
-                                    compact
-                                    requeueBusy={requeueBusyIds?.has(doc.id) === true}
-                                    onRequeue={
-                                      onRequeueDocument
-                                        ? () => {
-                                            onRequeueDocument(doc.id);
-                                          }
-                                        : undefined
+                            <LibraryDocumentStatusWithLayout
+                              doc={doc}
+                              pendingReview={false}
+                              pendingReviewLabel={t('library.reviewPending')}
+                              requeueBusy={requeueBusyIds?.has(doc.id) === true}
+                              onRequeue={
+                                onRequeueDocument
+                                  ? () => {
+                                      onRequeueDocument(doc.id);
                                     }
-                                  />
-                                ) : null}
-                              </>
-                            )}
+                                  : undefined
+                              }
+                            />
                           </div>
                         ) : null}
                       </td>
@@ -917,43 +891,24 @@ export function LibraryDocumentTable({
                       ) : null}
                       {showStatusCol ? (
                         <td className="library-col-status">
-                          {doc.duplicateStack?.pendingReview ? (
-                            <span
-                              className="badge badge-warn"
-                              title={t('library.reviewPendingTooltip')}
-                            >
-                              {t('library.reviewPending')}
-                            </span>
-                          ) : isExtractionPending(doc.status) ? (
-                            <ExtractionProgressBar
-                              doc={doc}
-                              compact
-                              className="library-row-progress"
-                            />
-                          ) : (
-                            <>
-                              <span
-                                title={
-                                  doc.status === 'failed' ? extractionFailureMessage(doc) : undefined
-                                }
-                              >
-                                <Badge status={doc.status} />
-                              </span>
-                              {showLayoutMissingBadge(doc) ? (
-                                <LayoutMissingBadge
-                                  compact
-                                  requeueBusy={requeueBusyIds?.has(doc.id) === true}
-                                  onRequeue={
-                                    onRequeueDocument
-                                      ? () => {
-                                          onRequeueDocument(doc.id);
-                                        }
-                                      : undefined
+                          <LibraryDocumentStatusWithLayout
+                            doc={doc}
+                            pendingReview={doc.duplicateStack?.pendingReview === true}
+                            pendingReviewLabel={t('library.reviewPending')}
+                            pendingReviewTooltip={t('library.reviewPendingTooltip')}
+                            requeueBusy={requeueBusyIds?.has(doc.id) === true}
+                            onRequeue={
+                              onRequeueDocument
+                                ? () => {
+                                    onRequeueDocument(doc.id);
                                   }
-                                />
-                              ) : null}
-                            </>
-                          )}
+                                : undefined
+                            }
+                            failureTitle={
+                              doc.status === 'failed' ? extractionFailureMessage(doc) : undefined
+                            }
+                            wrapReadyInSpan
+                          />
                         </td>
                       ) : null}
                       {showDateCol ? (

@@ -18,10 +18,10 @@ import { fetchDocumentPreviewBuffer } from '../../lib/documentPreviewCache';
 import { DocumentPreviewCard } from '../documents';
 import { ExtractionProgressBar } from '../documents';
 import { Badge } from '../ui/Badge';
-import { LayoutMissingBadge } from './LayoutMissingBadge';
-import { showLayoutMissingBadge } from './layoutMissingBadge';
 import { Chip } from '../ui/Chip';
 import { duplicateStackVersionLabel, showDuplicateStackBadge } from './duplicateStackLabel';
+import { LayoutMissingBadge } from './LayoutMissingBadge';
+import { showLayoutMissingBadge } from './layoutMissingBadge';
 import { documentDisplayDate, isImageMime, isPdfMime } from './libraryDocumentUtils';
 
 interface LibraryFocusViewProps {

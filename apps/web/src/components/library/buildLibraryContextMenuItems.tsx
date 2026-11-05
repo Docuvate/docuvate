@@ -6,8 +6,8 @@ import type { TFunction } from 'i18next';
 import { routes } from '../../lib/routes';
 import type { ContextMenuEntry } from '../ui/ContextMenu';
 import { showDuplicateStackBadge } from './duplicateStackLabel';
-import { showLayoutMissingBadge } from './layoutMissingBadge';
 import { buildFolderContextMenuEntries } from './folderContextMenuEntries';
+import { showLayoutMissingBadge } from './layoutMissingBadge';
 
 interface BuildLibraryContextMenuItemsArgs {
   anchorDoc: DocumentDto;

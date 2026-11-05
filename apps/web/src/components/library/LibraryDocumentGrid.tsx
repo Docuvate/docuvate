@@ -8,8 +8,6 @@ import { Link } from 'react-router-dom';
 
 import { DocumentDraggableGridItem } from '../ordner';
 import { Badge } from '../ui/Badge';
-import { LayoutMissingBadge } from './LayoutMissingBadge';
-import { showLayoutMissingBadge } from './layoutMissingBadge';
 import { Chip } from '../ui/Chip';
 import { DocumentThumb } from './DocumentThumb';
 import {
@@ -18,6 +16,8 @@ import {
   showLegacyDuplicateHint,
 } from './duplicateStackLabel';
 import { DuplicateStackQuickReview } from './DuplicateStackQuickReview';
+import { LayoutMissingBadge } from './LayoutMissingBadge';
+import { showLayoutMissingBadge } from './layoutMissingBadge';
 import { documentDisplayDate } from './libraryDocumentUtils';
 import { useLibraryDocumentVirtualizer } from './useLibraryDocumentVirtualizer';
 
