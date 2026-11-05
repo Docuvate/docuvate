@@ -241,10 +241,8 @@ export async function listDocuments(filters: DocumentListQuery = {}): Promise<Do
   return data.items;
 }
 
-export type DocumentFieldValuesExportFormat = 'csv' | 'json';
-
 export async function exportDocumentFieldValues(
-  format: DocumentFieldValuesExportFormat,
+  format: 'csv' | 'json',
   filters: DocumentListQuery = {},
   documentIds?: readonly string[]
 ): Promise<Blob> {

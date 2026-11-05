@@ -20,9 +20,9 @@ import {
 } from '../domain/field-values-export.js';
 
 /** Soft cap so a mistaken full-library export cannot OOM the API process. */
-export const FIELD_VALUES_EXPORT_MAX_DOCUMENTS = 5000;
+const FIELD_VALUES_EXPORT_MAX_DOCUMENTS = 5000;
 
-export interface ExportDocumentFieldValuesResult {
+interface ExportDocumentFieldValuesResult {
   body: string;
   contentType: string;
   filename: string;

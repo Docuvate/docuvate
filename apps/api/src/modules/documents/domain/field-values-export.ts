@@ -3,7 +3,7 @@
 
 export type FieldValuesExportFormat = 'csv' | 'json';
 
-export interface FieldValueExportRow {
+interface FieldValueExportRow {
   documentId: string;
   title: string;
   filename: string;
@@ -12,7 +12,7 @@ export interface FieldValueExportRow {
   confidence: number | null;
 }
 
-export interface FieldValuesExportDocumentJson {
+interface FieldValuesExportDocumentJson {
   documentId: string;
   title: string;
   filename: string;
