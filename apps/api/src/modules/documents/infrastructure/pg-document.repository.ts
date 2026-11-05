@@ -210,14 +210,14 @@ export class PgDocumentRepository implements DocumentRepository {
     userId: string,
     documentIds: readonly string[]
   ): Promise<
-    Array<{
+    {
       documentId: string;
       title: string;
       filename: string;
       fieldKey: string;
       value: string;
       confidence: number | null;
-    }>
+    }[]
   > {
     if (documentIds.length === 0) {
       return [];

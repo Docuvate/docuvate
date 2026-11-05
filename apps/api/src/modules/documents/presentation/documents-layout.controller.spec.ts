@@ -26,6 +26,7 @@ import { BatchDocumentTagSuggestionsUseCase } from '../application/batch-documen
 import { BulkDocumentsUseCase } from '../application/bulk-documents.use-case.js';
 import { CompareDocumentExtractionUseCase } from '../application/compare-extraction.use-case.js';
 import { DeleteDocumentUseCase } from '../application/delete-document.use-case.js';
+import { ExportDocumentFieldValuesUseCase } from '../application/export-document-field-values.use-case.js';
 import { GetDocumentUseCase } from '../application/get-document.use-case.js';
 import { GetDocumentContentUseCase } from '../application/get-document-content.use-case.js';
 import { GetDocumentExtractionImageThumbnailUseCase } from '../application/get-document-extraction-image-thumbnail.use-case.js';
@@ -37,7 +38,6 @@ import { GetDocumentLayoutIrUseCase } from '../application/get-document-layout-i
 import { GetDocumentLayoutTypstUseCase } from '../application/get-document-layout-typst.use-case.js';
 import { GetDocumentPreviewUseCase } from '../application/get-document-preview.use-case.js';
 import { ListDocumentsUseCase } from '../application/list-documents.use-case.js';
-import { ExportDocumentFieldValuesUseCase } from '../application/export-document-field-values.use-case.js';
 import { MoveDocumentsUseCase } from '../application/move-documents.use-case.js';
 import { RequeueDocumentExtractionUseCase } from '../application/requeue-document-extraction.use-case.js';
 import { UpdateDocumentUseCase } from '../application/update-document.use-case.js';

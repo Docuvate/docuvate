@@ -67,14 +67,14 @@ export interface DocumentRepository {
     userId: string,
     documentIds: readonly string[]
   ): Promise<
-    Array<{
+    {
       documentId: string;
       title: string;
       filename: string;
       fieldKey: string;
       value: string;
       confidence: number | null;
-    }>
+    }[]
   >;
   listForUser(userId: string, filters?: DocumentListQuery): Promise<DocumentEntity[]>;
   listPageForUser(

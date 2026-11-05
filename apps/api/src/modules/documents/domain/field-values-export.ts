@@ -16,11 +16,11 @@ interface FieldValuesExportDocumentJson {
   documentId: string;
   title: string;
   filename: string;
-  fields: ReadonlyArray<{
+  fields: readonly {
     key: string;
     value: string;
     confidence: number | null;
-  }>;
+  }[];
 }
 
 const CSV_HEADER = ['documentId', 'title', 'filename', 'fieldKey', 'value', 'confidence'] as const;
@@ -32,7 +32,7 @@ export function escapeCsvCell(value: string): string {
   return value;
 }
 
-export function serializeFieldValuesCsv(rows: ReadonlyArray<FieldValueExportRow>): string {
+export function serializeFieldValuesCsv(rows: readonly FieldValueExportRow[]): string {
   const lines: string[] = [CSV_HEADER.join(',')];
   for (const row of rows) {
     lines.push(
@@ -50,7 +50,7 @@ export function serializeFieldValuesCsv(rows: ReadonlyArray<FieldValueExportRow>
 }
 
 export function groupFieldValuesForJson(
-  rows: ReadonlyArray<FieldValueExportRow>
+  rows: readonly FieldValueExportRow[]
 ): FieldValuesExportDocumentJson[] {
   const byDocument = new Map<
     string,
@@ -58,7 +58,7 @@ export function groupFieldValuesForJson(
       documentId: string;
       title: string;
       filename: string;
-      fields: Array<{ key: string; value: string; confidence: number | null }>;
+      fields: { key: string; value: string; confidence: number | null }[];
     }
   >();
   for (const row of rows) {
@@ -81,7 +81,7 @@ export function groupFieldValuesForJson(
   return [...byDocument.values()];
 }
 
-export function serializeFieldValuesJson(rows: ReadonlyArray<FieldValueExportRow>): string {
+export function serializeFieldValuesJson(rows: readonly FieldValueExportRow[]): string {
   return `${JSON.stringify({ documents: groupFieldValuesForJson(rows) }, null, 2)}\n`;
 }
 

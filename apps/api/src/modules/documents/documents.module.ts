@@ -20,13 +20,13 @@ import { BatchDocumentTagSuggestionsUseCase } from './application/batch-document
 import { BulkDocumentsUseCase } from './application/bulk-documents.use-case.js';
 import { CompareDocumentExtractionUseCase } from './application/compare-extraction.use-case.js';
 import { DeleteDocumentUseCase } from './application/delete-document.use-case.js';
-import { ExportDocumentFieldValuesUseCase } from './application/export-document-field-values.use-case.js';
 import { AcceptDocumentReviewUseCase } from './application/document-review/accept-document-review.use-case.js';
 import { AcceptDocumentReviewBatchUseCase } from './application/document-review/accept-document-review-batch.use-case.js';
 import { ArchiveHashIdenticalDuplicateSetsUseCase } from './application/document-review/archive-hash-identical-duplicate-sets.use-case.js';
 import { AutoAcceptCalibratedReviewUseCase } from './application/document-review/auto-accept-calibrated-review.use-case.js';
 import { ListDocumentReviewQueueUseCase } from './application/document-review/list-document-review-queue.use-case.js';
 import { PromoteHighConfidenceExtractionSuggestionsUseCase } from './application/document-review/promote-extraction-suggestions.use-case.js';
+import { ExportDocumentFieldValuesUseCase } from './application/export-document-field-values.use-case.js';
 import { GetDocumentUseCase } from './application/get-document.use-case.js';
 import { GetDocumentContentUseCase } from './application/get-document-content.use-case.js';
 import { GetDocumentExtractionImageThumbnailUseCase } from './application/get-document-extraction-image-thumbnail.use-case.js';
