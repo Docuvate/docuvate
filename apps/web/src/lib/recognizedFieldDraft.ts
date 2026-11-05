@@ -6,7 +6,12 @@ import type {
   RecognizedFieldLabelGateMatch,
 } from '@docuvate/contracts';
 
-import type { RecognizedFieldGateDraft } from '../components/settings/RecognizedFieldQualityGateEditor';
+/** Presets applied when a new field is created in the field dialog. */
+export interface RecognizedFieldGateDraft {
+  confidenceGateEnabled: boolean;
+  /** Workspace field-acceptance confidence; preset for new fields, set in Einstellungen. */
+  labelFieldConfidenceThreshold: number;
+}
 
 export interface RecognizedFieldDraft {
   /** Stable React key; not sent to the API. */
@@ -52,7 +57,7 @@ export function emptyRecognizedFieldDraft(
     label: '',
     fieldType: 'text',
     extractForAllDocuments: false,
-    gateLabelIds: [...defaults.requiredLabelIds],
+    gateLabelIds: [],
     gateLabelMatch: 'all',
     minLabelConfidence: defaults.labelFieldConfidenceThreshold,
     confidenceGateEnabled: defaults.confidenceGateEnabled,

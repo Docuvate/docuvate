@@ -5,31 +5,20 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
-import { PageFormSaveKit } from '../../components/save/PageFormSaveKit';
 import { useToastNotify } from '../../components/save/ToastProvider';
 import { RecognizedFieldCatalogEditor } from '../../components/settings/RecognizedFieldCatalogEditor';
-import {
-  type RecognizedFieldGateDraft,
-  RecognizedFieldQualityGateEditor,
-} from '../../components/settings/RecognizedFieldQualityGateEditor';
 import { Card } from '../../components/ui/Card';
-import {
-  getUserSettings,
-  getWorkspaceMlSettings,
-  listRecognizedFields,
-  listTags,
-  updateUserSettings,
-} from '../../lib/api';
+import { getWorkspaceMlSettings, listRecognizedFields, listTags } from '../../lib/api';
 import { formatUserFacingError } from '../../lib/apiErrors';
 import {
   draftsFromRecognizedDefinitions,
   type RecognizedFieldDraft,
+  type RecognizedFieldGateDraft,
 } from '../../lib/recognizedFieldDraft';
 import { validateRecognizedFieldDrafts } from '../../lib/recognizedFieldRules';
 import { persistRecognizedFieldCatalog } from '../../lib/recognizedFieldsPersist';
 import { routes } from '../../lib/routes';
-import { notifySaved, notifySaveError } from '../../lib/saveNotify';
-import { useFormDraft } from '../../lib/useFormDraft';
+import { notifySaveError } from '../../lib/saveNotify';
 
 export function RecognizedFieldsPage() {
   const { t } = useTranslation();
@@ -39,29 +28,19 @@ export function RecognizedFieldsPage() {
   const [gateBaseline, setGateBaseline] = useState<RecognizedFieldGateDraft>({
     confidenceGateEnabled: true,
     labelFieldConfidenceThreshold: FIELD_ACCEPTANCE_LABEL_CONFIDENCE.normal,
-    requiredLabelIds: [],
   });
-  const gateForm = useFormDraft(gateBaseline);
   const [loading, setLoading] = useState(true);
   const [catalogBusy, setCatalogBusy] = useState(false);
-  const [gateSaving, setGateSaving] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [gateSaveError, setGateSaveError] = useState<string | null>(null);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
   useEffect(() => {
-    void Promise.all([
-      listRecognizedFields(),
-      listTags(),
-      getUserSettings(),
-      getWorkspaceMlSettings(),
-    ])
-      .then(([recognized, tagList, settings, workspaceMl]) => {
+    void Promise.all([listRecognizedFields(), listTags(), getWorkspaceMlSettings()])
+      .then(([recognized, tagList, workspaceMl]) => {
         const defaults: RecognizedFieldGateDraft = {
           confidenceGateEnabled: true,
           labelFieldConfidenceThreshold:
             FIELD_ACCEPTANCE_LABEL_CONFIDENCE[workspaceMl.fieldAcceptance],
-          requiredLabelIds: settings.fieldExtractionRequiredLabelIds ?? [],
         };
         const nextFields = draftsFromRecognizedDefinitions(recognized, defaults);
         setGateBaseline(defaults);
@@ -112,28 +91,8 @@ export function RecognizedFieldsPage() {
     [gateBaseline, pushSuccess, validationMessages]
   );
 
-  async function saveGateDefaults() {
-    setGateSaving(true);
-    setGateSaveError(null);
-    try {
-      await updateUserSettings({
-        fieldExtractionConfidenceGateEnabled: true,
-        fieldExtractionRequiredLabelIds: gateForm.draft.requiredLabelIds,
-      });
-      setGateBaseline(gateForm.draft);
-      gateForm.commit(gateForm.draft);
-      notifySaved();
-    } catch (err) {
-      const message = formatUserFacingError(err, 'recognizedFields.saveFailed');
-      setGateSaveError(message);
-      notifySaveError(message, () => void saveGateDefaults());
-    } finally {
-      setGateSaving(false);
-    }
-  }
-
   return (
-    <div className="page library-page recognized-fields-page page--with-save-bar" data-ux="page">
+    <div className="page library-page recognized-fields-page" data-ux="page">
       <header className="page-header recognized-fields-header">
         <div>
           <h1 data-ux="page-title">{t('recognizedFields.pageTitle')}</h1>
@@ -173,29 +132,8 @@ export function RecognizedFieldsPage() {
               <Link to={routes.structureLabels}>{t('nav.labels')}</Link>.
             </p>
           </Card>
-
-          <Card className="recognized-fields-defaults-card">
-            <h2>{t('recognizedFields.defaultsTitle')}</h2>
-            <p className="muted recognized-fields-defaults-lead">
-              {t('recognizedFields.defaultsLead')}
-            </p>
-            <RecognizedFieldQualityGateEditor
-              tags={tags}
-              gate={gateForm.draft}
-              disabled={gateSaving}
-              onChange={gateForm.setDraft}
-            />
-          </Card>
         </div>
       ) : null}
-
-      <PageFormSaveKit
-        dirty={gateForm.dirty}
-        saving={gateSaving}
-        error={gateSaveError}
-        onDiscard={gateForm.discard}
-        onSave={() => void saveGateDefaults()}
-      />
     </div>
   );
 }

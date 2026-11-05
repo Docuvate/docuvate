@@ -5,10 +5,10 @@ import { useEffect, useId, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import type { RecognizedFieldDraft } from '../../lib/recognizedFieldDraft';
+import type { RecognizedFieldGateDraft } from '../../lib/recognizedFieldDraft';
 import { emptyRecognizedFieldDraft } from '../../lib/recognizedFieldDraft';
 import { Button } from '../ui/Button';
 import { Dialog, DialogBody, DialogFooter, DialogHeader } from '../ui/Dialog';
-import type { RecognizedFieldGateDraft } from './RecognizedFieldQualityGateEditor';
 import { RecognizedFieldRowForm } from './RecognizedFieldRowForm';
 
 interface RecognizedFieldEditDialogProps {
@@ -66,7 +66,6 @@ export function RecognizedFieldEditDialog({
         <RecognizedFieldRowForm
           row={draft}
           tags={tags}
-          gateDefaults={gateDefaults}
           keyManual={keyManual}
           onChange={setDraft}
           onKeyManual={() => {

@@ -5,6 +5,7 @@ import { Trash2 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import type { RecognizedFieldGateDraft } from '../../lib/recognizedFieldDraft';
 import {
   emptyRecognizedFieldDraft,
   RECOGNIZED_FIELD_STARTER_PRESETS,
@@ -13,7 +14,6 @@ import {
 import { Button } from '../ui/Button';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { RecognizedFieldEditDialog } from './RecognizedFieldEditDialog';
-import type { RecognizedFieldGateDraft } from './RecognizedFieldQualityGateEditor';
 
 const FIELD_TYPE_KEYS: Record<string, string> = {
   text: 'recognizedFields.typeText',
