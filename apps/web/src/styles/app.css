@@ -14344,24 +14344,43 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   gap: var(--dv-space-sm);
 }
 
+/* Name and count share the first line, the bar spans the full width below, so label names get
+   the whole card width instead of a fixed 10rem column. */
 .dashboard-top-label-row {
   display: grid;
-  grid-template-columns: 10rem minmax(0, 1fr) 3rem;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    'chip count'
+    'bar bar';
   align-items: center;
-  gap: var(--dv-space-sm);
-  min-height: 2.5rem;
+  column-gap: var(--dv-space-sm);
+  row-gap: var(--dv-space-2xs);
 }
 
 .dashboard-top-label-chip {
+  grid-area: chip;
   min-width: 0;
-  max-width: 10rem;
+  max-width: 100%;
+}
+
+.dashboard-top-label-chip .chip {
+  --chip-max-width: 100%;
+  max-width: 100%;
+}
+
+/* Wrap long label names instead of truncating them; break inside a word only as a last resort. */
+.dashboard-top-label-chip .chip-label {
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .dashboard-top-label-progress {
+  grid-area: bar;
   height: 0.25rem;
 }
 
 .dashboard-top-label-count {
+  grid-area: count;
   text-align: right;
   font-variant-numeric: tabular-nums;
   font-size: var(--dv-font-size-sm);
