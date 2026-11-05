@@ -21,11 +21,20 @@ import {
   captureLoadedScreenshot,
   captureViewportScreenshot,
 } from '../../helpers/overflow-check';
+import {
+  listFields,
+  replaceFields,
+  type RecognizedFieldPayload,
+} from '../../helpers/recognized-fields-catalog';
 import { smokeFixtureStoragePath } from '../../helpers/smoke-fixture-auth';
 import { findReadyLayoutDocument } from '../../helpers/wait-for-layout-ir';
 
 const apiBase = process.env['E2E_API_URL'] ?? 'http://localhost:3001';
 const webOrigin = process.env['E2E_WEB_URL'] ?? 'http://localhost:5173';
+
+/** Seeded for this suite: workstream-e config has no globalSetup, so smoke users start with an empty catalog. */
+const SEEDED_FIELD_KEY = 'e2e_field_regions_assign';
+const SEEDED_FIELD_LABEL = 'E2E Zuweisen';
 
 test.use({ storageState: smokeFixtureStoragePath() });
 
@@ -144,8 +153,11 @@ async function dismissOverlaySheets(page: Page): Promise<void> {
   }
 }
 
-/** Open the field combobox and pick an existing definition (catalog or document). */
-async function selectExistingFieldInContextBar(page: Page): Promise<void> {
+/**
+ * Real-user assign path: focus the field combobox, type a known label, choose the matching option.
+ * Relies on a seeded recognized-field catalog entry (see beforeAll) — smoke + workstream-e has none by default.
+ */
+async function selectExistingFieldInContextBar(page: Page, fieldLabel: string): Promise<void> {
   const bar = page.getByTestId('field-context-bar');
   const accept = bar.getByTestId('field-context-bar-accept');
   await expect(accept).toBeDisabled();
@@ -155,7 +167,10 @@ async function selectExistingFieldInContextBar(page: Page): Promise<void> {
     name: /Feld für diese Auswahl|Field for this selection/i,
   });
   await combobox.click();
-  const option = page.getByRole('option').first();
+  await expect(combobox).toHaveAttribute('aria-expanded', 'true');
+  await combobox.fill(fieldLabel);
+
+  const option = page.getByRole('option', { name: fieldLabel, exact: true });
   await expect(option).toBeVisible({ timeout: 15_000 });
   await option.click();
 
@@ -207,9 +222,28 @@ test.describe('document field regions', () => {
   let ownedLayoutDoc = false;
   const labels = longLabelNames(25);
   const createdTagIds: string[] = [];
+  let originalRecognizedFields: RecognizedFieldPayload[] | null = null;
 
   test.beforeAll(async ({ request }) => {
     test.setTimeout(420_000);
+    // Capture first so afterAll can restore even if later steps fail.
+    originalRecognizedFields = await listFields(request);
+    const alreadySeeded = originalRecognizedFields.some((field) => field.key === SEEDED_FIELD_KEY);
+    if (!alreadySeeded) {
+      const seed: RecognizedFieldPayload = {
+        key: SEEDED_FIELD_KEY,
+        label: SEEDED_FIELD_LABEL,
+        fieldType: 'text',
+        sortOrder: originalRecognizedFields.length,
+        extractForAllDocuments: false,
+        gateLabelIds: [],
+        gateLabelMatch: 'any',
+        minLabelConfidence: null,
+        confidenceGateEnabled: null,
+        showInFilter: false,
+      };
+      await replaceFields(request, [...originalRecognizedFields, seed]);
+    }
     const existing = await findReadyLayoutDocument(request, apiBase, webOrigin);
     if (existing) {
       layoutDocId = existing;
@@ -224,6 +258,9 @@ test.describe('document field regions', () => {
 
   test.afterAll(async ({ request }) => {
     test.setTimeout(60_000);
+    if (originalRecognizedFields !== null) {
+      await replaceFields(request, originalRecognizedFields);
+    }
     for (const tagId of createdTagIds) {
       await request.delete(`${apiBase}/v1/tags/${tagId}`, {
         headers: { origin: webOrigin },
@@ -264,7 +301,7 @@ test.describe('document field regions', () => {
     const bar = page.getByTestId('field-context-bar');
     await expect(bar).toBeVisible({ timeout: 30_000 });
     // Bar starts with no field selected — Accept stays disabled until an existing field is chosen.
-    await selectExistingFieldInContextBar(page);
+    await selectExistingFieldInContextBar(page, SEEDED_FIELD_LABEL);
     await confirmAssignedFieldInContextBar(page);
     await expect(page.getByText(/Korrektur gespeichert|Correction saved/i)).toBeVisible({
       timeout: 30_000,
