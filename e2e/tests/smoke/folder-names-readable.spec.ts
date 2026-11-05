@@ -68,13 +68,21 @@ test.describe('folder names stay readable', () => {
       expect(await isClipped(childTile.locator('.filesystem-folder-tile-name'))).toBe(false);
 
       await page.mouse.move(width - 5, 795);
-      const rootRow = page
-        .locator('.dateisystem-tree-row')
-        .filter({
-          has: page.locator('.sidebar-tree-name', { hasText: new RegExp(`^${ROOT_NAME}$`) }),
-        });
+      const rootRow = page.locator('.dateisystem-tree-row').filter({
+        has: page.locator('.sidebar-tree-name', { hasText: new RegExp(`^${ROOT_NAME}$`) }),
+      });
       await expect(rootRow).toBeVisible();
       expect(await isClipped(rootRow.locator('.sidebar-tree-name'))).toBe(false);
+
+      // Hovering reveals the row actions next to the name, never on top of it.
+      await rootRow.hover();
+      const actionButton = rootRow.locator('.dateisystem-tree-actions button').first();
+      await expect(actionButton).toBeVisible();
+      const nameBox = await rootRow.locator('a.dateisystem-tree-link').boundingBox();
+      const actionBox = await actionButton.boundingBox();
+      expect(nameBox && actionBox ? nameBox.x + nameBox.width <= actionBox.x + 1 : false).toBe(
+        true
+      );
       await assertNoHorizontalOverflow(page);
     });
   }
