@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { passkey } from '@better-auth/passkey';
-import { betterAuth } from 'better-auth';
+import { APIError, betterAuth } from 'better-auth';
 import { twoFactor } from 'better-auth/plugins/two-factor';
 import pg from 'pg';
 
@@ -18,7 +18,10 @@ import {
 } from '../../../modules/auth/infrastructure/mail/email-change-mailer.factory.js';
 import { createPasswordResetMailer } from '../../../modules/auth/infrastructure/mail/password-reset-mailer.factory.js';
 import { PgInstallationOidcProviderRepository } from '../../../modules/auth/infrastructure/pg-installation-oidc-provider.repository.js';
-import { isSignupPermitted } from '../../../modules/auth/infrastructure/signup-policy.js';
+import {
+  isSignupPermitted,
+  SIGNUP_DISABLED_ERROR_CODE,
+} from '../../../modules/auth/infrastructure/signup-policy.js';
 import { syncEnvOidcProviders } from '../../../modules/auth/infrastructure/sync-env-oidc-providers.js';
 import { assertBetterAuthSecretForRuntime } from './better-auth-secret.js';
 
@@ -120,6 +123,14 @@ async function buildAuthInstance() {
         create: {
           before: async () => {
             if (!(await isSignupPermitted(pool))) {
+              // A distinct code lets the register page say why instead of a generic failure.
+              const signupDisabled = APIError.from('FORBIDDEN', {
+                code: SIGNUP_DISABLED_ERROR_CODE,
+                message: 'Registration is invite-only on this installation',
+              });
+              if (signupDisabled instanceof Error) {
+                throw signupDisabled;
+              }
               return false;
             }
           },

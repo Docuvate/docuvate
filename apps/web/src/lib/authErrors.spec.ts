@@ -34,6 +34,16 @@ describe('formatAuthClientError', () => {
     expect(warn).not.toHaveBeenCalled();
   });
 
+  it('explains invite-only registration instead of a generic failure', () => {
+    const text = formatAuthClientError(
+      { code: 'SIGNUP_DISABLED', status: 403, message: 'Registration is invite-only' },
+      'signUp'
+    );
+    expect(text).toBe(
+      'Auf dieser Installation ist die Registrierung nur mit Einladung möglich. Bitte wenden Sie sich an eine Administratorin oder einen Administrator.'
+    );
+  });
+
   it('maps HTTP 429 without code', () => {
     const text = formatAuthClientError({ status: 429, message: 'Too Many Requests' }, 'signIn');
     expect(text).toBe('Zu viele Versuche. Bitte kurz warten und erneut versuchen.');

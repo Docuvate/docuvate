@@ -19,6 +19,7 @@ const AUTH_ERROR_CODE_KEYS: Record<string, string> = {
   INVALID_EMAIL: 'auth.errors.invalidEmail',
   INVALID_EMAIL_FORMAT: 'auth.errors.invalidEmail',
   EMAIL_NOT_VERIFIED: 'auth.errors.emailNotVerified',
+  SIGNUP_DISABLED: 'auth.errors.signupDisabled',
   USER_ALREADY_EXISTS: 'auth.errors.userAlreadyExists',
   USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL: 'auth.errors.userAlreadyExists',
   PASSWORD_TOO_SHORT: 'auth.errors.passwordTooShort',
