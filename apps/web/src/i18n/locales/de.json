@@ -924,7 +924,7 @@
     "labelPanelLoadingTags": "Lade Labels…",
     "labelAddPlaceholder": "Label-Name eingeben…",
     "labelAddInputAria": "Label-Name für Zuweisung oder Neuanlage",
-    "labelAddHint": "Eingeben und mit Enter oder „Hinzufügen“ bestätigen. Bestehende Labels können Sie darunter anklicken.",
+    "labelAddHint": "Namen eingeben und ein vorhandenes Label aus der Liste wählen oder mit Enter als neues Label anlegen.",
     "labelSuggestionAcceptHint": "Klicken, um Label „{{name}}“ zu übernehmen. Rechtsklick zum Verwerfen.",
     "labelSuggestionChipPrefix": "Vorschlag",
     "labelAddSubmitAssign": "Hinzufügen",
