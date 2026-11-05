@@ -241,6 +241,38 @@ export async function listDocuments(filters: DocumentListQuery = {}): Promise<Do
   return data.items;
 }
 
+export type DocumentFieldValuesExportFormat = 'csv' | 'json';
+
+export async function exportDocumentFieldValues(
+  format: DocumentFieldValuesExportFormat,
+  filters: DocumentListQuery = {},
+  documentIds?: readonly string[]
+): Promise<Blob> {
+  const listQs = documentListQueryString({
+    ...filters,
+    limit: undefined,
+    cursor: undefined,
+  });
+  const params = new URLSearchParams(listQs.startsWith('?') ? listQs.slice(1) : listQs);
+  params.set('format', format);
+  if (documentIds != null && documentIds.length > 0) {
+    params.set('ids', documentIds.join(','));
+  }
+  const query = params.toString();
+  const response = await fetch(`${baseURL}/documents/export?${query}`, {
+    method: 'GET',
+    credentials: 'include',
+  });
+  if (!response.ok) {
+    const bodyUnknown: unknown = await response.json().catch(() => ({}));
+    const body = isRecord(bodyUnknown) ? bodyUnknown : {};
+    throwApiRequestError(response.status, body, response.headers.get('x-request-id'));
+  }
+  notifyApiRequestSucceeded();
+  return response.blob();
+}
+
+
 export async function getDocument(id: string): Promise<DocumentDto> {
   return request<DocumentDto>(`/documents/${id}`);
 }

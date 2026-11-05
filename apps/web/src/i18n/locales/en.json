@@ -518,7 +518,12 @@
     "stackPrimaryDeleteDescription": "“{{filename}}” will be permanently deleted.",
     "stackPrimaryDeleteAllVersions": "Also delete all versions in the stack",
     "stackPrimaryDeleteConfirmWithVersions": "Delete {{count}} documents permanently",
-    "reviewPendingTooltip": "Suggestions are waiting for review"
+    "reviewPendingTooltip": "Suggestions are waiting for review",
+    "exportFieldValuesCsv": "Field values as CSV",
+    "exportFieldValuesJson": "Field values as JSON",
+    "exportFieldValuesPending": "Preparing export…",
+    "exportFieldValuesFailed": "Export failed",
+    "exportFieldValuesDone": "Export downloaded"
   },
   "filesystem": {
     "title": "Filesystem",

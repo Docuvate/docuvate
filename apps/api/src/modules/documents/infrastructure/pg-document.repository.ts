@@ -14,6 +14,7 @@ import {
   isRecord,
   parseJsonString,
   parseNumber,
+  parseOptionalNumber,
   parseOptionalString,
   parseString,
   recordFromUnknown,
@@ -202,6 +203,50 @@ export class PgDocumentRepository implements DocumentRepository {
       [userId, documentIds]
     );
     return result.rows.map((row) => parseString(requireRecord(row).id));
+  }
+
+
+  async listFieldValuesForDocuments(
+    userId: string,
+    documentIds: readonly string[]
+  ): Promise<
+    Array<{
+      documentId: string;
+      title: string;
+      filename: string;
+      fieldKey: string;
+      value: string;
+      confidence: number | null;
+    }>
+  > {
+    if (documentIds.length === 0) {
+      return [];
+    }
+    const result = await this.pool.query(
+      `SELECT d.id::text AS document_id,
+              d.title,
+              d.filename,
+              v.field_storage_key AS field_key,
+              v.value_text AS value,
+              v.confidence
+         FROM documents d
+         INNER JOIN document_field_values v ON v.document_id = d.id
+        WHERE d.user_id = $1
+          AND d.id = ANY($2::uuid[])
+        ORDER BY d.title ASC, d.filename ASC, v.field_storage_key ASC`,
+      [userId, [...documentIds]]
+    );
+    return result.rows.map((raw) => {
+      const row = requireRecord(raw);
+      return {
+        documentId: parseString(row.document_id),
+        title: parseString(row.title),
+        filename: parseString(row.filename),
+        fieldKey: parseString(row.field_key),
+        value: parseString(row.value),
+        confidence: parseOptionalNumber(row.confidence),
+      };
+    });
   }
 
   async findByIdForUser(id: string, userId: string): Promise<DocumentEntity | null> {
