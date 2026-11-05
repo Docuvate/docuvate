@@ -8850,6 +8850,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   flex: 0 1 auto;
   max-width: 100%;
   white-space: nowrap;
+  color: var(--dv-color-pdf-chrome-text) !important;
 }
 
 @media (max-width: 640px) {
