@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next';
 
 import { isUserConfirmedField } from '../../lib/documentFieldValueRowState';
 import { fieldSuggestionOutsideUserSchema } from '../../lib/fieldSuggestionSchema';
+import { findFieldRegion } from '../../lib/findFieldRegion';
 import { formatExtractedFieldDisplayValue } from '../../lib/formatExtractedFieldDisplayValue';
 import {
   allLayoutWidgets,
@@ -26,7 +27,6 @@ import {
   groupLayoutPanelFields,
   LAYOUT_FIELD_FILTER_MIN_FIELDS,
 } from '../../lib/layoutPanelFieldGroups';
-import { findFieldRegion } from '../../lib/findFieldRegion';
 import { fieldsForLayoutPanel } from '../../lib/layoutPanelFields';
 import {
   buildRecognizedFieldDefinitionIndex,

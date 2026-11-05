@@ -18,11 +18,11 @@ import {
   withdrawDocumentFieldCorrection,
   withdrawDocumentTableCorrection,
 } from '../../lib/api';
-import { findFieldRegion } from '../../lib/findFieldRegion';
 import { formatUserFacingError } from '../../lib/apiErrors';
 import { isExtractionPending } from '../../lib/documentExtractionState';
 import { withSavedFieldValue } from '../../lib/documentFieldValueRowState';
 import { findBlockIndexAtPoint } from '../../lib/extractionLayout';
+import { findFieldRegion } from '../../lib/findFieldRegion';
 import { layoutIrDocumentFromPageSummaries } from '../../lib/layoutIrPages';
 import {
   buildLayoutOverlays,
