@@ -95,7 +95,9 @@ export function ConnectorSourcesPage() {
       ? t('connectors.sources.rootBucket', {
           name: activeInstallation?.displayName ?? t('connectors.sources.rootBucketFallback'),
         })
-      : t('connectors.sources.rootMailbox');
+      : (activeInstallation?.pluginId ?? routePluginId) === 'sftp_fetch'
+        ? t('connectors.sources.rootServer')
+        : t('connectors.sources.rootMailbox');
 
   return (
     <ConnectorDetailLayout
