@@ -50,7 +50,7 @@ import {
   readLibraryViewMode,
   writeLibraryViewMode,
 } from '../../lib/libraryViewMode';
-import { childFolders } from '../../lib/ordnerTree';
+import { childFolders, folderDocumentCountsWithSubfolders } from '../../lib/ordnerTree';
 import { applySavedViewToLibrary, buildSavedViewPayload } from '../../lib/savedViewState';
 type SortField = NonNullable<DocumentListQuery['sort']>;
 
@@ -507,6 +507,8 @@ export function useLibraryPageData(mode: 'all' | 'folder' | 'unassigned' | 'ordn
     return t('library.titleDocuments');
   }, [mode, filters.inbox, folderId, folders, t]);
 
+  const folderDocumentCounts = useMemo(() => folderDocumentCountsWithSubfolders(folders), [folders]);
+
   const childFoldersForView = useMemo(() => {
     if (mode !== 'folder' || !folderId) return [];
     return childFolders(folders, folderId);
@@ -549,6 +551,7 @@ export function useLibraryPageData(mode: 'all' | 'folder' | 'unassigned' | 'ordn
     items,
     folders,
     childFoldersForView,
+    folderDocumentCounts,
     tags,
     recognizedFields,
     filterableFields,

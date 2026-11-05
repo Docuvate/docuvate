@@ -22,7 +22,12 @@ import {
   collectVisibleFolderTreeRows,
   type FlatFolderTreeRow,
 } from '../../lib/ordner/folderExplorerFlatRows';
-import { folderDirectDocumentCount, folderHref } from '../../lib/ordnerTree';
+import type { FolderDocumentCounts } from '../../lib/ordnerTree';
+import {
+  folderDocumentCountsFor,
+  folderDocumentCountsWithSubfolders,
+  folderHref,
+} from '../../lib/ordnerTree';
 import { routes } from '../../lib/routes';
 import { Button } from '../ui/Button';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
@@ -92,6 +97,7 @@ export function FolderExplorerTree({
   } | null>(null);
 
   const treeScrollRef = useRef<HTMLDivElement>(null);
+  const documentCounts = useMemo(() => folderDocumentCountsWithSubfolders(folders), [folders]);
   const visibleRows = useMemo(
     () =>
       collectVisibleFolderTreeRows({
@@ -288,6 +294,7 @@ export function FolderExplorerTree({
                   key={row.folderKey}
                   row={row}
                   folders={folders}
+                  documentCounts={documentCounts}
                   fileDropHighlightId={fileDropHighlightId}
                   virtualRow={virtualRow}
                   measureElement={treeVirtualizer.measureElement}
@@ -386,6 +393,7 @@ function UnassignedTreeLink({ active }: { active: boolean }) {
 interface FolderFlatTreeRowProps {
   row: FlatFolderTreeRow;
   folders: FolderDto[];
+  documentCounts: ReadonlyMap<string, FolderDocumentCounts>;
   fileDropHighlightId: string | null;
   virtualRow: { index: number; start: number };
   measureElement: (element: Element) => void;
@@ -399,6 +407,7 @@ interface FolderFlatTreeRowProps {
 function FolderFlatTreeRow({
   row,
   folders,
+  documentCounts,
   fileDropHighlightId,
   virtualRow,
   measureElement,
@@ -417,7 +426,7 @@ function FolderFlatTreeRow({
   });
 
   const dropTarget = dndHighlight || fileDropHighlightId === folderKey;
-  const count = folderDirectDocumentCount(folder);
+  const { total: count, direct } = folderDocumentCountsFor(documentCounts, folder);
 
   return (
     <li
@@ -449,7 +458,7 @@ function FolderFlatTreeRow({
         name={folder.name}
         count={count}
         countAriaLabel={t('library.folderDocCount', { count })}
-        countTitle={t('filesystem.treeDocCountTooltip', { count })}
+        countTitle={t('filesystem.folderDocCountTooltip', { count, direct })}
         onDragOver={(e) => {
           if (!isFileDrag(e.dataTransfer)) return;
           e.preventDefault();

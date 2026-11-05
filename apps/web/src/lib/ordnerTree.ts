@@ -124,6 +124,58 @@ export function folderDirectDocumentCount(folder: FolderDto): number {
   return folder.documentCount ?? 0;
 }
 
+export interface FolderDocumentCounts {
+  /** Documents in this folder and all of its subfolders. */
+  total: number;
+  /** Documents stored directly in this folder. */
+  direct: number;
+}
+
+/**
+ * Document counts per folder id, including all subfolders. A parent that only holds
+ * subfolders must not read as empty.
+ */
+export function folderDocumentCountsWithSubfolders(
+  folders: FolderDto[]
+): ReadonlyMap<string, FolderDocumentCounts> {
+  const childrenByParent = new Map<string, FolderDto[]>();
+  for (const folder of folders) {
+    if (!folder.parentId) continue;
+    const siblings = childrenByParent.get(folder.parentId) ?? [];
+    siblings.push(folder);
+    childrenByParent.set(folder.parentId, siblings);
+  }
+  const totals = new Map<string, number>();
+  const inProgress = new Set<string>();
+  function total(folder: FolderDto): number {
+    const known = totals.get(folder.id);
+    if (known !== undefined) return known;
+    if (inProgress.has(folder.id)) return 0;
+    inProgress.add(folder.id);
+    let sum = folderDirectDocumentCount(folder);
+    for (const child of childrenByParent.get(folder.id) ?? []) {
+      sum += total(child);
+    }
+    inProgress.delete(folder.id);
+    totals.set(folder.id, sum);
+    return sum;
+  }
+  const counts = new Map<string, FolderDocumentCounts>();
+  for (const folder of folders) {
+    counts.set(folder.id, { total: total(folder), direct: folderDirectDocumentCount(folder) });
+  }
+  return counts;
+}
+
+/** Counts for one folder; falls back to its direct count when it is not in the map. */
+export function folderDocumentCountsFor(
+  counts: ReadonlyMap<string, FolderDocumentCounts>,
+  folder: FolderDto
+): FolderDocumentCounts {
+  const direct = folderDirectDocumentCount(folder);
+  return counts.get(folder.id) ?? { total: direct, direct };
+}
+
 export function isDescendant(
   folders: FolderDto[],
   maybeDescendantId: string,
