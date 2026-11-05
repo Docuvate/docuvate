@@ -586,20 +586,22 @@ export function LibraryDocumentTable({
                               className="library-row-progress"
                             />
                           ) : (
-                            <Badge status={doc.status} />
-                          {showLayoutMissingBadge(doc) ? (
-                            <LayoutMissingBadge
-                              compact
-                              requeueBusy={requeueBusyIds?.has(doc.id) === true}
-                              onRequeue={
-                                onRequeueDocument
-                                  ? () => {
-                                      onRequeueDocument(doc.id);
-                                    }
-                                  : undefined
-                              }
-                            />
-                          ) : null}
+                            <>
+                              <Badge status={doc.status} />
+                              {showLayoutMissingBadge(doc) ? (
+                                <LayoutMissingBadge
+                                  compact
+                                  requeueBusy={requeueBusyIds?.has(doc.id) === true}
+                                  onRequeue={
+                                    onRequeueDocument
+                                      ? () => {
+                                          onRequeueDocument(doc.id);
+                                        }
+                                      : undefined
+                                  }
+                                />
+                              ) : null}
+                            </>
                           )}
                           {hasStack ? (
                             <>
@@ -877,20 +879,22 @@ export function LibraryDocumentTable({
                                 className="library-row-progress"
                               />
                             ) : (
-                              <Badge status={doc.status} />
-                          {showLayoutMissingBadge(doc) ? (
-                            <LayoutMissingBadge
-                              compact
-                              requeueBusy={requeueBusyIds?.has(doc.id) === true}
-                              onRequeue={
-                                onRequeueDocument
-                                  ? () => {
-                                      onRequeueDocument(doc.id);
+                              <>
+                                <Badge status={doc.status} />
+                                {showLayoutMissingBadge(doc) ? (
+                                  <LayoutMissingBadge
+                                    compact
+                                    requeueBusy={requeueBusyIds?.has(doc.id) === true}
+                                    onRequeue={
+                                      onRequeueDocument
+                                        ? () => {
+                                            onRequeueDocument(doc.id);
+                                          }
+                                        : undefined
                                     }
-                                  : undefined
-                              }
-                            />
-                          ) : null}
+                                  />
+                                ) : null}
+                              </>
                             )}
                           </div>
                         ) : null}
