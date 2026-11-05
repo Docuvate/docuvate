@@ -29,8 +29,8 @@ import {
 } from '../lib/api';
 import { formatUserFacingError } from '../lib/apiErrors';
 import { formatConnectorError } from '../lib/connectorErrors';
-import { validateHttpUrlInput } from '../lib/httpUrlInput';
 import { formatPaperlessImportRunError } from '../lib/formatPaperlessImportRunError';
+import { validateHttpUrlInput } from '../lib/httpUrlInput';
 import { routes } from '../lib/routes';
 
 interface FormState {

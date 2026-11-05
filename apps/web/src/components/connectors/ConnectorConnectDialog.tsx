@@ -41,6 +41,21 @@ function defaultDisplayName(plugin: ConnectorPluginCatalogEntryDto, t: (key: str
   return t(plugin.labelKey);
 }
 
+
+function withoutFieldError(
+  errors: Record<string, string>,
+  key: string,
+): Record<string, string> {
+  if (!(key in errors)) return errors;
+  const next: Record<string, string> = {};
+  for (const [entryKey, value] of Object.entries(errors)) {
+    if (entryKey !== key) {
+      next[entryKey] = value;
+    }
+  }
+  return next;
+}
+
 export function ConnectorConnectDialog({
   open,
   plugin,
@@ -304,12 +319,7 @@ export function ConnectorConnectDialog({
                             autoComplete={field.secret ? 'off' : undefined}
                             placeholder={field.placeholderKey ? t(field.placeholderKey) : undefined}
                             onChange={(e) => {
-                              setFieldErrors((prev) => {
-                                if (!(field.key in prev)) return prev;
-                                const next = { ...prev };
-                                delete next[field.key];
-                                return next;
-                              });
+                              setFieldErrors((prev) => withoutFieldError(prev, field.key));
                               setCredentials((prev) => ({ ...prev, [field.key]: e.target.value }));
                             }}
                             aria-label={fieldLabel(field)}
@@ -332,12 +342,7 @@ export function ConnectorConnectDialog({
                             autoComplete={field.secret ? 'off' : undefined}
                             placeholder={field.placeholderKey ? t(field.placeholderKey) : undefined}
                             onChange={(e) => {
-                              setFieldErrors((prev) => {
-                                if (!(field.key in prev)) return prev;
-                                const next = { ...prev };
-                                delete next[field.key];
-                                return next;
-                              });
+                              setFieldErrors((prev) => withoutFieldError(prev, field.key));
                               setCredentials((prev) => ({ ...prev, [field.key]: e.target.value }));
                             }}
                             aria-label={fieldLabel(field)}
