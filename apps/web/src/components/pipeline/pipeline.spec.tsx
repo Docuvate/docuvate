@@ -95,7 +95,7 @@ describe('DocumentStageTrack / StagePill', () => {
     expect(current?.textContent).toContain('aktueller Schritt');
   });
 
-  it('keeps legacy badge hooks next to the stage class', () => {
+  it('keeps the status badge hooks next to the stage class', () => {
     const { container } = render(<StagePill state="structured" status="ready" />);
     const pill = container.querySelector('span');
     expect(pill?.className).toContain('badge-ready');

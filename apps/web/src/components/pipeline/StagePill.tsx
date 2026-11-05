@@ -15,10 +15,10 @@ interface StagePillProps {
 /** Where a document is in the structuring pipeline (Wartet · Wird strukturiert · Zu prüfen · …). */
 export function StagePill({ state, status, className = '' }: StagePillProps) {
   const { t } = useTranslation();
-  const legacy = status ? `badge badge-${status} ` : '';
+  const statusHooks = status ? `badge badge-${status} ` : '';
   return (
     <span
-      className={`${legacy}pipeline-pill pipeline-pill--${state}${className ? ` ${className}` : ''}`}
+      className={`${statusHooks}pipeline-pill pipeline-pill--${state}${className ? ` ${className}` : ''}`}
       data-stage-state={state}
     >
       <span className="pipeline-pill-dot" aria-hidden />
