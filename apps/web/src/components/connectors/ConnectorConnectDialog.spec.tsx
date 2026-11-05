@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 /** @vitest-environment jsdom */
 import type { ConnectorPluginCatalogEntryDto } from '@docuvate/contracts';
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import i18n from '../../i18n';
@@ -41,6 +41,36 @@ const amazonS3Plugin: ConnectorPluginCatalogEntryDto = {
   auth: {
     strategy: 'custom',
     fields: [{ key: 'bucket', labelKey: 'connectors.auth.fields.bucket', type: 'text', required: true }],
+  },
+};
+
+
+const homeAssistantPlugin: ConnectorPluginCatalogEntryDto = {
+  id: 'home_assistant',
+  categoryId: 'home_automation',
+  labelKey: 'connectors.plugins.homeAssistant.label',
+  descriptionKey: 'connectors.plugins.homeAssistant.description',
+  capabilities: ['sink'],
+  tier: 'oss',
+  auth: {
+    strategy: 'custom',
+    fields: [
+      {
+        key: 'base_url',
+        labelKey: 'connectors.auth.fields.baseUrl',
+        type: 'url',
+        required: true,
+        helpKey: 'connectors.plugins.homeAssistant.baseUrlHelp',
+      },
+      {
+        key: 'access_token',
+        labelKey: 'connectors.auth.fields.accessToken',
+        type: 'password',
+        required: true,
+        secret: true,
+        helpKey: 'connectors.plugins.homeAssistant.accessTokenHelp',
+      },
+    ],
   },
 };
 
@@ -85,5 +115,51 @@ describe('ConnectorConnectDialog', () => {
       <ConnectorConnectDialog open plugin={sftpFetchPlugin} onSubmit={vi.fn()} onCancel={vi.fn()} />
     );
     expect(screen.getByText('Connect Fetch from SFTP server')).toBeTruthy();
+  });
+
+  it('keeps Home Assistant help text out of the access-token accessible name', () => {
+    renderDialog(homeAssistantPlugin);
+    expect(screen.getByLabelText('Access token')).toBeTruthy();
+    expect(screen.getByText(/Long-lived access token from your HA user profile/i)).toBeTruthy();
+    // Help must not be glued into the label name
+    expect(screen.queryByLabelText(/Long-lived access token from your HA/i)).toBeNull();
+  });
+
+  it('shows an inline invalid-URL error and does not submit for Home Assistant', () => {
+    const onSubmit = vi.fn();
+    render(
+      <ConnectorConnectDialog
+        open
+        plugin={homeAssistantPlugin}
+        onSubmit={onSubmit}
+        onCancel={vi.fn()}
+      />
+    );
+    fireEvent.change(screen.getByLabelText('Instance URL'), {
+      target: { value: 'not-a-url' },
+    });
+    fireEvent.change(screen.getByLabelText('Access token'), {
+      target: { value: 'token' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Save connection' }));
+    expect(
+      screen.getByText(/Enter a valid Home Assistant URL/i)
+    ).toBeTruthy();
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+
+  it('renders submitError inside the dialog', () => {
+    render(
+      <ConnectorConnectDialog
+        open
+        plugin={homeAssistantPlugin}
+        submitError="Home Assistant instance unreachable."
+        onSubmit={vi.fn()}
+        onCancel={vi.fn()}
+      />
+    );
+    expect(screen.getByTestId('connector-connect-submit-error').textContent).toContain(
+      'unreachable'
+    );
   });
 });

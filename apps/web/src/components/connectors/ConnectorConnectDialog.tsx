@@ -12,6 +12,7 @@ import { listFolders, listTags, previewConnectorSourceNodes, probeSftpFetchHostK
 import { connectorOAuthConfigured, connectorOAuthMissingEnvVars } from '../../lib/connectorOAuth';
 import { connectorsOAuthSetupDocUrl } from '../../lib/connectorOAuthSetupDoc';
 import { connectorPluginSupportsSourceSelection } from '../../lib/connectorSourceSelection';
+import { validateHttpUrlInput } from '../../lib/httpUrlInput';
 import { Button } from '../ui/Button';
 import { Dialog, DialogBody, DialogFooter, DialogHeader } from '../ui/Dialog';
 import { Input } from '../ui/Input';
@@ -25,6 +26,8 @@ interface ConnectorConnectDialogProps {
   plugin: ConnectorPluginCatalogEntryDto | null;
   busy?: boolean;
   viewerIsServerAdmin?: boolean;
+  /** API/connect failure shown inside the dialog (not as a toast behind it). */
+  submitError?: string | null;
   onSubmit: (payload: {
     displayName: string;
     credentials: Record<string, string>;
@@ -43,6 +46,7 @@ export function ConnectorConnectDialog({
   plugin,
   busy = false,
   viewerIsServerAdmin = false,
+  submitError = null,
   onSubmit,
   onOAuthStart,
   onCancel,
@@ -58,6 +62,7 @@ export function ConnectorConnectDialog({
   const [step, setStep] = useState<ConnectorSetupStep>('access');
   const [sourceScope, setSourceScope] = useState<ConnectorSourceScopeDto>({ mode: 'all', paths: [] });
   const [stepError, setStepError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const fields = useMemo(() => plugin?.auth.fields ?? [], [plugin]);
   const isOAuth = plugin?.auth.strategy === 'oauth2';
@@ -89,6 +94,7 @@ export function ConnectorConnectDialog({
     setStep('access');
     setSourceScope({ mode: 'all', paths: [] });
     setStepError(null);
+    setFieldErrors({});
   }, [plugin, t]);
 
   useEffect(() => {
@@ -125,9 +131,35 @@ export function ConnectorConnectDialog({
     return t(field.labelKey);
   }
 
+  function urlInvalidMessage(pluginId: string): string {
+    if (pluginId === 'paperless') {
+      return t('connectors.plugins.paperless.errors.urlInvalid');
+    }
+    if (pluginId === 'home_assistant') {
+      return t('connectors.plugins.homeAssistant.errors.urlInvalid');
+    }
+    return t('connectors.errors.urlInvalid');
+  }
+
+  function validateUrlFields(): boolean {
+    if (!plugin) return false;
+    const nextErrors: Record<string, string> = {};
+    for (const field of fields) {
+      if (field.type !== 'url') continue;
+      const raw = credential(field.key);
+      const result = validateHttpUrlInput(raw);
+      if (!result.ok) {
+        nextErrors[field.key] = urlInvalidMessage(plugin.id);
+      }
+    }
+    setFieldErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
+  }
+
   async function advanceToSelection() {
     if (!plugin) return;
     setStepError(null);
+    if (!validateUrlFields()) return;
     try {
       await previewConnectorSourceNodes(plugin.id, credentials, '');
       setStep('selection');
@@ -146,6 +178,7 @@ export function ConnectorConnectDialog({
       });
       return;
     }
+    if (!validateUrlFields()) return;
     if (hasSelectionStep && step === 'access') {
       void advanceToSelection();
       return;
@@ -169,7 +202,9 @@ export function ConnectorConnectDialog({
             ? credential('bucket').trim()
             : t('connectors.sources.rootBucketFallback'),
         })
-      : t('connectors.sources.rootMailbox');
+      : plugin?.id === 'sftp_fetch'
+        ? t('connectors.sources.rootServer')
+        : t('connectors.sources.rootMailbox');
 
   return (
     <Dialog
@@ -180,7 +215,7 @@ export function ConnectorConnectDialog({
       className="connector-connect-dialog"
     >
       {plugin ? (
-        <form onSubmit={handleSubmit}>
+        <form noValidate onSubmit={handleSubmit}>
           <DialogHeader
             title={t('connectors.connectTitle', { name: t(plugin.labelKey) })}
             titleId={titleId}
@@ -191,6 +226,11 @@ export function ConnectorConnectDialog({
             {stepError ? (
               <p className="error" role="alert">
                 {stepError}
+              </p>
+            ) : null}
+            {submitError ? (
+              <p className="error" role="alert" data-testid="connector-connect-submit-error">
+                {submitError}
               </p>
             ) : null}
             {step === 'access' ? (
@@ -240,41 +280,96 @@ export function ConnectorConnectDialog({
                         'label_ids',
                       ].includes(field.key)
                   )
-                  .map((field) => (
-                    <label key={field.key} className="settings-field">
-                      {fieldLabel(field)}
-                      {field.required ? ' *' : ''}
-                      {field.type === 'password' ? (
-                        <PasswordInput
-                          value={credentials[field.key] ?? ''}
-                          required={field.required}
-                          disabled={busy}
-                          autoComplete={field.secret ? 'off' : undefined}
-                          placeholder={field.placeholderKey ? t(field.placeholderKey) : undefined}
-                          onChange={(e) => {
-                            setCredentials((prev) => ({ ...prev, [field.key]: e.target.value }));
-                          }}
-                          aria-label={fieldLabel(field)}
-                        />
-                      ) : (
-                        <Input
-                          type={field.type === 'email' ? 'email' : 'text'}
-                          value={credentials[field.key] ?? ''}
-                          required={field.required}
-                          disabled={busy}
-                          autoComplete={field.secret ? 'off' : undefined}
-                          placeholder={field.placeholderKey ? t(field.placeholderKey) : undefined}
-                          onChange={(e) => {
-                            setCredentials((prev) => ({ ...prev, [field.key]: e.target.value }));
-                          }}
-                          aria-label={fieldLabel(field)}
-                        />
-                      )}
-                      {field.helpKey ? (
-                        <span className="muted settings-hint">{t(field.helpKey)}</span>
-                      ) : null}
-                    </label>
-                  ))}
+                  .map((field) => {
+                    const fieldError = fieldErrors[field.key];
+                    const inputType =
+                      field.type === 'email' ? 'email' : field.type === 'url' ? 'url' : 'text';
+                    return (
+                      <div key={field.key} className="settings-field">
+                        <label className="settings-field-label" htmlFor={`connector-field-${field.key}`}>
+                          <span>{fieldLabel(field)}</span>
+                          {field.required ? (
+                            <span className="settings-field-required" aria-hidden="true">
+                              {' '}
+                              *
+                            </span>
+                          ) : null}
+                        </label>
+                        {field.type === 'password' ? (
+                          <PasswordInput
+                            id={`connector-field-${field.key}`}
+                            value={credentials[field.key] ?? ''}
+                            required={field.required}
+                            disabled={busy}
+                            autoComplete={field.secret ? 'off' : undefined}
+                            placeholder={field.placeholderKey ? t(field.placeholderKey) : undefined}
+                            onChange={(e) => {
+                              setFieldErrors((prev) => {
+                                if (!(field.key in prev)) return prev;
+                                const next = { ...prev };
+                                delete next[field.key];
+                                return next;
+                              });
+                              setCredentials((prev) => ({ ...prev, [field.key]: e.target.value }));
+                            }}
+                            aria-label={fieldLabel(field)}
+                            aria-invalid={fieldError ? true : undefined}
+                            aria-describedby={
+                              fieldError
+                                ? `connector-field-${field.key}-error`
+                                : field.helpKey
+                                  ? `connector-field-${field.key}-help`
+                                  : undefined
+                            }
+                          />
+                        ) : (
+                          <Input
+                            id={`connector-field-${field.key}`}
+                            type={inputType}
+                            value={credentials[field.key] ?? ''}
+                            required={field.required}
+                            disabled={busy}
+                            autoComplete={field.secret ? 'off' : undefined}
+                            placeholder={field.placeholderKey ? t(field.placeholderKey) : undefined}
+                            onChange={(e) => {
+                              setFieldErrors((prev) => {
+                                if (!(field.key in prev)) return prev;
+                                const next = { ...prev };
+                                delete next[field.key];
+                                return next;
+                              });
+                              setCredentials((prev) => ({ ...prev, [field.key]: e.target.value }));
+                            }}
+                            aria-label={fieldLabel(field)}
+                            aria-invalid={fieldError ? true : undefined}
+                            aria-describedby={
+                              fieldError
+                                ? `connector-field-${field.key}-error`
+                                : field.helpKey
+                                  ? `connector-field-${field.key}-help`
+                                  : undefined
+                            }
+                          />
+                        )}
+                        {fieldError ? (
+                          <p
+                            id={`connector-field-${field.key}-error`}
+                            className="error"
+                            role="alert"
+                          >
+                            {fieldError}
+                          </p>
+                        ) : field.helpKey ? (
+                          <p
+                            id={`connector-field-${field.key}-help`}
+                            className="muted settings-hint"
+                          >
+                            {t(field.helpKey)}
+                          </p>
+                        ) : null}
+                      </div>
+                    );
+                  })}
                 {plugin.id === 'sftp_fetch' ? (
                   <>
                     <label className="settings-field">
