@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it } from 'vitest';
 
-import { showLayoutMissingBadge } from './layoutMissingBadge';
+import { showLayoutMissingBadge } from './layoutMissingBadgeVisibility';
 
 describe('showLayoutMissingBadge', () => {
   it('hides while extraction is pending', () => {

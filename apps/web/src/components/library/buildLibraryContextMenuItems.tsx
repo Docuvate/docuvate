@@ -7,7 +7,7 @@ import { routes } from '../../lib/routes';
 import type { ContextMenuEntry } from '../ui/ContextMenu';
 import { showDuplicateStackBadge } from './duplicateStackLabel';
 import { buildFolderContextMenuEntries } from './folderContextMenuEntries';
-import { showLayoutMissingBadge } from './layoutMissingBadge';
+import { showLayoutMissingBadge } from './layoutMissingBadgeVisibility';
 
 interface BuildLibraryContextMenuItemsArgs {
   anchorDoc: DocumentDto;
