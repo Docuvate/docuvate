@@ -4,10 +4,12 @@ import type { LayoutToken, NormalizedRect } from '@docuvate/contracts';
 import {
   inferTableGrid,
   remapRegionTokens,
+  selectionRectForTokenSpace,
   snapRectToTokenHull,
   tokenBelongsToRect,
   tokenCoverageRatio,
   tokensInsideRect,
+  viewerPointToUnrotatedPage,
 } from '@docuvate/contracts';
 import { describe, expect, it } from 'vitest';
 
@@ -102,5 +104,27 @@ describe('inferTableGrid', () => {
     const grid = inferTableGrid([], { x0: 0.2, y0: 0.2, x1: 0.5, y1: 0.4 });
     expect(grid.cells).toEqual([{ row: 0, col: 0, text: '' }]);
     expect(grid.headerRows).toBe(0);
+  });
+});
+
+describe('viewer ↔ unrotated page mapping', () => {
+  it('is identity for upright pages', () => {
+    expect(viewerPointToUnrotatedPage(0.25, 0.75, 0)).toEqual({ x: 0.25, y: 0.75 });
+  });
+
+  it('inverts 90° clockwise viewer space', () => {
+    // Viewer top-left (0,0) came from unrotated (1,0) after 90° CW.
+    expect(viewerPointToUnrotatedPage(0, 0, 90)).toEqual({ x: 1, y: 0 });
+    expect(viewerPointToUnrotatedPage(1, 0, 90)).toEqual({ x: 1, y: 1 });
+    expect(viewerPointToUnrotatedPage(0, 1, 90)).toEqual({ x: 0, y: 0 });
+  });
+
+  it('only remaps selection when tokens live in the unrotated MediaBox', () => {
+    const viewer = { x0: 0.1, y0: 0.2, x1: 0.4, y1: 0.5 };
+    expect(selectionRectForTokenSpace(viewer, 90, false)).toEqual(viewer);
+    const remapped = selectionRectForTokenSpace(viewer, 90, true);
+    expect(remapped).not.toBeNull();
+    expect(remapped?.x0).toBeCloseTo(0.5);
+    expect(remapped?.y0).toBeCloseTo(0.1);
   });
 });

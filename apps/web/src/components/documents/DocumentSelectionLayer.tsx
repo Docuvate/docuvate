@@ -1,7 +1,12 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { LayoutToken, NormalizedRect } from '@docuvate/contracts';
-import { joinedTokenText, snapRectToTokenHull, tokensInsideRect } from '@docuvate/contracts';
+import {
+  joinedTokenText,
+  selectionRectForTokenSpace,
+  snapRectToTokenHull,
+  tokensInsideRect,
+} from '@docuvate/contracts';
 import { useCallback, useEffect, useState } from 'react';
 
 import type { DocumentSelectionTool } from './DocumentSelectionTools';
@@ -28,7 +33,42 @@ function pageWrapForEvent(target: EventTarget | null): HTMLElement | null {
   return wrap instanceof HTMLElement ? wrap : null;
 }
 
-function clientToNormalized(wrap: HTMLElement, clientX: number, clientY: number): { x: number; y: number } {
+function pageWrapForPage(page: number): HTMLElement | null {
+  const wraps = document.querySelectorAll('.pdf-page-wrap');
+  for (const node of wraps) {
+    if (!(node instanceof HTMLElement)) {
+      continue;
+    }
+    if (node.dataset.page === String(page)) {
+      return node;
+    }
+  }
+  const first = wraps.item(0);
+  return first instanceof HTMLElement ? first : null;
+}
+
+function readPageRotationDeg(wrap: HTMLElement): number {
+  const raw = wrap.dataset.pdfRotate;
+  if (raw == null || raw === '') {
+    return 0;
+  }
+  const parsed = Number(raw);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+/**
+ * IR tokens from pdfplumber already match the PDF.js viewport after /Rotate.
+ * Tokens stored against the unrotated MediaBox set data-tokens-unrotated="1".
+ */
+function tokensUseUnrotatedMediaBox(wrap: HTMLElement): boolean {
+  return wrap.dataset.tokensUnrotated === '1';
+}
+
+function clientToNormalized(
+  wrap: HTMLElement,
+  clientX: number,
+  clientY: number
+): { x: number; y: number } {
   const bounds = wrap.getBoundingClientRect();
   const width = bounds.width || 1;
   const height = bounds.height || 1;
@@ -38,11 +78,22 @@ function clientToNormalized(wrap: HTMLElement, clientX: number, clientY: number)
   };
 }
 
-function draftFromRect(page: number, tokens: LayoutToken[], rect: NormalizedRect): DocumentSelectionDraft {
-  const selected = tokensInsideRect(tokens.filter((token) => token.page === page), rect);
+function draftFromViewerRect(
+  page: number,
+  tokens: LayoutToken[],
+  viewerRect: NormalizedRect,
+  pageRotationDeg: number,
+  unrotatedMediaBox: boolean
+): DocumentSelectionDraft {
+  const mapped =
+    selectionRectForTokenSpace(viewerRect, pageRotationDeg, unrotatedMediaBox) ?? viewerRect;
+  const selected = tokensInsideRect(
+    tokens.filter((token) => token.page === page),
+    mapped
+  );
   return {
     page,
-    rect: snapRectToTokenHull(selected) ?? rect,
+    rect: snapRectToTokenHull(selected) ?? mapped,
     tokens: selected,
     text: joinedTokenText(selected),
   };
@@ -56,14 +107,22 @@ export function DocumentSelectionLayer({
 }: DocumentSelectionLayerProps) {
   const [liveRect, setLiveRect] = useState<NormalizedRect | null>(null);
 
-  const commitRect = useCallback(
-    (next: NormalizedRect | null) => {
+  const commitViewerRect = useCallback(
+    (next: NormalizedRect | null, wrap: HTMLElement | null) => {
       setLiveRect(next);
-      if (!next) {
+      if (!next || !wrap) {
         onDraftChange(null);
         return;
       }
-      onDraftChange(draftFromRect(page, tokens, next));
+      onDraftChange(
+        draftFromViewerRect(
+          page,
+          tokens,
+          next,
+          readPageRotationDeg(wrap),
+          tokensUseUnrotatedMediaBox(wrap)
+        )
+      );
     },
     [onDraftChange, page, tokens]
   );
@@ -74,34 +133,39 @@ export function DocumentSelectionLayer({
       return;
     }
     let origin: { x: number; y: number } | null = null;
+    let activeWrap: HTMLElement | null = null;
     function onPointerDown(event: PointerEvent) {
       const wrap = pageWrapForEvent(event.target);
       if (!wrap) {
         return;
       }
+      if (wrap.dataset.page != null && wrap.dataset.page !== String(page)) {
+        return;
+      }
       event.preventDefault();
       const start = clientToNormalized(wrap, event.clientX, event.clientY);
       origin = start;
-      commitRect({ x0: start.x, y0: start.y, x1: start.x, y1: start.y });
+      activeWrap = wrap;
+      commitViewerRect({ x0: start.x, y0: start.y, x1: start.x, y1: start.y }, wrap);
     }
     function onPointerMove(event: PointerEvent) {
-      if (!origin) {
+      if (!origin || !activeWrap) {
         return;
       }
-      const wrap = document.querySelector('.pdf-page-wrap');
-      if (!(wrap instanceof HTMLElement)) {
-        return;
-      }
-      const current = clientToNormalized(wrap, event.clientX, event.clientY);
-      commitRect({
-        x0: Math.min(origin.x, current.x),
-        y0: Math.min(origin.y, current.y),
-        x1: Math.max(origin.x, current.x),
-        y1: Math.max(origin.y, current.y),
-      });
+      const current = clientToNormalized(activeWrap, event.clientX, event.clientY);
+      commitViewerRect(
+        {
+          x0: Math.min(origin.x, current.x),
+          y0: Math.min(origin.y, current.y),
+          x1: Math.max(origin.x, current.x),
+          y1: Math.max(origin.y, current.y),
+        },
+        activeWrap
+      );
     }
     function onPointerUp() {
       origin = null;
+      activeWrap = null;
     }
     document.addEventListener('pointerdown', onPointerDown);
     document.addEventListener('pointermove', onPointerMove);
@@ -111,7 +175,7 @@ export function DocumentSelectionLayer({
       document.removeEventListener('pointermove', onPointerMove);
       document.removeEventListener('pointerup', onPointerUp);
     };
-  }, [commitRect, tool]);
+  }, [commitViewerRect, page, tool]);
 
   useEffect(() => {
     if (tool !== 'text') {
@@ -123,7 +187,7 @@ export function DocumentSelectionLayer({
         return;
       }
       const range = selection.getRangeAt(0);
-      const wrap = pageWrapForEvent(range.commonAncestorContainer);
+      const wrap = pageWrapForEvent(range.commonAncestorContainer) ?? pageWrapForPage(page);
       if (!wrap) {
         return;
       }
@@ -132,13 +196,21 @@ export function DocumentSelectionLayer({
       if (client.width <= 0 || client.height <= 0) {
         return;
       }
-      const rect: NormalizedRect = {
+      const viewerRect: NormalizedRect = {
         x0: Math.min(1, Math.max(0, (client.left - bounds.left) / (bounds.width || 1))),
         y0: Math.min(1, Math.max(0, (client.top - bounds.top) / (bounds.height || 1))),
         x1: Math.min(1, Math.max(0, (client.right - bounds.left) / (bounds.width || 1))),
         y1: Math.min(1, Math.max(0, (client.bottom - bounds.top) / (bounds.height || 1))),
       };
-      onDraftChange(draftFromRect(page, tokens, rect));
+      onDraftChange(
+        draftFromViewerRect(
+          page,
+          tokens,
+          viewerRect,
+          readPageRotationDeg(wrap),
+          tokensUseUnrotatedMediaBox(wrap)
+        )
+      );
     }
     document.addEventListener('selectionchange', onSelectionChange);
     return () => {
@@ -147,7 +219,7 @@ export function DocumentSelectionLayer({
   }, [onDraftChange, page, tokens, tool]);
 
   useEffect(() => {
-    const wrap = document.querySelector('.pdf-page-wrap');
+    const wrap = pageWrapForPage(page);
     if (!(wrap instanceof HTMLElement) || !liveRect || tool !== 'rect') {
       const stale = document.querySelector('[data-testid="document-selection-rect"]');
       stale?.remove();
@@ -167,13 +239,14 @@ export function DocumentSelectionLayer({
     return () => {
       mark.remove();
     };
-  }, [liveRect, tool]);
+  }, [liveRect, page, tool]);
 
   return (
     <span
       hidden
       data-testid="document-selection-layer"
       data-token-count={String(tokens.length)}
+      data-page={String(page)}
     />
   );
 }

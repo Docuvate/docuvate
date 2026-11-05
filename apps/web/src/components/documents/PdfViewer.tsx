@@ -134,10 +134,18 @@ function appendLayoutOverlays(
       });
     }
     if (onHover) {
-      mark.addEventListener('mouseenter', () => { onHover(overlay); });
-      mark.addEventListener('mouseleave', () => { onHover(null); });
-      mark.addEventListener('focus', () => { onHover(overlay); });
-      mark.addEventListener('blur', () => { onHover(null); });
+      mark.addEventListener('mouseenter', () => {
+        onHover(overlay);
+      });
+      mark.addEventListener('mouseleave', () => {
+        onHover(null);
+      });
+      mark.addEventListener('focus', () => {
+        onHover(overlay);
+      });
+      mark.addEventListener('blur', () => {
+        onHover(null);
+      });
     }
     wrap.appendChild(mark);
   }
@@ -168,6 +176,9 @@ async function renderPdfPage(
   const wrap = document.createElement('div');
   wrap.className = 'pdf-page-wrap';
   wrap.dataset.page = String(pageNum);
+  // PDF.js applies page.rotate to the viewport; expose it so selection can remap
+  // when tokens were stored against the unrotated MediaBox (data-tokens-unrotated).
+  wrap.dataset.pdfRotate = String(page.rotate ?? 0);
   wrap.style.width = `${String(viewport.width)}px`;
   wrap.style.height = `${String(viewport.height)}px`;
   wrap.appendChild(canvas);
@@ -375,7 +386,9 @@ export function PdfViewer({
     let rafId = 0;
     const observer = new ResizeObserver(() => {
       cancelAnimationFrame(rafId);
-      rafId = requestAnimationFrame(() => { updateWidth(); });
+      rafId = requestAnimationFrame(() => {
+        updateWidth();
+      });
     });
     observer.observe(scrollEl);
     return () => {
@@ -397,12 +410,7 @@ export function PdfViewer({
       try {
         const highlights = highlightBlocks;
 
-        const scale = await resolveRenderScale(
-          pdf,
-          currentPage,
-          fitWidth,
-          containerWidth
-        );
+        const scale = await resolveRenderScale(pdf, currentPage, fitWidth, containerWidth);
 
         const renderKey = `${String(docToken)}:${String(currentPage)}:${String(Math.round(scale * 1000))}:${String(containerWidth ?? 0)}:${highlightKey}:${overlayKey}:paginated`;
         if (lastPageRenderKeyRef.current === renderKey && pagesHost.childElementCount > 0) {
@@ -502,16 +510,7 @@ export function PdfViewer({
     return () => {
       effectGenerationRef.current += 1;
     };
-  }, [
-    paginated,
-    docToken,
-    pageCount,
-    pageSizes,
-    fitWidth,
-    containerWidth,
-    currentPage,
-    t,
-  ]);
+  }, [paginated, docToken, pageCount, pageSizes, fitWidth, containerWidth, currentPage, t]);
 
   useEffect(() => {
     if (paginated) return;
@@ -621,9 +620,13 @@ export function PdfViewer({
       },
       { root, rootMargin: '120% 0px', threshold: 0.01 }
     );
-    host.querySelectorAll('.pdf-page-slot').forEach((el) => { observer.observe(el); });
+    host.querySelectorAll('.pdf-page-slot').forEach((el) => {
+      observer.observe(el);
+    });
     virtualIoRef.current = observer;
-    return () => { observer.disconnect(); };
+    return () => {
+      observer.disconnect();
+    };
   }, [paginated, pageCount, docToken, pageSizes.length]);
 
   useEffect(() => {
@@ -640,7 +643,9 @@ export function PdfViewer({
       if (event.key === 'Escape') onLayoutOverlayClear();
     };
     window.addEventListener('keydown', onKey);
-    return () => { window.removeEventListener('keydown', onKey); };
+    return () => {
+      window.removeEventListener('keydown', onKey);
+    };
   }, [onLayoutOverlayClear]);
 
   useEffect(() => {
@@ -661,7 +666,9 @@ export function PdfViewer({
               variant="ghost"
               className="pdf-viewer-pager-btn"
               disabled={currentPage <= 1 || loading}
-              onClick={() => { setPage(currentPage - 1); }}
+              onClick={() => {
+                setPage(currentPage - 1);
+              }}
               aria-label={t('documents.pdfPrevPage')}
             >
               ←
@@ -674,7 +681,9 @@ export function PdfViewer({
               variant="ghost"
               className="pdf-viewer-pager-btn"
               disabled={currentPage >= pageCount || loading}
-              onClick={() => { setPage(currentPage + 1); }}
+              onClick={() => {
+                setPage(currentPage + 1);
+              }}
               aria-label={t('documents.pdfNextPage')}
             >
               →
@@ -701,10 +710,7 @@ export function PdfViewer({
         className={`pdf-viewer-scroll${fitWidth ? ' pdf-viewer-scroll-fit-width' : ''}`}
         ref={scrollRef}
       >
-        <div
-          className={`pdf-pages${paginated ? ' pdf-pages-single' : ''}`}
-          ref={pagesRef}
-        />
+        <div className={`pdf-pages${paginated ? ' pdf-pages-single' : ''}`} ref={pagesRef} />
       </div>
     </div>
   );

@@ -1440,7 +1440,6 @@ export type {
   DashboardWidgetPreviewType,
 } from './dashboard-widget-previews.js';
 
-
 export type {
   SavedViewVisibility,
   SavedViewListScope,
@@ -1564,6 +1563,9 @@ export {
   remapRegionTokens,
   roundGeometry,
   canonicalRegionPayload,
+  viewerPointToUnrotatedPage,
+  viewerRectToUnrotatedPage,
+  selectionRectForTokenSpace,
 } from './region-geometry.js';
 export type { NormalizedRect, LayoutToken, RemappedRegionTokens } from './region-geometry.js';
 export { inferTableGrid } from './table-geometry.js';

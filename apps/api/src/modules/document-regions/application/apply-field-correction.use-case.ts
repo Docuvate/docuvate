@@ -339,13 +339,8 @@ export class ApplyFieldCorrectionUseCase {
   } {
     const page = body.page ?? existing?.page ?? 1;
     const pageTokens = tokens.filter((token) => token.page === page);
-    if (body.blockIndexes && body.blockIndexes.length > 0) {
-      const selected = pageTokens.filter((token) => body.blockIndexes?.includes(token.blockIndex));
-      const hull = snapRectToTokenHull(selected);
-      if (hull) {
-        return { page, rect: hull, tokens: selected };
-      }
-    }
+    // Prefer the drawn rectangle so word-level tokens that share a blockIndex are not
+    // expanded back to the whole IR run (e.g. selecting "Provadis" must not re-include "©").
     const drawn = normalizeRect({
       x0: body.x0 ?? existing?.x0 ?? 0,
       y0: body.y0 ?? existing?.y0 ?? 0,
@@ -356,6 +351,13 @@ export class ApplyFieldCorrectionUseCase {
       const selected = tokensInsideRect(pageTokens, drawn);
       const snapped = snapRectToTokenHull(selected) ?? drawn;
       return { page, rect: snapped, tokens: selected };
+    }
+    if (body.blockIndexes && body.blockIndexes.length > 0) {
+      const selected = pageTokens.filter((token) => body.blockIndexes?.includes(token.blockIndex));
+      const hull = snapRectToTokenHull(selected);
+      if (hull) {
+        return { page, rect: hull, tokens: selected };
+      }
     }
     if (existing) {
       return {
