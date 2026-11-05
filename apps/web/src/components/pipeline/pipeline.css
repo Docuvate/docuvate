@@ -224,12 +224,17 @@
   padding: 0;
   list-style: none;
   counter-reset: none;
+  /* Row 1: stage tiles (equal height); row 2: optional alert under a tile. */
+  grid-auto-rows: minmax(0, 1fr) auto;
+  row-gap: 0;
 }
 
 .pipeline-rail-step {
   position: relative;
   display: grid;
-  gap: var(--dv-space-2xs);
+  grid-row: span 2;
+  grid-template-rows: subgrid;
+  row-gap: var(--dv-space-2xs);
   min-width: 0;
 }
 
