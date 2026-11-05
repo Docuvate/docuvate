@@ -136,6 +136,66 @@ async function dismissOverlaySheets(page: Page): Promise<void> {
   }
 }
 
+
+/** Open the field combobox and pick an existing definition (catalog or document). */
+async function selectExistingFieldInContextBar(page: Page): Promise<void> {
+  const bar = page.getByTestId('field-context-bar');
+  const accept = bar.getByTestId('field-context-bar-accept');
+  await expect(accept).toBeDisabled();
+  await expect(accept).toHaveText(/Feld anlegen|Create field/i);
+
+  const combobox = bar.getByRole('combobox', {
+    name: /Feld für diese Auswahl|Field for this selection/i,
+  });
+  await combobox.click();
+  const option = page.getByRole('option').first();
+  await expect(option).toBeVisible({ timeout: 15_000 });
+  await option.click();
+
+  await expect(accept).toBeEnabled();
+  await expect(accept).toHaveText(/Feld zuweisen|Assign field/i);
+}
+
+async function confirmAssignedFieldInContextBar(page: Page): Promise<void> {
+  const accept = page.getByTestId('field-context-bar-accept');
+  await expect(accept).toBeEnabled();
+  await expect(accept).toHaveText(/Feld zuweisen|Assign field/i);
+  await accept.click();
+
+  // Assigning onto a field that already holds a different value opens overwrite confirm.
+  const overwriteDialog = page.getByRole('dialog', {
+    name: /Vorhandenes Feld überschreiben|Overwrite existing field/i,
+  });
+  const overwriteAppeared = await overwriteDialog
+    .waitFor({ state: 'visible', timeout: 2_000 })
+    .then(() => true)
+    .catch(() => false);
+  if (overwriteAppeared) {
+    await overwriteDialog.getByRole('button', { name: /Überschreiben|Overwrite/i }).click();
+  }
+}
+
+/** Type a new field name and confirm via the create-option row (auto-submits). */
+async function createFieldViaContextBarOption(page: Page, fieldName: string): Promise<void> {
+  const bar = page.getByTestId('field-context-bar');
+  const accept = bar.getByTestId('field-context-bar-accept');
+  await expect(accept).toBeDisabled();
+  await expect(accept).toHaveText(/Feld anlegen|Create field/i);
+
+  const combobox = bar.getByRole('combobox', {
+    name: /Feld für diese Auswahl|Field for this selection/i,
+  });
+  await combobox.click();
+  await combobox.fill(fieldName);
+
+  const createOption = page
+    .locator('.combobox-create-option')
+    .filter({ hasText: fieldName });
+  await expect(createOption).toBeVisible({ timeout: 15_000 });
+  await createOption.click();
+}
+
+
 test.describe('document field regions', () => {
   test.describe.configure({ mode: 'serial', timeout: 420_000, retries: 0 });
 
@@ -196,7 +256,9 @@ test.describe('document field regions', () => {
 
     const bar = page.getByTestId('field-context-bar');
     await expect(bar).toBeVisible({ timeout: 30_000 });
-    await bar.getByRole('button', { name: /Feld anlegen|Create field/i }).click();
+    // Bar starts with no field selected — Accept stays disabled until an existing field is chosen.
+    await selectExistingFieldInContextBar(page);
+    await confirmAssignedFieldInContextBar(page);
     await expect(page.getByText(/Korrektur gespeichert|Correction saved/i)).toBeVisible({
       timeout: 30_000,
     });
@@ -302,7 +364,8 @@ test.describe('document field regions', () => {
       document.dispatchEvent(new Event('selectionchange'));
     });
     await expect(page.getByTestId('field-context-bar')).toBeVisible({ timeout: 30_000 });
-    await page.getByTestId('field-context-bar').getByRole('button', { name: /Feld anlegen|Create field/i }).click();
+    const fieldName = `e2e_text_sel_${Date.now().toString(36)}`;
+    await createFieldViaContextBarOption(page, fieldName);
     await expect(page.getByText(/Korrektur gespeichert|Correction saved/i)).toBeVisible({
       timeout: 30_000,
     });
