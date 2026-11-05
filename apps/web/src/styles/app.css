@@ -16473,13 +16473,13 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   display: inline-flex;
   align-items: center;
   padding: 0.1rem 0.4rem;
-  border-radius: var(--dv-radius-sm, 4px);
+  border-radius: var(--dv-radius-sm);
   font-size: 0.75rem;
   font-weight: 600;
   line-height: 1.2;
-  color: var(--dv-color-warning-fg, #7a4a00);
-  background: color-mix(in srgb, var(--dv-color-warning, #f5a524) 22%, transparent);
-  border: 1px solid color-mix(in srgb, var(--dv-color-warning, #f5a524) 45%, var(--dv-color-border));
+  color: var(--dv-color-warn);
+  background: var(--dv-color-warn-soft);
+  border: 1px solid color-mix(in srgb, var(--dv-color-warn) 45%, var(--dv-color-border));
 }
 .layout-missing-badge--compact .layout-missing-reprocess-btn {
   padding: 0.15rem 0.45rem;
@@ -16488,6 +16488,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 .layout-missing-reprocess-btn {
   white-space: nowrap;
 }
+
 @media (max-width: 480px) {
   .layout-missing-badge {
     gap: 0.25rem;
