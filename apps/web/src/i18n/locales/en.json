@@ -534,6 +534,8 @@
       "status": "Status",
       "statusAll": "All statuses",
       "labelsAndHint": "Multiple labels = all must match (AND).",
+      "moreFields": "More fields ({{count}})",
+      "moreFieldsActive": "{{count}} active",
       "labelSearchPlaceholder": "Search labels…",
       "labelSearchEmpty": "No labels found.",
       "withoutLabel": "Without label",
