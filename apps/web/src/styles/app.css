@@ -1214,12 +1214,12 @@ mark.global-search-mark {
 .border-rail-toggle {
   position: absolute;
   top: var(--dv-space-sm);
-  right: -11px;
+  right: -12px;
   z-index: var(--dv-z-sticky);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 22px;
+  width: 24px;
   height: 28px;
   padding: 0;
   border: 1px solid var(--dv-color-border);
@@ -13239,6 +13239,16 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 
 .labels-vocabulary-doc-link {
   font-weight: 600;
+}
+
+/* Inline text actions on the Labels page keep a 24 px target (WCAG 2.5.8) on touch screens. */
+.labels-coverage-filter-link,
+.labels-coverage-threshold-toggle,
+.labels-todo-review-link,
+.labels-vocabulary-doc-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
 }
 
 .labels-vocabulary-table th.labels-vocabulary-col-actions,
