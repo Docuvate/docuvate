@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 
-export type HttpUrlInputResult =
+type HttpUrlInputResult =
   | { ok: true; href: string }
   | { ok: false; reason: 'empty' | 'invalid' };
 
