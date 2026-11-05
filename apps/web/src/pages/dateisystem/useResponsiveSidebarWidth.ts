@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react';
 
 const NARROW_MAX = 1280;
-const NARROW_CAP = 260;
+/** Upper bound on medium-width screens; the user's stored width is respected below it. */
+const NARROW_CAP = 320;
 
 export function useResponsiveSidebarWidth(storedWidth: number): number {
   const [narrow, setNarrow] = useState(() =>
@@ -18,5 +19,5 @@ export function useResponsiveSidebarWidth(storedWidth: number): number {
     return () => { mq.removeEventListener('change', sync); };
   }, []);
 
-  return narrow ? NARROW_CAP : storedWidth;
+  return narrow ? Math.min(storedWidth, NARROW_CAP) : storedWidth;
 }

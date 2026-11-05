@@ -12241,6 +12241,21 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   transition: opacity 0.12s ease;
 }
 
+/* On pointer devices the row actions overlay the count instead of reserving width next to it,
+   so folder names get the full row width until the row is hovered or focused. */
+@media (hover: hover) and (pointer: fine) {
+  .dateisystem-tree-row-trailing {
+    position: relative;
+  }
+
+  .dateisystem-tree-actions {
+    position: absolute;
+    inset-inline-end: 0;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+}
+
 .dateisystem-tree-actions {
   display: flex;
   align-items: center;
@@ -12426,8 +12441,8 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   list-style: none;
   margin: 0;
   padding: 0;
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(13rem, 100%), 1fr));
   gap: var(--dv-space-xs);
 }
 
@@ -12440,7 +12455,8 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   display: flex;
   align-items: center;
   gap: var(--dv-space-xs);
-  width: 9.5rem;
+  width: 100%;
+  height: 100%;
   min-height: 3.5rem;
   padding: var(--dv-space-xs) var(--dv-space-sm);
   border: 1px solid var(--dv-color-border);
@@ -12459,8 +12475,12 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   flex: 1;
   min-width: 0;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  overflow-wrap: anywhere;
+  line-height: 1.3;
   font-weight: 500;
   font-size: var(--dv-font-size-sm);
 }
