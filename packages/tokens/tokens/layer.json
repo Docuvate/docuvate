@@ -1,0 +1,11 @@
+{
+  "z": {
+    "base": { "value": "0", "comment": "Local stacking: calc(var(--dv-z-base) + N)." },
+    "sticky": { "value": "30", "comment": "Sticky headers, save bar." },
+    "dropdown": { "value": "40", "comment": "Inline dropdowns anchored in page flow." },
+    "drawer": { "value": "200", "comment": "Mobile navigation drawer and its scrim." },
+    "modal": { "value": "1000", "comment": "Dialogs and their backdrop." },
+    "popover": { "value": "1100", "comment": "Menus / popovers (also above dialogs)." },
+    "toast": { "value": "1200", "comment": "Toasts always on top." }
+  }
+}

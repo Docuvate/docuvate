@@ -131,7 +131,7 @@ function VocabularyCompactRow(props: RowSharedProps) {
       data-index={dataIndex}
       className="labels-vocabulary-card-row"
       style={style}
-      role="row"
+      role="listitem"
     >
       <div className="labels-vocabulary-card-row__main">
         <div className="labels-vocabulary-card-row__line1">
@@ -324,13 +324,12 @@ export function LabelsVocabularyTable(props: Props) {
           className={`labels-vocabulary-scroll${stackedLayout ? ' labels-vocabulary-scroll--stacked' : ''}`}
           ref={scrollRef}
           data-testid={useVirtual ? 'labels-vocabulary-virtual-scroll' : 'labels-vocabulary-scroll'}
+          role={stackedLayout ? 'list' : 'table'}
+          aria-label={t('labels.vocabularyTitle')}
+          aria-rowcount={stackedLayout ? undefined : displayTags.length + 1}
         >
           {!stackedLayout ? (
-            <div
-              className="labels-vocabulary-grid labels-vocabulary-grid--head"
-              role="row"
-              aria-hidden
-            >
+            <div className="labels-vocabulary-grid labels-vocabulary-grid--head" role="row">
               <span role="columnheader">{t('labels.vocabularyColName')}</span>
               <span role="columnheader" className="labels-vocabulary-grid__count">
                 {t('labels.vocabularyColDocuments')}
@@ -344,6 +343,7 @@ export function LabelsVocabularyTable(props: Props) {
           {useVirtual ? (
             <div
               className="labels-vocabulary-virtual-body"
+              role={stackedLayout ? undefined : 'rowgroup'}
               style={{ height: `${String(virtualizer.getTotalSize())}px`, position: 'relative' }}
             >
               {virtualizer.getVirtualItems().map((virtualRow) => {

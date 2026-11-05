@@ -8,10 +8,22 @@
       "3xl": { "value": "3.5rem" },
       "2xl": { "value": "2.5rem" },
       "xl": { "value": "1.75rem" },
+      "title": { "value": "1.5rem", "comment": "Page titles (h1 inside the app shell)." },
       "lg": { "value": "1.25rem" },
       "md": { "value": "1rem" },
-      "sm": { "value": "0.875rem" },
-      "xs": { "value": "0.75rem" }
+      "sm": {
+        "value": "0.875rem",
+        "comment": "Default UI text: buttons, inputs, navigation, table cells."
+      },
+      "compact": {
+        "value": "0.8125rem",
+        "comment": "Dense secondary text: table meta, help text."
+      },
+      "xs": { "value": "0.75rem" },
+      "2xs": {
+        "value": "0.6875rem",
+        "comment": "Overlines and tiny counters only; never body text."
+      }
     },
     "weight": {
       "regular": { "value": "400" },
@@ -21,8 +33,15 @@
     },
     "line-height": {
       "tight": { "value": "1.2" },
+      "snug": { "value": "1.35" },
       "normal": { "value": "1.5" },
       "relaxed": { "value": "1.65" }
+    },
+    "tracking": {
+      "tighter": { "value": "-0.02em" },
+      "tight": { "value": "-0.01em" },
+      "normal": { "value": "0" },
+      "caps": { "value": "0.06em", "comment": "Uppercase overlines only." }
     }
   }
 }

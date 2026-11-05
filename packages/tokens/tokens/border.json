@@ -1,0 +1,21 @@
+{
+  "border": {
+    "width": {
+      "hairline": { "value": "1px", "comment": "Default borders and dividers." },
+      "thick": { "value": "2px", "comment": "Selected indicators, active tab underline." }
+    }
+  },
+  "focus": {
+    "ring": {
+      "width": {
+        "value": "2px",
+        "comment": "Outline width of :focus-visible (colour: --dv-color-focus)."
+      },
+      "offset": { "value": "2px", "comment": "Outline offset outside the control." },
+      "offset-inset": {
+        "value": "-2px",
+        "comment": "Inset outline for edge-to-edge rows, tabs, inputs."
+      }
+    }
+  }
+}

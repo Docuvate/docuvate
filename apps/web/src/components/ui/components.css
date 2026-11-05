@@ -1,4 +1,5 @@
 @import './overlay/overlay.css';
+@import './primitives.css';
 
 .btn {
   display: inline-flex;
@@ -14,10 +15,14 @@
   font-weight: var(--dv-font-weight-medium);
   line-height: 1.5;
   cursor: pointer;
+  transition:
+    background-color var(--dv-motion-duration-fast) var(--dv-motion-easing-standard),
+    border-color var(--dv-motion-duration-fast) var(--dv-motion-easing-standard),
+    color var(--dv-motion-duration-fast) var(--dv-motion-easing-standard);
 }
 
 .btn-sm {
-  min-height: 2rem;
+  min-height: var(--dv-control-height-sm);
   padding: var(--dv-space-2xs) var(--dv-space-sm);
 }
 
@@ -33,7 +38,7 @@ a.btn:hover {
 }
 
 .btn:disabled {
-  opacity: 0.55;
+  opacity: var(--dv-state-disabled-opacity);
   cursor: not-allowed;
 }
 
@@ -109,6 +114,7 @@ a.btn:hover {
 
 .btn-ghost:hover:not(:disabled) {
   background: var(--dv-color-header-control-hover-bg);
+  color: var(--dv-color-text);
 }
 
 .input {
@@ -122,10 +128,15 @@ a.btn:hover {
   line-height: 1.5;
   background: var(--dv-color-bg-raised);
   color: var(--dv-color-text);
+  transition: border-color var(--dv-motion-duration-fast) var(--dv-motion-easing-standard);
+}
+
+.input:hover:not(:disabled, :focus-visible, .input-invalid, .input-error) {
+  border-color: var(--dv-color-border-strong);
 }
 
 .input:disabled {
-  opacity: 0.55;
+  opacity: var(--dv-state-disabled-opacity);
   background: var(--dv-color-bg-overlay);
   cursor: not-allowed;
 }
@@ -200,8 +211,8 @@ a.btn:hover {
 
 .btn:focus-visible,
 .chip-remove:focus-visible {
-  outline: 2px solid var(--dv-color-focus);
-  outline-offset: 2px;
+  outline: var(--dv-focus-ring-width) solid var(--dv-color-focus);
+  outline-offset: var(--dv-focus-ring-offset);
 }
 
 .textarea {
@@ -212,9 +223,9 @@ a.btn:hover {
 
 .card {
   background: var(--dv-color-bg-raised);
-  border: 1px solid var(--dv-color-border);
-  border-radius: var(--dv-radius-lg);
-  box-shadow: var(--dv-shadow-sm);
+  border: var(--dv-border-width-hairline) solid var(--dv-color-border);
+  border-radius: var(--dv-radius-surface);
+  box-shadow: var(--dv-elevation-1);
   padding: var(--dv-space-lg);
 }
 
@@ -334,7 +345,8 @@ a.btn:hover {
 
 .chip-assigned {
   background: var(--chip-bg, var(--dv-color-border-strong));
-  color: var(--chip-fg, var(--dv-color-on-accent));
+  /* Uncoloured labels: body text on border-strong passes AA in both themes (white did not in light). */
+  color: var(--chip-fg, var(--dv-color-text));
   border: 1px solid transparent;
 }
 
@@ -399,7 +411,7 @@ a.btn:hover {
 }
 
 .custom-select-caret {
-  font-size: 0.75rem;
+  font-size: var(--dv-font-size-xs);
   opacity: 0.7;
 }
 
@@ -560,7 +572,7 @@ a.btn:hover {
   min-height: 22px;
   border-radius: var(--dv-radius-lg);
   background: var(--dv-color-border-strong);
-  transition: background 0.15s ease;
+  transition: background var(--dv-motion-duration-fast) var(--dv-motion-easing-standard);
   box-shadow: inset 0 0 0 1px var(--dv-color-border);
 }
 
@@ -574,7 +586,7 @@ a.btn:hover {
   border-radius: var(--dv-radius-lg);
   background: var(--dv-color-bg-raised);
   box-shadow: var(--dv-shadow-sm);
-  transition: transform 0.15s ease;
+  transition: transform var(--dv-motion-duration-fast) var(--dv-motion-easing-standard);
 }
 
 .switch {

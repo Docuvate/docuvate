@@ -13,6 +13,7 @@ import { useToastNotify } from '../../components/save/ToastProvider';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { Input } from '../../components/ui/Input';
+import { PageHeader } from '../../components/ui/PageHeader';
 import { Select } from '../../components/ui/Select';
 import { createTag, deleteTag, listTags, updateTag } from '../../lib/api';
 import { formatUserFacingError } from '../../lib/apiErrors';
@@ -148,20 +149,20 @@ export function LabelsPage() {
 
   return (
     <div className="page labels-page" data-ux="page">
-      <header className="page-header">
-        <div>
-          <h1 data-ux="page-title">{t('labels.pageTitle')}</h1>
-          <p className="muted">{t('labels.pageLead')}</p>
-        </div>
-        <Button
-          type="button"
-          className="labels-page-new-label-btn"
-          data-ux="primary-action"
-          onClick={() => { startCreate(); }}
-        >
-          {t('labels.newLabel')}
-        </Button>
-      </header>
+      <PageHeader
+        title={t('labels.pageTitle')}
+        description={t('labels.pageLead')}
+        actions={
+          <Button
+            type="button"
+            className="labels-page-new-label-btn"
+            data-ux="primary-action"
+            onClick={() => { startCreate(); }}
+          >
+            {t('labels.newLabel')}
+          </Button>
+        }
+      />
 
       <LabelCoverageHeader
         loading={insights.loading}

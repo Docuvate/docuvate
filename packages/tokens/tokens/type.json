@@ -1,0 +1,64 @@
+{
+  "type": {
+    "display": {
+      "size": { "value": "{font.size.2xl}" },
+      "line-height": { "value": "{font.line-height.tight}" },
+      "weight": { "value": "{font.weight.semibold}" },
+      "tracking": { "value": "{font.tracking.tighter}" }
+    },
+    "page-title": {
+      "size": { "value": "{font.size.title}", "comment": "One per page (h1)." },
+      "line-height": { "value": "{font.line-height.tight}" },
+      "weight": { "value": "{font.weight.semibold}" },
+      "tracking": { "value": "{font.tracking.tighter}" }
+    },
+    "section-title": {
+      "size": { "value": "{font.size.lg}", "comment": "h2 for page sections and dialog titles." },
+      "line-height": { "value": "{font.line-height.snug}" },
+      "weight": { "value": "{font.weight.semibold}" },
+      "tracking": { "value": "{font.tracking.tight}" }
+    },
+    "card-title": {
+      "size": { "value": "{font.size.md}", "comment": "h3 / card and panel headings." },
+      "line-height": { "value": "{font.line-height.snug}" },
+      "weight": { "value": "{font.weight.semibold}" },
+      "tracking": { "value": "{font.tracking.normal}" }
+    },
+    "body": {
+      "size": { "value": "{font.size.sm}", "comment": "Default UI copy." },
+      "line-height": { "value": "{font.line-height.normal}" },
+      "weight": { "value": "{font.weight.regular}" },
+      "tracking": { "value": "{font.tracking.normal}" }
+    },
+    "lead": {
+      "size": { "value": "{font.size.sm}", "comment": "Page lead below the title (muted colour)." },
+      "line-height": { "value": "{font.line-height.normal}" },
+      "weight": { "value": "{font.weight.regular}" },
+      "tracking": { "value": "{font.tracking.normal}" }
+    },
+    "label": {
+      "size": {
+        "value": "{font.size.compact}",
+        "comment": "Form labels, table headers, control captions."
+      },
+      "line-height": { "value": "{font.line-height.snug}" },
+      "weight": { "value": "{font.weight.medium}" },
+      "tracking": { "value": "{font.tracking.normal}" }
+    },
+    "caption": {
+      "size": { "value": "{font.size.xs}", "comment": "Meta lines, help text, badges." },
+      "line-height": { "value": "{font.line-height.snug}" },
+      "weight": { "value": "{font.weight.regular}" },
+      "tracking": { "value": "{font.tracking.normal}" }
+    },
+    "overline": {
+      "size": {
+        "value": "{font.size.2xs}",
+        "comment": "Uppercase group labels (sidebar sections)."
+      },
+      "line-height": { "value": "{font.line-height.snug}" },
+      "weight": { "value": "{font.weight.semibold}" },
+      "tracking": { "value": "{font.tracking.caps}" }
+    }
+  }
+}

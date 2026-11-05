@@ -6,6 +6,8 @@ import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { DuplicateSetReviewCard } from '../components/documents/DuplicateSetReviewCard';
+import { InlineStatus } from '../components/ui/InlineStatus';
+import { PageHeader } from '../components/ui/PageHeader';
 import { useDuplicateSetsInfiniteQuery } from '../lib/duplicates/useDuplicateSetsInfiniteQuery';
 import { flattenCursorPages } from '../lib/pagination/useCursorInfiniteQuery';
 import { useCursorLoadMoreSentinel } from '../lib/pagination/useCursorLoadMoreSentinel';
@@ -47,13 +49,15 @@ export function DuplicatesOverviewPage() {
       data-testid="duplicates-overview-page"
       data-ux="page"
     >
-      <header className="page-header">
-        <h1>{t('documents.duplicateQueueTitle')}</h1>
-        <p className="muted">{t('documents.duplicateQueueLead')}</p>
-      </header>
-      {loading ? <p className="muted">{t('documents.duplicateQueueLoading')}</p> : null}
+      <PageHeader
+        title={t('documents.duplicateQueueTitle')}
+        description={t('documents.duplicateQueueLead')}
+      />
+      {loading ? (
+        <InlineStatus tone="loading">{t('documents.duplicateQueueLoading')}</InlineStatus>
+      ) : null}
       {!loading && sets.length === 0 ? (
-        <p className="muted">{t('documents.duplicateQueueEmpty')}</p>
+        <InlineStatus>{t('documents.duplicateQueueEmpty')}</InlineStatus>
       ) : null}
       {!loading && sets.length > 0 ? (
         <div

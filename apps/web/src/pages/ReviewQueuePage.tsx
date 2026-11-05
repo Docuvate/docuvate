@@ -11,6 +11,7 @@ import { useToastNotify } from '../components/save/ToastProvider';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
+import { PageHeader } from '../components/ui/PageHeader';
 import {
   acceptDocumentReviewHighConfidenceBatch,
   archiveHashIdenticalDuplicateSets,
@@ -77,19 +78,20 @@ export function ReviewQueuePage() {
 
   return (
     <div className="page review-queue-page" data-ux="page">
-      <header className="page-header review-queue-header">
-        <div>
-          <h1 data-ux="page-title">{t('reviewQueue.title')}</h1>
-          <p className="muted">{t('reviewQueue.lead')}</p>
-        </div>
-        {showWizard ? (
-          <div className="review-queue-header-actions">
-            <Button type="button" variant="ghost" onClick={() => { navigate(routes.home); }}>
-              {t('reviewWizard.exit')}
-            </Button>
-          </div>
-        ) : null}
-      </header>
+      <PageHeader
+        className="review-queue-header"
+        title={t('reviewQueue.title')}
+        description={t('reviewQueue.lead')}
+        actions={
+          showWizard ? (
+            <div className="review-queue-header-actions">
+              <Button type="button" variant="ghost" onClick={() => { navigate(routes.home); }}>
+                {t('reviewWizard.exit')}
+              </Button>
+            </div>
+          ) : undefined
+        }
+      />
 
       {showWizard ? (
         <section

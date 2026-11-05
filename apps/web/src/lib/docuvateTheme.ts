@@ -16,8 +16,20 @@ import {
 let systemMediaQuery: MediaQueryList | null = null;
 let systemListenerAttached = false;
 
+/** While set on <html>, CSS transitions are suppressed so a theme switch repaints in one frame. */
+const THEME_SWITCHING_ATTRIBUTE = 'data-docuvate-theme-switching';
+
 function applyResolvedTheme(resolved: DocuvateTheme): void {
-  document.documentElement.setAttribute(docuvateThemeAttribute, resolved);
+  const root = document.documentElement;
+  if (root.getAttribute(docuvateThemeAttribute) !== resolved) {
+    root.setAttribute(THEME_SWITCHING_ATTRIBUTE, '');
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => {
+        root.removeAttribute(THEME_SWITCHING_ATTRIBUTE);
+      });
+    });
+  }
+  root.setAttribute(docuvateThemeAttribute, resolved);
   window.localStorage.setItem(COMPACT_THEME_STORAGE_KEY, resolved);
 }
 

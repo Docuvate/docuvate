@@ -8,6 +8,7 @@ import { Link } from 'react-router-dom';
 import { useToastNotify } from '../../components/save/ToastProvider';
 import { RecognizedFieldCatalogEditor } from '../../components/settings/RecognizedFieldCatalogEditor';
 import { Card } from '../../components/ui/Card';
+import { PageHeader } from '../../components/ui/PageHeader';
 import { getWorkspaceMlSettings, listRecognizedFields, listTags } from '../../lib/api';
 import { formatUserFacingError } from '../../lib/apiErrors';
 import {
@@ -93,12 +94,11 @@ export function RecognizedFieldsPage() {
 
   return (
     <div className="page library-page recognized-fields-page" data-ux="page">
-      <header className="page-header recognized-fields-header">
-        <div>
-          <h1 data-ux="page-title">{t('recognizedFields.pageTitle')}</h1>
-          <p className="muted">{t('recognizedFields.pageLead')}</p>
-        </div>
-      </header>
+      <PageHeader
+        className="recognized-fields-header"
+        title={t('recognizedFields.pageTitle')}
+        description={t('recognizedFields.pageLead')}
+      />
 
       {loadError ? (
         <p className="error" role="alert">

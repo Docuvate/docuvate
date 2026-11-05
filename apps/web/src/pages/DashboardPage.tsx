@@ -17,6 +17,7 @@ import { DashboardWidgets } from '../components/dashboard/DashboardWidgets';
 import { useToastNotify } from '../components/save/ToastProvider';
 import { Banner } from '../components/ui/Banner';
 import { Button } from '../components/ui/Button';
+import { PageHeader } from '../components/ui/PageHeader';
 import { Select } from '../components/ui/Select';
 import {
   getDashboardLayout,
@@ -172,23 +173,24 @@ export function DashboardPage() {
 
   return (
     <div className="page dashboard-page dv-page-grid">
-      <header className="page-header dashboard-page-header">
-        <div>
-          <h1>{t('dashboard.title')}</h1>
-          <p className="muted">{t('dashboard.lead')}</p>
-        </div>
-        <div className="dashboard-header-actions">
-          <Button
-            type="button"
-            variant={editMode ? 'primary' : 'secondary'}
-            onClick={() => {
-              setEditMode((v) => !v);
-            }}
-          >
-            {editMode ? t('dashboard.doneEditing') : t('dashboard.customize')}
-          </Button>
-        </div>
-      </header>
+      <PageHeader
+        className="dashboard-page-header"
+        title={t('dashboard.title')}
+        description={t('dashboard.lead')}
+        actions={
+          <div className="dashboard-header-actions">
+            <Button
+              type="button"
+              variant={editMode ? 'primary' : 'secondary'}
+              onClick={() => {
+                setEditMode((v) => !v);
+              }}
+            >
+              {editMode ? t('dashboard.doneEditing') : t('dashboard.customize')}
+            </Button>
+          </div>
+        }
+      />
 
       {reviewPendingCount > 0 && !editMode ? (
         <Banner

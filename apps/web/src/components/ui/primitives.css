@@ -1,0 +1,267 @@
+/*
+ * Design-system primitives (page header, card header, toolbar, inline status, tone badges,
+ * focus + touch-target foundations). Tokens only — see docs/design-system.md.
+ * Loaded before app.css so page-specific rules can still refine layout.
+ */
+
+/* ---------- Focus: one visible ring for every interactive primitive ---------- */
+:where(
+  .btn,
+  .tab,
+  .chip-remove,
+  .sidebar-link,
+  .topbar-icon-btn,
+  .ds-toolbar button,
+  .segmented-control__option,
+  .menu-item
+):focus-visible {
+  outline: var(--dv-focus-ring-width) solid var(--dv-color-focus);
+  outline-offset: var(--dv-focus-ring-offset);
+}
+
+/* ---------- Page header ---------- */
+.page-header.ds-page-header {
+  flex-wrap: wrap;
+  gap: var(--dv-space-sm) var(--dv-space-md);
+}
+
+.ds-page-header-heading {
+  display: grid;
+  flex: 1 1 16rem;
+  gap: var(--dv-space-2xs);
+  min-width: 0;
+}
+
+.ds-page-header-eyebrow {
+  font-size: var(--dv-type-caption-size);
+  line-height: var(--dv-type-caption-line-height);
+  color: var(--dv-color-text-muted);
+}
+
+.ds-page-header-title {
+  margin: 0;
+  font-size: var(--dv-type-page-title-size);
+  line-height: var(--dv-type-page-title-line-height);
+  font-weight: var(--dv-type-page-title-weight);
+  letter-spacing: var(--dv-type-page-title-tracking);
+  color: var(--dv-color-text);
+  overflow-wrap: anywhere;
+}
+
+.ds-page-header .ds-page-header-lead {
+  margin: 0;
+  max-width: var(--dv-layout-readable-max);
+  font-size: var(--dv-type-lead-size);
+  line-height: var(--dv-type-lead-line-height);
+}
+
+.ds-page-header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--dv-space-xs);
+  min-width: 0;
+}
+
+/* ---------- Card variants + header ---------- */
+.card--outlined {
+  box-shadow: var(--dv-elevation-0);
+}
+
+.card--muted {
+  background: var(--dv-color-bg-overlay);
+  box-shadow: var(--dv-elevation-0);
+}
+
+.card--pad-none {
+  padding: 0;
+}
+
+.card--pad-sm {
+  padding: var(--dv-space-sm);
+}
+
+.card--pad-md {
+  padding: var(--dv-space-md);
+}
+
+.ds-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--dv-space-md);
+  margin-bottom: var(--dv-space-md);
+}
+
+.ds-card-header-text {
+  display: grid;
+  gap: var(--dv-space-2xs);
+  min-width: 0;
+}
+
+.ds-card-header-title {
+  margin: 0;
+  font-size: var(--dv-type-card-title-size);
+  line-height: var(--dv-type-card-title-line-height);
+  font-weight: var(--dv-type-card-title-weight);
+}
+
+.ds-card-header-lead {
+  margin: 0;
+  font-size: var(--dv-type-caption-size);
+  line-height: var(--dv-type-caption-line-height);
+  color: var(--dv-color-text-muted);
+}
+
+.ds-card-header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--dv-space-xs);
+  flex-shrink: 0;
+}
+
+/* ---------- Toolbar / tool groups ---------- */
+.ds-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--dv-space-xs) var(--dv-space-md);
+  min-width: 0;
+}
+
+.ds-toolbar--nowrap {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+}
+
+.ds-toolbar--end {
+  justify-content: flex-end;
+}
+
+.ds-toolbar--between {
+  justify-content: space-between;
+}
+
+.ds-tool-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--dv-space-xs);
+  min-width: 0;
+}
+
+.ds-tool-group--attached {
+  gap: 0;
+  flex-wrap: nowrap;
+}
+
+.ds-tool-group--attached > * + * {
+  margin-inline-start: calc(-1 * var(--dv-border-width-hairline));
+}
+
+.ds-tool-group--attached > :not(:first-child, :last-child) {
+  border-radius: 0;
+}
+
+.ds-tool-group--attached > :first-child:not(:last-child) {
+  border-start-end-radius: 0;
+  border-end-end-radius: 0;
+}
+
+.ds-tool-group--attached > :last-child:not(:first-child) {
+  border-start-start-radius: 0;
+  border-end-start-radius: 0;
+}
+
+/* ---------- Inline status (loading / empty / success / warn / error) ---------- */
+.ds-inline-status {
+  display: flex;
+  align-items: center;
+  gap: var(--dv-space-xs);
+  min-height: var(--dv-control-height);
+  padding: var(--dv-space-xs) var(--dv-space-sm);
+  border: var(--dv-border-width-hairline) solid var(--dv-color-border);
+  border-radius: var(--dv-radius-control);
+  background: var(--dv-color-bg-raised);
+  color: var(--dv-color-text-muted);
+  font-size: var(--dv-type-body-size);
+  line-height: var(--dv-type-body-line-height);
+}
+
+.ds-inline-status-icon {
+  flex-shrink: 0;
+}
+
+.ds-inline-status-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.ds-inline-status-action {
+  flex-shrink: 0;
+}
+
+.ds-inline-status--success {
+  border-color: color-mix(in srgb, var(--dv-color-ok) 35%, var(--dv-color-border));
+  background: var(--dv-color-ok-soft);
+  color: var(--dv-color-ok-strong);
+}
+
+.ds-inline-status--warn {
+  border-color: color-mix(in srgb, var(--dv-color-warn) 35%, var(--dv-color-border));
+  background: var(--dv-color-warn-soft);
+  color: var(--dv-color-warn-strong);
+}
+
+.ds-inline-status--error {
+  border-color: color-mix(in srgb, var(--dv-color-danger) 35%, var(--dv-color-border));
+  background: var(--dv-color-danger-soft);
+  color: var(--dv-color-error-text);
+}
+
+/* ---------- Tone badges ---------- */
+.ds-badge {
+  gap: var(--dv-space-2xs);
+  border-radius: var(--dv-radius-badge);
+  line-height: var(--dv-font-line-height-snug);
+  white-space: nowrap;
+}
+
+.ds-badge--neutral {
+  color: var(--dv-color-text-muted);
+}
+
+.ds-badge--accent {
+  color: var(--dv-color-accent-text);
+  background: var(--dv-color-accent-soft);
+  border-color: color-mix(in srgb, var(--dv-color-accent) 30%, var(--dv-color-border));
+}
+
+.ds-badge--success {
+  color: var(--dv-color-ok);
+  background: var(--dv-color-ok-soft);
+}
+
+.ds-badge--warn {
+  color: var(--dv-color-warn-strong);
+  background: var(--dv-color-warn-soft);
+}
+
+.ds-badge--danger {
+  color: var(--dv-color-danger-strong);
+  background: var(--dv-color-danger-soft);
+}
+
+.ds-badge--info {
+  color: var(--dv-color-inbox);
+  background: var(--dv-color-inbox-soft);
+  border-color: var(--dv-color-inbox-border);
+}
+
+/* Theme switches repaint at once instead of fading each control (see lib/docuvateTheme.ts). */
+:root[data-docuvate-theme-switching] *,
+:root[data-docuvate-theme-switching] *::before,
+:root[data-docuvate-theme-switching] *::after {
+  transition: none !important;
+}

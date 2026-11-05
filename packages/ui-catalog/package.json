@@ -17,5 +17,8 @@
   },
   "dependencies": {
     "@docuvate/tokens": "workspace:*"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
   }
 }

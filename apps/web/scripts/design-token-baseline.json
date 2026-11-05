@@ -1,0 +1,20 @@
+{
+  "apps/web/src/components/errors/error-scenes.css": {
+    "raw-font-size": 2,
+    "raw-transition-timing": 1
+  },
+  "apps/web/src/components/ui/components.css": {
+    "raw-font-size": 1,
+    "raw-border-radius": 1
+  },
+  "apps/web/src/components/ui/ds.css": {
+    "raw-font-size": 2
+  },
+  "apps/web/src/styles/app.css": {
+    "raw-font-size": 17,
+    "raw-border-radius": 24,
+    "raw-shadow-color": 5,
+    "raw-transition-timing": 1,
+    "raw-rgb-hsl": 12
+  }
+}
