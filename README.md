@@ -25,7 +25,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/license-SUL%201.0%20(fair--code)-cb3a00" alt="License Sustainable Use 1.0 (fair-code)">
   <img src="https://img.shields.io/badge/version-0.1.0-120f09" alt="Version 0.1.0">
-  <img src="https://img.shields.io/badge/node-24.21.0-cb3a00?logo=node.js&logoColor=white" alt="Node 24.21.0">
+  <img src="https://img.shields.io/badge/node-24.22.2-cb3a00?logo=node.js&logoColor=white" alt="Node 24.22.2">
   <img src="https://img.shields.io/badge/python-3.12.15-cb3a00?logo=python&logoColor=white" alt="Python 3.12.15">
   <img src="https://img.shields.io/badge/self--hosted-yes-cb3a00" alt="Self-hosted">
   <img src="https://img.shields.io/badge/docker-compose-cb3a00?logo=docker&logoColor=white" alt="Docker Compose">

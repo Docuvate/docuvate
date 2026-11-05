@@ -240,6 +240,35 @@ jobs:
           path: workstream-e-artifacts/
           retention-days: 14
           if-no-files-found: warn
+      - name: Wait for smoke-seed before extract-heavy tests
+        run: |
+          set -euo pipefail
+          # Free the single extract slot before ranking fixtures. Seed success is not required
+          # here (duplicate/field-learning checks are best-effort background); a non-zero exit
+          # only warns so ranking is not blocked by an unrelated seed assertion flake.
+          deadline=$((SECONDS + 600))
+          while true; do
+            status="$(docker inspect -f '{{.State.Status}}' docuvate-smoke-seed-1 2>/dev/null || echo missing)"
+            if [ "$status" = "exited" ]; then
+              code="$(docker inspect -f '{{.State.ExitCode}}' docuvate-smoke-seed-1)"
+              if [ "$code" != "0" ]; then
+                docker compose -f docker-compose.yml -f docker-compose.ci.yml -f docker-compose.smoke.yml --profile smoke logs --tail=80 smoke-seed || true
+                echo "warning: smoke-seed exited with code $code (continuing; extract slot is free)" >&2
+              else
+                echo "smoke-seed finished successfully"
+              fi
+              break
+            fi
+            if [ "$status" = "missing" ]; then
+              echo "smoke-seed container missing; continuing"
+              break
+            fi
+            if (( SECONDS >= deadline )); then
+              echo "warning: still waiting on smoke-seed (status=$status) after 600s; continuing" >&2
+              break
+            fi
+            sleep 5
+          done
       - name: Global search ranking (exact title)
         run: |
           set -euo pipefail
