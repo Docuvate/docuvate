@@ -72,7 +72,10 @@ function writeScreenshotFiles(name: string, body: Buffer): void {
   writeFileSync(join(cursorDir, hashed), body);
 }
 
-export async function assertNoHorizontalOverflow(page: Page): Promise<void> {
+export async function assertNoHorizontalOverflow(
+  page: Page,
+  containers: readonly string[] = CONTAINERS
+): Promise<void> {
   const hits = await page.evaluate((selectors) => {
     const skipClosest = [
       '[data-floating-placement]',
@@ -142,7 +145,7 @@ export async function assertNoHorizontalOverflow(page: Page): Promise<void> {
       });
     }
     return results;
-  }, CONTAINERS);
+  }, containers);
   expect(hits, JSON.stringify(hits)).toEqual([]);
 }
 

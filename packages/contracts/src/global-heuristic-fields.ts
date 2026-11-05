@@ -66,6 +66,7 @@ export function partitionRecognizedAndHeuristicSuggestions<T extends ExtractedFi
 ): { recognized: T[]; suggestions: FieldSuggestionRow[] } {
   const recognized: T[] = [];
   const suggestionMap = new Map<string, FieldSuggestionRow>();
+  const confirmedNames = new Set<string>();
 
   for (const row of persistedSuggestions) {
     const key = row.key.trim();
@@ -87,6 +88,12 @@ export function partitionRecognizedAndHeuristicSuggestions<T extends ExtractedFi
       }
       continue;
     }
+    // A value a person confirmed or corrected is no longer a suggestion, whatever its key.
+    if (field.userConfirmed === true) {
+      recognized.push(field);
+      confirmedNames.add(canonicalFieldName(field.key));
+      continue;
+    }
     const semantic = semanticFieldKey(field);
     if (isPlainGlobalHeuristicField(field) && !catalogDefinesSemanticKey(catalogKeys, semantic)) {
       const key = semantic;
@@ -103,5 +110,8 @@ export function partitionRecognizedAndHeuristicSuggestions<T extends ExtractedFi
     recognized.push(field);
   }
 
-  return { recognized, suggestions: [...suggestionMap.values()] };
+  const suggestions = [...suggestionMap.values()].filter(
+    (suggestion) => !confirmedNames.has(canonicalFieldName(suggestion.key))
+  );
+  return { recognized, suggestions };
 }

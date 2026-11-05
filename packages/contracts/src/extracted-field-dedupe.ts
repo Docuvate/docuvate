@@ -7,6 +7,7 @@ export type ExtractedFieldRow = {
   value: string;
   confidence?: number;
   tagId?: string;
+  userConfirmed?: boolean;
 };
 
 const LABEL_STORAGE_PREFIX = /^label:([0-9a-f-]{36}):(.+)$/i;
