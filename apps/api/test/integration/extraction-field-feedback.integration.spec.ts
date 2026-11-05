@@ -57,7 +57,7 @@ describe('extraction field feedback (Testcontainers Postgres)', () => {
     await repo.updateForUser(documentId, userId, { extractionFields: fields });
   }
 
-  it('records confirmations without corrections for confidence-only updates', async () => {
+  it('records confirmations without corrections when a person confirms unchanged values', async () => {
     await saveFields([
       { key: 'global:absender', value: 'Nordwind GmbH', confidence: 0.7 },
       { key: 'global:rechnungsdatum', value: '15.03.2024', confidence: 0.75 },
@@ -70,8 +70,8 @@ describe('extraction field feedback (Testcontainers Postgres)', () => {
         { key: 'global:rechnungsdatum', value: '15.03.2024', confidence: 0.75 },
       ],
       [
-        { key: 'global:absender', value: 'Nordwind GmbH', confidence: 1 },
-        { key: 'global:rechnungsdatum', value: '15.03.2024', confidence: 1 },
+        { key: 'global:absender', value: 'Nordwind GmbH', confidence: 1, userConfirmed: true },
+        { key: 'global:rechnungsdatum', value: '15.03.2024', confidence: 1, userConfirmed: true },
       ]
     );
     expect(result).toEqual({ correctionsRecorded: 0, confirmationsRecorded: 2 });
@@ -80,12 +80,12 @@ describe('extraction field feedback (Testcontainers Postgres)', () => {
       documentId,
       userId,
       [
-        { key: 'global:absender', value: 'Nordwind GmbH', confidence: 1 },
-        { key: 'global:rechnungsdatum', value: '15.03.2024', confidence: 1 },
+        { key: 'global:absender', value: 'Nordwind GmbH', confidence: 1, userConfirmed: true },
+        { key: 'global:rechnungsdatum', value: '15.03.2024', confidence: 1, userConfirmed: true },
       ],
       [
-        { key: 'global:absender', value: 'Nordwind GmbH', confidence: 1 },
-        { key: 'global:rechnungsdatum', value: '15.03.2024', confidence: 1 },
+        { key: 'global:absender', value: 'Nordwind GmbH', confidence: 1, userConfirmed: true },
+        { key: 'global:rechnungsdatum', value: '15.03.2024', confidence: 1, userConfirmed: true },
       ]
     );
     expect(repeat).toEqual({ correctionsRecorded: 0, confirmationsRecorded: 0 });
@@ -133,7 +133,7 @@ describe('extraction field feedback (Testcontainers Postgres)', () => {
       isoDoc,
       userId,
       [{ key: 'global:rechnungsdatum', value: '2024-03-15', confidence: 0.8 }],
-      [{ key: 'global:rechnungsdatum', value: '15.03.2024', confidence: 1 }]
+      [{ key: 'global:rechnungsdatum', value: '15.03.2024', confidence: 1, userConfirmed: true }]
     );
     expect(result.correctionsRecorded).toBe(0);
     expect(result.confirmationsRecorded).toBe(1);
