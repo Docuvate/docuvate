@@ -157,7 +157,13 @@ export type BanAdminUserRequestDto = {
 };
 
 export type ConfirmDocumentFieldRequestDto = {
+    /**
+     * Storage key of the field as returned in `extraction.fields[].key`.
+     */
     fieldKey: string;
+    /**
+     * Value the person confirms. An empty string keeps the stored value.
+     */
     value: string;
 };
 
@@ -926,6 +932,10 @@ export type ProblemDetailsDto = {
     code: string;
     detail: string;
     requestId: string;
+    /**
+     * Request properties that failed validation, as dotted paths. Only set for VALIDATION_FAILED.
+     */
+    invalidParams?: Array<string>;
 };
 
 export type RecognizedFieldFilterValuesResponseDto = {

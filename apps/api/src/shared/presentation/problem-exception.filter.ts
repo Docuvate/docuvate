@@ -27,6 +27,7 @@ import {
 } from '../domain/errors.js';
 import { requestIdFromFastify } from '../infrastructure/http/request-id.js';
 import { buildProblemDetails, problemDetailForCode } from './problem-details.builder.js';
+import { RequestValidationException } from './request-validation.exception.js';
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
@@ -79,6 +80,31 @@ function errorCodeI18nKeySafe(code: (typeof ERROR_CODES)[keyof typeof ERROR_CODE
   return `errors.codes.${code}`;
 }
 
+/** Maps any thrown value to the RFC 9457 body the API returns. */
+export function problemForException(exception: unknown, requestId: string): ProblemDetails {
+  if (exception instanceof DomainError) {
+    const status = statusFromDomainError(exception);
+    return {
+      type: PROBLEM_TYPE_ABOUT_BLANK,
+      title: problemDetailForCode(exception.code, status, requestId).title,
+      status,
+      code: exception.code,
+      detail: exception.detailKey,
+      requestId,
+    };
+  }
+  if (exception instanceof RequestValidationException) {
+    return {
+      ...problemDetailForCode(ERROR_CODES.VALIDATION_FAILED, exception.getStatus(), requestId),
+      invalidParams: exception.invalidParams,
+    };
+  }
+  if (exception instanceof HttpException) {
+    return problemFromHttpException(exception, requestId);
+  }
+  return problemDetailForCode(ERROR_CODES.INTERNAL_ERROR, HttpStatus.INTERNAL_SERVER_ERROR, requestId);
+}
+
 @Catch()
 export class ProblemDetailsExceptionFilter implements ExceptionFilter {
   catch(exception: unknown, host: ArgumentsHost): void {
@@ -87,26 +113,7 @@ export class ProblemDetailsExceptionFilter implements ExceptionFilter {
     const request = ctx.getRequest<FastifyRequest>();
     const requestId = requestIdFromFastify(request);
 
-    let problem: ProblemDetails;
-    if (exception instanceof DomainError) {
-      const status = statusFromDomainError(exception);
-      problem = {
-        type: PROBLEM_TYPE_ABOUT_BLANK,
-        title: problemDetailForCode(exception.code, status, requestId).title,
-        status,
-        code: exception.code,
-        detail: exception.detailKey,
-        requestId,
-      };
-    } else if (exception instanceof HttpException) {
-      problem = problemFromHttpException(exception, requestId);
-    } else {
-      problem = problemDetailForCode(
-        ERROR_CODES.INTERNAL_ERROR,
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        requestId
-      );
-    }
+    const problem = problemForException(exception, requestId);
 
     void reply
       .header('content-type', PROBLEM_DETAILS_MEDIA_TYPE)

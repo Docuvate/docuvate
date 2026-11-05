@@ -12937,10 +12937,14 @@
         "type": "object",
         "properties": {
           "fieldKey": {
-            "type": "string"
+            "type": "string",
+            "description": "Storage key of the field as returned in `extraction.fields[].key`.",
+            "example": "global:rechnungsnummer"
           },
           "value": {
-            "type": "string"
+            "type": "string",
+            "description": "Value the person confirms. An empty string keeps the stored value.",
+            "example": "RE-2024-0042"
           }
         },
         "required": [
@@ -15607,6 +15611,16 @@
           "requestId": {
             "type": "string",
             "example": "7f3a91c2"
+          },
+          "invalidParams": {
+            "description": "Request properties that failed validation, as dotted paths. Only set for VALIDATION_FAILED.",
+            "example": [
+              "fieldKey"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         },
         "required": [

@@ -38,6 +38,14 @@ export class ProblemDetailsDto {
 
   @ApiProperty({ example: '7f3a91c2' })
   requestId!: string;
+
+  @ApiPropertyOptional({
+    type: [String],
+    description:
+      'Request properties that failed validation, as dotted paths. Only set for VALIDATION_FAILED.',
+    example: ['fieldKey'],
+  })
+  invalidParams?: string[];
 }
 
 export class OkResponseDto {

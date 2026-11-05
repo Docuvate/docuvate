@@ -1,11 +1,16 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import type {
+  ConfirmDocumentFieldRequest,
+  ConfirmDocumentFieldResponse,
+} from '@docuvate/contracts';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   IsArray,
   IsIn,
   IsInt,
+  IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
@@ -305,17 +310,24 @@ export class ApplyFieldCorrectionResponseDto {
   region!: DocumentRegionDto | null;
 }
 
-export class ConfirmDocumentFieldRequestDto {
-  @ApiProperty()
+export class ConfirmDocumentFieldRequestDto implements ConfirmDocumentFieldRequest {
+  @ApiProperty({
+    description: 'Storage key of the field as returned in `extraction.fields[].key`.',
+    example: 'global:rechnungsnummer',
+  })
   @IsString()
+  @IsNotEmpty()
   fieldKey!: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'Value the person confirms. An empty string keeps the stored value.',
+    example: 'RE-2024-0042',
+  })
   @IsString()
   value!: string;
 }
 
-export class ConfirmDocumentFieldResponseDto {
+export class ConfirmDocumentFieldResponseDto implements ConfirmDocumentFieldResponse {
   @ApiProperty()
   confirmed!: boolean;
 
