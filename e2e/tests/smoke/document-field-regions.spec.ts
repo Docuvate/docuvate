@@ -3,7 +3,10 @@
 import { expect, test, type Page } from '@playwright/test';
 
 import { applyDocuvateLocale } from '../../helpers/docuvate-theme';
-import { openLayoutDocumentPage, uploadLayoutTableDocument } from '../../helpers/layout-document-fixture';
+import {
+  openLayoutDocumentPage,
+  uploadLayoutTableDocument,
+} from '../../helpers/layout-document-fixture';
 import { showLayoutPane } from '../../helpers/layout-pane';
 import { assignLongLabels, longLabelNames } from '../../helpers/long-label-fixture';
 import {
@@ -92,9 +95,12 @@ async function openFieldCorrectionSheet(page: Page): Promise<void> {
 }
 
 async function startRectangle(page: Page): Promise<void> {
-  const word = page.locator('.pdf-page-wrap .textLayer span').filter({
-    hasText: /Widget|Alex|Testmann|FIXTURE|Compose/i,
-  }).first();
+  const word = page
+    .locator('.pdf-page-wrap .textLayer span')
+    .filter({
+      hasText: /Widget|Alex|Testmann|FIXTURE|Compose/i,
+    })
+    .first();
   if ((await word.count()) > 0) {
     await expect(word).toBeVisible({ timeout: 60_000 });
     const box = await word.boundingBox();
@@ -132,10 +138,11 @@ async function dismissOverlaySheets(page: Page): Promise<void> {
       return;
     }
     await page.keyboard.press('Escape');
-    await expect(open).toHaveCount(0, { timeout: 5_000 }).catch(() => undefined);
+    await expect(open)
+      .toHaveCount(0, { timeout: 5_000 })
+      .catch(() => undefined);
   }
 }
-
 
 /** Open the field combobox and pick an existing definition (catalog or document). */
 async function selectExistingFieldInContextBar(page: Page): Promise<void> {
@@ -188,13 +195,10 @@ async function createFieldViaContextBarOption(page: Page, fieldName: string): Pr
   await combobox.click();
   await combobox.fill(fieldName);
 
-  const createOption = page
-    .locator('.combobox-create-option')
-    .filter({ hasText: fieldName });
+  const createOption = page.locator('.combobox-create-option').filter({ hasText: fieldName });
   await expect(createOption).toBeVisible({ timeout: 15_000 });
   await createOption.click();
 }
-
 
 test.describe('document field regions', () => {
   test.describe.configure({ mode: 'serial', timeout: 420_000, retries: 0 });
@@ -238,7 +242,10 @@ test.describe('document field regions', () => {
     await applyGermanLocale(page);
     await openLayoutDocumentPage(page, layoutDocId);
 
-    await page.locator('.layout-side-tabs').getByRole('tab', { name: /Übersicht|Overview/i }).click();
+    await page
+      .locator('.layout-side-tabs')
+      .getByRole('tab', { name: /Übersicht|Overview/i })
+      .click();
     await expect(page.getByTestId('document-selection-layer')).toHaveAttribute(
       'data-token-count',
       /^(?!0$)\d+$/,
@@ -333,7 +340,9 @@ test.describe('document field regions', () => {
         await assertNoHorizontalOverflow(page);
         if (scheme === 'light') {
           await more.click();
-          const popover = page.locator('.label-chip-row-overflow-popover, .overflow-chip-popover, [data-testid="label-overflow-sheet"]');
+          const popover = page.locator(
+            '.label-chip-row-overflow-popover, .overflow-chip-popover, [data-testid="label-overflow-sheet"]'
+          );
           await expect(popover).toBeVisible();
           await assertOverflowMissesHeader(page);
           await captureViewportScreenshot(
