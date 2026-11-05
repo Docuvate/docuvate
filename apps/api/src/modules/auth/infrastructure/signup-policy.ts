@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type pg from 'pg';
 
+/** Error code the sign-up endpoint returns while registration is invite-only. */
+export const SIGNUP_DISABLED_ERROR_CODE = 'SIGNUP_DISABLED';
+
 function explicitSignupFlag(env: NodeJS.ProcessEnv = process.env): 'open' | 'closed' | 'default' {
   const raw = env.DV_ALLOW_SIGNUP?.trim().toLowerCase();
   if (raw === 'true' || raw === '1' || raw === 'yes') {

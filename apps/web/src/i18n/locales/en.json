@@ -117,6 +117,7 @@
       "sessionExpired": "Your session has expired. Please sign in again.",
       "signInFailed": "Sign-in failed. Please try again.",
       "registerFailed": "Registration failed. Please try again.",
+      "signupDisabled": "Registration on this installation is by invitation only. Please ask an administrator for an invite.",
       "signOutFailed": "Sign-out failed. Please try again.",
       "sessionNotReady": "We could not start your session. Please try again.",
       "generic": "Something went wrong. Please try again."

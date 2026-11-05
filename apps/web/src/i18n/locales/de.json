@@ -117,6 +117,7 @@
       "sessionExpired": "Ihre Sitzung ist abgelaufen. Bitte erneut anmelden.",
       "signInFailed": "Anmeldung fehlgeschlagen. Bitte erneut versuchen.",
       "registerFailed": "Registrierung fehlgeschlagen. Bitte erneut versuchen.",
+      "signupDisabled": "Auf dieser Installation ist die Registrierung nur mit Einladung möglich. Bitte wenden Sie sich an eine Administratorin oder einen Administrator.",
       "signOutFailed": "Abmeldung fehlgeschlagen. Bitte erneut versuchen.",
       "sessionNotReady": "Die Sitzung konnte nicht gestartet werden. Bitte erneut versuchen.",
       "generic": "Das hat leider nicht geklappt. Bitte erneut versuchen."

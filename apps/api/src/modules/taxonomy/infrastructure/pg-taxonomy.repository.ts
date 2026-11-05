@@ -226,13 +226,28 @@ export class PgTaxonomyRepository implements TaxonomyRepository {
   }
 
   async ensureInboxTag(userId: string): Promise<TagEntity> {
-    const existing = await this.pool.query(
+    const existing = await this.findInboxTag(userId);
+    if (existing) return existing;
+    // Several uploads of a new user can get here at once; the unique indexes on (user_id, name)
+    // and (user_id) WHERE is_inbox let exactly one insert win, the others read its row.
+    await this.pool.query(
+      `INSERT INTO tags (id, user_id, name, color, is_inbox, matching_algorithm, match_text)
+       VALUES ($1, $2, $3, '#2563eb', true, 'none', '')
+       ON CONFLICT DO NOTHING`,
+      [crypto.randomUUID(), userId, INBOX_NAME]
+    );
+    const created = await this.findInboxTag(userId);
+    if (created) return created;
+    return this.createTag(userId, INBOX_NAME, { color: '#2563eb', isInbox: true });
+  }
+
+  private async findInboxTag(userId: string): Promise<TagEntity | null> {
+    const result = await this.pool.query(
       `SELECT * FROM tags WHERE user_id = $1 AND is_inbox = true LIMIT 1`,
       [userId]
     );
-    const raw: unknown = existing.rows[0];
-    if (raw) return this.mapTag(requireRecord(raw));
-    return this.createTag(userId, INBOX_NAME, { color: '#2563eb', isInbox: true });
+    const raw: unknown = result.rows[0];
+    return raw ? this.mapTag(requireRecord(raw)) : null;
   }
 
   async listCorrespondents(userId: string): Promise<CorrespondentEntity[]> {
