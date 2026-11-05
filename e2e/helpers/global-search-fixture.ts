@@ -104,6 +104,7 @@ export async function provisionGlobalSearchLibrary(
   const kontoId = await uploadPdf(request, opts.apiBase, 'kontoauszug.pdf');
   await patchDocument(request, opts.apiBase, kontoId, {
     title: 'Kontoauszug Nordwind',
+    documentDate: '2026-10-22',
     notes: 'Der monatliche Kontoauszug weist eine Gebühr für den Zahlungsverkehr aus.',
   });
 

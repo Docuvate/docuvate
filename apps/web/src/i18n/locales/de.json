@@ -560,8 +560,7 @@
   "filesystem": {
     "title": "Dateisystem",
     "pathAria": "Pfad",
-    "folderDocCountTooltip": "{{count}} Dokumente direkt in diesem Ordner (ohne Unterordner)",
-    "treeDocCountTooltip": "{{count}} Dokumente in diesem Ordner",
+    "folderDocCountTooltip": "{{count}} Dokumente inkl. Unterordner, davon {{direct}} direkt in diesem Ordner",
     "treePanelAria": "Ordnerbaum",
     "contentPaneAria": "Ordnerinhalt",
     "treeSearchPlaceholder": "Ordner suchen…",
