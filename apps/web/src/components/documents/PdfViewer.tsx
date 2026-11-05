@@ -178,7 +178,7 @@ async function renderPdfPage(
   wrap.dataset.page = String(pageNum);
   // PDF.js applies page.rotate to the viewport; expose it so selection can remap
   // when tokens were stored against the unrotated MediaBox (data-tokens-unrotated).
-  wrap.dataset.pdfRotate = String(page.rotate ?? 0);
+  wrap.dataset.pdfRotate = String(page.rotate);
   wrap.style.width = `${String(viewport.width)}px`;
   wrap.style.height = `${String(viewport.height)}px`;
   wrap.appendChild(canvas);

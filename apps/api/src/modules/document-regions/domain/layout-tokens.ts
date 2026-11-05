@@ -75,21 +75,24 @@ export function expandBlockTextPieces(text: string): string[] {
   return pieces;
 }
 
+interface WordRect {
+  x0: number;
+  y0: number;
+  x1: number;
+  y1: number;
+  text: string;
+}
+
 function apportionWordRects(
   blockRect: { x0: number; y0: number; x1: number; y1: number },
   pieces: readonly string[],
   axis: 'x' | 'y'
-): Array<{ x0: number; y0: number; x1: number; y1: number; text: string }> {
-  const weights = pieces.map((piece) => Math.max(1, piece.length));
-  const total = weights.reduce((sum, weight) => sum + weight, 0);
-  const out: Array<{ x0: number; y0: number; x1: number; y1: number; text: string }> = [];
+): WordRect[] {
+  const total = pieces.reduce((sum, piece) => sum + Math.max(1, piece.length), 0);
+  const out: WordRect[] = [];
   let cursor = 0;
-  for (let index = 0; index < pieces.length; index += 1) {
-    const piece = pieces[index];
-    if (piece === undefined) {
-      continue;
-    }
-    const weight = weights[index] ?? 1;
+  for (const piece of pieces) {
+    const weight = Math.max(1, piece.length);
     const start = cursor / total;
     cursor += weight;
     const end = cursor / total;
@@ -112,6 +115,20 @@ function apportionWordRects(
         y1: blockRect.y0 + height * end,
       });
     }
+  }
+  return out;
+}
+
+/** Distinct IR block indexes for persistence (PK is region_id + block_index). */
+export function uniqueBlockIndexes(tokens: readonly LayoutToken[]): number[] {
+  const seen = new Set<number>();
+  const out: number[] = [];
+  for (const token of tokens) {
+    if (seen.has(token.blockIndex)) {
+      continue;
+    }
+    seen.add(token.blockIndex);
+    out.push(token.blockIndex);
   }
   return out;
 }

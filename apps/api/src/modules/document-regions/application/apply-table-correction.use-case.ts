@@ -31,7 +31,7 @@ import {
   type DocumentRegionRepository,
   type DocumentRepository,
 } from '../../../shared/domain/ports.js';
-import { layoutTokensFromIr } from '../domain/layout-tokens.js';
+import { layoutTokensFromIr, uniqueBlockIndexes } from '../domain/layout-tokens.js';
 import { isUuid } from '../domain/parse-uuid.js';
 
 const TABLE_OPS = new Set<TableCorrectionOp>(['create', 'set_headers', 'edit_cell', 'remove']);
@@ -189,7 +189,7 @@ export class ApplyTableCorrectionUseCase {
             role: 'table',
             page: resolved.page,
             rect: resolved.rect,
-            blockIndexes: resolved.tokens.map((token) => token.blockIndex),
+            blockIndexes: uniqueBlockIndexes(resolved.tokens),
             attributes: tableAttributes(nextTable),
           });
     if (beforePayload === afterPayload) {
@@ -216,7 +216,7 @@ export class ApplyTableCorrectionUseCase {
         x1: resolved.rect.x1,
         y1: resolved.rect.y1,
         irSha256: snapshot.irSha256,
-        blockIndexes: resolved.tokens.map((token) => token.blockIndex),
+        blockIndexes: uniqueBlockIndexes(resolved.tokens),
         boundText: joinedTokenText(resolved.tokens),
         table: nextTable,
       });

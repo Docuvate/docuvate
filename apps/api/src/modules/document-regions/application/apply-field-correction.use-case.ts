@@ -34,7 +34,7 @@ import {
   type ExtractionFieldFeedbackRepository,
   type FieldFeedbackPosition,
 } from '../../../shared/domain/ports.js';
-import { layoutTokensFromIr } from '../domain/layout-tokens.js';
+import { layoutTokensFromIr, uniqueBlockIndexes } from '../domain/layout-tokens.js';
 import { isUuid } from '../domain/parse-uuid.js';
 
 const FIELD_OPS = new Set<FieldCorrectionOp>(['create', 'reanchor', 'edit_value', 'remove']);
@@ -190,7 +190,7 @@ export class ApplyFieldCorrectionUseCase {
             role: 'field',
             page: resolved.page,
             rect: resolved.rect,
-            blockIndexes: resolved.tokens.map((token) => token.blockIndex),
+            blockIndexes: uniqueBlockIndexes(resolved.tokens),
             fieldKey,
             valueOverride: nextValue,
           });
@@ -210,7 +210,7 @@ export class ApplyFieldCorrectionUseCase {
       (existing != null &&
         (existing.page !== resolved.page ||
           existing.blockIndexes.join(',') !==
-            resolved.tokens.map((token) => token.blockIndex).join(',')));
+            uniqueBlockIndexes(resolved.tokens).join(',')));
 
     let afterRegion: DocumentRegionRecord | null = null;
     if (body.op !== 'remove' && (geometryChanged || !existing)) {
@@ -228,7 +228,7 @@ export class ApplyFieldCorrectionUseCase {
         x1: resolved.rect.x1,
         y1: resolved.rect.y1,
         irSha256: snapshot.irSha256,
-        blockIndexes: resolved.tokens.map((token) => token.blockIndex),
+        blockIndexes: uniqueBlockIndexes(resolved.tokens),
         boundText: joinedTokenText(resolved.tokens),
         fieldKey,
         valueOverride: valueChanged ? nextValue : null,
@@ -239,7 +239,7 @@ export class ApplyFieldCorrectionUseCase {
       await this.regions.replaceFieldTokenSpans(
         documentId,
         fieldKey,
-        resolved.tokens.map((token) => token.blockIndex)
+        uniqueBlockIndexes(resolved.tokens)
       );
     } else if (body.op === 'remove' && existing) {
       await this.regions.supersedeRegion(existing.id, null);
