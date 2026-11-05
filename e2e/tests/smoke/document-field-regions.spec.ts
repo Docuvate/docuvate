@@ -154,18 +154,31 @@ async function dismissOverlaySheets(page: Page): Promise<void> {
 }
 
 /**
- * Real-user assign path: focus the field combobox, type a known label, choose the matching option.
- * Relies on a seeded recognized-field catalog entry (see beforeAll) — smoke + workstream-e has none by default.
+ * Real-user assign path for an existing catalog field.
+ * With a single option the bar auto-selects it (Accept already Zuweisen) — verify that selection.
+ * With multiple options the bar starts empty — type the label and choose the matching option.
  */
 async function selectExistingFieldInContextBar(page: Page, fieldLabel: string): Promise<void> {
   const bar = page.getByTestId('field-context-bar');
   const accept = bar.getByTestId('field-context-bar-accept');
-  await expect(accept).toBeDisabled();
-  await expect(accept).toHaveText(/Feld anlegen|Create field/i);
-
   const combobox = bar.getByRole('combobox', {
     name: /Feld für diese Auswahl|Field for this selection/i,
   });
+
+  const acceptText = (await accept.innerText()).trim();
+  const alreadyAssigned =
+    (await accept.isEnabled()) && /Feld zuweisen|Assign field/i.test(acceptText);
+
+  if (alreadyAssigned) {
+    // Single-option convenience: closed combobox already shows the selected label.
+    await expect(combobox).toHaveValue(fieldLabel);
+    await expect(accept).toHaveText(/Feld zuweisen|Assign field/i);
+    return;
+  }
+
+  await expect(accept).toBeDisabled();
+  await expect(accept).toHaveText(/Feld anlegen|Create field/i);
+
   await combobox.click();
   await expect(combobox).toHaveAttribute('aria-expanded', 'true');
   await combobox.fill(fieldLabel);
@@ -197,17 +210,17 @@ async function confirmAssignedFieldInContextBar(page: Page): Promise<void> {
   }
 }
 
-/** Type a new field name and confirm via the create-option row (auto-submits). */
+/**
+ * Create path: open the field combobox, type a new name, confirm via the create-option row (auto-submits).
+ * Do not require Accept to start disabled — a single seeded catalog field auto-selects and enables Zuweisen.
+ */
 async function createFieldViaContextBarOption(page: Page, fieldName: string): Promise<void> {
   const bar = page.getByTestId('field-context-bar');
-  const accept = bar.getByTestId('field-context-bar-accept');
-  await expect(accept).toBeDisabled();
-  await expect(accept).toHaveText(/Feld anlegen|Create field/i);
-
   const combobox = bar.getByRole('combobox', {
     name: /Feld für diese Auswahl|Field for this selection/i,
   });
   await combobox.click();
+  await expect(combobox).toHaveAttribute('aria-expanded', 'true');
   await combobox.fill(fieldName);
 
   const createOption = page.locator('.combobox-create-option').filter({ hasText: fieldName });

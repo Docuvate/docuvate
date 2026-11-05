@@ -93,6 +93,24 @@ describe('DocumentFieldContextBar assign existing field', () => {
     expect(accept.textContent).toBe('documents.selectionAssign');
   });
 
+  it('auto-selects the sole existing field and labels the primary action as assign', () => {
+    const onConfirm = vi.fn();
+    render(
+      <DocumentFieldContextBar
+        draft={DRAFT}
+        fieldOptions={[{ value: 'e2e_field_regions_assign', label: 'E2E Zuweisen' }]}
+        existingFieldValues={new Map()}
+        onConfirm={onConfirm}
+        onCancel={() => undefined}
+      />
+    );
+    const accept = screen.getByTestId('field-context-bar-accept');
+    expect(accept.hasAttribute('disabled')).toBe(false);
+    expect(accept.textContent).toBe('documents.selectionAssign');
+    fireEvent.click(accept);
+    expect(onConfirm).toHaveBeenCalledWith('e2e_field_regions_assign');
+  });
+
   it('assigns the selection to a different existing field without overwrite when that field is empty', () => {
     const { onConfirm } = renderBar({
       existing: new Map([['betrag', '1.000,00']]),
