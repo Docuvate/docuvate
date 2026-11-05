@@ -253,6 +253,13 @@ jobs:
           E2E_WEB_URL=http://localhost:5173 E2E_API_URL=http://localhost:3001 \
             pnpm --filter @docuvate/e2e exec playwright test tests/smoke/recognized-fields-status.spec.ts \
             --config=playwright.workstream-e.config.ts
+      - name: Review wizard field correction (Playwright)
+        run: |
+          set -euo pipefail
+          node e2e/scripts/provision-smoke-storage.mjs
+          E2E_WEB_URL=http://localhost:5173 E2E_API_URL=http://localhost:3001 \
+            pnpm --filter @docuvate/e2e exec playwright test tests/smoke/review-wizard-correct.spec.ts \
+            --config=playwright.workstream-e.config.ts
       - name: Document table regions (Playwright)
         run: |
           set -euo pipefail
