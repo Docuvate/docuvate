@@ -556,7 +556,7 @@ export function DocumentDetailPage() {
         return suggestionSemantic !== key && f.key !== key;
       });
       if (kept.some((f) => f.key === key)) return prev;
-      return [...kept, { key, value, confidence: 0.9 }];
+      return [...kept, { key, value, confidence: 0.9, userConfirmed: true }];
     });
     if (key === 'date' || semanticFieldKey({ key, value }) === 'date') {
       const iso = isoDateFromExtractedValue(value);
@@ -670,7 +670,9 @@ export function DocumentDetailPage() {
                 const baseline = baselineFields.find((row) => row.key === field.key);
                 const previous = fields.find((row) => row.key === field.key) ?? field;
                 const nextFields = fields.map((row) =>
-                  row.key === field.key ? { ...row, value: field.value, confidence: 1 } : row
+                  row.key === field.key
+                    ? { ...row, value: field.value, confidence: 1, userConfirmed: true }
+                    : row
                 );
                 setFields(nextFields);
                 void persist({ extractionFields: nextFields }).then(() => {

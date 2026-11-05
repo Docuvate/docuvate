@@ -66,6 +66,7 @@ import { DocumentRegions20261029120000 } from './migrations/20261029120000-docum
 import { WorkspaceMlSettings20261104090000 } from './migrations/20261104090000-workspace-ml-settings.js';
 import { ExtractionFieldFeedbackPositions20261104120000 } from './migrations/20261104120000-extraction-field-feedback-positions.js';
 import { JobOutbox20261105080000 } from './migrations/20261105080000-job-outbox.js';
+import { DocumentFieldValuesUserConfirmed20261105120000 } from './migrations/20261105120000-document-field-values-user-confirmed.js';
 
 /** Set only by `scripts/export-openapi.mts` to skip TypeORM during OpenAPI export; `main.ts` refuses to boot when this is set. */
 export function isOpenApiHeadlessMode(): boolean {
@@ -151,6 +152,7 @@ export function buildTypeOrmOptions(): DataSourceOptions {
       WorkspaceMlSettings20261104090000,
       ExtractionFieldFeedbackPositions20261104120000,
       JobOutbox20261105080000,
+      DocumentFieldValuesUserConfirmed20261105120000,
     ],
     migrationsTableName: 'migrations',
     synchronize: false,

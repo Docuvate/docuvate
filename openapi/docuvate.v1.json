@@ -14335,6 +14335,15 @@
             "type": "number",
             "minimum": 0,
             "maximum": 1
+          },
+          "tagId": {
+            "type": "string",
+            "description": "Label id for label-scoped custom fields (`label:{tagId}:{key}`).",
+            "format": "uuid"
+          },
+          "userConfirmed": {
+            "type": "boolean",
+            "description": "True once a person confirmed or corrected the value."
           }
         },
         "required": [

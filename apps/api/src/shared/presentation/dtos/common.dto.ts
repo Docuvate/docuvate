@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import type { MatchingAlgorithm } from '@docuvate/contracts';
+import type { ExtractedField, MatchingAlgorithm } from '@docuvate/contracts';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
@@ -45,7 +45,7 @@ export class OkResponseDto {
   ok!: true;
 }
 
-export class ExtractedFieldDto {
+export class ExtractedFieldDto implements ExtractedField {
   @IsString()
   key!: string;
 
@@ -57,6 +57,16 @@ export class ExtractedFieldDto {
   @Min(0)
   @Max(1)
   confidence?: number;
+
+  /** Label id for label-scoped custom fields (`label:{tagId}:{key}`). */
+  @IsOptional()
+  @IsUUID()
+  tagId?: string;
+
+  /** True once a person confirmed or corrected the value. */
+  @IsOptional()
+  @IsBoolean()
+  userConfirmed?: boolean;
 }
 
 export class ExtractionBlockDto {

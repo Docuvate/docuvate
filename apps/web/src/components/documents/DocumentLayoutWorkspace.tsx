@@ -20,6 +20,7 @@ import {
 } from '../../lib/api';
 import { formatUserFacingError } from '../../lib/apiErrors';
 import { isExtractionPending } from '../../lib/documentExtractionState';
+import { withSavedFieldValue } from '../../lib/documentFieldValueRowState';
 import { findBlockIndexAtPoint } from '../../lib/extractionLayout';
 import { layoutIrDocumentFromPageSummaries } from '../../lib/layoutIrPages';
 import {
@@ -228,6 +229,21 @@ export function DocumentLayoutWorkspace({
     [blocks, fieldRegions, onHighlightBlocks, onViewerPageChange]
   );
 
+  const confirmField = useCallback(
+    (key: string, value: string) => {
+      void confirmDocumentField(doc.id, key, value)
+        .then(() => {
+          onFieldsChange?.(withSavedFieldValue(fields, key, value));
+          toast.success(t('documents.fieldConfirmedToast'));
+          highlightRegion(key);
+        })
+        .catch((err: unknown) => {
+          toast.error(formatUserFacingError(err, 'errors.generic'));
+        });
+    },
+    [doc.id, fields, highlightRegion, onFieldsChange, t, toast]
+  );
+
   const tableSheetOpen = Boolean(correctionSheetViewport && selectedTableId);
   const correctionSheetOpen = Boolean(correctionSheetViewport && (selectedFieldKey ?? selectedTableId));
   const mobilePane = useLayoutMobilePane(correctionSheetOpen);
@@ -277,12 +293,12 @@ export function DocumentLayoutWorkspace({
             exists
               ? fields.map((field) =>
                   field.key === fieldKey
-                    ? { ...field, value: nextValue || field.value, confidence: 1 }
+                    ? { ...field, value: nextValue || field.value, confidence: 1, userConfirmed: true }
                     : field
                 )
               : [
                   ...fields,
-                  { key: fieldKey, value: nextValue, confidence: 1 },
+                  { key: fieldKey, value: nextValue, confidence: 1, userConfirmed: true },
                 ]
           );
         }
@@ -905,23 +921,7 @@ export function DocumentLayoutWorkspace({
               toast.error(formatUserFacingError(err, 'errors.generic'));
             });
           }}
-          onConfirmField={(key, value) => {
-            void confirmDocumentField(doc.id, key, value)
-              .then(() => {
-                if (onFieldsChange) {
-                  onFieldsChange(
-                    fields.map((field) =>
-                      field.key === key ? { ...field, value, confidence: 1 } : field
-                    )
-                  );
-                }
-                toast.success(t('documents.fieldConfirmedToast'));
-                highlightRegion(key);
-              })
-              .catch((err: unknown) => {
-                toast.error(formatUserFacingError(err, 'errors.generic'));
-              });
-          }}
+          onConfirmField={confirmField}
           onCorrectField={fieldMarking.startMarkingField}
           onSaveFieldValue={onSaveFieldValue}
           onHighlightField={highlightRegion}
@@ -946,22 +946,8 @@ export function DocumentLayoutWorkspace({
           onConfirm={
             selectedField
               ? () => {
-                  const field = selectedField;
-                  void confirmDocumentField(doc.id, field.key, field.value)
-                    .then(() => {
-                      if (onFieldsChange) {
-                        onFieldsChange(
-                          fields.map((item) =>
-                            item.key === field.key ? { ...item, value: field.value, confidence: 1 } : item
-                          )
-                        );
-                      }
-                      toast.success(t('documents.fieldConfirmedToast'));
-                      highlightRegion(field.key);
-                    })
-                    .catch((err: unknown) => {
-                      toast.error(formatUserFacingError(err, 'errors.generic'));
-                    });
+                  confirmField(selectedField.key, selectedField.value);
+                  setSelectedFieldKey(null);
                 }
               : undefined
           }

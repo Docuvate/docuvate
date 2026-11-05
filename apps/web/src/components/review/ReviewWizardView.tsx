@@ -227,7 +227,7 @@ export function ReviewWizardView({
         const sem = parseSuggestionStorageKey(f.key);
         return sem !== key && f.key !== key && sem !== suggestionSemantic;
       });
-      const nextFields = [...kept, { key, value, confidence: 0.95 }];
+      const nextFields = [...kept, { key, value, confidence: 0.95, userConfirmed: true }];
       const patch: { extractionFields: typeof nextFields; documentDate?: string | null } = {
         extractionFields: nextFields,
       };

@@ -5,19 +5,16 @@ import type { ExtractedField } from '@docuvate/contracts';
 import { fieldsByCorrectionSlot } from './correction-diff-slots.js';
 import { extractionFieldValuesEquivalent } from './extraction-field-value-equivalence.js';
 
-const FIELD_CONFIRMED_CONFIDENCE_THRESHOLD = 0.85;
-
 interface ExtractionFieldConfirmationDraft {
   fieldKey: string;
   value: string;
   fieldTagId: string | null;
 }
 
-function isConfirmedConfidence(confidence: number | undefined): boolean {
-  return (confidence ?? 1) >= FIELD_CONFIRMED_CONFIDENCE_THRESHOLD;
-}
-
-/** Emits one draft per field newly confirmed without a normalized value change. */
+/**
+ * Emits one draft per field a person newly confirmed (`userConfirmed`) without a normalized value
+ * change. Model confidence never counts as a confirmation.
+ */
 export function diffExtractionFieldConfirmations(
   before: ExtractedField[],
   after: ExtractedField[]
@@ -39,9 +36,8 @@ export function diffExtractionFieldConfirmations(
     if (!extractionFieldValuesEquivalent(fieldKey, oldValue, newValue)) {
       continue;
     }
-    const wasConfirmed = isConfirmedConfidence(prev?.confidence);
-    const isConfirmed = isConfirmedConfidence(next.confidence);
-    if (!isConfirmed || wasConfirmed) {
+    const wasConfirmed = prev?.userConfirmed === true;
+    if (next.userConfirmed !== true || wasConfirmed) {
       continue;
     }
     drafts.push({

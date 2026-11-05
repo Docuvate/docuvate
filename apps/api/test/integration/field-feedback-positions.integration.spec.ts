@@ -135,7 +135,7 @@ describe('field feedback positions (Testcontainers Postgres)', () => {
       { key: 'global:absender', value: 'Nordwind GmbH', confidence: 0.7 },
       { key: 'global:betrag', value: '12,50', confidence: 0.6 },
     ];
-    const after = before.map((field) => ({ ...field, confidence: 1 }));
+    const after = before.map((field) => ({ ...field, confidence: 1, userConfirmed: true }));
     await documents.updateForUser(documentA, userA, { extractionFields: before });
     const result = await record.execute(documentA, userA, before, after);
     expect(result.confirmationsRecorded).toBe(2);

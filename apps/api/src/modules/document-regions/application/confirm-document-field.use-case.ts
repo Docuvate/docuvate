@@ -61,7 +61,7 @@ export class ConfirmDocumentFieldUseCase {
       },
     ]);
     const nextFields: ExtractedField[] = fields.map((field) =>
-      field.key === key ? { ...field, value: confirmedValue, confidence: 1 } : field
+      field.key === key ? { ...field, value: confirmedValue, confidence: 1, userConfirmed: true } : field
     );
     await this.documents.updateForUser(documentId, userId, { extractionFields: nextFields });
     return {

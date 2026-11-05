@@ -552,6 +552,14 @@ export type ExtractedFieldDto = {
     key: string;
     value: string;
     confidence?: number;
+    /**
+     * Label id for label-scoped custom fields (`label:{tagId}:{key}`).
+     */
+    tagId?: string;
+    /**
+     * True once a person confirmed or corrected the value.
+     */
+    userConfirmed?: boolean;
 };
 
 export type ExtractionArenaRatingRequestDto = {

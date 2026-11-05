@@ -143,7 +143,12 @@ export class AcceptDocumentReviewUseCase {
           semanticFieldKey(row) !== semantic
       );
       if (!nextFields.some((row) => semanticFieldKey(row) === semantic)) {
-        nextFields.push({ key: semantic, value, confidence: suggestion.confidence ?? 0.9 });
+        nextFields.push({
+          key: semantic,
+          value,
+          confidence: suggestion.confidence ?? 0.9,
+          userConfirmed: true,
+        });
         acceptedFields += 1;
       }
       if (semantic === 'date' && !doc.documentDate) {

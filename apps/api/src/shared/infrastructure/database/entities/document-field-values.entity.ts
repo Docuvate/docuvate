@@ -24,6 +24,10 @@ export class DocumentFieldValuesEntity {
   @Column('real', { name: 'confidence', nullable: true, precision: 24 })
   confidence: number | null;
 
+  /** True once a person confirmed or corrected the value; model confidence never sets it. */
+  @Column('boolean', { name: 'user_confirmed', default: () => 'false' })
+  userConfirmed: boolean;
+
   @Column('text', { name: 'value_text_norm', nullable: true })
   valueTextNorm: string | null;
 

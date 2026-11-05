@@ -9,7 +9,7 @@ import type {
 import { type KeyboardEvent, useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { isConfirmedFieldConfidence } from '../../lib/documentFieldValueRowState';
+import { isUserConfirmedField } from '../../lib/documentFieldValueRowState';
 import { fieldSuggestionOutsideUserSchema } from '../../lib/fieldSuggestionSchema';
 import { formatExtractedFieldDisplayValue } from '../../lib/formatExtractedFieldDisplayValue';
 import {
@@ -308,7 +308,7 @@ export function DocumentLayoutSidePanel({
           state={
             missing
               ? 'missing'
-              : isConfirmedFieldConfidence(field.confidence)
+              : isUserConfirmedField(field)
                 ? 'confirmed'
                 : 'suggested'
           }
