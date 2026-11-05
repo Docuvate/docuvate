@@ -4,6 +4,7 @@ import type {
   DocumentRepresentationDto,
   ExtractedFactDto,
   ExtractedField,
+  ExtractionBlock,
   ExtractionImageIngestDto,
   ExtractionResult,
   LayoutIrBlock,
@@ -57,6 +58,48 @@ function parseExtractedFields(value: unknown): ExtractedField[] {
     }
   }
   return fields;
+}
+
+function finiteNumber(value: unknown): number | null {
+  return typeof value === 'number' && Number.isFinite(value) ? value : null;
+}
+
+function parseExtractionBlock(value: unknown): ExtractionBlock | null {
+  if (!isRecord(value) || typeof value.text !== 'string') {
+    return null;
+  }
+  const page = finiteNumber(value.page);
+  const x = finiteNumber(value.x);
+  const y = finiteNumber(value.y);
+  const width = finiteNumber(value.width);
+  const height = finiteNumber(value.height);
+  if (page === null || x === null || y === null || width === null || height === null) {
+    return null;
+  }
+  if (!Number.isInteger(page) || page < 1) {
+    return null;
+  }
+  const block: ExtractionBlock = { page, x, y, width, height, text: value.text };
+  const blockIndex = finiteNumber(value.blockIndex) ?? finiteNumber(value.block_index);
+  if (blockIndex !== null && Number.isInteger(blockIndex) && blockIndex >= 0) {
+    block.blockIndex = blockIndex;
+  }
+  return block;
+}
+
+/** Worker OCR/text-layer blocks (page-relative boxes) — persisted for text view and click-linking. */
+function parseExtractionBlocks(value: unknown): ExtractionBlock[] | undefined {
+  if (!Array.isArray(value)) {
+    return undefined;
+  }
+  const blocks: ExtractionBlock[] = [];
+  for (const item of value) {
+    const block = parseExtractionBlock(item);
+    if (block) {
+      blocks.push(block);
+    }
+  }
+  return blocks;
 }
 
 function parseFieldSuggestions(
@@ -279,11 +322,15 @@ function parseExtractionResultBody(value: unknown): ExtractionResult {
   const documentRepresentation = parseDocumentRepresentation(row.documentRepresentation);
   const extractedFacts: ExtractedFactDto[] | undefined =
     row.extractedFacts !== undefined ? parseExtractedFacts(row.extractedFacts) : undefined;
+  const blocks = parseExtractionBlocks(row.blocks);
   const result: ExtractionResult = {
     text,
     fields: parseExtractedFields(row.fields),
     fieldSuggestions,
   };
+  if (blocks) {
+    result.blocks = blocks;
+  }
   if (markdown) {
     result.markdown = markdown;
   }

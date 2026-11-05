@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { fetchDocumentLayoutTypst } from '../../lib/api';
+import { extractedTextDisplayPages, extractedTextPageNumbers } from '../../lib/extractedTextPages';
 import {
   findBlockIndex,
   groupBlocksIntoLines,
@@ -24,6 +25,7 @@ import {
   LAYOUT_IR_ZOOM_STEPS,
   type LayoutIrZoomStep,
 } from './ExtractedLayoutHtmlFrame';
+import { ExtractedTextPageNav } from './ExtractedTextPageNav';
 
 type ContentMode = 'text' | 'layout';
 
@@ -94,14 +96,18 @@ export function ExtractedTextPanel({
     !textOnly && !editMode && (blocks.length > 0 || fullText.trim().length > 0);
   const showLayoutPane = showModeToggle && contentMode === 'layout';
 
-  const pageNumbers = [...new Set(blocks.map((b) => b.page))].sort((a, b) => a - b);
+  const readingBlocks = useMemo(
+    () => (layoutIrDocument ? buildLayoutReadingBlocks(layoutIrDocument) : []),
+    [layoutIrDocument]
+  );
+  const readingMode = textOnly && readingBlocks.length > 0;
 
-  const displayPages =
-    pageSynced && pageNumbers.length > 1
-      ? pageNumbers.includes(activePage)
-        ? [activePage]
-        : pageNumbers
-      : pageNumbers;
+  // Reading mode renders layout IR text, so its pages must come from the layout IR — not from
+  // extraction blocks, which can be empty while the IR carries the full OCR text.
+  const pageNumbers = readingMode
+    ? extractedTextPageNumbers(layoutIrDocument?.pages ?? [], readingBlocks)
+    : extractedTextPageNumbers(blocks);
+  const displayPages = extractedTextDisplayPages(pageNumbers, activePage, pageSynced);
 
   useEffect(() => {
     if (activeBlockIndex == null || editingBlockIndex != null) return;
@@ -128,6 +134,12 @@ export function ExtractedTextPanel({
     }
     el?.scrollIntoView({ block: 'center', behavior: 'smooth' });
   }, [activeBlockIndex, blocks, editingBlockIndex, contentMode]);
+
+  useEffect(() => {
+    if (!pageSynced) return;
+    const host = bodyRef.current;
+    if (host) host.scrollTop = 0;
+  }, [activePage, pageSynced]);
 
   useEffect(() => {
     if (editingBlockIndex === null) {
@@ -264,133 +276,136 @@ export function ExtractedTextPanel({
 
   const showCopy = allowCopy && canCopy;
 
-  const readingBlocks = useMemo(
-    () => (layoutIrDocument ? buildLayoutReadingBlocks(layoutIrDocument) : []),
-    [layoutIrDocument]
-  );
+  const showPageNav = textOnly && pageSynced && pageNumbers.length > 1;
 
-  const textPane =
-    textOnly && readingBlocks.length > 0 ? (
-      displayPages.map((page) => (
+  const textPane = readingMode ? (
+    displayPages.map((page) => {
+      const pageBlocks = readingBlocks.filter((block) => block.page === page);
+      return (
         <section
           key={page}
           className="extracted-text-page extracted-text-reading-page"
           data-page={page}
           aria-label={t('documents.extractedTextPageAria', { page })}
         >
-          {readingBlocks
-            .filter((block) => block.page === page)
-            .map((block) =>
-              block.kind === 'heading' ? (
-                <h3
-                  key={block.id}
-                  className={`extracted-text-reading-heading extracted-text-reading-heading-${String(block.level ?? 2)}`}
-                >
-                  {block.text}
-                </h3>
-              ) : (
-                <p key={block.id} className="extracted-text-reading-paragraph">
-                  {block.text}
-                </p>
-              )
-            )}
-        </section>
-      ))
-    ) : blocks.length > 0 ? (
-      displayPages.map((page) => (
-        <section
-          key={page}
-          className="extracted-text-page"
-          data-page={page}
-          aria-label={t('documents.extractedTextPageAria', { page })}
-        >
-          {pageNumbers.length > 1 || textOnly ? (
-            <h3 className="extracted-text-page-title">
-              {t('documents.extractedTextPageTitle', { page })}
-            </h3>
+          {pageBlocks.length === 0 ? (
+            <p className="muted extracted-text-page-empty">
+              {t('documents.extractedTextPageEmpty', { page })}
+            </p>
           ) : null}
-          {groupBlocksIntoLines(blocks, page).map((line) => {
-            const lineKey = line.map((b) => `${String(b.x)}-${String(b.y)}-${b.text}`).join('|');
-            const lineText = line.map((b) => b.text).join(' ');
-            return (
-              <p
-                key={lineKey}
-                className={`extracted-text-line${lineMatchesSearch(lineText) ? ' extracted-text-line-search-hit' : ''}`}
+          {pageBlocks.map((block) => {
+            const hitClass = lineMatchesSearch(block.text) ? ' extracted-text-line-search-hit' : '';
+            return block.kind === 'heading' ? (
+              <h3
+                key={block.id}
+                className={`extracted-text-reading-heading extracted-text-reading-heading-${String(block.level ?? 2)}${hitClass}`}
               >
-                {line.map((block, wordIdx) => {
-                  const index = findBlockIndex(blocks, block);
-                  const isActive = activeBlockIndex === index;
-                  const isEditing = editingBlockIndex === index;
-                  return (
-                    <span
-                      key={`${String(block.page)}-${String(block.blockIndex ?? index)}-${String(block.x)}-${block.text}`}
-                      className="extracted-text-word-wrap"
-                    >
-                      {wordIdx > 0 ? ' ' : null}
-                      {editMode && isEditing ? (
-                        <Input
-                          className="extracted-text-inline-edit"
-                          value={block.text}
-                          aria-label={t('documents.extractedTextEditBlockAria')}
-                          onChange={(e) => {
-                            if (index < 0) return;
-                            const next = blocks.map((row, i) =>
-                              i === index ? { ...row, text: e.target.value } : row
-                            );
-                            onBlocksChange(next);
-                          }}
-                          onBlur={() => {
-                            setEditingBlockIndex(null);
-                            onActiveBlockIndexChange(null);
-                          }}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter' || e.key === 'Escape') {
-                              e.preventDefault();
-                              setEditingBlockIndex(null);
-                              onActiveBlockIndexChange(null);
-                            }
-                          }}
-                        />
-                      ) : (
-                        <span
-                          role="button"
-                          tabIndex={0}
-                          data-block-index={index}
-                          data-block-id={block.blockIndex ?? index}
-                          className={`extracted-text-segment${isActive ? ' extracted-text-segment-active' : ''}`}
-                          onClick={() => {
-                            selectBlock(block);
-                          }}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter' || e.key === ' ') {
-                              e.preventDefault();
-                              selectBlock(block);
-                            }
-                          }}
-                          onDoubleClick={(e) => {
-                            if (!editMode) return;
-                            e.preventDefault();
-                            if (index < 0) return;
-                            setEditingBlockIndex(index);
-                            onActiveBlockIndexChange(index);
-                          }}
-                        >
-                          {block.text}
-                        </span>
-                      )}
-                    </span>
-                  );
-                })}
+                {block.text}
+              </h3>
+            ) : (
+              <p key={block.id} className={`extracted-text-reading-paragraph${hitClass}`}>
+                {block.text}
               </p>
             );
           })}
         </section>
-      ))
-    ) : fullText ? (
-      <pre className="extraction-text extraction-text-flowing extraction-text-mono">{fullText}</pre>
-    ) : (
-      <p className="muted extraction-empty">{t('documents.extractionEmptyText')}</p>
-    );
+      );
+    })
+  ) : blocks.length > 0 ? (
+    displayPages.map((page) => (
+      <section
+        key={page}
+        className="extracted-text-page"
+        data-page={page}
+        aria-label={t('documents.extractedTextPageAria', { page })}
+      >
+        {pageNumbers.length > 1 || textOnly ? (
+          <h3 className="extracted-text-page-title">
+            {t('documents.extractedTextPageTitle', { page })}
+          </h3>
+        ) : null}
+        {groupBlocksIntoLines(blocks, page).map((line) => {
+          const lineKey = line.map((b) => `${String(b.x)}-${String(b.y)}-${b.text}`).join('|');
+          const lineText = line.map((b) => b.text).join(' ');
+          return (
+            <p
+              key={lineKey}
+              className={`extracted-text-line${lineMatchesSearch(lineText) ? ' extracted-text-line-search-hit' : ''}`}
+            >
+              {line.map((block, wordIdx) => {
+                const index = findBlockIndex(blocks, block);
+                const isActive = activeBlockIndex === index;
+                const isEditing = editingBlockIndex === index;
+                return (
+                  <span
+                    key={`${String(block.page)}-${String(block.blockIndex ?? index)}-${String(block.x)}-${block.text}`}
+                    className="extracted-text-word-wrap"
+                  >
+                    {wordIdx > 0 ? ' ' : null}
+                    {editMode && isEditing ? (
+                      <Input
+                        className="extracted-text-inline-edit"
+                        value={block.text}
+                        aria-label={t('documents.extractedTextEditBlockAria')}
+                        onChange={(e) => {
+                          if (index < 0) return;
+                          const next = blocks.map((row, i) =>
+                            i === index ? { ...row, text: e.target.value } : row
+                          );
+                          onBlocksChange(next);
+                        }}
+                        onBlur={() => {
+                          setEditingBlockIndex(null);
+                          onActiveBlockIndexChange(null);
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === 'Escape') {
+                            e.preventDefault();
+                            setEditingBlockIndex(null);
+                            onActiveBlockIndexChange(null);
+                          }
+                        }}
+                      />
+                    ) : (
+                      <span
+                        role="button"
+                        tabIndex={0}
+                        data-block-index={index}
+                        data-block-id={block.blockIndex ?? index}
+                        className={`extracted-text-segment${isActive ? ' extracted-text-segment-active' : ''}`}
+                        onClick={() => {
+                          selectBlock(block);
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            selectBlock(block);
+                          }
+                        }}
+                        onDoubleClick={(e) => {
+                          if (!editMode) return;
+                          e.preventDefault();
+                          if (index < 0) return;
+                          setEditingBlockIndex(index);
+                          onActiveBlockIndexChange(index);
+                        }}
+                      >
+                        {block.text}
+                      </span>
+                    )}
+                  </span>
+                );
+              })}
+            </p>
+          );
+        })}
+      </section>
+    ))
+  ) : fullText ? (
+    <pre className="extraction-text extraction-text-flowing extraction-text-mono">{fullText}</pre>
+  ) : (
+    <p className="muted extraction-empty">{t('documents.extractionEmptyText')}</p>
+  );
 
   const frameLayoutIr =
     layoutIrPages && layoutIrPages.length > 0
@@ -541,6 +556,14 @@ export function ExtractedTextPanel({
             </Button>
           ))}
         </div>
+      ) : null}
+
+      {showPageNav && !showLayoutPane ? (
+        <ExtractedTextPageNav
+          pageNumbers={pageNumbers}
+          activePage={activePage}
+          onPageChange={onActivePageChange}
+        />
       ) : null}
 
       <div className="extracted-text-body" ref={bodyRef}>

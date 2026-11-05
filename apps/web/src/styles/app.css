@@ -15260,7 +15260,9 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 /* PR-H: D7 text view, DocumentSnippet, DocumentImage */
 .extracted-text-panel-d7 .extracted-text-d7-head {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
+  min-width: 0;
   gap: var(--dv-space-md);
   margin-bottom: var(--dv-space-md);
 }
@@ -15273,9 +15275,32 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 .extracted-text-d7-search {
   width: 15rem;
   max-width: 100%;
+  min-width: 0;
 }
 .extracted-text-line-search-hit {
   background: color-mix(in srgb, var(--dv-color-accent) 15%, transparent);
+}
+.extracted-text-page-nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--dv-space-xs);
+  min-width: 0;
+  max-width: 100%;
+  margin-bottom: var(--dv-space-xs);
+}
+.extracted-text-page-nav-status {
+  min-width: 0;
+  font-size: var(--dv-font-size-xs);
+  overflow-wrap: anywhere;
+}
+.extracted-text-page-empty {
+  margin: 0;
+  font-size: 0.85rem;
+}
+.extracted-text-reading-paragraph,
+.extracted-text-reading-heading {
+  overflow-wrap: anywhere;
 }
 .extraction-text-mono {
   font-family: var(--dv-font-mono, ui-monospace, monospace);
