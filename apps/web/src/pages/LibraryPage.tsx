@@ -10,6 +10,7 @@ import { LibrarySavedViewsMenu } from '../components/library/LibrarySavedViewsMe
 import { LibraryViewSwitcher } from '../components/library/LibraryViewSwitcher';
 import { SaveViewDialog } from '../components/library/SaveViewDialog';
 import { useToastNotify } from '../components/save/ToastProvider';
+import { Button } from '../components/ui/Button';
 import { Select } from '../components/ui/Select';
 import { DocumentUploadProvider } from '../components/upload/DocumentUploadProvider';
 import { UploadDropzone } from '../components/UploadDropzone';
@@ -109,6 +110,28 @@ export function LibraryPage() {
               options={[...sortOptions]}
               aria-label={t('library.sortLabel')}
             />
+            <Button
+              type="button"
+              variant="secondary"
+              className="library-export-btn"
+              disabled={data.exportBusy || !data.hasDocuments}
+              onClick={() => {
+                void data.exportFieldValues('csv');
+              }}
+            >
+              {data.exportBusy ? t('library.exportFieldValuesPending') : t('library.exportFieldValuesCsv')}
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              className="library-export-btn"
+              disabled={data.exportBusy || !data.hasDocuments}
+              onClick={() => {
+                void data.exportFieldValues('json');
+              }}
+            >
+              {data.exportBusy ? t('library.exportFieldValuesPending') : t('library.exportFieldValuesJson')}
+            </Button>
           </div>
         </header>
 

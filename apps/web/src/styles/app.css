@@ -7291,6 +7291,19 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   white-space: pre;
 }
 
+
+.library-export-btn {
+  flex: 0 1 auto;
+  max-width: 100%;
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .library-page .library-page-header .library-toolbar .library-export-btn {
+    flex: 1 1 100%;
+  }
+}
+
 .library-toolbar {
   display: flex;
   flex-wrap: wrap;

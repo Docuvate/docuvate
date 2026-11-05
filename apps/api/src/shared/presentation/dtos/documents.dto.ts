@@ -157,6 +157,19 @@ export class DocumentListQueryDto {
   cursor?: string;
 }
 
+export class ExportDocumentFieldValuesQueryDto extends DocumentListQueryDto {
+  @ApiProperty({ enum: ['csv', 'json'], description: 'Download format for field values.' })
+  @IsIn(['csv', 'json'])
+  format!: 'csv' | 'json';
+
+  @ApiPropertyOptional({
+    description: 'Optional comma-separated document UUIDs; when set, list filters are ignored.',
+  })
+  @IsOptional()
+  @IsString()
+  ids?: string;
+}
+
 export class UpdateDocumentRequestDto implements UpdateDocumentRequest {
   @IsOptional()
   @IsString()

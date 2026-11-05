@@ -8,6 +8,7 @@ import {
   Get,
   HttpCode,
   Param,
+  ParseUUIDPipe,
   Patch,
   Post,
   Query,
@@ -40,6 +41,7 @@ import {
   DocumentResponseDto,
   DocumentTagSuggestionsBatchRequestDto,
   DocumentTagSuggestionsBatchResponseDto,
+  ExportDocumentFieldValuesQueryDto,
   MoveDocumentsRequestDto,
   MoveDocumentsResponseDto,
   UpdateDocumentRequestDto,
@@ -78,6 +80,7 @@ import { BatchDocumentTagSuggestionsUseCase } from '../application/batch-documen
 import { BulkDocumentsUseCase } from '../application/bulk-documents.use-case.js';
 import { CompareDocumentExtractionUseCase } from '../application/compare-extraction.use-case.js';
 import { DeleteDocumentUseCase } from '../application/delete-document.use-case.js';
+import { ExportDocumentFieldValuesUseCase } from '../application/export-document-field-values.use-case.js';
 import { GetDocumentUseCase } from '../application/get-document.use-case.js';
 import { GetDocumentContentUseCase } from '../application/get-document-content.use-case.js';
 import { GetDocumentExtractionImageThumbnailUseCase } from '../application/get-document-extraction-image-thumbnail.use-case.js';
@@ -106,6 +109,7 @@ export class DocumentsController {
     private readonly uploadDocument: UploadDocumentUseCase,
     private readonly getDocument: GetDocumentUseCase,
     private readonly listDocuments: ListDocumentsUseCase,
+    private readonly exportDocumentFieldValues: ExportDocumentFieldValuesUseCase,
     private readonly installationUserCount: PgInstallationUserCountReader,
     private readonly batchDocumentTagSuggestions: BatchDocumentTagSuggestionsUseCase,
     private readonly updateDocument: UpdateDocumentUseCase,
@@ -179,6 +183,43 @@ export class DocumentsController {
       total: page.total,
       libraryUi,
     };
+  }
+
+
+  @Get('export')
+  @ApiDocuvateRoute({
+    operationId: 'exportDocumentFieldValues',
+    summary: 'Export field values for the current library filter (or selected ids) as CSV or JSON',
+  })
+  async exportFieldValues(
+    @Session() session: AuthSession,
+    @AuthSubject() subject: AuthorizationSubject,
+    @Query() query: ExportDocumentFieldValuesQueryDto,
+    @Res({ passthrough: false }) reply: FastifyReply
+  ): Promise<void> {
+    const filters = parseDocumentListQuery(query);
+    delete filters.limit;
+    delete filters.cursor;
+    const ids = query.ids
+      ? query.ids
+          .split(',')
+          .map((part) => part.trim())
+          .filter((part) => part.length > 0)
+      : undefined;
+    const result = await this.exportDocumentFieldValues.execute(
+      session.user.id,
+      subject,
+      query.format,
+      filters,
+      ids
+    );
+    reply
+      .header('Content-Type', result.contentType)
+      .header(
+        'Content-Disposition',
+        `attachment; filename="${encodeURIComponent(result.filename)}"`
+      )
+      .send(result.body);
   }
 
   @Get('tag-suggestions')
@@ -554,7 +595,7 @@ export class DocumentsController {
   async getOne(
     @Session() session: AuthSession,
     @AuthSubject() subject: AuthorizationSubject,
-    @Param('id') id: string
+    @Param('id', ParseUUIDPipe) id: string
   ) {
     const doc = await this.getDocument.execute(id, session.user.id, subject);
     const suggestions = await this.loadSuggestions.execute(id, session.user.id);

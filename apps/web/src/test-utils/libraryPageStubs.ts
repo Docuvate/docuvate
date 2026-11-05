@@ -17,6 +17,8 @@ export function createLibraryPageDataStub(
 ): LibraryPageDataStub {
   return {
     items: [],
+    exportFieldValues: () => Promise.resolve(),
+    exportBusy: false,
     folders: [],
     childFoldersForView: [],
     folderDocumentCounts: new Map(),

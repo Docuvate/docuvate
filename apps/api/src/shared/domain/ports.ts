@@ -63,6 +63,19 @@ export interface DocumentRepository {
   findById(id: string): Promise<DocumentEntity | null>;
   findByIdForUser(id: string, userId: string): Promise<DocumentEntity | null>;
   filterOwnedDocumentIds(userId: string, documentIds: string[]): Promise<string[]>;
+  listFieldValuesForDocuments(
+    userId: string,
+    documentIds: readonly string[]
+  ): Promise<
+    {
+      documentId: string;
+      title: string;
+      filename: string;
+      fieldKey: string;
+      value: string;
+      confidence: number | null;
+    }[]
+  >;
   listForUser(userId: string, filters?: DocumentListQuery): Promise<DocumentEntity[]>;
   listPageForUser(
     userId: string,
