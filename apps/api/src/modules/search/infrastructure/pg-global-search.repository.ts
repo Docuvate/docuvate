@@ -448,7 +448,8 @@ export class PgGlobalSearchRepository {
     }
 
     const details = await this.pool.query(
-      `SELECT d.id, d.title, d.filename, d.extracted_text, d.document_date, d.updated_at,
+      `SELECT d.id, d.title, d.filename, d.extracted_text,
+              to_char(d.document_date, 'YYYY-MM-DD') AS document_date, d.updated_at,
               f.name AS folder_name
        FROM documents d
        LEFT JOIN folders f ON f.id = d.folder_id
