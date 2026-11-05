@@ -5122,7 +5122,6 @@ mark.global-search-mark {
   color: var(--dv-color-text-subtle);
 }
 
-
 .segmented-control {
   --segmented-inset: 2px;
   display: inline-flex;
@@ -5889,10 +5888,9 @@ mark.global-search-mark {
 
 .library-layout {
   display: grid;
-  grid-template-columns: minmax(
-      var(--dv-layout-library-filter-min),
-      var(--dv-layout-library-filter-max)
-    ) minmax(0, 1fr);
+  grid-template-columns:
+    minmax(var(--dv-layout-library-filter-min), var(--dv-layout-library-filter-max))
+    minmax(0, 1fr);
   gap: var(--dv-space-md);
   align-items: start;
   min-width: 0;
@@ -5941,13 +5939,12 @@ mark.global-search-mark {
 }
 
 .library-table-wrap.library-table-virtual-with-folder .library-table-virtualized {
-  --library-virtual-grid-cols:
-    2rem 2.5rem minmax(0, 1fr) minmax(0, 7.5rem) minmax(7rem, 9rem) 8.75rem 6.25rem 4.5rem;
+  --library-virtual-grid-cols: 2rem 2.5rem minmax(0, 1fr) minmax(0, 7.5rem) minmax(7rem, 9rem)
+    8.75rem 6.25rem 4.5rem;
 }
 
 .library-table-wrap.library-table-virtual-no-folder .library-table-virtualized {
-  --library-virtual-grid-cols:
-    2rem 2.5rem minmax(0, 1fr) minmax(7rem, 9rem) 8.75rem 6.25rem 4.5rem;
+  --library-virtual-grid-cols: 2rem 2.5rem minmax(0, 1fr) minmax(7rem, 9rem) 8.75rem 6.25rem 4.5rem;
 }
 
 .library-doc-list-scroll.library-table-scroll {
@@ -6020,7 +6017,10 @@ mark.global-search-mark {
   cursor: pointer;
 }
 
-.library-table.library-table-virtualized td.library-col-labels .document-label-suggestion-chip-btn .chip {
+.library-table.library-table-virtualized
+  td.library-col-labels
+  .document-label-suggestion-chip-btn
+  .chip {
   --chip-max-width: 100%;
   box-sizing: border-box;
   max-width: 100%;
@@ -12049,7 +12049,8 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
     max-width: 100%;
   }
 
-  .library-list-search.library-search-row:not(.library-list-search--compact) .library-list-search-actions {
+  .library-list-search.library-search-row:not(.library-list-search--compact)
+    .library-list-search-actions {
     grid-column: 1;
     display: flex;
     flex-wrap: wrap;
@@ -12241,6 +12242,20 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   transition: opacity 0.12s ease;
 }
 
+/* On pointer devices idle rows (the selected one too) hide their actions entirely, so folder
+   names get the full row width; hovered, focused or menu-open rows show them in flow, never on
+   top of the name. */
+@media (hover: hover) and (pointer: fine) {
+  .dateisystem-tree-row:not(
+      :hover,
+      :focus-within,
+      :has(.dateisystem-tree-actions [aria-expanded='true'])
+    )
+    .dateisystem-tree-actions {
+    display: none;
+  }
+}
+
 .dateisystem-tree-actions {
   display: flex;
   align-items: center;
@@ -12426,8 +12441,8 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   list-style: none;
   margin: 0;
   padding: 0;
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(13rem, 100%), 1fr));
   gap: var(--dv-space-xs);
 }
 
@@ -12440,7 +12455,8 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   display: flex;
   align-items: center;
   gap: var(--dv-space-xs);
-  width: 9.5rem;
+  width: 100%;
+  height: 100%;
   min-height: 3.5rem;
   padding: var(--dv-space-xs) var(--dv-space-sm);
   border: 1px solid var(--dv-color-border);
@@ -12459,8 +12475,12 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   flex: 1;
   min-width: 0;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  overflow-wrap: anywhere;
+  line-height: 1.3;
   font-weight: 500;
   font-size: var(--dv-font-size-sm);
 }
@@ -12601,7 +12621,6 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 .add-existing-docs-badge {
   font-size: 0.75rem;
 }
-
 
 .dateisystem-root-empty {
   display: flex;
@@ -12781,7 +12800,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   }
 
   .document-detail-page:has(.layout-workspace--correction-sheet) .extracted-fields-section,
-  .document-detail-page[data-correction-sheet-open="1"] .extracted-fields-section {
+  .document-detail-page[data-correction-sheet-open='1'] .extracted-fields-section {
     display: none;
   }
 }
@@ -16986,7 +17005,11 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
     width: 100%;
   }
 
-  .library-page .library-page-header .library-toolbar > .segmented-control .segmented-control__option {
+  .library-page
+    .library-page-header
+    .library-toolbar
+    > .segmented-control
+    .segmented-control__option {
     flex: 1 1 auto;
     min-width: 0;
     padding-inline: var(--dv-space-2xs);

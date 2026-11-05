@@ -40,7 +40,7 @@ function FolderTile({
       <Link
         to={folderHref(folder.id)}
         className="filesystem-folder-tile"
-        title={t('filesystem.folderDocCountTooltip', { count, direct })}
+        title={`${folder.name}\n${t('filesystem.folderDocCountTooltip', { count, direct })}`}
       >
         <Folder size={18} strokeWidth={1.75} aria-hidden className="filesystem-folder-tile-icon" />
         <span className="filesystem-folder-tile-name">{folder.name}</span>
