@@ -391,7 +391,7 @@
     "stackVersionsTitle": "Show stack versions",
     "duplicateHintTitle": "Possible duplicates",
     "layoutMissingBadge": "No layout",
-    "layoutMissingTitle": "No layout IR — reprocess to fill overlays and fields",
+    "layoutMissingTitle": "No layout IR  -  reprocess to fill overlays and fields",
     "contextReprocess": "Reprocess",
     "duplicateHintBadge": "Duplicate?",
     "reviewPendingBadge": "Review",
