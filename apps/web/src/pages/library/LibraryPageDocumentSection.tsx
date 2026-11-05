@@ -235,7 +235,10 @@ export function LibraryPageDocumentSection({
           : null}
 
         {filesystemLayout && data.childFoldersForView.length > 0 ? (
-          <FilesystemChildFoldersSection folders={data.childFoldersForView} />
+          <FilesystemChildFoldersSection
+            folders={data.childFoldersForView}
+            documentCounts={data.folderDocumentCounts}
+          />
         ) : null}
 
         {showTableArea ? (

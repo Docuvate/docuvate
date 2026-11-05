@@ -560,8 +560,7 @@
   "filesystem": {
     "title": "Filesystem",
     "pathAria": "Path",
-    "folderDocCountTooltip": "{{count}} documents directly in this folder (not in subfolders)",
-    "treeDocCountTooltip": "{{count}} documents in this folder",
+    "folderDocCountTooltip": "{{count}} documents including subfolders, {{direct}} directly in this folder",
     "treePanelAria": "Folder tree",
     "contentPaneAria": "Folder contents",
     "treeSearchPlaceholder": "Search folders…",

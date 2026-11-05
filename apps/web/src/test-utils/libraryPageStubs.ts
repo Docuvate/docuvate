@@ -19,6 +19,7 @@ export function createLibraryPageDataStub(
     items: [],
     folders: [],
     childFoldersForView: [],
+    folderDocumentCounts: new Map(),
     tags: [],
     recognizedFields: [],
     filterableFields: [],
