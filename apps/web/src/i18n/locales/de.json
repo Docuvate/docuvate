@@ -902,7 +902,6 @@
     "selectionFieldCreateOption": "Feld „{{name}}“ anlegen",
     "selectionAccept": "Feld anlegen",
     "fieldCorrectionSaved": "Korrektur gespeichert · {{name}}",
-    "fieldRegionEmptyHint": "Kein Text im Bereich - als Bildbereich gespeichert",
     "fieldCorrectionSheetTitle": "{{name}} korrigieren",
     "fieldValueInputLabel": "Feldwert",
     "fieldValueInputAria": "Wert für {{name}}",
@@ -1068,7 +1067,13 @@
       "claim_busy": "Die Extraktion für dieses Dokument lief bereits.",
       "internal_error": "Die Extraktion ist wegen eines internen Fehlers fehlgeschlagen.",
       "orphan_requeue_exhausted": "Die Extraktion wurde zu oft neu gestartet, ohne abzuschließen, und wurde beendet."
-    }
+    },
+    "layoutFieldsMissing": "Nicht gefunden ({{count}})",
+    "layoutFieldsFilterPlaceholder": "Felder filtern…",
+    "layoutFieldsFilterAria": "Erkannte Felder filtern",
+    "layoutFieldsFilterEmpty": "Kein Feld passt zu „{{query}}“.",
+    "fieldMarkHint": "Ziehen Sie auf dem Dokument einen Rahmen um den Wert für „{{name}}“.",
+    "fieldMarkHintCancel": "Markieren abbrechen"
   },
   "settings": {
     "title": "Einstellungen",
@@ -2322,7 +2327,13 @@
     "fieldValue": {
       "confirmed": "Bestätigt",
       "correct": "Korrigieren",
-      "moreActions": "Weitere Aktionen"
+      "moreActions": "Weitere Aktionen",
+      "missing": "Nicht gefunden",
+      "enterValue": "Wert eingeben",
+      "markInDocument": "Im Dokument markieren",
+      "inputPlaceholder": "Wert eingeben…",
+      "inputAria": "Wert für {{name}}",
+      "save": "Speichern"
     },
     "suggestion": {
       "accept": "Übernehmen",

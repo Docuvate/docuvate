@@ -27,3 +27,16 @@ export function areBlocksDirty(
 ): boolean {
   return blocksSignature(blocks) !== blocksSignature(baselineBlocks);
 }
+
+/**
+ * Blocks to send with a document update. Unchanged blocks are omitted because the API
+ * treats any `extractionBlocks` payload as a text edit and drops the stored layout IR.
+ */
+export function extractionBlocksForUpdate(
+  patchBlocks: ExtractionBlock[] | undefined,
+  blocks: ExtractionBlock[],
+  baselineBlocks: ExtractionBlock[]
+): ExtractionBlock[] | undefined {
+  if (patchBlocks !== undefined) return patchBlocks;
+  return areBlocksDirty(blocks, baselineBlocks) ? blocks : undefined;
+}

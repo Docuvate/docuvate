@@ -62,13 +62,14 @@ import {
   readHighlightBlocksFromLocationState,
 } from '../lib/documentDetailLocationState';
 import { isExtractionPending } from '../lib/documentExtractionState';
+import { withSavedFieldValue } from '../lib/documentFieldValueRowState';
 import { fetchDocumentPreviewBuffer } from '../lib/documentPreviewCache';
 import {
   catalogFieldGateContextFromDocument,
   type CatalogFieldGateSettings,
   mergeCatalogFieldsForDocument,
 } from '../lib/documentRecognizedCatalogFields';
-import { areBlocksDirty, areFieldsDirty } from '../lib/extractionDirty';
+import { areBlocksDirty, areFieldsDirty, extractionBlocksForUpdate } from '../lib/extractionDirty';
 import { extractionFieldLabel } from '../lib/extractionFieldLabels';
 import {
   findBlockIndexAtPoint,
@@ -374,7 +375,7 @@ export function DocumentDetailPage() {
         notes: notes || null,
         folderId: folderId || null,
         extractionFields: patch?.extractionFields ?? fields,
-        extractionBlocks: patch?.extractionBlocks ?? blocks,
+        extractionBlocks: extractionBlocksForUpdate(patch?.extractionBlocks, blocks, baselineBlocks),
       });
       const nextFields = patch?.extractionFields ?? fields;
       const nextBlocks = patch?.extractionBlocks ?? blocks;
@@ -570,18 +571,6 @@ export function DocumentDetailPage() {
     [globalFieldLabels, t]
   );
 
-  const onFieldValueChange = useCallback((key: string, value: string) => {
-    setFieldFeedback(null);
-    setFields((prev) => {
-      const idx = prev.findIndex((field) => field.key === key);
-      if (idx >= 0) {
-        const copy = [...prev];
-        copy[idx] = { ...copy[idx], value };
-        return copy;
-      }
-      return [...prev, { key, value }];
-    });
-  }, []);
 
   const onAcceptFieldSuggestion = useCallback((key: string, value: string) => {
     setFields((prev) => {
@@ -775,7 +764,12 @@ export function DocumentDetailPage() {
           blocks={blocks}
           fields={recognizedFields}
           recognizedCatalog={recognizedCatalog}
-          onFieldValueChange={onFieldValueChange}
+          onSaveFieldValue={(key, value) => {
+            setFieldFeedback(null);
+            const nextFields = withSavedFieldValue(fields, key, value);
+            setFields(nextFields);
+            void persist({ extractionFields: nextFields });
+          }}
           onFieldsChange={setFields}
           heuristicSuggestions={heuristicSuggestions}
           highlightBlocks={highlightBlocks}

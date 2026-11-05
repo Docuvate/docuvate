@@ -49,6 +49,7 @@ import { SegmentedControl } from '../ui/SegmentedControl';
 import { DocumentExtractionRecovery } from './DocumentExtractionRecovery';
 import { DocumentFieldContextBar } from './DocumentFieldContextBar';
 import { DocumentFieldCorrectionSheet } from './DocumentFieldCorrectionSheet';
+import { DocumentFieldMarkHint, useDocumentFieldMarking } from './DocumentFieldMarkHint';
 import { DocumentLayoutCompareView } from './DocumentLayoutCompareView';
 import { DocumentLayoutExportTab } from './DocumentLayoutExportTab';
 import { DocumentLayoutSidePanel, type LayoutSideTab, overlayRegionById } from './DocumentLayoutSidePanel';
@@ -109,7 +110,8 @@ interface DocumentLayoutWorkspaceProps {
   onHighlightBlocks: (blocks: ExtractionBlock[]) => void;
   onBlocksChange: (blocks: ExtractionBlock[]) => void;
   onAcceptFieldSuggestion: (key: string, value: string) => void;
-  onFieldValueChange?: (key: string, value: string) => void;
+  /** Saves a typed field value (recorded as a correction). */
+  onSaveFieldValue?: (key: string, value: string) => void;
   onFieldsChange?: (fields: ExtractedField[]) => void;
   recognizedCatalog?: RecognizedFieldDefinitionDto[];
   editMode: boolean;
@@ -149,7 +151,7 @@ export function DocumentLayoutWorkspace({
   onHighlightBlocks,
   onBlocksChange,
   onAcceptFieldSuggestion,
-  onFieldValueChange,
+  onSaveFieldValue,
   onFieldsChange,
   recognizedCatalog = [],
   editMode,
@@ -249,6 +251,16 @@ export function DocumentLayoutWorkspace({
     },
     [blocks, fieldRegions, onHighlightBlocks, onViewerPageChange]
   );
+
+  const fieldMarking = useDocumentFieldMarking({
+    setReanchorFieldKey,
+    setSelectionDraft,
+    setSelectionTool,
+    highlightRegion,
+    sheetFieldKey: selectedFieldKey,
+    closeSheet: () => { setSelectedFieldKey(null); },
+    onSaveFieldValue,
+  });
 
   const selectField = useCallback(
     (key: string) => {
@@ -697,7 +709,14 @@ export function DocumentLayoutWorkspace({
             ) : null}
           </div>
 
-          <div className="layout-viewer-stage" data-testid="layout-viewer-stage">
+          <DocumentFieldMarkHint
+            fieldKey={reanchorFieldKey}
+            fieldLabelForKey={fieldLabelForKey}
+            selectionTool={selectionTool}
+            hasDraft={selectionDraft !== null}
+            onCancel={fieldMarking.cancelMarkingField}
+          />
+          <div className="layout-viewer-stage" data-testid="layout-viewer-stage" ref={fieldMarking.viewerStageRef}>
             {leftMode === 'text' ? (
               <div className="layout-text-stage">
                 <ExtractedTextPanel
@@ -975,11 +994,8 @@ export function DocumentLayoutWorkspace({
                 toast.error(formatUserFacingError(err, 'errors.generic'));
               });
           }}
-          onCorrectField={(key) => {
-            setReanchorFieldKey(key);
-            setSelectionTool('rect');
-            highlightRegion(key);
-          }}
+          onCorrectField={fieldMarking.startMarkingField}
+          onSaveFieldValue={onSaveFieldValue}
           onHighlightField={highlightRegion}
           onSelectField={selectField}
           hideInlineFieldList={Boolean(correctionSheetViewport && selectedFieldKey)}
@@ -1025,21 +1041,8 @@ export function DocumentLayoutWorkspace({
                 }
               : undefined
           }
-          onCorrect={
-            selectedFieldKey
-              ? () => {
-                  setReanchorFieldKey(selectedFieldKey);
-                  setSelectionTool('rect');
-                  highlightRegion(selectedFieldKey);
-                  setSelectedFieldKey(null);
-                }
-              : undefined
-          }
-          onValueChange={
-            selectedFieldKey && onFieldValueChange
-              ? (value) => { onFieldValueChange(selectedFieldKey, value); }
-              : undefined
-          }
+          onCorrect={fieldMarking.sheetMarkInDocument}
+          onSaveValue={fieldMarking.sheetSaveValue}
           onSourceClick={
             selectedFieldKey ? () => { highlightRegion(selectedFieldKey); } : undefined
           }

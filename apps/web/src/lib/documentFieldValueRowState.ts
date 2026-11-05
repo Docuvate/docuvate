@@ -23,3 +23,15 @@ export function fieldValueRowState(
   }
   return 'suggested';
 }
+
+/** Returns `fields` with `key` set to a user-typed value, which counts as confirmed. */
+export function withSavedFieldValue(
+  fields: readonly ExtractedField[],
+  key: string,
+  value: string
+): ExtractedField[] {
+  if (!fields.some((field) => field.key === key)) {
+    return [...fields, { key, value, confidence: 1 }];
+  }
+  return fields.map((field) => (field.key === key ? { ...field, value, confidence: 1 } : field));
+}

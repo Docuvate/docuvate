@@ -1338,6 +1338,24 @@
   color: var(--dv-color-ok);
 }
 
+.field-value-row--missing .field-value-row-value {
+  font-size: var(--dv-font-size-sm);
+  font-weight: var(--dv-font-weight-regular);
+  color: var(--dv-color-text-muted);
+}
+
+.field-value-row--editing {
+  grid-template-areas: 'primary';
+}
+
+.field-value-row-editor {
+  grid-area: primary;
+  display: flex;
+  flex-direction: column;
+  gap: var(--dv-space-2xs);
+  min-width: 0;
+}
+
 .field-value-row-original {
   font-size: var(--dv-font-size-xs);
   color: var(--dv-color-text-subtle);
