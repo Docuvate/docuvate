@@ -27,7 +27,12 @@ const ICONS: Record<Exclude<InlineStatusTone, 'loading'>, LucideIcon> = {
  * Errors are announced assertively (role="alert"); everything else politely (role="status").
  * For page-level empty states use `EmptyState`; for app-wide notices use `Banner` or toasts.
  */
-export function InlineStatus({ tone = 'neutral', children, className = '', action }: InlineStatusProps) {
+export function InlineStatus({
+  tone = 'neutral',
+  children,
+  className = '',
+  action,
+}: InlineStatusProps) {
   const Icon = tone === 'loading' ? null : ICONS[tone];
   return (
     <div

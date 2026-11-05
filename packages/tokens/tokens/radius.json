@@ -3,7 +3,10 @@
     "xs": { "value": "0.125rem", "comment": "Focus outlines, tiny indicators." },
     "sm": { "value": "0.25rem", "comment": "Badges, checkboxes, inline code." },
     "md": { "value": "0.5rem", "comment": "Controls: buttons, inputs, chips, menu items." },
-    "lg": { "value": "0.75rem", "comment": "Surfaces: cards, panels, dialogs, popovers. Maximum radius." },
+    "lg": {
+      "value": "0.75rem",
+      "comment": "Surfaces: cards, panels, dialogs, popovers. Maximum radius."
+    },
     "control": { "value": "{radius.md}" },
     "surface": { "value": "{radius.lg}" },
     "badge": { "value": "{radius.sm}" },

@@ -11,9 +11,10 @@
     "raw-font-size": 2
   },
   "apps/web/src/styles/app.css": {
-    "raw-font-size": 14,
-    "raw-border-radius": 23,
+    "raw-font-size": 17,
+    "raw-border-radius": 24,
     "raw-shadow-color": 5,
+    "raw-transition-timing": 1,
     "raw-rgb-hsl": 12
   }
 }

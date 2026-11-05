@@ -329,10 +329,7 @@ export function LabelsVocabularyTable(props: Props) {
           aria-rowcount={stackedLayout ? undefined : displayTags.length + 1}
         >
           {!stackedLayout ? (
-            <div
-              className="labels-vocabulary-grid labels-vocabulary-grid--head"
-              role="row"
-            >
+            <div className="labels-vocabulary-grid labels-vocabulary-grid--head" role="row">
               <span role="columnheader">{t('labels.vocabularyColName')}</span>
               <span role="columnheader" className="labels-vocabulary-grid__count">
                 {t('labels.vocabularyColDocuments')}

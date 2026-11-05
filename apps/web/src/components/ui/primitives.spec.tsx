@@ -8,7 +8,7 @@ import { Card, CardHeader } from './Card';
 import { InlineStatus } from './InlineStatus';
 import { PageHeader } from './PageHeader';
 import { ToneBadge } from './ToneBadge';
-import { Toolbar,ToolGroup } from './Toolbar';
+import { Toolbar, ToolGroup } from './Toolbar';
 
 afterEach(() => {
   cleanup();
@@ -30,7 +30,9 @@ describe('PageHeader', () => {
     const header = heading.closest('header');
     expect(header?.className).toContain('page-header');
     expect(header?.className).toContain('labels-page-header');
-    expect(screen.getByRole('button', { name: 'Neues Label' }).closest('.ds-page-header-actions')).not.toBeNull();
+    expect(
+      screen.getByRole('button', { name: 'Neues Label' }).closest('.ds-page-header-actions')
+    ).not.toBeNull();
   });
 
   it('can render an h2 without the page-title marker for embedded previews', () => {

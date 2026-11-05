@@ -50,51 +50,103 @@ export const COMPONENT_GUIDELINES: readonly ComponentGuideline[] = [
     source: 'components/ui/Button.tsx',
     whenToUse:
       'Actions that change data or open a flow. Primary for the one main action per view, secondary for alternatives, ghost for low-emphasis toolbar actions, danger only for destructive confirmations.',
-    states: ['default', 'hover', 'focus-visible', 'disabled (opacity token, same size)', 'loading (spinner, aria-busy)'],
-    dos: ['Use one primary button per page region.', 'Use verbs: “Speichern”, “Label anlegen”.', 'Use size="sm" only in dense desktop tables and toolbars.'],
-    donts: ['Do not style links as primary buttons for navigation inside text.', 'Do not change button width when it starts loading.'],
+    states: [
+      'default',
+      'hover',
+      'focus-visible',
+      'disabled (opacity token, same size)',
+      'loading (spinner, aria-busy)',
+    ],
+    dos: [
+      'Use one primary button per page region.',
+      'Use verbs: “Speichern”, “Label anlegen”.',
+      'Use size="sm" only in dense desktop tables and toolbars.',
+    ],
+    donts: [
+      'Do not style links as primary buttons for navigation inside text.',
+      'Do not change button width when it starts loading.',
+    ],
   },
   {
     id: 'input',
     name: 'Input, Select, SearchField',
     source: 'components/ui/Input.tsx · Select.tsx · SearchField.tsx',
-    whenToUse: 'Single-value entry. Always pair with a visible label (FormField) unless it is a search field with an accessible name.',
-    states: ['default', 'hover (strong border)', 'focus-visible (focus ring)', 'invalid (danger border + hint)', 'disabled'],
-    dos: ['Put help text below the control (FormField help).', 'Keep the default control height for all inputs in one row.'],
-    donts: ['Do not use placeholder text as the label.', 'Do not mix control heights in one toolbar.'],
+    whenToUse:
+      'Single-value entry. Always pair with a visible label (FormField) unless it is a search field with an accessible name.',
+    states: [
+      'default',
+      'hover (strong border)',
+      'focus-visible (focus ring)',
+      'invalid (danger border + hint)',
+      'disabled',
+    ],
+    dos: [
+      'Put help text below the control (FormField help).',
+      'Keep the default control height for all inputs in one row.',
+    ],
+    donts: [
+      'Do not use placeholder text as the label.',
+      'Do not mix control heights in one toolbar.',
+    ],
   },
   {
     id: 'page-header',
     name: 'PageHeader',
     source: 'components/ui/PageHeader.tsx',
     whenToUse: 'Top of every routed page: title (h1), one-sentence lead and page-level actions.',
-    states: ['title only', 'title + lead', 'title + lead + actions (wrap under the title on narrow screens)'],
+    states: [
+      'title only',
+      'title + lead',
+      'title + lead + actions (wrap under the title on narrow screens)',
+    ],
     dos: ['Keep the lead to one sentence.', 'Put the primary action last in the actions slot.'],
-    donts: ['Do not add a second h1 or nest PageHeader inside cards.', 'Do not place filters in the header; use a Toolbar below it.'],
+    donts: [
+      'Do not add a second h1 or nest PageHeader inside cards.',
+      'Do not place filters in the header; use a Toolbar below it.',
+    ],
   },
   {
     id: 'card',
     name: 'Card & CardHeader',
     source: 'components/ui/Card.tsx',
-    whenToUse: 'Group related content that belongs together and can be scanned independently (settings section, dashboard widget).',
+    whenToUse:
+      'Group related content that belongs together and can be scanned independently (settings section, dashboard widget).',
     states: ['raised (default, elevation 1)', 'outlined (flat)', 'muted (inset section)'],
-    dos: ['Use CardHeader for title, lead and trailing actions.', 'Pick padding from the scale (sm / md / lg).'],
-    donts: ['Do not nest raised cards inside raised cards.', 'Do not use cards for single lines of text; use InlineStatus or plain text.'],
+    dos: [
+      'Use CardHeader for title, lead and trailing actions.',
+      'Pick padding from the scale (sm / md / lg).',
+    ],
+    donts: [
+      'Do not nest raised cards inside raised cards.',
+      'Do not use cards for single lines of text; use InlineStatus or plain text.',
+    ],
   },
   {
     id: 'toolbar',
     name: 'Toolbar & ToolGroup',
     source: 'components/ui/Toolbar.tsx',
-    whenToUse: 'A row of controls acting on the content below: search, filters, view switchers, bulk actions.',
-    states: ['wrapping (default)', 'nowrap with horizontal scroll', 'attached groups (segmented look)'],
-    dos: ['Group related controls; groups are separated by --dv-space-md.', 'Give standalone toolbars an aria-label.'],
-    donts: ['Do not mix button sizes inside a group.', 'Do not hide the only way to an action behind an overflow menu on desktop.'],
+    whenToUse:
+      'A row of controls acting on the content below: search, filters, view switchers, bulk actions.',
+    states: [
+      'wrapping (default)',
+      'nowrap with horizontal scroll',
+      'attached groups (segmented look)',
+    ],
+    dos: [
+      'Group related controls; groups are separated by --dv-space-md.',
+      'Give standalone toolbars an aria-label.',
+    ],
+    donts: [
+      'Do not mix button sizes inside a group.',
+      'Do not hide the only way to an action behind an overflow menu on desktop.',
+    ],
   },
   {
     id: 'tabs',
     name: 'Tabs',
     source: 'components/ui/Tab.tsx',
-    whenToUse: 'Switch between sibling views of the same object (document details, settings sections).',
+    whenToUse:
+      'Switch between sibling views of the same object (document details, settings sections).',
     states: ['default', 'hover', 'active (accent underline)', 'focus-visible (inset ring)'],
     dos: ['Keep labels short nouns.', 'Use links (settings tabs) when each tab is a route.'],
     donts: ['Do not use tabs for sequential steps; use the review wizard pattern.'],
@@ -103,7 +155,8 @@ export const COMPONENT_GUIDELINES: readonly ComponentGuideline[] = [
     id: 'badge',
     name: 'Badge, ToneBadge & Chip',
     source: 'components/ui/Badge.tsx · ToneBadge.tsx · Chip.tsx',
-    whenToUse: 'Badge = document processing status. ToneBadge = other system states and counts. Chip = user-defined labels with their own colour.',
+    whenToUse:
+      'Badge = document processing status. ToneBadge = other system states and counts. Chip = user-defined labels with their own colour.',
     states: ['neutral', 'accent', 'success', 'warn', 'danger', 'info'],
     dos: ['Keep badge text to one or two words.', 'Let Chip compute its foreground for contrast.'],
     donts: ['Do not use pill radii.', 'Do not use status colours for user labels.'],
@@ -114,25 +167,43 @@ export const COMPONENT_GUIDELINES: readonly ComponentGuideline[] = [
     source: 'components/ui/InlineStatus.tsx · Banner.tsx · EmptyState.tsx · save/ToastProvider.tsx',
     whenToUse:
       'InlineStatus for a section’s loading / empty / error line; Banner for page-level notices with one action; EmptyState for a whole empty view; Toast for confirmation after an action.',
-    states: ['loading (spinner, aria-busy)', 'neutral / empty', 'success', 'warn', 'error (role="alert")'],
+    states: [
+      'loading (spinner, aria-busy)',
+      'neutral / empty',
+      'success',
+      'warn',
+      'error (role="alert")',
+    ],
     dos: ['Say what happened and what to do next.', 'Offer a retry action for recoverable errors.'],
-    donts: ['Do not stack several banners; merge them.', 'Do not use toasts for errors that need action.'],
+    donts: [
+      'Do not stack several banners; merge them.',
+      'Do not use toasts for errors that need action.',
+    ],
   },
   {
     id: 'table',
     name: 'Tables & lists',
     source: 'library/LibraryDocumentTable.tsx · labels/LabelsVocabularyTable.tsx',
-    whenToUse: 'Scannable collections with comparable attributes. Lists of cards only when items are heterogeneous.',
+    whenToUse:
+      'Scannable collections with comparable attributes. Lists of cards only when items are heterogeneous.',
     states: ['row hover', 'row selected (accent-soft)', 'loading skeleton rows', 'empty state'],
-    dos: ['Left-align text, right-align numbers.', 'Keep row height constant; truncate with a tooltip.'],
+    dos: [
+      'Left-align text, right-align numbers.',
+      'Keep row height constant; truncate with a tooltip.',
+    ],
     donts: ['Do not put more than two actions inline per row; use the overflow menu.'],
   },
   {
     id: 'dialog',
     name: 'Dialog & ConfirmDialog',
     source: 'components/ui/Dialog.tsx · ConfirmDialog.tsx · AlertDialog.tsx',
-    whenToUse: 'Short, focused tasks that block the page (rename, confirm delete). Drawers / sheets for longer side tasks on mobile.',
-    states: ['open (focus trapped, Escape closes)', 'busy (primary button loading)', 'error inside the dialog'],
+    whenToUse:
+      'Short, focused tasks that block the page (rename, confirm delete). Drawers / sheets for longer side tasks on mobile.',
+    states: [
+      'open (focus trapped, Escape closes)',
+      'busy (primary button loading)',
+      'error inside the dialog',
+    ],
     dos: ['All dialogs share --dv-layout-dialog-width.', 'Put the primary action on the right.'],
     donts: ['Do not open a dialog from a dialog.', 'Do not use dialogs for success messages.'],
   },

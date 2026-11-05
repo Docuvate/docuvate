@@ -1,6 +1,9 @@
 {
   "space": {
-    "3xs": { "value": "0.125rem", "comment": "Hairline nudges only (icon/text optical alignment)." },
+    "3xs": {
+      "value": "0.125rem",
+      "comment": "Hairline nudges only (icon/text optical alignment)."
+    },
     "2xs": { "value": "0.25rem", "comment": "Tight gaps inside a control (icon + label)." },
     "xs": { "value": "0.5rem", "comment": "Gap between related controls in a tool group." },
     "sm": { "value": "0.75rem", "comment": "Padding inside compact surfaces, list rows." },
@@ -11,22 +14,41 @@
     "3xl": { "value": "4.5rem", "comment": "Marketing / docs layouts only." }
   },
   "control": {
-    "height-sm": { "value": "2rem", "comment": "Compact controls in dense tables and toolbars (desktop only)." },
+    "height-sm": {
+      "value": "2rem",
+      "comment": "Compact controls in dense tables and toolbars (desktop only)."
+    },
     "height": { "value": "2.5rem", "comment": "Default height of buttons, inputs, selects, tabs." },
-    "height-lg": { "value": "2.75rem", "comment": "Prominent single actions; equals the touch target." },
-    "touch-target": { "value": "2.75rem", "comment": "Minimum hit area (44px) on coarse pointers / mobile." },
+    "height-lg": {
+      "value": "2.75rem",
+      "comment": "Prominent single actions; equals the touch target."
+    },
+    "touch-target": {
+      "value": "2.75rem",
+      "comment": "Minimum hit area (44px) on coarse pointers / mobile."
+    },
+    "inline-target": {
+      "value": "1.5rem",
+      "comment": "Minimum hit area (24px, WCAG 2.5.8) for inline text links on desktop; becomes touch-target below the tablet breakpoint."
+    },
     "icon-btn-sm": { "value": "1.75rem" },
     "icon-btn-md": { "value": "2.25rem" },
     "icon-sm": { "value": "1rem", "comment": "Inline icon size next to sm/compact text." },
     "icon-md": { "value": "1.25rem", "comment": "Default icon size in buttons and navigation." },
     "padding-x": { "value": "{space.md}", "comment": "Horizontal padding of default buttons." },
-    "padding-x-sm": { "value": "{space.sm}", "comment": "Horizontal padding of small buttons and inputs." }
+    "padding-x-sm": {
+      "value": "{space.sm}",
+      "comment": "Horizontal padding of small buttons and inputs."
+    }
   },
   "layout": {
     "library-filter-min": { "value": "15rem" },
     "library-filter-max": { "value": "17.5rem" },
     "page-max": { "value": "73.75rem", "comment": "Max content width of standard pages (1180px)." },
-    "page-wide-max": { "value": "100rem", "comment": "Max width for viewer / explorer pages (1600px)." },
+    "page-wide-max": {
+      "value": "100rem",
+      "comment": "Max width for viewer / explorer pages (1600px)."
+    },
     "page-pad": { "value": "{space.lg}", "comment": "Page padding on tablet and desktop." },
     "page-pad-mobile": { "value": "{space.md}", "comment": "Page padding below 768px." },
     "topbar-height": { "value": "3.25rem" },
@@ -55,7 +77,10 @@
     }
   },
   "breakpoint": {
-    "tablet": { "value": "768px", "comment": "min-width for tablet layouts (media queries cannot read vars; keep CSS in sync)." },
+    "tablet": {
+      "value": "768px",
+      "comment": "min-width for tablet layouts (media queries cannot read vars; keep CSS in sync)."
+    },
     "desktop": { "value": "1280px", "comment": "min-width for desktop layouts." }
   }
 }

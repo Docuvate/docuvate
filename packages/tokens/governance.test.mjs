@@ -27,7 +27,8 @@ for (const theme of ['light', 'dark']) {
     }
   }
   for (const role of Object.keys(live)) {
-    if (!(role in frozen)) fail(`color.${theme}.${role} is new; add it to governance/color-freeze.json deliberately`);
+    if (!(role in frozen))
+      fail(`color.${theme}.${role} is new; add it to governance/color-freeze.json deliberately`);
   }
 }
 if (freeze.light.accent !== '#d9480f') fail('Brand accent must stay #d9480f');
@@ -40,8 +41,10 @@ for (const r of colorRoles(colorJson)) {
 // 3. Static tokens: aliases resolve (loadStaticTokens throws otherwise), names are kebab-case.
 const tokens = loadStaticTokens();
 for (const t of tokens) {
-  if (!t.path.every((p) => /^[a-z0-9]+(-[a-z0-9]+)*$/.test(p))) fail(`token ${t.id} is not kebab-case`);
-  if (/#[0-9a-f]{3,8}\b/i.test(t.value)) fail(`token ${t.id} hard-codes a hex colour; colours belong in color.json`);
+  if (!t.path.every((p) => /^[a-z0-9]+(-[a-z0-9]+)*$/.test(p)))
+    fail(`token ${t.id} is not kebab-case`);
+  if (/#[0-9a-f]{3,8}\b/i.test(t.value))
+    fail(`token ${t.id} hard-codes a hex colour; colours belong in color.json`);
 }
 
 // 4. No duplicate values inside a primitive scale (aliases are the way to share a value).
@@ -50,13 +53,15 @@ for (const scale of SCALES) {
   const members = tokens.filter((t) => t.id.startsWith(`${scale}.`) && !t.aliasOf);
   const seen = new Map();
   for (const t of members) {
-    if (seen.has(t.value)) fail(`${scale}: ${t.id} duplicates ${seen.get(t.value)} (${t.value}); use an alias`);
+    if (seen.has(t.value))
+      fail(`${scale}: ${t.id} duplicates ${seen.get(t.value)} (${t.value}); use an alias`);
     seen.set(t.value, t.id);
   }
 }
 
 // 5. Rhythm: spacing ≥ 0.5rem sits on the 4px grid; radii never exceed 12px.
-const remPx = (v) => (v.endsWith('rem') ? parseFloat(v) * 16 : v.endsWith('px') ? parseFloat(v) : NaN);
+const remPx = (v) =>
+  v.endsWith('rem') ? parseFloat(v) * 16 : v.endsWith('px') ? parseFloat(v) : NaN;
 for (const t of tokens.filter((x) => x.id.startsWith('space.'))) {
   const px = remPx(t.resolved);
   if (px >= 8 && px % 4 !== 0) fail(`${t.id} = ${t.resolved} is off the 4px grid`);
@@ -79,7 +84,8 @@ const cssPath = path.join(here, 'dist/css/tokens.css');
 if (fs.existsSync(cssPath)) {
   const css = fs.readFileSync(cssPath, 'utf8');
   for (const t of tokens) {
-    if (!css.includes(`${t.cssVar}: ${t.cssValue};`)) fail(`dist/css/tokens.css is stale for ${t.cssVar}; run the build`);
+    if (!css.includes(`${t.cssVar}: ${t.cssValue};`))
+      fail(`dist/css/tokens.css is stale for ${t.cssVar}; run the build`);
   }
 } else {
   fail('dist/css/tokens.css missing; run pnpm --filter @docuvate/tokens build');

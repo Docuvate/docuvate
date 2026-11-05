@@ -58,7 +58,7 @@ The living catalog (no Storybook) is implemented as **`@docuvate/ui-catalog`** a
 
 - `apps/web` runs **stylelint** on `src/**/*.css` with `color-no-hex` and radius guards. User-defined label hex colors belong in TS/data, not in app stylesheets.
 - `apps/web/scripts/check-design-tokens.mjs` (part of `pnpm test`) fails on undefined custom properties and ratchets raw literals against `design-token-baseline.json`.
-- `apps/web/scripts/codemod-design-tokens.mjs` rewrites raw font sizes, transition timings and exact radius values to tokens (idempotent; `--check` for CI-style dry runs).
+- `apps/web/scripts/codemod-design-tokens.mjs` rewrites raw font sizes, transition timings and exact radius values to tokens (idempotent; `--check` for CI-style dry runs). It has not been applied to library or document-viewer selectors yet; run it there only as part of their migration.
 - `packages/tokens/governance.test.mjs` enforces the palette freeze, light/dark parity, kebab-case names, no hex in static tokens, no duplicate primitive values, 4px-grid spacing, radius ≤ 12px, touch target ≥ 44px and that `dist/` is in sync.
 
 ## Local stack (screenshots / QA)

@@ -39,7 +39,8 @@ if (!fs.existsSync(generatedCss)) {
 
 const files = [srcRoot, ...extraRoots].flatMap((root) => walk(root));
 const defined = new Set();
-for (const m of fs.readFileSync(generatedCss, 'utf8').matchAll(/(--[a-zA-Z0-9-]+)\s*:/g)) defined.add(m[1]);
+for (const m of fs.readFileSync(generatedCss, 'utf8').matchAll(/(--[a-zA-Z0-9-]+)\s*:/g))
+  defined.add(m[1]);
 for (const file of files) {
   const text = fs.readFileSync(file, 'utf8');
   for (const m of text.matchAll(/(--[a-zA-Z0-9-]+)\s*:/g)) defined.add(m[1]);
@@ -61,7 +62,8 @@ for (const file of files) {
 
 const RULES = {
   'raw-font-size': /font-size:\s*(?![\s])(?!var\(|inherit|initial|unset|100%|1em|0\b)[^;]+;/g,
-  'raw-border-radius': /border(?:-[a-z]+)*-radius:\s*(?![\s])(?!var\(|0\s*(?:!important)?;|inherit)[^;]+;/g,
+  'raw-border-radius':
+    /border(?:-[a-z]+)*-radius:\s*(?![\s])(?!var\(|0\s*(?:!important)?;|inherit)[^;]+;/g,
   'raw-shadow-color': /box-shadow:[^;]*\brgba?\(/g,
   'raw-transition-timing': /transition:[^;{}]*\b\d*\.?\d+m?s\b[^;{}]*;/g,
   'raw-rgb-hsl': /\b(?:rgba?|hsla?)\(/g,
@@ -87,7 +89,9 @@ if (process.argv.includes('--update')) {
   process.exit(0);
 }
 
-const baseline = fs.existsSync(baselinePath) ? JSON.parse(fs.readFileSync(baselinePath, 'utf8')) : {};
+const baseline = fs.existsSync(baselinePath)
+  ? JSON.parse(fs.readFileSync(baselinePath, 'utf8'))
+  : {};
 const regressions = [];
 for (const [rel, rules] of Object.entries(counts)) {
   for (const [rule, n] of Object.entries(rules)) {

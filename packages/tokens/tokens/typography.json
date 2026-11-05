@@ -11,10 +11,19 @@
       "title": { "value": "1.5rem", "comment": "Page titles (h1 inside the app shell)." },
       "lg": { "value": "1.25rem" },
       "md": { "value": "1rem" },
-      "sm": { "value": "0.875rem", "comment": "Default UI text: buttons, inputs, navigation, table cells." },
-      "compact": { "value": "0.8125rem", "comment": "Dense secondary text: table meta, help text." },
+      "sm": {
+        "value": "0.875rem",
+        "comment": "Default UI text: buttons, inputs, navigation, table cells."
+      },
+      "compact": {
+        "value": "0.8125rem",
+        "comment": "Dense secondary text: table meta, help text."
+      },
       "xs": { "value": "0.75rem" },
-      "2xs": { "value": "0.6875rem", "comment": "Overlines and tiny counters only; never body text." }
+      "2xs": {
+        "value": "0.6875rem",
+        "comment": "Overlines and tiny counters only; never body text."
+      }
     },
     "weight": {
       "regular": { "value": "400" },

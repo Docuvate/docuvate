@@ -83,7 +83,8 @@ function buildTs(tokens, roles) {
   for (const t of tokens) lines.push(`  ${t.camel}: ${JSON.stringify(t.resolved)},`);
   for (const theme of ['light', 'dark']) {
     lines.push(`  color${theme.charAt(0).toUpperCase() + theme.slice(1)}: {`);
-    for (const r of roles) lines.push(`    ${camelName(['color', r.role])}: ${JSON.stringify(r[theme])},`);
+    for (const r of roles)
+      lines.push(`    ${camelName(['color', r.role])}: ${JSON.stringify(r[theme])},`);
     lines.push('  },');
   }
   lines.push('};', '');
@@ -162,7 +163,8 @@ function buildDart(tokens, roles) {
     const name = tokenPathToDartField(t.path);
     const v = t.resolved;
     if (/^-?[\d.]+px$/.test(v)) lines.push(`  static const double ${name} = ${parseFloat(v)};`);
-    else if (/^-?[\d.]+rem$/.test(v)) lines.push(`  static const double ${name} = ${parseFloat(v)} * 16;`);
+    else if (/^-?[\d.]+rem$/.test(v))
+      lines.push(`  static const double ${name} = ${parseFloat(v)} * 16;`);
     else lines.push(`  static const String ${name} = ${JSON.stringify(v)};`);
   }
   lines.push(
@@ -224,8 +226,10 @@ assertUnique(tokens, 'cssVar', 'CSS variable');
 assertUnique(tokens, 'camel', 'TS key');
 assertUnique(roles, 'cssVar', 'colour variable');
 for (const r of roles) {
-  if (r.dark == null) throw new Error(`Colour role "${r.role}" has no dark value (light/dark parity)`);
-  if (tokens.some((t) => t.cssVar === r.cssVar)) throw new Error(`Static token shadows colour ${r.cssVar}`);
+  if (r.dark == null)
+    throw new Error(`Colour role "${r.role}" has no dark value (light/dark parity)`);
+  if (tokens.some((t) => t.cssVar === r.cssVar))
+    throw new Error(`Static token shadows colour ${r.cssVar}`);
 }
 
 fs.writeFileSync(
@@ -236,4 +240,6 @@ fs.writeFileSync(path.join(distJs, 'tokens.js'), buildTs(tokens, roles));
 fs.writeFileSync(path.join(distJs, 'tokens.d.ts'), buildTsDecl(tokens, roles));
 fs.writeFileSync(path.join(distDart, 'docuvate_tokens.dart'), buildDart(tokens, roles));
 
-console.log(`Built @docuvate/tokens (${String(tokens.length)} static tokens, ${String(roles.length)} colour roles)`);
+console.log(
+  `Built @docuvate/tokens (${String(tokens.length)} static tokens, ${String(roles.length)} colour roles)`
+);

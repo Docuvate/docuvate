@@ -53,7 +53,9 @@ export function DuplicatesOverviewPage() {
         title={t('documents.duplicateQueueTitle')}
         description={t('documents.duplicateQueueLead')}
       />
-      {loading ? <InlineStatus tone="loading">{t('documents.duplicateQueueLoading')}</InlineStatus> : null}
+      {loading ? (
+        <InlineStatus tone="loading">{t('documents.duplicateQueueLoading')}</InlineStatus>
+      ) : null}
       {!loading && sets.length === 0 ? (
         <InlineStatus>{t('documents.duplicateQueueEmpty')}</InlineStatus>
       ) : null}

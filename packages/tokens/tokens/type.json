@@ -37,7 +37,10 @@
       "tracking": { "value": "{font.tracking.normal}" }
     },
     "label": {
-      "size": { "value": "{font.size.compact}", "comment": "Form labels, table headers, control captions." },
+      "size": {
+        "value": "{font.size.compact}",
+        "comment": "Form labels, table headers, control captions."
+      },
       "line-height": { "value": "{font.line-height.snug}" },
       "weight": { "value": "{font.weight.medium}" },
       "tracking": { "value": "{font.tracking.normal}" }
@@ -49,7 +52,10 @@
       "tracking": { "value": "{font.tracking.normal}" }
     },
     "overline": {
-      "size": { "value": "{font.size.2xs}", "comment": "Uppercase group labels (sidebar sections)." },
+      "size": {
+        "value": "{font.size.2xs}",
+        "comment": "Uppercase group labels (sidebar sections)."
+      },
       "line-height": { "value": "{font.line-height.snug}" },
       "weight": { "value": "{font.weight.semibold}" },
       "tracking": { "value": "{font.tracking.caps}" }

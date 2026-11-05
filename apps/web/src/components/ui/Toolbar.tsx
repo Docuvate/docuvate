@@ -40,7 +40,12 @@ interface ToolGroupProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 /** Related controls inside a toolbar, separated from other groups by `--dv-space-md`. */
-export function ToolGroup({ children, attached = false, className = '', ...props }: ToolGroupProps) {
+export function ToolGroup({
+  children,
+  attached = false,
+  className = '',
+  ...props
+}: ToolGroupProps) {
   return (
     <div
       className={`ds-tool-group${attached ? ' ds-tool-group--attached' : ''}${className ? ` ${className}` : ''}`}

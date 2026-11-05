@@ -14,7 +14,7 @@ import { PageHeader } from '../components/ui/PageHeader';
 import { Select } from '../components/ui/Select';
 import { Tab, TabBar } from '../components/ui/Tab';
 import { type BadgeTone, ToneBadge } from '../components/ui/ToneBadge';
-import { Toolbar,ToolGroup } from '../components/ui/Toolbar';
+import { Toolbar, ToolGroup } from '../components/ui/Toolbar';
 import { useDocuvateTheme } from '../lib/useDocuvateTheme';
 import { DesignSystemShowcase } from './DesignSystemShowcase';
 
@@ -53,7 +53,9 @@ function CatalogCard({
 }) {
   return (
     <Card>
-      {title ? <CardHeader as="h4" title={title} description={description} actions={actions} /> : null}
+      {title ? (
+        <CardHeader as="h4" title={title} description={description} actions={actions} />
+      ) : null}
       {children}
     </Card>
   );

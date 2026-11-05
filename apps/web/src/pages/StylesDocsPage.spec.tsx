@@ -52,7 +52,9 @@ describe('StylesDocsPage (design-system catalog)', () => {
 
   it('documents usage guidelines with states and do / don’t for each component', () => {
     renderCatalog();
-    const components = screen.getByRole('heading', { level: 2, name: 'Components' }).closest('section');
+    const components = screen
+      .getByRole('heading', { level: 2, name: 'Components' })
+      .closest('section');
     expect(components).not.toBeNull();
     if (!components) return;
     const guides = components.querySelectorAll('.styles-guide');

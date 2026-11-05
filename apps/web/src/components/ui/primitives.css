@@ -5,7 +5,16 @@
  */
 
 /* ---------- Focus: one visible ring for every interactive primitive ---------- */
-:where(.btn, .tab, .chip-remove, .sidebar-link, .topbar-icon-btn, .ds-toolbar button, .segmented-control__option, .menu-item):focus-visible {
+:where(
+  .btn,
+  .tab,
+  .chip-remove,
+  .sidebar-link,
+  .topbar-icon-btn,
+  .ds-toolbar button,
+  .segmented-control__option,
+  .menu-item
+):focus-visible {
   outline: var(--dv-focus-ring-width) solid var(--dv-color-focus);
   outline-offset: var(--dv-focus-ring-offset);
 }

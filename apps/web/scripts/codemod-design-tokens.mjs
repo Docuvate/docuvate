@@ -15,7 +15,11 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const webRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const FILES = ['src/styles/app.css', 'src/components/ui/ds.css', 'src/components/ui/components.css'];
+const FILES = [
+  'src/styles/app.css',
+  'src/components/ui/ds.css',
+  'src/components/ui/components.css',
+];
 
 export const FONT_SIZE_MAP = new Map([
   ['0.6875rem', '2xs'],
@@ -58,10 +62,13 @@ const DURATION_MAP = new Map([
 ]);
 
 function mapFontSizes(css) {
-  return css.replace(/font-size:\s*([0-9.]+rem)(\s*!important)?\s*;/g, (match, value, important) => {
-    const token = FONT_SIZE_MAP.get(value);
-    return token ? `font-size: var(--dv-font-size-${token})${important ?? ''};` : match;
-  });
+  return css.replace(
+    /font-size:\s*([0-9.]+rem)(\s*!important)?\s*;/g,
+    (match, value, important) => {
+      const token = FONT_SIZE_MAP.get(value);
+      return token ? `font-size: var(--dv-font-size-${token})${important ?? ''};` : match;
+    }
+  );
 }
 
 /** Only exact equivalents are mapped so radii never visibly change. */
@@ -88,7 +95,8 @@ function mapRadii(css) {
 
 function mapTransitions(css) {
   return css.replace(/transition:([^;{}]+);/g, (match, body) => {
-    if (/var\(--dv-motion/.test(body) && !/\b\d/.test(body.replace(/var\([^)]*\)/g, ''))) return match;
+    if (/var\(--dv-motion/.test(body) && !/\b\d/.test(body.replace(/var\([^)]*\)/g, '')))
+      return match;
     let next = body.replace(/\b(\d*\.?\d+m?s)\b/g, (d) => {
       const token = DURATION_MAP.get(d);
       return token ? `var(--dv-motion-duration-${token})` : d;

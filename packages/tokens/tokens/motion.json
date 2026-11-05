@@ -9,7 +9,10 @@
     "easing": {
       "standard": { "value": "cubic-bezier(0.4, 0, 0.2, 1)" },
       "emphasized": { "value": "cubic-bezier(0.2, 0, 0, 1)" },
-      "enter": { "value": "cubic-bezier(0, 0, 0.2, 1)", "comment": "Elements entering the screen." },
+      "enter": {
+        "value": "cubic-bezier(0, 0, 0.2, 1)",
+        "comment": "Elements entering the screen."
+      },
       "exit": { "value": "cubic-bezier(0.4, 0, 1, 1)", "comment": "Elements leaving the screen." }
     }
   }

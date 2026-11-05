@@ -1,8 +1,20 @@
 {
   "state": {
-    "disabled-opacity": { "value": "0.55", "comment": "Disabled controls keep their size; only opacity drops." },
-    "hover-mix": { "value": "6%", "comment": "color-mix() share of --dv-color-text for neutral hover layers." },
-    "pressed-mix": { "value": "12%", "comment": "color-mix() share of --dv-color-text for pressed layers." },
-    "selected-mix": { "value": "10%", "comment": "color-mix() share of --dv-color-accent for selected rows." }
+    "disabled-opacity": {
+      "value": "0.55",
+      "comment": "Disabled controls keep their size; only opacity drops."
+    },
+    "hover-mix": {
+      "value": "6%",
+      "comment": "color-mix() share of --dv-color-text for neutral hover layers."
+    },
+    "pressed-mix": {
+      "value": "12%",
+      "comment": "color-mix() share of --dv-color-text for pressed layers."
+    },
+    "selected-mix": {
+      "value": "10%",
+      "comment": "color-mix() share of --dv-color-accent for selected rows."
+    }
   }
 }

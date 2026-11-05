@@ -53,8 +53,18 @@ function syntheticDocument(index: number) {
 const SYNTHETIC_DOCUMENTS = Array.from({ length: 12 }, (_, index) => syntheticDocument(index));
 
 const MOCK_SESSION = {
-  session: { id: 'ds-session', token: 'ds-token', userId: 'ds-user', expiresAt: '2099-01-01T00:00:00.000Z' },
-  user: { id: 'ds-user', email: 'designer@example.test', name: 'Design Review', emailVerified: true },
+  session: {
+    id: 'ds-session',
+    token: 'ds-token',
+    userId: 'ds-user',
+    expiresAt: '2099-01-01T00:00:00.000Z',
+  },
+  user: {
+    id: 'ds-user',
+    email: 'designer@example.test',
+    name: 'Design Review',
+    emailVerified: true,
+  },
 };
 
 function json(route: Route, body: unknown, status = 200): Promise<void> {
@@ -105,7 +115,12 @@ export async function installDesignSystemMocks(
     }
     if (path === '/tags' && method === 'GET') return json(route, { items: SYNTHETIC_TAGS });
     if (path.startsWith('/tags/search')) {
-      return json(route, { items: SYNTHETIC_TAGS, nextCursor: null, hasMore: false, total: SYNTHETIC_TAGS.length });
+      return json(route, {
+        items: SYNTHETIC_TAGS,
+        nextCursor: null,
+        hasMore: false,
+        total: SYNTHETIC_TAGS.length,
+      });
     }
     if (path === '/documents' && method === 'GET') {
       return json(route, {
@@ -123,7 +138,14 @@ export async function installDesignSystemMocks(
         widgets: [
           { id: 'w-stats', type: 'statistics', position: 0, widthCols: 6, heightRows: 1 },
           { id: 'w-attention', type: 'attention', position: 1, widthCols: 6, heightRows: 1 },
-          { id: 'w-recent', type: 'recent_documents', position: 2, widthCols: 12, heightRows: 2, itemLimit: 6 },
+          {
+            id: 'w-recent',
+            type: 'recent_documents',
+            position: 2,
+            widthCols: 12,
+            heightRows: 2,
+            itemLimit: 6,
+          },
         ],
       });
     }
@@ -148,7 +170,9 @@ export async function installDesignSystemMocks(
     if (path === '/labels/document-inventory/summary') {
       return json(route, {
         inventory: { total: SYNTHETIC_DOCUMENTS.length, labeled: 10, unlabeled: 2 },
-        documentCountByTagId: Object.fromEntries(SYNTHETIC_TAGS.map((tag, index) => [tag.id, 6 - index])),
+        documentCountByTagId: Object.fromEntries(
+          SYNTHETIC_TAGS.map((tag, index) => [tag.id, 6 - index])
+        ),
       });
     }
     if (path === '/labels/recommendations') return json(route, { items: [], state: 'ready' });
@@ -162,7 +186,8 @@ export async function installDesignSystemMocks(
         coverageSummary: null,
       });
     }
-    if (path === '/labels/recommendation-blocklist') return json(route, { items: [], patterns: [] });
+    if (path === '/labels/recommendation-blocklist')
+      return json(route, { items: [], patterns: [] });
     if (path === '/review-queue/summary') return json(route, { pendingCount: 3 });
     if (path === '/admin/access') {
       return json(route, { isAdministrator: true, role: 'admin', roleDescriptions: [] });
@@ -178,7 +203,9 @@ export async function installDesignSystemMocks(
     }
     if (path === '/settings/extraction-engines') {
       return json(route, {
-        engines: [{ id: 'pipeline', label: 'Pipeline', description: 'Synthetic engine description' }],
+        engines: [
+          { id: 'pipeline', label: 'Pipeline', description: 'Synthetic engine description' },
+        ],
       });
     }
     if (path === '/connectors/catalog') {
