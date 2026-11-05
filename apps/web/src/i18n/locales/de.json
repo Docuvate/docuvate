@@ -534,6 +534,8 @@
       "status": "Status",
       "statusAll": "Alle Status",
       "labelsAndHint": "Mehrere Labels = alle müssen passen (UND).",
+      "moreFields": "Weitere Felder ({{count}})",
+      "moreFieldsActive": "{{count}} aktiv",
       "labelSearchPlaceholder": "Label suchen…",
       "labelSearchEmpty": "Keine Labels gefunden.",
       "withoutLabel": "Ohne Label",

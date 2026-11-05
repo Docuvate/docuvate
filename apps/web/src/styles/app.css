@@ -6303,6 +6303,33 @@ mark.global-search-mark {
   display: block;
 }
 
+.filter-more-fields-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--dv-space-xs);
+  min-height: 32px;
+  cursor: pointer;
+  list-style-position: inside;
+}
+
+.filter-more-fields-summary .filter-label {
+  display: inline;
+}
+
+.filter-more-fields-active {
+  font-size: var(--dv-font-size-xs);
+  color: var(--dv-color-accent-text);
+  white-space: nowrap;
+}
+
+.filter-more-fields-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dv-space-sm);
+  margin-top: var(--dv-space-xs);
+}
+
 .filter-group {
   margin-bottom: var(--dv-space-sm);
 }
