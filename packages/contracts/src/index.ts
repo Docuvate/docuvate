@@ -1560,6 +1560,7 @@ export {
   tokenCoverageRatio,
   tokenBelongsToRect,
   tokensInsideRect,
+  padTextSelectionRect,
   snapRectToTokenHull,
   joinedTokenText,
   normalizeSelectionText,
