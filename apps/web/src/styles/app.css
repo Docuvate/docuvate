@@ -12683,6 +12683,13 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
     border-bottom: 1px solid var(--dv-color-border);
   }
 
+  /* Stacked layout: the tree scrolls inside a bounded box so the folder content stays within reach
+     and the virtualized tree only renders the rows in view. */
+  .dateisystem-sidebar .dateisystem-tree-nav-scroll {
+    max-height: min(40vh, 320px);
+    overscroll-behavior: contain;
+  }
+
   .dateisystem-split-handle {
     display: none;
   }
