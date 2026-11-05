@@ -119,7 +119,7 @@ function apportionWordRects(
   return out;
 }
 
-/** Distinct IR block indexes for persistence (PK is region_id + block_index). */
+/** Distinct IR block indexes for persistence (`region_id`, `block_index` PK). */
 export function uniqueBlockIndexes(tokens: readonly LayoutToken[]): number[] {
   const seen = new Set<number>();
   const out: number[] = [];
