@@ -110,6 +110,49 @@ export async function waitForDocumentLayoutIrReady(
     .toBe('ready');
 }
 
+/** Wait until extraction finished (`ready`). Does not require layout IR. */
+export async function waitForDocumentExtractionReady(
+  request: APIRequestContext,
+  apiBase: string,
+  webOrigin: string,
+  docId: string
+): Promise<void> {
+  let requeued = false;
+  await expect
+    .poll(
+      async () => {
+        const docRes = await request.get(`${apiBase}/v1/documents/${docId}`, {
+          headers: { origin: webOrigin },
+          timeout: REQUEST_TIMEOUT_MS,
+        });
+        if (!docRes.ok()) {
+          return `document-${String(docRes.status())}`;
+        }
+        const doc = readDocumentReadyState(await docRes.json());
+        if (doc.status === 'failed') {
+          if (!requeued) {
+            requeued = true;
+            const rq = await request.post(`${apiBase}/v1/documents/${docId}/extraction/requeue`, {
+              headers: { origin: webOrigin },
+              timeout: REQUEST_TIMEOUT_MS,
+            });
+            if (rq.ok()) {
+              return 'requeued';
+            }
+          }
+          const reason = doc.failureReason.length > 0 ? doc.failureReason : 'unknown';
+          throw new Error(`document extraction failed (${docId}): ${reason}`);
+        }
+        if (doc.status !== 'ready') {
+          return `status-${doc.status}`;
+        }
+        return 'ready';
+      },
+      { timeout: 160_000, intervals: [2000, 3000, 5000] }
+    )
+    .toBe('ready');
+}
+
 /** Prefer a smoke-seed document that already has layout IR over a new extract. */
 export async function findReadyLayoutDocument(
   request: APIRequestContext,

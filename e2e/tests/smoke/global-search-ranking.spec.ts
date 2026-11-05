@@ -9,7 +9,7 @@ import { type APIRequestContext, expect, type Page, test } from '@playwright/tes
 import { applyDocuvateLocale } from '../../helpers/docuvate-theme';
 import { assertNoHorizontalOverflow } from '../../helpers/overflow-check';
 import { smokeFixtureStoragePath } from '../../helpers/smoke-fixture-auth';
-import { waitForDocumentLayoutIrReady } from '../../helpers/wait-for-layout-ir';
+import { waitForDocumentExtractionReady } from '../../helpers/wait-for-layout-ir';
 
 const apiBase = process.env['E2E_API_URL'] ?? 'http://localhost:3001';
 const webOrigin = process.env['E2E_WEB_URL'] ?? 'http://localhost:5173';
@@ -62,7 +62,7 @@ async function createDocument(request: APIRequestContext, doc: FixtureDocument):
   const docId = isRecord(body) ? readString(body, 'id') : '';
   expect(docId).not.toBe('');
   // Let extraction finish first so it cannot overwrite the title and fields set below.
-  await waitForDocumentLayoutIrReady(request, apiBase, webOrigin, docId);
+  await waitForDocumentExtractionReady(request, apiBase, webOrigin, docId);
   const patch = await request.patch(`${apiBase}/v1/documents/${docId}`, {
     headers: { origin: webOrigin },
     data: {
@@ -108,7 +108,10 @@ test.describe('global search ranking', () => {
   const createdIds: string[] = [];
   let exactId = '';
 
+  // Hook timeout must be set explicitly: describe.configure(timeout) does not cover beforeAll,
+  // and the default 30s is too tight when smoke-seed still holds the extract slot.
   test.beforeAll(async ({ request }) => {
+    test.setTimeout(600_000);
     // Two distractors repeat the query in title, filename and a field value, so they win every
     // other lexical leg. Only the exact-title leg puts the target first.
     exactId = await createDocument(request, {
