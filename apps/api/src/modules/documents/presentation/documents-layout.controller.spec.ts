@@ -37,6 +37,7 @@ import { GetDocumentLayoutIrUseCase } from '../application/get-document-layout-i
 import { GetDocumentLayoutTypstUseCase } from '../application/get-document-layout-typst.use-case.js';
 import { GetDocumentPreviewUseCase } from '../application/get-document-preview.use-case.js';
 import { ListDocumentsUseCase } from '../application/list-documents.use-case.js';
+import { ExportDocumentFieldValuesUseCase } from '../application/export-document-field-values.use-case.js';
 import { MoveDocumentsUseCase } from '../application/move-documents.use-case.js';
 import { RequeueDocumentExtractionUseCase } from '../application/requeue-document-extraction.use-case.js';
 import { UpdateDocumentUseCase } from '../application/update-document.use-case.js';
@@ -102,6 +103,7 @@ describe('DocumentsController layout routes', () => {
             uploadDocument: UploadDocumentUseCase,
             getDocument: GetDocumentUseCase,
             listDocuments: ListDocumentsUseCase,
+            exportDocumentFieldValues: ExportDocumentFieldValuesUseCase,
             installationUserCount: PgInstallationUserCountReader,
             batchDocumentTagSuggestions: BatchDocumentTagSuggestionsUseCase,
             updateDocument: UpdateDocumentUseCase,
@@ -137,6 +139,7 @@ describe('DocumentsController layout routes', () => {
               uploadDocument,
               getDocument,
             listDocuments,
+            exportDocumentFieldValues,
             installationUserCount,
             batchDocumentTagSuggestions,
             updateDocument,
@@ -172,6 +175,7 @@ describe('DocumentsController layout routes', () => {
             UploadDocumentUseCase,
             GetDocumentUseCase,
             ListDocumentsUseCase,
+            ExportDocumentFieldValuesUseCase,
             PgInstallationUserCountReader,
             BatchDocumentTagSuggestionsUseCase,
             UpdateDocumentUseCase,
@@ -212,6 +216,7 @@ describe('DocumentsController layout routes', () => {
         { provide: UploadDocumentUseCase, useValue: useCaseExecuteMock() },
         { provide: GetDocumentUseCase, useValue: useCaseExecuteMock() },
         { provide: ListDocumentsUseCase, useValue: useCaseExecuteMock() },
+        { provide: ExportDocumentFieldValuesUseCase, useValue: useCaseExecuteMock() },
         {
           provide: PgInstallationUserCountReader,
           useValue: { countActiveUsers: vi.fn().mockResolvedValue(1) },
