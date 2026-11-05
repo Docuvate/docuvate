@@ -166,3 +166,51 @@ def test_correction_generalizes_rechnungsbetrag_from_catalog_label() -> None:
     spec = [{"key": "rechnungsbetrag", "label": "Rechnungsbetrag", "field_type": "currency"}]
     rows = extract_label_custom_fields(text, tag_name="Rechnung", fields=spec, examples=examples)
     assert {row.value for row in rows} == {"250,00"}
+
+
+def test_date_without_colon_uses_near_label_confidence() -> None:
+    """Bank-style OCR often emits ``Datum 30.12.2023`` without a colon."""
+    text = "\n".join(
+        [
+            "Kontoauszug Demo",
+            "Datum 30.12.2023",
+            "Vorgangsnummer 0811549879",
+            "Betrag: 100,00 EUR",
+        ]
+    )
+    fields = extract_label_custom_fields(
+        text,
+        tag_name="Kontoauszug",
+        fields=[{"key": "datum", "label": "Datum", "field_type": "date"}],
+    )
+    assert len(fields) == 1
+    assert fields[0].key == "datum"
+    assert fields[0].value == "30.12.2023"
+    assert fields[0].confidence is not None
+    assert fields[0].confidence >= 0.62
+
+
+def test_date_with_leading_whitespace_on_label_line() -> None:
+    text = "Header\n  Datum: 15.01.2026\nBetrag: 1,00 EUR"
+    fields = extract_label_custom_fields(
+        text,
+        tag_name="Rechnung",
+        fields=[{"key": "datum", "label": "Datum", "field_type": "date"}],
+    )
+    assert len(fields) == 1
+    assert fields[0].value == "15.01.2026"
+    assert fields[0].confidence is not None
+    assert fields[0].confidence >= 0.62
+
+
+def test_bare_date_regex_stays_below_normal_gate() -> None:
+    text = "Ohne Label steht nur 01.02.2026 irgendwo im Fließtext."
+    fields = extract_label_custom_fields(
+        text,
+        tag_name="Sonstiges",
+        fields=[{"key": "datum", "label": "Datum", "field_type": "date"}],
+    )
+    assert len(fields) == 1
+    assert fields[0].value == "01.02.2026"
+    assert fields[0].confidence is not None
+    assert fields[0].confidence < 0.62

@@ -83,6 +83,24 @@ def _extract_inline_currency_after_label(text: str, label: str) -> str | None:
     return None
 
 
+
+_DATE_NEAR_LABEL_CONFIDENCE = 0.78
+_DATE_REGEX_FALLBACK_CONFIDENCE = 0.55
+
+
+def _extract_inline_date_after_label(text: str, label: str) -> str | None:
+    """Match ``Label 30.12.2023`` when OCR omits the colon between label and value."""
+    if not label.strip():
+        return None
+    for variant in _label_search_variants(label):
+        esc = _escape_label(variant)
+        pattern = rf"(?im)^\s*{esc}\s+(?:vom\s+)?(\d{{2}}[./-]\d{{2}}[./-]\d{{2,4}})\b"
+        match = re.search(pattern, text)
+        if match:
+            return match.group(1)
+    return None
+
+
 def _extract_near_label(
     text: str,
     label: str,
@@ -107,6 +125,8 @@ def _extract_near_label(
             break
     if not value and field_type.strip().lower() in ("currency", "number"):
         value = _extract_inline_currency_after_label(text, label)
+    if not value and field_type.strip().lower() == "date":
+        value = _extract_inline_date_after_label(text, label)
     if value:
         value = strip_leading_sender_label_prefixes(value.strip(" ."))
         if value:
@@ -155,7 +175,7 @@ def _extract_by_type(
         if field_type == "date":
             parsed = _parse_date_field_value(near)
             if parsed:
-                return parsed, 0.78
+                return parsed, _DATE_NEAR_LABEL_CONFIDENCE
         elif field_type in ("currency", "number"):
             parsed = _first_currency_in_value(near)
             if parsed:
@@ -166,7 +186,8 @@ def _extract_by_type(
     if field_type == "date":
         date = re.search(r"\b(\d{2}[./-]\d{2}[./-]\d{2,4})\b", text)
         if date:
-            return date.group(1), 0.55
+            # Bare token only: stays below workspace "normal" (0.62). Prefer near-label.
+            return date.group(1), _DATE_REGEX_FALLBACK_CONFIDENCE
     if field_type in ("currency", "number"):
         labeled = _AMOUNT_ON_LABEL_LINE.search(text)
         if labeled:

@@ -20,4 +20,24 @@ describe('fieldsForLayoutPanel', () => {
     ];
     expect(fieldsForLayoutPanel(fields)).toEqual(fields);
   });
+
+  it('keeps one Absender when vendor and global:vendor both carry the same value', () => {
+    const fields = [
+      { key: 'vendor', value: 'Demo Absender GmbH', confidence: 0.7, userConfirmed: true },
+      {
+        key: 'global:vendor',
+        value: 'Demo Absender GmbH',
+        confidence: 1,
+        userConfirmed: true,
+      },
+      { key: 'amount', value: '12,00', userConfirmed: true },
+    ];
+    const panel = fieldsForLayoutPanel(fields);
+    const vendorRows = panel.filter(
+      (row) => row.key === 'vendor' || row.key === 'global:vendor' || row.key === 'absender'
+    );
+    expect(vendorRows).toHaveLength(1);
+    expect(vendorRows[0]?.key).toBe('global:vendor');
+    expect(panel.some((row) => row.key === 'amount')).toBe(true);
+  });
 });

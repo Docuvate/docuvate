@@ -77,7 +77,7 @@ def extract_multiline_value_after_label(
     if not label.strip():
         return None
     esc = _escape_label(label)
-    pattern = rf"(?im)^{esc}\s*[:\-\u2013\u2014]\s*(.*)$"
+    pattern = rf"(?im)^\s*{esc}\s*[:\-\u2013\u2014]\s*(.*)$"
     match = re.search(pattern, text)
     if not match:
         return None
