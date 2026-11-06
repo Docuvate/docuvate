@@ -73,3 +73,19 @@ for (const width of [390, 1024, 1280, 1440]) {
     expect(log.unmatched).toEqual([]);
   });
 }
+
+test('viewer: the Ansicht menu switches to recognised text and back at 1280px', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  const log = await installStructuringMocks(page);
+  await page.goto(`/documents/${LAYOUT_DOCUMENT_ID}`);
+  const toolbar = page.getByTestId('layout-viewer-toolbar');
+  await toolbar.getByRole('button', { name: /^(Ansicht|View):/ }).click();
+  await page.getByRole('menuitemradio', { name: /^(Erkannter Text|Recognised text)$/ }).click();
+  await expect(toolbar.getByRole('button', { name: 'Ansicht: Erkannter Text' })).toBeVisible();
+  await toolbar.getByRole('button', { name: /^(Ansicht|View):/ }).click();
+  await page.getByRole('menuitemradio', { name: /^Original$/ }).click();
+  await expect(toolbar.getByRole('button', { name: 'Ansicht: Original' })).toBeVisible();
+  expect(log.unmatched).toEqual([]);
+});

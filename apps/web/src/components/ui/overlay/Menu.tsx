@@ -124,41 +124,40 @@ export function MenuContent({
   portalLayer = 'popover',
 }: MenuContentProps) {
   const { open, setOpen, menuId, triggerRef } = useMenuContext();
-  const panelRef = useRef<HTMLDivElement>(null);
+  // The portal mounts the panel after `open` flips, so effects key off the node itself.
+  const [panel, setPanel] = useState<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    if (!open) {
-      return;
-    }
-    const panel = panelRef.current;
-    if (!panel) {
+    if (!open || !panel) {
       return;
     }
     const first = panel.querySelector<HTMLElement>(
       '[role="menuitem"], [role="menuitemcheckbox"], [role="menuitemradio"]'
     );
     first?.focus();
-  }, [open]);
+  }, [open, panel]);
 
   useEffect(() => {
-    if (!open) {
+    if (!open || !panel) {
       return;
     }
-    const panel = panelRef.current;
     function onClick(event: MouseEvent) {
       const target = event.target;
       if (
-        target instanceof HTMLElement &&
+        target instanceof Element &&
         target.closest('[role="menuitem"], [role="menuitemcheckbox"], [role="menuitemradio"]')
       ) {
-        setOpen(false);
+        // Close after React has run the item's own click handler.
+        window.setTimeout(() => {
+          setOpen(false);
+        }, 0);
       }
     }
-    panel?.addEventListener('click', onClick);
+    panel.addEventListener('click', onClick);
     return () => {
-      panel?.removeEventListener('click', onClick);
+      panel.removeEventListener('click', onClick);
     };
-  }, [open, setOpen]);
+  }, [open, panel, setOpen]);
 
   useEffect(() => {
     if (!open) {
@@ -168,7 +167,6 @@ export function MenuContent({
       if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') {
         return;
       }
-      const panel = panelRef.current;
       if (!panel) {
         return;
       }
@@ -191,7 +189,7 @@ export function MenuContent({
     return () => {
       document.removeEventListener('keydown', onKeyDown);
     };
-  }, [open]);
+  }, [open, panel]);
 
   return (
     <Popover
@@ -205,7 +203,7 @@ export function MenuContent({
       role="menu"
       id={menuId}
     >
-      <div ref={panelRef}>{children}</div>
+      <div ref={setPanel}>{children}</div>
     </Popover>
   );
 }
