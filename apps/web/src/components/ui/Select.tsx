@@ -1,5 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import { ChevronDown, type LucideIcon } from 'lucide-react';
 import {
   type CSSProperties,
   type KeyboardEvent,
@@ -34,6 +35,10 @@ interface SelectProps {
   className?: string;
   /** Render the listbox in a portal (avoids clipping in overflow containers). Default: true. */
   menuPortal?: boolean;
+  /** Leading icon; toolbar style with an icon chevron, like every other menu trigger. */
+  icon?: LucideIcon;
+  /** Tooltip, e.g. when the visible label collapses to the icon. */
+  title?: string;
 }
 
 function useSelectMenuPosition(
@@ -80,12 +85,16 @@ function useSelectMenuPosition(
     if (!open || !menuPortal) return;
     updatePosition();
     const frame = requestAnimationFrame(updatePosition);
-    return () => { cancelAnimationFrame(frame); };
+    return () => {
+      cancelAnimationFrame(frame);
+    };
   }, [open, menuPortal, updatePosition]);
 
   useEffect(() => {
     if (!open || !menuPortal) return;
-    const onScrollOrResize = () => { updatePosition(); };
+    const onScrollOrResize = () => {
+      updatePosition();
+    };
     window.addEventListener('resize', onScrollOrResize);
     window.addEventListener('scroll', onScrollOrResize, true);
     return () => {
@@ -123,6 +132,8 @@ export function Select({
   'aria-label': ariaLabel,
   className = '',
   menuPortal = true,
+  icon: Icon,
+  title,
 }: SelectProps) {
   const { t } = useTranslation();
   const resolvedPlaceholder = placeholder ?? t('common.selectPlaceholder');
@@ -175,7 +186,9 @@ export function Select({
       setOpen(false);
     };
     document.addEventListener('mousedown', onDoc);
-    return () => { document.removeEventListener('mousedown', onDoc); };
+    return () => {
+      document.removeEventListener('mousedown', onDoc);
+    };
   }, [open]);
 
   function onTriggerKeyDown(e: KeyboardEvent<HTMLButtonElement>) {
@@ -232,8 +245,12 @@ export function Select({
             aria-selected={opt.value === value}
             disabled={opt.disabled}
             className={`custom-select-option${opt.value === value ? ' custom-select-option-active' : ''}${index === activeIndex ? ' custom-select-option-focus' : ''}${opt.disabled ? ' custom-select-option-disabled' : ''}`}
-            onMouseEnter={() => { setActiveIndex(index); }}
-            onClick={() => { selectOption(opt); }}
+            onMouseEnter={() => {
+              setActiveIndex(index);
+            }}
+            onClick={() => {
+              selectOption(opt);
+            }}
           >
             <span className="custom-select-option-label">{opt.label}</span>
             {opt.suffix ? (
@@ -256,6 +273,7 @@ export function Select({
         className="custom-select-trigger input"
         disabled={disabled}
         aria-label={ariaLabel}
+        title={title}
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-controls={listId}
@@ -266,10 +284,19 @@ export function Select({
         }}
         onKeyDown={onTriggerKeyDown}
       >
-        <span className={selected ? '' : 'muted'}>{selected?.label ?? resolvedPlaceholder}</span>
-        <span className="custom-select-caret" aria-hidden>
-          ▾
+        {Icon ? (
+          <Icon className="custom-select-icon" size={16} strokeWidth={1.75} aria-hidden />
+        ) : null}
+        <span className={`custom-select-value${selected ? '' : ' muted'}`}>
+          {selected?.label ?? resolvedPlaceholder}
         </span>
+        {Icon ? (
+          <ChevronDown className="custom-select-caret" size={14} strokeWidth={2} aria-hidden />
+        ) : (
+          <span className="custom-select-caret" aria-hidden>
+            ▾
+          </span>
+        )}
       </button>
       {menuPortal && menu ? createPortal(menu, portalRoot) : menu}
     </div>

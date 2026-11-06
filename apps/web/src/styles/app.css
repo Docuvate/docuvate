@@ -470,219 +470,7 @@
   max-width: var(--dv-page-wide-max);
 }
 
-.app-ribbon-nav {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--dv-density-item-gap) var(--dv-space-lg);
-  min-width: 0;
-}
-
-/* Row 2: contextual ribbon. Area navigation first, then the screen's grouped actions. */
-.app-ribbon {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--dv-density-item-gap) var(--dv-space-lg);
-  padding: var(--dv-space-2xs) var(--dv-space-lg);
-  background: color-mix(in srgb, var(--dv-color-bg-raised) 55%, transparent);
-}
-
-.app-ribbon:not(:has(.ribbon-group)) {
-  display: none;
-}
-
-.app-ribbon-nav + .app-ribbon-actions:not(:empty) {
-  padding-inline-start: var(--dv-space-lg);
-  border-inline-start: var(--dv-border-width-hairline) solid var(--dv-color-border);
-}
-
-.app-ribbon-actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--dv-density-item-gap) var(--dv-space-lg);
-  margin-inline-start: auto;
-  min-width: 0;
-}
-
-.app-ribbon-actions:empty {
-  display: none;
-}
-
-.ribbon-group {
-  display: flex;
-  align-items: center;
-  gap: var(--dv-density-item-gap);
-  min-width: 0;
-}
-
-.ribbon-group + .ribbon-group {
-  padding-inline-start: var(--dv-space-lg);
-  border-inline-start: var(--dv-border-width-hairline) solid
-    color-mix(in srgb, var(--dv-color-border) 70%, transparent);
-}
-
-.ribbon-group-label {
-  color: var(--dv-color-text-subtle);
-  font-size: var(--dv-type-overline-size);
-  font-weight: var(--dv-type-overline-weight);
-  letter-spacing: var(--dv-type-overline-tracking);
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
-.ribbon-group-items,
-.ribbon-saved-views {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--dv-space-2xs);
-  min-width: 0;
-}
-
-.ribbon-link {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--dv-space-2xs);
-  min-height: var(--dv-control-height-sm);
-  padding: 0 var(--dv-space-xs);
-  border-radius: var(--dv-radius-lg);
-  color: var(--dv-color-text-muted);
-  font-size: var(--dv-font-size-sm);
-  font-weight: var(--dv-font-weight-medium);
-  text-decoration: none;
-  white-space: nowrap;
-  transition:
-    background-color var(--dv-motion-duration-fast) var(--dv-motion-easing-standard),
-    box-shadow var(--dv-motion-duration-fast) var(--dv-motion-easing-standard);
-}
-
-.ribbon-link:hover {
-  background: color-mix(in srgb, var(--dv-color-bg-muted) 55%, transparent);
-  color: var(--dv-color-text);
-  text-decoration: none;
-}
-
-.ribbon-link.active {
-  background: var(--dv-color-bg-raised);
-  color: var(--dv-color-text);
-  font-weight: var(--dv-font-weight-semibold);
-  box-shadow: var(--dv-surface-highlight), var(--dv-elevation-1);
-}
-
-.app-ribbon .library-toolbar {
-  justify-content: flex-start;
-  gap: var(--dv-space-2xs);
-}
-
-.app-ribbon .library-toolbar .custom-select {
-  min-width: 12rem;
-}
-
-@media (max-width: 1599px) {
-  .ribbon-group-label {
-    display: none;
-  }
-
-  .ribbon-link-label--wide {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-  }
-}
-
-@media (max-width: 1199px) {
-  .app-primary-nav-link {
-    padding-inline: var(--dv-space-xs);
-  }
-
-  .app-primary-nav-label {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-  }
-}
-
 @media (max-width: 768px) {
-  /* Phones: one scrollable row for the area, one for the screen's actions. */
-  .app-ribbon {
-    flex-direction: column;
-    flex-wrap: nowrap;
-    align-items: stretch;
-    gap: 0;
-    padding: 0;
-  }
-
-  .app-ribbon-nav,
-  .app-ribbon-actions {
-    flex-wrap: nowrap;
-    gap: var(--dv-space-sm);
-    margin-inline-start: 0;
-    padding: var(--dv-space-3xs) var(--dv-space-sm);
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-
-  .app-ribbon-nav + .app-ribbon-actions:not(:empty) {
-    padding-inline-start: var(--dv-space-sm);
-    border-inline-start: 0;
-    border-top: var(--dv-border-width-hairline) solid var(--dv-color-border);
-  }
-
-  .ribbon-group-items,
-  .ribbon-saved-views,
-  .app-ribbon .library-toolbar {
-    flex-wrap: nowrap;
-  }
-
-  .ribbon-group,
-  .ribbon-group-items > *,
-  .app-ribbon .library-toolbar > * {
-    flex: none;
-  }
-
-  .ribbon-link-label {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-  }
-
-  .ribbon-group + .ribbon-group {
-    padding-inline-start: var(--dv-space-sm);
-  }
-
-  .ribbon-link,
-  .app-ribbon .btn {
-    min-height: var(--dv-touch-target-min);
-  }
-
-  .app-ribbon .library-toolbar .custom-select {
-    min-width: 0;
-    max-width: 9.5rem;
-  }
-
-  .app-ribbon .library-saved-views-trigger-label {
-    display: none;
-  }
-
-  .app-ribbon .library-saved-views-trigger {
-    min-width: var(--dv-touch-target-min);
-    justify-content: center;
-  }
-
   .app-shell .app-sidebar-rail {
     width: min(18rem, 85vw);
     max-width: min(18rem, 85vw);
@@ -17099,58 +16887,6 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   box-shadow: inset 0 0 0 var(--dv-border-width-hairline) var(--dv-color-accent-text);
 }
 
-/* Ribbon controls stay compact so a screen's actions share one row with its area nav. */
-.app-ribbon .segmented-control__option {
-  min-width: 0;
-  padding-inline: var(--dv-space-sm);
-}
-
-.app-ribbon .library-toolbar .library-toolbar-sort {
-  width: auto;
-  min-width: 0;
-  max-width: 11rem;
-}
-
-@media (min-width: 1280px) {
-  .app-ribbon:has(.app-ribbon-nav) {
-    flex-wrap: nowrap;
-  }
-
-  .app-ribbon .app-ribbon-nav {
-    flex: 0 1 auto;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-
-  .app-ribbon .app-ribbon-nav .ribbon-group,
-  .app-ribbon .app-ribbon-actions {
-    flex: none;
-  }
-
-  .app-ribbon .app-ribbon-actions {
-    flex-wrap: nowrap;
-  }
-
-  .app-ribbon:has(.app-ribbon-nav),
-  .app-ribbon .app-ribbon-nav,
-  .app-ribbon .app-ribbon-actions {
-    gap: var(--dv-space-md);
-  }
-
-  .app-ribbon .ribbon-group + .ribbon-group,
-  .app-ribbon .app-ribbon-nav + .app-ribbon-actions:not(:empty) {
-    padding-inline-start: var(--dv-space-md);
-  }
-}
-
-@media (min-width: 769px) and (max-width: 1279px) {
-  .app-ribbon-nav + .app-ribbon-actions:not(:empty) {
-    padding-inline-start: 0;
-    border-inline-start: 0;
-  }
-}
-
 /* ---------- Depth: layered surfaces instead of boxed cards ---------- */
 
 .filter-panel {
@@ -17195,65 +16931,6 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   letter-spacing: -0.015em;
 }
 
-/* Document screen: inspector tabs live in the ribbon as a segmented pill group. */
-.app-ribbon .detail-tabs-bar {
-  display: inline-flex;
-  gap: var(--dv-space-3xs);
-  padding: var(--dv-space-3xs);
-  border-radius: var(--dv-radius-lg);
-  background: color-mix(in srgb, var(--dv-color-bg-muted) 45%, transparent);
-}
-
-.app-ribbon .detail-tab {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--dv-space-2xs);
-  min-height: var(--dv-control-height-sm);
-  padding: 0 var(--dv-space-sm);
-  border: 0;
-  border-radius: var(--dv-radius-md);
-  background: transparent;
-  color: var(--dv-color-text-muted);
-  font: inherit;
-  font-size: var(--dv-font-size-sm);
-  font-weight: var(--dv-font-weight-medium);
-  cursor: pointer;
-  transition:
-    background-color var(--dv-motion-duration-fast) var(--dv-motion-easing-standard),
-    box-shadow var(--dv-motion-duration-fast) var(--dv-motion-easing-standard);
-}
-
-.app-ribbon .detail-tab:hover {
-  color: var(--dv-color-text);
-}
-
-.app-ribbon .detail-tab.active {
-  background: var(--dv-color-bg-raised);
-  color: var(--dv-color-text);
-  font-weight: var(--dv-font-weight-semibold);
-  box-shadow: var(--dv-surface-highlight), var(--dv-elevation-1);
-}
-
-.app-ribbon .detail-tab:focus-visible {
-  outline: var(--dv-focus-ring-width) solid var(--dv-color-focus);
-  outline-offset: var(--dv-focus-ring-offset);
-}
-
-.app-ribbon .document-detail-tab-count {
-  min-inline-size: var(--dv-space-md);
-  padding: 0 var(--dv-space-2xs);
-  border-radius: var(--dv-radius-sm);
-  background: var(--dv-color-bg-muted);
-  color: var(--dv-color-text-muted);
-  font-size: var(--dv-font-size-xs);
-  font-variant-numeric: tabular-nums;
-  text-align: center;
-}
-
-.app-ribbon .aspect-strip {
-  margin: 0;
-}
-
 .document-inspector-card .detail-tab-panel-surface {
   padding: 0;
   border: 0;
@@ -17272,4 +16949,455 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   margin: var(--dv-space-2xs) 0;
   border: 0;
   border-top: var(--dv-border-width-hairline) solid var(--dv-color-border);
+}
+
+/* ==========================================================================
+   Ribbon system (second header row). One set of rules for every screen:
+   - Order: navigate → act → view → output. The group marked --end and all
+     after it sit at the right edge (view controls, output).
+   - Groups carry a visible caption where the row has room (≥ 1280px);
+     below that the caption is the group's accessible name only.
+   - Controls share one height, padding and radius (--dv-ribbon-* tokens).
+   - Navigation: text links, the current one a raised tonal pill.
+   - Actions: icon + label. Primary = the one main action, secondary =
+     bordered, tertiary = quiet until hover. Only menus show a chevron.
+   - Mutually exclusive views: segmented track with a raised selection.
+   ========================================================================== */
+
+.app-ribbon {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--dv-space-2xs) 0;
+  padding: var(--dv-space-2xs) var(--dv-space-lg) var(--dv-space-xs);
+  background: color-mix(in srgb, var(--dv-color-bg-raised) 55%, transparent);
+}
+
+.app-ribbon:not(:has(.ribbon-group)) {
+  display: none;
+}
+
+/* Nav and page-owned groups form one row of sibling groups. */
+.app-ribbon-nav,
+.app-ribbon-actions {
+  display: contents;
+}
+
+.ribbon-group {
+  display: grid;
+  grid-template-rows: auto auto;
+  align-content: end;
+  row-gap: var(--dv-ribbon-label-gap);
+  min-width: 0;
+  padding-inline: var(--dv-ribbon-group-gap);
+  border-inline-start: var(--dv-border-width-hairline) solid
+    color-mix(in srgb, var(--dv-color-border) 70%, transparent);
+}
+
+/* The first group of the row starts flush; the right-aligned part needs no rule, space separates it. */
+.app-ribbon > :first-child > .ribbon-group:first-child {
+  padding-inline-start: 0;
+  border-inline-start: 0;
+}
+
+.ribbon-group--end {
+  margin-inline-start: auto;
+  border-inline-start: 0;
+}
+
+.app-ribbon > :last-child > .ribbon-group:last-child {
+  padding-inline-end: 0;
+}
+
+.ribbon-group-label {
+  padding-inline-start: var(--dv-space-3xs);
+  color: var(--dv-color-text-subtle);
+  font-size: var(--dv-type-overline-size);
+  font-weight: var(--dv-type-overline-weight);
+  letter-spacing: var(--dv-type-overline-tracking);
+  line-height: 1.2;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.ribbon-group-items,
+.ribbon-saved-views,
+.app-ribbon .library-toolbar,
+.app-ribbon .review-workbench-actions {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: var(--dv-ribbon-item-gap);
+  min-width: 0;
+}
+
+.app-ribbon .library-toolbar {
+  justify-content: flex-start;
+}
+
+/* --- Shared control geometry --- */
+
+.ribbon-link,
+.app-ribbon .ribbon-action,
+.app-ribbon .custom-select-trigger,
+.app-ribbon .aspect-strip-btn,
+.app-ribbon .segmented-control__option,
+.app-ribbon .detail-tab {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--dv-ribbon-control-gap);
+  min-height: var(--dv-ribbon-control-height);
+  padding: 0 var(--dv-ribbon-control-padding-x);
+  border-radius: var(--dv-radius-control);
+  font: inherit;
+  font-size: var(--dv-font-size-sm);
+  font-weight: var(--dv-font-weight-medium);
+  line-height: 1;
+  white-space: nowrap;
+  text-decoration: none;
+  transition:
+    background-color var(--dv-motion-duration-fast) var(--dv-motion-easing-standard),
+    border-color var(--dv-motion-duration-fast) var(--dv-motion-easing-standard),
+    box-shadow var(--dv-motion-duration-fast) var(--dv-motion-easing-standard),
+    color var(--dv-motion-duration-fast) var(--dv-motion-easing-standard);
+}
+
+.ribbon-link:focus-visible,
+.app-ribbon .ribbon-action:focus-visible,
+.app-ribbon .custom-select-trigger:focus-visible,
+.app-ribbon .aspect-strip-btn:focus-visible,
+.app-ribbon .detail-tab:focus-visible {
+  outline: var(--dv-focus-ring-width) solid var(--dv-color-focus);
+  outline-offset: var(--dv-focus-ring-offset);
+}
+
+/* --- Navigation --- */
+
+.ribbon-link {
+  border: var(--dv-border-width-hairline) solid transparent;
+  color: var(--dv-color-text-muted);
+}
+
+.ribbon-link:hover {
+  background: color-mix(in srgb, var(--dv-color-bg-muted) 55%, transparent);
+  color: var(--dv-color-text);
+  text-decoration: none;
+}
+
+.ribbon-link.active {
+  background: var(--dv-color-bg-raised);
+  color: var(--dv-color-text);
+  font-weight: var(--dv-font-weight-semibold);
+  box-shadow: var(--dv-surface-highlight), var(--dv-elevation-1);
+}
+
+/* --- Actions --- */
+
+.app-ribbon .ribbon-action {
+  justify-content: center;
+}
+
+.app-ribbon .ribbon-action--secondary {
+  border-color: color-mix(in srgb, var(--dv-color-border) 85%, transparent);
+  background: var(--dv-color-bg-raised);
+  color: var(--dv-color-text);
+}
+
+.app-ribbon .ribbon-action--tertiary,
+.app-ribbon .custom-select-trigger {
+  border: var(--dv-border-width-hairline) solid transparent;
+  background: transparent;
+  color: var(--dv-color-text);
+  box-shadow: none;
+}
+
+.app-ribbon .ribbon-action--tertiary:hover:not(:disabled),
+.app-ribbon .ribbon-action--tertiary[aria-expanded='true'],
+.app-ribbon .custom-select-trigger:hover:not(:disabled),
+.app-ribbon .custom-select-trigger[aria-expanded='true'] {
+  border-color: color-mix(in srgb, var(--dv-color-border) 70%, transparent);
+  background: var(--dv-color-bg-raised);
+  box-shadow: var(--dv-surface-highlight), var(--dv-elevation-1);
+}
+
+.app-ribbon .ribbon-action > svg,
+.app-ribbon .custom-select-icon {
+  flex: none;
+  color: var(--dv-color-text-muted);
+}
+
+.app-ribbon .ribbon-action--primary > svg {
+  color: currentcolor;
+}
+
+/* Only menus carry a chevron, always the last icon and always muted. */
+.app-ribbon .ribbon-action--menu > svg:last-child,
+.app-ribbon .custom-select-caret {
+  opacity: 0.7;
+}
+
+.app-ribbon .custom-select {
+  min-width: 0;
+}
+
+.app-ribbon .custom-select-trigger {
+  justify-content: flex-start;
+  width: auto;
+  min-width: 0;
+}
+
+/* --- Mutually exclusive views: segmented track, raised selection (no accent fill) --- */
+
+.app-ribbon .segmented-control.segmented-control--shell,
+.app-ribbon .detail-tabs-bar {
+  display: inline-flex;
+  flex-wrap: nowrap;
+  gap: var(--dv-space-3xs);
+  padding: var(--dv-space-3xs);
+  border: 0;
+  border-radius: var(--dv-radius-lg);
+  background: color-mix(in srgb, var(--dv-color-bg-muted) 55%, transparent);
+}
+
+.app-ribbon .segmented-control--shell .segmented-control__option,
+.app-ribbon .detail-tab {
+  flex: none;
+  min-width: 0;
+  min-height: calc(var(--dv-ribbon-control-height) - 2 * var(--dv-space-3xs));
+  border: 0;
+  background: transparent;
+  color: var(--dv-color-text-muted);
+  cursor: pointer;
+}
+
+.app-ribbon .segmented-control--shell .segmented-control__option + .segmented-control__option {
+  border-left: 0;
+}
+
+.app-ribbon
+  .segmented-control--shell
+  .segmented-control__option:hover:not(.segmented-control__option--selected),
+.app-ribbon .detail-tab:hover:not(.active) {
+  background: transparent;
+  color: var(--dv-color-text);
+}
+
+.app-ribbon .segmented-control--shell .segmented-control__option--selected,
+.app-ribbon .detail-tab.active {
+  background: var(--dv-color-bg-raised);
+  color: var(--dv-color-text);
+  font-weight: var(--dv-font-weight-semibold);
+  box-shadow: var(--dv-surface-highlight), var(--dv-elevation-1);
+}
+
+.segmented-option-content {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--dv-ribbon-control-gap);
+}
+
+.app-ribbon .document-detail-tab-count {
+  min-inline-size: var(--dv-space-md);
+  padding: 0 var(--dv-space-2xs);
+  border-radius: var(--dv-radius-sm);
+  background: var(--dv-color-bg-muted);
+  color: var(--dv-color-text-muted);
+  font-size: var(--dv-font-size-xs);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.5;
+  text-align: center;
+}
+
+/* --- Structuring aspects: jump buttons with a state badge --- */
+
+.app-ribbon .aspect-strip {
+  flex-wrap: nowrap;
+  gap: var(--dv-ribbon-item-gap);
+  margin: 0;
+}
+
+.app-ribbon .aspect-strip-btn {
+  border: var(--dv-border-width-hairline) solid transparent;
+  background: transparent;
+  color: var(--dv-color-text);
+}
+
+.app-ribbon button.aspect-strip-btn:hover {
+  border-color: color-mix(in srgb, var(--dv-color-border) 70%, transparent);
+  background: var(--dv-color-bg-raised);
+  box-shadow: var(--dv-surface-highlight), var(--dv-elevation-1);
+}
+
+.app-ribbon .aspect-strip-btn > svg {
+  color: var(--aspect-tone);
+}
+
+.app-ribbon .aspect-strip-name {
+  font-weight: var(--dv-font-weight-medium);
+}
+
+.app-ribbon .aspect-strip-state {
+  padding: var(--dv-space-3xs) var(--dv-space-2xs);
+  border-radius: var(--dv-radius-sm);
+  background: var(--aspect-fill);
+  color: var(--aspect-tone);
+  font-size: var(--dv-font-size-xs);
+  font-weight: var(--dv-font-weight-semibold);
+  line-height: 1;
+}
+
+/* --- Responsive rules --- */
+
+/* Below 1280px the captions go (names stay accessible) and the row may wrap: area first. */
+@media (max-width: 1279px) {
+  .ribbon-group-label {
+    display: none;
+  }
+
+  .app-ribbon {
+    align-items: center;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1279px) {
+  /* Two deliberate rows instead of a random wrap: where you are, then what you can do. */
+  .app-ribbon-nav::after {
+    content: '';
+    flex-basis: 100%;
+  }
+
+  .app-ribbon-nav + .app-ribbon-actions > .ribbon-group:first-child {
+    padding-inline-start: 0;
+    border-inline-start: 0;
+  }
+}
+
+/* Under 1600px view-mode segments show icons; their label stays the name and the tooltip. */
+@media (min-width: 769px) and (max-width: 1599px) {
+  .app-ribbon .segmented-option-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
+}
+
+/* Below 1440px view controls (sort, saved views) collapse to icon + chevron with a tooltip;
+   actions and navigation always keep their labels. */
+@media (min-width: 769px) and (max-width: 1439px) {
+  .app-ribbon .custom-select-value,
+  .app-ribbon .library-saved-views-trigger-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
+}
+
+/* Main areas keep their names: icons drop first, labels only on small tablets. */
+@media (max-width: 1279px) {
+  .app-primary-nav-link {
+    padding-inline: var(--dv-space-xs);
+  }
+
+  .app-primary-nav-link > svg {
+    display: none;
+  }
+
+  .global-search-trigger {
+    width: min(14rem, 100%);
+  }
+
+  .global-search-trigger kbd {
+    display: none;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1023px) {
+  .app-primary-nav-link > svg {
+    display: inline-block;
+  }
+
+  .app-primary-nav-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
+}
+
+/* Phones: two swipeable rows, the area and the screen's controls; captions and chevrons stay off. */
+@media (max-width: 768px) {
+  .app-ribbon {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    gap: 0;
+    padding: 0;
+  }
+
+  .app-ribbon-nav,
+  .app-ribbon-actions {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 0;
+    padding: var(--dv-space-3xs) var(--dv-space-sm);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .app-ribbon-actions:empty {
+    display: none;
+  }
+
+  .app-ribbon-nav + .app-ribbon-actions:not(:empty) {
+    border-top: var(--dv-border-width-hairline) solid var(--dv-color-border);
+  }
+
+  .ribbon-group {
+    flex: none;
+    padding-inline: var(--dv-space-sm);
+  }
+
+  .app-ribbon > * > .ribbon-group:first-child {
+    padding-inline-start: 0;
+    border-inline-start: 0;
+  }
+
+  .ribbon-group--end {
+    margin-inline-start: 0;
+    border-inline-start: var(--dv-border-width-hairline) solid
+      color-mix(in srgb, var(--dv-color-border) 70%, transparent);
+  }
+
+  .ribbon-group-items > *,
+  .app-ribbon .library-toolbar > * {
+    flex: none;
+  }
+
+  .ribbon-link,
+  .app-ribbon .ribbon-action,
+  .app-ribbon .custom-select-trigger,
+  .app-ribbon .aspect-strip-btn {
+    min-height: var(--dv-touch-target-min);
+  }
+
+  .app-ribbon .library-saved-views-trigger-label {
+    display: none;
+  }
+
+  .app-ribbon .library-saved-views-trigger {
+    min-width: var(--dv-touch-target-min);
+  }
 }

@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { Plug } from 'lucide-react';
+import { ArrowDownUp, Plug } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
@@ -20,6 +20,7 @@ import { UploadDropzone } from '../components/UploadDropzone';
 import { resolveLibraryDropTarget } from '../lib/documentUploadAssignment';
 import { countLibraryActiveFilters } from '../lib/libraryActiveFilterCount';
 import { librarySortSelectOptions, parseLibrarySortSelectValue } from '../lib/librarySortOptions';
+import { ribbonActionClass } from '../lib/ribbonAction';
 import { routes } from '../lib/routes';
 import { LibraryPageDocumentSection } from './library/LibraryPageDocumentSection';
 import { useLibraryDocumentContextMenu } from './library/useLibraryDocumentContextMenu';
@@ -53,6 +54,7 @@ export function LibraryPage() {
     };
   }, []);
   const sortOptions = useMemo(() => librarySortSelectOptions(t), [t]);
+  const sortValue = `${data.filters.sort ?? 'updatedAt'}:${data.filters.order ?? 'desc'}`;
   const activeFilterCount = useMemo(() => countLibraryActiveFilters(data.filters), [data.filters]);
 
   const dropTarget = useMemo(
@@ -88,23 +90,34 @@ export function LibraryPage() {
     <DocumentUploadProvider dropTarget={dropTarget} onUploaded={onUploaded}>
       <div className="page library-page" data-ux="page">
         <AppRibbon>
-          <RibbonGroup label={t('ribbon.capture')}>
-            <UploadFileTrigger variant="primary" size="sm" />
+          <RibbonGroup label={t('ribbon.capture')} kind="act">
+            <UploadFileTrigger
+              variant="primary"
+              size="sm"
+              className="ribbon-action ribbon-action--primary"
+              icon
+            />
             <Link
               to={routes.settingsConnectors}
-              className="ribbon-link"
-              aria-label={t('pipeline.library.importSources')}
+              className={ribbonActionClass('secondary')}
+              title={t('ribbon.autoImportHint')}
             >
-              <Plug size={14} strokeWidth={1.75} aria-hidden />
-              <span className="ribbon-link-label">{t('pipeline.library.importSources')}</span>
+              <Plug size={16} strokeWidth={1.75} aria-hidden />
+              {t('ribbon.autoImport')}
             </Link>
           </RibbonGroup>
-          <RibbonGroup label={t('ribbon.display')}>
+          <RibbonGroup label={t('ribbon.display')} kind="view" align="end">
             <div className="library-toolbar">
-              <LibraryViewSwitcher value={data.viewMode} onChange={data.onViewModeChange} />
+              <LibraryViewSwitcher
+                value={data.viewMode}
+                onChange={data.onViewModeChange}
+                withIcons
+              />
               <Select
-                className="library-toolbar-sort"
-                value={`${data.filters.sort ?? 'updatedAt'}:${data.filters.order ?? 'desc'}`}
+                className="library-toolbar-sort ribbon-select"
+                icon={ArrowDownUp}
+                title={`${t('library.sortLabel')}: ${sortOptions.find((option) => option.value === sortValue)?.label ?? ''}`}
+                value={sortValue}
                 onChange={(value) => {
                   const { sort, order } = parseLibrarySortSelectValue(value);
                   data.toggleFilter({ sort, order });
@@ -133,7 +146,7 @@ export function LibraryPage() {
               />
             </div>
           </RibbonGroup>
-          <RibbonGroup label={t('ribbon.output')}>
+          <RibbonGroup label={t('ribbon.output')} kind="output">
             <LibraryExportMenu
               busy={data.exportBusy}
               disabled={!data.hasDocuments}

@@ -2581,7 +2581,7 @@
   },
   "ribbon": {
     "stock": "Records",
-    "views": "Views",
+    "views": "Pinned",
     "area": "Area",
     "structure": "Structure",
     "capture": "Capture",
@@ -2589,6 +2589,8 @@
     "output": "Output",
     "work": "Work",
     "review": "Review",
-    "inspector": "Inspector"
+    "inspector": "Inspector",
+    "autoImport": "Auto-import",
+    "autoImportHint": "Set up connections that import documents automatically: mailbox, scanner/SFTP or Paperless-ngx"
   }
 }

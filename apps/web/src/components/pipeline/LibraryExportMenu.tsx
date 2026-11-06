@@ -3,6 +3,7 @@
 import { ChevronDown, FileJson, FileOutput, FileSpreadsheet } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
+import { ribbonActionClass } from '../../lib/ribbonAction';
 import { MenuItem } from '../ui/MenuItem';
 import { Menu, MenuContent, MenuTrigger } from '../ui/overlay/Menu';
 
@@ -29,7 +30,10 @@ export function LibraryExportMenu({
   return (
     <Menu>
       <MenuTrigger
-        className="btn btn-secondary library-export-trigger"
+        className={ribbonActionClass('tertiary', {
+          menu: true,
+          className: 'library-export-trigger',
+        })}
         aria-label={t('pipeline.library.exportMenuAria')}
         disabled={disabled || busy}
       >

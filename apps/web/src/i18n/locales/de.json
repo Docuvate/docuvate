@@ -2581,7 +2581,7 @@
   },
   "ribbon": {
     "stock": "Bestand",
-    "views": "Ansichten",
+    "views": "Angeheftet",
     "area": "Bereich",
     "structure": "Struktur",
     "capture": "Erfassen",
@@ -2589,6 +2589,8 @@
     "output": "Ausgabe",
     "work": "Arbeiten",
     "review": "Prüfen",
-    "inspector": "Inspektor"
+    "inspector": "Inspektor",
+    "autoImport": "Automatisch importieren",
+    "autoImportHint": "Verbindungen einrichten, die Dokumente automatisch importieren: Postfach, Scanner/SFTP oder Paperless-ngx"
   }
 }

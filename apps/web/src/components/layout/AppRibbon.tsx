@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { Bookmark, Settings2 } from 'lucide-react';
+import { Bookmark } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
@@ -26,19 +26,32 @@ export function AppRibbon({ children }: { children: ReactNode }) {
   return slot ? createPortal(children, slot) : null;
 }
 
+/**
+ * What a group holds. The ribbon always reads navigate → act → view → output: where you are, what
+ * you can do here, how the screen is shown, and what leaves the app. The part from the group marked
+ * `align="end"` sits at the right edge, so actions and view controls never interleave.
+ */
+type RibbonGroupKind = 'navigate' | 'act' | 'view' | 'output';
+
 export function RibbonGroup({
   label,
+  kind = 'act',
+  align,
   order,
   children,
 }: {
+  /** Visible caption where space permits; always the group's accessible name. */
   label: string;
+  kind?: RibbonGroupKind;
+  /** Start the right-aligned part of the ribbon at this group. */
+  align?: 'end';
   /** Position among groups portalled by different components of one screen. */
   order?: number;
   children: ReactNode;
 }) {
   return (
     <div
-      className="ribbon-group"
+      className={`ribbon-group ribbon-group--${kind}${align === 'end' ? ' ribbon-group--end' : ''}`}
       role="group"
       aria-label={label}
       style={order === undefined ? undefined : { order }}
@@ -54,13 +67,10 @@ export function RibbonGroup({
 function RibbonLink({
   to,
   active,
-  label,
   children,
 }: {
   to: string;
   active: boolean;
-  /** Accessible name when the visible label collapses to an icon. */
-  label?: string;
   children: ReactNode;
 }) {
   return (
@@ -68,7 +78,6 @@ function RibbonLink({
       to={to}
       className={`ribbon-link${active ? ' active' : ''}`}
       aria-current={active ? 'page' : undefined}
-      aria-label={label}
     >
       {children}
     </Link>
@@ -89,45 +98,37 @@ function DocumentsSectionNav() {
   const views = usePinnedSavedViews();
   return (
     <>
-      <RibbonGroup label={t('ribbon.stock')}>
+      <RibbonGroup label={t('ribbon.stock')} kind="navigate">
         {DOCUMENT_LINKS.map((link) => (
           <RibbonLink key={link.id} to={link.to} active={current === link.id}>
             {t(link.labelKey)}
           </RibbonLink>
         ))}
       </RibbonGroup>
-      <RibbonGroup label={t('ribbon.views')}>
-        <div className="ribbon-saved-views">
-          {views.map((view) => {
-            const active = savedViewSidebarLinkIsActive(
-              location.pathname,
-              location.search,
-              view.id
-            );
-            return (
-              <Link
-                key={view.id}
-                to={`${routes.documents}?view=${encodeURIComponent(view.id)}`}
-                className={`ribbon-link ribbon-saved-view-link${active ? ' active' : ''}`}
-                aria-current={active ? 'page' : undefined}
-              >
-                <Bookmark size={14} strokeWidth={1.75} aria-hidden />
-                {view.name}
-              </Link>
-            );
-          })}
-          <RibbonLink
-            to={routes.savedViews}
-            active={current === 'views'}
-            label={t('nav.manageViews')}
-          >
-            <Settings2 size={14} strokeWidth={1.75} aria-hidden />
-            <span className="ribbon-link-label ribbon-link-label--wide">
-              {t('nav.manageViews')}
-            </span>
-          </RibbonLink>
-        </div>
-      </RibbonGroup>
+      {views.length > 0 ? (
+        <RibbonGroup label={t('ribbon.views')} kind="navigate">
+          <div className="ribbon-saved-views">
+            {views.map((view) => {
+              const active = savedViewSidebarLinkIsActive(
+                location.pathname,
+                location.search,
+                view.id
+              );
+              return (
+                <Link
+                  key={view.id}
+                  to={`${routes.documents}?view=${encodeURIComponent(view.id)}`}
+                  className={`ribbon-link ribbon-saved-view-link${active ? ' active' : ''}`}
+                  aria-current={active ? 'page' : undefined}
+                >
+                  <Bookmark size={14} strokeWidth={1.75} aria-hidden />
+                  {view.name}
+                </Link>
+              );
+            })}
+          </div>
+        </RibbonGroup>
+      ) : null}
     </>
   );
 }
@@ -136,7 +137,7 @@ function FoldersSectionNav() {
   const { t } = useTranslation();
   const { pathname } = useLocation();
   return (
-    <RibbonGroup label={t('ribbon.area')}>
+    <RibbonGroup label={t('ribbon.area')} kind="navigate">
       <RibbonLink to={routes.filesystem} active={pathname !== routes.filesystemUnassigned}>
         {t('nav.folders')}
       </RibbonLink>
@@ -153,7 +154,7 @@ function FoldersSectionNav() {
 function StructureSectionNav({ section }: { section: AppSection }) {
   const { t } = useTranslation();
   return (
-    <RibbonGroup label={t('ribbon.structure')}>
+    <RibbonGroup label={t('ribbon.structure')} kind="navigate">
       <RibbonLink to={routes.structureLabels} active={section === 'labels'}>
         {t('nav.labels')}
       </RibbonLink>

@@ -162,8 +162,9 @@ test.describe('document list toolbar at small widths', () => {
     await assertNoHorizontalOverflow(page);
   });
 
-  test('desktop keeps labelled saved-view menu (1280)', async ({ page }) => {
-    await page.setViewportSize({ width: 1280, height: 900 });
+  test('desktop keeps labelled saved-view menu (1440)', async ({ page }) => {
+    // Below 1440px view controls collapse to icon + chevron; the accessible name stays.
+    await page.setViewportSize({ width: 1440, height: 900 });
     await openLibrary(page);
     await expect(page.locator('.library-saved-views-trigger-label')).toBeVisible();
     await expect(page.getByTestId('library-filter-panel')).toBeVisible();

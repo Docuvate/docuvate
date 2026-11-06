@@ -13,6 +13,7 @@ import {
   type WorkbenchRow,
   workbenchRows,
 } from '../../lib/reviewWorkbench';
+import { ribbonActionClass } from '../../lib/ribbonAction';
 import { routes } from '../../lib/routes';
 import { type StructuringAspect, structuringAspects } from '../../lib/structuringAspects';
 import { DocumentLabelSuggestionChips } from '../documents';
@@ -220,7 +221,7 @@ export function DocumentReviewWorkbench({
       data-open-count={open}
     >
       <AppRibbon>
-        <RibbonGroup label={t('ribbon.structure')} order={1}>
+        <RibbonGroup label={t('ribbon.structure')} kind="navigate" order={1}>
           <StructuringAspectStrip
             statuses={aspects}
             className="review-workbench-aspects"
@@ -234,12 +235,13 @@ export function DocumentReviewWorkbench({
             }}
           />
         </RibbonGroup>
-        <RibbonGroup label={t('ribbon.review')} order={2}>
+        <RibbonGroup label={t('ribbon.review')} kind="act" order={2}>
           <div className="review-workbench-actions">
             <Button
               type="button"
               size="sm"
               variant={safeKeys.length > 0 ? 'primary' : 'secondary'}
+              className={`ribbon-action ribbon-action--${safeKeys.length > 0 ? 'primary' : 'secondary'}`}
               disabled={saving || safeKeys.length === 0}
               onClick={() => {
                 onConfirmMany(safeKeys);
@@ -252,14 +254,16 @@ export function DocumentReviewWorkbench({
               <Link
                 ref={nextRef}
                 to={reviewDocumentHref(nextDocumentId)}
-                className={`btn btn-sm review-workbench-next ${open + openLabels === 0 ? 'btn-primary' : 'btn-secondary'}`}
+                className={ribbonActionClass(open + openLabels === 0 ? 'primary' : 'secondary', {
+                  className: 'review-workbench-next',
+                })}
                 aria-keyshortcuts="N"
               >
                 {t('pipeline.workbench.next')}
                 <ArrowRight size={16} strokeWidth={2} aria-hidden />
               </Link>
             ) : (
-              <Link to={routes.reviewQueue} className="btn btn-ghost btn-sm">
+              <Link to={routes.reviewQueue} className={ribbonActionClass('tertiary')}>
                 {t('pipeline.viewer.review.queueAction')}
               </Link>
             )}

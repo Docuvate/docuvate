@@ -76,6 +76,8 @@ interface MenuTriggerProps {
   children: ReactNode;
   className?: string;
   'aria-label'?: string;
+  /** Tooltip, e.g. when the visible label collapses to an icon. */
+  title?: string;
   disabled?: boolean;
 }
 
@@ -83,6 +85,7 @@ export function MenuTrigger({
   children,
   className,
   'aria-label': ariaLabel,
+  title,
   disabled = false,
 }: MenuTriggerProps) {
   const { open, setOpen, menuId, triggerRef } = useMenuContext();
@@ -96,6 +99,7 @@ export function MenuTrigger({
       aria-expanded={open}
       aria-controls={open ? menuId : undefined}
       aria-label={ariaLabel}
+      title={title}
       disabled={disabled}
       onClick={() => {
         setOpen(!open);

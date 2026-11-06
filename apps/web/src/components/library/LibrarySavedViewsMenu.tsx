@@ -4,6 +4,7 @@ import { Bookmark, ChevronDown, RefreshCw, Save, Settings2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
+import { ribbonActionClass } from '../../lib/ribbonAction';
 import { routes } from '../../lib/routes';
 import { MenuItem } from '../ui/MenuItem';
 import { Menu, MenuContent, MenuTrigger } from '../ui/overlay/Menu';
@@ -25,8 +26,12 @@ export function LibrarySavedViewsMenu({
   return (
     <Menu>
       <MenuTrigger
-        className="btn btn-secondary library-saved-views-trigger"
+        className={ribbonActionClass('tertiary', {
+          menu: true,
+          className: 'library-saved-views-trigger',
+        })}
         aria-label={t('savedViews.menuAria')}
+        title={t('savedViews.menuAria')}
       >
         <Bookmark size={16} strokeWidth={2} aria-hidden />
         <span className="library-saved-views-trigger-label">{t('savedViews.menuLabel')}</span>

@@ -102,7 +102,6 @@ import { routes } from '../lib/routes';
 import { notifySaved, notifySaveError } from '../lib/saveNotify';
 import { pushRecentDocument } from '../lib/search/searchRecent';
 
-
 interface DocumentMetadataBaseline {
   title: string;
   documentDate: string;
@@ -736,7 +735,7 @@ export function DocumentDetailPage() {
       ) : null}
 
       <AppRibbon>
-        <RibbonGroup label={t('ribbon.inspector')} order={3}>
+        <RibbonGroup label={t('ribbon.inspector')} kind="view" align="end" order={3}>
           <DocumentDetailTabStrip
             panels={inspectorPanels}
             activeTab={inspector}
@@ -854,54 +853,54 @@ export function DocumentDetailPage() {
                 aria-labelledby="document-detail-tab-fields"
                 hidden={inspector !== 'fields'}
               >
-              <DocumentReviewWorkbench
-                doc={doc}
-                fields={recognizedFields}
-                suggestions={heuristicSuggestions}
-                fieldLabelForKey={fieldLabelForKey}
-                fieldTargets={fieldTargets}
-                saving={saving}
-                nextDocumentId={nextDocumentId}
-                autoFocusFirst={arrivedForReview}
-                onConfirm={(key) => {
-                  const field = fields.find((row) => row.key === key);
-                  if (field) confirmField(field);
-                }}
-                onConfirmMany={(keys) => {
-                  saveFieldsWithUndo(
-                    confirmFieldKeys(fields, new Set(keys)),
-                    t('pipeline.workbench.acceptedToast', { count: keys.length })
-                  );
-                }}
-                onSaveValue={(key, value) => {
-                  saveFieldsWithUndo(
-                    withSavedFieldValue(fields, key, value),
-                    t('pipeline.workbench.correctedToast')
-                  );
-                }}
-                onAcceptSuggestion={acceptSuggestionAndSave}
-                onReassign={(fromKey, toKey) => {
-                  saveFieldsWithUndo(
-                    reassignFieldValue(fields, fromKey, toKey),
-                    t('pipeline.workbench.reassignedToast', { field: fieldLabelForKey(toKey) })
-                  );
-                }}
-                onLocate={locateValue}
-                onLabelsUpdated={refreshDocumentLabels}
-                onOpenAspect={(aspect) => {
-                  if (aspect === 'labels') {
-                    openInspector('labels');
-                    return;
-                  }
-                  if (aspect === 'layout' && layoutWorkspace) setLayoutSideTab('outline');
-                  if (aspect === 'ocr' && layoutWorkspace) setLayoutTextEditOpen(true);
-                  window.requestAnimationFrame(() => {
-                    document
-                      .querySelector('.document-workbench-main')
-                      ?.scrollIntoView({ block: 'start', behavior: 'smooth' });
-                  });
-                }}
-              />
+                <DocumentReviewWorkbench
+                  doc={doc}
+                  fields={recognizedFields}
+                  suggestions={heuristicSuggestions}
+                  fieldLabelForKey={fieldLabelForKey}
+                  fieldTargets={fieldTargets}
+                  saving={saving}
+                  nextDocumentId={nextDocumentId}
+                  autoFocusFirst={arrivedForReview}
+                  onConfirm={(key) => {
+                    const field = fields.find((row) => row.key === key);
+                    if (field) confirmField(field);
+                  }}
+                  onConfirmMany={(keys) => {
+                    saveFieldsWithUndo(
+                      confirmFieldKeys(fields, new Set(keys)),
+                      t('pipeline.workbench.acceptedToast', { count: keys.length })
+                    );
+                  }}
+                  onSaveValue={(key, value) => {
+                    saveFieldsWithUndo(
+                      withSavedFieldValue(fields, key, value),
+                      t('pipeline.workbench.correctedToast')
+                    );
+                  }}
+                  onAcceptSuggestion={acceptSuggestionAndSave}
+                  onReassign={(fromKey, toKey) => {
+                    saveFieldsWithUndo(
+                      reassignFieldValue(fields, fromKey, toKey),
+                      t('pipeline.workbench.reassignedToast', { field: fieldLabelForKey(toKey) })
+                    );
+                  }}
+                  onLocate={locateValue}
+                  onLabelsUpdated={refreshDocumentLabels}
+                  onOpenAspect={(aspect) => {
+                    if (aspect === 'labels') {
+                      openInspector('labels');
+                      return;
+                    }
+                    if (aspect === 'layout' && layoutWorkspace) setLayoutSideTab('outline');
+                    if (aspect === 'ocr' && layoutWorkspace) setLayoutTextEditOpen(true);
+                    window.requestAnimationFrame(() => {
+                      document
+                        .querySelector('.document-workbench-main')
+                        ?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+                    });
+                  }}
+                />
               </div>
             ) : null}
             {inspector === 'details' ? (

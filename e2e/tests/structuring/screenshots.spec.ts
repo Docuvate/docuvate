@@ -100,12 +100,35 @@ test('screenshot navigation drawer · mobile · light', async ({ page }) => {
   expect(log.unmatched).toEqual([]);
 });
 
-test('screenshot library · tablet · light', async ({ page }) => {
-  await page.setViewportSize({ width: 1024, height: 800 });
-  const log = await installStructuringMocks(page, { theme: 'light' });
-  await page.goto('/documents');
-  await page.locator('[data-ux="page-title"]').first().waitFor({ state: 'visible' });
-  await page.waitForTimeout(500);
-  await page.screenshot({ path: path.join(shotDir, 'library-tablet-light.png'), fullPage: true });
-  expect(log.unmatched).toEqual([]);
-});
+for (const width of [1024, 1280] as const) {
+  const id = width === 1024 ? 'tablet' : 'laptop';
+  test(`screenshot library · ${id} · light`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 800 });
+    const log = await installStructuringMocks(page, { theme: 'light' });
+    await page.goto('/documents');
+    await page.locator('[data-ux="page-title"]').first().waitFor({ state: 'visible' });
+    await page.waitForTimeout(500);
+    await page.screenshot({ path: path.join(shotDir, `library-${id}-light.png`), fullPage: true });
+    expect(log.unmatched).toEqual([]);
+  });
+}
+
+// The header and ribbon alone, across widths, to review the ribbon rules side by side.
+for (const screen of [
+  { slug: 'library', path: '/documents' },
+  { slug: 'viewer', path: '/documents/synthetic-doc-0001' },
+] as const) {
+  for (const width of [1024, 1280, 1440, 1920] as const) {
+    test(`screenshot ribbon · ${screen.slug} · ${String(width)}`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 700 });
+      const log = await installStructuringMocks(page, { theme: 'light' });
+      await page.goto(screen.path);
+      await page.locator('.app-ribbon .ribbon-group').first().waitFor({ state: 'visible' });
+      await page.waitForTimeout(400);
+      await page
+        .locator('.app-header')
+        .screenshot({ path: path.join(shotDir, `ribbon-${screen.slug}-${String(width)}.png`) });
+      expect(log.unmatched).toEqual([]);
+    });
+  }
+}
