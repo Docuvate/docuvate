@@ -3,12 +3,16 @@
 import type {
   ConfirmDocumentFieldRequest,
   ConfirmDocumentFieldResponse,
+  TableRowRole,
+  TableRuleLine,
 } from '@docuvate/contracts';
+import { TABLE_ROW_ROLES, TABLE_RULE_LINES } from '@docuvate/contracts';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   ArrayMaxSize,
   IsArray,
+  IsBoolean,
   IsIn,
   IsInt,
   IsNotEmpty,
@@ -72,6 +76,48 @@ class DocumentRegionTableRuleDto {
 
   @ApiProperty()
   pos!: number;
+
+  @ApiProperty({
+    enum: TABLE_RULE_LINES,
+    description: 'Line evidence; unknown until observed or set.',
+  })
+  line!: TableRuleLine;
+}
+
+class DocumentRegionTableRowRoleDto {
+  @ApiProperty()
+  row!: number;
+
+  @ApiProperty({ enum: TABLE_ROW_ROLES })
+  role!: TableRowRole;
+}
+
+class TableRowRoleInputDto {
+  @ApiProperty()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  row!: number;
+
+  @ApiProperty({ enum: TABLE_ROW_ROLES })
+  @IsIn(TABLE_ROW_ROLES)
+  role!: TableRowRole;
+}
+
+class TableRuleLineInputDto {
+  @ApiProperty({ enum: ['row', 'col'] })
+  @IsIn(['row', 'col'])
+  axis!: 'row' | 'col';
+
+  @ApiProperty()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  ord!: number;
+
+  @ApiProperty({ enum: TABLE_RULE_LINES })
+  @IsIn(TABLE_RULE_LINES)
+  line!: TableRuleLine;
 }
 
 class DocumentRegionTableMergeDto {
@@ -136,11 +182,23 @@ class DocumentRegionTableDto {
   @ApiProperty({ enum: ['line_items', 'key_value', 'other'] })
   tableType!: 'line_items' | 'key_value' | 'other';
 
-  @ApiProperty()
+  @ApiProperty({ description: 'Header rows; more than one is a nested header.' })
   headerRows!: number;
 
-  @ApiProperty()
+  @ApiProperty({ description: 'Trailing summary rows (results footer).' })
+  footerRows!: number;
+
+  @ApiProperty({ description: 'Leading index columns.' })
   headerCols!: number;
+
+  @ApiProperty({ description: 'Trailing index columns (right or, with headerCols, double index).' })
+  trailingHeaderCols!: number;
+
+  @ApiProperty({ description: 'Alternating row tint (appearance only).' })
+  banded!: boolean;
+
+  @ApiProperty({ type: [DocumentRegionTableRowRoleDto] })
+  rowRoles!: DocumentRegionTableRowRoleDto[];
 
   @ApiProperty({ type: [DocumentRegionTableRuleDto] })
   rules!: DocumentRegionTableRuleDto[];
@@ -463,6 +521,48 @@ export class ApplyTableCorrectionRequestDto {
   @IsInt()
   @Min(0)
   headerCols?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  footerRows?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  trailingHeaderCols?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsBoolean()
+  banded?: boolean;
+
+  @ApiPropertyOptional({
+    type: [TableRowRoleInputDto],
+    description:
+      'Section headings and subtotals; replaces all row roles on create and set_headers.',
+  })
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(500)
+  @ValidateNested({ each: true })
+  @Type(() => TableRowRoleInputDto)
+  rowRoles?: TableRowRoleInputDto[];
+
+  @ApiPropertyOptional({
+    type: [TableRuleLineInputDto],
+    description: 'Line evidence for the listed grid rules; other rules keep theirs.',
+  })
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(1000)
+  @ValidateNested({ each: true })
+  @Type(() => TableRuleLineInputDto)
+  ruleLines?: TableRuleLineInputDto[];
 
   @ApiPropertyOptional({
     type: [TableMergeInputDto],

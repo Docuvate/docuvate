@@ -2,11 +2,14 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { LayoutToken, NormalizedRect } from '@docuvate/contracts';
 import {
+  inferTableBands,
   inferTableGrid,
   padTextSelectionRect,
   remapRegionTokens,
   selectionRectForTokenSpace,
   snapRectToTokenHull,
+  tableRuling,
+  tableRulingLines,
   tokenBelongsToRect,
   tokenCoverageRatio,
   tokensInsideRect,
@@ -109,6 +112,54 @@ describe('inferTableGrid', () => {
   });
 });
 
+describe('inferTableBands', () => {
+  const cell = (row: number, col: number, text: string) => ({ row, col, text });
+  it('reads a results footer, a section heading and a subtotal from cell text only', () => {
+    const cells = [
+      cell(0, 0, 'Position'),
+      cell(0, 1, 'Menge'),
+      cell(0, 2, 'Betrag'),
+      cell(1, 0, 'Hardware'),
+      cell(2, 0, 'Gerät A'),
+      cell(2, 2, '10,00'),
+      cell(3, 0, 'Zwischensumme'),
+      cell(3, 2, '10,00'),
+      cell(4, 0, 'Netto'),
+      cell(5, 0, 'MwSt. 19 %'),
+      cell(6, 0, 'Gesamtbetrag'),
+    ];
+    expect(inferTableBands(cells, 7, 3, 1)).toEqual({
+      footerRows: 3,
+      rowRoles: [
+        { row: 1, role: 'section' },
+        { row: 3, role: 'subtotal' },
+      ],
+    });
+  });
+
+  it('finds no footer when the last row is data', () => {
+    expect(inferTableBands([cell(0, 0, 'A'), cell(1, 0, 'B')], 2, 2, 1).footerRows).toBe(0);
+  });
+});
+
+describe('table ruling (appearance only)', () => {
+  const structure = { rows: 3, cols: 2, headerRows: 1, footerRows: 1 };
+  it('summarizes presets as grid, horizontal, borderless and mixed', () => {
+    expect(tableRuling(tableRulingLines('grid', structure))).toBe('grid');
+    expect(tableRuling(tableRulingLines('horizontal', structure))).toBe('horizontal');
+    expect(tableRuling(tableRulingLines('none', structure))).toBe('none');
+    expect(tableRuling([])).toBe('unknown');
+  });
+
+  it('draws accounting lines: thick under the header, double closing the footer, no verticals', () => {
+    const lines = tableRulingLines('accounting', structure);
+    const row = (ord: number) => lines.find((l) => l.axis === 'row' && l.ord === ord)?.line;
+    expect([row(0), row(1), row(2), row(3)]).toEqual(['none', 'thick', 'thin', 'double']);
+    expect(lines.filter((l) => l.axis === 'col').every((l) => l.line === 'none')).toBe(true);
+    expect(tableRuling(lines)).toBe('horizontal');
+  });
+});
+
 describe('viewer ↔ unrotated page mapping', () => {
   it('is identity for upright pages', () => {
     expect(viewerPointToUnrotatedPage(0.25, 0.75, 0)).toEqual({ x: 0.25, y: 0.75 });
@@ -158,10 +209,7 @@ describe('tokensMatchingSelectedText', () => {
       token(1, 0.3, 0.1, 0.5, 0.15, 'XTURE_PHRASE_'),
       token(2, 0.1, 0.2, 0.25, 0.25, 'Alex'),
     ];
-    const matched = tokensMatchingSelectedText(
-      tokens,
-      'E2E_SYNTHETIC_FIXTURE_PHRASE_Q1'
-    );
+    const matched = tokensMatchingSelectedText(tokens, 'E2E_SYNTHETIC_FIXTURE_PHRASE_Q1');
     expect(matched.map((t) => t.text)).toEqual([]);
     expect(tokensMatchingSelectedText(tokens, 'Alex Testmann').map((t) => t.text)).toEqual([
       'Alex',
@@ -173,7 +221,14 @@ describe('text-tool selection padding', () => {
   // Three vertical (90° rotated) lines, pitch ≈ 0.037 of the page width, each split into words.
   const lines = [0.925, 0.888, 0.851].map((x0, line) =>
     ['one', 'two', 'three'].map((word, index) =>
-      token(line * 10 + index, x0, 0.1 + index * 0.12, x0 + 0.023, 0.2 + index * 0.12, `${word}${String(line)}`)
+      token(
+        line * 10 + index,
+        x0,
+        0.1 + index * 0.12,
+        x0 + 0.023,
+        0.2 + index * 0.12,
+        `${word}${String(line)}`
+      )
     )
   );
   const tokens = lines.flat();

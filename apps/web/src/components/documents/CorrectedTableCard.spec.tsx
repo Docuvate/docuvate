@@ -7,6 +7,7 @@ import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 
 import i18n from '../../i18n';
 import { CorrectedTableCard } from './CorrectedTableCard';
+import type { TableStructureChoice } from './TableLayoutPicker';
 
 const rows = 4;
 const cols = 3;
@@ -27,10 +28,24 @@ const region: DocumentRegionDto = {
   table: {
     tableType: 'other',
     headerRows: 0,
+    footerRows: 0,
     headerCols: 0,
+    trailingHeaderCols: 0,
+    banded: false,
+    rowRoles: [],
     rules: [
-      ...Array.from({ length: rows + 1 }, (_, ord) => ({ axis: 'row' as const, ord, pos: ord })),
-      ...Array.from({ length: cols + 1 }, (_, ord) => ({ axis: 'col' as const, ord, pos: ord })),
+      ...Array.from({ length: rows + 1 }, (_, ord) => ({
+        axis: 'row' as const,
+        ord,
+        pos: ord,
+        line: 'unknown' as const,
+      })),
+      ...Array.from({ length: cols + 1 }, (_, ord) => ({
+        axis: 'col' as const,
+        ord,
+        pos: ord,
+        line: 'unknown' as const,
+      })),
     ],
     merges: [{ row0: 3, col0: 0, rowSpan: 1, colSpan: 2 }],
     cells: [{ row: 3, col: 0, text: 'Summe' }],
@@ -50,7 +65,42 @@ describe('CorrectedTableCard', () => {
     expect(sum?.getAttribute('colspan')).toBe('2');
   });
 
-  it('applies a named layout with header band and merges in one step', () => {
+  it('applies a table family with header, footer, merges and accounting lines in one step', () => {
+    const onLayoutApply = vi.fn<(choice: TableStructureChoice) => void>();
+    render(
+      <CorrectedTableCard
+        region={region}
+        index={0}
+        active
+        onSelect={vi.fn()}
+        onLayoutApply={onLayoutApply}
+      />
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Layout für Tabelle 1 wählen' }));
+    fireEvent.click(screen.getByRole('radio', { name: 'Finanzlayout' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Layout übernehmen' }));
+    const choice = onLayoutApply.mock.calls[0]?.[0];
+    expect(choice).toMatchObject({
+      tableType: 'line_items',
+      headerRows: 1,
+      footerRows: 2,
+      headerCols: 0,
+      trailingHeaderCols: 0,
+      merges: [
+        { row0: 2, col0: 0, rowSpan: 1, colSpan: 2 },
+        { row0: 3, col0: 0, rowSpan: 1, colSpan: 2 },
+      ],
+    });
+    expect(choice.ruleLines).toEqual(
+      expect.arrayContaining([
+        { axis: 'row', ord: 1, line: 'thick' },
+        { axis: 'row', ord: 4, line: 'double' },
+        { axis: 'col', ord: 1, line: 'none' },
+      ])
+    );
+  });
+
+  it('composes a right index and zebra rows independently of the family', () => {
     const onLayoutApply = vi.fn();
     render(
       <CorrectedTableCard
@@ -62,14 +112,43 @@ describe('CorrectedTableCard', () => {
       />
     );
     fireEvent.click(screen.getByRole('button', { name: 'Layout für Tabelle 1 wählen' }));
-    fireEvent.click(screen.getByRole('radio', { name: 'Positionen mit Summe' }));
+    fireEvent.click(screen.getByRole('radio', { name: 'Matrix' }));
+    fireEvent.click(screen.getByRole('radio', { name: 'Rechts' }));
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Zebrastreifen' }));
     fireEvent.click(screen.getByRole('button', { name: 'Layout übernehmen' }));
-    expect(onLayoutApply).toHaveBeenCalledWith({
-      tableType: 'line_items',
-      headerRows: 1,
-      headerCols: 0,
-      merges: [{ row0: 3, col0: 0, rowSpan: 1, colSpan: 2 }],
-    });
+    expect(onLayoutApply).toHaveBeenCalledWith(
+      expect.objectContaining({ headerCols: 0, trailingHeaderCols: 1, banded: true })
+    );
+  });
+
+  it('renders footer rows in tfoot, index columns as row headers and recorded lines', () => {
+    const table = region.table;
+    if (!table) throw new Error('fixture');
+    render(
+      <CorrectedTableCard
+        region={{
+          ...region,
+          table: {
+            ...table,
+            headerRows: 1,
+            footerRows: 1,
+            trailingHeaderCols: 1,
+            rules: table.rules.map((rule) =>
+              rule.axis === 'row' && rule.ord === 4 ? { ...rule, line: 'double' as const } : rule
+            ),
+          },
+        }}
+        index={0}
+        active
+        onSelect={vi.fn()}
+      />
+    );
+    const sum = screen.getByDisplayValue('Summe').closest('td');
+    expect(sum?.closest('tfoot')).toBeTruthy();
+    expect(sum?.getAttribute('data-bb')).toBe('double');
+    expect(
+      screen.getByLabelText('Zelle Zeile 2 Spalte 3').closest('th')?.getAttribute('scope')
+    ).toBe('row');
   });
 
   it('merges a custom area with select + M and splits it again', () => {

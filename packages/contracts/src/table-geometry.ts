@@ -3,6 +3,7 @@
 
 import type { LayoutToken, NormalizedRect } from './region-geometry.js';
 import { normalizeRect } from './region-geometry.js';
+import type { TableRowRoleEntry } from './table-structure.js';
 
 export type TableGridAxis = 'row' | 'col';
 
@@ -20,9 +21,55 @@ export interface TableGridCell {
 
 export interface InferredTableGrid {
   headerRows: number;
+  footerRows: number;
   headerCols: number;
+  rowRoles: TableRowRoleEntry[];
   rules: TableGridRule[];
   cells: TableGridCell[];
+}
+
+const TOTAL_LABEL =
+  /^(gesamt|gesamtbetrag|summe|endsumme|netto|brutto|mwst|ust|umsatzsteuer|total|grand total|net|tax|vat|amount due)\b/i;
+const SUBTOTAL_LABEL = /^(zwischensumme|teilsumme|subtotal|sub-total)/i;
+
+/**
+ * Semantic bands from cell text alone (no line evidence): trailing total/tax rows become the
+ * footer, a body row with a subtotal label is a subtotal, and a body row whose only text sits in
+ * its first cell is a section heading.
+ */
+export function inferTableBands(
+  cells: readonly TableGridCell[],
+  rows: number,
+  cols: number,
+  headerRows: number
+): { footerRows: number; rowRoles: TableRowRoleEntry[] } {
+  const rowTexts = (row: number) =>
+    Array.from(
+      { length: cols },
+      (_, col) => cells.find((cell) => cell.row === row && cell.col === col)?.text.trim() ?? ''
+    );
+  const label = (texts: string[]) => texts.find((text) => text.length > 0) ?? '';
+  let footerRows = 0;
+  for (let row = rows - 1; row > headerRows; row -= 1) {
+    const text = label(rowTexts(row));
+    if (!TOTAL_LABEL.test(text) || SUBTOTAL_LABEL.test(text)) {
+      break;
+    }
+    footerRows += 1;
+  }
+  const rowRoles: TableRowRoleEntry[] = [];
+  if (cols < 2) {
+    return { footerRows, rowRoles };
+  }
+  for (let row = headerRows; row < rows - footerRows; row += 1) {
+    const texts = rowTexts(row);
+    if (SUBTOTAL_LABEL.test(label(texts))) {
+      rowRoles.push({ row, role: 'subtotal' });
+    } else if (texts[0] !== '' && texts.slice(1).every((text) => text === '') && cols >= 3) {
+      rowRoles.push({ row, role: 'section' });
+    }
+  }
+  return { footerRows, rowRoles };
 }
 
 function median(values: number[]): number {
@@ -121,7 +168,9 @@ export function inferTableGrid(
   if (tokens.length === 0) {
     return {
       headerRows: 0,
+      footerRows: 0,
       headerCols: 0,
+      rowRoles: [],
       rules: [
         { axis: 'row', ord: 0, pos: box.y0 },
         { axis: 'row', ord: 1, pos: box.y1 },
@@ -176,9 +225,13 @@ export function inferTableGrid(
     ...rowPos.map((pos, ord) => ({ axis: 'row' as const, ord, pos })),
     ...colPos.map((pos, ord) => ({ axis: 'col' as const, ord, pos })),
   ];
+  const headerRows = rowCount >= 2 ? 1 : 0;
+  const bands = inferTableBands(cells, rowCount, colCount, headerRows);
   return {
-    headerRows: rowCount >= 2 ? 1 : 0,
+    headerRows,
+    footerRows: bands.footerRows,
     headerCols: 0,
+    rowRoles: bands.rowRoles,
     rules,
     cells,
   };

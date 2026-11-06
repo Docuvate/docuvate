@@ -1003,7 +1003,8 @@
     "layoutFieldsFilterEmpty": "No field matches “{{query}}”.",
     "fieldMarkHint": "Drag a box around the value for “{{name}}” on the document.",
     "fieldMarkHintCancel": "Cancel marking",
-    "tableMergesInvalid": "Merged cells do not fit the table (outside the grid or overlapping)."
+    "tableMergesInvalid": "Merged cells do not fit the table (outside the grid or overlapping).",
+    "tableStructureInvalid": "Header, footer, index columns or row roles do not fit the table."
   },
   "settings": {
     "title": "Settings",
@@ -2526,26 +2527,51 @@
   },
   "tableLayouts": {
     "title": "Table layout",
-    "more": "More layouts",
     "apply": "Apply layout",
     "choose": "Layout",
     "chooseAria": "Choose a layout for table {{n}}",
+    "families": {
+      "simple": "Simple table",
+      "matrix": "Matrix",
+      "nested": "Multi-level header",
+      "financial": "Financial layout",
+      "grouped": "Sections with subtotals",
+      "key_value": "Key and value"
+    },
+    "customize": "Adjust structure",
+    "headerLevels": "Header rows",
+    "footerRows": "Result rows",
+    "index": "Index column",
+    "indexOptions": {
+      "none": "None",
+      "left": "Left",
+      "right": "Right",
+      "both": "Both sides"
+    },
+    "ruling": "Lines",
+    "rulingOptions": {
+      "grid": "Grid",
+      "accounting": "Accounting",
+      "horizontal": "Horizontal",
+      "none": "None",
+      "keep": "As detected"
+    },
+    "grouped": "Sections and subtotals",
+    "banded": "Zebra rows",
+    "preview": "Preview: {{rows}} × {{cols}} cells",
+    "cellsTitle": "Merge cells and row roles",
+    "rowRoles": {
+      "data": "Data",
+      "section": "Section",
+      "subtotal": "Subtotal",
+      "header": "Header",
+      "footer": "Result"
+    },
+    "rowRoleAria": "Row {{row}}: {{role}}",
     "mergeHint": "Select a cell, then Shift+click a second cell or press M on it to merge the area. Merging the same area again splits it.",
     "mergeAria": "Set merged cells",
     "cellAria": "Row {{row}}, column {{col}}, {{rowSpan}} × {{colSpan}}",
     "span": "{{rowSpan}} × {{colSpan}}",
-    "applied": "Table layout applied",
-    "names": {
-      "grid": "Simple grid",
-      "header_row": "Header row",
-      "header_row_col": "Header row and column",
-      "line_items_totals": "Line items with total",
-      "key_value": "Key and value",
-      "grouped_rows": "Grouped rows",
-      "multi_level_header": "Multi level header",
-      "matrix_stub": "Matrix with stub column",
-      "transposed_key_value": "Key and value, transposed",
-      "form_grid": "Form grid"
-    }
+    "applied": "Table layout applied"
   }
 }

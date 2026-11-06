@@ -20,7 +20,7 @@ correct structured data in as few decisions as possible. This is not a general-p
 | Law | Decision |
 |---|---|
 | Fitts's Law | Accept and correct sit on the value row, next to where the eye already is, not in a far toolbar. Handles are 8 px visible with a 24 px hit area. Primary actions in the workbench are full-width rows, not tiny icons only. |
-| Hick's Law | One active tool at a time. A role palette of at most 9 roles bound to 1-9. Everything else goes behind "More". The table layout picker shows six common layouts first; the full catalog is one step away. |
+| Hick's Law | One active tool at a time. A role palette of at most 9 roles bound to 1-9. Everything else goes behind "More". The table layout picker shows six table families first; the independent dimensions are one disclosure away. |
 | Jakob's Law | Standard editor keys: V select, H or Space-drag pan, B box, P polygon, Esc select, Del delete, Cmd/Ctrl+Z / Shift+Z, Cmd/Ctrl-click to add to the selection, wheel+Ctrl to zoom. These match Figma, Label Studio and CVAT. |
 | Doherty Threshold (<400 ms) | Optimistic UI: the row turns confirmed instantly and the save runs in the background with a visible state ("Saving…", "Saved", "Retry"). No spinner blocks the next keystroke. Overlays are computed client-side from tokens already loaded. |
 | Tesler's Law | Coordinate math (page rotation, deskew, MediaBox) lives in `region-geometry.ts`, never in the user's head. Users draw in what they see; we store unrotated, normalized coordinates. |
@@ -91,9 +91,31 @@ After a region is drawn, the role palette applies `1-9` (heading, paragraph, lis
 ### 4.5 Tables
 
 * The model already supports row/column rules, merges (`row_span`, `col_span`), cell texts and header rows/columns.
-* Table layout picker (built): a "Layout" button on each recognised table opens a named catalog with schematic sketches drawn from the same data that is saved, so the sketch cannot disagree with the result. Six common layouts first (Hick): Header row, Line items with total, Key and value, Header row and column, Grouped rows, Simple grid. Four more behind one click: multi level header, matrix with stub column, transposed key and value, form grid.
-* A layout adapts to the real grid (e.g. "Line items with total" spans the last row's label across all but the amount column). The grid itself, meaning the row and column dividers, still comes from the recognised tokens, so picking a layout never moves dividers away from the text.
-* Merged cells: select a cell, then Shift+click or press M on a second cell to merge the rectangle; merging the same area again splits it. Layout, header bands and merges are saved as one `set_headers` correction (now accepting `merges`), validated on the server against the grid and undoable from the toast.
+* Table layout picker (built): a "Layout" button on each recognised table opens six families (Simple table, Matrix, Multi-level header, Financial layout, Sections with subtotals, Key and value). A family only sets defaults. "Adjust structure" then exposes the independent dimensions: header rows (levels), index column (none, left, right, both), result rows (footer), lines (grid, accounting, horizontal, none, as detected), sections with subtotals, and zebra rows. Every combination is valid by construction, so there is no hard-coded list of combinations. The sketches are generated from the same `designTable` function whose result is saved, so a sketch cannot disagree with the result.
+* The grid itself, meaning the row and column dividers, still comes from the recognised tokens, so picking a layout never moves dividers away from the text. Nested headers use rowspan stubs for the index and pairwise column groups; footer labels span all but the amount column.
+
+#### 4.5.1 Table structure model (three independent dimensions)
+
+| Dimension | Stored as (3NF) | Meaning |
+| --- | --- | --- |
+| Logical bands | `document_region_tables.header_rows`, `footer_rows`; `document_region_table_row_roles (region_id, row, role)` with role `section` or `subtotal` | More than one header row is a nested header (spans come from merges). Footer rows are the results/accounting footer. Row roles mark group headings and subtotals inside the body. |
+| Index position | `header_cols` (leading), `trailing_header_cols` | Left, right, or double index. Index cells render as `th scope="row"`. |
+| Spans | `document_region_table_merges` (unchanged) | rowspan/colspan. A merge may not cross a band boundary (header, body, footer). |
+| Appearance | `document_region_table_rules.line` (`unknown`, `none`, `thin`, `thick`, `double`); `document_region_tables.banded` | Line evidence per grid rule and zebra rows. It never decides semantics. The overall ruling (grid, horizontal, none, mixed) is derived and never stored. |
+
+`validTableStructure` (contracts) is shared by the API and the editor. It checks that header and footer do not overlap, that index columns fit, that row roles sit in the body, that merges are valid and stay inside one band, and that line updates refer to existing rules. `set_headers` and `create` accept the new fields: `footerRows`, `trailingHeaderCols`, `banded`, `rowRoles` (these replace the stored ones), and `ruleLines` (only the listed rules change). Correction payloads add these keys only when they are non-default, so older payloads stay byte-identical.
+
+Detection keeps the same split. Text-only inference (`inferTableBands`) proposes footer rows from trailing total/tax labels, subtotals from subtotal labels, and section headings from body rows whose only text is in the first cell. Line evidence starts as `unknown`, because the layout IR carries no ruling segments yet. Only a person or a future line detector sets it.
+
+What the survey says, versus what is built (Kasem et al., "Deep learning for table detection and structure recognition: A survey", arXiv 2211.08469):
+
+* The survey covers datasets and methods. It defines no semantic taxonomy like matrix, financial or grouped. Our families are product presets on top of a neutral model.
+* Its datasets describe structure as cells with start/end row and column, meaning spans (ICDAR 2013/2019, SciTSR, PubTabNet HTML). Header annotations come from PubTables-1M (with canonicalization against over-segmented headers), and FinTabNet covers financial tables. We store the same thing: rules, spans, and header/footer bands.
+* It treats appearance separately: Marmot and TNCR distinguish full lined, partially lined, merged-cell and unlined tables, and it names borderless tables and spanning cells as the hard cases. That is why lines are evidence on rules and not part of the table type.
+* Split-and-merge methods (SPLERGE, RobusTabNet) first predict a separator grid and then merge spanning cells. That matches our rules + merges, so a future learned detector can fill the same tables.
+
+Future work: a worker step that emits ruling segments from PDF vector graphics (pdfplumber already finds lines for table detection) to set `line` evidence; multi-level column headers inferred from bold or centred header text; per-column header levels (stub headers spanning header rows); TEDS-style evaluation on synthetic fixtures; and showing derived ruling and zebra in exports.
+* Merged cells: select a cell, then Shift+click or press M on a second cell to merge the rectangle; merging the same area again splits it. Layout, bands, row roles, lines and merges are saved as one `set_headers` correction, validated on the server against the grid and undoable from the toast. Body rows cycle through data, section and subtotal on the same grid.
 * Not built yet: dragging dividers and snapping them to whitespace.
 * Cell text edits use the existing `edit_cell` op.
 
@@ -135,7 +157,7 @@ After a region is drawn, the role palette applies `1-9` (heading, paragraph, lis
 2. **Figure/graphic regions and sections.** Extend the `block_type` CHECK with `figure` and `caption`. Add `section` as a group type (see 3 in this list).
 3. **Region groups (multi-page and logical sections).** `document_region_groups(id, document_id, kind CHECK ('continuation','section'))` and `document_region_group_members(group_id, region_id, ord)`, PK `(group_id, ord)`, UNIQUE `(group_id, region_id)`.
 4. **Polygon in the UI.** The backend already supports it. Needs the Polygon tool, vertex handles, and validation that the polygon is simple and its bbox stays in range.
-5. **Table layout catalog (done).** No schema change: the catalog is a typed constant in the web app (`TABLE_LAYOUTS`) and only the result is stored in the existing table, rule and merge tables. API change: `merges` on `create` and `set_headers` table corrections, checked by `validTableMerges` (shared in contracts).
+5. **Composable table structure (done).** Migration `document-region-table-structure` adds `footer_rows`, `trailing_header_cols` and `banded` to `document_region_tables`, `line` to `document_region_table_rules`, and a `document_region_table_row_roles` table. API change: `footerRows`, `trailingHeaderCols`, `banded`, `rowRoles`, `ruleLines` and `merges` on `create`/`set_headers`, checked by `validTableStructure` (shared in contracts). Families are a typed constant in the web app (`TABLE_FAMILIES`); only the resulting structure is stored.
 6. **OCR line edits.** `block` corrections exist. Need an endpoint `POST /documents/:id/block-corrections { blockIndex, text }` that stores before/after in the correction row. Today `extractionBlocks` are replaced wholesale via PATCH, which loses per-line provenance.
 7. **Undo/redo stack.** Client-only; relies on withdraw and re-apply. No schema change.
 8. **Reading order edits.** `reading_rank` exists. Need an endpoint `POST /documents/:id/reading-order { regionIds[] }` recorded as one correction.

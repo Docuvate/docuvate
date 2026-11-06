@@ -1,13 +1,31 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import type { DocumentRegionDto } from '@docuvate/contracts';
-import { tableGridSize } from '@docuvate/contracts';
+import type {
+  DocumentRegionDto,
+  DocumentRegionTableDto,
+  TableBand,
+  TableRuleLine,
+} from '@docuvate/contracts';
+import { isTableIndexCol, tableGridSize, tableRowBand } from '@docuvate/contracts';
 import { LayoutTemplate } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { mergeAt } from '../../lib/tableLayouts';
 import { TableLayoutPicker, type TableStructureChoice } from './TableLayoutPicker';
+
+const BANDS: readonly TableBand[] = ['header', 'body', 'footer'];
+const BAND_SECTION = { header: 'thead', body: 'tbody', footer: 'tfoot' } as const;
+
+/** Recorded line on a rule; undefined (default look) while nothing was observed or set. */
+function lineAt(
+  table: DocumentRegionTableDto,
+  axis: 'row' | 'col',
+  ord: number
+): Exclude<TableRuleLine, 'unknown'> | undefined {
+  const line = table.rules.find((rule) => rule.axis === axis && rule.ord === ord)?.line;
+  return line === undefined || line === 'unknown' ? undefined : line;
+}
 
 interface CorrectedTableCardProps {
   region: DocumentRegionDto;
@@ -113,47 +131,68 @@ export function CorrectedTableCard({
         </label>
       </div>
       <div className="layout-table-scroll">
-        <table className="layout-data-table layout-data-table-editable">
-          <tbody>
-            {Array.from({ length: rowCount }, (_, row) => (
-              <tr key={row}>
-                {Array.from({ length: colCount }, (_, col) => {
-                  const merge = mergeAt(table.merges, row, col);
-                  if (merge && (merge.row0 !== row || merge.col0 !== col)) {
-                    return null;
-                  }
-                  const cell = table.cells.find((item) => item.row === row && item.col === col);
-                  const isHeader = row < table.headerRows || col < table.headerCols;
-                  const Tag = isHeader ? 'th' : 'td';
-                  return (
-                    <Tag
-                      key={col}
-                      scope={isHeader && row < table.headerRows ? 'col' : undefined}
-                      rowSpan={merge && merge.rowSpan > 1 ? merge.rowSpan : undefined}
-                      colSpan={merge && merge.colSpan > 1 ? merge.colSpan : undefined}
-                    >
-                      <input
-                        key={`${region.id}-${String(row)}-${String(col)}-${cell?.text ?? ''}`}
-                        className="layout-table-cell-input"
-                        defaultValue={cell?.text ?? ''}
-                        aria-label={t('documents.tableCellAria', {
-                          row: row + 1,
-                          col: col + 1,
-                        })}
-                        onBlur={(event) => {
-                          const next = event.target.value;
-                          if (next === (cell?.text ?? '')) {
-                            return;
-                          }
-                          onCellChange?.(row, col, next);
-                        }}
-                      />
-                    </Tag>
-                  );
-                })}
-              </tr>
-            ))}
-          </tbody>
+        <table
+          className={`layout-data-table layout-data-table-editable${table.banded ? ' layout-data-table--banded' : ''}`}
+        >
+          {BANDS.map((band) => {
+            const rows = Array.from({ length: rowCount }, (_, row) => row).filter(
+              (row) => tableRowBand({ ...grid, ...table }, row) === band
+            );
+            if (rows.length === 0) return null;
+            const Section = BAND_SECTION[band];
+            return (
+              <Section key={band}>
+                {rows.map((row) => (
+                  <tr
+                    key={row}
+                    data-row-role={table.rowRoles.find((entry) => entry.row === row)?.role}
+                  >
+                    {Array.from({ length: colCount }, (_, col) => {
+                      const merge = mergeAt(table.merges, row, col);
+                      if (merge && (merge.row0 !== row || merge.col0 !== col)) {
+                        return null;
+                      }
+                      const cell = table.cells.find((item) => item.row === row && item.col === col);
+                      const rowSpan = merge?.rowSpan ?? 1;
+                      const colSpan = merge?.colSpan ?? 1;
+                      const index = isTableIndexCol({ ...grid, ...table }, col);
+                      const isHeader = band === 'header' || index;
+                      const Tag = isHeader ? 'th' : 'td';
+                      return (
+                        <Tag
+                          key={col}
+                          scope={band === 'header' ? 'col' : index ? 'row' : undefined}
+                          rowSpan={rowSpan > 1 ? rowSpan : undefined}
+                          colSpan={colSpan > 1 ? colSpan : undefined}
+                          data-bt={lineAt(table, 'row', row)}
+                          data-bb={lineAt(table, 'row', row + rowSpan)}
+                          data-bl={lineAt(table, 'col', col)}
+                          data-br={lineAt(table, 'col', col + colSpan)}
+                        >
+                          <input
+                            key={`${region.id}-${String(row)}-${String(col)}-${cell?.text ?? ''}`}
+                            className="layout-table-cell-input"
+                            defaultValue={cell?.text ?? ''}
+                            aria-label={t('documents.tableCellAria', {
+                              row: row + 1,
+                              col: col + 1,
+                            })}
+                            onBlur={(event) => {
+                              const next = event.target.value;
+                              if (next === (cell?.text ?? '')) {
+                                return;
+                              }
+                              onCellChange?.(row, col, next);
+                            }}
+                          />
+                        </Tag>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </Section>
+            );
+          })}
         </table>
       </div>
     </section>

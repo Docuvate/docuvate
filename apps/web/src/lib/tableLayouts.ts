@@ -1,210 +1,248 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import type { DocumentRegionTableMergeDto, DocumentRegionTableType } from '@docuvate/contracts';
+import type {
+  DocumentRegionTableCellDto,
+  DocumentRegionTableDto,
+  DocumentRegionTableMergeDto,
+  DocumentRegionTableRowRoleDto,
+  DocumentRegionTableRuleLineDto,
+  DocumentRegionTableType,
+  TableIndexPosition,
+  TableRulingPreset,
+} from '@docuvate/contracts';
+import {
+  inferTableBands,
+  tableIndexPosition,
+  tableRuling,
+  tableRulingLines,
+} from '@docuvate/contracts';
 
-export type TableLayoutId =
-  | 'grid'
-  | 'header_row'
-  | 'header_row_col'
-  | 'line_items_totals'
-  | 'key_value'
-  | 'grouped_rows'
-  | 'multi_level_header'
-  | 'matrix_stub'
-  | 'transposed_key_value'
-  | 'form_grid';
+/**
+ * Composable table layouts. A layout is not one of N fixed presets but a point in three
+ * independent dimensions: logical bands (header levels, footer rows, grouped sections), index
+ * position (left, right, both) and appearance (lines, zebra). A family only picks sensible
+ * defaults; every dimension stays adjustable, and the preview and the saved structure come from
+ * the same function, so what the picker shows is what gets stored.
+ */
 
-interface GridSize {
+export interface GridSize {
   rows: number;
   cols: number;
 }
 
-export interface TableLayout {
-  id: TableLayoutId;
-  /** `common` layouts are offered first; the rest sit behind "more layouts". */
-  tier: 'common' | 'more';
-  tableType: DocumentRegionTableType;
-  headerRows: number;
-  headerCols: number;
-  /** Size of the schematic preview. */
-  sketch: GridSize;
-  /** Merges for a concrete grid, so a layout adapts to the real table instead of a fixed size. */
-  merges: (grid: GridSize) => DocumentRegionTableMergeDto[];
+export const TABLE_FAMILIES = [
+  'simple',
+  'matrix',
+  'nested',
+  'financial',
+  'grouped',
+  'key_value',
+] as const;
+export type TableFamily = (typeof TABLE_FAMILIES)[number];
+
+/** `keep` leaves the recorded line evidence untouched (mixed or unknown rulings). */
+export type TableRulingChoice = TableRulingPreset | 'keep';
+
+export interface TableDesign {
+  family: TableFamily;
+  headerLevels: number;
+  index: TableIndexPosition;
+  footerRows: number;
+  grouped: boolean;
+  ruling: TableRulingChoice;
+  banded: boolean;
 }
 
-const none = (): DocumentRegionTableMergeDto[] => [];
-
-function totalsRow({ rows, cols }: GridSize): DocumentRegionTableMergeDto[] {
-  return rows >= 3 && cols >= 3 ? [{ row0: rows - 1, col0: 0, rowSpan: 1, colSpan: cols - 1 }] : [];
-}
-
-function groupedFirstColumn({ rows }: GridSize): DocumentRegionTableMergeDto[] {
-  const merges: DocumentRegionTableMergeDto[] = [];
-  for (let row = 1; row + 1 < rows; row += 2) {
-    merges.push({ row0: row, col0: 0, rowSpan: 2, colSpan: 1 });
-  }
-  return merges;
-}
-
-function twoLevelHeader({ rows, cols }: GridSize): DocumentRegionTableMergeDto[] {
-  if (rows < 3 || cols < 3) return [];
-  const merges: DocumentRegionTableMergeDto[] = [{ row0: 0, col0: 0, rowSpan: 2, colSpan: 1 }];
-  for (let col = 1; col + 1 < cols; col += 2) {
-    merges.push({ row0: 0, col0: col, rowSpan: 1, colSpan: 2 });
-  }
-  return merges;
-}
-
-function formLines({ rows, cols }: GridSize): DocumentRegionTableMergeDto[] {
-  if (cols < 3) return [];
-  const merges: DocumentRegionTableMergeDto[] = [
-    { row0: 0, col0: 1, rowSpan: 1, colSpan: cols - 1 },
-  ];
-  if (rows >= 3) merges.push({ row0: rows - 1, col0: 1, rowSpan: 1, colSpan: cols - 1 });
-  return merges;
-}
-
-/**
- * Named table layouts. The schematic preview and the stored structure come from the same data,
- * so what the picker shows is what gets saved.
- */
-export const TABLE_LAYOUTS: readonly TableLayout[] = [
-  {
-    id: 'header_row',
-    tier: 'common',
-    tableType: 'other',
-    headerRows: 1,
-    headerCols: 0,
-    sketch: { rows: 4, cols: 4 },
-    merges: none,
-  },
-  {
-    id: 'line_items_totals',
-    tier: 'common',
-    tableType: 'line_items',
-    headerRows: 1,
-    headerCols: 0,
-    sketch: { rows: 5, cols: 4 },
-    merges: totalsRow,
-  },
-  {
-    id: 'key_value',
-    tier: 'common',
-    tableType: 'key_value',
-    headerRows: 0,
-    headerCols: 1,
-    sketch: { rows: 4, cols: 2 },
-    merges: none,
-  },
-  {
-    id: 'header_row_col',
-    tier: 'common',
-    tableType: 'other',
-    headerRows: 1,
-    headerCols: 1,
-    sketch: { rows: 4, cols: 4 },
-    merges: none,
-  },
-  {
-    id: 'grouped_rows',
-    tier: 'common',
-    tableType: 'other',
-    headerRows: 1,
-    headerCols: 0,
-    sketch: { rows: 5, cols: 3 },
-    merges: groupedFirstColumn,
-  },
-  {
-    id: 'grid',
-    tier: 'common',
-    tableType: 'other',
-    headerRows: 0,
-    headerCols: 0,
-    sketch: { rows: 4, cols: 4 },
-    merges: none,
-  },
-  {
-    id: 'multi_level_header',
-    tier: 'more',
-    tableType: 'other',
-    headerRows: 2,
-    headerCols: 0,
-    sketch: { rows: 5, cols: 5 },
-    merges: twoLevelHeader,
-  },
-  {
-    id: 'matrix_stub',
-    tier: 'more',
-    tableType: 'other',
-    headerRows: 1,
-    headerCols: 1,
-    sketch: { rows: 5, cols: 5 },
-    merges: none,
-  },
-  {
-    id: 'transposed_key_value',
-    tier: 'more',
-    tableType: 'key_value',
-    headerRows: 1,
-    headerCols: 0,
-    sketch: { rows: 2, cols: 5 },
-    merges: none,
-  },
-  {
-    id: 'form_grid',
-    tier: 'more',
-    tableType: 'key_value',
-    headerRows: 0,
-    headerCols: 0,
-    sketch: { rows: 4, cols: 4 },
-    merges: formLines,
-  },
+export const TABLE_INDEX_POSITIONS: readonly TableIndexPosition[] = [
+  'none',
+  'left',
+  'right',
+  'both',
 ];
+export const TABLE_RULING_CHOICES: readonly TableRulingChoice[] = [
+  'grid',
+  'accounting',
+  'horizontal',
+  'none',
+  'keep',
+];
+export const MAX_BAND_ROWS = 3;
 
-/** Table structure a layout produces for a real grid; headers never swallow the whole table. */
-export function applyTableLayout(
-  layout: TableLayout,
-  grid: GridSize
-): {
-  tableType: DocumentRegionTableType;
-  headerRows: number;
-  headerCols: number;
-  merges: DocumentRegionTableMergeDto[];
-} {
-  return {
-    tableType: layout.tableType,
-    headerRows: Math.min(layout.headerRows, Math.max(0, grid.rows - 1)),
-    headerCols: Math.min(layout.headerCols, Math.max(0, grid.cols - 1)),
-    merges: layout.merges(grid),
+const FAMILY_TYPE: Record<TableFamily, DocumentRegionTableType> = {
+  simple: 'other',
+  matrix: 'other',
+  nested: 'other',
+  financial: 'line_items',
+  grouped: 'line_items',
+  key_value: 'key_value',
+};
+
+/** Defaults per family; the user changes any dimension afterwards. */
+export function familyDesign(family: TableFamily): TableDesign {
+  const base: TableDesign = {
+    family,
+    headerLevels: 1,
+    index: 'none',
+    footerRows: 0,
+    grouped: false,
+    ruling: 'grid',
+    banded: false,
   };
+  switch (family) {
+    case 'matrix':
+      return { ...base, index: 'left' };
+    case 'nested':
+      return { ...base, headerLevels: 2, index: 'left' };
+    case 'financial':
+      return { ...base, footerRows: 2, ruling: 'accounting' };
+    case 'grouped':
+      return { ...base, footerRows: 1, grouped: true, ruling: 'horizontal' };
+    case 'key_value':
+      return { ...base, headerLevels: 0, index: 'left', ruling: 'none' };
+    case 'simple':
+      return base;
+  }
 }
 
-/** The layout whose structure matches a stored table, if any (pre-selects the picker). */
-export function matchingTableLayout(
-  table: {
-    tableType: DocumentRegionTableType;
-    headerRows: number;
-    headerCols: number;
-    merges: readonly DocumentRegionTableMergeDto[];
-  },
-  grid: GridSize
-): TableLayout | null {
-  const key = (merges: readonly DocumentRegionTableMergeDto[]) =>
-    merges
-      .map((m) => `${String(m.row0)},${String(m.col0)},${String(m.rowSpan)},${String(m.colSpan)}`)
-      .sort()
-      .join('|');
-  return (
-    TABLE_LAYOUTS.find((layout) => {
-      const applied = applyTableLayout(layout, grid);
-      return (
-        applied.tableType === table.tableType &&
-        applied.headerRows === table.headerRows &&
-        applied.headerCols === table.headerCols &&
-        key(applied.merges) === key(table.merges)
-      );
-    }) ?? null
-  );
+/** One correction carrying every structural dimension (`set_headers`). */
+export interface TableStructureChoice {
+  tableType: DocumentRegionTableType;
+  headerRows: number;
+  footerRows: number;
+  headerCols: number;
+  trailingHeaderCols: number;
+  banded: boolean;
+  rowRoles: DocumentRegionTableRowRoleDto[];
+  merges: DocumentRegionTableMergeDto[];
+  /** Absent when the ruling is kept as recorded. */
+  ruleLines?: DocumentRegionTableRuleLineDto[];
+}
+
+function indexCols(index: TableIndexPosition, cols: number): { lead: number; trail: number } {
+  const lead = (index === 'left' || index === 'both') && cols >= 2 ? 1 : 0;
+  const trail = (index === 'right' || index === 'both') && cols >= 2 + lead ? 1 : 0;
+  return { lead, trail };
+}
+
+/** Header and footer always leave at least one body row when the grid allows it. */
+function bandRows(design: TableDesign, rows: number): { header: number; footer: number } {
+  const room = Math.max(0, rows - 1);
+  const header = Math.min(design.headerLevels, room);
+  const footer = Math.min(design.footerRows, Math.max(0, room - header));
+  return { header, footer };
+}
+
+/** Nested header: each upper level groups the data columns below it in pairs (rowspan stubs). */
+function headerMerges(
+  header: number,
+  lead: number,
+  trail: number,
+  cols: number
+): DocumentRegionTableMergeDto[] {
+  if (header < 2) return [];
+  const merges: DocumentRegionTableMergeDto[] = [];
+  for (let col = 0; col < cols; col += 1) {
+    if (col < lead || col >= cols - trail) {
+      merges.push({ row0: 0, col0: col, rowSpan: header, colSpan: 1 });
+    }
+  }
+  for (let level = 0; level < header - 1; level += 1) {
+    const width = 2 ** (header - 1 - level);
+    for (let col = lead; col + width <= cols - trail; col += width) {
+      merges.push({ row0: level, col0: col, rowSpan: 1, colSpan: width });
+    }
+  }
+  return merges;
+}
+
+/** Synthetic sections for previews and grids without text: heading, rows, subtotal, repeat. */
+function sketchRowRoles(start: number, end: number): DocumentRegionTableRowRoleDto[] {
+  const roles: DocumentRegionTableRowRoleDto[] = [];
+  for (let row = start; row + 2 < end; row += 4) {
+    roles.push({ row, role: 'section' });
+    roles.push({ row: Math.min(row + 3, end - 1), role: 'subtotal' });
+  }
+  return roles;
+}
+
+/** Table structure a design produces for a real grid (and its cell texts, when known). */
+export function designTable(
+  design: TableDesign,
+  grid: GridSize,
+  cells: readonly DocumentRegionTableCellDto[] = []
+): TableStructureChoice {
+  const { header, footer } = bandRows(design, grid.rows);
+  const { lead, trail } = indexCols(design.index, grid.cols);
+  const bodyEnd = grid.rows - footer;
+  let rowRoles: DocumentRegionTableRowRoleDto[] = [];
+  if (design.grouped) {
+    const fromText = inferTableBands(cells, grid.rows, grid.cols, header).rowRoles.filter(
+      (entry) => entry.row < bodyEnd
+    );
+    rowRoles = fromText.length > 0 ? fromText : sketchRowRoles(header, bodyEnd);
+  }
+  const merges = headerMerges(header, lead, trail, grid.cols);
+  for (const entry of rowRoles) {
+    if (entry.role === 'section' && grid.cols >= 2) {
+      merges.push({ row0: entry.row, col0: 0, rowSpan: 1, colSpan: grid.cols });
+    }
+  }
+  // Footer labels span the leading columns so the amount stays in its own last column.
+  if (trail === 0 && grid.cols >= 3) {
+    for (let row = bodyEnd; row < grid.rows; row += 1) {
+      merges.push({ row0: row, col0: 0, rowSpan: 1, colSpan: grid.cols - 1 });
+    }
+  }
+  const choice: TableStructureChoice = {
+    tableType: FAMILY_TYPE[design.family],
+    headerRows: header,
+    footerRows: footer,
+    headerCols: lead,
+    trailingHeaderCols: trail,
+    banded: design.banded,
+    rowRoles,
+    merges,
+  };
+  if (design.ruling !== 'keep') {
+    choice.ruleLines = tableRulingLines(design.ruling, {
+      rows: grid.rows,
+      cols: grid.cols,
+      headerRows: header,
+      footerRows: footer,
+    });
+  }
+  return choice;
+}
+
+function rulingChoice(table: DocumentRegionTableDto): TableRulingChoice {
+  const ruling = tableRuling(table.rules);
+  if (ruling === 'grid' || ruling === 'none') return ruling;
+  if (ruling === 'horizontal') {
+    const accented = table.rules.some((rule) => rule.line === 'thick' || rule.line === 'double');
+    return accented ? 'accounting' : 'horizontal';
+  }
+  return 'keep';
+}
+
+/** Reads the design back from a stored table, so the picker opens on what is saved. */
+export function tableDesignOf(table: DocumentRegionTableDto): TableDesign {
+  const index = tableIndexPosition(table.headerCols, table.trailingHeaderCols);
+  const grouped = table.rowRoles.length > 0;
+  let family: TableFamily = 'simple';
+  if (table.tableType === 'key_value') family = 'key_value';
+  else if (grouped) family = 'grouped';
+  else if (table.footerRows > 0) family = 'financial';
+  else if (table.headerRows >= 2) family = 'nested';
+  else if (index !== 'none') family = 'matrix';
+  return {
+    family,
+    headerLevels: Math.min(table.headerRows, MAX_BAND_ROWS),
+    index,
+    footerRows: Math.min(table.footerRows, MAX_BAND_ROWS),
+    grouped,
+    ruling: rulingChoice(table),
+    banded: table.banded,
+  };
 }
 
 /** The merge covering a cell, if any (cells inside a span are not drawn on their own). */
@@ -218,6 +256,21 @@ export function mergeAt(
       (m) => row >= m.row0 && row < m.row0 + m.rowSpan && col >= m.col0 && col < m.col0 + m.colSpan
     ) ?? null
   );
+}
+
+/** Cycles a body row through data → section heading → subtotal → data. */
+export function cycleRowRole(
+  roles: readonly DocumentRegionTableRowRoleDto[],
+  row: number
+): DocumentRegionTableRowRoleDto[] {
+  const current = roles.find((entry) => entry.row === row)?.role;
+  const rest = roles.filter((entry) => entry.row !== row);
+  if (current === 'subtotal') return rest;
+  const next: DocumentRegionTableRowRoleDto = {
+    row,
+    role: current === 'section' ? 'subtotal' : 'section',
+  };
+  return [...rest, next].sort((a, b) => a.row - b.row);
 }
 
 /**

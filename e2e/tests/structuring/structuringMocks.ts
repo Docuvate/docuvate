@@ -16,7 +16,11 @@ const INVOICE_PDF = fs.readFileSync(
   path.join(__dirname, '..', '..', 'fixtures', 'synthetic-invoice-table.pdf')
 );
 
-interface SyntheticTable {
+type RuleLine = 'unknown' | 'none' | 'thin' | 'thick' | 'double';
+const RULE_LINES: readonly RuleLine[] = ['unknown', 'none', 'thin', 'thick', 'double'];
+
+/** Table as stored in the fixture file (text-only detection: no bands or line evidence). */
+interface FixtureTable {
   tableType: 'line_items' | 'key_value' | 'other';
   headerRows: number;
   headerCols: number;
@@ -25,10 +29,42 @@ interface SyntheticTable {
   cells: { row: number; col: number; text: string }[];
 }
 
+interface SyntheticTable extends Omit<FixtureTable, 'rules'> {
+  footerRows: number;
+  trailingHeaderCols: number;
+  banded: boolean;
+  rowRoles: { row: number; role: 'section' | 'subtotal' }[];
+  rules: { axis: 'row' | 'col'; ord: number; pos: number; line: RuleLine }[];
+}
+
+function isRuleLineEntry(
+  value: unknown
+): value is { axis: 'row' | 'col'; ord: number; line: RuleLine } {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'axis' in value &&
+    'ord' in value &&
+    'line' in value &&
+    RULE_LINES.some((line) => line === value.line)
+  );
+}
+
+function isRowRoleEntry(value: unknown): value is SyntheticTable['rowRoles'][number] {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'row' in value &&
+    typeof value.row === 'number' &&
+    'role' in value &&
+    (value.role === 'section' || value.role === 'subtotal')
+  );
+}
+
 interface SyntheticLayoutFixture {
   ir: { version: 1; pages: { blocks: { text: string }[] }[] };
   tokens: unknown[];
-  tableRegion: { x0: number; y0: number; x1: number; y1: number; table: SyntheticTable };
+  tableRegion: { x0: number; y0: number; x1: number; y1: number; table: FixtureTable };
 }
 
 function isLayoutFixture(value: unknown): value is SyntheticLayoutFixture {
@@ -331,7 +367,15 @@ export async function installStructuringMocks(
     tableCorrections: [],
   };
   let tableRevision = 0;
-  let layoutTable: SyntheticTable = LAYOUT_FIXTURE.tableRegion.table;
+  const fixtureTable = LAYOUT_FIXTURE.tableRegion.table;
+  let layoutTable: SyntheticTable = {
+    ...fixtureTable,
+    footerRows: 0,
+    trailingHeaderCols: 0,
+    banded: false,
+    rowRoles: [],
+    rules: fixtureTable.rules.map((rule) => ({ ...rule, line: 'unknown' })),
+  };
   const layoutTableRegion = () => ({
     id: `synthetic-table-${String(tableRevision)}`,
     documentId: LAYOUT_DOCUMENT_ID,
@@ -457,6 +501,22 @@ export async function installStructuringMocks(
           next.headerRows = body.headerRows;
         if ('headerCols' in body && typeof body.headerCols === 'number')
           next.headerCols = body.headerCols;
+        if ('footerRows' in body && typeof body.footerRows === 'number')
+          next.footerRows = body.footerRows;
+        if ('trailingHeaderCols' in body && typeof body.trailingHeaderCols === 'number')
+          next.trailingHeaderCols = body.trailingHeaderCols;
+        if ('banded' in body && typeof body.banded === 'boolean') next.banded = body.banded;
+        if ('rowRoles' in body && Array.isArray(body.rowRoles))
+          next.rowRoles = body.rowRoles.filter(isRowRoleEntry);
+        if ('ruleLines' in body && Array.isArray(body.ruleLines)) {
+          const lines = body.ruleLines.filter(isRuleLineEntry);
+          next.rules = next.rules.map((rule) => ({
+            ...rule,
+            line:
+              lines.find((entry) => entry.axis === rule.axis && entry.ord === rule.ord)?.line ??
+              rule.line,
+          }));
+        }
         if ('merges' in body && Array.isArray(body.merges)) {
           next.merges = body.merges.filter(
             (m: unknown): m is SyntheticTable['merges'][number] =>

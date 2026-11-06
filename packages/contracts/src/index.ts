@@ -1574,7 +1574,36 @@ export {
 } from './region-geometry.js';
 export type { NormalizedRect, LayoutToken, RemappedRegionTokens } from './region-geometry.js';
 export type { TableGridMerge } from './table-geometry.js';
-export { inferTableGrid, tableGridSize, validTableMerges } from './table-geometry.js';
+export {
+  TABLE_ROW_ROLES,
+  TABLE_RULE_LINES,
+  TABLE_RULING_PRESETS,
+  isTableIndexCol,
+  isTableRowRole,
+  isTableRuleLine,
+  tableIndexPosition,
+  tableRowBand,
+  tableRuling,
+  tableRulingLines,
+  validTableStructure,
+} from './table-structure.js';
+export type {
+  TableBand,
+  TableIndexPosition,
+  TableRowRole,
+  TableRowRoleEntry,
+  TableRuleLine,
+  TableRuleLineEntry,
+  TableRuling,
+  TableRulingPreset,
+  TableStructure,
+} from './table-structure.js';
+export {
+  inferTableBands,
+  inferTableGrid,
+  tableGridSize,
+  validTableMerges,
+} from './table-geometry.js';
 export type {
   TableGridAxis,
   TableGridRule,

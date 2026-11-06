@@ -10,6 +10,7 @@ import type {
   DocumentRegionTableDto,
   LayoutToken,
   TableCorrectionOp,
+  TableRuleLine,
 } from '@docuvate/contracts';
 import {
   canonicalRegionPayload,
@@ -33,7 +34,13 @@ import {
 } from '../../../shared/domain/ports.js';
 import { layoutTokensFromIr, uniqueBlockIndexes } from '../domain/layout-tokens.js';
 import { isUuid } from '../domain/parse-uuid.js';
-import { serializeTableMerges, withTableMerges } from '../domain/table-merges.js';
+import {
+  serializeTableMerges,
+  serializeTableStructure,
+  withTableStructure,
+} from '../domain/table-merges.js';
+
+const UNKNOWN_LINE: TableRuleLine = 'unknown';
 
 const TABLE_OPS = new Set<TableCorrectionOp>(['create', 'set_headers', 'edit_cell', 'remove']);
 
@@ -97,6 +104,7 @@ function tableAttributes(
     cells,
     // Only present when merges exist, so payloads of tables without spans stay unchanged.
     ...(table.merges.length > 0 ? { merges: serializeTableMerges(table.merges) } : {}),
+    ...serializeTableStructure(table),
   };
 }
 
@@ -104,7 +112,11 @@ function cloneTable(table: DocumentRegionTableDto): DocumentRegionTableDto {
   return {
     tableType: table.tableType,
     headerRows: table.headerRows,
+    footerRows: table.footerRows,
     headerCols: table.headerCols,
+    trailingHeaderCols: table.trailingHeaderCols,
+    banded: table.banded,
+    rowRoles: table.rowRoles.map((entry) => ({ ...entry })),
     rules: table.rules.map((rule) => ({ ...rule })),
     merges: table.merges.map((merge) => ({ ...merge })),
     cells: table.cells.map((cell) => ({ ...cell })),
@@ -115,7 +127,11 @@ function emptyTable(): DocumentRegionTableDto {
   return {
     tableType: 'other',
     headerRows: 0,
+    footerRows: 0,
     headerCols: 0,
+    trailingHeaderCols: 0,
+    banded: false,
+    rowRoles: [],
     rules: [],
     merges: [],
     cells: [],
@@ -347,7 +363,7 @@ export class ApplyTableCorrectionUseCase {
   ): DocumentRegionTableDto {
     const table = this.nextTableStructure(body, existing, tokens, rect);
     const structural = body.op === 'create' || body.op === 'set_headers';
-    return structural && body.merges !== undefined ? withTableMerges(table, body.merges) : table;
+    return structural ? withTableStructure(table, body) : table;
   }
 
   private nextTableStructure(
@@ -358,11 +374,22 @@ export class ApplyTableCorrectionUseCase {
   ): DocumentRegionTableDto {
     if (body.op === 'create' || !existing?.table) {
       const inferred = inferTableGrid(tokens, rect);
+      const headerRows = body.headerRows ?? inferred.headerRows;
+      const rows = Math.max(1, inferred.rules.filter((rule) => rule.axis === 'row').length - 1);
+      // Inferred bands are text evidence only; drop them when explicit headers leave no room.
+      const footerRows = headerRows + inferred.footerRows <= rows ? inferred.footerRows : 0;
       return {
         tableType: body.tableType ?? (inferred.headerRows > 0 ? 'line_items' : 'other'),
-        headerRows: body.headerRows ?? inferred.headerRows,
+        headerRows,
+        footerRows,
         headerCols: body.headerCols ?? inferred.headerCols,
-        rules: inferred.rules,
+        trailingHeaderCols: 0,
+        banded: false,
+        rowRoles: inferred.rowRoles.filter(
+          (entry) => entry.row >= headerRows && entry.row < rows - footerRows
+        ),
+        // No ruling evidence in the layout IR yet, so lines start as unknown.
+        rules: inferred.rules.map((rule) => ({ ...rule, line: UNKNOWN_LINE })),
         merges: [],
         cells: inferred.cells,
       };
