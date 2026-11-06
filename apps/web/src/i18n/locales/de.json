@@ -2091,7 +2091,7 @@
     "bulkLead": "Sichere Vorschläge lassen sich gesammelt übernehmen; den Rest prüfen Sie unten Schritt für Schritt.",
     "batchConfirmTitle": "Alle sicheren Vorschläge übernehmen?",
     "batchConfirmBody": "Gilt für alle wartenden Dokumente, nicht nur die angezeigten: Labels und Felder mit mindestens 90 % Sicherheit werden gespeichert. Alle anderen Vorschläge bleiben zur Prüfung.",
-    "nextWorkLead": "Öffne das nächste Dokument und strukturiere Werte direkt im Viewer — ohne zweiten Wizard.",
+    "nextWorkLead": "Öffne das nächste Dokument und strukturiere Werte direkt im Viewer  -  ohne zweiten Wizard.",
     "nextDocument": "Als Nächstes strukturieren",
     "openStructuring": "Dokument strukturieren",
     "openFieldsHint": "{fields} Felder · {labels} Labels offen",
@@ -2600,7 +2600,7 @@
       "nested": "Zwei Kopfzeilen, z. B. gruppierte Spalten.",
       "financial": "Fußzeilen für Summen und Steuern.",
       "grouped": "Abschnitte mit Zwischensummen im Körper.",
-      "key_value": "Links Bezeichnung, rechts Wert — ohne Raster."
+      "key_value": "Links Bezeichnung, rechts Wert  -  ohne Raster."
     },
     "editInDocument": "Im Dokument bearbeiten",
     "exitDocumentEdit": "Overlay schließen",

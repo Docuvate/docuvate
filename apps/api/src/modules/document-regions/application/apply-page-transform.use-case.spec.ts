@@ -10,7 +10,13 @@ import { ApplyPageTransformUseCase } from './apply-page-transform.use-case.js';
 const DOC_ID = '11111111-1111-4111-8111-111111111111';
 const CORRECTION_ID = '22222222-2222-4222-8222-222222222222';
 const USER_ID = 'user-1';
-const subject = { userId: USER_ID, roles: [] } as AuthorizationSubject;
+const subject = {
+  kind: 'user',
+  id: USER_ID,
+  tenantId: 'tenant-1',
+  roles: [],
+  claims: [],
+} satisfies AuthorizationSubject;
 
 function makeUseCase(overrides?: {
   findByIdForUser?: ReturnType<typeof vi.fn>;

@@ -2091,7 +2091,7 @@
     "bulkLead": "Confident suggestions can be accepted in one go; review the rest below step by step.",
     "batchConfirmTitle": "Accept all confident suggestions?",
     "batchConfirmBody": "Applies to every waiting document, not only the ones shown: labels and fields with at least 90 % confidence are saved. All other suggestions stay for review.",
-    "nextWorkLead": "Open the next document and structure values in the viewer — no second wizard.",
+    "nextWorkLead": "Open the next document and structure values in the viewer  -  no second wizard.",
     "nextDocument": "Structure next",
     "openStructuring": "Structure document",
     "openFieldsHint": "{fields} fields · {labels} labels open",
@@ -2600,7 +2600,7 @@
       "nested": "Two header rows, e.g. grouped columns.",
       "financial": "Footer rows for totals and tax.",
       "grouped": "Sections with subtotals in the body.",
-      "key_value": "Label on the left, value on the right — no grid."
+      "key_value": "Label on the left, value on the right  -  no grid."
     },
     "editInDocument": "Edit on document",
     "exitDocumentEdit": "Close overlay",

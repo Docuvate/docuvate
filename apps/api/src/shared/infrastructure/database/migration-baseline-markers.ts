@@ -72,6 +72,7 @@ export const BASELINE_MARKER_MIGRATION_NAMES = [
   'JobOutbox20261105080000',
   'DocumentFieldValuesUserConfirmed20261105120000',
   'DocumentRegionTableStructure20261106090000',
+  'DocumentPageTransforms20261106180000',
 ] as const;
 
 async function featureFlagMlKeysConstraintPresent(runner: QueryRunner): Promise<boolean> {

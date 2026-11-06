@@ -69,6 +69,7 @@ import { ExtractionFieldFeedbackPositions20261104120000 } from './migrations/202
 import { JobOutbox20261105080000 } from './migrations/20261105080000-job-outbox.js';
 import { DocumentFieldValuesUserConfirmed20261105120000 } from './migrations/20261105120000-document-field-values-user-confirmed.js';
 import { DocumentRegionTableStructure20261106090000 } from './migrations/20261106090000-document-region-table-structure.js';
+import { DocumentPageTransforms20261106180000 } from './migrations/20261106180000-document-page-transforms.js';
 import { buildTypeOrmOptions } from './typeorm-options.js';
 
 const EXPECTED_MIGRATIONS = [
@@ -137,6 +138,7 @@ const EXPECTED_MIGRATIONS = [
   JobOutbox20261105080000,
   DocumentFieldValuesUserConfirmed20261105120000,
   DocumentRegionTableStructure20261106090000,
+  DocumentPageTransforms20261106180000,
 ];
 
 describe('buildTypeOrmOptions', () => {
