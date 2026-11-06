@@ -50,3 +50,35 @@ def test_orient_forced() -> None:
     oriented = orient_page_for_ocr(image, forced_quarter_turns_cw=1)
     assert oriented.quarter_turns_cw == 1
     assert oriented.image.shape[:2] == (16, 8)
+
+
+def test_map_box_matches_contract_viewer_inverse_for_all_turns() -> None:
+    """OCR-space box (x,y,w,h) → MediaBox (x,y,w,h) for every quarter turn."""
+    cases = [
+        # turns, ocr (x,y,w,h), expected media (x,y,w,h)
+        (0, (0.1, 0.2, 0.2, 0.2), (0.1, 0.2, 0.2, 0.2)),
+        (1, (0.0, 0.0, 0.1, 0.2), (0.8, 0.0, 0.2, 0.1)),
+        (2, (0.1, 0.2, 0.3, 0.4), (0.6, 0.4, 0.3, 0.4)),
+        (3, (0.0, 0.0, 0.1, 0.2), (0.0, 0.9, 0.2, 0.1)),
+    ]
+    for turns, ocr, expected in cases:
+        got = map_norm_box_to_unrotated(*ocr, turns)
+        for a, b in zip(got, expected, strict=True):
+            assert abs(a - b) < 1e-9, (turns, got, expected)
+
+
+def test_orient_page_scores_sideways_hint() -> None:
+    """Vertical structure (sideways scan) plus a portrait-preferring scorer picks 90°/270°."""
+    image = np.zeros((40, 80, 3), dtype=np.uint8)
+    # Strong column variance → projection sideways hint.
+    image[:, 10:14] = 255
+    image[:, 40:44] = 255
+    image[:, 70:74] = 255
+
+    def score(arr: np.ndarray) -> float:
+        h, w = arr.shape[:2]
+        return 2.0 if h > w else 0.1
+
+    oriented = orient_page_for_ocr(image, score)
+    assert oriented.quarter_turns_cw in (1, 3)
+    assert oriented.image.shape[0] > oriented.image.shape[1]

@@ -111,13 +111,12 @@ test.describe('review queue, field bbox and table overlay', () => {
     await page.goto(`/documents/${LAYOUT_DOCUMENT_ID}`);
     await page.getByRole('tab', { name: /Layout|Tables|Tabellen/i }).first().click();
     const rotate = page.getByTestId('pdf-viewer-rotate-clockwise');
-    if (await rotate.count()) {
-      await rotate.click();
-      await expect(page.getByTestId('pdf-viewer-display-rotation')).toHaveAttribute(
-        'data-rotation-deg',
-        '90'
-      );
-    }
+    await expect(rotate).toBeVisible({ timeout: 30_000 });
+    await rotate.click();
+    await expect(page.getByTestId('pdf-viewer-display-rotation')).toHaveAttribute(
+      'data-rotation-deg',
+      '90'
+    );
     await page.getByTestId('table-edit-in-document').click();
     await expect(page.getByTestId('table-pdf-overlay')).toBeVisible();
     await page.screenshot({
@@ -125,4 +124,82 @@ test.describe('review queue, field bbox and table overlay', () => {
       fullPage: false,
     });
   });
+
+  test('manual page transform persists via API and GET returns it', async ({ page }) => {
+    const log = await installStructuringMocks(page);
+    await page.goto(`/documents/${LAYOUT_DOCUMENT_ID}`);
+    const rotate = page.getByTestId('pdf-viewer-rotate-clockwise');
+    await expect(rotate).toBeVisible({ timeout: 30_000 });
+    await rotate.click();
+    await expect(page.getByTestId('pdf-viewer-display-rotation')).toHaveAttribute(
+      'data-rotation-deg',
+      '90'
+    );
+    // Mock recorded the POST; GET must now return the stored transform.
+    const transforms = await page.evaluate(async (docId) => {
+      const res = await fetch(`/api/v1/documents/${docId}/page-transforms`);
+      return res.json();
+    }, LAYOUT_DOCUMENT_ID);
+    expect(transforms.transforms?.length ?? 0).toBeGreaterThan(0);
+    expect(transforms.transforms[0].rotationQuarterTurns).toBe(1);
+    expect(log.calls.some((c) => c.includes('POST') && c.includes('/transform'))).toBeTruthy();
+  });
+
+  test('field bbox save posts reanchor with MediaBox coordinates', async ({ page }) => {
+    const log = await installStructuringMocks(page);
+    await page.goto(`/documents/${LAYOUT_DOCUMENT_ID}?review=1`);
+    await page.getByRole('button', { name: /Betrag korrigieren|Correct amount|total_amount/i }).click();
+    await page.getByTestId('field-position-correct').click();
+    const editor = page.getByTestId('field-bbox-editor');
+    await expect(editor).toBeVisible({ timeout: 15_000 });
+    const box = page.locator('.field-bbox-box');
+    const handle = page.locator('.field-bbox-handle--se');
+    const before = await box.boundingBox();
+    const hb = await handle.boundingBox();
+    expect(before && hb).toBeTruthy();
+    await page.mouse.move(hb!.x + hb!.width / 2, hb!.y + hb!.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(hb!.x + 40, hb!.y + 24);
+    await page.mouse.up();
+    await page.getByTestId('field-bbox-save').click();
+    await expect
+      .poll(() => log.fieldCorrections.length, { timeout: 10_000 })
+      .toBeGreaterThan(0);
+    const body = log.fieldCorrections[0] as {
+      op?: string;
+      fieldKey?: string;
+      x0?: number;
+      y0?: number;
+      x1?: number;
+      y1?: number;
+      page?: number;
+    };
+    expect(body.op).toBe('reanchor');
+    expect(body.fieldKey).toBe('total_amount');
+    expect(body.page).toBe(1);
+    expect(body.x0).toBeGreaterThanOrEqual(0);
+    expect(body.y0).toBeGreaterThanOrEqual(0);
+    expect(body.x1).toBeGreaterThan(body.x0!);
+    expect(body.y1).toBeGreaterThan(body.y0!);
+  });
+
+  test('screenshot field bbox on rotated page', async ({ page }) => {
+    await installStructuringMocks(page);
+    await page.goto(`/documents/${LAYOUT_DOCUMENT_ID}?review=1`);
+    const rotate = page.getByTestId('pdf-viewer-rotate-clockwise');
+    await expect(rotate).toBeVisible({ timeout: 30_000 });
+    await rotate.click();
+    await expect(page.getByTestId('pdf-viewer-display-rotation')).toHaveAttribute(
+      'data-rotation-deg',
+      '90'
+    );
+    await page.getByRole('button', { name: /Betrag korrigieren|Correct amount|total_amount/i }).click();
+    await page.getByTestId('field-position-correct').click();
+    await expect(page.getByTestId('field-bbox-editor')).toBeVisible({ timeout: 15_000 });
+    await page.screenshot({
+      path: path.join(shotDir, 'field-bbox-rotated-90.png'),
+      fullPage: false,
+    });
+  });
+
 });

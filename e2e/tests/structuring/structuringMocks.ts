@@ -299,6 +299,8 @@ export interface StructuringMockLog {
   fieldWrites: { documentId: string; fields: SyntheticField[] }[];
   /** Bodies of table correction POSTs (synthetic). */
   tableCorrections: unknown[];
+  /** Bodies of field correction POSTs (synthetic). */
+  fieldCorrections: unknown[];
 }
 
 export interface SyntheticField {
@@ -365,6 +367,7 @@ export async function installStructuringMocks(
     calls: [],
     fieldWrites: [],
     tableCorrections: [],
+    fieldCorrections: [],
   };
   let tableRevision = 0;
   const fixtureTable = LAYOUT_FIXTURE.tableRegion.table;
@@ -389,16 +392,17 @@ export async function installStructuringMocks(
     source: string;
     updatedAt: string;
   }> = [];
+  let fieldBounds = { x0: 0.55, y0: 0.72, x1: 0.88, y1: 0.78 };
   const layoutFieldRegion = () => ({
     id: 'synthetic-field-total',
     documentId: LAYOUT_DOCUMENT_ID,
     page: 1,
     shape: 'rect' as const,
     role: 'field' as const,
-    x0: 0.55,
-    y0: 0.72,
-    x1: 0.88,
-    y1: 0.78,
+    x0: fieldBounds.x0,
+    y0: fieldBounds.y0,
+    x1: fieldBounds.x1,
+    y1: fieldBounds.y1,
     irSha256: 'synthetic',
     needsReview: false,
     blockIndexes: [],
@@ -516,6 +520,44 @@ export async function installStructuringMocks(
       const items =
         role === 'table' ? [table] : role === 'field' ? [field] : [field, table];
       return json(route, { irSha256: 'synthetic', items });
+    }
+    if (p === `/documents/${LAYOUT_DOCUMENT_ID}/corrections` && method === 'POST') {
+      const body: unknown = route.request().postDataJSON();
+      log.fieldCorrections.push(body);
+      const region = layoutFieldRegion();
+      let nextRegion = region;
+      if (
+        typeof body === 'object' &&
+        body !== null &&
+        'x0' in body &&
+        typeof body.x0 === 'number' &&
+        typeof body.y0 === 'number' &&
+        typeof body.x1 === 'number' &&
+        typeof body.y1 === 'number'
+      ) {
+        fieldBounds = { x0: body.x0, y0: body.y0, x1: body.x1, y1: body.y1 };
+        nextRegion = layoutFieldRegion();
+      }
+      return json(route, {
+        noChange: false,
+        correction: {
+          id: `synthetic-field-correction-${String(log.fieldCorrections.length)}`,
+          documentId: LAYOUT_DOCUMENT_ID,
+          kind: 'field',
+          status: 'active',
+          op: typeof body === 'object' && body && 'op' in body ? body.op : 'reanchor',
+          fieldKey:
+            typeof body === 'object' && body && 'fieldKey' in body
+              ? body.fieldKey
+              : 'total_amount',
+          beforeRegionId: region.id,
+          afterRegionId: region.id,
+          oldValue: null,
+          newValue: null,
+          createdAt: NOW,
+        },
+        region: nextRegion,
+      });
     }
     if (p === `/documents/${LAYOUT_DOCUMENT_ID}/table-corrections` && method === 'POST') {
       const body: unknown = route.request().postDataJSON();
