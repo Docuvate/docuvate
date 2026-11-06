@@ -1227,3 +1227,15 @@ button.aspect-strip-btn:hover {
     min-block-size: var(--dv-control-touch-target);
   }
 }
+
+/* Small screens: the document title keeps its room; export collapses to its icon. */
+@media (max-width: 767px) {
+  .document-export-trigger {
+    min-inline-size: var(--dv-control-touch-target);
+    padding-inline: var(--dv-space-xs);
+  }
+
+  .document-export-label {
+    display: none;
+  }
+}

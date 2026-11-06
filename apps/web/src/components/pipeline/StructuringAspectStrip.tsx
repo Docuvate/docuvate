@@ -39,11 +39,13 @@ export function StructuringAspectStrip({
             ? t('pipeline.aspects.openCount', { count: status.open })
             : t(`pipeline.aspects.state.${status.state}`);
         const label = t('pipeline.aspects.itemAria', { aspect: name, state: stateText });
+        // Settled aspects show only their name in green; text appears where something needs a look.
+        const settled = status.state === 'no_open_items' || status.state === 'confirmed';
         const content = (
           <>
             <Icon size={14} strokeWidth={2} aria-hidden />
             <span className="aspect-strip-name">{name}</span>
-            <span className="aspect-strip-state">{stateText}</span>
+            {settled ? null : <span className="aspect-strip-state">{stateText}</span>}
           </>
         );
         const openable =

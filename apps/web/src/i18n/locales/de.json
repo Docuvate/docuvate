@@ -2351,8 +2351,8 @@
       "intake": "Wartet",
       "structuring": "Wird erkannt",
       "failed": "Fehler",
-      "review": "In Strukturierung",
-      "structured": "Nichts offen"
+      "review": "Vorschläge offen",
+      "structured": "Erkannt"
     },
     "rail": {
       "waiting_one": "{{count}} wartet",
@@ -2422,11 +2422,11 @@
       "tabsAria": "Nach Stand filtern",
       "tab": {
         "all": "Alle",
-        "review": "Offen",
+        "review": "Vorschläge",
         "unlabeled": "Ohne Label",
         "structuring": "Wird erkannt",
         "failed": "Fehler",
-        "ready": "Nichts offen"
+        "ready": "Erkannt"
       },
       "intakeTitle": "Neue Dokumente",
       "importSources": "Importquellen",
@@ -2461,11 +2461,10 @@
         "queueAction": "In der Prüfwarteschlange öffnen"
       },
       "export": {
-        "title": "Strukturiert und bereit zum Export",
-        "text": "Exportieren Sie die erkannten Feldwerte dieses Dokuments.",
         "csv": "Als CSV exportieren",
         "json": "Als JSON exportieren",
-        "busy": "Export läuft…"
+        "busy": "Export läuft…",
+        "menu": "Feldwerte exportieren"
       }
     },
     "workbench": {

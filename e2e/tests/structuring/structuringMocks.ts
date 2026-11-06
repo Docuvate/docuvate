@@ -12,6 +12,37 @@ import path from 'node:path';
 
 const NOW = '2026-10-01T09:00:00.000Z';
 const PDF = fs.readFileSync(path.join(__dirname, '..', '..', 'fixtures', 'synthetic-upload.pdf'));
+const INVOICE_PDF = fs.readFileSync(
+  path.join(__dirname, '..', '..', 'fixtures', 'synthetic-invoice-table.pdf')
+);
+
+interface SyntheticTable {
+  tableType: 'line_items' | 'key_value' | 'other';
+  headerRows: number;
+  headerCols: number;
+  rules: { axis: 'row' | 'col'; ord: number; pos: number }[];
+  merges: { row0: number; col0: number; rowSpan: number; colSpan: number }[];
+  cells: { row: number; col: number; text: string }[];
+}
+
+interface SyntheticLayoutFixture {
+  ir: { version: 1; pages: { blocks: { text: string }[] }[] };
+  tokens: unknown[];
+  tableRegion: { x0: number; y0: number; x1: number; y1: number; table: SyntheticTable };
+}
+
+function isLayoutFixture(value: unknown): value is SyntheticLayoutFixture {
+  return typeof value === 'object' && value !== null && 'ir' in value && 'tableRegion' in value;
+}
+
+const layoutFixtureRaw: unknown = JSON.parse(
+  fs.readFileSync(path.join(__dirname, 'synthetic-invoice-layout.json'), 'utf8')
+);
+if (!isLayoutFixture(layoutFixtureRaw)) throw new Error('invalid synthetic layout fixture');
+const LAYOUT_FIXTURE = layoutFixtureRaw;
+
+/** Synthetic invoice with layout IR and one recognised table (structuring editor views). */
+export const LAYOUT_DOCUMENT_ID = 'synthetic-layout-0001';
 
 export const STRUCTURING_TAGS = [
   { id: 'tag-inbox', name: 'Posteingang', color: '#0369a1', isInbox: true },
@@ -101,7 +132,36 @@ function documentAt(index: number) {
 
 export const STRUCTURING_DOCUMENTS = SPECS.map((_, index) => documentAt(index));
 
+function layoutDocumentDetail() {
+  const text = LAYOUT_FIXTURE.ir.pages.flatMap((pg) => pg.blocks.map((b) => b.text)).join('\n');
+  return {
+    ...documentAt(5),
+    id: LAYOUT_DOCUMENT_ID,
+    title: 'Rechnung Strukturierung Oktober',
+    filename: 'rechnung-strukturierung.pdf',
+    status: 'ready' as const,
+    extractionFailureReason: null,
+    documentDate: '2026-10-14',
+    tags: [tagById('tag-invoice')],
+    tagSuggestions: [],
+    layoutIrAvailable: true,
+    extraction: {
+      text,
+      fields: [
+        { key: 'invoice_number', value: 'RE-2026-0042', confidence: 0.98, userConfirmed: true },
+        { key: 'total_amount', value: '1.570,80 €', confidence: 0.95 },
+        { key: 'date', value: '14.10.2026', confidence: 0.71 },
+      ],
+      blocks: [],
+      layoutIrAvailable: true,
+      layoutIrPages: [{ page: 1, widthPt: 595.28, heightPt: 841.89 }],
+    },
+    recognizedFieldAttempts: [],
+  };
+}
+
 function detailFor(id: string) {
+  if (id === LAYOUT_DOCUMENT_ID) return layoutDocumentDetail();
   const base = STRUCTURING_DOCUMENTS.find((d) => d.id === id);
   if (!base) return null;
   const ready = base.status === 'ready';
@@ -201,6 +261,8 @@ export interface StructuringMockLog {
   calls: string[];
   /** Field lists sent with each document PATCH, in order (synthetic). */
   fieldWrites: { documentId: string; fields: SyntheticField[] }[];
+  /** Bodies of table correction POSTs (synthetic). */
+  tableCorrections: unknown[];
 }
 
 export interface SyntheticField {
@@ -262,7 +324,30 @@ export async function installStructuringMocks(
   options: StructuringMockOptions = {}
 ): Promise<StructuringMockLog> {
   const theme = options.theme ?? 'light';
-  const log: StructuringMockLog = { unmatched: [], calls: [], fieldWrites: [] };
+  const log: StructuringMockLog = {
+    unmatched: [],
+    calls: [],
+    fieldWrites: [],
+    tableCorrections: [],
+  };
+  let tableRevision = 0;
+  let layoutTable: SyntheticTable = LAYOUT_FIXTURE.tableRegion.table;
+  const layoutTableRegion = () => ({
+    id: `synthetic-table-${String(tableRevision)}`,
+    documentId: LAYOUT_DOCUMENT_ID,
+    page: 1,
+    shape: 'rect',
+    role: 'table',
+    x0: LAYOUT_FIXTURE.tableRegion.x0,
+    y0: LAYOUT_FIXTURE.tableRegion.y0,
+    x1: LAYOUT_FIXTURE.tableRegion.x1,
+    y1: LAYOUT_FIXTURE.tableRegion.y1,
+    irSha256: 'synthetic',
+    needsReview: false,
+    blockIndexes: [],
+    table: layoutTable,
+    createdAt: NOW,
+  });
   const fieldOverrides = new Map<string, SyntheticField[]>();
   const withOverrides = (detail: NonNullable<ReturnType<typeof detailFor>>) => {
     const override = fieldOverrides.get(detail.id);
@@ -344,7 +429,62 @@ export async function installStructuringMocks(
     if (p === '/documents/tag-suggestions' && method === 'POST') return json(route, { items: [] });
     const previewMatch = /^\/documents\/([^/]+)\/(preview|content)$/.exec(p);
     if (previewMatch) {
-      return route.fulfill({ status: 200, contentType: 'application/pdf', body: PDF });
+      const body = previewMatch[1] === LAYOUT_DOCUMENT_ID ? INVOICE_PDF : PDF;
+      return route.fulfill({ status: 200, contentType: 'application/pdf', body });
+    }
+    if (p === `/documents/${LAYOUT_DOCUMENT_ID}/layout-ir`) return json(route, LAYOUT_FIXTURE.ir);
+    if (p === `/documents/${LAYOUT_DOCUMENT_ID}/layout/tokens`) {
+      return json(route, { page: null, irSha256: 'synthetic', tokens: LAYOUT_FIXTURE.tokens });
+    }
+    if (p === `/documents/${LAYOUT_DOCUMENT_ID}/regions`) {
+      const role = url.searchParams.get('role');
+      const items = role && role !== 'table' ? [] : [layoutTableRegion()];
+      return json(route, { irSha256: 'synthetic', items });
+    }
+    if (p === `/documents/${LAYOUT_DOCUMENT_ID}/table-corrections` && method === 'POST') {
+      const body: unknown = route.request().postDataJSON();
+      log.tableCorrections.push(body);
+      if (typeof body === 'object' && body !== null) {
+        const next: SyntheticTable = { ...layoutTable };
+        if (
+          'tableType' in body &&
+          (body.tableType === 'line_items' ||
+            body.tableType === 'key_value' ||
+            body.tableType === 'other')
+        )
+          next.tableType = body.tableType;
+        if ('headerRows' in body && typeof body.headerRows === 'number')
+          next.headerRows = body.headerRows;
+        if ('headerCols' in body && typeof body.headerCols === 'number')
+          next.headerCols = body.headerCols;
+        if ('merges' in body && Array.isArray(body.merges)) {
+          next.merges = body.merges.filter(
+            (m: unknown): m is SyntheticTable['merges'][number] =>
+              typeof m === 'object' && m !== null && 'row0' in m && 'colSpan' in m
+          );
+        }
+        layoutTable = next;
+      }
+      const before = layoutTableRegion();
+      tableRevision += 1;
+      const region = layoutTableRegion();
+      return json(route, {
+        noChange: false,
+        correction: {
+          id: `synthetic-correction-${String(tableRevision)}`,
+          documentId: LAYOUT_DOCUMENT_ID,
+          kind: 'table',
+          status: 'active',
+          op: 'set_headers',
+          fieldKey: '',
+          beforeRegionId: before.id,
+          afterRegionId: region.id,
+          oldValue: null,
+          newValue: null,
+          createdAt: NOW,
+        },
+        region,
+      });
     }
     const detailMatch = /^\/documents\/([^/]+)$/.exec(p);
     if (detailMatch?.[1]) {
@@ -445,8 +585,7 @@ export async function installStructuringMocks(
     if (p === '/connectors/catalog')
       return json(route, { categories: [], plugins: [], viewerIsServerAdmin: true });
     if (p === '/recognized-fields') return json(route, { items: RECOGNIZED_CATALOG });
-    if (p === '/saved-views' || p === '/folders')
-      return json(route, { items: [] });
+    if (p === '/saved-views' || p === '/folders') return json(route, { items: [] });
     if (p === '/duplicate-sets') return json(route, EMPTY_PAGE);
     if (method !== 'GET') return json(route, {});
     log.unmatched.push(`${method} ${p}`);

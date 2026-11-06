@@ -106,6 +106,8 @@ export function TableLayoutPicker({
   const [layoutId, setLayoutId] = useState(current?.id ?? null);
   const [anchor, setAnchor] = useState<{ row: number; col: number } | null>(null);
   const visible = TABLE_LAYOUTS.filter((entry) => showAll || entry.tier === 'common');
+  const textAt = (row: number, col: number) =>
+    table.cells.find((cell) => cell.row === row && cell.col === col)?.text ?? '';
 
   function choose(layout: TableLayout) {
     setLayoutId(layout.id);
@@ -157,6 +159,7 @@ export function TableLayoutPicker({
           type="button"
           variant="ghost"
           size="sm"
+          className="table-layout-more"
           onClick={() => {
             setShowAll(true);
           }}
@@ -215,7 +218,12 @@ export function TableLayoutPicker({
                     }
                   }}
                 >
-                  {rowSpan > 1 || colSpan > 1 ? t('tableLayouts.span', { rowSpan, colSpan }) : null}
+                  <span className="table-layout-merge-text">{textAt(row, col)}</span>
+                  {rowSpan > 1 || colSpan > 1 ? (
+                    <span className="table-layout-merge-span">
+                      {t('tableLayouts.span', { rowSpan, colSpan })}
+                    </span>
+                  ) : null}
                 </button>
               );
             })

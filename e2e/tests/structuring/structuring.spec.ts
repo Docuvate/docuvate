@@ -87,7 +87,7 @@ test.describe('structuring journey', () => {
     await expect(page.getByRole('link', { name: 'Kontoauszug September' }).first()).toBeVisible();
     await expect(page.getByRole('link', { name: 'Stromrechnung Oktober' })).toHaveCount(0);
 
-    // Stage tab "Offen" maps onto the inbox filter.
+    // Stage tab "Vorschläge" maps onto the inbox filter.
     await page.locator('[data-stage-tab="review"]').click();
     await expect(page.locator('[data-stage-tab="review"]')).toHaveAttribute('aria-pressed', 'true');
     await expect.poll(() => lastCall(log, 'GET /documents?')).toContain('inbox=true');
@@ -126,14 +126,13 @@ test.describe('structuring journey', () => {
       'total_amount'
     );
 
-    // Viewer: a structured document exports exactly its own field values.
+    // Viewer: a recognised document exports exactly its own field values.
+    // Export is an everyday action in the document header, not a final pipeline step.
     await page.goto('/documents/synthetic-doc-0007');
-    await expect(page.locator('.pipeline-doc-header')).toHaveAttribute(
-      'data-stage-state',
-      'structured'
-    );
+    await expect(page.locator('.pipeline-doc-header')).toHaveCount(0);
     const docDownload = page.waitForEvent('download');
-    await page.getByRole('button', { name: 'Als CSV exportieren' }).click();
+    await page.getByRole('button', { name: 'Feldwerte exportieren' }).click();
+    await page.getByRole('menuitem', { name: 'Als CSV exportieren' }).click();
     expect((await docDownload).suggestedFilename()).toMatch(/\.csv$/);
     expect(lastCall(log, 'GET /documents/export')).toContain('ids=synthetic-doc-0007');
 

@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 
 import { documentContentUrl } from '../../lib/api';
 import { documentStageState } from '../../lib/documentPipeline';
-import { StagePill } from '../pipeline';
+import { DocumentExportMenu, StagePill } from '../pipeline';
 import { Menu, MenuContent, MenuTrigger } from '../ui/overlay/Menu';
 
 type DetailTab = 'details' | 'labels';
@@ -98,6 +98,7 @@ export function DocumentDetailMetaBar({
           >
             {t('documents.download')}
           </a>
+          {doc.status === 'ready' ? <DocumentExportMenu documentId={doc.id} /> : null}
           <Menu>
             <MenuTrigger
               className="document-detail-overflow-trigger btn btn-ghost"

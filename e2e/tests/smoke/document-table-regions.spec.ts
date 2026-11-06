@@ -142,6 +142,17 @@ test.describe('document table regions', () => {
     ).toBeVisible({ timeout: 30_000 });
     await assertNoHorizontalOverflow(page);
 
+    // Named table layout: header band, table type and merged cells saved as one correction.
+    await card.first().getByRole('button', { name: /Layout für Tabelle 1|layout for table 1/i }).click();
+    const picker = page.getByTestId('table-layout-picker');
+    await expect(picker).toBeVisible();
+    await picker.getByRole('radio', { name: /Positionen mit Summe|Line items with total/i }).check({ force: true });
+    await Promise.all([
+      waitForTableCorrectionSave(page),
+      picker.getByRole('button', { name: /Layout übernehmen|Apply layout/i }).click(),
+    ]);
+    await expect(picker).toHaveCount(0);
+
     for (const viewport of VIEWPORTS) {
       await page.setViewportSize({ width: viewport.width, height: viewport.height });
       await expect(page.locator('.layout-workspace')).toHaveAttribute(

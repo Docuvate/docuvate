@@ -16728,3 +16728,30 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   border-color: var(--dv-color-accent);
   color: var(--dv-color-accent-text);
 }
+
+.table-layout-more {
+  justify-self: start;
+}
+
+.table-layout-merge-cell {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--dv-space-3xs);
+  min-inline-size: 0;
+  padding-inline: var(--dv-space-2xs);
+  text-align: start;
+}
+
+.table-layout-merge-text {
+  overflow: hidden;
+  color: var(--dv-color-text);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.table-layout-merge-span {
+  flex: none;
+  color: var(--dv-color-accent-text);
+  font-weight: var(--dv-font-weight-semibold);
+}

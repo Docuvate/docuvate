@@ -693,7 +693,7 @@ export function DocumentDetailPage() {
         onShowTechnicalDetailsChange={layoutWorkspace ? setShowTechnicalDetails : undefined}
       />
 
-      {stageState === 'review' ? null : (
+      {stageState === 'review' || stageState === 'structured' ? null : (
         <DocumentPipelineHeader
           doc={doc}
           fields={recognizedFields}

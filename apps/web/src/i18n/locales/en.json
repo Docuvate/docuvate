@@ -2351,8 +2351,8 @@
       "intake": "Waiting",
       "structuring": "Being read",
       "failed": "Failed",
-      "review": "Structuring",
-      "structured": "Nothing open"
+      "review": "Suggestions open",
+      "structured": "Recognized"
     },
     "rail": {
       "waiting_one": "{{count}} waiting",
@@ -2422,11 +2422,11 @@
       "tabsAria": "Filter by status",
       "tab": {
         "all": "All",
-        "review": "Open",
+        "review": "Suggestions",
         "unlabeled": "No label",
         "structuring": "Being read",
         "failed": "Failed",
-        "ready": "Nothing open"
+        "ready": "Recognized"
       },
       "intakeTitle": "New documents",
       "importSources": "Import sources",
@@ -2461,11 +2461,10 @@
         "queueAction": "Open in review queue"
       },
       "export": {
-        "title": "Structured and ready to export",
-        "text": "Export the recognized field values of this document.",
         "csv": "Export as CSV",
         "json": "Export as JSON",
-        "busy": "Exporting…"
+        "busy": "Exporting…",
+        "menu": "Export field values"
       }
     },
     "workbench": {

@@ -9,7 +9,7 @@ import { expect, test } from '@playwright/test';
 import fs from 'node:fs';
 import path from 'node:path';
 
-import { installStructuringMocks } from './structuringMocks';
+import { installStructuringMocks, LAYOUT_DOCUMENT_ID } from './structuringMocks';
 
 const shotDir =
   process.env['STRUCTURING_SHOT_DIR'] ??
@@ -20,6 +20,7 @@ const ROUTES = [
   { slug: 'library', path: '/documents' },
   { slug: 'viewer', path: '/documents/synthetic-doc-0001' },
   { slug: 'review', path: '/review' },
+  { slug: 'editor', path: `/documents/${LAYOUT_DOCUMENT_ID}` },
 ] as const satisfies readonly { slug: string; path: string }[];
 
 const VIEWPORTS = [
@@ -52,4 +53,24 @@ for (const viewport of VIEWPORTS) {
       });
     }
   }
+}
+
+for (const theme of ['light', 'dark'] as const) {
+  test(`screenshot table-layout · desktop · ${theme}`, async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    const log = await installStructuringMocks(page, { theme });
+    await page.goto(`/documents/${LAYOUT_DOCUMENT_ID}`);
+    await page.locator('.layout-side-tabs').getByRole('tab', { name: /Tabellen/ }).click();
+    const card = page.getByTestId('corrected-table-card').first();
+    await card.getByRole('button', { name: 'Layout für Tabelle 1 wählen' }).click();
+    const picker = page.getByTestId('table-layout-picker');
+    await picker.getByText('Positionen mit Summe').click();
+    await page.evaluate(async () => {
+      await document.fonts.ready;
+    });
+    await page.waitForTimeout(1_000);
+    await card.scrollIntoViewIfNeeded();
+    await page.screenshot({ path: path.join(shotDir, `table-layout-desktop-${theme}.png`) });
+    expect(log.unmatched).toEqual([]);
+  });
 }
