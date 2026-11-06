@@ -87,7 +87,7 @@ test.describe('structuring journey', () => {
     await expect(page.getByRole('link', { name: 'Kontoauszug September' }).first()).toBeVisible();
     await expect(page.getByRole('link', { name: 'Stromrechnung Oktober' })).toHaveCount(0);
 
-    // Stage tab "Zu prüfen" maps onto the inbox filter.
+    // Stage tab "Offen" maps onto the inbox filter.
     await page.locator('[data-stage-tab="review"]').click();
     await expect(page.locator('[data-stage-tab="review"]')).toHaveAttribute('aria-pressed', 'true');
     await expect.poll(() => lastCall(log, 'GET /documents?')).toContain('inbox=true');
@@ -103,15 +103,24 @@ test.describe('structuring journey', () => {
     expect((await libraryDownload).suggestedFilename()).toMatch(/^docuvate-field-values-.*\.csv$/);
     expect(lastCall(log, 'GET /documents/export')).toContain('format=csv');
 
-    // Viewer: stage track + next best action for a document waiting for review.
+    // Viewer: per-aspect structuring state with open counts; nothing claims "done" by itself.
     await page.goto('/documents/synthetic-doc-0001');
-    const track = page.getByRole('list', { name: 'Fortschritt dieses Dokuments' });
-    await expect(track.locator('[aria-current="step"]')).toHaveAttribute('data-stage', 'review');
-    await expect(track.locator('[data-step-status="done"]')).toHaveCount(2);
+    const aspects = page
+      .locator('.review-workbench')
+      .getByRole('list', { name: 'Stand der Strukturierung' });
+    await expect(aspects.locator('[data-aspect="labels"]')).toHaveAttribute(
+      'data-aspect-state',
+      'open'
+    );
+    await expect(aspects.locator('[data-aspect="fields"]')).toHaveAttribute(
+      'data-aspect-state',
+      'open'
+    );
+    await expect(aspects.locator('[data-aspect-state="confirmed"]')).toHaveCount(0);
     // Review state: the split workbench replaces the header band and lists the worst value first.
     await expect(page.locator('.pipeline-doc-header')).toHaveCount(0);
     const workbench = page.locator('.review-workbench');
-    await expect(workbench).toContainText('Prüfen und korrigieren');
+    await expect(workbench).toContainText('Strukturieren');
     await expect(workbench.locator('.review-workbench-row').first()).toHaveAttribute(
       'data-field-key',
       'total_amount'

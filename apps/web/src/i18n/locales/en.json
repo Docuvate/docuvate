@@ -2330,15 +2330,15 @@
     "railAria": "Structuring pipeline",
     "stage": {
       "upload": "Upload",
-      "structure": "Structure",
-      "review": "Review",
+      "structure": "Recognize",
+      "review": "Structure",
       "export": "Export"
     },
     "stageHint": {
       "upload": "PDFs, scans and photos via upload or an import source",
       "structure": "Text recognition, layout and fields, automatic",
-      "review": "Confirm labels and fields in one click",
-      "export": "Hand off field values as CSV or JSON"
+      "review": "Keep refining labels, fields, layout and text",
+      "export": "Any time: field values as CSV or JSON"
     },
     "stepStatus": {
       "done": "done",
@@ -2348,10 +2348,10 @@
     },
     "state": {
       "intake": "Waiting",
-      "structuring": "Structuring",
+      "structuring": "Being read",
       "failed": "Failed",
-      "review": "To review",
-      "structured": "Structured"
+      "review": "Structuring",
+      "structured": "Nothing open"
     },
     "rail": {
       "waiting_one": "{{count}} waiting",
@@ -2365,8 +2365,8 @@
       "review_one": "{{count}} document open",
       "review_other": "{{count}} documents open",
       "reviewNone": "All reviewed",
-      "ready_one": "{{count}} document ready",
-      "ready_other": "{{count}} documents ready",
+      "ready_one": "{{count}} document exportable",
+      "ready_other": "{{count}} documents exportable",
       "readyNone": "Nothing ready yet"
     },
     "hub": {
@@ -2376,7 +2376,7 @@
       "importSources": "Connect an import source",
       "openReview": "Start review",
       "progressTitle": "Progress",
-      "progressLead": "{{ready}} of {{total}} documents fully recognized",
+      "progressLead": "{{ready}} of {{total}} documents read",
       "workspaceTitle": "Your overview",
       "loadError": "The overview could not be loaded.",
       "retry": "Try again"
@@ -2417,15 +2417,15 @@
       }
     },
     "library": {
-      "lead": "Filter by pipeline step, review and export.",
-      "tabsAria": "Filter by pipeline step",
+      "lead": "Filter by status, structure and export any time.",
+      "tabsAria": "Filter by status",
       "tab": {
         "all": "All",
-        "review": "To review",
+        "review": "Open",
         "unlabeled": "No label",
-        "structuring": "In progress",
+        "structuring": "Being read",
         "failed": "Failed",
-        "ready": "Ready"
+        "ready": "Nothing open"
       },
       "intakeTitle": "New documents",
       "importSources": "Import sources",
@@ -2468,10 +2468,10 @@
       }
     },
     "workbench": {
-      "title": "Review and correct",
+      "title": "Structure",
       "open_one": "{{count}} open",
       "open_other": "{{count}} open",
-      "done": "All reviewed",
+      "done": "Nothing open",
       "progressAria": "Reviewed values",
       "acceptSafe_one": "Accept {{count}} safe value",
       "acceptSafe_other": "Accept {{count}} safe values",
@@ -2500,6 +2500,28 @@
       "acceptedToast_other": "{{count}} values accepted",
       "correctedToast": "Correction saved",
       "reassignedToast": "Value moved to {{field}}"
+    },
+    "aspects": {
+      "aria": "Structuring status",
+      "name": {
+        "ocr": "Text",
+        "labels": "Labels",
+        "layout": "Layout",
+        "fields": "Fields"
+      },
+      "state": {
+        "pending": "not processed",
+        "processing": "being read",
+        "failed": "failed",
+        "open": "open",
+        "no_open_items": "nothing open",
+        "confirmed": "confirmed",
+        "unavailable": "not available",
+        "unknown": "unknown"
+      },
+      "openCount_one": "{{count}} open",
+      "openCount_other": "{{count}} open",
+      "itemAria": "{{aspect}}: {{state}}"
     }
   }
 }

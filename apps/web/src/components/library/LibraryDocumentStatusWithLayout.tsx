@@ -4,8 +4,9 @@ import type { DocumentDto } from '@docuvate/contracts';
 
 import { isExtractionPending } from '../../lib/documentExtractionState';
 import { documentStageState } from '../../lib/documentPipeline';
+import { structuringAspects } from '../../lib/structuringAspects';
 import { ExtractionProgressBar } from '../documents';
-import { StagePill } from '../pipeline';
+import { StagePill, StructuringAspectStrip } from '../pipeline';
 import { LayoutMissingBadge } from './LayoutMissingBadge';
 import { showLayoutMissingBadge } from './layoutMissingBadgeVisibility';
 
@@ -48,7 +49,13 @@ export function LibraryDocumentStatusWithLayout({
     return <ExtractionProgressBar doc={doc} compact={compact} className="library-row-progress" />;
   }
 
-  const badge = <StagePill state={documentStageState(doc)} status={doc.status} />;
+  const aspects = structuringAspects(doc, null).filter((status) => status.state !== 'unknown');
+  const badge = (
+    <>
+      <StagePill state={documentStageState(doc)} status={doc.status} />
+      <StructuringAspectStrip statuses={aspects} compact className="library-row-aspects" />
+    </>
+  );
   if (wrapReadyInSpan) {
     return (
       <>

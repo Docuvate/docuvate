@@ -833,6 +833,24 @@ export function DocumentDetailPage() {
               }}
               onLocate={locateValue}
               onLabelsUpdated={refreshDocumentLabels}
+              onOpenAspect={(aspect) => {
+                if (aspect === 'labels') {
+                  setActiveTab('labels');
+                  window.requestAnimationFrame(() => {
+                    document
+                      .getElementById(DOCUMENT_DETAIL_TAB_PANEL_IDS.labels)
+                      ?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+                  });
+                  return;
+                }
+                if (aspect === 'layout' && layoutWorkspace) setLayoutSideTab('outline');
+                if (aspect === 'ocr' && layoutWorkspace) setLayoutTextEditOpen(true);
+                window.requestAnimationFrame(() => {
+                  document
+                    .querySelector('.document-workbench-main')
+                    ?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+                });
+              }}
             />
           ) : null}
           <div className="document-detail-tab-region">

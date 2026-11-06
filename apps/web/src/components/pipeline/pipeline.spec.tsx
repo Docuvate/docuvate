@@ -100,7 +100,7 @@ describe('DocumentStageTrack / StagePill', () => {
     const pill = container.querySelector('span');
     expect(pill?.className).toContain('badge-ready');
     expect(pill?.className).toContain('pipeline-pill--structured');
-    expect(pill?.textContent).toBe('Strukturiert');
+    expect(pill?.textContent).toBe('Nichts offen');
   });
 });
 
@@ -108,7 +108,7 @@ describe('LibraryStageTabs', () => {
   it('reflects the active filter and patches filters on select', () => {
     const onSelect = vi.fn();
     render(<LibraryStageTabs filters={{ inbox: true }} overview={OVERVIEW} onSelect={onSelect} />);
-    expect(screen.getByRole('button', { name: /Zu prüfen/ }).getAttribute('aria-pressed')).toBe(
+    expect(screen.getByRole('button', { name: /^Offen/ }).getAttribute('aria-pressed')).toBe(
       'true'
     );
     fireEvent.click(screen.getByRole('button', { name: /Fehler/ }));

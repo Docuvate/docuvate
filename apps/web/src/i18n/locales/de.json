@@ -2330,15 +2330,15 @@
     "railAria": "Strukturierungs-Pipeline",
     "stage": {
       "upload": "Hochladen",
-      "structure": "Strukturieren",
-      "review": "Prüfen",
+      "structure": "Erkennen",
+      "review": "Strukturieren",
       "export": "Exportieren"
     },
     "stageHint": {
       "upload": "PDFs, Scans und Fotos per Upload oder Importquelle",
       "structure": "Texterkennung, Layout und Felder, automatisch",
-      "review": "Labels und Felder mit einem Klick bestätigen",
-      "export": "Feldwerte als CSV oder JSON weitergeben"
+      "review": "Labels, Felder, Layout und Text laufend verfeinern",
+      "export": "Jederzeit: Feldwerte als CSV oder JSON"
     },
     "stepStatus": {
       "done": "erledigt",
@@ -2348,10 +2348,10 @@
     },
     "state": {
       "intake": "Wartet",
-      "structuring": "Wird strukturiert",
+      "structuring": "Wird erkannt",
       "failed": "Fehler",
-      "review": "Zu prüfen",
-      "structured": "Strukturiert"
+      "review": "In Strukturierung",
+      "structured": "Nichts offen"
     },
     "rail": {
       "waiting_one": "{{count}} wartet",
@@ -2365,8 +2365,8 @@
       "review_one": "{{count}} Dokument offen",
       "review_other": "{{count}} Dokumente offen",
       "reviewNone": "Alles geprüft",
-      "ready_one": "{{count}} Dokument bereit",
-      "ready_other": "{{count}} Dokumente bereit",
+      "ready_one": "{{count}} Dokument exportierbar",
+      "ready_other": "{{count}} Dokumente exportierbar",
       "readyNone": "Noch nichts bereit"
     },
     "hub": {
@@ -2376,7 +2376,7 @@
       "importSources": "Importquelle verbinden",
       "openReview": "Prüfen starten",
       "progressTitle": "Fortschritt",
-      "progressLead": "{{ready}} von {{total}} Dokumenten fertig erkannt",
+      "progressLead": "{{ready}} von {{total}} Dokumenten erkannt",
       "workspaceTitle": "Ihr Überblick",
       "loadError": "Die Übersicht konnte nicht geladen werden.",
       "retry": "Erneut versuchen"
@@ -2417,15 +2417,15 @@
       }
     },
     "library": {
-      "lead": "Nach Pipeline-Schritt filtern, prüfen und exportieren.",
-      "tabsAria": "Nach Pipeline-Schritt filtern",
+      "lead": "Nach Stand filtern, strukturieren und jederzeit exportieren.",
+      "tabsAria": "Nach Stand filtern",
       "tab": {
         "all": "Alle",
-        "review": "Zu prüfen",
+        "review": "Offen",
         "unlabeled": "Ohne Label",
-        "structuring": "In Arbeit",
+        "structuring": "Wird erkannt",
         "failed": "Fehler",
-        "ready": "Bereit"
+        "ready": "Nichts offen"
       },
       "intakeTitle": "Neue Dokumente",
       "importSources": "Importquellen",
@@ -2468,10 +2468,10 @@
       }
     },
     "workbench": {
-      "title": "Prüfen und korrigieren",
+      "title": "Strukturieren",
       "open_one": "{{count}} offen",
       "open_other": "{{count}} offen",
-      "done": "Alles geprüft",
+      "done": "Nichts offen",
       "progressAria": "Geprüfte Werte",
       "acceptSafe_one": "{{count}} sicheren Wert übernehmen",
       "acceptSafe_other": "{{count}} sichere Werte übernehmen",
@@ -2500,6 +2500,28 @@
       "acceptedToast_other": "{{count}} Werte übernommen",
       "correctedToast": "Korrektur gespeichert",
       "reassignedToast": "Wert zu {{field}} verschoben"
+    },
+    "aspects": {
+      "aria": "Stand der Strukturierung",
+      "name": {
+        "ocr": "Text",
+        "labels": "Labels",
+        "layout": "Layout",
+        "fields": "Felder"
+      },
+      "state": {
+        "pending": "nicht verarbeitet",
+        "processing": "wird erkannt",
+        "failed": "fehlgeschlagen",
+        "open": "offen",
+        "no_open_items": "nichts offen",
+        "confirmed": "bestätigt",
+        "unavailable": "nicht vorhanden",
+        "unknown": "unbekannt"
+      },
+      "openCount_one": "{{count}} offen",
+      "openCount_other": "{{count}} offen",
+      "itemAria": "{{aspect}}: {{state}}"
     }
   }
 }

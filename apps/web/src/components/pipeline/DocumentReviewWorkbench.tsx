@@ -7,7 +7,6 @@ import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
 
 import { confidenceLevelFromRatio } from '../../lib/confidenceLevel';
-import { documentStageState } from '../../lib/documentPipeline';
 import {
   openWorkbenchRowCount,
   safeConfirmKeys,
@@ -15,12 +14,13 @@ import {
   workbenchRows,
 } from '../../lib/reviewWorkbench';
 import { routes } from '../../lib/routes';
+import { type StructuringAspect, structuringAspects } from '../../lib/structuringAspects';
 import { DocumentLabelSuggestionChips } from '../documents';
 import { Button } from '../ui/Button';
 import { IconButton } from '../ui/IconButton';
 import { Input } from '../ui/Input';
 import { Select } from '../ui/Select';
-import { DocumentStageTrack } from './DocumentStageTrack';
+import { StructuringAspectStrip } from './StructuringAspectStrip';
 
 interface FieldTarget {
   key: string;
@@ -44,6 +44,8 @@ interface DocumentReviewWorkbenchProps {
   /** Show where a value sits in the document (highlight + page jump). */
   onLocate: (value: string) => void;
   onLabelsUpdated: () => void | Promise<void>;
+  /** Jump to the correction mode of OCR, labels or layout. */
+  onOpenAspect: (aspect: Exclude<StructuringAspect, 'fields'>) => void;
   /** Focus the first open value when the document opens (arriving from "next document"). */
   autoFocusFirst?: boolean;
 }
@@ -77,6 +79,7 @@ export function DocumentReviewWorkbench({
   onReassign,
   onLocate,
   onLabelsUpdated,
+  onOpenAspect,
   autoFocusFirst = false,
 }: DocumentReviewWorkbenchProps) {
   const { t } = useTranslation();
@@ -94,6 +97,7 @@ export function DocumentReviewWorkbench({
   const assigned = useMemo(() => new Set(doc.tags.map((tag) => tag.id)), [doc.tags]);
   const labelSuggestions = doc.tagSuggestions ?? [];
   const openLabels = labelSuggestions.filter((item) => !assigned.has(item.tag.id)).length;
+  const aspects = structuringAspects(doc, { fields, suggestions });
   const reviewedPercent =
     rows.length === 0 ? 100 : Math.round(((rows.length - open) / rows.length) * 100);
 
@@ -215,7 +219,18 @@ export function DocumentReviewWorkbench({
       data-open-count={open}
     >
       <header className="review-workbench-head">
-        <DocumentStageTrack state={documentStageState(doc)} className="review-workbench-track" />
+        <StructuringAspectStrip
+          statuses={aspects}
+          className="review-workbench-aspects"
+          onOpen={(aspect) => {
+            if (aspect !== 'fields') {
+              onOpenAspect(aspect);
+              return;
+            }
+            const firstOpen = rows.findIndex((row) => row.state !== 'confirmed');
+            focusRow(firstOpen >= 0 ? firstOpen : 0);
+          }}
+        />
         <div className="review-workbench-title-row">
           <h2 id="review-workbench-heading" className="review-workbench-title">
             {t('pipeline.workbench.title')}
