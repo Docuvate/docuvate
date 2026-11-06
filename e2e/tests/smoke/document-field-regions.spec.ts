@@ -412,7 +412,7 @@ test.describe('document field regions', () => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await applyGermanLocale(page);
     await openLayoutDocumentPage(page, layoutDocId);
-    await page.getByRole('radio', { name: /Text \(T\)/i }).click();
+    await page.getByRole('radio', { name: /^(Text markieren|Mark text)/ }).click();
     const word = page.locator('.pdf-page-wrap .textLayer span').first();
     await expect(word).toBeVisible({ timeout: 60_000 });
     await word.evaluate((node) => {

@@ -109,7 +109,7 @@ test.describe('rotated page bounding-box selection', () => {
 
     await page
       .getByTestId('document-selection-tools')
-      .getByRole('radio', { name: /Text \(T\)/i })
+      .getByRole('radio', { name: /^(Text markieren|Mark text)/ })
       .click();
     // Prefer a clean name span — the SYNTHETIC_FIXTURE line OCRs into fragments on /Rotate.
     const word = page
