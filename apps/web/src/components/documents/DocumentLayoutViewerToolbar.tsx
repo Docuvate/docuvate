@@ -132,7 +132,7 @@ export function DocumentLayoutViewerToolbar({
               aria-checked={leftMode === 'original'}
               icon={FileText}
               label={t('documents.layoutViewOriginal')}
-              shortcut={leftMode === 'original' ? '✓' : undefined}
+              variant={leftMode === 'original' ? 'active' : 'default'}
               onClick={() => {
                 onLeftModeChange('original');
               }}
@@ -142,7 +142,7 @@ export function DocumentLayoutViewerToolbar({
               aria-checked={leftMode === 'text'}
               icon={ScanText}
               label={t('documents.layoutViewText')}
-              shortcut={leftMode === 'text' ? '✓' : undefined}
+              variant={leftMode === 'text' ? 'active' : 'default'}
               onClick={() => {
                 onLeftModeChange('text');
               }}

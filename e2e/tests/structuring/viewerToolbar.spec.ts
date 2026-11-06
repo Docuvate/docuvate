@@ -26,14 +26,13 @@ test('viewer: marking tools first, page view in one menu', async ({ page }) => {
 
   await toolbar.getByRole('button', { name: 'Ansicht: Original' }).click();
   const menu = page.getByRole('menu');
-  await expect(menu.getByRole('menuitemradio', { name: 'Original' })).toHaveAttribute(
+  await expect(menu.getByRole('menuitemradio', { name: 'Original', exact: true })).toHaveAttribute(
     'aria-checked',
     'true'
   );
-  await expect(menu.getByRole('menuitemradio', { name: 'Erkannter Text' })).toHaveAttribute(
-    'aria-checked',
-    'false'
-  );
+  await expect(
+    menu.getByRole('menuitemradio', { name: 'Erkannter Text', exact: true })
+  ).toHaveAttribute('aria-checked', 'false');
   await expect(menu.getByRole('menuitem', { name: 'Im Uhrzeigersinn drehen' })).toBeVisible();
   await page.keyboard.press('Escape');
   await expect(menu).toHaveCount(0);
