@@ -9,6 +9,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import type { Pool, PoolClient } from 'pg';
 
 import type { DocumentPageTransformRepository } from '../../../shared/domain/ports.js';
+import { recordFromUnknown } from '../../../shared/domain/row-parse.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 
 function asQuarterTurns(value: unknown): PageRotationQuarterTurns {
@@ -50,7 +51,7 @@ export class PgDocumentPageTransformRepository implements DocumentPageTransformR
 
   async replacePipelineTransforms(
     documentId: string,
-    transforms: Array<{ page: number; rotationQuarterTurns: PageRotationQuarterTurns }>
+    transforms: { page: number; rotationQuarterTurns: PageRotationQuarterTurns }[]
   ): Promise<void> {
     const client = await this.pool.connect();
     try {
@@ -162,5 +163,9 @@ async function upsertTransform(
       input.correctionId,
     ]
   );
-  return mapRow(result.rows[0] as Record<string, unknown>);
+  const row = recordFromUnknown(result.rows[0]);
+  if (!row) {
+    throw new Error('document_page_transforms upsert returned no row');
+  }
+  return mapRow(row);
 }

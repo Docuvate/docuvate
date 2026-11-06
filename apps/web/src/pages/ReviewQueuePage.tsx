@@ -125,16 +125,15 @@ export function ReviewQueuePage() {
             <h2 id="review-next-title" className="review-next-title">
               {t('reviewQueue.nextDocument')}
             </h2>
-            {nextItem ? (
-              <Card className="review-next-card">
+            <Card className="review-next-card">
                 <div className="review-next-card-main">
                   <FileText size={22} aria-hidden />
                   <div>
                     <p className="review-next-filename">{nextItem.filename}</p>
                     <p className="muted">
                       {t('reviewQueue.openFieldsHint', {
-                        fields: nextItem.fieldSuggestions.length ?? 0,
-                        labels: nextItem.labelSuggestions.length ?? 0,
+                        fields: nextItem.fieldSuggestions.length,
+                        labels: nextItem.labelSuggestions.length,
                       })}
                     </p>
                   </div>
@@ -148,7 +147,6 @@ export function ReviewQueuePage() {
                   <ArrowRight size={16} aria-hidden />
                 </Link>
               </Card>
-            ) : null}
             <div className="review-queue-bulk-actions">
               <Button
                 type="button"

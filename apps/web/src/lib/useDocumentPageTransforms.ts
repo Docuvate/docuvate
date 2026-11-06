@@ -1,9 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { useCallback, useEffect, useState } from 'react';
-
-import type { PageRotationQuarterTurns } from '@docuvate/contracts';
 import { degreesToQuarterTurns, quarterTurnsToDegrees } from '@docuvate/contracts';
+import { useCallback, useEffect, useState } from 'react';
 
 import { applyDocumentPageTransform, listDocumentPageTransforms } from './api';
 
@@ -42,11 +40,11 @@ export function useDocumentPageTransforms(documentId: string | undefined) {
 
   const rotatePageClockwise = useCallback(
     async (page: number) => {
-      if (!documentId) return 0 as PageRotationDeg;
+      if (!documentId) return 0;
       const current = byPage[page] ?? 0;
       const nextDeg: PageRotationDeg =
         current === 0 ? 90 : current === 90 ? 180 : current === 180 ? 270 : 0;
-      const turns = degreesToQuarterTurns(nextDeg) as PageRotationQuarterTurns;
+      const turns = degreesToQuarterTurns(nextDeg);
       setByPage((prev) => ({ ...prev, [page]: nextDeg }));
       await applyDocumentPageTransform(documentId, page, {
         id: crypto.randomUUID(),
