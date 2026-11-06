@@ -2775,7 +2775,6 @@ mark.global-search-mark {
     overflow-x: visible;
   }
 
-  .layout-viewer-toolbar .layout-view-mode-switch.segmented-control,
   .layout-viewer-toolbar .layout-zoom-switch.segmented-control {
     flex: 1 1 100%;
     max-width: 100%;
@@ -9043,10 +9042,6 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   flex: 1 1 auto;
   min-width: 0;
   justify-content: flex-start;
-}
-
-.pdf-viewer-overlay-toggle {
-  margin: 0;
 }
 
 .pdf-viewer-pager {
@@ -17399,5 +17394,105 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 
   .app-ribbon .library-saved-views-trigger {
     min-width: var(--dv-touch-target-min);
+  }
+}
+
+/* ---------- Viewer toolbar: the marking task first, the page view in one menu ---------- */
+
+.layout-viewer-toolbar {
+  gap: var(--dv-space-md);
+}
+
+.layout-viewer-toolbar .document-selection-tools.segmented-control--shell {
+  flex-wrap: nowrap;
+  gap: var(--dv-space-3xs);
+  padding: var(--dv-space-3xs);
+  border: 0;
+  border-radius: var(--dv-radius-lg);
+  background: color-mix(in srgb, var(--dv-color-bg-muted) 55%, transparent);
+}
+
+.layout-viewer-toolbar .document-selection-tools .segmented-control__option {
+  min-width: 0;
+  min-height: calc(var(--dv-ribbon-control-height) - 2 * var(--dv-space-3xs));
+  padding: 0 var(--dv-ribbon-control-padding-x);
+  border: 0;
+  border-radius: var(--dv-radius-control);
+  background: transparent;
+  color: var(--dv-color-text-muted);
+  font-size: var(--dv-font-size-sm);
+  font-weight: var(--dv-font-weight-medium);
+}
+
+.layout-viewer-toolbar .document-selection-tools .segmented-control__option:hover {
+  color: var(--dv-color-text);
+}
+
+.layout-viewer-toolbar .document-selection-tools .segmented-control__option--selected {
+  background: var(--dv-color-bg-raised);
+  color: var(--dv-color-text);
+  font-weight: var(--dv-font-weight-semibold);
+  box-shadow: var(--dv-surface-highlight), var(--dv-elevation-1);
+}
+
+.document-selection-tool-key {
+  padding: 0 var(--dv-space-3xs);
+  border: var(--dv-border-width-hairline) solid var(--dv-color-border);
+  border-radius: var(--dv-radius-xs);
+  color: var(--dv-color-text-subtle);
+  font-family: inherit;
+  font-size: var(--dv-font-size-xs);
+  line-height: 1.3;
+}
+
+.layout-viewer-toolbar-hint {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  color: var(--dv-color-text-muted);
+  font-size: var(--dv-font-size-sm);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.layout-viewer-toolbar-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--dv-space-2xs);
+}
+
+.layout-view-menu-trigger {
+  gap: var(--dv-ribbon-control-gap);
+  min-height: var(--dv-ribbon-control-height);
+  border-color: transparent;
+  background: transparent;
+}
+
+.layout-view-menu-trigger:hover,
+.layout-view-menu-trigger[aria-expanded='true'] {
+  border-color: color-mix(in srgb, var(--dv-color-border) 70%, transparent);
+  background: var(--dv-color-bg-raised);
+  box-shadow: var(--dv-surface-highlight), var(--dv-elevation-1);
+}
+
+.layout-view-menu-trigger > svg {
+  color: var(--dv-color-text-muted);
+}
+
+@media (max-width: 1023px) {
+  .layout-viewer-toolbar-hint,
+  .document-selection-tool-key {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .layout-viewer-toolbar .document-selection-tools .segmented-control__option {
+    white-space: nowrap;
+  }
+
+  .layout-viewer-toolbar .document-selection-tools .segmented-option-content > svg {
+    display: none;
   }
 }

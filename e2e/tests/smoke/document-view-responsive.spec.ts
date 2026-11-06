@@ -111,7 +111,7 @@ test.describe('document view at small widths', () => {
         'document'
       );
       await expect(page.locator('.layout-side-panel')).toBeHidden();
-      const rect = page.getByRole('radio', { name: /Rechteck|Rectangle/i });
+      const rect = page.getByRole('radio', { name: /^(Bereich|Area)/ });
       await expectWithinViewportWidth(page, rect);
       await rect.click();
       await expect(rect).toBeChecked();

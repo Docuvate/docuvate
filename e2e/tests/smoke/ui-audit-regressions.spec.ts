@@ -44,10 +44,12 @@ test.describe('UI audit regressions (non-ML)', () => {
     });
     expect(adjacent).toBe(true);
 
+    // Recognised text is a page view in the "Ansicht" menu, not a second mode bar.
     await page
       .getByTestId('layout-viewer-toolbar')
-      .getByRole('radio', { name: /^Text$/i })
+      .getByRole('button', { name: /^(Ansicht|View):/ })
       .click();
+    await page.getByRole('menuitemradio', { name: /^(Erkannter Text|Recognised text)$/ }).click();
     await expect(page.locator('.layout-text-stage .extracted-text-panel')).toBeVisible({
       timeout: 120_000,
     });

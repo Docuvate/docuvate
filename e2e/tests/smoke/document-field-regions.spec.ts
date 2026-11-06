@@ -302,7 +302,7 @@ test.describe('document field regions', () => {
       /^(?!0$)\d+$/,
       { timeout: 60_000 }
     );
-    await page.getByRole('radio', { name: /Rechteck|Rectangle/i }).click();
+    await page.getByRole('radio', { name: /^(Bereich|Area)/ }).click();
     await startRectangle(page);
     await expect(page.getByTestId('document-selection-rect')).toBeVisible({ timeout: 15_000 });
     await captureLoadedScreenshot(

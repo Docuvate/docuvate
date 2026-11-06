@@ -185,6 +185,9 @@ export function DocumentLayoutWorkspace({
   const [advancedView, setAdvancedView] = useState<AdvancedViewerMode>('reconstruction');
   const [overlayEnabled, setOverlayEnabled] = useState(true);
   const [displayRotationDeg, setDisplayRotationDeg] = useState<0 | 90 | 180 | 270>(0);
+  const rotateClockwise = useCallback(() => {
+    setDisplayRotationDeg((prev) => (prev === 270 ? 0 : prev === 0 ? 90 : prev === 90 ? 180 : 270));
+  }, []);
   const [activeOverlayId, setActiveOverlayId] = useState<string | null>(null);
   const [hoverOverlay, setHoverOverlay] = useState<PdfLayoutOverlay | null>(null);
   const [layoutZoom, setLayoutZoom] = useState<LayoutIrZoomStep>(100);
@@ -689,6 +692,12 @@ export function DocumentLayoutWorkspace({
             qualityPage={qualityReviewPage ?? viewerPage}
             editMode={editMode}
             onEditModeChange={onEditModeChange}
+            overlay={
+              pdfOverlays.length > 0 && leftMode === 'original'
+                ? { enabled: overlayEnabled, onChange: setOverlayEnabled }
+                : undefined
+            }
+            onRotate={leftMode === 'original' && !showAdvancedStage ? rotateClockwise : undefined}
           />
 
           <DocumentFieldMarkHint
@@ -786,34 +795,6 @@ export function DocumentLayoutWorkspace({
                     fitWidth
                     onPageClick={selectionTool === 'none' ? onPdfPageClick : undefined}
                     displayRotationDeg={displayRotationDeg}
-                    onRotateClockwise={() => {
-                      setDisplayRotationDeg((prev) => {
-                        switch (prev) {
-                          case 0:
-                            return 90;
-                          case 90:
-                            return 180;
-                          case 180:
-                            return 270;
-                          case 270:
-                            return 0;
-                        }
-                      });
-                    }}
-                    toolbarAccessory={
-                      pdfOverlays.length > 0 ? (
-                        <label className="layout-overlay-toggle pdf-viewer-overlay-toggle">
-                          <input
-                            type="checkbox"
-                            checked={overlayEnabled}
-                            onChange={(e) => {
-                              setOverlayEnabled(e.target.checked);
-                            }}
-                          />
-                          <span>{t('documents.layoutOverlayToggle')}</span>
-                        </label>
-                      ) : null
-                    }
                   />
                 )}
                 {!showAdvancedStage ? (

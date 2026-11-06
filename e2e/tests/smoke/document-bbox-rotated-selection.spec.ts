@@ -83,7 +83,7 @@ test.describe('rotated page bounding-box selection', () => {
 
       await page
         .getByTestId('document-selection-tools')
-        .getByRole('radio', { name: /Rechteck|Rectangle/i })
+        .getByRole('radio', { name: /^(Bereich|Area)/ })
         .click();
       await dragRectangleFraction(page, 0.05, 0.05, 0.95, 0.95);
 

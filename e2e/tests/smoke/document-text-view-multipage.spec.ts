@@ -42,11 +42,20 @@ async function uploadMultipagePdf(request: APIRequestContext): Promise<string> {
   return readDocumentId(await upload.json());
 }
 
+/** Original and recognised text are page views in the viewer's "Ansicht" menu. */
+async function chooseView(page: Page, view: RegExp): Promise<void> {
+  await page
+    .getByTestId('layout-viewer-toolbar')
+    .getByRole('button', { name: /^(Ansicht|View):/ })
+    .click();
+  await page.getByRole('menuitemradio', { name: view }).click();
+}
+
 async function openTextView(page: Page, docId: string): Promise<Locator> {
   await page.goto(`/documents/${docId}`, { waitUntil: 'domcontentloaded' });
   await page.locator('.layout-workspace').waitFor({ state: 'visible', timeout: 120_000 });
   await showLayoutPane(page, 'document');
-  await page.getByRole('radio', { name: /^Text$/ }).click();
+  await chooseView(page, /^(Erkannter Text|Recognised text)$/);
   const body = page.locator('.layout-text-stage .extracted-text-body');
   await expect(body).toBeVisible({ timeout: 30_000 });
   return body;
@@ -96,8 +105,8 @@ test.describe('document text view (multi-page)', () => {
     await expectPageText(body, 2);
 
     // Switching back to the PDF keeps the page; the text view picks it up again.
-    await page.getByRole('radio', { name: /^Original$/ }).click();
-    await page.getByRole('radio', { name: /^Text$/ }).click();
+    await chooseView(page, /^Original$/);
+    await chooseView(page, /^(Erkannter Text|Recognised text)$/);
     await expectPageText(body, 2);
 
     await page.locator('.extracted-text-d7-search').fill('E2E_MULTIPAGE_TEXT_PAGE_2');

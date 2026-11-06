@@ -112,7 +112,9 @@ test.describe('document field correction flow', () => {
     await expect
       .poll(() => readFieldValue(request, docId, MISSING_KEY), { timeout: 30_000 })
       .toBe(TYPED_IBAN);
-    await expect(missingList.locator('.field-value-row').filter({ hasText: /iban/i })).toHaveCount(0);
+    await expect(missingList.locator('.field-value-row').filter({ hasText: /iban/i })).toHaveCount(
+      0
+    );
     await expect(page.getByTestId('layout-field-list-found')).toContainText(TYPED_IBAN);
     // Saving a field must not drop the layout IR (regression: unchanged blocks were re-sent).
     await expect(page.locator('.layout-workspace')).toBeVisible();
@@ -122,7 +124,7 @@ test.describe('document field correction flow', () => {
     await found.getByRole('button', { name: 'Im Dokument markieren' }).click();
     const hint = page.getByTestId('field-mark-hint');
     await expect(hint).toBeVisible();
-    await expect(page.getByRole('radio', { name: /Rechteck|Rectangle/i })).toBeChecked();
+    await expect(page.getByRole('radio', { name: /^(Bereich|Area)/ })).toBeChecked();
     await hint.getByRole('button', { name: 'Markieren abbrechen' }).click();
     await expect(hint).toHaveCount(0);
     await assertNoHorizontalOverflow(page);

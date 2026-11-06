@@ -124,7 +124,7 @@ test.describe('document table regions', () => {
       /^(?!0$)\d+$/,
       { timeout: 60_000 }
     );
-    await page.getByRole('radio', { name: /Rechteck|Rectangle/i }).click();
+    await page.getByRole('radio', { name: /^(Bereich|Area)/ }).click();
     await drawTableRectangle(page);
     const bar = page.getByTestId('field-context-bar');
     await expect(bar).toBeVisible({ timeout: 30_000 });

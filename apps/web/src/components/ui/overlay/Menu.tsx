@@ -134,7 +134,9 @@ export function MenuContent({
     if (!panel) {
       return;
     }
-    const first = panel.querySelector<HTMLElement>('[role="menuitem"], [role="menuitemcheckbox"]');
+    const first = panel.querySelector<HTMLElement>(
+      '[role="menuitem"], [role="menuitemcheckbox"], [role="menuitemradio"]'
+    );
     first?.focus();
   }, [open]);
 
@@ -147,7 +149,7 @@ export function MenuContent({
       const target = event.target;
       if (
         target instanceof HTMLElement &&
-        target.closest('[role="menuitem"], [role="menuitemcheckbox"]')
+        target.closest('[role="menuitem"], [role="menuitemcheckbox"], [role="menuitemradio"]')
       ) {
         setOpen(false);
       }
@@ -171,7 +173,9 @@ export function MenuContent({
         return;
       }
       const items = [
-        ...panel.querySelectorAll<HTMLElement>('[role="menuitem"], [role="menuitemcheckbox"]'),
+        ...panel.querySelectorAll<HTMLElement>(
+          '[role="menuitem"], [role="menuitemcheckbox"], [role="menuitemradio"]'
+        ),
       ];
       if (items.length === 0) {
         return;
