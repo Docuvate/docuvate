@@ -77,7 +77,11 @@
     },
     "page-pad": { "value": "{space.lg}", "comment": "Page padding on tablet and desktop." },
     "page-pad-mobile": { "value": "{space.md}", "comment": "Page padding below 768px." },
-    "topbar-height": { "value": "3.25rem" },
+    "topbar-height": { "value": "3.75rem", "comment": "Global header row (60px)." },
+    "inspector-width": {
+      "value": "23rem",
+      "comment": "Floating document inspector on wide screens."
+    },
     "sidebar-width": { "value": "13.75rem", "comment": "Expanded navigation rail (220px)." },
     "sidebar-collapsed-width": { "value": "3.25rem" },
     "dialog-width": { "value": "35rem", "comment": "All standard dialogs share one width." },

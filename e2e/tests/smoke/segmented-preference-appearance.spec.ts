@@ -140,7 +140,9 @@ test.describe('Segmented preference appearance', () => {
     });
     await page.reload();
     await waitForLibrary(page);
-    await assertSegmentPair(page, '.locale-switcher-wrap--topbar .segmented-control');
+    // Language lives in the account menu, next to the theme.
+    await page.locator('.user-account-menu-trigger').click();
+    await assertSegmentPair(page, '.locale-switcher-wrap--menu .segmented-control');
 
     await page.evaluate(() => {
       localStorage.setItem('docuvate-theme-preference', 'dark');
@@ -149,7 +151,8 @@ test.describe('Segmented preference appearance', () => {
     });
     await page.reload();
     await waitForLibrary(page);
-    await assertSegmentPair(page, '.locale-switcher-wrap--topbar .segmented-control');
+    await page.locator('.user-account-menu-trigger').click();
+    await assertSegmentPair(page, '.locale-switcher-wrap--menu .segmented-control');
 
     await page.setViewportSize({ width: 390, height: 844 });
     await page.reload();

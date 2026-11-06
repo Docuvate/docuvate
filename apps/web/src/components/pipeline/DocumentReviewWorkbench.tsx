@@ -16,6 +16,7 @@ import {
 import { routes } from '../../lib/routes';
 import { type StructuringAspect, structuringAspects } from '../../lib/structuringAspects';
 import { DocumentLabelSuggestionChips } from '../documents';
+import { AppRibbon, RibbonGroup } from '../layout/AppRibbon';
 import { Button } from '../ui/Button';
 import { IconButton } from '../ui/IconButton';
 import { Input } from '../ui/Input';
@@ -218,19 +219,54 @@ export function DocumentReviewWorkbench({
       aria-labelledby="review-workbench-heading"
       data-open-count={open}
     >
+      <AppRibbon>
+        <RibbonGroup label={t('ribbon.structure')} order={1}>
+          <StructuringAspectStrip
+            statuses={aspects}
+            className="review-workbench-aspects"
+            onOpen={(aspect) => {
+              if (aspect !== 'fields') {
+                onOpenAspect(aspect);
+                return;
+              }
+              const firstOpen = rows.findIndex((row) => row.state !== 'confirmed');
+              focusRow(firstOpen >= 0 ? firstOpen : 0);
+            }}
+          />
+        </RibbonGroup>
+        <RibbonGroup label={t('ribbon.review')} order={2}>
+          <div className="review-workbench-actions">
+            <Button
+              type="button"
+              size="sm"
+              variant={safeKeys.length > 0 ? 'primary' : 'secondary'}
+              disabled={saving || safeKeys.length === 0}
+              onClick={() => {
+                onConfirmMany(safeKeys);
+              }}
+            >
+              <CheckCheck size={16} strokeWidth={2} aria-hidden />
+              {t('pipeline.workbench.acceptSafe', { count: safeKeys.length })}
+            </Button>
+            {nextDocumentId ? (
+              <Link
+                ref={nextRef}
+                to={reviewDocumentHref(nextDocumentId)}
+                className={`btn btn-sm review-workbench-next ${open + openLabels === 0 ? 'btn-primary' : 'btn-secondary'}`}
+                aria-keyshortcuts="N"
+              >
+                {t('pipeline.workbench.next')}
+                <ArrowRight size={16} strokeWidth={2} aria-hidden />
+              </Link>
+            ) : (
+              <Link to={routes.reviewQueue} className="btn btn-ghost btn-sm">
+                {t('pipeline.viewer.review.queueAction')}
+              </Link>
+            )}
+          </div>
+        </RibbonGroup>
+      </AppRibbon>
       <header className="review-workbench-head">
-        <StructuringAspectStrip
-          statuses={aspects}
-          className="review-workbench-aspects"
-          onOpen={(aspect) => {
-            if (aspect !== 'fields') {
-              onOpenAspect(aspect);
-              return;
-            }
-            const firstOpen = rows.findIndex((row) => row.state !== 'confirmed');
-            focusRow(firstOpen >= 0 ? firstOpen : 0);
-          }}
-        />
         <div className="review-workbench-title-row">
           <h2 id="review-workbench-heading" className="review-workbench-title">
             {t('pipeline.workbench.title')}
@@ -250,35 +286,6 @@ export function DocumentReviewWorkbench({
           aria-label={t('pipeline.workbench.progressAria')}
         >
           <span style={{ inlineSize: `${String(reviewedPercent)}%` }} />
-        </div>
-        <div className="review-workbench-actions">
-          <Button
-            type="button"
-            size="sm"
-            variant={safeKeys.length > 0 ? 'primary' : 'secondary'}
-            disabled={saving || safeKeys.length === 0}
-            onClick={() => {
-              onConfirmMany(safeKeys);
-            }}
-          >
-            <CheckCheck size={16} strokeWidth={2} aria-hidden />
-            {t('pipeline.workbench.acceptSafe', { count: safeKeys.length })}
-          </Button>
-          {nextDocumentId ? (
-            <Link
-              ref={nextRef}
-              to={reviewDocumentHref(nextDocumentId)}
-              className={`btn btn-sm review-workbench-next ${open + openLabels === 0 ? 'btn-primary' : 'btn-secondary'}`}
-              aria-keyshortcuts="N"
-            >
-              {t('pipeline.workbench.next')}
-              <ArrowRight size={16} strokeWidth={2} aria-hidden />
-            </Link>
-          ) : (
-            <Link to={routes.reviewQueue} className="btn btn-ghost btn-sm">
-              {t('pipeline.viewer.review.queueAction')}
-            </Link>
-          )}
         </div>
       </header>
 

@@ -105,8 +105,9 @@ test.describe('structuring journey', () => {
 
     // Viewer: per-aspect structuring state with open counts; nothing claims "done" by itself.
     await page.goto('/documents/synthetic-doc-0001');
+    // The aspects live in the contextual ribbon, not in a side panel.
     const aspects = page
-      .locator('.review-workbench')
+      .getByTestId('app-ribbon')
       .getByRole('list', { name: 'Stand der Strukturierung' });
     await expect(aspects.locator('[data-aspect="labels"]')).toHaveAttribute(
       'data-aspect-state',
@@ -127,11 +128,15 @@ test.describe('structuring journey', () => {
     );
 
     // Viewer: a recognised document exports exactly its own field values.
-    // Export is an everyday action in the document header, not a final pipeline step.
+    // Export is tertiary: it sits in the overflow menu, next to downloading the original.
     await page.goto('/documents/synthetic-doc-0007');
     await expect(page.locator('.pipeline-doc-header')).toHaveCount(0);
     const docDownload = page.waitForEvent('download');
-    await page.getByRole('button', { name: 'Feldwerte exportieren' }).click();
+    await expect(page.getByRole('button', { name: 'Feldwerte exportieren' })).toHaveCount(0);
+    await page
+      .locator('.document-detail-meta-actions')
+      .getByRole('button', { name: 'Weitere Aktionen' })
+      .click();
     await page.getByRole('menuitem', { name: 'Als CSV exportieren' }).click();
     expect((await docDownload).suggestedFilename()).toMatch(/\.csv$/);
     expect(lastCall(log, 'GET /documents/export')).toContain('ids=synthetic-doc-0007');

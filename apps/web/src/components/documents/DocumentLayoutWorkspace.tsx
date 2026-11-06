@@ -37,6 +37,7 @@ import {
 import { useFeatureFlags } from '../../lib/remoteConfig';
 import { segmentedToolbarClass } from '../../lib/segmentedControlClasses';
 import { sourceChipPageLabel } from '../../lib/sourceChipLabel';
+import type { TableStructureChoice } from '../../lib/tableLayouts';
 import { useDocumentLayoutIr } from '../../lib/useDocumentLayoutIr';
 import { useDocumentRegionLayers } from '../../lib/useDocumentRegionLayers';
 import { useLayoutCompare } from '../../lib/useLayoutCompare';
@@ -64,7 +65,6 @@ import { DocumentTableCorrectionSheet } from './DocumentTableCorrectionSheet';
 import { ExtractedLayoutHtmlFrame, type LayoutIrZoomStep } from './ExtractedLayoutHtmlFrame';
 import { ExtractedTextPanel } from './ExtractedTextPanel';
 import { type PdfLayoutOverlay, PdfViewer } from './PdfViewer';
-import type { TableStructureChoice } from './TableLayoutPicker';
 
 type AdvancedViewerMode = 'reconstruction' | 'compare';
 
@@ -973,15 +973,6 @@ export function DocumentLayoutWorkspace({
           recognizedCatalog={recognizedCatalog}
           fieldRegions={fieldRegions}
           tableRegions={tableRegions}
-          onTableHeaderChange={(regionId, headerRows, headerCols) => {
-            submitTableCorrection({
-              id: crypto.randomUUID(),
-              op: 'set_headers',
-              beforeRegionId: regionId,
-              headerRows,
-              headerCols,
-            });
-          }}
           onTableLayoutApply={applyTableLayoutChoice}
           onTableCellChange={(regionId, row, col, text) => {
             submitTableCorrection({
@@ -1050,19 +1041,6 @@ export function DocumentLayoutWorkspace({
               setActiveOverlayId(regionTableOverlayId(selectedTableId));
             }
           }}
-          onHeaderChange={
-            selectedTableId
-              ? (headerRows, headerCols) => {
-                  submitTableCorrection({
-                    id: crypto.randomUUID(),
-                    op: 'set_headers',
-                    beforeRegionId: selectedTableId,
-                    headerRows,
-                    headerCols,
-                  });
-                }
-              : undefined
-          }
           onLayoutApply={
             selectedTableId
               ? (choice) => {

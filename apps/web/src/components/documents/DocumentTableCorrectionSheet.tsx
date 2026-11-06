@@ -3,9 +3,9 @@
 import type { DocumentRegionDto } from '@docuvate/contracts';
 import { useTranslation } from 'react-i18next';
 
+import type { TableStructureChoice } from '../../lib/tableLayouts';
 import { BottomSheet } from '../ui/overlay/BottomSheet';
 import { CorrectedTableCard } from './CorrectedTableCard';
-import type { TableStructureChoice } from './TableLayoutPicker';
 
 interface DocumentTableCorrectionSheetProps {
   open: boolean;
@@ -13,7 +13,6 @@ interface DocumentTableCorrectionSheetProps {
   index: number;
   onClose: () => void;
   onSelect: () => void;
-  onHeaderChange?: (headerRows: number, headerCols: number) => void;
   onCellChange?: (row: number, col: number, text: string) => void;
   onLayoutApply?: (choice: TableStructureChoice) => void;
 }
@@ -24,7 +23,6 @@ export function DocumentTableCorrectionSheet({
   index,
   onClose,
   onSelect,
-  onHeaderChange,
   onCellChange,
   onLayoutApply,
 }: DocumentTableCorrectionSheetProps) {
@@ -42,7 +40,6 @@ export function DocumentTableCorrectionSheet({
           index={index}
           active
           onSelect={onSelect}
-          onHeaderChange={onHeaderChange}
           onCellChange={onCellChange}
           onLayoutApply={onLayoutApply}
         />

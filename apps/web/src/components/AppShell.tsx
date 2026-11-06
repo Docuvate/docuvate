@@ -18,7 +18,6 @@ import { AppPrimaryNav } from './layout/AppPrimaryNav';
 import { AppSectionRibbon } from './layout/AppRibbon';
 import { AppRibbonSlotContext } from './layout/appRibbonContext';
 import { AppSidebar } from './layout/AppSidebar';
-import { LocaleSwitcher } from './layout/LocaleSwitcher';
 import { UserAccountMenu } from './layout/UserAccountMenu';
 import { SaveBarLayoutSync } from './save/SaveBarLayoutSync';
 import { ToastGlobalBridge, ToastProvider } from './save/ToastProvider';
@@ -129,7 +128,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 </div>
               )}
               <div className="topbar-user">
-                {!narrowTopbar ? <LocaleSwitcher placement="topbar" /> : null}
                 {!narrowTopbar ? (
                   <NavLink
                     to={routes.settings}
@@ -142,7 +140,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     <Settings size={18} strokeWidth={1.75} aria-hidden />
                   </NavLink>
                 ) : null}
-                <UserAccountMenu showLocaleSwitcher={narrowTopbar} />
+                <UserAccountMenu />
               </div>
             </header>
             <div className="app-ribbon" data-testid="app-ribbon">

@@ -1007,7 +1007,10 @@
     "fieldMarkHint": "Ziehen Sie auf dem Dokument einen Rahmen um den Wert für „{{name}}“.",
     "fieldMarkHintCancel": "Markieren abbrechen",
     "tableMergesInvalid": "Verbundene Zellen passen nicht zur Tabelle (außerhalb oder überlappend).",
-    "tableStructureInvalid": "Kopf, Fuß, Indexspalten oder Zeilenrollen passen nicht zur Tabelle."
+    "tableStructureInvalid": "Kopf, Fuß, Indexspalten oder Zeilenrollen passen nicht zur Tabelle.",
+    "downloadOriginal": "Original herunterladen",
+    "tabFields": "Felder",
+    "inspectorClose": "Inspektor schließen"
   },
   "settings": {
     "title": "Einstellungen",
@@ -2529,10 +2532,7 @@
     }
   },
   "tableLayouts": {
-    "title": "Tabellenlayout",
-    "apply": "Layout übernehmen",
-    "choose": "Layout",
-    "chooseAria": "Layout für Tabelle {{n}} wählen",
+    "apply": "Übernehmen",
     "families": {
       "simple": "Einfache Tabelle",
       "matrix": "Matrix",
@@ -2541,8 +2541,6 @@
       "grouped": "Abschnitte mit Zwischensummen",
       "key_value": "Schlüssel und Wert"
     },
-    "customize": "Struktur anpassen",
-    "headerLevels": "Kopfzeilen",
     "footerRows": "Ergebniszeilen",
     "index": "Indexspalte",
     "indexOptions": {
@@ -2561,21 +2559,25 @@
     },
     "grouped": "Abschnitte und Zwischensummen",
     "banded": "Zebrastreifen",
-    "preview": "Vorschau: {{rows}} × {{cols}} Zellen",
-    "cellsTitle": "Zellen verbinden und Zeilenrollen",
-    "rowRoles": {
+    "applied": "Tabellenlayout übernommen",
+    "discard": "Verwerfen",
+    "draft": "Entwurf",
+    "toolbarAria": "Struktur von Tabelle {{n}}",
+    "template": "Vorlage",
+    "appearance": "Darstellung",
+    "less": "Weniger",
+    "more": "Mehr",
+    "mergeCells": "Zellen verbinden",
+    "splitCells": "Verbindung lösen",
+    "directHint": "Zeilenart links an der Zeile wählen. Zellen verbinden: Zelle anklicken, zweite mit Umschalt+Klick (oder Umschalt+Alt+Pfeil) wählen.",
+    "rowKinds": {
+      "header": "Kopf",
       "data": "Daten",
       "section": "Abschnitt",
       "subtotal": "Zwischensumme",
-      "header": "Kopf",
       "footer": "Ergebnis"
     },
-    "rowRoleAria": "Zeile {{row}}: {{role}}",
-    "mergeHint": "Zelle wählen, dann eine zweite Zelle mit Umschalt+Klick oder Taste M: der Bereich wird verbunden. Denselben Bereich erneut verbinden trennt ihn.",
-    "mergeAria": "Verbundene Zellen festlegen",
-    "cellAria": "Zeile {{row}}, Spalte {{col}}, {{rowSpan}} × {{colSpan}}",
-    "span": "{{rowSpan}} × {{colSpan}}",
-    "applied": "Tabellenlayout übernommen"
+    "rowKindAria": "Zeilenart von Zeile {{row}}"
   },
   "ribbon": {
     "stock": "Bestand",
@@ -2585,6 +2587,8 @@
     "capture": "Erfassen",
     "display": "Darstellung",
     "output": "Ausgabe",
-    "work": "Arbeiten"
+    "work": "Arbeiten",
+    "review": "Prüfen",
+    "inspector": "Inspektor"
   }
 }

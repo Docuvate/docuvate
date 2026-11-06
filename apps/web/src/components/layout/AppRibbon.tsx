@@ -26,9 +26,23 @@ export function AppRibbon({ children }: { children: ReactNode }) {
   return slot ? createPortal(children, slot) : null;
 }
 
-export function RibbonGroup({ label, children }: { label: string; children: ReactNode }) {
+export function RibbonGroup({
+  label,
+  order,
+  children,
+}: {
+  label: string;
+  /** Position among groups portalled by different components of one screen. */
+  order?: number;
+  children: ReactNode;
+}) {
   return (
-    <div className="ribbon-group" role="group" aria-label={label}>
+    <div
+      className="ribbon-group"
+      role="group"
+      aria-label={label}
+      style={order === undefined ? undefined : { order }}
+    >
       <span className="ribbon-group-label" aria-hidden>
         {label}
       </span>

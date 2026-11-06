@@ -65,18 +65,20 @@ for (const theme of ['light', 'dark'] as const) {
       .getByRole('tab', { name: /Tabellen/ })
       .click();
     const card = page.getByTestId('corrected-table-card').first();
-    await card.getByRole('button', { name: 'Layout für Tabelle 1 wählen' }).click();
-    const picker = page.getByTestId('table-layout-picker');
-    await picker.getByText('Finanzlayout').click();
-    await picker.getByText('Struktur anpassen').click();
+    const tools = card.getByTestId('table-structure-tools');
+    await tools.getByRole('combobox', { name: 'Vorlage' }).selectOption('financial');
+    await card.getByLabel('Zelle Zeile 2 Spalte 1', { exact: true }).click();
+    await card
+      .getByLabel('Zelle Zeile 2 Spalte 2', { exact: true })
+      .click({ modifiers: ['Shift'] });
     await page.evaluate(async () => {
       await document.fonts.ready;
     });
     await page.waitForTimeout(1_000);
     await card.scrollIntoViewIfNeeded();
     await page.screenshot({ path: path.join(shotDir, `table-layout-desktop-${theme}.png`) });
-    await picker.getByRole('button', { name: 'Layout übernehmen' }).click();
-    await expect(picker).toHaveCount(0);
+    await tools.getByRole('button', { name: 'Übernehmen' }).click();
+    await expect(tools.getByRole('button', { name: 'Übernehmen' })).toHaveCount(0);
     await page.waitForTimeout(500);
     await card.locator('table').scrollIntoViewIfNeeded();
     await card.screenshot({ path: path.join(shotDir, `table-structure-desktop-${theme}.png`) });

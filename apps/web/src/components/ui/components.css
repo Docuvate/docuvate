@@ -82,10 +82,12 @@ a.btn:hover {
 .btn-primary {
   background: var(--dv-color-accent-fill);
   color: var(--dv-color-on-accent);
+  box-shadow: var(--dv-shadow-highlight-dim), var(--dv-elevation-1);
 }
 
 .btn-primary:hover:not(:disabled) {
   background: var(--dv-color-accent-fill-hover);
+  box-shadow: var(--dv-shadow-highlight-dim), var(--dv-elevation-2);
 }
 
 .btn-danger {
@@ -99,8 +101,9 @@ a.btn:hover {
 
 .btn-secondary {
   background: var(--dv-color-bg-raised);
-  border-color: var(--dv-color-border);
+  border-color: color-mix(in srgb, var(--dv-color-border) 80%, transparent);
   color: var(--dv-color-text);
+  box-shadow: var(--dv-surface-highlight), var(--dv-elevation-1);
 }
 
 .btn-secondary:hover:not(:disabled) {
@@ -223,9 +226,10 @@ a.btn:hover {
 
 .card {
   background: var(--dv-color-bg-raised);
-  border: var(--dv-border-width-hairline) solid var(--dv-color-border);
+  border: var(--dv-border-width-hairline) solid
+    color-mix(in srgb, var(--dv-color-border) 65%, transparent);
   border-radius: var(--dv-radius-surface);
-  box-shadow: var(--dv-elevation-1);
+  box-shadow: var(--dv-surface-highlight), var(--dv-elevation-2);
   padding: var(--dv-space-lg);
 }
 

@@ -1007,7 +1007,10 @@
     "fieldMarkHint": "Drag a box around the value for “{{name}}” on the document.",
     "fieldMarkHintCancel": "Cancel marking",
     "tableMergesInvalid": "Merged cells do not fit the table (outside the grid or overlapping).",
-    "tableStructureInvalid": "Header, footer, index columns or row roles do not fit the table."
+    "tableStructureInvalid": "Header, footer, index columns or row roles do not fit the table.",
+    "downloadOriginal": "Download original",
+    "tabFields": "Fields",
+    "inspectorClose": "Close inspector"
   },
   "settings": {
     "title": "Settings",
@@ -2529,10 +2532,7 @@
     }
   },
   "tableLayouts": {
-    "title": "Table layout",
-    "apply": "Apply layout",
-    "choose": "Layout",
-    "chooseAria": "Choose a layout for table {{n}}",
+    "apply": "Apply",
     "families": {
       "simple": "Simple table",
       "matrix": "Matrix",
@@ -2541,8 +2541,6 @@
       "grouped": "Sections with subtotals",
       "key_value": "Key and value"
     },
-    "customize": "Adjust structure",
-    "headerLevels": "Header rows",
     "footerRows": "Result rows",
     "index": "Index column",
     "indexOptions": {
@@ -2561,21 +2559,25 @@
     },
     "grouped": "Sections and subtotals",
     "banded": "Zebra rows",
-    "preview": "Preview: {{rows}} × {{cols}} cells",
-    "cellsTitle": "Merge cells and row roles",
-    "rowRoles": {
+    "applied": "Table layout applied",
+    "discard": "Discard",
+    "draft": "Draft",
+    "toolbarAria": "Structure of table {{n}}",
+    "template": "Template",
+    "appearance": "Appearance",
+    "less": "Fewer",
+    "more": "More",
+    "mergeCells": "Merge cells",
+    "splitCells": "Split cells",
+    "directHint": "Pick a row's kind at its left edge. To merge, click a cell, then Shift+click (or Shift+Alt+Arrow) a second one.",
+    "rowKinds": {
+      "header": "Header",
       "data": "Data",
       "section": "Section",
       "subtotal": "Subtotal",
-      "header": "Header",
       "footer": "Result"
     },
-    "rowRoleAria": "Row {{row}}: {{role}}",
-    "mergeHint": "Select a cell, then Shift+click a second cell or press M on it to merge the area. Merging the same area again splits it.",
-    "mergeAria": "Set merged cells",
-    "cellAria": "Row {{row}}, column {{col}}, {{rowSpan}} × {{colSpan}}",
-    "span": "{{rowSpan}} × {{colSpan}}",
-    "applied": "Table layout applied"
+    "rowKindAria": "Kind of row {{row}}"
   },
   "ribbon": {
     "stock": "Records",
@@ -2585,6 +2587,8 @@
     "capture": "Capture",
     "display": "Display",
     "output": "Output",
-    "work": "Work"
+    "work": "Work",
+    "review": "Review",
+    "inspector": "Inspector"
   }
 }

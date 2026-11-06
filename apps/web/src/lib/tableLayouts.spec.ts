@@ -5,7 +5,6 @@ import { tableRuling, tableRulingLines, validTableStructure } from '@docuvate/co
 import { describe, expect, it } from 'vitest';
 
 import {
-  cycleRowRole,
   designTable,
   familyDesign,
   mergeAt,
@@ -14,7 +13,9 @@ import {
   TABLE_RULING_CHOICES,
   type TableDesign,
   tableDesignOf,
+  tableRowKind,
   toggleTableMerge,
+  withRowKind,
 } from './tableLayouts';
 
 function stored(grid: { rows: number; cols: number }, design: TableDesign): DocumentRegionTableDto {
@@ -146,11 +147,32 @@ describe('composable table layouts', () => {
     expect(tableDesignOf(mixed).ruling).toBe('keep');
   });
 
-  it('cycles body row roles data → section → subtotal → data', () => {
-    const one = cycleRowRole([], 2);
-    expect(one).toEqual([{ row: 2, role: 'section' }]);
-    expect(cycleRowRole(one, 2)).toEqual([{ row: 2, role: 'subtotal' }]);
-    expect(cycleRowRole(cycleRowRole(one, 2), 2)).toEqual([]);
+  it('re-labels rows in place: header grows from the top, results from the bottom', () => {
+    const grid = { rows: 6, cols: 3 };
+    const base = designTable(familyDesign('simple'), grid);
+    const twoHeads = withRowKind(base, grid, 1, 'header');
+    expect(twoHeads.headerRows).toBe(2);
+    expect(tableRowKind(twoHeads, grid, 0)).toBe('header');
+    const results = withRowKind(twoHeads, grid, 4, 'footer');
+    expect(results.footerRows).toBe(2);
+    expect(tableRowKind(results, grid, 5)).toBe('footer');
+    const section = withRowKind(results, grid, 2, 'section');
+    expect(section.rowRoles).toEqual([{ row: 2, role: 'section' }]);
+    expect(tableRowKind(section, grid, 2)).toBe('section');
+    const back = withRowKind(section, grid, 4, 'data');
+    expect(back.footerRows).toBe(1);
+    expect(withRowKind(section, grid, 2, 'data').rowRoles).toEqual([]);
+    expect(validTableStructure({ ...grid, ...withRowKind(base, grid, 5, 'header') })).toBe(true);
+  });
+
+  it('drops spans that a re-labelled row would cut across a band edge', () => {
+    const grid = { rows: 4, cols: 2 };
+    const base = {
+      ...designTable(familyDesign('simple'), grid),
+      headerRows: 0,
+      merges: [{ row0: 0, col0: 0, rowSpan: 2, colSpan: 1 }],
+    };
+    expect(withRowKind(base, grid, 0, 'header').merges).toEqual([]);
   });
 
   it('toggles merges: create, split on reselect, replace overlaps', () => {

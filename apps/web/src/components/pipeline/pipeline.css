@@ -558,9 +558,10 @@
   margin-bottom: var(--dv-space-sm);
   padding: var(--dv-space-3xs);
   overflow-x: auto;
-  border: var(--dv-border-width-hairline) solid var(--dv-color-border);
-  border-radius: var(--dv-radius-md);
-  background: var(--dv-color-bg-raised);
+  border: var(--dv-border-width-hairline) solid
+    color-mix(in srgb, var(--dv-color-border) 60%, transparent);
+  border-radius: var(--dv-radius-lg);
+  background: color-mix(in srgb, var(--dv-color-bg-muted) 45%, transparent);
   scrollbar-width: none;
 }
 
@@ -572,7 +573,7 @@
   min-block-size: var(--dv-control-height-sm);
   padding: 0 var(--dv-space-sm);
   border: 0;
-  border-radius: var(--dv-radius-sm);
+  border-radius: var(--dv-radius-md);
   background: transparent;
   color: var(--dv-color-text-muted);
   font: inherit;
@@ -590,9 +591,10 @@
 }
 
 .library-stage-tab.is-active {
-  background: var(--dv-color-accent-soft);
-  color: var(--dv-color-accent-text);
+  background: var(--dv-color-bg-raised);
+  color: var(--dv-color-text);
   font-weight: var(--dv-font-weight-semibold);
+  box-shadow: var(--dv-surface-highlight), var(--dv-elevation-1);
 }
 
 .library-stage-tab-count {
@@ -909,23 +911,81 @@
   order: -1;
 }
 
+/* The inspector is a floating tool surface, not a column: no rail, it can be closed, and the
+   document takes the full width when it is. Its actions live in the ribbon. */
+.document-inspector[hidden] {
+  display: none;
+}
+
+.document-inspector-card {
+  position: relative;
+  display: grid;
+  gap: var(--dv-space-sm);
+  min-width: 0;
+}
+
+.document-inspector-close {
+  position: absolute;
+  inset-block-start: var(--dv-space-xs);
+  inset-inline-end: var(--dv-space-xs);
+  z-index: calc(var(--dv-z-base) + 1);
+}
+
+.document-inspector-card > [role='tabpanel'] > .review-workbench,
+.document-inspector-card > .detail-tab-panel-surface {
+  padding-inline-end: var(--dv-space-xl);
+}
+
+.document-inspector-card .review-workbench {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
 @media (min-width: 1200px) {
   .document-workbench {
-    grid-template-columns: minmax(0, 1fr) minmax(22rem, 26rem);
-    align-items: start;
+    position: relative;
+    display: block;
   }
 
-  .document-workbench-side {
-    order: 0;
+  .document-workbench[data-inspector]:not([data-inspector='closed']) .document-workbench-main {
+    padding-inline-end: calc(var(--dv-layout-inspector-width) + var(--dv-space-md));
+  }
+
+  .document-workbench-side.document-inspector {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-end: 0;
+    inline-size: var(--dv-layout-inspector-width);
+    pointer-events: none;
+  }
+
+  .document-inspector-card {
     position: sticky;
     top: var(--dv-space-sm);
-    max-block-size: calc(100dvh - var(--dv-layout-topbar-height) - var(--dv-space-lg));
+    max-block-size: calc(100dvh - var(--dv-layout-topbar-height) - 7rem);
     overflow-y: auto;
     overscroll-behavior: contain;
+    padding: var(--dv-space-md);
+    border: var(--dv-border-width-hairline) solid
+      color-mix(in srgb, var(--dv-color-border) 55%, transparent);
+    border-radius: var(--dv-radius-surface);
+    background: color-mix(in srgb, var(--dv-color-bg-raised) 90%, transparent);
+    backdrop-filter: blur(var(--dv-space-md)) saturate(1.1);
+    box-shadow: var(--dv-surface-highlight), var(--dv-elevation-float);
+    pointer-events: auto;
   }
+}
 
-  .document-workbench-side .document-detail-tab-region {
-    margin: 0;
+/* Below desktop the inspector sits above the document as a regular raised surface. */
+@media (max-width: 1199px) {
+  .document-inspector-card {
+    padding: var(--dv-density-panel-inset);
+    border: var(--dv-border-width-hairline) solid
+      color-mix(in srgb, var(--dv-color-border) 60%, transparent);
+    border-radius: var(--dv-radius-surface);
+    background: var(--dv-color-bg-raised);
+    box-shadow: var(--dv-surface-highlight), var(--dv-elevation-1);
   }
 }
 
@@ -943,8 +1003,8 @@
   }
 }
 
-/* The workbench owns the right column, so the preview gets the full main width. */
-@media (min-width: 1200px) and (max-width: 1679px) {
+/* The floating inspector owns the right edge, so the preview keeps one column. */
+@media (min-width: 1200px) {
   .document-workbench-main .detail-workspace,
   .document-workbench-main .layout-workspace {
     grid-template-columns: minmax(0, 1fr);
@@ -1232,27 +1292,5 @@ button.aspect-strip-btn:hover {
 @media (max-width: 767px) {
   .review-workbench-aspects button.aspect-strip-btn {
     min-block-size: var(--dv-control-touch-target);
-  }
-}
-
-/* Small screens: the document title keeps its room; download and export collapse to icons. */
-.document-detail-download {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--dv-space-xs);
-}
-
-@media (max-width: 767px) {
-  .document-export-trigger,
-  .document-detail-download {
-    min-inline-size: var(--dv-control-touch-target);
-    padding-inline: var(--dv-space-xs);
-    justify-content: center;
-  }
-
-  .document-export-label,
-  .document-detail-download-label,
-  .document-export-trigger > svg:last-child {
-    display: none;
   }
 }

@@ -13,6 +13,7 @@ import type {
 import {
   inferTableBands,
   tableIndexPosition,
+  tableRowBand,
   tableRuling,
   tableRulingLines,
 } from '@docuvate/contracts';
@@ -21,8 +22,8 @@ import {
  * Composable table layouts. A layout is not one of N fixed presets but a point in three
  * independent dimensions: logical bands (header levels, footer rows, grouped sections), index
  * position (left, right, both) and appearance (lines, zebra). A family only picks sensible
- * defaults; every dimension stays adjustable, and the preview and the saved structure come from
- * the same function, so what the picker shows is what gets stored.
+ * defaults; every dimension stays adjustable. The table card edits a draft of this structure in
+ * place (row kinds, merges, toolbar), so what the user sees on the table is what gets stored.
  */
 
 export interface GridSize {
@@ -258,21 +259,6 @@ export function mergeAt(
   );
 }
 
-/** Cycles a body row through data → section heading → subtotal → data. */
-export function cycleRowRole(
-  roles: readonly DocumentRegionTableRowRoleDto[],
-  row: number
-): DocumentRegionTableRowRoleDto[] {
-  const current = roles.find((entry) => entry.row === row)?.role;
-  const rest = roles.filter((entry) => entry.row !== row);
-  if (current === 'subtotal') return rest;
-  const next: DocumentRegionTableRowRoleDto = {
-    row,
-    role: current === 'section' ? 'subtotal' : 'section',
-  };
-  return [...rest, next].sort((a, b) => a.row - b.row);
-}
-
 /**
  * Toggle a rectangular merge between two cells (click, then Shift+click). Selecting an existing
  * span exactly splits it again; overlapping spans are replaced.
@@ -303,4 +289,70 @@ export function toggleTableMerge(
     next.col0 < m.col0 + m.colSpan;
   const kept = merges.filter((m) => !overlaps(m));
   return next.rowSpan === 1 && next.colSpan === 1 ? kept : [...kept, next];
+}
+
+/** The structure stored on a table, as an editable draft. */
+export function tableStructureOf(table: DocumentRegionTableDto): TableStructureChoice {
+  return {
+    tableType: table.tableType,
+    headerRows: table.headerRows,
+    footerRows: table.footerRows,
+    headerCols: table.headerCols,
+    trailingHeaderCols: table.trailingHeaderCols,
+    banded: table.banded,
+    rowRoles: table.rowRoles.map((entry) => ({ ...entry })),
+    merges: table.merges.map((merge) => ({ ...merge })),
+  };
+}
+
+/** What a row is, as the user sees it in the row gutter. */
+export const TABLE_ROW_KINDS = ['header', 'data', 'section', 'subtotal', 'footer'] as const;
+export type TableRowKind = (typeof TABLE_ROW_KINDS)[number];
+
+export function tableRowKind(
+  choice: TableStructureChoice,
+  grid: GridSize,
+  row: number
+): TableRowKind {
+  const band = tableRowBand({ ...grid, ...choice }, row);
+  if (band === 'header') return 'header';
+  if (band === 'footer') return 'footer';
+  return choice.rowRoles.find((entry) => entry.row === row)?.role ?? 'data';
+}
+
+/**
+ * Re-label one row directly on the table. Header rows grow from the top and result rows from the
+ * bottom (bands stay contiguous); at least one body row always remains. Row roles outside the
+ * body and spans that would cross a band edge are dropped, so the draft stays valid.
+ */
+export function withRowKind(
+  choice: TableStructureChoice,
+  grid: GridSize,
+  row: number,
+  kind: TableRowKind
+): TableStructureChoice {
+  let { headerRows, footerRows } = choice;
+  if (kind === 'header') {
+    headerRows = Math.min(row + 1, Math.max(0, grid.rows - 1));
+    footerRows = Math.min(footerRows, Math.max(0, grid.rows - headerRows - 1));
+  } else if (kind === 'footer') {
+    footerRows = Math.min(grid.rows - row, Math.max(0, grid.rows - 1));
+    headerRows = Math.min(headerRows, Math.max(0, grid.rows - footerRows - 1));
+  } else {
+    if (row < headerRows) headerRows = row;
+    if (row >= grid.rows - footerRows) footerRows = grid.rows - row - 1;
+  }
+  const bodyEnd = grid.rows - footerRows;
+  let rowRoles = choice.rowRoles.filter(
+    (entry) => entry.row !== row && entry.row >= headerRows && entry.row < bodyEnd
+  );
+  if (kind === 'section' || kind === 'subtotal') {
+    rowRoles = [...rowRoles, { row, role: kind }].sort((a, b) => a.row - b.row);
+  }
+  const shape = { ...grid, headerRows, footerRows };
+  const merges = choice.merges.filter(
+    (merge) =>
+      tableRowBand(shape, merge.row0) === tableRowBand(shape, merge.row0 + merge.rowSpan - 1)
+  );
+  return { ...choice, headerRows, footerRows, rowRoles, merges };
 }

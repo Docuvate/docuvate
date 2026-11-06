@@ -39,10 +39,10 @@ vi.mock('./LocaleSwitcher', () => ({
   LocaleSwitcher: () => <div data-testid="locale-switcher">locale</div>,
 }));
 
-function renderMenu(showLocaleSwitcher = false) {
+function renderMenu() {
   return render(
     <MemoryRouter>
-      <UserAccountMenu showLocaleSwitcher={showLocaleSwitcher} />
+      <UserAccountMenu />
     </MemoryRouter>
   );
 }

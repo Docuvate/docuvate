@@ -65,7 +65,8 @@ function positionAccountMenuPanel(
   panel.style.visibility = '';
 }
 
-export function UserAccountMenu({ showLocaleSwitcher = false }: { showLocaleSwitcher?: boolean }) {
+/** Account menu: profile, language, theme, settings and sign-out. */
+export function UserAccountMenu() {
   const { t } = useTranslation();
   const { data } = authClient.useSession();
   const user = data?.user;
@@ -106,7 +107,7 @@ export function UserAccountMenu({ showLocaleSwitcher = false }: { showLocaleSwit
       window.removeEventListener('resize', reposition);
       window.removeEventListener('scroll', reposition, true);
     };
-  }, [open, showLocaleSwitcher, displayName, email, saveError, themePreference]);
+  }, [open, displayName, email, saveError, themePreference]);
 
   useEffect(() => {
     if (!open) {
@@ -176,14 +177,10 @@ export function UserAccountMenu({ showLocaleSwitcher = false }: { showLocaleSwit
         {email ? <span className="user-account-menu-email">{email}</span> : null}
       </div>
       <hr className="user-account-menu-divider" />
-      {showLocaleSwitcher ? (
-        <>
-          <div role="presentation" className="user-account-menu-locale-section">
-            <LocaleSwitcher placement="menu" />
-          </div>
-          <hr className="user-account-menu-divider" />
-        </>
-      ) : null}
+      <div role="presentation" className="user-account-menu-locale-section">
+        <LocaleSwitcher placement="menu" />
+      </div>
+      <hr className="user-account-menu-divider" />
       <div role="presentation" className="user-account-menu-theme-section">
         <ThemePreferencePicker
           value={themePreference}

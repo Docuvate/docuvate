@@ -6,8 +6,8 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 
 import i18n from '../../i18n';
+import type { TableStructureChoice } from '../../lib/tableLayouts';
 import { CorrectedTableCard } from './CorrectedTableCard';
-import type { TableStructureChoice } from './TableLayoutPicker';
 
 const rows = 4;
 const cols = 3;
@@ -76,9 +76,13 @@ describe('CorrectedTableCard', () => {
         onLayoutApply={onLayoutApply}
       />
     );
-    fireEvent.click(screen.getByRole('button', { name: 'Layout für Tabelle 1 wählen' }));
-    fireEvent.click(screen.getByRole('radio', { name: 'Finanzlayout' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Layout übernehmen' }));
+    expect(screen.queryByRole('button', { name: 'Übernehmen' })).toBeNull();
+    fireEvent.change(screen.getByRole('combobox', { name: 'Vorlage' }), {
+      target: { value: 'financial' },
+    });
+    // The draft is previewed on the real table before it is applied.
+    expect(screen.getByDisplayValue('Summe').closest('tfoot')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Übernehmen' }));
     const choice = onLayoutApply.mock.calls[0]?.[0];
     expect(choice).toMatchObject({
       tableType: 'line_items',
@@ -111,11 +115,15 @@ describe('CorrectedTableCard', () => {
         onLayoutApply={onLayoutApply}
       />
     );
-    fireEvent.click(screen.getByRole('button', { name: 'Layout für Tabelle 1 wählen' }));
-    fireEvent.click(screen.getByRole('radio', { name: 'Matrix' }));
-    fireEvent.click(screen.getByRole('radio', { name: 'Rechts' }));
+    fireEvent.change(screen.getByRole('combobox', { name: 'Vorlage' }), {
+      target: { value: 'matrix' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Darstellung' }));
+    fireEvent.change(screen.getByRole('combobox', { name: 'Indexspalte' }), {
+      target: { value: 'right' },
+    });
     fireEvent.click(screen.getByRole('checkbox', { name: 'Zebrastreifen' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Layout übernehmen' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Übernehmen' }));
     expect(onLayoutApply).toHaveBeenCalledWith(
       expect.objectContaining({ headerCols: 0, trailingHeaderCols: 1, banded: true })
     );
@@ -151,7 +159,7 @@ describe('CorrectedTableCard', () => {
     ).toBe('row');
   });
 
-  it('merges a custom area with select + M and splits it again', () => {
+  it('merges cells selected directly on the table', () => {
     const onLayoutApply = vi.fn();
     render(
       <CorrectedTableCard
@@ -162,15 +170,40 @@ describe('CorrectedTableCard', () => {
         onLayoutApply={onLayoutApply}
       />
     );
-    fireEvent.click(screen.getByRole('button', { name: 'Layout für Tabelle 1 wählen' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Zeile 1, Spalte 1, 1 × 1' }));
-    fireEvent.keyDown(screen.getByRole('button', { name: 'Zeile 1, Spalte 3, 1 × 1' }), {
-      key: 'm',
-    });
-    expect(screen.getByRole('button', { name: 'Zeile 1, Spalte 1, 1 × 3' })).toBeTruthy();
-    fireEvent.click(screen.getByRole('button', { name: 'Layout übernehmen' }));
+    fireEvent.focus(screen.getByLabelText('Zelle Zeile 1 Spalte 1'));
+    fireEvent.mouseDown(screen.getByLabelText('Zelle Zeile 1 Spalte 3'), { shiftKey: true });
+    fireEvent.click(screen.getByRole('button', { name: 'Zellen verbinden' }));
+    expect(
+      screen.getByLabelText('Zelle Zeile 1 Spalte 1').closest('td')?.getAttribute('colspan')
+    ).toBe('3');
+    fireEvent.click(screen.getByRole('button', { name: 'Übernehmen' }));
     expect(onLayoutApply).toHaveBeenLastCalledWith(
       expect.objectContaining({ merges: [{ row0: 0, col0: 0, rowSpan: 1, colSpan: 3 }] })
     );
+  });
+
+  it('re-labels a row from its gutter and discards the draft on demand', () => {
+    const onLayoutApply = vi.fn();
+    render(
+      <CorrectedTableCard
+        region={region}
+        index={0}
+        active
+        onSelect={vi.fn()}
+        onLayoutApply={onLayoutApply}
+      />
+    );
+    fireEvent.change(screen.getByRole('combobox', { name: 'Zeilenart von Zeile 1' }), {
+      target: { value: 'header' },
+    });
+    expect(screen.getByLabelText('Zelle Zeile 1 Spalte 1').closest('thead')).toBeTruthy();
+    expect(screen.getByRole('spinbutton', { name: 'Kopfzeilen' })).toHaveProperty('value', '1');
+    fireEvent.click(screen.getByRole('button', { name: 'Verwerfen' }));
+    expect(screen.getByLabelText('Zelle Zeile 1 Spalte 1').closest('thead')).toBeNull();
+    fireEvent.change(screen.getByRole('combobox', { name: 'Zeilenart von Zeile 4' }), {
+      target: { value: 'footer' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Übernehmen' }));
+    expect(onLayoutApply).toHaveBeenCalledWith(expect.objectContaining({ footerRows: 1 }));
   });
 });

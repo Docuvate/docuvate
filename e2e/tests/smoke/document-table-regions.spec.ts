@@ -3,7 +3,10 @@
 import { expect, test, type Page } from '@playwright/test';
 
 import { applyDocuvateLocale } from '../../helpers/docuvate-theme';
-import { openLayoutDocumentPage, uploadLayoutTableDocument } from '../../helpers/layout-document-fixture';
+import {
+  openLayoutDocumentPage,
+  uploadLayoutTableDocument,
+} from '../../helpers/layout-document-fixture';
 import { showLayoutPane } from '../../helpers/layout-pane';
 import {
   assertNoHorizontalOverflow,
@@ -35,9 +38,12 @@ async function applyGermanLocale(page: Page): Promise<void> {
 }
 
 async function drawTableRectangle(page: Page): Promise<void> {
-  const word = page.locator('.pdf-page-wrap .textLayer span').filter({
-    hasText: /Widget|Alex|Testmann|FIXTURE|Compose|Brutto|Position/i,
-  }).first();
+  const word = page
+    .locator('.pdf-page-wrap .textLayer span')
+    .filter({
+      hasText: /Widget|Alex|Testmann|FIXTURE|Compose|Brutto|Position/i,
+    })
+    .first();
   if ((await word.count()) > 0) {
     await expect(word).toBeVisible({ timeout: 60_000 });
     const box = await word.boundingBox();
@@ -123,14 +129,17 @@ test.describe('document table regions', () => {
     const bar = page.getByTestId('field-context-bar');
     await expect(bar).toBeVisible({ timeout: 30_000 });
     await bar.getByRole('button', { name: /Als Tabelle markieren|Mark as table/i }).click();
-    await expect(page.getByText(/Tabellenkorrektur gespeichert|Table correction saved/i)).toBeVisible({
+    await expect(
+      page.getByText(/Tabellenkorrektur gespeichert|Table correction saved/i)
+    ).toBeVisible({
       timeout: 30_000,
     });
     const card = page.getByTestId('corrected-table-card');
     await expect(card).toBeVisible({ timeout: 30_000 });
-    const headerRows = card.getByLabel(/Kopfzeilen|Header rows/i);
+    // Structure edits are a draft on the real table; the header stepper is directly on the card.
+    const headerRows = card.getByRole('spinbutton', { name: /Kopfzeilen|Header rows/i });
     await headerRows.fill('1');
-    await headerRows.blur();
+    await expect(card.getByRole('button', { name: /^(Übernehmen|Apply)$/ })).toBeVisible();
     const firstCell = card.locator('.layout-table-cell-input').first();
     await firstCell.fill('Position');
     // A pending save re-selects its table when it resolves, which would reopen the narrow sheet
@@ -143,15 +152,13 @@ test.describe('document table regions', () => {
     await assertNoHorizontalOverflow(page);
 
     // Table family: header band, result footer, lines and merged cells saved as one correction.
-    await card.first().getByRole('button', { name: /Layout für Tabelle 1|layout for table 1/i }).click();
-    const picker = page.getByTestId('table-layout-picker');
-    await expect(picker).toBeVisible();
-    await picker.getByRole('radio', { name: /Finanzlayout|Financial layout/i }).check({ force: true });
+    const tools = card.first().getByTestId('table-structure-tools');
+    await tools.getByRole('combobox', { name: /Vorlage|Template/i }).selectOption('financial');
     await Promise.all([
       waitForTableCorrectionSave(page),
-      picker.getByRole('button', { name: /Layout übernehmen|Apply layout/i }).click(),
+      tools.getByRole('button', { name: /^(Übernehmen|Apply)$/ }).click(),
     ]);
-    await expect(picker).toHaveCount(0);
+    await expect(tools.getByRole('button', { name: /^(Übernehmen|Apply)$/ })).toHaveCount(0);
 
     for (const viewport of VIEWPORTS) {
       await page.setViewportSize({ width: viewport.width, height: viewport.height });
