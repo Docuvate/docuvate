@@ -132,6 +132,21 @@ export type ApplyTableCorrectionRequestDto = {
     tableType?: 'line_items' | 'key_value' | 'other';
     headerRows?: number;
     headerCols?: number;
+    footerRows?: number;
+    trailingHeaderCols?: number;
+    banded?: boolean;
+    /**
+     * Section headings and subtotals; replaces all row roles on create and set_headers.
+     */
+    rowRoles?: Array<TableRowRoleInputDto>;
+    /**
+     * Line evidence for the listed grid rules; other rules keep theirs.
+     */
+    ruleLines?: Array<TableRuleLineInputDto>;
+    /**
+     * Merged cells; replaces all merges on create and set_headers.
+     */
+    merges?: Array<TableMergeInputDto>;
     cell?: DocumentRegionTableCellDto;
 };
 
@@ -424,8 +439,27 @@ export type DocumentRegionTableCellDto = {
 
 export type DocumentRegionTableDto = {
     tableType: 'line_items' | 'key_value' | 'other';
+    /**
+     * Header rows; more than one is a nested header.
+     */
     headerRows: number;
+    /**
+     * Trailing summary rows (results footer).
+     */
+    footerRows: number;
+    /**
+     * Leading index columns.
+     */
     headerCols: number;
+    /**
+     * Trailing index columns (right or, with headerCols, double index).
+     */
+    trailingHeaderCols: number;
+    /**
+     * Alternating row tint (appearance only).
+     */
+    banded: boolean;
+    rowRoles: Array<DocumentRegionTableRowRoleDto>;
     rules: Array<DocumentRegionTableRuleDto>;
     merges: Array<DocumentRegionTableMergeDto>;
     cells: Array<DocumentRegionTableCellDto>;
@@ -438,10 +472,19 @@ export type DocumentRegionTableMergeDto = {
     colSpan: number;
 };
 
+export type DocumentRegionTableRowRoleDto = {
+    row: number;
+    role: 'section' | 'subtotal';
+};
+
 export type DocumentRegionTableRuleDto = {
     axis: 'row' | 'col';
     ord: number;
     pos: number;
+    /**
+     * Line evidence; unknown until observed or set.
+     */
+    line: 'unknown' | 'none' | 'thin' | 'thick' | 'double';
 };
 
 export type DocumentResponseDto = {
@@ -1056,6 +1099,24 @@ export type SftpIngressCreateAccountBodyDto = {
 export type StartMailOAuthRequestDto = {
     displayName: string;
     accountHint?: string;
+};
+
+export type TableMergeInputDto = {
+    row0: number;
+    col0: number;
+    rowSpan: number;
+    colSpan: number;
+};
+
+export type TableRowRoleInputDto = {
+    row: number;
+    role: 'section' | 'subtotal';
+};
+
+export type TableRuleLineInputDto = {
+    axis: 'row' | 'col';
+    ord: number;
+    line: 'unknown' | 'none' | 'thin' | 'thick' | 'double';
 };
 
 export type TagCustomFieldListResponseDtoClass = {

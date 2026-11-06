@@ -3,18 +3,15 @@
 import type { DocumentDto } from '@docuvate/contracts';
 
 import { isExtractionPending } from '../../lib/documentExtractionState';
+import { documentStageState } from '../../lib/documentPipeline';
 import { ExtractionProgressBar } from '../documents';
-import { Badge } from '../ui/Badge';
-import { LayoutMissingBadge } from './LayoutMissingBadge';
-import { showLayoutMissingBadge } from './layoutMissingBadgeVisibility';
+import { StagePill } from '../pipeline';
 
 interface LibraryDocumentStatusWithLayoutProps {
   doc: DocumentDto;
   pendingReview: boolean;
   pendingReviewLabel: string;
   pendingReviewTooltip?: string;
-  requeueBusy: boolean;
-  onRequeue?: () => void;
   failureTitle?: string;
   wrapReadyInSpan?: boolean;
   compact?: boolean;
@@ -25,16 +22,10 @@ export function LibraryDocumentStatusWithLayout({
   pendingReview,
   pendingReviewLabel,
   pendingReviewTooltip,
-  requeueBusy,
-  onRequeue,
   failureTitle,
   wrapReadyInSpan = false,
   compact = true,
 }: LibraryDocumentStatusWithLayoutProps) {
-  const layoutBadge = showLayoutMissingBadge(doc) ? (
-    <LayoutMissingBadge compact={compact} requeueBusy={requeueBusy} onRequeue={onRequeue} />
-  ) : null;
-
   if (pendingReview) {
     return (
       <span className="badge badge-warn" title={pendingReviewTooltip}>
@@ -47,20 +38,10 @@ export function LibraryDocumentStatusWithLayout({
     return <ExtractionProgressBar doc={doc} compact={compact} className="library-row-progress" />;
   }
 
-  const badge = <Badge status={doc.status} />;
+  const badge = <StagePill state={documentStageState(doc)} status={doc.status} />;
   if (wrapReadyInSpan) {
-    return (
-      <>
-        <span title={failureTitle}>{badge}</span>
-        {layoutBadge}
-      </>
-    );
+    return <span title={failureTitle}>{badge}</span>;
   }
 
-  return (
-    <>
-      {badge}
-      {layoutBadge}
-    </>
-  );
+  return badge;
 }

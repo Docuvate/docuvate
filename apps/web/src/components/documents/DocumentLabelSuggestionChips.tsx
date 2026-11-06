@@ -62,20 +62,21 @@ export function DocumentLabelSuggestionChips({
   return (
     <div className="chip-row document-label-suggestion-chips" role="list">
       {open.map((item) => (
-        <button
-          key={item.tag.id}
-          type="button"
-          className="document-label-suggestion-chip-btn"
-          disabled={disabled}
-          aria-label={t('documents.labelSuggestionAcceptHint', { name: item.tag.name })}
-          onClick={() => void accept(item.tag.id)}
-          onContextMenu={(event) => {
-            event.preventDefault();
-            void dismiss(item.tag.id);
-          }}
-        >
-          <Chip label={item.tag.name} variant="suggest" color={item.tag.color} truncateLabel />
-        </button>
+        <span key={item.tag.id} role="listitem" className="document-label-suggestion-item">
+          <button
+            type="button"
+            className="document-label-suggestion-chip-btn"
+            disabled={disabled}
+            aria-label={t('documents.labelSuggestionAcceptHint', { name: item.tag.name })}
+            onClick={() => void accept(item.tag.id)}
+            onContextMenu={(event) => {
+              event.preventDefault();
+              void dismiss(item.tag.id);
+            }}
+          >
+            <Chip label={item.tag.name} variant="suggest" color={item.tag.color} truncateLabel />
+          </button>
+        </span>
       ))}
     </div>
   );

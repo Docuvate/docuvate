@@ -1,179 +1,84 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import {
-  FileText,
-  Folder,
-  LayoutDashboard,
-  ListChecks,
-  Settings,
-  Tags,
-  X,
-} from 'lucide-react';
-import { Fragment } from 'react';
+import { Settings, X } from 'lucide-react';
+import { Fragment, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NavLink, useLocation } from 'react-router-dom';
 
+import { appSectionOf, PRIMARY_NAV } from '../../lib/appNav';
 import { routes } from '../../lib/routes';
-import { usePersistedSidebarCollapsed } from '../../lib/usePersistedSidebarCollapsed';
-import { BorderCollapsibleRail } from '../ui/BorderCollapsibleRail';
+import { AppSectionIcon } from './AppSectionIcon';
 import { SavedViewsSidebar } from './SavedViewsSidebar';
-
-const NAV_ICON_SIZE = 20;
-const NAV_ICON_STROKE = 1.75;
 
 function sidebarLinkClass(isActive: boolean) {
   return `sidebar-link${isActive ? ' active' : ''}`;
 }
 
-function NavIcon({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="sidebar-link-icon" aria-hidden>
-      {children}
-    </span>
-  );
-}
-
-const primaryNav = [
-  { to: routes.home, labelKey: 'nav.home', end: true as const, icon: 'home' as const },
-  {
-    to: routes.documents,
-    labelKey: 'nav.documents',
-    end: false as const,
-    icon: 'documents' as const,
-  },
-  {
-    to: routes.structureLabels,
-    labelKey: 'nav.labels',
-    end: true as const,
-    icon: 'labels' as const,
-  },
-  {
-    to: routes.structureRecognizedFields,
-    labelKey: 'nav.recognizedFields',
-    end: true as const,
-    icon: 'recognized' as const,
-  },
-  {
-    to: routes.filesystem,
-    labelKey: 'nav.folders',
-    end: false as const,
-    icon: 'folders' as const,
-  },
-] as const;
-
-function documentsNavIsActive(pathname: string, search: string): boolean {
-  if (pathname === routes.savedViews) {
-    return false;
-  }
-  const params = new URLSearchParams(search);
-  if (pathname === routes.documents && params.has('view')) {
-    return false;
-  }
-  return (
-    pathname === routes.documents ||
-    pathname === routes.inbox ||
-    pathname === routes.duplicates ||
-    (pathname.startsWith('/documents/') && !pathname.startsWith('/documents/views'))
-  );
-}
-
 interface AppSidebarProps {
-  mobileDrawerOpen?: boolean;
-  onCloseMobileDrawer?: () => void;
+  open: boolean;
+  onClose: () => void;
 }
 
-export function AppSidebar({ mobileDrawerOpen = false, onCloseMobileDrawer }: AppSidebarProps) {
+/**
+ * Navigation drawer for narrow screens. On wider screens the same entries live in the global
+ * header, so the content always gets the full width.
+ */
+export function AppSidebar({ open, onClose }: AppSidebarProps) {
   const { t } = useTranslation();
   const location = useLocation();
-  const [collapsed, setCollapsed] = usePersistedSidebarCollapsed();
+  const section = appSectionOf(location.pathname);
+  const closeRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (open) closeRef.current?.focus();
+  }, [open]);
 
   return (
-    <BorderCollapsibleRail
-      collapsed={collapsed}
-      onToggle={() => { setCollapsed(!collapsed); }}
-      expandLabel={t('nav.expandSidebar')}
-      collapseLabel={t('nav.collapseSidebar')}
-      railClassName="app-sidebar-rail"
-      panelClassName="app-sidebar"
-      collapsedPanelClassName="app-sidebar-collapsed"
-    >
-      <aside aria-label={t('nav.main')}>
-        {mobileDrawerOpen ? (
-          <div className="sidebar-drawer-header">
-            <span className="sidebar-drawer-title">{t('nav.main')}</span>
-            <button
-              type="button"
-              className="sidebar-drawer-close"
-              aria-label={t('common.close')}
-              onClick={() => onCloseMobileDrawer?.()}
-            >
-              <X size={20} strokeWidth={2} aria-hidden />
-            </button>
-          </div>
-        ) : null}
+    <div className="app-sidebar-rail" data-open={open ? 'true' : 'false'}>
+      <aside className="app-sidebar" aria-label={t('nav.main')} hidden={!open}>
+        <div className="sidebar-drawer-header">
+          <span className="sidebar-drawer-title">{t('nav.main')}</span>
+          <button
+            ref={closeRef}
+            type="button"
+            className="sidebar-drawer-close"
+            aria-label={t('common.close')}
+            onClick={onClose}
+          >
+            <X size={20} strokeWidth={2} aria-hidden />
+          </button>
+        </div>
         <nav className="sidebar-nav">
-          {primaryNav.map(({ to, labelKey, end, icon }) => (
-            <Fragment key={to}>
+          {PRIMARY_NAV.map((item) => (
+            <Fragment key={item.to}>
               <NavLink
-                to={to}
-                end={end}
-                className={({ isActive }) => {
-                  if (to === routes.documents) {
-                    return sidebarLinkClass(
-                      documentsNavIsActive(location.pathname, location.search)
-                    );
-                  }
-                  return sidebarLinkClass(isActive);
-                }}
-                title={collapsed ? t(labelKey) : undefined}
+                to={item.to}
+                className={sidebarLinkClass(section === item.section)}
+                aria-current={section === item.section ? 'page' : undefined}
+                onClick={onClose}
               >
-                {icon === 'home' ? (
-                  <NavIcon>
-                    <LayoutDashboard size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE} />
-                  </NavIcon>
-                ) : null}
-                {icon === 'documents' ? (
-                  <NavIcon>
-                    <FileText size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE} />
-                  </NavIcon>
-                ) : null}
-                {icon === 'labels' ? (
-                  <NavIcon>
-                    <Tags size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE} />
-                  </NavIcon>
-                ) : null}
-                {icon === 'recognized' ? (
-                  <NavIcon>
-                    <ListChecks size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE} />
-                  </NavIcon>
-                ) : null}
-                {icon === 'folders' ? (
-                  <NavIcon>
-                    <Folder size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE} />
-                  </NavIcon>
-                ) : null}
-                <span className="sidebar-link-label">{t(labelKey)}</span>
+                <span className="sidebar-link-icon" aria-hidden>
+                  <AppSectionIcon section={item.section} />
+                </span>
+                <span className="sidebar-link-label">{t(item.labelKey)}</span>
               </NavLink>
-              {to === routes.documents ? (
-                <SavedViewsSidebar key={`${to}-saved`} collapsed={collapsed} />
-              ) : null}
+              {item.section === 'documents' ? <SavedViewsSidebar /> : null}
             </Fragment>
           ))}
-
           <div className="sidebar-footer">
             <NavLink
               to={routes.settings}
-              className={({ isActive }) => sidebarLinkClass(isActive)}
-              title={collapsed ? t('nav.settings') : undefined}
+              className={sidebarLinkClass(section === 'settings')}
+              onClick={onClose}
             >
-              <NavIcon>
-                <Settings size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE} />
-              </NavIcon>
+              <span className="sidebar-link-icon" aria-hidden>
+                <Settings size={20} strokeWidth={1.75} />
+              </span>
               <span className="sidebar-link-label">{t('nav.settings')}</span>
             </NavLink>
           </div>
         </nav>
       </aside>
-    </BorderCollapsibleRail>
+    </div>
   );
 }

@@ -13,7 +13,7 @@ import {
   parseSuggestionStorageKey,
   semanticFieldKey,
 } from '@docuvate/contracts';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, X } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
@@ -23,19 +23,20 @@ import {
   DOCUMENT_DETAIL_TAB_PANEL_IDS,
   DocumentDetailMetaBar,
   DocumentDetailTabStrip,
+  type InspectorPanel,
 } from '../components/documents/DocumentDetailMetaBar';
 import { DocumentDetailNotFound } from '../components/documents/DocumentDetailNotFound';
 import { DocumentExtractionSection } from '../components/documents/DocumentExtractionSection';
 import type { LayoutSideTab } from '../components/documents/DocumentLayoutSidePanel';
-import {
-  DocumentLayoutWorkspace,
-} from '../components/documents/DocumentLayoutWorkspace';
+import { DocumentLayoutWorkspace } from '../components/documents/DocumentLayoutWorkspace';
 import { DocumentMetadataForm } from '../components/documents/DocumentMetadataForm';
 import { DocumentPreviewCard } from '../components/documents/DocumentPreviewCard';
 import { DuplicateCandidatesPanel } from '../components/documents/DuplicateCandidatesPanel';
 import { ExtractedFieldsPanel } from '../components/documents/ExtractedFieldsPanel';
 import { LabelPanel } from '../components/documents/LabelPanel';
 import { LabelPlacementHints } from '../components/documents/LabelPlacementHints';
+import { AppRibbon, RibbonGroup } from '../components/layout/AppRibbon';
+import { DocumentPipelineHeader, DocumentReviewWorkbench } from '../components/pipeline';
 import { PageFormSaveKit } from '../components/save/PageFormSaveKit';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import {
@@ -63,6 +64,7 @@ import {
 } from '../lib/documentDetailLocationState';
 import { isExtractionPending } from '../lib/documentExtractionState';
 import { withSavedFieldValue } from '../lib/documentFieldValueRowState';
+import { documentStageState } from '../lib/documentPipeline';
 import { fetchDocumentPreviewBuffer } from '../lib/documentPreviewCache';
 import {
   catalogFieldGateContextFromDocument,
@@ -86,12 +88,19 @@ import {
   buildGlobalFieldLabelMap,
   parseGlobalFieldKey,
 } from '../lib/labelFieldDisplay';
+import { flattenCursorPages } from '../lib/pagination/useCursorInfiniteQuery';
 import { splitRecognizedFieldsAndSuggestions } from '../lib/recognizedFieldDisplay';
+import { useDocumentReviewQueueInfiniteQuery } from '../lib/review/useDocumentReviewQueueInfiniteQuery';
+import {
+  acceptSuggestedField,
+  blocksContainingValue,
+  confirmFieldKeys,
+  nextReviewDocumentId,
+  reassignFieldValue,
+} from '../lib/reviewWorkbench';
 import { routes } from '../lib/routes';
 import { notifySaved, notifySaveError } from '../lib/saveNotify';
 import { pushRecentDocument } from '../lib/search/searchRecent';
-
-type DetailTab = 'details' | 'labels';
 
 interface DocumentMetadataBaseline {
   title: string;
@@ -136,7 +145,10 @@ export function DocumentDetailPage() {
   const [previewFetchState, setPreviewFetchState] = useState<
     'idle' | 'loading' | 'ready' | 'missing'
   >('idle');
-  const [activeTab, setActiveTab] = useState<DetailTab | null>(null);
+  // undefined = default for the document's stage (field review open when there is one).
+  const [inspectorChoice, setInspectorChoice] = useState<InspectorPanel | null | undefined>(
+    undefined
+  );
   const [layoutSideTab, setLayoutSideTab] = useState<LayoutSideTab>('fields');
   const [correctionSheetOpen, setCorrectionSheetOpen] = useState(false);
   const [viewerPage, setViewerPage] = useState(1);
@@ -172,6 +184,14 @@ export function DocumentDetailPage() {
   });
   const [documentDateAuto, setDocumentDateAuto] = useState(false);
   const docRef = useRef<DocumentDto | null>(null);
+  const reviewQueue = useDocumentReviewQueueInfiniteQuery();
+  const refetchReviewQueue = reviewQueue.refetch;
+  const reviewQueueItems = flattenCursorPages(reviewQueue.data?.pages);
+  const arrivedForReview = new URLSearchParams(location.search).get('review') === '1';
+
+  useEffect(() => {
+    void refetchReviewQueue();
+  }, [id, refetchReviewQueue]);
 
   useEffect(() => {
     docRef.current = doc;
@@ -201,8 +221,7 @@ export function DocumentDetailPage() {
   const mimeType = doc?.mimeType;
   const isPdf = mimeType === 'application/pdf' || doc?.previewAvailable === true;
   const isImage = mimeType?.startsWith('image/') ?? false;
-  const isPlainText =
-    mimeType === 'text/plain' || (mimeType?.startsWith('text/plain;') ?? false);
+  const isPlainText = mimeType === 'text/plain' || (mimeType?.startsWith('text/plain;') ?? false);
 
   const load = useCallback(async () => {
     if (!id) return;
@@ -227,9 +246,11 @@ export function DocumentDetailPage() {
 
   useEffect(() => {
     const tabParam = new URLSearchParams(window.location.search).get('tab');
-    if (tabParam === 'details' || tabParam === 'labels') {
-      setActiveTab(tabParam);
-    }
+    setInspectorChoice(
+      tabParam === 'details' || tabParam === 'labels' || tabParam === 'fields'
+        ? tabParam
+        : undefined
+    );
   }, [id]);
 
   useEffect(() => {
@@ -252,7 +273,8 @@ export function DocumentDetailPage() {
         setGlobalFieldLabels(buildGlobalFieldLabelMap(recognized));
         setFolders(f);
         setFieldGateSettings({
-          fieldExtractionConfidenceGateEnabled: settings.fieldExtractionConfidenceGateEnabled !== false,
+          fieldExtractionConfidenceGateEnabled:
+            settings.fieldExtractionConfidenceGateEnabled !== false,
           labelFieldConfidenceThreshold:
             FIELD_ACCEPTANCE_LABEL_CONFIDENCE[workspaceMl.fieldAcceptance],
           fieldExtractionRequiredLabelIds: settings.fieldExtractionRequiredLabelIds ?? [],
@@ -328,7 +350,9 @@ export function DocumentDetailPage() {
     const timer = window.setInterval(() => {
       void load().catch(() => undefined);
     }, 3000);
-    return () => { window.clearInterval(timer); };
+    return () => {
+      window.clearInterval(timer);
+    };
   }, [id, doc, load]);
 
   async function persist(
@@ -353,7 +377,11 @@ export function DocumentDetailPage() {
         notes: notes || null,
         folderId: folderId || null,
         extractionFields: patch?.extractionFields ?? fields,
-        extractionBlocks: extractionBlocksForUpdate(patch?.extractionBlocks, blocks, baselineBlocks),
+        extractionBlocks: extractionBlocksForUpdate(
+          patch?.extractionBlocks,
+          blocks,
+          baselineBlocks
+        ),
       });
       const nextFields = patch?.extractionFields ?? fields;
       const nextBlocks = patch?.extractionBlocks ?? blocks;
@@ -365,10 +393,7 @@ export function DocumentDetailPage() {
       setBaselineBlocks(nextBlocks);
       if (patch?.extractionFields !== undefined) {
         setFieldFeedback(
-          parseFieldExtractionFeedbackCounts(
-            fieldCorrectionsRecorded,
-            fieldConfirmationsRecorded
-          )
+          parseFieldExtractionFeedbackCounts(fieldCorrectionsRecorded, fieldConfirmationsRecorded)
         );
       }
       setDoc({
@@ -549,7 +574,6 @@ export function DocumentDetailPage() {
     [globalFieldLabels, t]
   );
 
-
   const onAcceptFieldSuggestion = useCallback((key: string, value: string) => {
     setFields((prev) => {
       const kept = prev.filter((f) => {
@@ -568,6 +592,71 @@ export function DocumentDetailPage() {
     }
   }, []);
 
+  function confirmField(field: ExtractedField) {
+    const baseline = baselineFields.find((row) => row.key === field.key);
+    const previous = fields.find((row) => row.key === field.key) ?? field;
+    const nextFields = fields.map((row) =>
+      row.key === field.key
+        ? { ...row, value: field.value, confidence: 1, userConfirmed: true }
+        : row
+    );
+    setFields(nextFields);
+    void persist({ extractionFields: nextFields }).then(() => {
+      notifySaved(t('documents.fieldConfirmedToast'), () => {
+        const restored = fields.map((row) =>
+          row.key === field.key
+            ? {
+                ...row,
+                value: baseline?.value ?? previous.value,
+                confidence: previous.confidence,
+              }
+            : row
+        );
+        setFields(restored);
+        void persist({ extractionFields: restored });
+      });
+    });
+  }
+
+  /** Workbench writes save immediately; each offers undo instead of asking first. */
+  function saveFieldsWithUndo(nextFields: ExtractedField[], message: string) {
+    const previous = fields;
+    setFieldFeedback(null);
+    setFields(nextFields);
+    void persist({ extractionFields: nextFields }).then(() => {
+      notifySaved(message, () => {
+        setFields(previous);
+        void persist({ extractionFields: previous });
+      });
+    });
+  }
+
+  function acceptSuggestionAndSave(key: string, value: string) {
+    if (key === 'date' || semanticFieldKey({ key, value }) === 'date') {
+      const iso = isoDateFromExtractedValue(value);
+      if (iso) {
+        setDocumentDate(iso);
+        setDocumentDateAuto(false);
+      }
+    }
+    saveFieldsWithUndo(
+      acceptSuggestedField(fields, key, value),
+      t('documents.fieldConfirmedToast')
+    );
+  }
+
+  function locateValue(value: string) {
+    const matches = blocksContainingValue(blocks, value);
+    if (matches.length > 0) onHighlightBlocks(matches);
+  }
+
+  async function refreshDocumentLabels() {
+    if (!id) return;
+    const refreshed = await getDocument(id);
+    setDoc(refreshed);
+    void refetchReviewQueue();
+  }
+
   if (loading) return <DocumentDetailLoadingShell />;
   if (error && !doc) {
     return <DocumentDetailNotFound message={error} />;
@@ -579,6 +668,31 @@ export function DocumentDetailPage() {
   const previewLoading = previewFetchState === 'loading';
   const previewUnavailable = previewFetchState === 'missing' && !isExtractionPending(doc.status);
   const layoutWorkspace = isPdf && doc.extraction?.layoutIrAvailable === true;
+  const stageState = documentStageState(doc);
+  const reviewable = stageState === 'review' || stageState === 'structured';
+  const inspectorPanels: readonly InspectorPanel[] = reviewable
+    ? ['fields', 'details', 'labels']
+    : ['details', 'labels'];
+  const inspector: InspectorPanel | null =
+    inspectorChoice === undefined
+      ? reviewable
+        ? 'fields'
+        : null
+      : inspectorChoice === 'fields' && !reviewable
+        ? null
+        : inspectorChoice;
+  const openInspector = (panel: InspectorPanel) => {
+    setInspectorChoice(panel);
+    window.requestAnimationFrame(() => {
+      document
+        .getElementById(DOCUMENT_DETAIL_TAB_PANEL_IDS[panel])
+        ?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    });
+  };
+  const nextDocumentId = nextReviewDocumentId(reviewQueueItems, doc.id);
+  const fieldTargets = [...new Set([...knownFieldKeys, ...recognizedFields.map((f) => f.key)])]
+    .map((key) => ({ key, label: fieldLabelForKey(key) }))
+    .sort((a, b) => a.label.localeCompare(b.label));
 
   return (
     <div
@@ -595,12 +709,24 @@ export function DocumentDetailPage() {
 
       <DocumentDetailMetaBar
         doc={doc}
-        onDelete={() => { setDeleteDialogOpen(true); }}
+        onDelete={() => {
+          setDeleteDialogOpen(true);
+        }}
         onRequeueExtraction={layoutWorkspace ? () => void onRequeueExtraction() : undefined}
         requeueBusy={requeueBusy}
         showTechnicalDetails={showTechnicalDetails}
         onShowTechnicalDetailsChange={layoutWorkspace ? setShowTechnicalDetails : undefined}
       />
+
+      {stageState === 'review' || stageState === 'structured' ? null : (
+        <DocumentPipelineHeader
+          doc={doc}
+          fields={recognizedFields}
+          requeueBusy={requeueBusy}
+          onRequeue={() => void onRequeueExtraction()}
+          onOpenPanel={openInspector}
+        />
+      )}
 
       {error ? (
         <p className="error" role="alert">
@@ -608,189 +734,250 @@ export function DocumentDetailPage() {
         </p>
       ) : null}
 
-      <div className="document-detail-tab-region">
-        <DocumentDetailTabStrip
-          activeTab={activeTab}
-          labelCount={doc.tags.length}
-          onTabChange={setActiveTab}
-        />
-        {activeTab === 'details' ? (
-          <div
-            id={DOCUMENT_DETAIL_TAB_PANEL_IDS.details}
-            className="detail-tab-panel-surface"
-            role="tabpanel"
-            aria-labelledby="document-detail-tab-details"
-          >
-            <DocumentMetadataForm
+      <AppRibbon>
+        <RibbonGroup label={t('ribbon.inspector')} kind="view" align="end" order={3}>
+          <DocumentDetailTabStrip
+            panels={inspectorPanels}
+            activeTab={inspector}
+            labelCount={doc.tags.length}
+            onTabChange={setInspectorChoice}
+          />
+        </RibbonGroup>
+      </AppRibbon>
+
+      <div
+        className="document-workbench"
+        data-stage-state={stageState}
+        data-inspector={inspector ?? 'closed'}
+      >
+        <div className="document-workbench-main">
+          {layoutWorkspace ? (
+            <DocumentLayoutWorkspace
+              showTechnicalDetails={showTechnicalDetails}
+              layoutSideTab={layoutSideTab}
+              onLayoutSideTabChange={setLayoutSideTab}
               doc={doc}
-              title={title}
-              documentDate={documentDate}
-              documentDateAutoFilled={documentDateAuto}
-              notes={notes}
-              folderId={folderId}
-              folders={folders}
-              saving={saving}
-              onTitleChange={setTitle}
-              onDocumentDateChange={(value) => {
-                setDocumentDate(value);
-                setDocumentDateAuto(false);
-              }}
-              onClearAutoDocumentDate={() => {
-                setDocumentDate('');
-                setDocumentDateAuto(false);
-              }}
-              onNotesChange={setNotes}
-              onFolderIdChange={setFolderId}
-            />
-            <ExtractedFieldsPanel
+              previewData={previewData}
+              previewLoading={previewLoading}
+              previewUnavailable={previewUnavailable}
+              blocks={blocks}
               fields={recognizedFields}
-              heuristicSuggestions={heuristicSuggestions}
-              onAcceptSuggestion={onAcceptFieldSuggestion}
-              tags={tags}
-              customFieldDefs={buildCustomFieldDefMap(tags)}
-              globalFieldLabels={globalFieldLabels}
-              saving={saving}
-              fieldsDirty={fieldsDirty}
-              baselineFields={baselineFields}
-              fieldFeedback={fieldFeedback}
-              replacedBySheet={correctionSheetOpen}
-              onFieldsChange={(next) => {
+              recognizedCatalog={recognizedCatalog}
+              onSaveFieldValue={(key, value) => {
                 setFieldFeedback(null);
-                setFields(next);
-              }}
-              onDiscardField={(key) => {
-                const baseline = baselineFields.find((row) => row.key === key);
-                if (!baseline) {
-                  return;
-                }
-                setFields((prev) =>
-                  prev.map((row) => (row.key === key ? { ...row, value: baseline.value } : row))
-                );
-                notifySaved(t('documents.fieldDiscardedToast'));
-              }}
-              onConfirmField={(field) => {
-                const baseline = baselineFields.find((row) => row.key === field.key);
-                const previous = fields.find((row) => row.key === field.key) ?? field;
-                const nextFields = fields.map((row) =>
-                  row.key === field.key
-                    ? { ...row, value: field.value, confidence: 1, userConfirmed: true }
-                    : row
-                );
+                const nextFields = withSavedFieldValue(fields, key, value);
                 setFields(nextFields);
-                void persist({ extractionFields: nextFields }).then(() => {
-                  notifySaved(t('documents.fieldConfirmedToast'), () => {
-                    const restored = fields.map((row) =>
-                      row.key === field.key
-                        ? {
-                            ...row,
-                            value: baseline?.value ?? previous.value,
-                            confidence: previous.confidence,
-                          }
-                        : row
-                    );
-                    setFields(restored);
-                    void persist({ extractionFields: restored });
-                  });
-                });
+                void persist({ extractionFields: nextFields });
               }}
-              onSave={() => void persist({ extractionFields: fields })}
+              onFieldsChange={setFields}
+              heuristicSuggestions={heuristicSuggestions}
+              highlightBlocks={highlightBlocks}
+              viewerPage={viewerPage}
+              activeBlockIndex={activeBlockIndex}
+              knownFieldKeys={knownFieldKeys}
+              fieldLabelForKey={fieldLabelForKey}
+              onViewerPageChange={setViewerPage}
+              onActiveBlockIndexChange={setActiveBlockIndex}
+              onHighlightBlocks={onHighlightBlocks}
+              onBlocksChange={setBlocks}
+              onAcceptFieldSuggestion={onAcceptFieldSuggestion}
+              requeueBusy={requeueBusy}
+              onRequeueExtraction={() => void onRequeueExtraction()}
+              textEditOpen={layoutTextEditOpen}
+              onTextEditOpenChange={setLayoutTextEditOpen}
+              editMode={layoutEditMode}
+              onEditModeChange={setLayoutEditMode}
+              blocksDirty={blocksDirty}
+              saving={saving}
+              onSaveBlocks={() => void persist({ extractionBlocks: blocks })}
+              onCorrectionSheetOpenChange={setCorrectionSheetOpen}
             />
-            <DuplicateCandidatesPanel documentId={doc.id} />
-          </div>
-        ) : null}
-
-        {activeTab === 'labels' ? (
-          <div
-            id={DOCUMENT_DETAIL_TAB_PANEL_IDS.labels}
-            className="detail-tab-panel-surface"
-            role="tabpanel"
-            aria-labelledby="document-detail-tab-labels"
-          >
-            <LabelPanel document={doc} onUpdated={setDoc} />
-            <LabelPlacementHints document={doc} />
-          </div>
-        ) : null}
-
-      </div>
-
-      {layoutWorkspace ? (
-        <DocumentLayoutWorkspace
-          showTechnicalDetails={showTechnicalDetails}
-          layoutSideTab={layoutSideTab}
-          onLayoutSideTabChange={setLayoutSideTab}
-          doc={doc}
-          previewData={previewData}
-          previewLoading={previewLoading}
-          previewUnavailable={previewUnavailable}
-          blocks={blocks}
-          fields={recognizedFields}
-          recognizedCatalog={recognizedCatalog}
-          onSaveFieldValue={(key, value) => {
-            setFieldFeedback(null);
-            const nextFields = withSavedFieldValue(fields, key, value);
-            setFields(nextFields);
-            void persist({ extractionFields: nextFields });
-          }}
-          onFieldsChange={setFields}
-          heuristicSuggestions={heuristicSuggestions}
-          highlightBlocks={highlightBlocks}
-          viewerPage={viewerPage}
-          activeBlockIndex={activeBlockIndex}
-          knownFieldKeys={knownFieldKeys}
-          fieldLabelForKey={fieldLabelForKey}
-          onViewerPageChange={setViewerPage}
-          onActiveBlockIndexChange={setActiveBlockIndex}
-          onHighlightBlocks={onHighlightBlocks}
-          onBlocksChange={setBlocks}
-          onAcceptFieldSuggestion={onAcceptFieldSuggestion}
-          requeueBusy={requeueBusy}
-          onRequeueExtraction={() => void onRequeueExtraction()}
-          textEditOpen={layoutTextEditOpen}
-          onTextEditOpenChange={setLayoutTextEditOpen}
-          editMode={layoutEditMode}
-          onEditModeChange={setLayoutEditMode}
-          blocksDirty={blocksDirty}
-          saving={saving}
-          onSaveBlocks={() => void persist({ extractionBlocks: blocks })}
-          onCorrectionSheetOpenChange={setCorrectionSheetOpen}
-        />
-      ) : (
-        <div className="detail-workspace">
-          <DocumentPreviewCard
-            doc={doc}
-            previewData={previewData}
-            previewLoading={previewLoading}
-            previewUnavailable={previewUnavailable}
-            isPdf={isPdf}
-            isImage={isImage}
-            isPlainText={isPlainText}
-            plainTextPreview={doc.extraction?.text ?? null}
-            highlightBlocks={highlightBlocks}
-            viewerPage={viewerPage}
-            onViewerPageChange={setViewerPage}
-            fitWidth={isPdf}
-            title={t('documents.previewTitle')}
-            onPageClick={isPdf && blocks.length > 0 ? onPdfPageClick : undefined}
-          />
-          <DocumentExtractionSection
-            doc={doc}
-            blocks={blocks}
-            saving={saving}
-            blocksDirty={blocksDirty}
-            viewerPage={viewerPage}
-            activeBlockIndex={activeBlockIndex}
-            requeueBusy={requeueBusy}
-            onRequeueExtraction={() => void onRequeueExtraction()}
-            sourceFileMissing={previewUnavailable}
-            onViewerPageChange={setViewerPage}
-            onActiveBlockIndexChange={setActiveBlockIndex}
-            onBlocksChange={setBlocks}
-            onHighlightBlocks={onHighlightBlocks}
-            onSaveBlocks={() => void persist({ extractionBlocks: blocks })}
-            onExtractionRefresh={load}
-          />
+          ) : (
+            <div className="detail-workspace">
+              <DocumentPreviewCard
+                doc={doc}
+                previewData={previewData}
+                previewLoading={previewLoading}
+                previewUnavailable={previewUnavailable}
+                isPdf={isPdf}
+                isImage={isImage}
+                isPlainText={isPlainText}
+                plainTextPreview={doc.extraction?.text ?? null}
+                highlightBlocks={highlightBlocks}
+                viewerPage={viewerPage}
+                onViewerPageChange={setViewerPage}
+                fitWidth={isPdf}
+                title={t('documents.previewTitle')}
+                onPageClick={isPdf && blocks.length > 0 ? onPdfPageClick : undefined}
+              />
+              <DocumentExtractionSection
+                doc={doc}
+                blocks={blocks}
+                saving={saving}
+                blocksDirty={blocksDirty}
+                viewerPage={viewerPage}
+                activeBlockIndex={activeBlockIndex}
+                requeueBusy={requeueBusy}
+                onRequeueExtraction={() => void onRequeueExtraction()}
+                sourceFileMissing={previewUnavailable}
+                onViewerPageChange={setViewerPage}
+                onActiveBlockIndexChange={setActiveBlockIndex}
+                onBlocksChange={setBlocks}
+                onHighlightBlocks={onHighlightBlocks}
+                onSaveBlocks={() => void persist({ extractionBlocks: blocks })}
+                onExtractionRefresh={load}
+              />
+            </div>
+          )}
         </div>
-      )}
+        <aside
+          className="document-workbench-side document-inspector"
+          aria-label={t('pipeline.workbench.sideAria')}
+          hidden={inspector === null}
+        >
+          <div className="document-inspector-card">
+            <button
+              type="button"
+              className="document-inspector-close btn btn-ghost btn-sm"
+              aria-label={t('documents.inspectorClose')}
+              onClick={() => {
+                setInspectorChoice(null);
+              }}
+            >
+              <X size={16} strokeWidth={2} aria-hidden />
+            </button>
+            {reviewable ? (
+              <div
+                id={DOCUMENT_DETAIL_TAB_PANEL_IDS.fields}
+                role="tabpanel"
+                aria-labelledby="document-detail-tab-fields"
+                hidden={inspector !== 'fields'}
+              >
+                <DocumentReviewWorkbench
+                  doc={doc}
+                  fields={recognizedFields}
+                  suggestions={heuristicSuggestions}
+                  fieldLabelForKey={fieldLabelForKey}
+                  fieldTargets={fieldTargets}
+                  saving={saving}
+                  nextDocumentId={nextDocumentId}
+                  autoFocusFirst={arrivedForReview}
+                  onConfirm={(key) => {
+                    const field = fields.find((row) => row.key === key);
+                    if (field) confirmField(field);
+                  }}
+                  onConfirmMany={(keys) => {
+                    saveFieldsWithUndo(
+                      confirmFieldKeys(fields, new Set(keys)),
+                      t('pipeline.workbench.acceptedToast', { count: keys.length })
+                    );
+                  }}
+                  onSaveValue={(key, value) => {
+                    saveFieldsWithUndo(
+                      withSavedFieldValue(fields, key, value),
+                      t('pipeline.workbench.correctedToast')
+                    );
+                  }}
+                  onAcceptSuggestion={acceptSuggestionAndSave}
+                  onReassign={(fromKey, toKey) => {
+                    saveFieldsWithUndo(
+                      reassignFieldValue(fields, fromKey, toKey),
+                      t('pipeline.workbench.reassignedToast', { field: fieldLabelForKey(toKey) })
+                    );
+                  }}
+                  onLocate={locateValue}
+                  onLabelsUpdated={refreshDocumentLabels}
+                  onOpenAspect={(aspect) => {
+                    if (aspect === 'labels') {
+                      openInspector('labels');
+                      return;
+                    }
+                    if (aspect === 'layout' && layoutWorkspace) setLayoutSideTab('outline');
+                    if (aspect === 'ocr' && layoutWorkspace) setLayoutTextEditOpen(true);
+                    window.requestAnimationFrame(() => {
+                      document
+                        .querySelector('.document-workbench-main')
+                        ?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+                    });
+                  }}
+                />
+              </div>
+            ) : null}
+            {inspector === 'details' ? (
+              <div
+                id={DOCUMENT_DETAIL_TAB_PANEL_IDS.details}
+                className="detail-tab-panel-surface"
+                role="tabpanel"
+                aria-labelledby="document-detail-tab-details"
+              >
+                <DocumentMetadataForm
+                  doc={doc}
+                  title={title}
+                  documentDate={documentDate}
+                  documentDateAutoFilled={documentDateAuto}
+                  notes={notes}
+                  folderId={folderId}
+                  folders={folders}
+                  saving={saving}
+                  onTitleChange={setTitle}
+                  onDocumentDateChange={(value) => {
+                    setDocumentDate(value);
+                    setDocumentDateAuto(false);
+                  }}
+                  onClearAutoDocumentDate={() => {
+                    setDocumentDate('');
+                    setDocumentDateAuto(false);
+                  }}
+                  onNotesChange={setNotes}
+                  onFolderIdChange={setFolderId}
+                />
+                <ExtractedFieldsPanel
+                  fields={recognizedFields}
+                  heuristicSuggestions={heuristicSuggestions}
+                  onAcceptSuggestion={onAcceptFieldSuggestion}
+                  tags={tags}
+                  customFieldDefs={buildCustomFieldDefMap(tags)}
+                  globalFieldLabels={globalFieldLabels}
+                  saving={saving}
+                  fieldsDirty={fieldsDirty}
+                  baselineFields={baselineFields}
+                  fieldFeedback={fieldFeedback}
+                  replacedBySheet={correctionSheetOpen}
+                  onFieldsChange={(next) => {
+                    setFieldFeedback(null);
+                    setFields(next);
+                  }}
+                  onDiscardField={(key) => {
+                    const baseline = baselineFields.find((row) => row.key === key);
+                    if (!baseline) {
+                      return;
+                    }
+                    setFields((prev) =>
+                      prev.map((row) => (row.key === key ? { ...row, value: baseline.value } : row))
+                    );
+                    notifySaved(t('documents.fieldDiscardedToast'));
+                  }}
+                  onConfirmField={confirmField}
+                  onSave={() => void persist({ extractionFields: fields })}
+                />
+                <DuplicateCandidatesPanel documentId={doc.id} />
+              </div>
+            ) : null}
+
+            {inspector === 'labels' ? (
+              <div
+                id={DOCUMENT_DETAIL_TAB_PANEL_IDS.labels}
+                className="detail-tab-panel-surface"
+                role="tabpanel"
+                aria-labelledby="document-detail-tab-labels"
+              >
+                <LabelPanel document={doc} onUpdated={setDoc} />
+                <LabelPlacementHints document={doc} />
+              </div>
+            ) : null}
+          </div>
+        </aside>
+      </div>
 
       <ConfirmDialog
         open={deleteDialogOpen}
@@ -799,7 +986,9 @@ export function DocumentDetailPage() {
         confirmLabel={t('common.deletePermanently')}
         tone="danger"
         busy={deleteBusy}
-        onCancel={() => { setDeleteDialogOpen(false); }}
+        onCancel={() => {
+          setDeleteDialogOpen(false);
+        }}
         onConfirm={() => void confirmDelete()}
       />
 

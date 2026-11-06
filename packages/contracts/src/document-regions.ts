@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 
 import type { LayoutToken, NormalizedRect } from './region-geometry.js';
+import type { TableRowRole, TableRuleLine } from './table-structure.js';
 
 export type DocumentRegionShape = 'rect' | 'polygon';
 export type DocumentRegionRole = 'field' | 'table' | 'block' | 'ignore';
@@ -29,6 +30,19 @@ export interface DocumentRegionTableRuleDto {
   axis: 'row' | 'col';
   ord: number;
   pos: number;
+  /** Appearance evidence only; `unknown` until a line is observed or set by a person. */
+  line: TableRuleLine;
+}
+
+export interface DocumentRegionTableRuleLineDto {
+  axis: 'row' | 'col';
+  ord: number;
+  line: TableRuleLine;
+}
+
+export interface DocumentRegionTableRowRoleDto {
+  row: number;
+  role: TableRowRole;
 }
 
 export interface DocumentRegionTableMergeDto {
@@ -46,8 +60,18 @@ export interface DocumentRegionTableCellDto {
 
 export interface DocumentRegionTableDto {
   tableType: DocumentRegionTableType;
+  /** Header rows; more than one is a nested header (spans come from `merges`). */
   headerRows: number;
+  /** Trailing summary rows (results/accounting footer). */
+  footerRows: number;
+  /** Leading index columns (left index). */
   headerCols: number;
+  /** Trailing index columns (right index; with `headerCols` a double index). */
+  trailingHeaderCols: number;
+  /** Alternating row tint; appearance only. */
+  banded: boolean;
+  /** Section headings and subtotals inside the body; other body rows are data rows. */
+  rowRoles: DocumentRegionTableRowRoleDto[];
   rules: DocumentRegionTableRuleDto[];
   merges: DocumentRegionTableMergeDto[];
   cells: DocumentRegionTableCellDto[];
@@ -127,6 +151,15 @@ export interface ApplyTableCorrectionRequest {
   tableType?: DocumentRegionTableType;
   headerRows?: number;
   headerCols?: number;
+  footerRows?: number;
+  trailingHeaderCols?: number;
+  banded?: boolean;
+  /** Replaces all row roles on `create` and `set_headers`. */
+  rowRoles?: DocumentRegionTableRowRoleDto[];
+  /** Line evidence for the listed rules on `create` and `set_headers`; other rules keep theirs. */
+  ruleLines?: DocumentRegionTableRuleLineDto[];
+  /** Merged cells (rowSpan/colSpan); replaces all merges on `create` and `set_headers`. */
+  merges?: DocumentRegionTableMergeDto[];
   cell?: DocumentRegionTableCellDto;
 }
 

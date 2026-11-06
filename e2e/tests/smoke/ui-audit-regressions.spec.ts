@@ -21,7 +21,9 @@ test.describe('UI audit regressions (non-ML)', () => {
     layoutDocId = await uploadLayoutTableDocument(request, apiBase, webOrigin);
   });
 
-  test('document detail: Original|Text modes and no SSIM in default compare chrome', async ({ page }) => {
+  test('document detail: Original|Text modes and no SSIM in default compare chrome', async ({
+    page,
+  }) => {
     test.setTimeout(360_000);
     await openLayoutDocumentPage(page, layoutDocId);
 
@@ -42,7 +44,12 @@ test.describe('UI audit regressions (non-ML)', () => {
     });
     expect(adjacent).toBe(true);
 
-    await page.getByTestId('layout-viewer-toolbar').getByRole('radio', { name: /^Text$/i }).click();
+    // Recognised text is a page view in the "Ansicht" menu, not a second mode bar.
+    await page
+      .getByTestId('layout-viewer-toolbar')
+      .getByRole('button', { name: /^(Ansicht|View):/ })
+      .click();
+    await page.getByRole('menuitemradio', { name: /^(Erkannter Text|Recognised text)$/ }).click();
     await expect(page.locator('.layout-text-stage .extracted-text-panel')).toBeVisible({
       timeout: 120_000,
     });
@@ -54,7 +61,8 @@ test.describe('UI audit regressions (non-ML)', () => {
   test('locale switcher uses filled segmented control', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
     await page.goto(webOrigin);
-    const localeGroup = page.locator('.locale-switcher-wrap--topbar .segmented-control');
+    await page.locator('.user-account-menu-trigger').click();
+    const localeGroup = page.locator('.locale-switcher-wrap--menu .segmented-control');
     await expect(localeGroup).toBeVisible();
     const selected = localeGroup.locator('.segmented-control__option--selected');
     await expect(selected).toHaveCount(1);

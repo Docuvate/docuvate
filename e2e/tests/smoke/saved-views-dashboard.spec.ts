@@ -8,7 +8,7 @@ async function savePinnedView(page: import('@playwright/test').Page, viewName: s
   await page.getByLabel(/name/i).fill(viewName);
   const dialog = page.getByRole('dialog');
   const pinCheckbox = dialog.getByRole('checkbox', {
-    name: /pin to sidebar|in der seitenleiste anheften/i,
+    name: /pin to navigation|in der navigation anheften/i,
   });
   await pinCheckbox.check();
   await expect(pinCheckbox).toBeChecked();
@@ -23,7 +23,10 @@ test.describe('Saved views and dashboard', () => {
     await page.goto('/');
     await expect(page).toHaveURL((url) => url.pathname === '/', { timeout: 15_000 });
 
-    await page.getByRole('link', { name: /documents|dokumente/i }).click();
+    await page
+      .locator('.app-primary-nav')
+      .getByRole('link', { name: /^(documents|dokumente)$/i })
+      .click();
     await expect(page).toHaveURL(/\/documents/, { timeout: 15_000 });
 
     const viewNameA = `E2E View A ${Date.now()}`;
@@ -32,22 +35,25 @@ test.describe('Saved views and dashboard', () => {
     await savePinnedView(page, viewNameB);
 
     await expect(
-      page.locator('.sidebar-saved-views').getByRole('link', { name: viewNameA })
+      page.locator('.ribbon-saved-views').getByRole('link', { name: viewNameA })
     ).toBeVisible({ timeout: 30_000 });
     await expect(
-      page.locator('.sidebar-saved-views').getByRole('link', { name: viewNameB })
+      page.locator('.ribbon-saved-views').getByRole('link', { name: viewNameB })
     ).toBeVisible({ timeout: 30_000 });
 
-    await page.locator('.sidebar-saved-views').getByRole('link', { name: viewNameB }).click();
+    await page.locator('.ribbon-saved-views').getByRole('link', { name: viewNameB }).click();
     await expect(page).toHaveURL(/view=/, { timeout: 10_000 });
 
-    await expect(page.locator('.sidebar-saved-view-link.active')).toHaveCount(1);
-    await expect(page.locator('.sidebar-saved-view-link[aria-current="page"]')).toHaveCount(1);
-    await expect(
-      page.locator('.sidebar-saved-view-link[aria-current="page"]')
-    ).toContainText(viewNameB);
+    await expect(page.locator('.ribbon-saved-view-link.active')).toHaveCount(1);
+    await expect(page.locator('.ribbon-saved-view-link[aria-current="page"]')).toHaveCount(1);
+    await expect(page.locator('.ribbon-saved-view-link[aria-current="page"]')).toContainText(
+      viewNameB
+    );
 
-    await page.getByRole('link', { name: /start/i }).first().click();
+    await page
+      .locator('.app-primary-nav')
+      .getByRole('link', { name: /^start$/i })
+      .click();
     await page.getByRole('button', { name: /customize|anpassen/i }).click();
     await page.getByRole('button', { name: /add widget|widget hinzufügen/i }).click();
 

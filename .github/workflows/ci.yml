@@ -154,7 +154,8 @@ jobs:
           pnpm nx affected -t lint --parallel=3 --exclude=worker
 
   design-system-e2e:
-    # Design-system regression (palette, focus, reduced motion, axe, touch targets, screenshots).
+    # Design-system regression (palette, focus, reduced motion, axe, touch targets, screenshots)
+    # and the structuring journey (pipeline hub, library stage tabs, viewer next action).
     # Self-contained: Vite dev server + synthetic in-test API mocks; no compose stack, no real documents.
     runs-on: ubuntu-latest
     needs: [changes, quick-checks]
@@ -176,6 +177,11 @@ jobs:
         env:
           DESIGN_SYSTEM_ARTIFACT_DIR: ${{ github.workspace }}/design-system-artifacts
         run: pnpm --filter @docuvate/e2e exec playwright test --config=playwright.design-system.config.ts
+      - name: Structuring journey (Playwright, synthetic fixtures)
+        # Dashboard → library → viewer → export → review, empty/error states, mobile + axe.
+        env:
+          STRUCTURING_SHOT_DIR: ${{ github.workspace }}/design-system-artifacts/structuring
+        run: pnpm --filter @docuvate/e2e exec playwright test --config=playwright.structuring.config.ts
       - name: Upload design-system screenshots and traces
         if: ${{ failure() }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2

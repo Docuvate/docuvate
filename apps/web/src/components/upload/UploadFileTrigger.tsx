@@ -1,5 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import { Upload } from 'lucide-react';
 import { useCallback, useId, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -9,14 +10,21 @@ import { useDocumentUploadContext } from './documentUploadContext';
 
 interface UploadFileTriggerProps {
   variant?: 'primary' | 'secondary' | 'ghost';
+  size?: 'sm' | 'md';
   disabledTitle?: string;
   onDisabledClick?: () => void;
+  className?: string;
+  /** Leading upload icon, as every labelled ribbon action has one. */
+  icon?: boolean;
 }
 
 export function UploadFileTrigger({
   variant = 'secondary',
+  size = 'md',
   disabledTitle,
   onDisabledClick,
+  className,
+  icon = false,
 }: UploadFileTriggerProps) {
   const { t } = useTranslation();
   const { dropTarget, enqueueFiles } = useDocumentUploadContext();
@@ -37,6 +45,8 @@ export function UploadFileTrigger({
       <Button
         type="button"
         variant={variant}
+        size={size}
+        className={className}
         data-ux={variant === 'primary' ? 'primary-action' : undefined}
         title={disabled && disabledTitle ? disabledTitle : undefined}
         onClick={() => {
@@ -47,6 +57,7 @@ export function UploadFileTrigger({
           inputRef.current?.click();
         }}
       >
+        {icon ? <Upload size={16} strokeWidth={2} aria-hidden /> : null}
         {t('upload.uploadButton')}
       </Button>
       <input

@@ -3,6 +3,7 @@
 
 import type { LayoutToken, NormalizedRect } from './region-geometry.js';
 import { normalizeRect } from './region-geometry.js';
+import type { TableRowRoleEntry } from './table-structure.js';
 
 export type TableGridAxis = 'row' | 'col';
 
@@ -20,9 +21,55 @@ export interface TableGridCell {
 
 export interface InferredTableGrid {
   headerRows: number;
+  footerRows: number;
   headerCols: number;
+  rowRoles: TableRowRoleEntry[];
   rules: TableGridRule[];
   cells: TableGridCell[];
+}
+
+const TOTAL_LABEL =
+  /^(gesamt|gesamtbetrag|summe|endsumme|netto|brutto|mwst|ust|umsatzsteuer|total|grand total|net|tax|vat|amount due)\b/i;
+const SUBTOTAL_LABEL = /^(zwischensumme|teilsumme|subtotal|sub-total)/i;
+
+/**
+ * Semantic bands from cell text alone (no line evidence): trailing total/tax rows become the
+ * footer, a body row with a subtotal label is a subtotal, and a body row whose only text sits in
+ * its first cell is a section heading.
+ */
+export function inferTableBands(
+  cells: readonly TableGridCell[],
+  rows: number,
+  cols: number,
+  headerRows: number
+): { footerRows: number; rowRoles: TableRowRoleEntry[] } {
+  const rowTexts = (row: number) =>
+    Array.from(
+      { length: cols },
+      (_, col) => cells.find((cell) => cell.row === row && cell.col === col)?.text.trim() ?? ''
+    );
+  const label = (texts: string[]) => texts.find((text) => text.length > 0) ?? '';
+  let footerRows = 0;
+  for (let row = rows - 1; row > headerRows; row -= 1) {
+    const text = label(rowTexts(row));
+    if (!TOTAL_LABEL.test(text) || SUBTOTAL_LABEL.test(text)) {
+      break;
+    }
+    footerRows += 1;
+  }
+  const rowRoles: TableRowRoleEntry[] = [];
+  if (cols < 2) {
+    return { footerRows, rowRoles };
+  }
+  for (let row = headerRows; row < rows - footerRows; row += 1) {
+    const texts = rowTexts(row);
+    if (SUBTOTAL_LABEL.test(label(texts))) {
+      rowRoles.push({ row, role: 'subtotal' });
+    } else if (texts[0] !== '' && texts.slice(1).every((text) => text === '') && cols >= 3) {
+      rowRoles.push({ row, role: 'section' });
+    }
+  }
+  return { footerRows, rowRoles };
 }
 
 function median(values: number[]): number {
@@ -35,7 +82,11 @@ function median(values: number[]): number {
   return atMid ?? 0;
 }
 
-function clusterTokens(tokens: readonly LayoutToken[], axis: TableGridAxis, minGap: number): LayoutToken[][] {
+function clusterTokens(
+  tokens: readonly LayoutToken[],
+  axis: TableGridAxis,
+  minGap: number
+): LayoutToken[][] {
   if (tokens.length === 0) {
     return [];
   }
@@ -83,7 +134,11 @@ function extent(tokens: readonly LayoutToken[], axis: TableGridAxis): { min: num
   return { min, max };
 }
 
-function rulePositions(extents: { min: number; max: number }[], start: number, end: number): number[] {
+function rulePositions(
+  extents: { min: number; max: number }[],
+  start: number,
+  end: number
+): number[] {
   const positions = [start];
   for (let index = 0; index < extents.length - 1; index += 1) {
     const current = extents[index];
@@ -113,7 +168,9 @@ export function inferTableGrid(
   if (tokens.length === 0) {
     return {
       headerRows: 0,
+      footerRows: 0,
       headerCols: 0,
+      rowRoles: [],
       rules: [
         { axis: 'row', ord: 0, pos: box.y0 },
         { axis: 'row', ord: 1, pos: box.y1 },
@@ -168,10 +225,76 @@ export function inferTableGrid(
     ...rowPos.map((pos, ord) => ({ axis: 'row' as const, ord, pos })),
     ...colPos.map((pos, ord) => ({ axis: 'col' as const, ord, pos })),
   ];
+  const headerRows = rowCount >= 2 ? 1 : 0;
+  const bands = inferTableBands(cells, rowCount, colCount, headerRows);
   return {
-    headerRows: rowCount >= 2 ? 1 : 0,
+    headerRows,
+    footerRows: bands.footerRows,
     headerCols: 0,
+    rowRoles: bands.rowRoles,
     rules,
     cells,
+  };
+}
+
+export interface TableGridMerge {
+  row0: number;
+  col0: number;
+  rowSpan: number;
+  colSpan: number;
+}
+
+/**
+ * True when every merge covers at least two cells, stays inside a `rows` x `cols` grid and no
+ * two merges overlap. Shared by the API (rejects bad input) and the editor (disables apply).
+ */
+export function validTableMerges(
+  merges: readonly TableGridMerge[],
+  rows: number,
+  cols: number
+): boolean {
+  const covered = new Set<number>();
+  for (const merge of merges) {
+    const ints = [merge.row0, merge.col0, merge.rowSpan, merge.colSpan].every(Number.isInteger);
+    if (!ints || merge.row0 < 0 || merge.col0 < 0 || merge.rowSpan < 1 || merge.colSpan < 1) {
+      return false;
+    }
+    if (merge.rowSpan * merge.colSpan < 2) {
+      return false;
+    }
+    if (merge.row0 + merge.rowSpan > rows || merge.col0 + merge.colSpan > cols) {
+      return false;
+    }
+    for (let row = merge.row0; row < merge.row0 + merge.rowSpan; row += 1) {
+      for (let col = merge.col0; col < merge.col0 + merge.colSpan; col += 1) {
+        const key = row * cols + col;
+        if (covered.has(key)) {
+          return false;
+        }
+        covered.add(key);
+      }
+    }
+  }
+  return true;
+}
+
+/** Grid size of a stored table: rules are frame edges plus dividers, so n rules bound n-1 bands. */
+export function tableGridSize(table: {
+  rules: readonly TableGridRule[];
+  cells: readonly TableGridCell[];
+}): { rows: number; cols: number } {
+  const fromRules = (axis: TableGridAxis) =>
+    Math.max(0, table.rules.filter((rule) => rule.axis === axis).length - 1);
+  const fromCells = (pick: (cell: TableGridCell) => number) =>
+    table.cells.reduce((max, cell) => Math.max(max, pick(cell) + 1), 0);
+  return {
+    rows: Math.max(
+      fromRules('row'),
+      fromCells((cell) => cell.row)
+    ),
+    cols: Math.max(
+      fromRules('col'),
+      fromCells((cell) => cell.col)
+    ),
   };
 }

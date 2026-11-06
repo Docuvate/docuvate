@@ -3,7 +3,7 @@
 .logo {
   display: inline-flex;
   align-items: center;
-  gap: 0.625rem;
+  gap: var(--dv-space-xs);
   color: var(--dv-color-text);
   text-decoration: none;
 }
@@ -495,7 +495,7 @@
   flex: 0 1 auto;
   align-items: center;
   gap: var(--dv-space-2xs);
-  padding: 0.125rem var(--dv-space-xs);
+  padding: var(--dv-space-3xs) var(--dv-space-xs);
   border-radius: var(--dv-radius-md);
   background: var(--dv-color-accent-soft);
   color: var(--dv-color-accent-text);
@@ -1413,7 +1413,7 @@
   font-size: var(--dv-font-size-xs);
   font-weight: var(--dv-font-weight-semibold);
   color: var(--dv-color-header-muted);
-  padding: 0.0625rem 0.375rem;
+  padding: var(--dv-space-3xs) var(--dv-space-2xs);
   border-radius: var(--dv-radius-sm);
   border: 1px solid var(--dv-color-header-control-border);
   background: var(--dv-color-header-control-bg);

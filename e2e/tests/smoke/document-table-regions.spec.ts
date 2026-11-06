@@ -3,7 +3,10 @@
 import { expect, test, type Page } from '@playwright/test';
 
 import { applyDocuvateLocale } from '../../helpers/docuvate-theme';
-import { openLayoutDocumentPage, uploadLayoutTableDocument } from '../../helpers/layout-document-fixture';
+import {
+  openLayoutDocumentPage,
+  uploadLayoutTableDocument,
+} from '../../helpers/layout-document-fixture';
 import { showLayoutPane } from '../../helpers/layout-pane';
 import {
   assertNoHorizontalOverflow,
@@ -35,9 +38,12 @@ async function applyGermanLocale(page: Page): Promise<void> {
 }
 
 async function drawTableRectangle(page: Page): Promise<void> {
-  const word = page.locator('.pdf-page-wrap .textLayer span').filter({
-    hasText: /Widget|Alex|Testmann|FIXTURE|Compose|Brutto|Position/i,
-  }).first();
+  const word = page
+    .locator('.pdf-page-wrap .textLayer span')
+    .filter({
+      hasText: /Widget|Alex|Testmann|FIXTURE|Compose|Brutto|Position/i,
+    })
+    .first();
   if ((await word.count()) > 0) {
     await expect(word).toBeVisible({ timeout: 60_000 });
     const box = await word.boundingBox();
@@ -118,19 +124,31 @@ test.describe('document table regions', () => {
       /^(?!0$)\d+$/,
       { timeout: 60_000 }
     );
-    await page.getByRole('radio', { name: /Rechteck|Rectangle/i }).click();
+    await page.getByRole('radio', { name: /^(Bereich|Area)/ }).click();
     await drawTableRectangle(page);
     const bar = page.getByTestId('field-context-bar');
     await expect(bar).toBeVisible({ timeout: 30_000 });
     await bar.getByRole('button', { name: /Als Tabelle markieren|Mark as table/i }).click();
-    await expect(page.getByText(/Tabellenkorrektur gespeichert|Table correction saved/i)).toBeVisible({
+    await expect(
+      page.getByText(/Tabellenkorrektur gespeichert|Table correction saved/i)
+    ).toBeVisible({
       timeout: 30_000,
     });
     const card = page.getByTestId('corrected-table-card');
     await expect(card).toBeVisible({ timeout: 30_000 });
-    const headerRows = card.getByLabel(/Kopfzeilen|Header rows/i);
-    await headerRows.fill('1');
-    await headerRows.blur();
+    // Structure edits are a draft on the real table; the header stepper is directly on the card.
+    // The detected header count may already be right, so step it away from whatever was inferred.
+    const headerGroup = card.getByRole('group', { name: /Kopfzeilen|Header rows/i });
+    const headerRows = headerGroup.getByRole('spinbutton');
+    const detectedHeaderRows = await headerRows.inputValue();
+    const moreHeaderRows = headerGroup.getByRole('button', { name: /^(Mehr|More)$/ });
+    await (
+      (await moreHeaderRows.isEnabled())
+        ? moreHeaderRows
+        : headerGroup.getByRole('button', { name: /^(Weniger|Fewer)$/ })
+    ).click();
+    await expect(headerRows).not.toHaveValue(detectedHeaderRows);
+    await expect(card.getByRole('button', { name: /^(Übernehmen|Apply)$/ })).toBeVisible();
     const firstCell = card.locator('.layout-table-cell-input').first();
     await firstCell.fill('Position');
     // A pending save re-selects its table when it resolves, which would reopen the narrow sheet
@@ -141,6 +159,15 @@ test.describe('document table regions', () => {
       page.getByText(/Tabellenkorrektur gespeichert|Table correction saved/i).last()
     ).toBeVisible({ timeout: 30_000 });
     await assertNoHorizontalOverflow(page);
+
+    // Table family: header band, result footer, lines and merged cells saved as one correction.
+    const tools = card.first().getByTestId('table-structure-tools');
+    await tools.getByRole('combobox', { name: /Vorlage|Template/i }).selectOption('financial');
+    await Promise.all([
+      waitForTableCorrectionSave(page),
+      tools.getByRole('button', { name: /^(Übernehmen|Apply)$/ }).click(),
+    ]);
+    await expect(tools.getByRole('button', { name: /^(Übernehmen|Apply)$/ })).toHaveCount(0);
 
     for (const viewport of VIEWPORTS) {
       await page.setViewportSize({ width: viewport.width, height: viewport.height });
@@ -191,7 +218,7 @@ test.describe('document table regions', () => {
         await assertTableCorrectionSheet(page);
         await assertToastMissesSheetActions(
           page,
-          '[data-testid="table-correction-sheet"] .layout-table-header-controls'
+          '[data-testid="table-correction-sheet"] [data-testid="table-structure-tools"]'
         );
       } else {
         await expect(page.locator('[data-testid="table-correction-sheet"]')).toHaveCount(0);

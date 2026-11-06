@@ -36,6 +36,8 @@ async function dragRectangleFraction(
 ): Promise<void> {
   const canvas = page.locator('.pdf-page-canvas').first();
   await expect(canvas).toBeVisible({ timeout: 180_000 });
+  // On phones the review workbench sits above the document; bring the page into view first.
+  await canvas.scrollIntoViewIfNeeded();
   const box = await canvas.boundingBox();
   expect(box).toBeTruthy();
   if (!box) {
@@ -81,7 +83,7 @@ test.describe('rotated page bounding-box selection', () => {
 
       await page
         .getByTestId('document-selection-tools')
-        .getByRole('radio', { name: /Rechteck|Rectangle/i })
+        .getByRole('radio', { name: /^(Bereich|Area)/ })
         .click();
       await dragRectangleFraction(page, 0.05, 0.05, 0.95, 0.95);
 
@@ -107,7 +109,7 @@ test.describe('rotated page bounding-box selection', () => {
 
     await page
       .getByTestId('document-selection-tools')
-      .getByRole('radio', { name: /Text \(T\)/i })
+      .getByRole('radio', { name: /^(Text markieren|Mark text)/ })
       .click();
     // Prefer a clean name span — the SYNTHETIC_FIXTURE line OCRs into fragments on /Rotate.
     const word = page

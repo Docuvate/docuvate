@@ -13,9 +13,9 @@ import { SegmentedControl } from '../ui/SegmentedControl';
 const LOCALE_CODES: UiLocale[] = ['de', 'en'];
 
 /**
- * Language picker placement (one surface per viewport):
- * - Desktop (≥769px): `topbar` only (`AppShell`, not in avatar menu).
- * - Mobile (≤768px): `menu` only (`UserAccountMenu`, not in topbar).
+ * Language picker placement:
+ * - Signed in: `menu`, inside the account menu on every viewport.
+ * - Signed-out screens (auth, errors, not found): `topbar`.
  */
 export function LocaleSwitcher({ placement = 'topbar' }: { placement?: 'topbar' | 'menu' }) {
   const { i18n, t } = useTranslation();

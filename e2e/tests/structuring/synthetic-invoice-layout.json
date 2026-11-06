@@ -1,0 +1,1306 @@
+{
+ "ir": {
+  "version": 1,
+  "pages": [
+   {
+    "page": 1,
+    "widthPt": 595.28,
+    "heightPt": 841.89,
+    "blocks": [
+     {
+      "page": 1,
+      "x": 56,
+      "y": 60,
+      "width": 113.81,
+      "height": 18.4,
+      "text": "Beispiel GmbH",
+      "fontFamily": "Helvetica",
+      "fontSizePt": 16,
+      "weight": "bold",
+      "blockIndex": 0
+     },
+     {
+      "page": 1,
+      "x": 56,
+      "y": 84,
+      "width": 140.06,
+      "height": 10.35,
+      "text": "Musterstraße 1, 12345 Musterstadt",
+      "fontFamily": "Helvetica",
+      "fontSizePt": 9,
+      "weight": "normal",
+      "blockIndex": 1
+     },
+     {
+      "page": 1,
+      "x": 380,
+      "y": 60,
+      "width": 78.22,
+      "height": 18.4,
+      "text": "Rechnung",
+      "fontFamily": "Helvetica",
+      "fontSizePt": 16,
+      "weight": "bold",
+      "blockIndex": 2
+     },
+     {
+      "page": 1,
+      "x": 380,
+      "y": 86,
+      "width": 142.06,
+      "height": 10.35,
+      "text": "Rechnungsnummer: RE-2026-0042",
+      "fontFamily": "Helvetica",
+      "fontSizePt": 9,
+      "weight": "normal",
+      "blockIndex": 3
+     },
+     {
+      "page": 1,
+      "x": 380,
+      "y": 100,
+      "width": 76.55,
+      "height": 10.35,
+      "text": "Datum: 14.10.2026",
+      "fontFamily": "Helvetica",
+      "fontSizePt": 9,
+      "weight": "normal",
+      "blockIndex": 4
+     },
+     {
+      "page": 1,
+      "x": 56,
+      "y": 150,
+      "width": 143.38,
+      "height": 13.8,
+      "text": "Leistungen Oktober 2026",
+      "fontFamily": "Helvetica",
+      "fontSizePt": 12,
+      "weight": "bold",
+      "blockIndex": 5
+     },
+     {
+      "page": 1,
+      "x": 56,
+      "y": 176,
+      "width": 21.12,
+      "height": 11.5,
+      "text": "Pos.",
+      "fontFamily": "Helvetica",
+      "fontSizePt": 10,
+      "weight": "bold",
+      "blockIndex": 6
+     },
+     {
+      "page": 1,
+      "x": 96,
+      "y": 176,
+      "width": 66.68,
+      "height": 11.5,
+      "text": "Beschreibung",
+      "fontFamily": "Helvetica",
+      "fontSizePt": 10,
+      "weight": "bold",
+      "blockIndex": 7
+     },
+     {
+      "page": 1,
+      "x": 330,
+      "y": 176,
+      "width": 31.67,
+      "height": 11.5,
+      "text": "Menge",
+      "fontFamily": "Helvetica",
+      "fontSizePt": 10,
+      "weight": "bold",
+      "blockIndex": 8
+     },
+     {
+      "page": 1,
+      "x": 410,
+      "y": 176,
+      "width": 52.8,
+      "height": 11.5,
+      "text": "Einzelpreis",
+      "fontFamily": "Helvetica",
+      "fontSizePt": 10,
+      "weight": "bold",
+      "blockIndex": 9
+     },
+     {
+      "page": 1,
+      "x": 490,
+      "y": 176,
+      "width": 31.67,
+      "height": 11.5,
+      "text": "Betrag",
+      "fontFamily": "Helvetica",
+      "fontSizePt": 10,
+      "weight": "bold",
+      "blockIndex": 10
+     },
+     {
+      "page": 1,
+      "x": 56,
+      "y": 200,
+      "width": 5.56,
+      "height": 11.5,
+      "text": "1",
+      "fontFamily": "Helvetica",
+      "fontSizePt": 10,
+      "weight": "normal",
+      "blockIndex": 11
+     },
+     {
+      "page": 1,
+      "x": 96,
+      "y": 200,
+      "width": 106.16,
+      "height": 11.5,
+      "text": "Beratung Strukturierung",
+      "fontFamily": "Helvetica",
+      "fontSizePt": 10,
+      "weight": "normal",
+      "blockIndex": 12
+     },
+     {
+      "page": 1,
+      "x": 330,
+      "y": 200,
+      "width": 13.9,
+      "height": 11.5,
+      "text": "8 h",
+      "fontFamily": "Helvetica",
+      "fontSizePt": 10,
+      "weight": "normal",
+      "blockIndex": 13
+     },
+     {
+      "page": 1,
+      "x": 410,
+      "y": 200,
+      "width": 33.36,
+      "height": 11.5,
+      "text": "95,00 €",
+      "fontFamily": "Helvetica",
+      "fontSizePt": 10,
+      "weight": "normal",
+      "blockIndex": 14
+     },
+     {
+      "page": 1,
+      "x": 490,
+      "y": 200,
+      "width": 38.92,
+      "height": 11.5,
+      "text": "760,00 €",
+      "fontFamily": "Helvetica",
+      "fontSizePt": 10,
+      "weight": "normal",
+      "blockIndex": 15
+     },
+     {
+      "page": 1,
+      "x": 56,
+      "y": 222,
+      "width": 5.56,
+      "height": 11.5,
+      "text": "2",
+      "fontFamily": "Helvetica",
+      "fontSizePt": 10,
+      "weight": "normal",
+      "blockIndex": 16
+     },
+     {
+      "page": 1,
+      "x": 96,
+      "y": 222,
+      "width": 114.51,
+      "height": 11.5,
+      "text": "Tabellenerkennung Setup",
+      "fontFamily": "Helvetica",
+      "fontSizePt": 10,
+      "weight": "normal",
+      "blockIndex": 17
+     },
+     {
+      "page": 1,
+      "x": 330,
+      "y": 222,
+      "width": 5.56,
+      "height": 11.5,
+      "text": "1",
+      "fontFamily": "Helvetica",
+      "fontSizePt": 10,
+      "weight": "normal",
+      "blockIndex": 18
+     },
+     {
+      "page": 1,
+      "x": 410,
+      "y": 222,
+      "width": 38.92,
+      "height": 11.5,
+      "text": "240,00 €",
+      "fontFamily": "Helvetica",
+      "fontSizePt": 10,
+      "weight": "normal",
+      "blockIndex": 19
+     },
+     {
+      "page": 1,
+      "x": 490,
+      "y": 222,
+      "width": 38.92,
+      "height": 11.5,
+      "text": "240,00 €",
+      "fontFamily": "Helvetica",
+      "fontSizePt": 10,
+      "weight": "normal",
+      "blockIndex": 20
+     },
+     {
+      "page": 1,
+      "x": 56,
+      "y": 244,
+      "width": 5.56,
+      "height": 11.5,
+      "text": "3",
+      "fontFamily": "Helvetica",
+      "fontSizePt": 10,
+      "weight": "normal",
+      "blockIndex": 21
+     },
+     {
+      "page": 1,
+      "x": 96,
+      "y": 244,
+      "width": 70.03,
+      "height": 11.5,
+      "text": "Schulung Team",
+      "fontFamily": "Helvetica",
+      "fontSizePt": 10,
+      "weight": "normal",
+      "blockIndex": 22
+     },
+     {
+      "page": 1,
+      "x": 330,
+      "y": 244,
+      "width": 13.9,
+      "height": 11.5,
+      "text": "4 h",
+      "fontFamily": "Helvetica",
+      "fontSizePt": 10,
+      "weight": "normal",
+      "blockIndex": 23
+     },
+     {
+      "page": 1,
+      "x": 410,
+      "y": 244,
+      "width": 33.36,
+      "height": 11.5,
+      "text": "80,00 €",
+      "fontFamily": "Helvetica",
+      "fontSizePt": 10,
+      "weight": "normal",
+      "blockIndex": 24
+     },
+     {
+      "page": 1,
+      "x": 490,
+      "y": 244,
+      "width": 38.92,
+      "height": 11.5,
+      "text": "320,00 €",
+      "fontFamily": "Helvetica",
+      "fontSizePt": 10,
+      "weight": "normal",
+      "blockIndex": 25
+     },
+     {
+      "page": 1,
+      "x": 56,
+      "y": 268,
+      "width": 63.34,
+      "height": 11.5,
+      "text": "Summe netto",
+      "fontFamily": "Helvetica",
+      "fontSizePt": 10,
+      "weight": "bold",
+      "blockIndex": 26
+     },
+     {
+      "page": 1,
+      "x": 490,
+      "y": 268,
+      "width": 47.26,
+      "height": 11.5,
+      "text": "1.320,00 €",
+      "fontFamily": "Helvetica",
+      "fontSizePt": 10,
+      "weight": "bold",
+      "blockIndex": 27
+     },
+     {
+      "page": 1,
+      "x": 56,
+      "y": 290,
+      "width": 45.02,
+      "height": 11.5,
+      "text": "USt. 19 %",
+      "fontFamily": "Helvetica",
+      "fontSizePt": 10,
+      "weight": "normal",
+      "blockIndex": 28
+     },
+     {
+      "page": 1,
+      "x": 490,
+      "y": 290,
+      "width": 38.92,
+      "height": 11.5,
+      "text": "250,80 €",
+      "fontFamily": "Helvetica",
+      "fontSizePt": 10,
+      "weight": "normal",
+      "blockIndex": 29
+     },
+     {
+      "page": 1,
+      "x": 56,
+      "y": 312,
+      "width": 67.24,
+      "height": 11.5,
+      "text": "Gesamtbetrag",
+      "fontFamily": "Helvetica",
+      "fontSizePt": 10,
+      "weight": "bold",
+      "blockIndex": 30
+     },
+     {
+      "page": 1,
+      "x": 490,
+      "y": 312,
+      "width": 47.26,
+      "height": 11.5,
+      "text": "1.570,80 €",
+      "fontFamily": "Helvetica",
+      "fontSizePt": 10,
+      "weight": "bold",
+      "blockIndex": 31
+     },
+     {
+      "page": 1,
+      "x": 56,
+      "y": 356,
+      "width": 180.6,
+      "height": 10.35,
+      "text": "Zahlbar innerhalb von 14 Tagen ohne Abzug.",
+      "fontFamily": "Helvetica",
+      "fontSizePt": 9,
+      "weight": "normal",
+      "blockIndex": 32
+     },
+     {
+      "page": 1,
+      "x": 56,
+      "y": 800,
+      "width": 178.31,
+      "height": 9.2,
+      "text": "Synthetisches Testdokument, keine echten Daten.",
+      "fontFamily": "Helvetica",
+      "fontSizePt": 8,
+      "weight": "normal",
+      "blockIndex": 33
+     }
+    ]
+   }
+  ]
+ },
+ "tokens": [
+  {
+   "blockIndex": 0,
+   "page": 1,
+   "x0": 0.09407,
+   "y0": 0.07127,
+   "x1": 0.19715,
+   "y1": 0.09312,
+   "text": "Beispiel"
+  },
+  {
+   "blockIndex": 0,
+   "page": 1,
+   "x0": 0.20462,
+   "y0": 0.07127,
+   "x1": 0.28526,
+   "y1": 0.09312,
+   "text": "GmbH"
+  },
+  {
+   "blockIndex": 1,
+   "page": 1,
+   "x0": 0.09407,
+   "y0": 0.09978,
+   "x1": 0.18312,
+   "y1": 0.11207,
+   "text": "Musterstraße"
+  },
+  {
+   "blockIndex": 1,
+   "page": 1,
+   "x0": 0.18733,
+   "y0": 0.09978,
+   "x1": 0.19994,
+   "y1": 0.11207,
+   "text": "1,"
+  },
+  {
+   "blockIndex": 1,
+   "page": 1,
+   "x0": 0.20414,
+   "y0": 0.09978,
+   "x1": 0.24617,
+   "y1": 0.11207,
+   "text": "12345"
+  },
+  {
+   "blockIndex": 1,
+   "page": 1,
+   "x0": 0.25037,
+   "y0": 0.09978,
+   "x1": 0.32935,
+   "y1": 0.11207,
+   "text": "Musterstadt"
+  },
+  {
+   "blockIndex": 2,
+   "page": 1,
+   "x0": 0.63836,
+   "y0": 0.07127,
+   "x1": 0.76976,
+   "y1": 0.09312,
+   "text": "Rechnung"
+  },
+  {
+   "blockIndex": 3,
+   "page": 1,
+   "x0": 0.63836,
+   "y0": 0.10215,
+   "x1": 0.77447,
+   "y1": 0.11444,
+   "text": "Rechnungsnummer:"
+  },
+  {
+   "blockIndex": 3,
+   "page": 1,
+   "x0": 0.77867,
+   "y0": 0.10215,
+   "x1": 0.87699,
+   "y1": 0.11444,
+   "text": "RE-2026-0042"
+  },
+  {
+   "blockIndex": 4,
+   "page": 1,
+   "x0": 0.63836,
+   "y0": 0.11878,
+   "x1": 0.68708,
+   "y1": 0.13107,
+   "text": "Datum:"
+  },
+  {
+   "blockIndex": 4,
+   "page": 1,
+   "x0": 0.69129,
+   "y0": 0.11878,
+   "x1": 0.76694,
+   "y1": 0.13107,
+   "text": "14.10.2026"
+  },
+  {
+   "blockIndex": 5,
+   "page": 1,
+   "x0": 0.09407,
+   "y0": 0.17817,
+   "x1": 0.2016,
+   "y1": 0.19456,
+   "text": "Leistungen"
+  },
+  {
+   "blockIndex": 5,
+   "page": 1,
+   "x0": 0.2072,
+   "y0": 0.17817,
+   "x1": 0.28449,
+   "y1": 0.19456,
+   "text": "Oktober"
+  },
+  {
+   "blockIndex": 5,
+   "page": 1,
+   "x0": 0.2901,
+   "y0": 0.17817,
+   "x1": 0.33493,
+   "y1": 0.19456,
+   "text": "2026"
+  },
+  {
+   "blockIndex": 6,
+   "page": 1,
+   "x0": 0.09407,
+   "y0": 0.20905,
+   "x1": 0.12955,
+   "y1": 0.22271,
+   "text": "Pos."
+  },
+  {
+   "blockIndex": 7,
+   "page": 1,
+   "x0": 0.16127,
+   "y0": 0.20905,
+   "x1": 0.27328,
+   "y1": 0.22271,
+   "text": "Beschreibung"
+  },
+  {
+   "blockIndex": 8,
+   "page": 1,
+   "x0": 0.55436,
+   "y0": 0.20905,
+   "x1": 0.60756,
+   "y1": 0.22271,
+   "text": "Menge"
+  },
+  {
+   "blockIndex": 9,
+   "page": 1,
+   "x0": 0.68875,
+   "y0": 0.20905,
+   "x1": 0.77745,
+   "y1": 0.22271,
+   "text": "Einzelpreis"
+  },
+  {
+   "blockIndex": 10,
+   "page": 1,
+   "x0": 0.82314,
+   "y0": 0.20905,
+   "x1": 0.87634,
+   "y1": 0.22271,
+   "text": "Betrag"
+  },
+  {
+   "blockIndex": 11,
+   "page": 1,
+   "x0": 0.09407,
+   "y0": 0.23756,
+   "x1": 0.10341,
+   "y1": 0.25122,
+   "text": "1"
+  },
+  {
+   "blockIndex": 12,
+   "page": 1,
+   "x0": 0.16127,
+   "y0": 0.23756,
+   "x1": 0.22944,
+   "y1": 0.25122,
+   "text": "Beratung"
+  },
+  {
+   "blockIndex": 12,
+   "page": 1,
+   "x0": 0.23411,
+   "y0": 0.23756,
+   "x1": 0.3396,
+   "y1": 0.25122,
+   "text": "Strukturierung"
+  },
+  {
+   "blockIndex": 13,
+   "page": 1,
+   "x0": 0.55436,
+   "y0": 0.23756,
+   "x1": 0.5637,
+   "y1": 0.25122,
+   "text": "8"
+  },
+  {
+   "blockIndex": 13,
+   "page": 1,
+   "x0": 0.56837,
+   "y0": 0.23756,
+   "x1": 0.57771,
+   "y1": 0.25122,
+   "text": "h"
+  },
+  {
+   "blockIndex": 14,
+   "page": 1,
+   "x0": 0.68875,
+   "y0": 0.23756,
+   "x1": 0.73078,
+   "y1": 0.25122,
+   "text": "95,00"
+  },
+  {
+   "blockIndex": 14,
+   "page": 1,
+   "x0": 0.73545,
+   "y0": 0.23756,
+   "x1": 0.74479,
+   "y1": 0.25122,
+   "text": "€"
+  },
+  {
+   "blockIndex": 15,
+   "page": 1,
+   "x0": 0.82314,
+   "y0": 0.23756,
+   "x1": 0.87451,
+   "y1": 0.25122,
+   "text": "760,00"
+  },
+  {
+   "blockIndex": 15,
+   "page": 1,
+   "x0": 0.87918,
+   "y0": 0.23756,
+   "x1": 0.88852,
+   "y1": 0.25122,
+   "text": "€"
+  },
+  {
+   "blockIndex": 16,
+   "page": 1,
+   "x0": 0.09407,
+   "y0": 0.26369,
+   "x1": 0.10341,
+   "y1": 0.27735,
+   "text": "2"
+  },
+  {
+   "blockIndex": 17,
+   "page": 1,
+   "x0": 0.16127,
+   "y0": 0.26369,
+   "x1": 0.30507,
+   "y1": 0.27735,
+   "text": "Tabellenerkennung"
+  },
+  {
+   "blockIndex": 17,
+   "page": 1,
+   "x0": 0.30974,
+   "y0": 0.26369,
+   "x1": 0.35363,
+   "y1": 0.27735,
+   "text": "Setup"
+  },
+  {
+   "blockIndex": 18,
+   "page": 1,
+   "x0": 0.55436,
+   "y0": 0.26369,
+   "x1": 0.5637,
+   "y1": 0.27735,
+   "text": "1"
+  },
+  {
+   "blockIndex": 19,
+   "page": 1,
+   "x0": 0.68875,
+   "y0": 0.26369,
+   "x1": 0.74012,
+   "y1": 0.27735,
+   "text": "240,00"
+  },
+  {
+   "blockIndex": 19,
+   "page": 1,
+   "x0": 0.74479,
+   "y0": 0.26369,
+   "x1": 0.75413,
+   "y1": 0.27735,
+   "text": "€"
+  },
+  {
+   "blockIndex": 20,
+   "page": 1,
+   "x0": 0.82314,
+   "y0": 0.26369,
+   "x1": 0.87451,
+   "y1": 0.27735,
+   "text": "240,00"
+  },
+  {
+   "blockIndex": 20,
+   "page": 1,
+   "x0": 0.87918,
+   "y0": 0.26369,
+   "x1": 0.88852,
+   "y1": 0.27735,
+   "text": "€"
+  },
+  {
+   "blockIndex": 21,
+   "page": 1,
+   "x0": 0.09407,
+   "y0": 0.28982,
+   "x1": 0.10341,
+   "y1": 0.30348,
+   "text": "3"
+  },
+  {
+   "blockIndex": 22,
+   "page": 1,
+   "x0": 0.16127,
+   "y0": 0.28982,
+   "x1": 0.2313,
+   "y1": 0.30348,
+   "text": "Schulung"
+  },
+  {
+   "blockIndex": 22,
+   "page": 1,
+   "x0": 0.23597,
+   "y0": 0.28982,
+   "x1": 0.27891,
+   "y1": 0.30348,
+   "text": "Team"
+  },
+  {
+   "blockIndex": 23,
+   "page": 1,
+   "x0": 0.55436,
+   "y0": 0.28982,
+   "x1": 0.5637,
+   "y1": 0.30348,
+   "text": "4"
+  },
+  {
+   "blockIndex": 23,
+   "page": 1,
+   "x0": 0.56837,
+   "y0": 0.28982,
+   "x1": 0.57771,
+   "y1": 0.30348,
+   "text": "h"
+  },
+  {
+   "blockIndex": 24,
+   "page": 1,
+   "x0": 0.68875,
+   "y0": 0.28982,
+   "x1": 0.73078,
+   "y1": 0.30348,
+   "text": "80,00"
+  },
+  {
+   "blockIndex": 24,
+   "page": 1,
+   "x0": 0.73545,
+   "y0": 0.28982,
+   "x1": 0.74479,
+   "y1": 0.30348,
+   "text": "€"
+  },
+  {
+   "blockIndex": 25,
+   "page": 1,
+   "x0": 0.82314,
+   "y0": 0.28982,
+   "x1": 0.87451,
+   "y1": 0.30348,
+   "text": "320,00"
+  },
+  {
+   "blockIndex": 25,
+   "page": 1,
+   "x0": 0.87918,
+   "y0": 0.28982,
+   "x1": 0.88852,
+   "y1": 0.30348,
+   "text": "€"
+  },
+  {
+   "blockIndex": 26,
+   "page": 1,
+   "x0": 0.09407,
+   "y0": 0.31833,
+   "x1": 0.15475,
+   "y1": 0.33199,
+   "text": "Summe"
+  },
+  {
+   "blockIndex": 26,
+   "page": 1,
+   "x0": 0.15942,
+   "y0": 0.31833,
+   "x1": 0.20048,
+   "y1": 0.33199,
+   "text": "netto"
+  },
+  {
+   "blockIndex": 27,
+   "page": 1,
+   "x0": 0.82314,
+   "y0": 0.31833,
+   "x1": 0.88852,
+   "y1": 0.33199,
+   "text": "1.320,00"
+  },
+  {
+   "blockIndex": 27,
+   "page": 1,
+   "x0": 0.89319,
+   "y0": 0.31833,
+   "x1": 0.90253,
+   "y1": 0.33199,
+   "text": "€"
+  },
+  {
+   "blockIndex": 28,
+   "page": 1,
+   "x0": 0.09407,
+   "y0": 0.34446,
+   "x1": 0.12675,
+   "y1": 0.35812,
+   "text": "USt."
+  },
+  {
+   "blockIndex": 28,
+   "page": 1,
+   "x0": 0.13142,
+   "y0": 0.34446,
+   "x1": 0.1501,
+   "y1": 0.35812,
+   "text": "19"
+  },
+  {
+   "blockIndex": 28,
+   "page": 1,
+   "x0": 0.15477,
+   "y0": 0.34446,
+   "x1": 0.1697,
+   "y1": 0.35812,
+   "text": "%"
+  },
+  {
+   "blockIndex": 29,
+   "page": 1,
+   "x0": 0.82314,
+   "y0": 0.34446,
+   "x1": 0.87451,
+   "y1": 0.35812,
+   "text": "250,80"
+  },
+  {
+   "blockIndex": 29,
+   "page": 1,
+   "x0": 0.87918,
+   "y0": 0.34446,
+   "x1": 0.88852,
+   "y1": 0.35812,
+   "text": "€"
+  },
+  {
+   "blockIndex": 30,
+   "page": 1,
+   "x0": 0.09407,
+   "y0": 0.37059,
+   "x1": 0.20703,
+   "y1": 0.38425,
+   "text": "Gesamtbetrag"
+  },
+  {
+   "blockIndex": 31,
+   "page": 1,
+   "x0": 0.82314,
+   "y0": 0.37059,
+   "x1": 0.88852,
+   "y1": 0.38425,
+   "text": "1.570,80"
+  },
+  {
+   "blockIndex": 31,
+   "page": 1,
+   "x0": 0.89319,
+   "y0": 0.37059,
+   "x1": 0.90253,
+   "y1": 0.38425,
+   "text": "€"
+  },
+  {
+   "blockIndex": 32,
+   "page": 1,
+   "x0": 0.09407,
+   "y0": 0.42286,
+   "x1": 0.14533,
+   "y1": 0.43515,
+   "text": "Zahlbar"
+  },
+  {
+   "blockIndex": 32,
+   "page": 1,
+   "x0": 0.14953,
+   "y0": 0.42286,
+   "x1": 0.21171,
+   "y1": 0.43515,
+   "text": "innerhalb"
+  },
+  {
+   "blockIndex": 32,
+   "page": 1,
+   "x0": 0.21592,
+   "y0": 0.42286,
+   "x1": 0.24029,
+   "y1": 0.43515,
+   "text": "von"
+  },
+  {
+   "blockIndex": 32,
+   "page": 1,
+   "x0": 0.24449,
+   "y0": 0.42286,
+   "x1": 0.2613,
+   "y1": 0.43515,
+   "text": "14"
+  },
+  {
+   "blockIndex": 32,
+   "page": 1,
+   "x0": 0.26551,
+   "y0": 0.42286,
+   "x1": 0.30837,
+   "y1": 0.43515,
+   "text": "Tagen"
+  },
+  {
+   "blockIndex": 32,
+   "page": 1,
+   "x0": 0.31257,
+   "y0": 0.42286,
+   "x1": 0.3462,
+   "y1": 0.43515,
+   "text": "ohne"
+  },
+  {
+   "blockIndex": 32,
+   "page": 1,
+   "x0": 0.3504,
+   "y0": 0.42286,
+   "x1": 0.39747,
+   "y1": 0.43515,
+   "text": "Abzug."
+  },
+  {
+   "blockIndex": 33,
+   "page": 1,
+   "x0": 0.09407,
+   "y0": 0.95024,
+   "x1": 0.17773,
+   "y1": 0.96117,
+   "text": "Synthetisches"
+  },
+  {
+   "blockIndex": 33,
+   "page": 1,
+   "x0": 0.18147,
+   "y0": 0.95024,
+   "x1": 0.27035,
+   "y1": 0.96117,
+   "text": "Testdokument,"
+  },
+  {
+   "blockIndex": 33,
+   "page": 1,
+   "x0": 0.27409,
+   "y0": 0.95024,
+   "x1": 0.30621,
+   "y1": 0.96117,
+   "text": "keine"
+  },
+  {
+   "blockIndex": 33,
+   "page": 1,
+   "x0": 0.30994,
+   "y0": 0.95024,
+   "x1": 0.35029,
+   "y1": 0.96117,
+   "text": "echten"
+  },
+  {
+   "blockIndex": 33,
+   "page": 1,
+   "x0": 0.35402,
+   "y0": 0.95024,
+   "x1": 0.39362,
+   "y1": 0.96117,
+   "text": "Daten."
+  }
+ ],
+ "tableRegion": {
+  "x0": 0.08735,
+  "y0": 0.2043,
+  "x1": 0.92058,
+  "y1": 0.38722,
+  "table": {
+   "tableType": "other",
+   "headerRows": 1,
+   "headerCols": 0,
+   "rules": [
+    {
+     "axis": "row",
+     "ord": 0,
+     "pos": 0.2043
+    },
+    {
+     "axis": "row",
+     "ord": 1,
+     "pos": 0.23281
+    },
+    {
+     "axis": "row",
+     "ord": 2,
+     "pos": 0.25894
+    },
+    {
+     "axis": "row",
+     "ord": 3,
+     "pos": 0.28507
+    },
+    {
+     "axis": "row",
+     "ord": 4,
+     "pos": 0.3112
+    },
+    {
+     "axis": "row",
+     "ord": 5,
+     "pos": 0.33971
+    },
+    {
+     "axis": "row",
+     "ord": 6,
+     "pos": 0.36584
+    },
+    {
+     "axis": "row",
+     "ord": 7,
+     "pos": 0.38722
+    },
+    {
+     "axis": "col",
+     "ord": 0,
+     "pos": 0.08735
+    },
+    {
+     "axis": "col",
+     "ord": 1,
+     "pos": 0.15455
+    },
+    {
+     "axis": "col",
+     "ord": 2,
+     "pos": 0.54764
+    },
+    {
+     "axis": "col",
+     "ord": 3,
+     "pos": 0.68203
+    },
+    {
+     "axis": "col",
+     "ord": 4,
+     "pos": 0.81642
+    },
+    {
+     "axis": "col",
+     "ord": 5,
+     "pos": 0.92058
+    }
+   ],
+   "merges": [],
+   "cells": [
+    {
+     "row": 0,
+     "col": 0,
+     "text": "Pos."
+    },
+    {
+     "row": 0,
+     "col": 1,
+     "text": "Beschreibung"
+    },
+    {
+     "row": 0,
+     "col": 2,
+     "text": "Menge"
+    },
+    {
+     "row": 0,
+     "col": 3,
+     "text": "Einzelpreis"
+    },
+    {
+     "row": 0,
+     "col": 4,
+     "text": "Betrag"
+    },
+    {
+     "row": 1,
+     "col": 0,
+     "text": "1"
+    },
+    {
+     "row": 1,
+     "col": 1,
+     "text": "Beratung Strukturierung"
+    },
+    {
+     "row": 1,
+     "col": 2,
+     "text": "8 h"
+    },
+    {
+     "row": 1,
+     "col": 3,
+     "text": "95,00 €"
+    },
+    {
+     "row": 1,
+     "col": 4,
+     "text": "760,00 €"
+    },
+    {
+     "row": 2,
+     "col": 0,
+     "text": "2"
+    },
+    {
+     "row": 2,
+     "col": 1,
+     "text": "Tabellenerkennung Setup"
+    },
+    {
+     "row": 2,
+     "col": 2,
+     "text": "1"
+    },
+    {
+     "row": 2,
+     "col": 3,
+     "text": "240,00 €"
+    },
+    {
+     "row": 2,
+     "col": 4,
+     "text": "240,00 €"
+    },
+    {
+     "row": 3,
+     "col": 0,
+     "text": "3"
+    },
+    {
+     "row": 3,
+     "col": 1,
+     "text": "Schulung Team"
+    },
+    {
+     "row": 3,
+     "col": 2,
+     "text": "4 h"
+    },
+    {
+     "row": 3,
+     "col": 3,
+     "text": "80,00 €"
+    },
+    {
+     "row": 3,
+     "col": 4,
+     "text": "320,00 €"
+    },
+    {
+     "row": 4,
+     "col": 0,
+     "text": "Summe netto"
+    },
+    {
+     "row": 4,
+     "col": 1,
+     "text": ""
+    },
+    {
+     "row": 4,
+     "col": 2,
+     "text": ""
+    },
+    {
+     "row": 4,
+     "col": 3,
+     "text": ""
+    },
+    {
+     "row": 4,
+     "col": 4,
+     "text": "1.320,00 €"
+    },
+    {
+     "row": 5,
+     "col": 0,
+     "text": "USt. 19 %"
+    },
+    {
+     "row": 5,
+     "col": 1,
+     "text": ""
+    },
+    {
+     "row": 5,
+     "col": 2,
+     "text": ""
+    },
+    {
+     "row": 5,
+     "col": 3,
+     "text": ""
+    },
+    {
+     "row": 5,
+     "col": 4,
+     "text": "250,80 €"
+    },
+    {
+     "row": 6,
+     "col": 0,
+     "text": "Gesamtbetrag"
+    },
+    {
+     "row": 6,
+     "col": 1,
+     "text": ""
+    },
+    {
+     "row": 6,
+     "col": 2,
+     "text": ""
+    },
+    {
+     "row": 6,
+     "col": 3,
+     "text": ""
+    },
+    {
+     "row": 6,
+     "col": 4,
+     "text": "1.570,80 €"
+    }
+   ]
+  }
+ }
+}

@@ -41,6 +41,7 @@ import {
   flattenDocumentPages,
   useDocumentsInfiniteQuery,
 } from '../../lib/documents/useDocumentsInfiniteQuery';
+import { downloadBlob, fieldValuesExportFilename } from '../../lib/downloadBlob';
 import { documentListQueryWithFieldFilters, patchFieldFilter } from '../../lib/libraryFieldFilters';
 import {
   type LibraryFilterMode,
@@ -582,16 +583,7 @@ export function useLibraryPageData(mode: 'all' | 'folder' | 'unassigned' | 'ordn
           listFilters ?? {},
           selectedIds.length > 0 ? selectedIds : undefined
         );
-        const url = URL.createObjectURL(blob);
-        const anchor = document.createElement('a');
-        const stamp = new Date().toISOString().slice(0, 10);
-        anchor.href = url;
-        anchor.download = `docuvate-field-values-${stamp}.${format}`;
-        anchor.rel = 'noopener';
-        document.body.appendChild(anchor);
-        anchor.click();
-        anchor.remove();
-        URL.revokeObjectURL(url);
+        downloadBlob(blob, fieldValuesExportFilename(format));
         pushSuccess(t('library.exportFieldValuesDone'));
       } catch (err) {
         setError(formatUserFacingError(err, 'library.exportFieldValuesFailed'));

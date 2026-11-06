@@ -10,7 +10,7 @@ import type {
   LayoutToken,
   TableCorrectionOp,
 } from '@docuvate/contracts';
-import { remapRegionTokens } from '@docuvate/contracts';
+import { isTableRowRole, isTableRuleLine, remapRegionTokens } from '@docuvate/contracts';
 import { Inject, Injectable } from '@nestjs/common';
 import type { Pool, PoolClient } from 'pg';
 
@@ -185,7 +185,8 @@ async function loadTableSatellites(
     return map;
   }
   const heads = await client.query(
-    `SELECT region_id, table_type, header_rows, header_cols
+    `SELECT region_id, table_type, header_rows, header_cols, footer_rows, trailing_header_cols,
+            banded
      FROM document_region_tables
      WHERE region_id = ANY($1::uuid[])`,
     [regionIds]
@@ -198,14 +199,18 @@ async function loadTableSatellites(
     map.set(parseString(row.region_id), {
       tableType: parseTableType(row.table_type),
       headerRows: parseNumber(row.header_rows, 0),
+      footerRows: parseNumber(row.footer_rows, 0),
       headerCols: parseNumber(row.header_cols, 0),
+      trailingHeaderCols: parseNumber(row.trailing_header_cols, 0),
+      banded: row.banded === true,
+      rowRoles: [],
       rules: [],
       merges: [],
       cells: [],
     });
   }
   const rules = await client.query(
-    `SELECT region_id, axis, ord, pos
+    `SELECT region_id, axis, ord, pos, line
      FROM document_region_table_rules
      WHERE region_id = ANY($1::uuid[])
      ORDER BY region_id, axis, ord`,
@@ -225,7 +230,23 @@ async function loadTableSatellites(
       axis: axisRaw === 'col' ? 'col' : 'row',
       ord: parseNumber(row.ord, 0),
       pos: parseNumber(row.pos),
+      line: isTableRuleLine(row.line) ? row.line : 'unknown',
     });
+  }
+  const roles = await client.query(
+    `SELECT region_id, row, role
+     FROM document_region_table_row_roles
+     WHERE region_id = ANY($1::uuid[])
+     ORDER BY region_id, row`,
+    [regionIds]
+  );
+  for (const raw of roles.rows) {
+    const row = recordFromUnknown(raw);
+    const table = row ? map.get(parseString(row.region_id)) : undefined;
+    if (!row || !table || !isTableRowRole(row.role)) {
+      continue;
+    }
+    table.rowRoles.push({ row: parseNumber(row.row, 0), role: row.role });
   }
   const cells = await client.query(
     `SELECT region_id, row, col, text
@@ -506,15 +527,32 @@ export class PgDocumentRegionRepository implements DocumentRegionRepository {
       }
       if (input.table) {
         await client.query(
-          `INSERT INTO document_region_tables (region_id, table_type, header_rows, header_cols)
-           VALUES ($1, $2, $3, $4)`,
-          [input.id, input.table.tableType, input.table.headerRows, input.table.headerCols]
+          `INSERT INTO document_region_tables
+             (region_id, table_type, header_rows, header_cols, footer_rows, trailing_header_cols,
+              banded)
+           VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+          [
+            input.id,
+            input.table.tableType,
+            input.table.headerRows,
+            input.table.headerCols,
+            input.table.footerRows,
+            input.table.trailingHeaderCols,
+            input.table.banded,
+          ]
         );
         for (const rule of input.table.rules) {
           await client.query(
-            `INSERT INTO document_region_table_rules (region_id, axis, ord, pos)
-             VALUES ($1, $2, $3, $4)`,
-            [input.id, rule.axis, rule.ord, rule.pos]
+            `INSERT INTO document_region_table_rules (region_id, axis, ord, pos, line)
+             VALUES ($1, $2, $3, $4, $5)`,
+            [input.id, rule.axis, rule.ord, rule.pos, rule.line]
+          );
+        }
+        for (const entry of input.table.rowRoles) {
+          await client.query(
+            `INSERT INTO document_region_table_row_roles (region_id, row, role)
+             VALUES ($1, $2, $3)`,
+            [input.id, entry.row, entry.role]
           );
         }
         for (const cell of input.table.cells) {

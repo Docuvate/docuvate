@@ -68,6 +68,7 @@ const FORWARD_SQL_ORDER = [
   'extraction-field-feedback-positions-up.sql',
   'job-outbox-up.sql',
   'document-field-values-user-confirmed-up.sql',
+  'document-region-table-structure-up.sql',
 ];
 
 function loadForwardMigrationSql(): string {

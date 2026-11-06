@@ -8,9 +8,12 @@
     "folders": "Folders",
     "correspondents": "Correspondents",
     "settings": "Settings",
-    "collapseSidebar": "Collapse navigation",
-    "expandSidebar": "Expand navigation",
-    "home": "Start"
+    "home": "Start",
+    "allDocuments": "All documents",
+    "review": "Review",
+    "duplicates": "Duplicates",
+    "manageViews": "Manage views",
+    "unassigned": "Without folder"
   },
   "shell": {
     "globalSearch": "Global search",
@@ -766,12 +769,11 @@
     "extractedTextCopyPlain": "Copy as text",
     "layoutZoomAria": "Layout zoom",
     "layoutZoomPercent": "{{value}}%",
-    "layoutViewModeAria": "View mode",
     "layoutPaneDocument": "Document",
     "layoutPanePanel": "Fields",
     "layoutPaneAria": "Choose view",
     "layoutViewOriginal": "Original",
-    "layoutViewText": "Text",
+    "layoutViewText": "Recognised text",
     "layoutViewReconstruction": "Reconstruction",
     "layoutViewCompare": "Compare",
     "layoutTabOverview": "Overview",
@@ -816,7 +818,7 @@
     "layoutCompareSliderAria": "Slider between original and reconstruction",
     "layoutCompareOriginalAlt": "Original, page {{page}}",
     "layoutCompareReconstructionAlt": "Reconstruction, page {{page}}",
-    "layoutOverlayToggle": "Layout overlay",
+    "layoutOverlayToggle": "Show recognised regions",
     "pdfRotateClockwise": "Rotate clockwise",
     "layoutTextEdit": "Text",
     "layoutTextEditDone": "Done",
@@ -870,10 +872,10 @@
     "layoutOverlayKind.field": "Field",
     "layoutOverlayKind.table": "Table",
     "layoutOverlayKind.text": "Text",
-    "selectionToolsAria": "Page selection tools",
-    "selectionToolNone": "Select",
-    "selectionToolText": "Text (T)",
-    "selectionToolRect": "Rectangle (R)",
+    "selectionToolsAria": "Mark on the page",
+    "selectionToolNone": "Pointer",
+    "selectionToolText": "Mark text",
+    "selectionToolRect": "Area",
     "selectionEmptyValue": "No words in this selection yet",
     "selectionTokenCount": "{{count}} words",
     "selectionFieldKeyAria": "Field for this selection",
@@ -1002,7 +1004,18 @@
     "layoutFieldsFilterAria": "Filter recognized fields",
     "layoutFieldsFilterEmpty": "No field matches “{{query}}”.",
     "fieldMarkHint": "Drag a box around the value for “{{name}}” on the document.",
-    "fieldMarkHintCancel": "Cancel marking"
+    "fieldMarkHintCancel": "Cancel marking",
+    "tableMergesInvalid": "Merged cells do not fit the table (outside the grid or overlapping).",
+    "tableStructureInvalid": "Header, footer, index columns or row roles do not fit the table.",
+    "downloadOriginal": "Download original",
+    "tabFields": "Fields",
+    "inspectorClose": "Close inspector",
+    "selectionToolHint": {
+      "none": "Click a recognised value to review it.",
+      "text": "Sweep over text on the page and assign it to a field.",
+      "rect": "Drag an area: capture it as a field, table or section."
+    },
+    "layoutViewMenuAria": "View: {{view}}"
   },
   "settings": {
     "title": "Settings",
@@ -1982,7 +1995,7 @@
     "visibilityLabel": "Visibility",
     "visibilityPrivate": "Private",
     "visibilityShared": "Shared with everyone",
-    "pinSidebar": "Pin to sidebar",
+    "pinSidebar": "Pin to navigation",
     "sidebarGroup": "Saved views",
     "sidebarGroupShort": "Saved",
     "manageSettingsAria": "Manage saved views",
@@ -1991,7 +2004,7 @@
     "manageLead": "Your private views and views shared with everyone on this installation.",
     "openLibrary": "Open documents",
     "rename": "Rename",
-    "unpin": "Unpin from sidebar",
+    "unpin": "Unpin from navigation",
     "deleteTitle": "Delete saved view?",
     "deleteLead": "“{{name}}” will be removed for everyone who could see it.",
     "updateFromFilters": "Update view with current filters",
@@ -2325,5 +2338,264 @@
     "sectionFrequent": "Frequent",
     "sectionAll": "All",
     "empty": "No matches"
+  },
+  "pipeline": {
+    "railAria": "Structuring pipeline",
+    "stage": {
+      "upload": "Upload",
+      "structure": "Recognize",
+      "review": "Structure",
+      "record": "Records"
+    },
+    "stageHint": {
+      "upload": "PDFs, scans and photos via upload or an import source",
+      "structure": "Text recognition, layout and fields, automatic",
+      "review": "Keep refining labels, fields, layout and text",
+      "record": "Searchable and usable; export when needed"
+    },
+    "stepStatus": {
+      "done": "done",
+      "current": "current step",
+      "error": "failed",
+      "todo": "pending"
+    },
+    "state": {
+      "intake": "Waiting",
+      "structuring": "Being read",
+      "failed": "Failed",
+      "review": "Suggestions open",
+      "structured": "Recognized"
+    },
+    "rail": {
+      "waiting_one": "{{count}} waiting",
+      "waiting_other": "{{count}} waiting",
+      "waitingNone": "Queue is empty",
+      "structuring_one": "{{count}} in progress",
+      "structuring_other": "{{count}} in progress",
+      "structuringNone": "Nothing in progress",
+      "failed_one": "{{count}} failed",
+      "failed_other": "{{count}} failed",
+      "review_one": "{{count}} document open",
+      "review_other": "{{count}} documents open",
+      "reviewNone": "All reviewed",
+      "ready_one": "{{count}} document on record",
+      "ready_other": "{{count}} documents on record",
+      "readyNone": "No records yet"
+    },
+    "hub": {
+      "eyebrow": "Structure documents",
+      "title": "Turn documents into data.",
+      "lead": "Upload documents. Docuvate recognizes text, fields and labels, you confirm in one click, and every document stays searchable as a structured record.",
+      "importSources": "Connect an import source",
+      "openReview": "Start review",
+      "progressTitle": "Progress",
+      "progressLead": "{{ready}} of {{total}} documents read",
+      "workspaceTitle": "Your overview",
+      "loadError": "The overview could not be loaded.",
+      "retry": "Try again"
+    },
+    "tasks": {
+      "title": "Next steps",
+      "lead": "What needs your decision, most important first.",
+      "empty": "Everything is structured. New tasks show up here as soon as documents need your decision.",
+      "review": {
+        "title_one": "Review {{count}} document",
+        "title_other": "Review {{count}} documents",
+        "text": "Accept or correct suggested labels and fields.",
+        "action": "Review"
+      },
+      "failed": {
+        "title_one": "{{count}} document failed",
+        "title_other": "{{count}} documents failed",
+        "text": "Restart text recognition or replace the file.",
+        "action": "Fix"
+      },
+      "unlabeled": {
+        "title_one": "{{count}} document without a label",
+        "title_other": "{{count}} documents without a label",
+        "text": "Without a label the document is missing from views and filters.",
+        "action": "Add labels"
+      },
+      "structuring": {
+        "title_one": "{{count}} document is being structured",
+        "title_other": "{{count}} documents are being structured",
+        "text": "Runs automatically, nothing to do.",
+        "action": "View"
+      },
+      "waiting": {
+        "title_one": "{{count}} document in the queue",
+        "title_other": "{{count}} documents in the queue",
+        "text": "Structuring starts automatically.",
+        "action": "View"
+      }
+    },
+    "library": {
+      "lead": "Filter by status, structure and keep using each document as a record.",
+      "tabsAria": "Filter by status",
+      "tab": {
+        "all": "All",
+        "review": "Suggestions",
+        "unlabeled": "No label",
+        "structuring": "Being read",
+        "failed": "Failed",
+        "ready": "Records"
+      },
+      "intakeTitle": "New documents",
+      "importSources": "Import sources",
+      "export": "Export",
+      "exportMenuAria": "Export field values",
+      "exportScopeSelected_one": "Field values of {{count}} selected document",
+      "exportScopeSelected_other": "Field values of {{count}} selected documents",
+      "exportScopeFiltered": "Field values of all documents in this view",
+      "exportCsv": "CSV for spreadsheets",
+      "exportJson": "JSON for integrations"
+    },
+    "viewer": {
+      "trackAria": "Progress of this document",
+      "nextLabel": "Next step",
+      "wait": {
+        "title": "Being structured",
+        "text": "Text recognition and fields run automatically. Afterwards the document appears under “To review”."
+      },
+      "retry": {
+        "title": "Structuring failed",
+        "action": "Reprocess"
+      },
+      "review": {
+        "title": "Review and confirm",
+        "fields_one": "{{count}} field with low confidence.",
+        "fields_other": "{{count}} fields with low confidence.",
+        "labels_one": "{{count}} label suggestion waiting.",
+        "labels_other": "{{count}} label suggestions waiting.",
+        "inbox": "The document is still in the inbox.",
+        "fieldsAction": "Review fields",
+        "labelsAction": "Review labels",
+        "queueAction": "Open in review queue"
+      },
+      "export": {
+        "csv": "Export as CSV",
+        "json": "Export as JSON",
+        "busy": "Exporting…",
+        "menu": "Export field values"
+      }
+    },
+    "workbench": {
+      "title": "Structure",
+      "open_one": "{{count}} open",
+      "open_other": "{{count}} open",
+      "done": "Nothing open",
+      "progressAria": "Reviewed values",
+      "acceptSafe_one": "Accept {{count}} safe value",
+      "acceptSafe_other": "Accept {{count}} safe values",
+      "next": "Next document",
+      "labels": "Label suggestions",
+      "empty": "No fields were recognized for this document. You can add fields under “Details”.",
+      "listAria": "Recognized values",
+      "state": {
+        "confirmed": "Confirmed",
+        "suggested": "Suggestion",
+        "review": "Open"
+      },
+      "confidence": "{{percent}}%",
+      "accept": "Accept {{field}}",
+      "correct": "Correct {{field}}",
+      "reassign": "{{field}}: assign value to another field",
+      "editAria": "New value for {{field}}",
+      "save": "Save",
+      "reassignPlaceholder": "Belongs to field …",
+      "reassignAria": "Other field for the value of {{field}}",
+      "keys": "Keyboard: ↑ ↓ select · Enter accept · E correct · F other field · N next document",
+      "overwrite": "{{field}} already holds the confirmed value “{{value}}”. Overwrite it?",
+      "overwriteConfirm": "Overwrite",
+      "sideAria": "Review and details",
+      "acceptedToast_one": "{{count}} value accepted",
+      "acceptedToast_other": "{{count}} values accepted",
+      "correctedToast": "Correction saved",
+      "reassignedToast": "Value moved to {{field}}"
+    },
+    "aspects": {
+      "aria": "Structuring status",
+      "name": {
+        "ocr": "Text",
+        "labels": "Labels",
+        "layout": "Layout",
+        "fields": "Fields"
+      },
+      "state": {
+        "pending": "not processed",
+        "processing": "being read",
+        "failed": "failed",
+        "open": "open",
+        "no_open_items": "nothing open",
+        "confirmed": "confirmed",
+        "unavailable": "not available",
+        "unknown": "unknown"
+      },
+      "openCount_one": "{{count}} open",
+      "openCount_other": "{{count}} open",
+      "itemAria": "{{aspect}}: {{state}}"
+    }
+  },
+  "tableLayouts": {
+    "apply": "Apply",
+    "families": {
+      "simple": "Simple table",
+      "matrix": "Matrix",
+      "nested": "Multi-level header",
+      "financial": "Financial layout",
+      "grouped": "Sections with subtotals",
+      "key_value": "Key and value"
+    },
+    "footerRows": "Result rows",
+    "index": "Index column",
+    "indexOptions": {
+      "none": "None",
+      "left": "Left",
+      "right": "Right",
+      "both": "Both sides"
+    },
+    "ruling": "Lines",
+    "rulingOptions": {
+      "grid": "Grid",
+      "accounting": "Accounting",
+      "horizontal": "Horizontal",
+      "none": "None",
+      "keep": "As detected"
+    },
+    "grouped": "Sections and subtotals",
+    "banded": "Zebra rows",
+    "applied": "Table layout applied",
+    "discard": "Discard",
+    "draft": "Draft",
+    "toolbarAria": "Structure of table {{n}}",
+    "template": "Template",
+    "appearance": "Appearance",
+    "less": "Fewer",
+    "more": "More",
+    "mergeCells": "Merge cells",
+    "splitCells": "Split cells",
+    "directHint": "Pick a row's kind at its left edge. To merge, click a cell, then Shift+click (or Shift+Alt+Arrow) a second one.",
+    "rowKinds": {
+      "header": "Header",
+      "data": "Data",
+      "section": "Section",
+      "subtotal": "Subtotal",
+      "footer": "Result"
+    },
+    "rowKindAria": "Kind of row {{row}}"
+  },
+  "ribbon": {
+    "stock": "Records",
+    "views": "Pinned",
+    "area": "Area",
+    "structure": "Structure",
+    "capture": "Capture",
+    "display": "Display",
+    "output": "Output",
+    "work": "Work",
+    "review": "Review",
+    "inspector": "Inspector",
+    "autoImport": "Auto-import",
+    "autoImportHint": "Set up connections that import documents automatically: mailbox, scanner/SFTP or Paperless-ngx"
   }
 }

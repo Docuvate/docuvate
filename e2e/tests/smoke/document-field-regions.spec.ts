@@ -64,15 +64,16 @@ async function applyGermanLocale(page: Page): Promise<void> {
 
 async function setLabelsTabOpen(page: Page, open: boolean): Promise<void> {
   const labels = page.getByRole('tab', { name: /^Labels/i });
-  const selected = (await labels.getAttribute('aria-selected')) === 'true';
-  if (open === selected) {
-    return;
-  }
-  if (open) {
-    await labels.click({ force: true });
-    return;
-  }
-  await page.getByRole('tab', { name: /^Details/i }).click({ force: true });
+  const target = open ? labels : page.getByRole('tab', { name: /^Details/i });
+  // Activate by keyboard: a toast or the bottom sheet can sit over the tab strip on phones,
+  // and a forced pointer click would land on that overlay instead.
+  await expect(async () => {
+    if ((await target.getAttribute('aria-selected')) !== 'true') {
+      await target.focus();
+      await page.keyboard.press('Enter');
+    }
+    await expect(target).toHaveAttribute('aria-selected', 'true', { timeout: 2_000 });
+  }).toPass({ timeout: 30_000 });
 }
 
 async function openFieldCorrectionSheet(page: Page): Promise<void> {
@@ -301,7 +302,7 @@ test.describe('document field regions', () => {
       /^(?!0$)\d+$/,
       { timeout: 60_000 }
     );
-    await page.getByRole('radio', { name: /Rechteck|Rectangle/i }).click();
+    await page.getByRole('radio', { name: /^(Bereich|Area)/ }).click();
     await startRectangle(page);
     await expect(page.getByTestId('document-selection-rect')).toBeVisible({ timeout: 15_000 });
     await captureLoadedScreenshot(
@@ -411,7 +412,7 @@ test.describe('document field regions', () => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await applyGermanLocale(page);
     await openLayoutDocumentPage(page, layoutDocId);
-    await page.getByRole('radio', { name: /Text \(T\)/i }).click();
+    await page.getByRole('radio', { name: /^(Text markieren|Mark text)/ }).click();
     const word = page.locator('.pdf-page-wrap .textLayer span').first();
     await expect(word).toBeVisible({ timeout: 60_000 });
     await word.evaluate((node) => {

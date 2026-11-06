@@ -65,8 +65,6 @@ interface LibraryDocumentTableProps {
   onLoadMore?: () => void;
   listScrollStorageKey?: string;
   showDocumentOwnerLine?: boolean;
-  onRequeueDocument?: (documentId: string) => void;
-  requeueBusyIds?: ReadonlySet<string>;
 }
 
 function showColumn(
@@ -97,8 +95,6 @@ export function LibraryDocumentTable({
   onLoadMore,
   listScrollStorageKey,
   showDocumentOwnerLine = false,
-  onRequeueDocument,
-  requeueBusyIds,
 }: LibraryDocumentTableProps) {
   const { t, i18n } = useTranslation();
   const dateLocale = i18n.language.startsWith('de') ? 'de-DE' : 'en-US';
@@ -314,7 +310,7 @@ export function LibraryDocumentTable({
       );
     }
     if (showStatusCol) {
-      columns.push('5.5rem');
+      columns.push('7.75rem');
     }
     if (showDateCol) {
       columns.push('6.5rem');
@@ -579,14 +575,6 @@ export function LibraryDocumentTable({
                             doc={doc}
                             pendingReview={doc.duplicateStack?.pendingReview === true}
                             pendingReviewLabel={t('library.reviewPending')}
-                            requeueBusy={requeueBusyIds?.has(doc.id) === true}
-                            onRequeue={
-                              onRequeueDocument
-                                ? () => {
-                                    onRequeueDocument(doc.id);
-                                  }
-                                : undefined
-                            }
                           />
                           {hasStack ? (
                             <>
@@ -861,14 +849,6 @@ export function LibraryDocumentTable({
                               doc={doc}
                               pendingReview={false}
                               pendingReviewLabel={t('library.reviewPending')}
-                              requeueBusy={requeueBusyIds?.has(doc.id) === true}
-                              onRequeue={
-                                onRequeueDocument
-                                  ? () => {
-                                      onRequeueDocument(doc.id);
-                                    }
-                                  : undefined
-                              }
                             />
                           </div>
                         ) : null}
@@ -896,14 +876,6 @@ export function LibraryDocumentTable({
                             pendingReview={doc.duplicateStack?.pendingReview === true}
                             pendingReviewLabel={t('library.reviewPending')}
                             pendingReviewTooltip={t('library.reviewPendingTooltip')}
-                            requeueBusy={requeueBusyIds?.has(doc.id) === true}
-                            onRequeue={
-                              onRequeueDocument
-                                ? () => {
-                                    onRequeueDocument(doc.id);
-                                  }
-                                : undefined
-                            }
                             failureTitle={
                               doc.status === 'failed' ? extractionFailureMessage(doc) : undefined
                             }

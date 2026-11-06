@@ -92,16 +92,19 @@ test.describe('document list toolbar at small widths', () => {
       await page.setViewportSize(viewport);
       await openLibrary(page);
 
-      const header = page.locator('.library-page-header');
-      const savedViews = header.getByRole('button', { name: /Gespeicherte Ansichten/ });
-      const viewSwitcher = header.getByRole('radiogroup');
-      const sort = header.locator('.library-toolbar-sort');
-      await expectInViewport(page, header.locator('h1'));
-      await expectInViewport(page, savedViews);
+      // Screen actions sit in one swipeable ribbon row under the area nav.
+      const ribbon = page.getByTestId('app-ribbon');
+      const savedViews = ribbon.getByRole('button', { name: /Gespeicherte Ansichten/ });
+      const viewSwitcher = ribbon.getByRole('radiogroup');
+      const sort = ribbon.locator('.library-toolbar-sort');
+      await expectInViewport(page, page.locator('.library-page-header h1'));
       await expectInViewport(page, viewSwitcher);
-      await expectInViewport(page, sort);
-      await expectSameRow(header.locator('h1'), savedViews);
       await expectSameRow(viewSwitcher, sort);
+      await expectSameRow(viewSwitcher, ribbon.getByRole('button', { name: 'Hochladen' }));
+      await sort.scrollIntoViewIfNeeded();
+      await expectInViewport(page, sort);
+      await savedViews.scrollIntoViewIfNeeded();
+      await expectInViewport(page, savedViews);
       for (const option of await viewSwitcher.getByRole('radio').all()) {
         const fits = await option.evaluate((el) => el.scrollWidth <= el.clientWidth + 1);
         expect(fits, 'view mode label is not clipped').toBe(true);
@@ -138,7 +141,7 @@ test.describe('document list toolbar at small widths', () => {
 
       // No drag and drop on phones: the upload button opens the file picker directly.
       const chooser = page.waitForEvent('filechooser');
-      await page.locator('.upload-compact-bar').getByRole('button', { name: 'Hochladen' }).click();
+      await ribbon.getByRole('button', { name: 'Hochladen' }).click();
       expect((await chooser).isMultiple()).toBe(true);
     });
   }
@@ -153,19 +156,20 @@ test.describe('document list toolbar at small widths', () => {
     await expectSameRow(search, page.locator('button.library-filter-toggle'));
     await expectSameRow(search, page.locator('.library-list-search button[type="submit"]'));
     await expectSameRow(
-      page.locator('.library-page-header .library-saved-views-trigger'),
-      page.locator('.library-page-header .library-toolbar-sort')
+      page.locator('.app-ribbon .library-saved-views-trigger'),
+      page.locator('.app-ribbon .library-toolbar-sort')
     );
     await assertNoHorizontalOverflow(page);
   });
 
-  test('desktop keeps labelled saved-view menu (1280)', async ({ page }) => {
-    await page.setViewportSize({ width: 1280, height: 900 });
+  test('desktop keeps labelled saved-view menu (1440)', async ({ page }) => {
+    // Below 1440px view controls collapse to icon + chevron; the accessible name stays.
+    await page.setViewportSize({ width: 1440, height: 900 });
     await openLibrary(page);
     await expect(page.locator('.library-saved-views-trigger-label')).toBeVisible();
     await expect(page.getByTestId('library-filter-panel')).toBeVisible();
     await page
-      .locator('.library-page-header')
+      .getByTestId('app-ribbon')
       .getByRole('button', { name: /Gespeicherte Ansichten/ })
       .click();
     await page.getByRole('menuitem', { name: /^Gespeicherte Ansichten$/ }).click();

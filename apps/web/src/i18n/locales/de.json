@@ -8,9 +8,12 @@
     "folders": "Ordner",
     "correspondents": "Korrespondenten",
     "settings": "Einstellungen",
-    "collapseSidebar": "Navigation einklappen",
-    "expandSidebar": "Navigation ausklappen",
-    "home": "Start"
+    "home": "Start",
+    "allDocuments": "Alle Dokumente",
+    "review": "Prüfen",
+    "duplicates": "Duplikate",
+    "manageViews": "Ansichten verwalten",
+    "unassigned": "Ohne Ordner"
   },
   "shell": {
     "globalSearch": "Globale Suche",
@@ -766,12 +769,11 @@
     "extractedTextCopyPlain": "Als Text kopieren",
     "layoutZoomAria": "Layout-Zoom",
     "layoutZoomPercent": "{{value}} %",
-    "layoutViewModeAria": "Ansichtsmodus",
     "layoutPaneDocument": "Dokument",
     "layoutPanePanel": "Felder",
     "layoutPaneAria": "Ansicht wählen",
     "layoutViewOriginal": "Original",
-    "layoutViewText": "Text",
+    "layoutViewText": "Erkannter Text",
     "layoutViewReconstruction": "Nachbau",
     "layoutViewCompare": "Vergleich",
     "layoutTabOverview": "Übersicht",
@@ -816,7 +818,7 @@
     "layoutCompareSliderAria": "Schieberegler zwischen Original und Nachbau",
     "layoutCompareOriginalAlt": "Original, Seite {{page}}",
     "layoutCompareReconstructionAlt": "Nachbau, Seite {{page}}",
-    "layoutOverlayToggle": "Layout-Overlay",
+    "layoutOverlayToggle": "Erkannte Bereiche zeigen",
     "pdfRotateClockwise": "Im Uhrzeigersinn drehen",
     "layoutTextEdit": "Text",
     "layoutTextEditDone": "Fertig",
@@ -870,10 +872,10 @@
     "layoutOverlayKind.field": "Feld",
     "layoutOverlayKind.table": "Tabelle",
     "layoutOverlayKind.text": "Text",
-    "selectionToolsAria": "Auswahlwerkzeuge auf der Seite",
-    "selectionToolNone": "Auswählen",
-    "selectionToolRect": "Rechteck (R)",
-    "selectionToolText": "Text (T)",
+    "selectionToolsAria": "Auf der Seite markieren",
+    "selectionToolNone": "Zeiger",
+    "selectionToolRect": "Bereich",
+    "selectionToolText": "Text markieren",
     "selectionEmptyValue": "Noch keine Wörter in dieser Auswahl",
     "selectionTokenCount": "{{count}} Wörter",
     "selectionFieldKeyAria": "Feld für diese Auswahl",
@@ -1002,7 +1004,18 @@
     "layoutFieldsFilterAria": "Erkannte Felder filtern",
     "layoutFieldsFilterEmpty": "Kein Feld passt zu „{{query}}“.",
     "fieldMarkHint": "Ziehen Sie auf dem Dokument einen Rahmen um den Wert für „{{name}}“.",
-    "fieldMarkHintCancel": "Markieren abbrechen"
+    "fieldMarkHintCancel": "Markieren abbrechen",
+    "tableMergesInvalid": "Verbundene Zellen passen nicht zur Tabelle (außerhalb oder überlappend).",
+    "tableStructureInvalid": "Kopf, Fuß, Indexspalten oder Zeilenrollen passen nicht zur Tabelle.",
+    "downloadOriginal": "Original herunterladen",
+    "tabFields": "Felder",
+    "inspectorClose": "Inspektor schließen",
+    "selectionToolHint": {
+      "none": "Erkannte Werte anklicken, um sie zu prüfen.",
+      "text": "Text auf der Seite überstreichen und einem Feld zuordnen.",
+      "rect": "Bereich aufziehen: als Feld, Tabelle oder Abschnitt erfassen."
+    },
+    "layoutViewMenuAria": "Ansicht: {{view}}"
   },
   "settings": {
     "title": "Einstellungen",
@@ -1982,7 +1995,7 @@
     "visibilityLabel": "Sichtbarkeit",
     "visibilityPrivate": "Privat",
     "visibilityShared": "Für alle freigegeben",
-    "pinSidebar": "In der Seitenleiste anheften",
+    "pinSidebar": "In der Navigation anheften",
     "sidebarGroup": "Gespeicherte Ansichten",
     "sidebarGroupShort": "Gespeichert",
     "manageSettingsAria": "Gespeicherte Ansichten verwalten",
@@ -2325,5 +2338,264 @@
     "sectionFrequent": "Häufig",
     "sectionAll": "Alle",
     "empty": "Keine Treffer"
+  },
+  "pipeline": {
+    "railAria": "Strukturierungs-Pipeline",
+    "stage": {
+      "upload": "Hochladen",
+      "structure": "Erkennen",
+      "review": "Strukturieren",
+      "record": "Bestand"
+    },
+    "stageHint": {
+      "upload": "PDFs, Scans und Fotos per Upload oder Importquelle",
+      "structure": "Texterkennung, Layout und Felder, automatisch",
+      "review": "Labels, Felder, Layout und Text laufend verfeinern",
+      "record": "Durchsuchbar und auswertbar; Export bei Bedarf"
+    },
+    "stepStatus": {
+      "done": "erledigt",
+      "current": "aktueller Schritt",
+      "error": "fehlgeschlagen",
+      "todo": "ausstehend"
+    },
+    "state": {
+      "intake": "Wartet",
+      "structuring": "Wird erkannt",
+      "failed": "Fehler",
+      "review": "Vorschläge offen",
+      "structured": "Erkannt"
+    },
+    "rail": {
+      "waiting_one": "{{count}} wartet",
+      "waiting_other": "{{count}} warten",
+      "waitingNone": "Keine Warteschlange",
+      "structuring_one": "{{count}} in Arbeit",
+      "structuring_other": "{{count}} in Arbeit",
+      "structuringNone": "Nichts in Arbeit",
+      "failed_one": "{{count}} fehlgeschlagen",
+      "failed_other": "{{count}} fehlgeschlagen",
+      "review_one": "{{count}} Dokument offen",
+      "review_other": "{{count}} Dokumente offen",
+      "reviewNone": "Alles geprüft",
+      "ready_one": "{{count}} Dokument im Bestand",
+      "ready_other": "{{count}} Dokumente im Bestand",
+      "readyNone": "Noch keine Dokumente im Bestand"
+    },
+    "hub": {
+      "eyebrow": "Dokumente strukturieren",
+      "title": "Aus Dokumenten werden Daten.",
+      "lead": "Laden Sie Dokumente hoch. Docuvate erkennt Text, Felder und Labels, Sie bestätigen mit einem Klick, und jedes Dokument bleibt als strukturierter Datensatz durchsuchbar.",
+      "importSources": "Importquelle verbinden",
+      "openReview": "Prüfen starten",
+      "progressTitle": "Fortschritt",
+      "progressLead": "{{ready}} von {{total}} Dokumenten erkannt",
+      "workspaceTitle": "Ihr Überblick",
+      "loadError": "Die Übersicht konnte nicht geladen werden.",
+      "retry": "Erneut versuchen"
+    },
+    "tasks": {
+      "title": "Nächste Schritte",
+      "lead": "Was Ihre Entscheidung braucht, Wichtigstes zuerst.",
+      "empty": "Alles strukturiert. Neue Aufgaben erscheinen hier, sobald Dokumente Ihre Entscheidung brauchen.",
+      "review": {
+        "title_one": "{{count}} Dokument prüfen",
+        "title_other": "{{count}} Dokumente prüfen",
+        "text": "Vorgeschlagene Labels und Felder übernehmen oder korrigieren.",
+        "action": "Prüfen"
+      },
+      "failed": {
+        "title_one": "{{count}} Dokument fehlgeschlagen",
+        "title_other": "{{count}} Dokumente fehlgeschlagen",
+        "text": "Texterkennung erneut starten oder die Datei ersetzen.",
+        "action": "Beheben"
+      },
+      "unlabeled": {
+        "title_one": "{{count}} Dokument ohne Label",
+        "title_other": "{{count}} Dokumente ohne Label",
+        "text": "Ohne Label fehlt das Dokument in Ansichten und Filtern.",
+        "action": "Labels vergeben"
+      },
+      "structuring": {
+        "title_one": "{{count}} Dokument wird strukturiert",
+        "title_other": "{{count}} Dokumente werden strukturiert",
+        "text": "Läuft automatisch, Sie müssen nichts tun.",
+        "action": "Ansehen"
+      },
+      "waiting": {
+        "title_one": "{{count}} Dokument in der Warteschlange",
+        "title_other": "{{count}} Dokumente in der Warteschlange",
+        "text": "Die Strukturierung startet automatisch.",
+        "action": "Ansehen"
+      }
+    },
+    "library": {
+      "lead": "Nach Stand filtern, strukturieren und als Datensatz weiter nutzen.",
+      "tabsAria": "Nach Stand filtern",
+      "tab": {
+        "all": "Alle",
+        "review": "Vorschläge",
+        "unlabeled": "Ohne Label",
+        "structuring": "Wird erkannt",
+        "failed": "Fehler",
+        "ready": "Bestand"
+      },
+      "intakeTitle": "Neue Dokumente",
+      "importSources": "Importquellen",
+      "export": "Exportieren",
+      "exportMenuAria": "Feldwerte exportieren",
+      "exportScopeSelected_one": "Feldwerte von {{count}} ausgewähltem Dokument",
+      "exportScopeSelected_other": "Feldwerte von {{count}} ausgewählten Dokumenten",
+      "exportScopeFiltered": "Feldwerte aller Dokumente dieser Ansicht",
+      "exportCsv": "CSV für Tabellenkalkulation",
+      "exportJson": "JSON für Integrationen"
+    },
+    "viewer": {
+      "trackAria": "Fortschritt dieses Dokuments",
+      "nextLabel": "Nächster Schritt",
+      "wait": {
+        "title": "Wird strukturiert",
+        "text": "Texterkennung und Felder laufen automatisch. Danach erscheint das Dokument unter „Zu prüfen“."
+      },
+      "retry": {
+        "title": "Strukturierung fehlgeschlagen",
+        "action": "Erneut verarbeiten"
+      },
+      "review": {
+        "title": "Prüfen und bestätigen",
+        "fields_one": "{{count}} Feld mit niedriger Sicherheit.",
+        "fields_other": "{{count}} Felder mit niedriger Sicherheit.",
+        "labels_one": "{{count}} Labelvorschlag wartet.",
+        "labels_other": "{{count}} Labelvorschläge warten.",
+        "inbox": "Das Dokument liegt noch im Posteingang.",
+        "fieldsAction": "Felder prüfen",
+        "labelsAction": "Labels prüfen",
+        "queueAction": "In der Prüfwarteschlange öffnen"
+      },
+      "export": {
+        "csv": "Als CSV exportieren",
+        "json": "Als JSON exportieren",
+        "busy": "Export läuft…",
+        "menu": "Feldwerte exportieren"
+      }
+    },
+    "workbench": {
+      "title": "Strukturieren",
+      "open_one": "{{count}} offen",
+      "open_other": "{{count}} offen",
+      "done": "Nichts offen",
+      "progressAria": "Geprüfte Werte",
+      "acceptSafe_one": "{{count}} sicheren Wert übernehmen",
+      "acceptSafe_other": "{{count}} sichere Werte übernehmen",
+      "next": "Nächstes Dokument",
+      "labels": "Labelvorschläge",
+      "empty": "Für dieses Dokument wurden keine Felder erkannt. Sie können Felder unter „Details“ ergänzen.",
+      "listAria": "Erkannte Werte",
+      "state": {
+        "confirmed": "Bestätigt",
+        "suggested": "Vorschlag",
+        "review": "Offen"
+      },
+      "confidence": "{{percent}} %",
+      "accept": "{{field}} übernehmen",
+      "correct": "{{field}} korrigieren",
+      "reassign": "{{field}}: Wert einem anderen Feld zuordnen",
+      "editAria": "Neuer Wert für {{field}}",
+      "save": "Speichern",
+      "reassignPlaceholder": "Gehört zu Feld …",
+      "reassignAria": "Anderes Feld für den Wert von {{field}}",
+      "keys": "Tastatur: ↑ ↓ wählen · Enter übernehmen · E korrigieren · F anderes Feld · N nächstes Dokument",
+      "overwrite": "{{field}} enthält schon den bestätigten Wert „{{value}}“. Überschreiben?",
+      "overwriteConfirm": "Überschreiben",
+      "sideAria": "Prüfen und Details",
+      "acceptedToast_one": "{{count}} Wert übernommen",
+      "acceptedToast_other": "{{count}} Werte übernommen",
+      "correctedToast": "Korrektur gespeichert",
+      "reassignedToast": "Wert zu {{field}} verschoben"
+    },
+    "aspects": {
+      "aria": "Stand der Strukturierung",
+      "name": {
+        "ocr": "Text",
+        "labels": "Labels",
+        "layout": "Layout",
+        "fields": "Felder"
+      },
+      "state": {
+        "pending": "nicht verarbeitet",
+        "processing": "wird erkannt",
+        "failed": "fehlgeschlagen",
+        "open": "offen",
+        "no_open_items": "nichts offen",
+        "confirmed": "bestätigt",
+        "unavailable": "nicht vorhanden",
+        "unknown": "unbekannt"
+      },
+      "openCount_one": "{{count}} offen",
+      "openCount_other": "{{count}} offen",
+      "itemAria": "{{aspect}}: {{state}}"
+    }
+  },
+  "tableLayouts": {
+    "apply": "Übernehmen",
+    "families": {
+      "simple": "Einfache Tabelle",
+      "matrix": "Matrix",
+      "nested": "Mehrstufiger Kopf",
+      "financial": "Finanzlayout",
+      "grouped": "Abschnitte mit Zwischensummen",
+      "key_value": "Schlüssel und Wert"
+    },
+    "footerRows": "Ergebniszeilen",
+    "index": "Indexspalte",
+    "indexOptions": {
+      "none": "Keine",
+      "left": "Links",
+      "right": "Rechts",
+      "both": "Beidseitig"
+    },
+    "ruling": "Linien",
+    "rulingOptions": {
+      "grid": "Raster",
+      "accounting": "Buchhaltung",
+      "horizontal": "Waagerecht",
+      "none": "Ohne",
+      "keep": "Wie erkannt"
+    },
+    "grouped": "Abschnitte und Zwischensummen",
+    "banded": "Zebrastreifen",
+    "applied": "Tabellenlayout übernommen",
+    "discard": "Verwerfen",
+    "draft": "Entwurf",
+    "toolbarAria": "Struktur von Tabelle {{n}}",
+    "template": "Vorlage",
+    "appearance": "Darstellung",
+    "less": "Weniger",
+    "more": "Mehr",
+    "mergeCells": "Zellen verbinden",
+    "splitCells": "Verbindung lösen",
+    "directHint": "Zeilenart links an der Zeile wählen. Zellen verbinden: Zelle anklicken, zweite mit Umschalt+Klick (oder Umschalt+Alt+Pfeil) wählen.",
+    "rowKinds": {
+      "header": "Kopf",
+      "data": "Daten",
+      "section": "Abschnitt",
+      "subtotal": "Zwischensumme",
+      "footer": "Ergebnis"
+    },
+    "rowKindAria": "Zeilenart von Zeile {{row}}"
+  },
+  "ribbon": {
+    "stock": "Bestand",
+    "views": "Angeheftet",
+    "area": "Bereich",
+    "structure": "Struktur",
+    "capture": "Erfassen",
+    "display": "Darstellung",
+    "output": "Ausgabe",
+    "work": "Arbeiten",
+    "review": "Prüfen",
+    "inspector": "Inspektor",
+    "autoImport": "Automatisch importieren",
+    "autoImportHint": "Verbindungen einrichten, die Dokumente automatisch importieren: Postfach, Scanner/SFTP oder Paperless-ngx"
   }
 }

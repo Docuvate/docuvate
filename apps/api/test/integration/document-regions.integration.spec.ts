@@ -108,7 +108,7 @@ describe('document regions (Testcontainers Postgres)', () => {
     expect(remapped?.irSha256).toBe(nextHash);
   });
 
-  it('stores a table region with header rows and cell texts', async () => {
+  it('stores a table region with header rows, merged cells and cell texts', async () => {
     const created = await regions.insertRegion({
       id: randomUUID(),
       documentId,
@@ -125,16 +125,20 @@ describe('document regions (Testcontainers Postgres)', () => {
       table: {
         tableType: 'line_items',
         headerRows: 1,
+        footerRows: 0,
         headerCols: 0,
+        trailingHeaderCols: 0,
+        banded: false,
+        rowRoles: [],
         rules: [
-          { axis: 'row', ord: 0, pos: 0.1 },
-          { axis: 'row', ord: 1, pos: 0.25 },
-          { axis: 'row', ord: 2, pos: 0.4 },
-          { axis: 'col', ord: 0, pos: 0.1 },
-          { axis: 'col', ord: 1, pos: 0.35 },
-          { axis: 'col', ord: 2, pos: 0.6 },
+          { axis: 'row', ord: 0, pos: 0.1, line: 'unknown' },
+          { axis: 'row', ord: 1, pos: 0.25, line: 'unknown' },
+          { axis: 'row', ord: 2, pos: 0.4, line: 'unknown' },
+          { axis: 'col', ord: 0, pos: 0.1, line: 'unknown' },
+          { axis: 'col', ord: 1, pos: 0.35, line: 'unknown' },
+          { axis: 'col', ord: 2, pos: 0.6, line: 'unknown' },
         ],
-        merges: [],
+        merges: [{ row0: 1, col0: 0, rowSpan: 1, colSpan: 2 }],
         cells: [
           { row: 0, col: 0, text: 'Item' },
           { row: 0, col: 1, text: 'Qty' },
@@ -146,8 +150,66 @@ describe('document regions (Testcontainers Postgres)', () => {
     expect(created.table?.headerRows).toBe(1);
     expect(created.table?.cells).toHaveLength(4);
     const listed = await regions.listActiveRegions(documentId, 'table');
-    expect(listed.some((region) => region.id === created.id && region.table?.cells[0]?.text === 'Item')).toBe(
-      true
-    );
+    expect(
+      listed.some((region) => region.id === created.id && region.table?.cells[0]?.text === 'Item')
+    ).toBe(true);
+    const stored = listed.find((region) => region.id === created.id);
+    expect(stored?.table?.merges).toEqual([{ row0: 1, col0: 0, rowSpan: 1, colSpan: 2 }]);
+  });
+
+  it('round-trips footer, right index, row roles, banding and line evidence', async () => {
+    const rows = 4;
+    const cols = 3;
+    const created = await regions.insertRegion({
+      id: randomUUID(),
+      documentId,
+      page: 1,
+      shape: 'rect',
+      role: 'table',
+      x0: 0.1,
+      y0: 0.1,
+      x1: 0.6,
+      y1: 0.5,
+      irSha256: hashLayoutIrHex(sampleIr('208,82 €')),
+      blockIndexes: [4],
+      boundText: 'Synthetic',
+      table: {
+        tableType: 'line_items',
+        headerRows: 1,
+        footerRows: 1,
+        headerCols: 0,
+        trailingHeaderCols: 1,
+        banded: true,
+        rowRoles: [{ row: 1, role: 'section' }],
+        rules: [
+          ...Array.from({ length: rows + 1 }, (_, ord) => ({
+            axis: 'row' as const,
+            ord,
+            pos: 0.1 + ord * 0.1,
+            line: ord === 1 ? ('thick' as const) : ('thin' as const),
+          })),
+          ...Array.from({ length: cols + 1 }, (_, ord) => ({
+            axis: 'col' as const,
+            ord,
+            pos: 0.1 + ord * 0.15,
+            line: 'none' as const,
+          })),
+        ],
+        merges: [{ row0: 1, col0: 0, rowSpan: 1, colSpan: 3 }],
+        cells: [{ row: 1, col: 0, text: 'Abschnitt A' }],
+      },
+    });
+    const listed = await regions.listActiveRegions(documentId, 'table');
+    const stored = listed.find((region) => region.id === created.id)?.table;
+    expect(stored).toMatchObject({
+      footerRows: 1,
+      trailingHeaderCols: 1,
+      banded: true,
+      rowRoles: [{ row: 1, role: 'section' }],
+    });
+    expect(stored?.rules.find((rule) => rule.axis === 'row' && rule.ord === 1)?.line).toBe('thick');
+    expect(
+      stored?.rules.filter((rule) => rule.axis === 'col').every((rule) => rule.line === 'none')
+    ).toBe(true);
   });
 });

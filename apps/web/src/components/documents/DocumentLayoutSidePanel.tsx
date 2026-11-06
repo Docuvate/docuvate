@@ -6,7 +6,15 @@ import type {
   LayoutIrDocument,
   RecognizedFieldDefinitionDto,
 } from '@docuvate/contracts';
-import { type KeyboardEvent, useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
+import {
+  type KeyboardEvent,
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { isUserConfirmedField } from '../../lib/documentFieldValueRowState';
@@ -35,6 +43,7 @@ import {
   suggestionMatchesPersistedDefinition,
 } from '../../lib/recognizedFieldDefinitionIndex';
 import { sourceChipPageLabel } from '../../lib/sourceChipLabel';
+import type { TableStructureChoice } from '../../lib/tableLayouts';
 import { Button } from '../ui/Button';
 import { FieldValueRow } from '../ui/FieldValueRow';
 import { Input } from '../ui/Input';
@@ -61,7 +70,7 @@ interface DocumentLayoutSidePanelProps {
   recognizedCatalog?: RecognizedFieldDefinitionDto[];
   fieldRegions?: DocumentRegionDto[];
   tableRegions?: DocumentRegionDto[];
-  onTableHeaderChange?: (regionId: string, headerRows: number, headerCols: number) => void;
+  onTableLayoutApply?: (regionId: string, choice: TableStructureChoice) => void;
   onTableCellChange?: (regionId: string, row: number, col: number, text: string) => void;
   onConfirmField?: (key: string, value: string) => void;
   onCorrectField?: (key: string) => void;
@@ -90,7 +99,7 @@ export function DocumentLayoutSidePanel({
   recognizedCatalog = [],
   fieldRegions = [],
   tableRegions = [],
-  onTableHeaderChange,
+  onTableLayoutApply,
   onTableCellChange,
   onConfirmField,
   onCorrectField,
@@ -295,44 +304,54 @@ export function DocumentLayoutSidePanel({
                 ? formatFieldValue(field.key, field.value)
                 : t('documents.fieldRegionEmptyHint')
           }
-          state={
-            missing
-              ? 'missing'
-              : isUserConfirmedField(field)
-                ? 'confirmed'
-                : 'suggested'
-          }
+          state={missing ? 'missing' : isUserConfirmedField(field) ? 'confirmed' : 'suggested'}
           confidencePercent={
             field.confidence != null ? Math.round(field.confidence * 100) : undefined
           }
           sourceLabel={sourceLabel}
-          onSelect={onSelectField ? () => { onSelectField(field.key); } : undefined}
-          onConfirm={
-            onConfirmField && !missing
-              ? () => { onConfirmField(field.key, field.value); }
+          onSelect={
+            onSelectField
+              ? () => {
+                  onSelectField(field.key);
+                }
               : undefined
           }
-          onCorrect={onCorrectField ? () => { onCorrectField(field.key); } : undefined}
-          onSaveValue={
-            onSaveFieldValue ? (value) => { onSaveFieldValue(field.key, value); } : undefined
+          onConfirm={
+            onConfirmField && !missing
+              ? () => {
+                  onConfirmField(field.key, field.value);
+                }
+              : undefined
           }
-          onSourceClick={onHighlightField ? () => { onHighlightField(field.key); } : undefined}
+          onCorrect={
+            onCorrectField
+              ? () => {
+                  onCorrectField(field.key);
+                }
+              : undefined
+          }
+          onSaveValue={
+            onSaveFieldValue
+              ? (value) => {
+                  onSaveFieldValue(field.key, value);
+                }
+              : undefined
+          }
+          onSourceClick={
+            onHighlightField
+              ? () => {
+                  onHighlightField(field.key);
+                }
+              : undefined
+          }
         />
       </li>
     );
   };
 
   return (
-    <aside
-      className="layout-side-panel"
-      aria-label={t('documents.layoutSidePanelAria')}
-    >
-      <div
-        className="layout-side-tabs"
-        role="tablist"
-        tabIndex={0}
-        onKeyDown={onTabListKeyDown}
-      >
+    <aside className="layout-side-panel" aria-label={t('documents.layoutSidePanelAria')}>
+      <div className="layout-side-tabs" role="tablist" tabIndex={0} onKeyDown={onTabListKeyDown}>
         {tabs.map((tab) => {
           const selected = activeTab === tab.id;
           return (
@@ -348,7 +367,9 @@ export function DocumentLayoutSidePanel({
               aria-controls={`${tabsBaseId}-panel-${tab.id}`}
               tabIndex={selected ? 0 : -1}
               className={`layout-side-tab${selected ? ' layout-side-tab-active' : ''}`}
-              onClick={() => { onTabChange(tab.id); }}
+              onClick={() => {
+                onTabChange(tab.id);
+              }}
             >
               {tab.label}
             </button>
@@ -376,7 +397,9 @@ export function DocumentLayoutSidePanel({
                 value={fieldQuery}
                 placeholder={t('documents.layoutFieldsFilterPlaceholder')}
                 aria-label={t('documents.layoutFieldsFilterAria')}
-                onChange={(event) => { setFieldQuery(event.target.value); }}
+                onChange={(event) => {
+                  setFieldQuery(event.target.value);
+                }}
               />
             ) : null}
             {fieldQuery.trim() &&
@@ -401,7 +424,9 @@ export function DocumentLayoutSidePanel({
             ) : null}
             {suggestions.length > 0 ? (
               <>
-                <h3 className="layout-side-section-title">{t('documents.layoutFieldSuggestions')}</h3>
+                <h3 className="layout-side-section-title">
+                  {t('documents.layoutFieldSuggestions')}
+                </h3>
                 <ul className="layout-field-suggestion-list">
                   {suggestions.map((s) => (
                     <li
@@ -413,16 +438,23 @@ export function DocumentLayoutSidePanel({
                         <span className="layout-field-label" title={fieldLabelForKey(s.key)}>
                           {fieldLabelForKey(s.key)}
                         </span>
-                        <span className="layout-field-value" title={formatFieldValue(s.key, s.value)}>
+                        <span
+                          className="layout-field-value"
+                          title={formatFieldValue(s.key, s.value)}
+                        >
                           {formatFieldValue(s.key, s.value)}
                         </span>
                       </div>
                       <div className="layout-field-suggestion-meta">
-                        <span className="layout-field-suggestion-tag">{t('documents.layoutSuggestionTag')}</span>
+                        <span className="layout-field-suggestion-tag">
+                          {t('documents.layoutSuggestionTag')}
+                        </span>
                         <SourceChip
                           kind="page"
                           label={sourceChipPageLabel(1, locale)}
-                          onClick={() => { onHighlightField?.(s.key); }}
+                          onClick={() => {
+                            onHighlightField?.(s.key);
+                          }}
                         />
                       </div>
                       {fieldSuggestionOutsideUserSchema(s.key, knownFieldKeys) ? (
@@ -436,10 +468,22 @@ export function DocumentLayoutSidePanel({
                         </p>
                       ) : null}
                       <div className="layout-field-suggestion-actions">
-                        <Button type="button" variant="secondary" onClick={() => { onAcceptSuggestion(s.key, s.value); }}>
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          onClick={() => {
+                            onAcceptSuggestion(s.key, s.value);
+                          }}
+                        >
                           {t('documents.layoutSuggestionAccept')}
                         </Button>
-                        <Button type="button" variant="ghost" onClick={() => { onDismissSuggestion(s.key); }}>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          onClick={() => {
+                            onDismissSuggestion(s.key);
+                          }}
+                        >
                           {t('documents.layoutSuggestionDismiss')}
                         </Button>
                       </div>
@@ -461,13 +505,19 @@ export function DocumentLayoutSidePanel({
                     region={region}
                     index={index}
                     active={activeOverlayId === `region-table-${region.id}`}
-                    onSelect={() => { onOverlaySelect(`region-table-${region.id}`, region.page); }}
-                    onHeaderChange={(headerRows, headerCols) => {
-                      onTableHeaderChange?.(region.id, headerRows, headerCols);
+                    onSelect={() => {
+                      onOverlaySelect(`region-table-${region.id}`, region.page);
                     }}
                     onCellChange={(row, col, text) => {
                       onTableCellChange?.(region.id, row, col, text);
                     }}
+                    onLayoutApply={
+                      onTableLayoutApply
+                        ? (choice) => {
+                            onTableLayoutApply(region.id, choice);
+                          }
+                        : undefined
+                    }
                   />
                 ))}
             {tables.length === 0 && tableRegions.length === 0 ? (
@@ -484,7 +534,9 @@ export function DocumentLayoutSidePanel({
                   <button
                     type="button"
                     className="layout-table-card-head"
-                    onClick={() => { onOverlaySelect(table.overlayId, table.page); }}
+                    onClick={() => {
+                      onOverlaySelect(table.overlayId, table.page);
+                    }}
                   >
                     <span>{t('documents.layoutTableLabel', { n: table.tableIndex + 1 })}</span>
                     <span className="muted">
@@ -500,7 +552,9 @@ export function DocumentLayoutSidePanel({
                         <thead>
                           <tr>
                             {table.headerRow.map((cell, colIdx) => (
-                              <th key={colIdx} scope="col">{cell}</th>
+                              <th key={colIdx} scope="col">
+                                {cell}
+                              </th>
                             ))}
                           </tr>
                         </thead>
@@ -541,7 +595,6 @@ export function DocumentLayoutSidePanel({
             )}
           </div>
         ) : null}
-
       </div>
     </aside>
   );
@@ -567,7 +620,9 @@ function OutlineTreeNode({
           activeOverlayId === entry.overlayId ? ' layout-outline-item-active' : ''
         }`}
         data-layout-overlay-target={entry.overlayId}
-        onClick={() => { onOverlaySelect(entry.overlayId, entry.page); }}
+        onClick={() => {
+          onOverlaySelect(entry.overlayId, entry.page);
+        }}
       >
         <span className="layout-outline-title">{entry.title}</span>
         <span className="muted layout-outline-page">

@@ -101,7 +101,6 @@ test.describe('document view at small widths', () => {
       await expect(title).toHaveText(LONG_TITLE);
       await expect(title).toHaveAttribute('title', /^Lohnsteuerbescheinigung 2025 .* vom Oktober/);
       expect(await titleLineCount(page)).toBe(2);
-      await expectWithinViewportWidth(page, page.locator('.document-detail-download'));
       await expectWithinViewportWidth(
         page,
         page.locator('.document-detail-meta-actions').getByRole('button').last()
@@ -112,7 +111,7 @@ test.describe('document view at small widths', () => {
         'document'
       );
       await expect(page.locator('.layout-side-panel')).toBeHidden();
-      const rect = page.getByRole('radio', { name: /Rechteck|Rectangle/i });
+      const rect = page.getByRole('radio', { name: /^(Bereich|Area)/ });
       await expectWithinViewportWidth(page, rect);
       await rect.click();
       await expect(rect).toBeChecked();
@@ -147,7 +146,12 @@ test.describe('document view at small widths', () => {
     await expect(page.locator('.layout-viewer-card')).toBeVisible();
     await expect(page.locator('.layout-side-panel')).toBeVisible();
     expect(await titleLineCount(page)).toBe(1);
-    await expectWithinViewportWidth(page, page.locator('.document-detail-download'));
+    await expectWithinViewportWidth(
+      page,
+      page
+        .locator('.document-detail-meta-actions')
+        .getByRole('button', { name: /Weitere Aktionen|More actions/ })
+    );
     await assertNoHorizontalOverflow(page);
   });
 });

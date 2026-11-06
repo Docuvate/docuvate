@@ -82,10 +82,12 @@ a.btn:hover {
 .btn-primary {
   background: var(--dv-color-accent-fill);
   color: var(--dv-color-on-accent);
+  box-shadow: var(--dv-shadow-highlight-dim), var(--dv-elevation-1);
 }
 
 .btn-primary:hover:not(:disabled) {
   background: var(--dv-color-accent-fill-hover);
+  box-shadow: var(--dv-shadow-highlight-dim), var(--dv-elevation-2);
 }
 
 .btn-danger {
@@ -99,8 +101,9 @@ a.btn:hover {
 
 .btn-secondary {
   background: var(--dv-color-bg-raised);
-  border-color: var(--dv-color-border);
+  border-color: color-mix(in srgb, var(--dv-color-border) 80%, transparent);
   color: var(--dv-color-text);
+  box-shadow: var(--dv-surface-highlight), var(--dv-elevation-1);
 }
 
 .btn-secondary:hover:not(:disabled) {
@@ -167,7 +170,7 @@ a.btn:hover {
 
 .password-input-wrap .password-input {
   width: 100%;
-  padding-right: calc(2.75rem + var(--dv-space-xs));
+  padding-right: calc(var(--dv-control-touch-target) + var(--dv-space-xs));
 }
 
 .password-input-toggle {
@@ -223,9 +226,10 @@ a.btn:hover {
 
 .card {
   background: var(--dv-color-bg-raised);
-  border: var(--dv-border-width-hairline) solid var(--dv-color-border);
+  border: var(--dv-border-width-hairline) solid
+    color-mix(in srgb, var(--dv-color-border) 65%, transparent);
   border-radius: var(--dv-radius-surface);
-  box-shadow: var(--dv-elevation-1);
+  box-shadow: var(--dv-surface-highlight), var(--dv-elevation-2);
   padding: var(--dv-space-lg);
 }
 
@@ -233,7 +237,7 @@ a.btn:hover {
   display: inline-flex;
   align-items: center;
   border-radius: var(--dv-radius-sm);
-  padding: 2px var(--dv-space-xs);
+  padding: var(--dv-space-3xs) var(--dv-space-xs);
   font-size: var(--dv-font-size-xs);
   font-weight: var(--dv-font-weight-semibold);
   border: 1px solid var(--dv-color-border);
@@ -263,7 +267,7 @@ a.btn:hover {
   align-items: center;
   gap: var(--dv-space-2xs);
   border-radius: var(--dv-radius-md);
-  padding: 2px var(--dv-space-xs);
+  padding: var(--dv-space-3xs) var(--dv-space-xs);
   font-size: var(--dv-font-size-xs);
   font-weight: var(--dv-font-weight-semibold);
   line-height: 1.5;
@@ -387,7 +391,7 @@ a.btn:hover {
   cursor: pointer;
   font-size: 14px;
   line-height: 1;
-  padding: 0 2px;
+  padding: 0 var(--dv-space-3xs);
   opacity: 0.85;
 }
 

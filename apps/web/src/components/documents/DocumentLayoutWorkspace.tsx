@@ -37,6 +37,7 @@ import {
 import { useFeatureFlags } from '../../lib/remoteConfig';
 import { segmentedToolbarClass } from '../../lib/segmentedControlClasses';
 import { sourceChipPageLabel } from '../../lib/sourceChipLabel';
+import type { TableStructureChoice } from '../../lib/tableLayouts';
 import { useDocumentLayoutIr } from '../../lib/useDocumentLayoutIr';
 import { useDocumentRegionLayers } from '../../lib/useDocumentRegionLayers';
 import { useLayoutCompare } from '../../lib/useLayoutCompare';
@@ -184,6 +185,9 @@ export function DocumentLayoutWorkspace({
   const [advancedView, setAdvancedView] = useState<AdvancedViewerMode>('reconstruction');
   const [overlayEnabled, setOverlayEnabled] = useState(true);
   const [displayRotationDeg, setDisplayRotationDeg] = useState<0 | 90 | 180 | 270>(0);
+  const rotateClockwise = useCallback(() => {
+    setDisplayRotationDeg((prev) => (prev === 270 ? 0 : prev === 0 ? 90 : prev === 90 ? 180 : 270));
+  }, []);
   const [activeOverlayId, setActiveOverlayId] = useState<string | null>(null);
   const [hoverOverlay, setHoverOverlay] = useState<PdfLayoutOverlay | null>(null);
   const [layoutZoom, setLayoutZoom] = useState<LayoutIrZoomStep>(100);
@@ -376,6 +380,22 @@ export function DocumentLayoutWorkspace({
     },
     [doc.id, onLayoutSideTabChange, refreshRegions, toast]
   );
+
+  const submitTableCorrection = useCallback(
+    (body: ApplyTableCorrectionRequest, message = t('documents.tableCorrectionSaved')) => {
+      runTableCorrection(body, message).catch((err: unknown) => {
+        toast.error(formatUserFacingError(err, 'errors.generic'));
+      });
+    },
+    [runTableCorrection, t, toast]
+  );
+
+  const applyTableLayoutChoice = (regionId: string, choice: TableStructureChoice) => {
+    submitTableCorrection(
+      { id: crypto.randomUUID(), op: 'set_headers', beforeRegionId: regionId, ...choice },
+      t('tableLayouts.applied')
+    );
+  };
 
   const layoutPageCount = layoutIr?.pages.length ?? layoutIrPages?.length ?? 1;
   const { metricsByPage, metrics: compareMetrics } = useLayoutCompare(
@@ -672,6 +692,12 @@ export function DocumentLayoutWorkspace({
             qualityPage={qualityReviewPage ?? viewerPage}
             editMode={editMode}
             onEditModeChange={onEditModeChange}
+            overlay={
+              pdfOverlays.length > 0 && leftMode === 'original'
+                ? { enabled: overlayEnabled, onChange: setOverlayEnabled }
+                : undefined
+            }
+            onRotate={leftMode === 'original' && !showAdvancedStage ? rotateClockwise : undefined}
           />
 
           <DocumentFieldMarkHint
@@ -769,34 +795,6 @@ export function DocumentLayoutWorkspace({
                     fitWidth
                     onPageClick={selectionTool === 'none' ? onPdfPageClick : undefined}
                     displayRotationDeg={displayRotationDeg}
-                    onRotateClockwise={() => {
-                      setDisplayRotationDeg((prev) => {
-                        switch (prev) {
-                          case 0:
-                            return 90;
-                          case 90:
-                            return 180;
-                          case 180:
-                            return 270;
-                          case 270:
-                            return 0;
-                        }
-                      });
-                    }}
-                    toolbarAccessory={
-                      pdfOverlays.length > 0 ? (
-                        <label className="layout-overlay-toggle pdf-viewer-overlay-toggle">
-                          <input
-                            type="checkbox"
-                            checked={overlayEnabled}
-                            onChange={(e) => {
-                              setOverlayEnabled(e.target.checked);
-                            }}
-                          />
-                          <span>{t('documents.layoutOverlayToggle')}</span>
-                        </label>
-                      ) : null
-                    }
                   />
                 )}
                 {!showAdvancedStage ? (
@@ -825,23 +823,16 @@ export function DocumentLayoutWorkspace({
                       reanchorFieldKey
                         ? undefined
                         : () => {
-                            void runTableCorrection(
-                              {
-                                id: crypto.randomUUID(),
-                                op: 'create',
-                                page: selectionDraft.page,
-                                shape: 'rect',
-                                x0: selectionDraft.rect.x0,
-                                y0: selectionDraft.rect.y0,
-                                x1: selectionDraft.rect.x1,
-                                y1: selectionDraft.rect.y1,
-                                blockIndexes: selectionDraft.tokens.map(
-                                  (token) => token.blockIndex
-                                ),
-                              },
-                              t('documents.tableCorrectionSaved')
-                            ).catch((err: unknown) => {
-                              toast.error(formatUserFacingError(err, 'errors.generic'));
+                            submitTableCorrection({
+                              id: crypto.randomUUID(),
+                              op: 'create',
+                              page: selectionDraft.page,
+                              shape: 'rect',
+                              x0: selectionDraft.rect.x0,
+                              y0: selectionDraft.rect.y0,
+                              x1: selectionDraft.rect.x1,
+                              y1: selectionDraft.rect.y1,
+                              blockIndexes: selectionDraft.tokens.map((token) => token.blockIndex),
                             });
                           }
                     }
@@ -963,31 +954,13 @@ export function DocumentLayoutWorkspace({
           recognizedCatalog={recognizedCatalog}
           fieldRegions={fieldRegions}
           tableRegions={tableRegions}
-          onTableHeaderChange={(regionId, headerRows, headerCols) => {
-            void runTableCorrection(
-              {
-                id: crypto.randomUUID(),
-                op: 'set_headers',
-                beforeRegionId: regionId,
-                headerRows,
-                headerCols,
-              },
-              t('documents.tableCorrectionSaved')
-            ).catch((err: unknown) => {
-              toast.error(formatUserFacingError(err, 'errors.generic'));
-            });
-          }}
+          onTableLayoutApply={applyTableLayoutChoice}
           onTableCellChange={(regionId, row, col, text) => {
-            void runTableCorrection(
-              {
-                id: crypto.randomUUID(),
-                op: 'edit_cell',
-                beforeRegionId: regionId,
-                cell: { row, col, text },
-              },
-              t('documents.tableCorrectionSaved')
-            ).catch((err: unknown) => {
-              toast.error(formatUserFacingError(err, 'errors.generic'));
+            submitTableCorrection({
+              id: crypto.randomUUID(),
+              op: 'edit_cell',
+              beforeRegionId: regionId,
+              cell: { row, col, text },
             });
           }}
           onConfirmField={confirmField}
@@ -1049,37 +1022,21 @@ export function DocumentLayoutWorkspace({
               setActiveOverlayId(regionTableOverlayId(selectedTableId));
             }
           }}
-          onHeaderChange={
+          onLayoutApply={
             selectedTableId
-              ? (headerRows, headerCols) => {
-                  void runTableCorrection(
-                    {
-                      id: crypto.randomUUID(),
-                      op: 'set_headers',
-                      beforeRegionId: selectedTableId,
-                      headerRows,
-                      headerCols,
-                    },
-                    t('documents.tableCorrectionSaved')
-                  ).catch((err: unknown) => {
-                    toast.error(formatUserFacingError(err, 'errors.generic'));
-                  });
+              ? (choice) => {
+                  applyTableLayoutChoice(selectedTableId, choice);
                 }
               : undefined
           }
           onCellChange={
             selectedTableId
               ? (row, col, text) => {
-                  void runTableCorrection(
-                    {
-                      id: crypto.randomUUID(),
-                      op: 'edit_cell',
-                      beforeRegionId: selectedTableId,
-                      cell: { row, col, text },
-                    },
-                    t('documents.tableCorrectionSaved')
-                  ).catch((err: unknown) => {
-                    toast.error(formatUserFacingError(err, 'errors.generic'));
+                  submitTableCorrection({
+                    id: crypto.randomUUID(),
+                    op: 'edit_cell',
+                    beforeRegionId: selectedTableId,
+                    cell: { row, col, text },
                   });
                 }
               : undefined

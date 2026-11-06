@@ -13123,6 +13123,41 @@
             "type": "number",
             "minimum": 0
           },
+          "footerRows": {
+            "type": "number",
+            "minimum": 0
+          },
+          "trailingHeaderCols": {
+            "type": "number",
+            "minimum": 0
+          },
+          "banded": {
+            "type": "boolean"
+          },
+          "rowRoles": {
+            "maxItems": 500,
+            "description": "Section headings and subtotals; replaces all row roles on create and set_headers.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TableRowRoleInputDto"
+            }
+          },
+          "ruleLines": {
+            "maxItems": 1000,
+            "description": "Line evidence for the listed grid rules; other rules keep theirs.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TableRuleLineInputDto"
+            }
+          },
+          "merges": {
+            "maxItems": 500,
+            "description": "Merged cells; replaces all merges on create and set_headers.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TableMergeInputDto"
+            }
+          },
           "cell": {
             "$ref": "#/components/schemas/DocumentRegionTableCellDto"
           }
@@ -14184,10 +14219,30 @@
             "type": "string"
           },
           "headerRows": {
-            "type": "number"
+            "type": "number",
+            "description": "Header rows; more than one is a nested header."
+          },
+          "footerRows": {
+            "type": "number",
+            "description": "Trailing summary rows (results footer)."
           },
           "headerCols": {
-            "type": "number"
+            "type": "number",
+            "description": "Leading index columns."
+          },
+          "trailingHeaderCols": {
+            "type": "number",
+            "description": "Trailing index columns (right or, with headerCols, double index)."
+          },
+          "banded": {
+            "type": "boolean",
+            "description": "Alternating row tint (appearance only)."
+          },
+          "rowRoles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DocumentRegionTableRowRoleDto"
+            }
           },
           "rules": {
             "type": "array",
@@ -14211,7 +14266,11 @@
         "required": [
           "tableType",
           "headerRows",
+          "footerRows",
           "headerCols",
+          "trailingHeaderCols",
+          "banded",
+          "rowRoles",
           "rules",
           "merges",
           "cells"
@@ -14240,6 +14299,25 @@
           "colSpan"
         ]
       },
+      "DocumentRegionTableRowRoleDto": {
+        "type": "object",
+        "properties": {
+          "row": {
+            "type": "number"
+          },
+          "role": {
+            "enum": [
+              "section",
+              "subtotal"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "row",
+          "role"
+        ]
+      },
       "DocumentRegionTableRuleDto": {
         "type": "object",
         "properties": {
@@ -14255,12 +14333,24 @@
           },
           "pos": {
             "type": "number"
+          },
+          "line": {
+            "enum": [
+              "unknown",
+              "none",
+              "thin",
+              "thick",
+              "double"
+            ],
+            "type": "string",
+            "description": "Line evidence; unknown until observed or set."
           }
         },
         "required": [
           "axis",
           "ord",
-          "pos"
+          "pos",
+          "line"
         ]
       },
       "DocumentResponseDto": {
@@ -16389,6 +16479,84 @@
         },
         "required": [
           "displayName"
+        ]
+      },
+      "TableMergeInputDto": {
+        "type": "object",
+        "properties": {
+          "row0": {
+            "type": "number",
+            "minimum": 0
+          },
+          "col0": {
+            "type": "number",
+            "minimum": 0
+          },
+          "rowSpan": {
+            "type": "number",
+            "minimum": 1
+          },
+          "colSpan": {
+            "type": "number",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "row0",
+          "col0",
+          "rowSpan",
+          "colSpan"
+        ]
+      },
+      "TableRowRoleInputDto": {
+        "type": "object",
+        "properties": {
+          "row": {
+            "type": "number",
+            "minimum": 0
+          },
+          "role": {
+            "enum": [
+              "section",
+              "subtotal"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "row",
+          "role"
+        ]
+      },
+      "TableRuleLineInputDto": {
+        "type": "object",
+        "properties": {
+          "axis": {
+            "enum": [
+              "row",
+              "col"
+            ],
+            "type": "string"
+          },
+          "ord": {
+            "type": "number",
+            "minimum": 0
+          },
+          "line": {
+            "enum": [
+              "unknown",
+              "none",
+              "thin",
+              "thick",
+              "double"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "axis",
+          "ord",
+          "line"
         ]
       },
       "TagCustomFieldListResponseDtoClass": {

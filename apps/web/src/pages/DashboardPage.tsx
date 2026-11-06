@@ -6,19 +6,19 @@ import type {
   DashboardWidgetType,
   SavedDocumentViewDto,
 } from '@docuvate/contracts';
-import { ListChecks } from 'lucide-react';
+import { CloudOff } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
 
 import { DashboardOnboarding } from '../components/dashboard/DashboardOnboarding';
 import { DashboardStartSkeleton } from '../components/dashboard/DashboardStartSkeleton';
 import { DashboardWidgets } from '../components/dashboard/DashboardWidgets';
+import { StructuringHub } from '../components/pipeline';
 import { useToastNotify } from '../components/save/ToastProvider';
-import { Banner } from '../components/ui/Banner';
 import { Button } from '../components/ui/Button';
-import { PageHeader } from '../components/ui/PageHeader';
+import { EmptyState } from '../components/ui/EmptyState';
 import { Select } from '../components/ui/Select';
+import { DocumentUploadProvider } from '../components/upload';
 import {
   getDashboardLayout,
   getDashboardStatistics,
@@ -26,7 +26,10 @@ import {
   listSavedDocumentViews,
   replaceDashboardLayout,
 } from '../lib/api';
-import { routes } from '../lib/routes';
+import { pipelineOverview } from '../lib/documentPipeline';
+import { resolveLibraryDropTarget } from '../lib/documentUploadAssignment';
+
+const DASHBOARD_DROP_TARGET = resolveLibraryDropTarget({ mode: 'all', filters: {}, folders: [] });
 
 const ADDABLE_WIDGET_TYPES: DashboardWidgetType[] = [
   'upload',
@@ -56,6 +59,7 @@ export function DashboardPage() {
   const [addType, setAddType] = useState<DashboardWidgetType>('statistics');
   const [addViewId, setAddViewId] = useState('');
   const [reviewPendingCount, setReviewPendingCount] = useState(0);
+  const [loadFailed, setLoadFailed] = useState(false);
 
   const addableWidgetTypes = useMemo(
     () =>
@@ -76,8 +80,10 @@ export function DashboardPage() {
       const [layout, stats] = await Promise.all([getDashboardLayout(), getDashboardStatistics()]);
       setWidgets(layout.widgets);
       setStatistics(stats);
+      setLoadFailed(false);
       await refreshViews();
     } catch (err) {
+      setLoadFailed(true);
       pushError(err instanceof Error ? err.message : t('errors.generic'));
     } finally {
       setLoading(false);
@@ -154,8 +160,12 @@ export function DashboardPage() {
   }
 
   const showOnboarding = statistics?.documentsTotal === 0 && !editMode;
+  const overview = useMemo(
+    () => (statistics ? pipelineOverview(statistics, reviewPendingCount) : null),
+    [statistics, reviewPendingCount]
+  );
 
-  if (loading) {
+  if (loading && !statistics) {
     return (
       <div className="page dashboard-page">
         <DashboardStartSkeleton />
@@ -171,90 +181,107 @@ export function DashboardPage() {
     );
   }
 
-  return (
-    <div className="page dashboard-page dv-page-grid">
-      <PageHeader
-        className="dashboard-page-header"
-        title={t('dashboard.title')}
-        description={t('dashboard.lead')}
-        actions={
-          <div className="dashboard-header-actions">
-            <Button
-              type="button"
-              variant={editMode ? 'primary' : 'secondary'}
-              onClick={() => {
-                setEditMode((v) => !v);
-              }}
-            >
-              {editMode ? t('dashboard.doneEditing') : t('dashboard.customize')}
+  if (!overview) {
+    return (
+      <div className="page dashboard-page dv-page-grid">
+        <header className="page-header dashboard-load-error-header">
+          <h1 className="ds-page-header-title" data-ux="page-title">
+            {t('dashboard.title')}
+          </h1>
+        </header>
+        <EmptyState
+          icon={CloudOff}
+          className="dashboard-load-error"
+          title={t('pipeline.hub.loadError')}
+          description={t('errors.generic')}
+          actions={
+            <Button type="button" variant="primary" onClick={() => void load()}>
+              {t('pipeline.hub.retry')}
             </Button>
-          </div>
-        }
-      />
-
-      {reviewPendingCount > 0 && !editMode ? (
-        <Banner
-          icon={ListChecks}
-          title={t('dashboard.reviewBannerTitle', { count: reviewPendingCount })}
-          description={t('dashboard.reviewBannerDescription', { count: reviewPendingCount })}
-          action={
-            <Link to={routes.reviewQueue} className="btn btn-primary">
-              {t('dashboard.reviewBannerAction')}
-            </Link>
           }
-          className="dashboard-review-banner"
         />
-      ) : null}
+      </div>
+    );
+  }
 
-      {editMode ? (
-        <div className="dashboard-add-panel card">
-          <h2 className="dashboard-add-title">{t('dashboard.addWidget')}</h2>
-          <div className="dashboard-add-row">
-            <Select
-              value={addType}
-              onChange={(v) => {
-                setAddType(parseDashboardWidgetType(v));
-              }}
-              options={addableWidgetTypes.map((type) => ({
-                value: type,
-                label: t(`dashboard.widgetType.${type}`),
-              }))}
-              aria-label={t('dashboard.addWidget')}
-            />
-            {addType === 'saved_view' ? (
+  const customizeToggle = (
+    <Button
+      type="button"
+      variant={editMode ? 'primary' : 'ghost'}
+      className="dashboard-customize-toggle"
+      onClick={() => {
+        setEditMode((v) => !v);
+      }}
+    >
+      {editMode ? t('dashboard.doneEditing') : t('dashboard.customize')}
+    </Button>
+  );
+
+  return (
+    <DocumentUploadProvider
+      dropTarget={DASHBOARD_DROP_TARGET}
+      onUploaded={() => {
+        void load();
+      }}
+    >
+      <div
+        className="page dashboard-page dv-page-grid"
+        data-load-state={loadFailed ? 'stale' : 'ok'}
+      >
+        <StructuringHub overview={overview} extraActions={customizeToggle} />
+
+        {editMode ? (
+          <div className="dashboard-add-panel card">
+            <h2 className="dashboard-add-title">{t('dashboard.addWidget')}</h2>
+            <div className="dashboard-add-row">
               <Select
-                value={addViewId}
-                onChange={setAddViewId}
-                options={[
-                  { value: '', label: t('dashboard.pickSavedView') },
-                  ...savedViews.map((v) => ({ value: v.id, label: v.name })),
-                ]}
-                aria-label={t('dashboard.pickSavedView')}
+                value={addType}
+                onChange={(v) => {
+                  setAddType(parseDashboardWidgetType(v));
+                }}
+                options={addableWidgetTypes.map((type) => ({
+                  value: type,
+                  label: t(`dashboard.widgetType.${type}`),
+                }))}
+                aria-label={t('dashboard.addWidget')}
               />
-            ) : null}
-            <Button
-              type="button"
-              onClick={onAddWidget}
-              disabled={addType === 'saved_view' && !addViewId}
-            >
-              {t('dashboard.addWidgetAction')}
-            </Button>
+              {addType === 'saved_view' ? (
+                <Select
+                  value={addViewId}
+                  onChange={setAddViewId}
+                  options={[
+                    { value: '', label: t('dashboard.pickSavedView') },
+                    ...savedViews.map((v) => ({ value: v.id, label: v.name })),
+                  ]}
+                  aria-label={t('dashboard.pickSavedView')}
+                />
+              ) : null}
+              <Button
+                type="button"
+                onClick={onAddWidget}
+                disabled={addType === 'saved_view' && !addViewId}
+              >
+                {t('dashboard.addWidgetAction')}
+              </Button>
+            </div>
           </div>
-        </div>
-      ) : null}
+        ) : null}
 
-      <DashboardWidgets
-        widgets={widgets}
-        editMode={editMode}
-        onWidgetsChange={(next) => {
-          void persist(next);
-        }}
-        savedViews={savedViews}
-        onRefreshViews={() => {
-          void refreshViews();
-        }}
-        statistics={statistics}
-      />
-    </div>
+        <section className="dashboard-workspace" aria-labelledby="dashboard-workspace-title">
+          <h2 id="dashboard-workspace-title" className="pipeline-section-title">
+            {t('pipeline.hub.workspaceTitle')}
+          </h2>
+          <DashboardWidgets
+            widgets={widgets}
+            editMode={editMode}
+            onWidgetsChange={(next) => {
+              void persist(next);
+            }}
+            savedViews={savedViews}
+            statistics={statistics}
+          />
+        </section>
+      </div>
+    </DocumentUploadProvider>
   );
 }
