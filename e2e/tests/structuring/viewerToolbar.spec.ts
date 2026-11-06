@@ -39,3 +39,28 @@ test('viewer: marking tools first, page view in one menu', async ({ page }) => {
   await expect(menu).toHaveCount(0);
   expect(log.unmatched).toEqual([]);
 });
+
+for (const width of [390, 1024, 1280, 1440]) {
+  test(`viewer: marking tools never clip their labels at ${width}px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 900 });
+    const log = await installStructuringMocks(page);
+    await page.goto(`/documents/${LAYOUT_DOCUMENT_ID}`);
+    const toolbar = page.getByTestId('layout-viewer-toolbar');
+    await expect(toolbar.getByRole('radio')).toHaveCount(3);
+    const clipped = await toolbar.evaluate((bar) => {
+      const barBox = bar.getBoundingClientRect();
+      const hits: string[] = [];
+      for (const option of bar.querySelectorAll('[role="radio"]')) {
+        const box = option.getBoundingClientRect();
+        const content = option.querySelector('.segmented-option-content');
+        const contentBox = content ? content.getBoundingClientRect() : box;
+        if (contentBox.right > box.right + 1 || box.right > barBox.right + 1) {
+          hits.push(option.textContent ?? '');
+        }
+      }
+      return hits;
+    });
+    expect(clipped).toEqual([]);
+    expect(log.unmatched).toEqual([]);
+  });
+}

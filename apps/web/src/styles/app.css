@@ -17400,10 +17400,13 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 /* ---------- Viewer toolbar: the marking task first, the page view in one menu ---------- */
 
 .layout-viewer-toolbar {
-  gap: var(--dv-space-md);
+  flex-wrap: wrap;
+  gap: var(--dv-space-xs) var(--dv-space-md);
+  overflow-x: visible;
 }
 
 .layout-viewer-toolbar .document-selection-tools.segmented-control--shell {
+  flex: 0 0 auto;
   flex-wrap: nowrap;
   gap: var(--dv-space-3xs);
   padding: var(--dv-space-3xs);
@@ -17413,7 +17416,9 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 }
 
 .layout-viewer-toolbar .document-selection-tools .segmented-control__option {
+  flex: 0 0 auto;
   min-width: 0;
+  white-space: nowrap;
   min-height: calc(var(--dv-ribbon-control-height) - 2 * var(--dv-space-3xs));
   padding: 0 var(--dv-ribbon-control-padding-x);
   border: 0;
@@ -17446,7 +17451,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 }
 
 .layout-viewer-toolbar-hint {
-  flex: 1 1 auto;
+  flex: 1 1 0;
   min-width: 0;
   margin: 0;
   overflow: hidden;
@@ -17458,6 +17463,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 
 .layout-viewer-toolbar-actions {
   display: inline-flex;
+  margin-inline-start: auto;
   align-items: center;
   gap: var(--dv-space-2xs);
 }
@@ -17488,10 +17494,6 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 }
 
 @media (max-width: 480px) {
-  .layout-viewer-toolbar .document-selection-tools .segmented-control__option {
-    white-space: nowrap;
-  }
-
   .layout-viewer-toolbar .document-selection-tools .segmented-option-content > svg {
     display: none;
   }
