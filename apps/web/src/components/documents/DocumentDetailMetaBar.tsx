@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { DocumentDto } from '@docuvate/contracts';
-import { MoreVertical } from 'lucide-react';
+import { Download, MoreVertical } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { documentContentUrl } from '../../lib/api';
@@ -95,8 +95,10 @@ export function DocumentDetailMetaBar({
             data-ux="primary-action"
             href={documentContentUrl(doc.id, true)}
             download={doc.filename}
+            aria-label={t('documents.download')}
           >
-            {t('documents.download')}
+            <Download size={16} strokeWidth={2} aria-hidden />
+            <span className="document-detail-download-label">{t('documents.download')}</span>
           </a>
           {doc.status === 'ready' ? <DocumentExportMenu documentId={doc.id} /> : null}
           <Menu>

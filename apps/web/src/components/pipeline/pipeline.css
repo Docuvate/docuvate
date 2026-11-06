@@ -1233,14 +1233,24 @@ button.aspect-strip-btn:hover {
   }
 }
 
-/* Small screens: the document title keeps its room; export collapses to its icon. */
+/* Small screens: the document title keeps its room; download and export collapse to icons. */
+.document-detail-download {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--dv-space-xs);
+}
+
 @media (max-width: 767px) {
-  .document-export-trigger {
+  .document-export-trigger,
+  .document-detail-download {
     min-inline-size: var(--dv-control-touch-target);
     padding-inline: var(--dv-space-xs);
+    justify-content: center;
   }
 
-  .document-export-label {
+  .document-export-label,
+  .document-detail-download-label,
+  .document-export-trigger > svg:last-child {
     display: none;
   }
 }
