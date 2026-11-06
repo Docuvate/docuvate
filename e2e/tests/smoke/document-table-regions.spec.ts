@@ -137,8 +137,17 @@ test.describe('document table regions', () => {
     const card = page.getByTestId('corrected-table-card');
     await expect(card).toBeVisible({ timeout: 30_000 });
     // Structure edits are a draft on the real table; the header stepper is directly on the card.
-    const headerRows = card.getByRole('spinbutton', { name: /Kopfzeilen|Header rows/i });
-    await headerRows.fill('1');
+    // The detected header count may already be right, so step it away from whatever was inferred.
+    const headerGroup = card.getByRole('group', { name: /Kopfzeilen|Header rows/i });
+    const headerRows = headerGroup.getByRole('spinbutton');
+    const detectedHeaderRows = await headerRows.inputValue();
+    const moreHeaderRows = headerGroup.getByRole('button', { name: /^(Mehr|More)$/ });
+    await (
+      (await moreHeaderRows.isEnabled())
+        ? moreHeaderRows
+        : headerGroup.getByRole('button', { name: /^(Weniger|Fewer)$/ })
+    ).click();
+    await expect(headerRows).not.toHaveValue(detectedHeaderRows);
     await expect(card.getByRole('button', { name: /^(Übernehmen|Apply)$/ })).toBeVisible();
     const firstCell = card.locator('.layout-table-cell-input').first();
     await firstCell.fill('Position');
