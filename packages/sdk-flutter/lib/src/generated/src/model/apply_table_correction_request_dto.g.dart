@@ -31,12 +31,12 @@ ApplyTableCorrectionRequestDtoOpEnum
     case 'remove':
       return _$applyTableCorrectionRequestDtoOpEnum_remove;
     default:
-      throw new ArgumentError(name);
+      throw ArgumentError(name);
   }
 }
 
 final BuiltSet<ApplyTableCorrectionRequestDtoOpEnum>
-    _$applyTableCorrectionRequestDtoOpEnumValues = new BuiltSet<
+    _$applyTableCorrectionRequestDtoOpEnumValues = BuiltSet<
         ApplyTableCorrectionRequestDtoOpEnum>(const <ApplyTableCorrectionRequestDtoOpEnum>[
   _$applyTableCorrectionRequestDtoOpEnum_create,
   _$applyTableCorrectionRequestDtoOpEnum_setHeaders,
@@ -59,12 +59,12 @@ ApplyTableCorrectionRequestDtoShapeEnum
     case 'polygon':
       return _$applyTableCorrectionRequestDtoShapeEnum_polygon;
     default:
-      throw new ArgumentError(name);
+      throw ArgumentError(name);
   }
 }
 
 final BuiltSet<ApplyTableCorrectionRequestDtoShapeEnum>
-    _$applyTableCorrectionRequestDtoShapeEnumValues = new BuiltSet<
+    _$applyTableCorrectionRequestDtoShapeEnumValues = BuiltSet<
         ApplyTableCorrectionRequestDtoShapeEnum>(const <ApplyTableCorrectionRequestDtoShapeEnum>[
   _$applyTableCorrectionRequestDtoShapeEnum_rect,
   _$applyTableCorrectionRequestDtoShapeEnum_polygon,
@@ -90,12 +90,12 @@ ApplyTableCorrectionRequestDtoTableTypeEnum
     case 'other':
       return _$applyTableCorrectionRequestDtoTableTypeEnum_other;
     default:
-      throw new ArgumentError(name);
+      throw ArgumentError(name);
   }
 }
 
 final BuiltSet<ApplyTableCorrectionRequestDtoTableTypeEnum>
-    _$applyTableCorrectionRequestDtoTableTypeEnumValues = new BuiltSet<
+    _$applyTableCorrectionRequestDtoTableTypeEnumValues = BuiltSet<
         ApplyTableCorrectionRequestDtoTableTypeEnum>(const <ApplyTableCorrectionRequestDtoTableTypeEnum>[
   _$applyTableCorrectionRequestDtoTableTypeEnum_lineItems,
   _$applyTableCorrectionRequestDtoTableTypeEnum_keyValue,
@@ -104,13 +104,13 @@ final BuiltSet<ApplyTableCorrectionRequestDtoTableTypeEnum>
 
 Serializer<ApplyTableCorrectionRequestDtoOpEnum>
     _$applyTableCorrectionRequestDtoOpEnumSerializer =
-    new _$ApplyTableCorrectionRequestDtoOpEnumSerializer();
+    _$ApplyTableCorrectionRequestDtoOpEnumSerializer();
 Serializer<ApplyTableCorrectionRequestDtoShapeEnum>
     _$applyTableCorrectionRequestDtoShapeEnumSerializer =
-    new _$ApplyTableCorrectionRequestDtoShapeEnumSerializer();
+    _$ApplyTableCorrectionRequestDtoShapeEnumSerializer();
 Serializer<ApplyTableCorrectionRequestDtoTableTypeEnum>
     _$applyTableCorrectionRequestDtoTableTypeEnumSerializer =
-    new _$ApplyTableCorrectionRequestDtoTableTypeEnumSerializer();
+    _$ApplyTableCorrectionRequestDtoTableTypeEnumSerializer();
 
 class _$ApplyTableCorrectionRequestDtoOpEnumSerializer
     implements PrimitiveSerializer<ApplyTableCorrectionRequestDtoOpEnum> {
@@ -243,11 +243,23 @@ class _$ApplyTableCorrectionRequestDto extends ApplyTableCorrectionRequestDto {
   @override
   final num? headerCols;
   @override
+  final num? footerRows;
+  @override
+  final num? trailingHeaderCols;
+  @override
+  final bool? banded;
+  @override
+  final BuiltList<TableRowRoleInputDto>? rowRoles;
+  @override
+  final BuiltList<TableRuleLineInputDto>? ruleLines;
+  @override
+  final BuiltList<TableMergeInputDto>? merges;
+  @override
   final DocumentRegionTableCellDto? cell;
 
   factory _$ApplyTableCorrectionRequestDto(
           [void Function(ApplyTableCorrectionRequestDtoBuilder)? updates]) =>
-      (new ApplyTableCorrectionRequestDtoBuilder()..update(updates))._build();
+      (ApplyTableCorrectionRequestDtoBuilder()..update(updates))._build();
 
   _$ApplyTableCorrectionRequestDto._(
       {required this.id,
@@ -263,14 +275,14 @@ class _$ApplyTableCorrectionRequestDto extends ApplyTableCorrectionRequestDto {
       this.tableType,
       this.headerRows,
       this.headerCols,
+      this.footerRows,
+      this.trailingHeaderCols,
+      this.banded,
+      this.rowRoles,
+      this.ruleLines,
+      this.merges,
       this.cell})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        id, r'ApplyTableCorrectionRequestDto', 'id');
-    BuiltValueNullFieldError.checkNotNull(
-        op, r'ApplyTableCorrectionRequestDto', 'op');
-  }
-
+      : super._();
   @override
   ApplyTableCorrectionRequestDto rebuild(
           void Function(ApplyTableCorrectionRequestDtoBuilder) updates) =>
@@ -278,7 +290,7 @@ class _$ApplyTableCorrectionRequestDto extends ApplyTableCorrectionRequestDto {
 
   @override
   ApplyTableCorrectionRequestDtoBuilder toBuilder() =>
-      new ApplyTableCorrectionRequestDtoBuilder()..replace(this);
+      ApplyTableCorrectionRequestDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -297,6 +309,12 @@ class _$ApplyTableCorrectionRequestDto extends ApplyTableCorrectionRequestDto {
         tableType == other.tableType &&
         headerRows == other.headerRows &&
         headerCols == other.headerCols &&
+        footerRows == other.footerRows &&
+        trailingHeaderCols == other.trailingHeaderCols &&
+        banded == other.banded &&
+        rowRoles == other.rowRoles &&
+        ruleLines == other.ruleLines &&
+        merges == other.merges &&
         cell == other.cell;
   }
 
@@ -316,6 +334,12 @@ class _$ApplyTableCorrectionRequestDto extends ApplyTableCorrectionRequestDto {
     _$hash = $jc(_$hash, tableType.hashCode);
     _$hash = $jc(_$hash, headerRows.hashCode);
     _$hash = $jc(_$hash, headerCols.hashCode);
+    _$hash = $jc(_$hash, footerRows.hashCode);
+    _$hash = $jc(_$hash, trailingHeaderCols.hashCode);
+    _$hash = $jc(_$hash, banded.hashCode);
+    _$hash = $jc(_$hash, rowRoles.hashCode);
+    _$hash = $jc(_$hash, ruleLines.hashCode);
+    _$hash = $jc(_$hash, merges.hashCode);
     _$hash = $jc(_$hash, cell.hashCode);
     _$hash = $jf(_$hash);
     return _$hash;
@@ -337,6 +361,12 @@ class _$ApplyTableCorrectionRequestDto extends ApplyTableCorrectionRequestDto {
           ..add('tableType', tableType)
           ..add('headerRows', headerRows)
           ..add('headerCols', headerCols)
+          ..add('footerRows', footerRows)
+          ..add('trailingHeaderCols', trailingHeaderCols)
+          ..add('banded', banded)
+          ..add('rowRoles', rowRoles)
+          ..add('ruleLines', ruleLines)
+          ..add('merges', merges)
           ..add('cell', cell))
         .toString();
   }
@@ -383,7 +413,7 @@ class ApplyTableCorrectionRequestDtoBuilder
 
   ListBuilder<num>? _blockIndexes;
   ListBuilder<num> get blockIndexes =>
-      _$this._blockIndexes ??= new ListBuilder<num>();
+      _$this._blockIndexes ??= ListBuilder<num>();
   set blockIndexes(ListBuilder<num>? blockIndexes) =>
       _$this._blockIndexes = blockIndexes;
 
@@ -406,9 +436,40 @@ class ApplyTableCorrectionRequestDtoBuilder
   num? get headerCols => _$this._headerCols;
   set headerCols(num? headerCols) => _$this._headerCols = headerCols;
 
+  num? _footerRows;
+  num? get footerRows => _$this._footerRows;
+  set footerRows(num? footerRows) => _$this._footerRows = footerRows;
+
+  num? _trailingHeaderCols;
+  num? get trailingHeaderCols => _$this._trailingHeaderCols;
+  set trailingHeaderCols(num? trailingHeaderCols) =>
+      _$this._trailingHeaderCols = trailingHeaderCols;
+
+  bool? _banded;
+  bool? get banded => _$this._banded;
+  set banded(bool? banded) => _$this._banded = banded;
+
+  ListBuilder<TableRowRoleInputDto>? _rowRoles;
+  ListBuilder<TableRowRoleInputDto> get rowRoles =>
+      _$this._rowRoles ??= ListBuilder<TableRowRoleInputDto>();
+  set rowRoles(ListBuilder<TableRowRoleInputDto>? rowRoles) =>
+      _$this._rowRoles = rowRoles;
+
+  ListBuilder<TableRuleLineInputDto>? _ruleLines;
+  ListBuilder<TableRuleLineInputDto> get ruleLines =>
+      _$this._ruleLines ??= ListBuilder<TableRuleLineInputDto>();
+  set ruleLines(ListBuilder<TableRuleLineInputDto>? ruleLines) =>
+      _$this._ruleLines = ruleLines;
+
+  ListBuilder<TableMergeInputDto>? _merges;
+  ListBuilder<TableMergeInputDto> get merges =>
+      _$this._merges ??= ListBuilder<TableMergeInputDto>();
+  set merges(ListBuilder<TableMergeInputDto>? merges) =>
+      _$this._merges = merges;
+
   DocumentRegionTableCellDtoBuilder? _cell;
   DocumentRegionTableCellDtoBuilder get cell =>
-      _$this._cell ??= new DocumentRegionTableCellDtoBuilder();
+      _$this._cell ??= DocumentRegionTableCellDtoBuilder();
   set cell(DocumentRegionTableCellDtoBuilder? cell) => _$this._cell = cell;
 
   ApplyTableCorrectionRequestDtoBuilder() {
@@ -431,6 +492,12 @@ class ApplyTableCorrectionRequestDtoBuilder
       _tableType = $v.tableType;
       _headerRows = $v.headerRows;
       _headerCols = $v.headerCols;
+      _footerRows = $v.footerRows;
+      _trailingHeaderCols = $v.trailingHeaderCols;
+      _banded = $v.banded;
+      _rowRoles = $v.rowRoles?.toBuilder();
+      _ruleLines = $v.ruleLines?.toBuilder();
+      _merges = $v.merges?.toBuilder();
       _cell = $v.cell?.toBuilder();
       _$v = null;
     }
@@ -439,7 +506,6 @@ class ApplyTableCorrectionRequestDtoBuilder
 
   @override
   void replace(ApplyTableCorrectionRequestDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$ApplyTableCorrectionRequestDto;
   }
 
@@ -455,33 +521,46 @@ class ApplyTableCorrectionRequestDtoBuilder
     _$ApplyTableCorrectionRequestDto _$result;
     try {
       _$result = _$v ??
-          new _$ApplyTableCorrectionRequestDto._(
-              id: BuiltValueNullFieldError.checkNotNull(
-                  id, r'ApplyTableCorrectionRequestDto', 'id'),
-              op: BuiltValueNullFieldError.checkNotNull(
-                  op, r'ApplyTableCorrectionRequestDto', 'op'),
-              page: page,
-              shape: shape,
-              x0: x0,
-              y0: y0,
-              x1: x1,
-              y1: y1,
-              blockIndexes: _blockIndexes?.build(),
-              beforeRegionId: beforeRegionId,
-              tableType: tableType,
-              headerRows: headerRows,
-              headerCols: headerCols,
-              cell: _cell?.build());
+          _$ApplyTableCorrectionRequestDto._(
+            id: BuiltValueNullFieldError.checkNotNull(
+                id, r'ApplyTableCorrectionRequestDto', 'id'),
+            op: BuiltValueNullFieldError.checkNotNull(
+                op, r'ApplyTableCorrectionRequestDto', 'op'),
+            page: page,
+            shape: shape,
+            x0: x0,
+            y0: y0,
+            x1: x1,
+            y1: y1,
+            blockIndexes: _blockIndexes?.build(),
+            beforeRegionId: beforeRegionId,
+            tableType: tableType,
+            headerRows: headerRows,
+            headerCols: headerCols,
+            footerRows: footerRows,
+            trailingHeaderCols: trailingHeaderCols,
+            banded: banded,
+            rowRoles: _rowRoles?.build(),
+            ruleLines: _ruleLines?.build(),
+            merges: _merges?.build(),
+            cell: _cell?.build(),
+          );
     } catch (_) {
       late String _$failedField;
       try {
         _$failedField = 'blockIndexes';
         _blockIndexes?.build();
 
+        _$failedField = 'rowRoles';
+        _rowRoles?.build();
+        _$failedField = 'ruleLines';
+        _ruleLines?.build();
+        _$failedField = 'merges';
+        _merges?.build();
         _$failedField = 'cell';
         _cell?.build();
       } catch (e) {
-        throw new BuiltValueNestedFieldError(
+        throw BuiltValueNestedFieldError(
             r'ApplyTableCorrectionRequestDto', _$failedField, e.toString());
       }
       rethrow;

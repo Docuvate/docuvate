@@ -12,13 +12,9 @@ class _$ApplyLabelCorrectionRequestDto extends ApplyLabelCorrectionRequestDto {
 
   factory _$ApplyLabelCorrectionRequestDto(
           [void Function(ApplyLabelCorrectionRequestDtoBuilder)? updates]) =>
-      (new ApplyLabelCorrectionRequestDtoBuilder()..update(updates))._build();
+      (ApplyLabelCorrectionRequestDtoBuilder()..update(updates))._build();
 
-  _$ApplyLabelCorrectionRequestDto._({required this.toTagId}) : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        toTagId, r'ApplyLabelCorrectionRequestDto', 'toTagId');
-  }
-
+  _$ApplyLabelCorrectionRequestDto._({required this.toTagId}) : super._();
   @override
   ApplyLabelCorrectionRequestDto rebuild(
           void Function(ApplyLabelCorrectionRequestDtoBuilder) updates) =>
@@ -26,7 +22,7 @@ class _$ApplyLabelCorrectionRequestDto extends ApplyLabelCorrectionRequestDto {
 
   @override
   ApplyLabelCorrectionRequestDtoBuilder toBuilder() =>
-      new ApplyLabelCorrectionRequestDtoBuilder()..replace(this);
+      ApplyLabelCorrectionRequestDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -75,7 +71,6 @@ class ApplyLabelCorrectionRequestDtoBuilder
 
   @override
   void replace(ApplyLabelCorrectionRequestDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$ApplyLabelCorrectionRequestDto;
   }
 
@@ -89,9 +84,10 @@ class ApplyLabelCorrectionRequestDtoBuilder
 
   _$ApplyLabelCorrectionRequestDto _build() {
     final _$result = _$v ??
-        new _$ApplyLabelCorrectionRequestDto._(
-            toTagId: BuiltValueNullFieldError.checkNotNull(
-                toTagId, r'ApplyLabelCorrectionRequestDto', 'toTagId'));
+        _$ApplyLabelCorrectionRequestDto._(
+          toTagId: BuiltValueNullFieldError.checkNotNull(
+              toTagId, r'ApplyLabelCorrectionRequestDto', 'toTagId'),
+        );
     replace(_$result);
     return _$result;
   }

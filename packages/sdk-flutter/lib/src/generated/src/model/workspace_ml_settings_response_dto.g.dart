@@ -26,12 +26,12 @@ WorkspaceMlSettingsResponseDtoLabelAutoAssignEnum
     case 'normal':
       return _$workspaceMlSettingsResponseDtoLabelAutoAssignEnum_normal;
     default:
-      throw new ArgumentError(name);
+      throw ArgumentError(name);
   }
 }
 
 final BuiltSet<WorkspaceMlSettingsResponseDtoLabelAutoAssignEnum>
-    _$workspaceMlSettingsResponseDtoLabelAutoAssignEnumValues = new BuiltSet<
+    _$workspaceMlSettingsResponseDtoLabelAutoAssignEnumValues = BuiltSet<
         WorkspaceMlSettingsResponseDtoLabelAutoAssignEnum>(const <WorkspaceMlSettingsResponseDtoLabelAutoAssignEnum>[
   _$workspaceMlSettingsResponseDtoLabelAutoAssignEnum_off,
   _$workspaceMlSettingsResponseDtoLabelAutoAssignEnum_cautious,
@@ -58,12 +58,12 @@ WorkspaceMlSettingsResponseDtoLabelSuggestionsEnum
     case 'many':
       return _$workspaceMlSettingsResponseDtoLabelSuggestionsEnum_many;
     default:
-      throw new ArgumentError(name);
+      throw ArgumentError(name);
   }
 }
 
 final BuiltSet<WorkspaceMlSettingsResponseDtoLabelSuggestionsEnum>
-    _$workspaceMlSettingsResponseDtoLabelSuggestionsEnumValues = new BuiltSet<
+    _$workspaceMlSettingsResponseDtoLabelSuggestionsEnumValues = BuiltSet<
         WorkspaceMlSettingsResponseDtoLabelSuggestionsEnum>(const <WorkspaceMlSettingsResponseDtoLabelSuggestionsEnum>[
   _$workspaceMlSettingsResponseDtoLabelSuggestionsEnum_few,
   _$workspaceMlSettingsResponseDtoLabelSuggestionsEnum_normal,
@@ -90,12 +90,12 @@ WorkspaceMlSettingsResponseDtoDuplicateDetectionEnum
     case 'similar':
       return _$workspaceMlSettingsResponseDtoDuplicateDetectionEnum_similar;
     default:
-      throw new ArgumentError(name);
+      throw ArgumentError(name);
   }
 }
 
 final BuiltSet<WorkspaceMlSettingsResponseDtoDuplicateDetectionEnum>
-    _$workspaceMlSettingsResponseDtoDuplicateDetectionEnumValues = new BuiltSet<
+    _$workspaceMlSettingsResponseDtoDuplicateDetectionEnumValues = BuiltSet<
         WorkspaceMlSettingsResponseDtoDuplicateDetectionEnum>(const <WorkspaceMlSettingsResponseDtoDuplicateDetectionEnum>[
   _$workspaceMlSettingsResponseDtoDuplicateDetectionEnum_off,
   _$workspaceMlSettingsResponseDtoDuplicateDetectionEnum_exact,
@@ -122,12 +122,12 @@ WorkspaceMlSettingsResponseDtoFieldAcceptanceEnum
     case 'generous':
       return _$workspaceMlSettingsResponseDtoFieldAcceptanceEnum_generous;
     default:
-      throw new ArgumentError(name);
+      throw ArgumentError(name);
   }
 }
 
 final BuiltSet<WorkspaceMlSettingsResponseDtoFieldAcceptanceEnum>
-    _$workspaceMlSettingsResponseDtoFieldAcceptanceEnumValues = new BuiltSet<
+    _$workspaceMlSettingsResponseDtoFieldAcceptanceEnumValues = BuiltSet<
         WorkspaceMlSettingsResponseDtoFieldAcceptanceEnum>(const <WorkspaceMlSettingsResponseDtoFieldAcceptanceEnum>[
   _$workspaceMlSettingsResponseDtoFieldAcceptanceEnum_cautious,
   _$workspaceMlSettingsResponseDtoFieldAcceptanceEnum_normal,
@@ -136,16 +136,16 @@ final BuiltSet<WorkspaceMlSettingsResponseDtoFieldAcceptanceEnum>
 
 Serializer<WorkspaceMlSettingsResponseDtoLabelAutoAssignEnum>
     _$workspaceMlSettingsResponseDtoLabelAutoAssignEnumSerializer =
-    new _$WorkspaceMlSettingsResponseDtoLabelAutoAssignEnumSerializer();
+    _$WorkspaceMlSettingsResponseDtoLabelAutoAssignEnumSerializer();
 Serializer<WorkspaceMlSettingsResponseDtoLabelSuggestionsEnum>
     _$workspaceMlSettingsResponseDtoLabelSuggestionsEnumSerializer =
-    new _$WorkspaceMlSettingsResponseDtoLabelSuggestionsEnumSerializer();
+    _$WorkspaceMlSettingsResponseDtoLabelSuggestionsEnumSerializer();
 Serializer<WorkspaceMlSettingsResponseDtoDuplicateDetectionEnum>
     _$workspaceMlSettingsResponseDtoDuplicateDetectionEnumSerializer =
-    new _$WorkspaceMlSettingsResponseDtoDuplicateDetectionEnumSerializer();
+    _$WorkspaceMlSettingsResponseDtoDuplicateDetectionEnumSerializer();
 Serializer<WorkspaceMlSettingsResponseDtoFieldAcceptanceEnum>
     _$workspaceMlSettingsResponseDtoFieldAcceptanceEnumSerializer =
-    new _$WorkspaceMlSettingsResponseDtoFieldAcceptanceEnumSerializer();
+    _$WorkspaceMlSettingsResponseDtoFieldAcceptanceEnumSerializer();
 
 class _$WorkspaceMlSettingsResponseDtoLabelAutoAssignEnumSerializer
     implements
@@ -304,7 +304,7 @@ class _$WorkspaceMlSettingsResponseDto extends WorkspaceMlSettingsResponseDto {
 
   factory _$WorkspaceMlSettingsResponseDto(
           [void Function(WorkspaceMlSettingsResponseDtoBuilder)? updates]) =>
-      (new WorkspaceMlSettingsResponseDtoBuilder()..update(updates))._build();
+      (WorkspaceMlSettingsResponseDtoBuilder()..update(updates))._build();
 
   _$WorkspaceMlSettingsResponseDto._(
       {required this.labelAutoAssign,
@@ -312,19 +312,7 @@ class _$WorkspaceMlSettingsResponseDto extends WorkspaceMlSettingsResponseDto {
       required this.duplicateDetection,
       required this.fieldAcceptance,
       required this.editable})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        labelAutoAssign, r'WorkspaceMlSettingsResponseDto', 'labelAutoAssign');
-    BuiltValueNullFieldError.checkNotNull(labelSuggestions,
-        r'WorkspaceMlSettingsResponseDto', 'labelSuggestions');
-    BuiltValueNullFieldError.checkNotNull(duplicateDetection,
-        r'WorkspaceMlSettingsResponseDto', 'duplicateDetection');
-    BuiltValueNullFieldError.checkNotNull(
-        fieldAcceptance, r'WorkspaceMlSettingsResponseDto', 'fieldAcceptance');
-    BuiltValueNullFieldError.checkNotNull(
-        editable, r'WorkspaceMlSettingsResponseDto', 'editable');
-  }
-
+      : super._();
   @override
   WorkspaceMlSettingsResponseDto rebuild(
           void Function(WorkspaceMlSettingsResponseDtoBuilder) updates) =>
@@ -332,7 +320,7 @@ class _$WorkspaceMlSettingsResponseDto extends WorkspaceMlSettingsResponseDto {
 
   @override
   WorkspaceMlSettingsResponseDtoBuilder toBuilder() =>
-      new WorkspaceMlSettingsResponseDtoBuilder()..replace(this);
+      WorkspaceMlSettingsResponseDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -428,7 +416,6 @@ class WorkspaceMlSettingsResponseDtoBuilder
 
   @override
   void replace(WorkspaceMlSettingsResponseDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$WorkspaceMlSettingsResponseDto;
   }
 
@@ -442,25 +429,26 @@ class WorkspaceMlSettingsResponseDtoBuilder
 
   _$WorkspaceMlSettingsResponseDto _build() {
     final _$result = _$v ??
-        new _$WorkspaceMlSettingsResponseDto._(
-            labelAutoAssign: BuiltValueNullFieldError.checkNotNull(
-                labelAutoAssign,
-                r'WorkspaceMlSettingsResponseDto',
-                'labelAutoAssign'),
-            labelSuggestions: BuiltValueNullFieldError.checkNotNull(
-                labelSuggestions,
-                r'WorkspaceMlSettingsResponseDto',
-                'labelSuggestions'),
-            duplicateDetection: BuiltValueNullFieldError.checkNotNull(
-                duplicateDetection,
-                r'WorkspaceMlSettingsResponseDto',
-                'duplicateDetection'),
-            fieldAcceptance: BuiltValueNullFieldError.checkNotNull(
-                fieldAcceptance,
-                r'WorkspaceMlSettingsResponseDto',
-                'fieldAcceptance'),
-            editable: BuiltValueNullFieldError.checkNotNull(
-                editable, r'WorkspaceMlSettingsResponseDto', 'editable'));
+        _$WorkspaceMlSettingsResponseDto._(
+          labelAutoAssign: BuiltValueNullFieldError.checkNotNull(
+              labelAutoAssign,
+              r'WorkspaceMlSettingsResponseDto',
+              'labelAutoAssign'),
+          labelSuggestions: BuiltValueNullFieldError.checkNotNull(
+              labelSuggestions,
+              r'WorkspaceMlSettingsResponseDto',
+              'labelSuggestions'),
+          duplicateDetection: BuiltValueNullFieldError.checkNotNull(
+              duplicateDetection,
+              r'WorkspaceMlSettingsResponseDto',
+              'duplicateDetection'),
+          fieldAcceptance: BuiltValueNullFieldError.checkNotNull(
+              fieldAcceptance,
+              r'WorkspaceMlSettingsResponseDto',
+              'fieldAcceptance'),
+          editable: BuiltValueNullFieldError.checkNotNull(
+              editable, r'WorkspaceMlSettingsResponseDto', 'editable'),
+        );
     replace(_$result);
     return _$result;
   }

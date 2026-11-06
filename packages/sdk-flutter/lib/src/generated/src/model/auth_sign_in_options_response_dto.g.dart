@@ -16,21 +16,13 @@ class _$AuthSignInOptionsResponseDto extends AuthSignInOptionsResponseDto {
 
   factory _$AuthSignInOptionsResponseDto(
           [void Function(AuthSignInOptionsResponseDtoBuilder)? updates]) =>
-      (new AuthSignInOptionsResponseDtoBuilder()..update(updates))._build();
+      (AuthSignInOptionsResponseDtoBuilder()..update(updates))._build();
 
   _$AuthSignInOptionsResponseDto._(
       {required this.passkeysEnabled,
       required this.oidcProviders,
       required this.emailChangeAvailable})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        passkeysEnabled, r'AuthSignInOptionsResponseDto', 'passkeysEnabled');
-    BuiltValueNullFieldError.checkNotNull(
-        oidcProviders, r'AuthSignInOptionsResponseDto', 'oidcProviders');
-    BuiltValueNullFieldError.checkNotNull(emailChangeAvailable,
-        r'AuthSignInOptionsResponseDto', 'emailChangeAvailable');
-  }
-
+      : super._();
   @override
   AuthSignInOptionsResponseDto rebuild(
           void Function(AuthSignInOptionsResponseDtoBuilder) updates) =>
@@ -38,7 +30,7 @@ class _$AuthSignInOptionsResponseDto extends AuthSignInOptionsResponseDto {
 
   @override
   AuthSignInOptionsResponseDtoBuilder toBuilder() =>
-      new AuthSignInOptionsResponseDtoBuilder()..replace(this);
+      AuthSignInOptionsResponseDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -83,7 +75,7 @@ class AuthSignInOptionsResponseDtoBuilder
   ListBuilder<AuthOidcProviderPublicResponseDto>? _oidcProviders;
   ListBuilder<AuthOidcProviderPublicResponseDto> get oidcProviders =>
       _$this._oidcProviders ??=
-          new ListBuilder<AuthOidcProviderPublicResponseDto>();
+          ListBuilder<AuthOidcProviderPublicResponseDto>();
   set oidcProviders(
           ListBuilder<AuthOidcProviderPublicResponseDto>? oidcProviders) =>
       _$this._oidcProviders = oidcProviders;
@@ -110,7 +102,6 @@ class AuthSignInOptionsResponseDtoBuilder
 
   @override
   void replace(AuthSignInOptionsResponseDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$AuthSignInOptionsResponseDto;
   }
 
@@ -126,23 +117,24 @@ class AuthSignInOptionsResponseDtoBuilder
     _$AuthSignInOptionsResponseDto _$result;
     try {
       _$result = _$v ??
-          new _$AuthSignInOptionsResponseDto._(
-              passkeysEnabled: BuiltValueNullFieldError.checkNotNull(
-                  passkeysEnabled,
-                  r'AuthSignInOptionsResponseDto',
-                  'passkeysEnabled'),
-              oidcProviders: oidcProviders.build(),
-              emailChangeAvailable: BuiltValueNullFieldError.checkNotNull(
-                  emailChangeAvailable,
-                  r'AuthSignInOptionsResponseDto',
-                  'emailChangeAvailable'));
+          _$AuthSignInOptionsResponseDto._(
+            passkeysEnabled: BuiltValueNullFieldError.checkNotNull(
+                passkeysEnabled,
+                r'AuthSignInOptionsResponseDto',
+                'passkeysEnabled'),
+            oidcProviders: oidcProviders.build(),
+            emailChangeAvailable: BuiltValueNullFieldError.checkNotNull(
+                emailChangeAvailable,
+                r'AuthSignInOptionsResponseDto',
+                'emailChangeAvailable'),
+          );
     } catch (_) {
       late String _$failedField;
       try {
         _$failedField = 'oidcProviders';
         oidcProviders.build();
       } catch (e) {
-        throw new BuiltValueNestedFieldError(
+        throw BuiltValueNestedFieldError(
             r'AuthSignInOptionsResponseDto', _$failedField, e.toString());
       }
       rethrow;

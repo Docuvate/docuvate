@@ -183,3 +183,36 @@ Next slices, in order of throughput impact:
 4. Page rotate/deskew (gap 1).
 5. Multi-page groups (gap 3).
 6. Undo/redo stack and autosave indicator across all of the above.
+
+
+## Field suggestion decisions (accept / correct / reject)
+
+Structuring decisions are durable per document. They are **not** a document-wide lock and they do
+not delete OCR or other candidates.
+
+| Decision | Meaning | Effect on open work |
+|---|---|---|
+| **Suggested** | Model or heuristic proposed a field+value; nobody decided yet | Counts as open |
+| **Confirmed** | Person accepted the value, or corrected it then saved | Leaves open; value is the source of truth |
+| **Rejected (`Verworfen`)** | Person dismissed this exact field+normalized value for this document | Leaves open/review queue; raw OCR and other candidates stay |
+| Undecided | Person navigates away (`N`) or leaves the row alone | Stays open |
+
+### Reject semantics
+
+- Inline action beside Accept and Correct (slash-circle, tooltip "Vorschlag verwerfen"). No
+  confirmation dialog.
+- Identity is `(documentId, fieldKey, normalize(value))` where normalize trims, collapses
+  whitespace and lowercases. Rejecting one value does not suppress other values for the same field.
+- Persistence: `corrections` row with `op = reject_suggestion` plus
+  `document_field_suggestion_decisions` (3NF). Withdraw the correction to undo.
+- Open counts and the review queue exclude active rejects. History/Details can list
+  "Verworfene Vorschläge" for undo.
+- Re-extraction that proposes the same field+value again must not resurrect it into open work
+  while the reject remains active. Accepting or correcting that value later withdraws the reject.
+
+### What we deliberately do **not** model
+
+- No document `locked` / "done" state for structuring.
+- No global suppression of field names across the corpus.
+- No `kein Wert` action unless a clear product need appears later.
+

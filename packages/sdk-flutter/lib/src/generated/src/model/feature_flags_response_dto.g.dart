@@ -26,7 +26,7 @@ class _$FeatureFlagsResponseDto extends FeatureFlagsResponseDto {
 
   factory _$FeatureFlagsResponseDto(
           [void Function(FeatureFlagsResponseDtoBuilder)? updates]) =>
-      (new FeatureFlagsResponseDtoBuilder()..update(updates))._build();
+      (FeatureFlagsResponseDtoBuilder()..update(updates))._build();
 
   _$FeatureFlagsResponseDto._(
       {required this.layoutReconstructionCompare,
@@ -37,25 +37,7 @@ class _$FeatureFlagsResponseDto extends FeatureFlagsResponseDto {
       required this.answerAbstention,
       required this.learnedValueTypes,
       required this.layoutKeyValueRoles})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(layoutReconstructionCompare,
-        r'FeatureFlagsResponseDto', 'layoutReconstructionCompare');
-    BuiltValueNullFieldError.checkNotNull(
-        sourceConnectors, r'FeatureFlagsResponseDto', 'sourceConnectors');
-    BuiltValueNullFieldError.checkNotNull(experimentalResearchModels,
-        r'FeatureFlagsResponseDto', 'experimentalResearchModels');
-    BuiltValueNullFieldError.checkNotNull(
-        exactAnswers, r'FeatureFlagsResponseDto', 'exactAnswers');
-    BuiltValueNullFieldError.checkNotNull(
-        smartDuplicates, r'FeatureFlagsResponseDto', 'smartDuplicates');
-    BuiltValueNullFieldError.checkNotNull(
-        answerAbstention, r'FeatureFlagsResponseDto', 'answerAbstention');
-    BuiltValueNullFieldError.checkNotNull(
-        learnedValueTypes, r'FeatureFlagsResponseDto', 'learnedValueTypes');
-    BuiltValueNullFieldError.checkNotNull(
-        layoutKeyValueRoles, r'FeatureFlagsResponseDto', 'layoutKeyValueRoles');
-  }
-
+      : super._();
   @override
   FeatureFlagsResponseDto rebuild(
           void Function(FeatureFlagsResponseDtoBuilder) updates) =>
@@ -63,7 +45,7 @@ class _$FeatureFlagsResponseDto extends FeatureFlagsResponseDto {
 
   @override
   FeatureFlagsResponseDtoBuilder toBuilder() =>
-      new FeatureFlagsResponseDtoBuilder()..replace(this);
+      FeatureFlagsResponseDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -175,7 +157,6 @@ class FeatureFlagsResponseDtoBuilder
 
   @override
   void replace(FeatureFlagsResponseDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$FeatureFlagsResponseDto;
   }
 
@@ -189,22 +170,32 @@ class FeatureFlagsResponseDtoBuilder
 
   _$FeatureFlagsResponseDto _build() {
     final _$result = _$v ??
-        new _$FeatureFlagsResponseDto._(
-            layoutReconstructionCompare: BuiltValueNullFieldError.checkNotNull(
-                layoutReconstructionCompare, r'FeatureFlagsResponseDto', 'layoutReconstructionCompare'),
-            sourceConnectors: BuiltValueNullFieldError.checkNotNull(
-                sourceConnectors, r'FeatureFlagsResponseDto', 'sourceConnectors'),
-            experimentalResearchModels: BuiltValueNullFieldError.checkNotNull(
-                experimentalResearchModels, r'FeatureFlagsResponseDto', 'experimentalResearchModels'),
-            exactAnswers: BuiltValueNullFieldError.checkNotNull(
-                exactAnswers, r'FeatureFlagsResponseDto', 'exactAnswers'),
-            smartDuplicates: BuiltValueNullFieldError.checkNotNull(
-                smartDuplicates, r'FeatureFlagsResponseDto', 'smartDuplicates'),
-            answerAbstention: BuiltValueNullFieldError.checkNotNull(
-                answerAbstention, r'FeatureFlagsResponseDto', 'answerAbstention'),
-            learnedValueTypes: BuiltValueNullFieldError.checkNotNull(
-                learnedValueTypes, r'FeatureFlagsResponseDto', 'learnedValueTypes'),
-            layoutKeyValueRoles: BuiltValueNullFieldError.checkNotNull(layoutKeyValueRoles, r'FeatureFlagsResponseDto', 'layoutKeyValueRoles'));
+        _$FeatureFlagsResponseDto._(
+          layoutReconstructionCompare: BuiltValueNullFieldError.checkNotNull(
+              layoutReconstructionCompare,
+              r'FeatureFlagsResponseDto',
+              'layoutReconstructionCompare'),
+          sourceConnectors: BuiltValueNullFieldError.checkNotNull(
+              sourceConnectors, r'FeatureFlagsResponseDto', 'sourceConnectors'),
+          experimentalResearchModels: BuiltValueNullFieldError.checkNotNull(
+              experimentalResearchModels,
+              r'FeatureFlagsResponseDto',
+              'experimentalResearchModels'),
+          exactAnswers: BuiltValueNullFieldError.checkNotNull(
+              exactAnswers, r'FeatureFlagsResponseDto', 'exactAnswers'),
+          smartDuplicates: BuiltValueNullFieldError.checkNotNull(
+              smartDuplicates, r'FeatureFlagsResponseDto', 'smartDuplicates'),
+          answerAbstention: BuiltValueNullFieldError.checkNotNull(
+              answerAbstention, r'FeatureFlagsResponseDto', 'answerAbstention'),
+          learnedValueTypes: BuiltValueNullFieldError.checkNotNull(
+              learnedValueTypes,
+              r'FeatureFlagsResponseDto',
+              'learnedValueTypes'),
+          layoutKeyValueRoles: BuiltValueNullFieldError.checkNotNull(
+              layoutKeyValueRoles,
+              r'FeatureFlagsResponseDto',
+              'layoutKeyValueRoles'),
+        );
     replace(_$result);
     return _$result;
   }

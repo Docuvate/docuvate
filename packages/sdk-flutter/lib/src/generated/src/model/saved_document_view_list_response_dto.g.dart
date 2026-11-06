@@ -19,24 +19,14 @@ class _$SavedDocumentViewListResponseDto
 
   factory _$SavedDocumentViewListResponseDto(
           [void Function(SavedDocumentViewListResponseDtoBuilder)? updates]) =>
-      (new SavedDocumentViewListResponseDtoBuilder()..update(updates))._build();
+      (SavedDocumentViewListResponseDtoBuilder()..update(updates))._build();
 
   _$SavedDocumentViewListResponseDto._(
       {required this.nextCursor,
       required this.hasMore,
       required this.total,
       required this.items})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        nextCursor, r'SavedDocumentViewListResponseDto', 'nextCursor');
-    BuiltValueNullFieldError.checkNotNull(
-        hasMore, r'SavedDocumentViewListResponseDto', 'hasMore');
-    BuiltValueNullFieldError.checkNotNull(
-        total, r'SavedDocumentViewListResponseDto', 'total');
-    BuiltValueNullFieldError.checkNotNull(
-        items, r'SavedDocumentViewListResponseDto', 'items');
-  }
-
+      : super._();
   @override
   SavedDocumentViewListResponseDto rebuild(
           void Function(SavedDocumentViewListResponseDtoBuilder) updates) =>
@@ -44,7 +34,7 @@ class _$SavedDocumentViewListResponseDto
 
   @override
   SavedDocumentViewListResponseDtoBuilder toBuilder() =>
-      new SavedDocumentViewListResponseDtoBuilder()..replace(this);
+      SavedDocumentViewListResponseDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -98,7 +88,7 @@ class SavedDocumentViewListResponseDtoBuilder
 
   ListBuilder<SavedDocumentViewDtoClass>? _items;
   ListBuilder<SavedDocumentViewDtoClass> get items =>
-      _$this._items ??= new ListBuilder<SavedDocumentViewDtoClass>();
+      _$this._items ??= ListBuilder<SavedDocumentViewDtoClass>();
   set items(ListBuilder<SavedDocumentViewDtoClass>? items) =>
       _$this._items = items;
 
@@ -120,7 +110,6 @@ class SavedDocumentViewListResponseDtoBuilder
 
   @override
   void replace(SavedDocumentViewListResponseDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$SavedDocumentViewListResponseDto;
   }
 
@@ -136,21 +125,22 @@ class SavedDocumentViewListResponseDtoBuilder
     _$SavedDocumentViewListResponseDto _$result;
     try {
       _$result = _$v ??
-          new _$SavedDocumentViewListResponseDto._(
-              nextCursor: BuiltValueNullFieldError.checkNotNull(nextCursor,
-                  r'SavedDocumentViewListResponseDto', 'nextCursor'),
-              hasMore: BuiltValueNullFieldError.checkNotNull(
-                  hasMore, r'SavedDocumentViewListResponseDto', 'hasMore'),
-              total: BuiltValueNullFieldError.checkNotNull(
-                  total, r'SavedDocumentViewListResponseDto', 'total'),
-              items: items.build());
+          _$SavedDocumentViewListResponseDto._(
+            nextCursor: BuiltValueNullFieldError.checkNotNull(
+                nextCursor, r'SavedDocumentViewListResponseDto', 'nextCursor'),
+            hasMore: BuiltValueNullFieldError.checkNotNull(
+                hasMore, r'SavedDocumentViewListResponseDto', 'hasMore'),
+            total: BuiltValueNullFieldError.checkNotNull(
+                total, r'SavedDocumentViewListResponseDto', 'total'),
+            items: items.build(),
+          );
     } catch (_) {
       late String _$failedField;
       try {
         _$failedField = 'items';
         items.build();
       } catch (e) {
-        throw new BuiltValueNestedFieldError(
+        throw BuiltValueNestedFieldError(
             r'SavedDocumentViewListResponseDto', _$failedField, e.toString());
       }
       rethrow;

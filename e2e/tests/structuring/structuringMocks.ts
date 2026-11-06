@@ -392,6 +392,14 @@ export async function installStructuringMocks(
     source: string;
     updatedAt: string;
   }> = [];
+  const fieldSuggestionRejects: Array<{
+  id: string;
+  correctionId: string;
+  fieldKey: string;
+  value: string;
+  valueNormalized: string;
+  createdAt: string;
+}> = [];
   let fieldBounds = { x0: 0.55, y0: 0.72, x1: 0.88, y1: 0.78 };
   const layoutFieldRegion = () => ({
     id: 'synthetic-field-total',
@@ -521,9 +529,88 @@ export async function installStructuringMocks(
         role === 'table' ? [table] : role === 'field' ? [field] : [field, table];
       return json(route, { irSha256: 'synthetic', items });
     }
+    if (
+      (p === `/documents/${LAYOUT_DOCUMENT_ID}/field-suggestion-decisions` ||
+        /^\/documents\/[^/]+\/field-suggestion-decisions$/.test(p)) &&
+      method === 'GET'
+    ) {
+      return json(route, {
+        items: fieldSuggestionRejects.map((item) => ({
+          ...item,
+          decision: 'rejected' as const,
+        })),
+      });
+    }
     if (p === `/documents/${LAYOUT_DOCUMENT_ID}/corrections` && method === 'POST') {
       const body: unknown = route.request().postDataJSON();
       log.fieldCorrections.push(body);
+      const op =
+        typeof body === 'object' && body && 'op' in body ? String(body.op) : 'reanchor';
+      const fieldKey =
+        typeof body === 'object' && body && 'fieldKey' in body
+          ? String(body.fieldKey)
+          : 'total_amount';
+      const valueOverride =
+        typeof body === 'object' &&
+        body &&
+        'valueOverride' in body &&
+        typeof body.valueOverride === 'string'
+          ? body.valueOverride
+          : null;
+      if (op === 'reject_suggestion' && valueOverride) {
+        const correctionId =
+          typeof body === 'object' && body && 'id' in body
+            ? String(body.id)
+            : `synthetic-reject-${String(fieldSuggestionRejects.length + 1)}`;
+        const valueNormalized = valueOverride.replace(/\s+/g, ' ').trim().toLowerCase();
+        const existing = fieldSuggestionRejects.find(
+          (item) => item.fieldKey === fieldKey && item.valueNormalized === valueNormalized
+        );
+        if (existing) {
+          return json(route, {
+            noChange: true,
+            correction: {
+              id: existing.correctionId,
+              documentId: LAYOUT_DOCUMENT_ID,
+              kind: 'field',
+              status: 'active',
+              op: 'reject_suggestion',
+              fieldKey,
+              beforeRegionId: null,
+              afterRegionId: null,
+              oldValue: null,
+              newValue: existing.value,
+              createdAt: existing.createdAt,
+            },
+            region: null,
+          });
+        }
+        fieldSuggestionRejects.push({
+          id: `synthetic-decision-${String(fieldSuggestionRejects.length + 1)}`,
+          correctionId,
+          fieldKey,
+          value: valueOverride,
+          valueNormalized,
+          createdAt: NOW,
+        });
+        return json(route, {
+          noChange: false,
+          correction: {
+            id: correctionId,
+            documentId: LAYOUT_DOCUMENT_ID,
+            kind: 'field',
+            status: 'active',
+            op: 'reject_suggestion',
+            fieldKey,
+            beforeRegionId: null,
+            afterRegionId: null,
+            oldValue: null,
+            newValue: valueOverride,
+            createdAt: NOW,
+          },
+          region: null,
+        });
+      }
       const region = layoutFieldRegion();
       let nextRegion = region;
       if (
@@ -545,11 +632,8 @@ export async function installStructuringMocks(
           documentId: LAYOUT_DOCUMENT_ID,
           kind: 'field',
           status: 'active',
-          op: typeof body === 'object' && body && 'op' in body ? body.op : 'reanchor',
-          fieldKey:
-            typeof body === 'object' && body && 'fieldKey' in body
-              ? body.fieldKey
-              : 'total_amount',
+          op,
+          fieldKey,
           beforeRegionId: region.id,
           afterRegionId: region.id,
           oldValue: null,

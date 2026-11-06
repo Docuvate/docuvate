@@ -21,12 +21,12 @@ CreateSavedDocumentViewRequestDtoVisibilityEnum
     case 'shared':
       return _$createSavedDocumentViewRequestDtoVisibilityEnum_shared;
     default:
-      throw new ArgumentError(name);
+      throw ArgumentError(name);
   }
 }
 
 final BuiltSet<CreateSavedDocumentViewRequestDtoVisibilityEnum>
-    _$createSavedDocumentViewRequestDtoVisibilityEnumValues = new BuiltSet<
+    _$createSavedDocumentViewRequestDtoVisibilityEnumValues = BuiltSet<
         CreateSavedDocumentViewRequestDtoVisibilityEnum>(const <CreateSavedDocumentViewRequestDtoVisibilityEnum>[
   _$createSavedDocumentViewRequestDtoVisibilityEnum_private,
   _$createSavedDocumentViewRequestDtoVisibilityEnum_shared,
@@ -57,12 +57,12 @@ CreateSavedDocumentViewRequestDtoSortEnum
     case 'documentDate':
       return _$createSavedDocumentViewRequestDtoSortEnum_documentDate;
     default:
-      throw new ArgumentError(name);
+      throw ArgumentError(name);
   }
 }
 
 final BuiltSet<CreateSavedDocumentViewRequestDtoSortEnum>
-    _$createSavedDocumentViewRequestDtoSortEnumValues = new BuiltSet<
+    _$createSavedDocumentViewRequestDtoSortEnumValues = BuiltSet<
         CreateSavedDocumentViewRequestDtoSortEnum>(const <CreateSavedDocumentViewRequestDtoSortEnum>[
   _$createSavedDocumentViewRequestDtoSortEnum_updatedAt,
   _$createSavedDocumentViewRequestDtoSortEnum_createdAt,
@@ -85,12 +85,12 @@ CreateSavedDocumentViewRequestDtoOrderEnum
     case 'desc':
       return _$createSavedDocumentViewRequestDtoOrderEnum_desc;
     default:
-      throw new ArgumentError(name);
+      throw ArgumentError(name);
   }
 }
 
 final BuiltSet<CreateSavedDocumentViewRequestDtoOrderEnum>
-    _$createSavedDocumentViewRequestDtoOrderEnumValues = new BuiltSet<
+    _$createSavedDocumentViewRequestDtoOrderEnumValues = BuiltSet<
         CreateSavedDocumentViewRequestDtoOrderEnum>(const <CreateSavedDocumentViewRequestDtoOrderEnum>[
   _$createSavedDocumentViewRequestDtoOrderEnum_asc,
   _$createSavedDocumentViewRequestDtoOrderEnum_desc,
@@ -116,12 +116,12 @@ CreateSavedDocumentViewRequestDtoViewModeEnum
     case 'fokus':
       return _$createSavedDocumentViewRequestDtoViewModeEnum_fokus;
     default:
-      throw new ArgumentError(name);
+      throw ArgumentError(name);
   }
 }
 
 final BuiltSet<CreateSavedDocumentViewRequestDtoViewModeEnum>
-    _$createSavedDocumentViewRequestDtoViewModeEnumValues = new BuiltSet<
+    _$createSavedDocumentViewRequestDtoViewModeEnumValues = BuiltSet<
         CreateSavedDocumentViewRequestDtoViewModeEnum>(const <CreateSavedDocumentViewRequestDtoViewModeEnum>[
   _$createSavedDocumentViewRequestDtoViewModeEnum_klassisch,
   _$createSavedDocumentViewRequestDtoViewModeEnum_karten,
@@ -143,12 +143,12 @@ CreateSavedDocumentViewRequestDtoFilterModeEnum
     case 'query':
       return _$createSavedDocumentViewRequestDtoFilterModeEnum_query;
     default:
-      throw new ArgumentError(name);
+      throw ArgumentError(name);
   }
 }
 
 final BuiltSet<CreateSavedDocumentViewRequestDtoFilterModeEnum>
-    _$createSavedDocumentViewRequestDtoFilterModeEnumValues = new BuiltSet<
+    _$createSavedDocumentViewRequestDtoFilterModeEnumValues = BuiltSet<
         CreateSavedDocumentViewRequestDtoFilterModeEnum>(const <CreateSavedDocumentViewRequestDtoFilterModeEnum>[
   _$createSavedDocumentViewRequestDtoFilterModeEnum_ui,
   _$createSavedDocumentViewRequestDtoFilterModeEnum_query,
@@ -169,12 +169,12 @@ CreateSavedDocumentViewRequestDtoListScopeEnum
     case 'folder':
       return _$createSavedDocumentViewRequestDtoListScopeEnum_folder;
     default:
-      throw new ArgumentError(name);
+      throw ArgumentError(name);
   }
 }
 
 final BuiltSet<CreateSavedDocumentViewRequestDtoListScopeEnum>
-    _$createSavedDocumentViewRequestDtoListScopeEnumValues = new BuiltSet<
+    _$createSavedDocumentViewRequestDtoListScopeEnumValues = BuiltSet<
         CreateSavedDocumentViewRequestDtoListScopeEnum>(const <CreateSavedDocumentViewRequestDtoListScopeEnum>[
   _$createSavedDocumentViewRequestDtoListScopeEnum_all,
   _$createSavedDocumentViewRequestDtoListScopeEnum_folder,
@@ -210,12 +210,12 @@ CreateSavedDocumentViewRequestDtoStatusEnum
     case 'failed':
       return _$createSavedDocumentViewRequestDtoStatusEnum_failed;
     default:
-      throw new ArgumentError(name);
+      throw ArgumentError(name);
   }
 }
 
 final BuiltSet<CreateSavedDocumentViewRequestDtoStatusEnum>
-    _$createSavedDocumentViewRequestDtoStatusEnumValues = new BuiltSet<
+    _$createSavedDocumentViewRequestDtoStatusEnumValues = BuiltSet<
         CreateSavedDocumentViewRequestDtoStatusEnum>(const <CreateSavedDocumentViewRequestDtoStatusEnum>[
   _$createSavedDocumentViewRequestDtoStatusEnum_uploaded,
   _$createSavedDocumentViewRequestDtoStatusEnum_queued,
@@ -226,25 +226,25 @@ final BuiltSet<CreateSavedDocumentViewRequestDtoStatusEnum>
 
 Serializer<CreateSavedDocumentViewRequestDtoVisibilityEnum>
     _$createSavedDocumentViewRequestDtoVisibilityEnumSerializer =
-    new _$CreateSavedDocumentViewRequestDtoVisibilityEnumSerializer();
+    _$CreateSavedDocumentViewRequestDtoVisibilityEnumSerializer();
 Serializer<CreateSavedDocumentViewRequestDtoSortEnum>
     _$createSavedDocumentViewRequestDtoSortEnumSerializer =
-    new _$CreateSavedDocumentViewRequestDtoSortEnumSerializer();
+    _$CreateSavedDocumentViewRequestDtoSortEnumSerializer();
 Serializer<CreateSavedDocumentViewRequestDtoOrderEnum>
     _$createSavedDocumentViewRequestDtoOrderEnumSerializer =
-    new _$CreateSavedDocumentViewRequestDtoOrderEnumSerializer();
+    _$CreateSavedDocumentViewRequestDtoOrderEnumSerializer();
 Serializer<CreateSavedDocumentViewRequestDtoViewModeEnum>
     _$createSavedDocumentViewRequestDtoViewModeEnumSerializer =
-    new _$CreateSavedDocumentViewRequestDtoViewModeEnumSerializer();
+    _$CreateSavedDocumentViewRequestDtoViewModeEnumSerializer();
 Serializer<CreateSavedDocumentViewRequestDtoFilterModeEnum>
     _$createSavedDocumentViewRequestDtoFilterModeEnumSerializer =
-    new _$CreateSavedDocumentViewRequestDtoFilterModeEnumSerializer();
+    _$CreateSavedDocumentViewRequestDtoFilterModeEnumSerializer();
 Serializer<CreateSavedDocumentViewRequestDtoListScopeEnum>
     _$createSavedDocumentViewRequestDtoListScopeEnumSerializer =
-    new _$CreateSavedDocumentViewRequestDtoListScopeEnumSerializer();
+    _$CreateSavedDocumentViewRequestDtoListScopeEnumSerializer();
 Serializer<CreateSavedDocumentViewRequestDtoStatusEnum>
     _$createSavedDocumentViewRequestDtoStatusEnumSerializer =
-    new _$CreateSavedDocumentViewRequestDtoStatusEnumSerializer();
+    _$CreateSavedDocumentViewRequestDtoStatusEnumSerializer();
 
 class _$CreateSavedDocumentViewRequestDtoVisibilityEnumSerializer
     implements
@@ -530,8 +530,7 @@ class _$CreateSavedDocumentViewRequestDto
 
   factory _$CreateSavedDocumentViewRequestDto(
           [void Function(CreateSavedDocumentViewRequestDtoBuilder)? updates]) =>
-      (new CreateSavedDocumentViewRequestDtoBuilder()..update(updates))
-          ._build();
+      (CreateSavedDocumentViewRequestDtoBuilder()..update(updates))._build();
 
   _$CreateSavedDocumentViewRequestDto._(
       {this.visibleColumns,
@@ -553,13 +552,7 @@ class _$CreateSavedDocumentViewRequestDto
       this.documentDateTo,
       this.tagIds,
       this.pinnedSidebar})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        name, r'CreateSavedDocumentViewRequestDto', 'name');
-    BuiltValueNullFieldError.checkNotNull(
-        searchQuery, r'CreateSavedDocumentViewRequestDto', 'searchQuery');
-  }
-
+      : super._();
   @override
   CreateSavedDocumentViewRequestDto rebuild(
           void Function(CreateSavedDocumentViewRequestDtoBuilder) updates) =>
@@ -567,7 +560,7 @@ class _$CreateSavedDocumentViewRequestDto
 
   @override
   CreateSavedDocumentViewRequestDtoBuilder toBuilder() =>
-      new CreateSavedDocumentViewRequestDtoBuilder()..replace(this);
+      CreateSavedDocumentViewRequestDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -654,7 +647,7 @@ class CreateSavedDocumentViewRequestDtoBuilder
 
   ListBuilder<LibraryTableColumnId>? _visibleColumns;
   ListBuilder<LibraryTableColumnId> get visibleColumns =>
-      _$this._visibleColumns ??= new ListBuilder<LibraryTableColumnId>();
+      _$this._visibleColumns ??= ListBuilder<LibraryTableColumnId>();
   set visibleColumns(ListBuilder<LibraryTableColumnId>? visibleColumns) =>
       _$this._visibleColumns = visibleColumns;
 
@@ -711,7 +704,7 @@ class CreateSavedDocumentViewRequestDtoBuilder
   ListBuilder<SavedDocumentViewFieldFilterDtoClass>? _fieldFilters;
   ListBuilder<SavedDocumentViewFieldFilterDtoClass> get fieldFilters =>
       _$this._fieldFilters ??=
-          new ListBuilder<SavedDocumentViewFieldFilterDtoClass>();
+          ListBuilder<SavedDocumentViewFieldFilterDtoClass>();
   set fieldFilters(
           ListBuilder<SavedDocumentViewFieldFilterDtoClass>? fieldFilters) =>
       _$this._fieldFilters = fieldFilters;
@@ -741,8 +734,7 @@ class CreateSavedDocumentViewRequestDtoBuilder
       _$this._documentDateTo = documentDateTo;
 
   ListBuilder<String>? _tagIds;
-  ListBuilder<String> get tagIds =>
-      _$this._tagIds ??= new ListBuilder<String>();
+  ListBuilder<String> get tagIds => _$this._tagIds ??= ListBuilder<String>();
   set tagIds(ListBuilder<String>? tagIds) => _$this._tagIds = tagIds;
 
   bool? _pinnedSidebar;
@@ -783,7 +775,6 @@ class CreateSavedDocumentViewRequestDtoBuilder
 
   @override
   void replace(CreateSavedDocumentViewRequestDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$CreateSavedDocumentViewRequestDto;
   }
 
@@ -800,28 +791,29 @@ class CreateSavedDocumentViewRequestDtoBuilder
     _$CreateSavedDocumentViewRequestDto _$result;
     try {
       _$result = _$v ??
-          new _$CreateSavedDocumentViewRequestDto._(
-              visibleColumns: _visibleColumns?.build(),
-              name: BuiltValueNullFieldError.checkNotNull(
-                  name, r'CreateSavedDocumentViewRequestDto', 'name'),
-              description: description,
-              visibility: visibility,
-              searchQuery: BuiltValueNullFieldError.checkNotNull(searchQuery,
-                  r'CreateSavedDocumentViewRequestDto', 'searchQuery'),
-              sort: sort,
-              order: order,
-              viewMode: viewMode,
-              filterMode: filterMode,
-              listScope: listScope,
-              folderId: folderId,
-              fieldFilters: _fieldFilters?.build(),
-              status: status,
-              inbox: inbox,
-              withoutNonInboxLabel: withoutNonInboxLabel,
-              documentDateFrom: documentDateFrom,
-              documentDateTo: documentDateTo,
-              tagIds: _tagIds?.build(),
-              pinnedSidebar: pinnedSidebar);
+          _$CreateSavedDocumentViewRequestDto._(
+            visibleColumns: _visibleColumns?.build(),
+            name: BuiltValueNullFieldError.checkNotNull(
+                name, r'CreateSavedDocumentViewRequestDto', 'name'),
+            description: description,
+            visibility: visibility,
+            searchQuery: BuiltValueNullFieldError.checkNotNull(searchQuery,
+                r'CreateSavedDocumentViewRequestDto', 'searchQuery'),
+            sort: sort,
+            order: order,
+            viewMode: viewMode,
+            filterMode: filterMode,
+            listScope: listScope,
+            folderId: folderId,
+            fieldFilters: _fieldFilters?.build(),
+            status: status,
+            inbox: inbox,
+            withoutNonInboxLabel: withoutNonInboxLabel,
+            documentDateFrom: documentDateFrom,
+            documentDateTo: documentDateTo,
+            tagIds: _tagIds?.build(),
+            pinnedSidebar: pinnedSidebar,
+          );
     } catch (_) {
       late String _$failedField;
       try {
@@ -834,7 +826,7 @@ class CreateSavedDocumentViewRequestDtoBuilder
         _$failedField = 'tagIds';
         _tagIds?.build();
       } catch (e) {
-        throw new BuiltValueNestedFieldError(
+        throw BuiltValueNestedFieldError(
             r'CreateSavedDocumentViewRequestDto', _$failedField, e.toString());
       }
       rethrow;

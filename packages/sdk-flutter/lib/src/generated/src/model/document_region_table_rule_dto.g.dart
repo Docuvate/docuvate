@@ -21,20 +21,67 @@ DocumentRegionTableRuleDtoAxisEnum _$documentRegionTableRuleDtoAxisEnumValueOf(
     case 'col':
       return _$documentRegionTableRuleDtoAxisEnum_col;
     default:
-      throw new ArgumentError(name);
+      throw ArgumentError(name);
   }
 }
 
 final BuiltSet<DocumentRegionTableRuleDtoAxisEnum>
-    _$documentRegionTableRuleDtoAxisEnumValues = new BuiltSet<
+    _$documentRegionTableRuleDtoAxisEnumValues = BuiltSet<
         DocumentRegionTableRuleDtoAxisEnum>(const <DocumentRegionTableRuleDtoAxisEnum>[
   _$documentRegionTableRuleDtoAxisEnum_row,
   _$documentRegionTableRuleDtoAxisEnum_col,
 ]);
 
+const DocumentRegionTableRuleDtoLineEnum
+    _$documentRegionTableRuleDtoLineEnum_unknown =
+    const DocumentRegionTableRuleDtoLineEnum._('unknown');
+const DocumentRegionTableRuleDtoLineEnum
+    _$documentRegionTableRuleDtoLineEnum_none =
+    const DocumentRegionTableRuleDtoLineEnum._('none');
+const DocumentRegionTableRuleDtoLineEnum
+    _$documentRegionTableRuleDtoLineEnum_thin =
+    const DocumentRegionTableRuleDtoLineEnum._('thin');
+const DocumentRegionTableRuleDtoLineEnum
+    _$documentRegionTableRuleDtoLineEnum_thick =
+    const DocumentRegionTableRuleDtoLineEnum._('thick');
+const DocumentRegionTableRuleDtoLineEnum
+    _$documentRegionTableRuleDtoLineEnum_double_ =
+    const DocumentRegionTableRuleDtoLineEnum._('double_');
+
+DocumentRegionTableRuleDtoLineEnum _$documentRegionTableRuleDtoLineEnumValueOf(
+    String name) {
+  switch (name) {
+    case 'unknown':
+      return _$documentRegionTableRuleDtoLineEnum_unknown;
+    case 'none':
+      return _$documentRegionTableRuleDtoLineEnum_none;
+    case 'thin':
+      return _$documentRegionTableRuleDtoLineEnum_thin;
+    case 'thick':
+      return _$documentRegionTableRuleDtoLineEnum_thick;
+    case 'double_':
+      return _$documentRegionTableRuleDtoLineEnum_double_;
+    default:
+      throw ArgumentError(name);
+  }
+}
+
+final BuiltSet<DocumentRegionTableRuleDtoLineEnum>
+    _$documentRegionTableRuleDtoLineEnumValues = BuiltSet<
+        DocumentRegionTableRuleDtoLineEnum>(const <DocumentRegionTableRuleDtoLineEnum>[
+  _$documentRegionTableRuleDtoLineEnum_unknown,
+  _$documentRegionTableRuleDtoLineEnum_none,
+  _$documentRegionTableRuleDtoLineEnum_thin,
+  _$documentRegionTableRuleDtoLineEnum_thick,
+  _$documentRegionTableRuleDtoLineEnum_double_,
+]);
+
 Serializer<DocumentRegionTableRuleDtoAxisEnum>
     _$documentRegionTableRuleDtoAxisEnumSerializer =
-    new _$DocumentRegionTableRuleDtoAxisEnumSerializer();
+    _$DocumentRegionTableRuleDtoAxisEnumSerializer();
+Serializer<DocumentRegionTableRuleDtoLineEnum>
+    _$documentRegionTableRuleDtoLineEnumSerializer =
+    _$DocumentRegionTableRuleDtoLineEnumSerializer();
 
 class _$DocumentRegionTableRuleDtoAxisEnumSerializer
     implements PrimitiveSerializer<DocumentRegionTableRuleDtoAxisEnum> {
@@ -66,6 +113,42 @@ class _$DocumentRegionTableRuleDtoAxisEnumSerializer
           _fromWire[serialized] ?? (serialized is String ? serialized : ''));
 }
 
+class _$DocumentRegionTableRuleDtoLineEnumSerializer
+    implements PrimitiveSerializer<DocumentRegionTableRuleDtoLineEnum> {
+  static const Map<String, Object> _toWire = const <String, Object>{
+    'unknown': 'unknown',
+    'none': 'none',
+    'thin': 'thin',
+    'thick': 'thick',
+    'double_': 'double',
+  };
+  static const Map<Object, String> _fromWire = const <Object, String>{
+    'unknown': 'unknown',
+    'none': 'none',
+    'thin': 'thin',
+    'thick': 'thick',
+    'double': 'double_',
+  };
+
+  @override
+  final Iterable<Type> types = const <Type>[DocumentRegionTableRuleDtoLineEnum];
+  @override
+  final String wireName = 'DocumentRegionTableRuleDtoLineEnum';
+
+  @override
+  Object serialize(
+          Serializers serializers, DocumentRegionTableRuleDtoLineEnum object,
+          {FullType specifiedType = FullType.unspecified}) =>
+      _toWire[object.name] ?? object.name;
+
+  @override
+  DocumentRegionTableRuleDtoLineEnum deserialize(
+          Serializers serializers, Object serialized,
+          {FullType specifiedType = FullType.unspecified}) =>
+      DocumentRegionTableRuleDtoLineEnum.valueOf(
+          _fromWire[serialized] ?? (serialized is String ? serialized : ''));
+}
+
 class _$DocumentRegionTableRuleDto extends DocumentRegionTableRuleDto {
   @override
   final DocumentRegionTableRuleDtoAxisEnum axis;
@@ -73,22 +156,19 @@ class _$DocumentRegionTableRuleDto extends DocumentRegionTableRuleDto {
   final num ord;
   @override
   final num pos;
+  @override
+  final DocumentRegionTableRuleDtoLineEnum line;
 
   factory _$DocumentRegionTableRuleDto(
           [void Function(DocumentRegionTableRuleDtoBuilder)? updates]) =>
-      (new DocumentRegionTableRuleDtoBuilder()..update(updates))._build();
+      (DocumentRegionTableRuleDtoBuilder()..update(updates))._build();
 
   _$DocumentRegionTableRuleDto._(
-      {required this.axis, required this.ord, required this.pos})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        axis, r'DocumentRegionTableRuleDto', 'axis');
-    BuiltValueNullFieldError.checkNotNull(
-        ord, r'DocumentRegionTableRuleDto', 'ord');
-    BuiltValueNullFieldError.checkNotNull(
-        pos, r'DocumentRegionTableRuleDto', 'pos');
-  }
-
+      {required this.axis,
+      required this.ord,
+      required this.pos,
+      required this.line})
+      : super._();
   @override
   DocumentRegionTableRuleDto rebuild(
           void Function(DocumentRegionTableRuleDtoBuilder) updates) =>
@@ -96,7 +176,7 @@ class _$DocumentRegionTableRuleDto extends DocumentRegionTableRuleDto {
 
   @override
   DocumentRegionTableRuleDtoBuilder toBuilder() =>
-      new DocumentRegionTableRuleDtoBuilder()..replace(this);
+      DocumentRegionTableRuleDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -104,7 +184,8 @@ class _$DocumentRegionTableRuleDto extends DocumentRegionTableRuleDto {
     return other is DocumentRegionTableRuleDto &&
         axis == other.axis &&
         ord == other.ord &&
-        pos == other.pos;
+        pos == other.pos &&
+        line == other.line;
   }
 
   @override
@@ -113,6 +194,7 @@ class _$DocumentRegionTableRuleDto extends DocumentRegionTableRuleDto {
     _$hash = $jc(_$hash, axis.hashCode);
     _$hash = $jc(_$hash, ord.hashCode);
     _$hash = $jc(_$hash, pos.hashCode);
+    _$hash = $jc(_$hash, line.hashCode);
     _$hash = $jf(_$hash);
     return _$hash;
   }
@@ -122,7 +204,8 @@ class _$DocumentRegionTableRuleDto extends DocumentRegionTableRuleDto {
     return (newBuiltValueToStringHelper(r'DocumentRegionTableRuleDto')
           ..add('axis', axis)
           ..add('ord', ord)
-          ..add('pos', pos))
+          ..add('pos', pos)
+          ..add('line', line))
         .toString();
   }
 }
@@ -144,6 +227,10 @@ class DocumentRegionTableRuleDtoBuilder
   num? get pos => _$this._pos;
   set pos(num? pos) => _$this._pos = pos;
 
+  DocumentRegionTableRuleDtoLineEnum? _line;
+  DocumentRegionTableRuleDtoLineEnum? get line => _$this._line;
+  set line(DocumentRegionTableRuleDtoLineEnum? line) => _$this._line = line;
+
   DocumentRegionTableRuleDtoBuilder() {
     DocumentRegionTableRuleDto._defaults(this);
   }
@@ -154,6 +241,7 @@ class DocumentRegionTableRuleDtoBuilder
       _axis = $v.axis;
       _ord = $v.ord;
       _pos = $v.pos;
+      _line = $v.line;
       _$v = null;
     }
     return this;
@@ -161,7 +249,6 @@ class DocumentRegionTableRuleDtoBuilder
 
   @override
   void replace(DocumentRegionTableRuleDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$DocumentRegionTableRuleDto;
   }
 
@@ -175,13 +262,16 @@ class DocumentRegionTableRuleDtoBuilder
 
   _$DocumentRegionTableRuleDto _build() {
     final _$result = _$v ??
-        new _$DocumentRegionTableRuleDto._(
-            axis: BuiltValueNullFieldError.checkNotNull(
-                axis, r'DocumentRegionTableRuleDto', 'axis'),
-            ord: BuiltValueNullFieldError.checkNotNull(
-                ord, r'DocumentRegionTableRuleDto', 'ord'),
-            pos: BuiltValueNullFieldError.checkNotNull(
-                pos, r'DocumentRegionTableRuleDto', 'pos'));
+        _$DocumentRegionTableRuleDto._(
+          axis: BuiltValueNullFieldError.checkNotNull(
+              axis, r'DocumentRegionTableRuleDto', 'axis'),
+          ord: BuiltValueNullFieldError.checkNotNull(
+              ord, r'DocumentRegionTableRuleDto', 'ord'),
+          pos: BuiltValueNullFieldError.checkNotNull(
+              pos, r'DocumentRegionTableRuleDto', 'pos'),
+          line: BuiltValueNullFieldError.checkNotNull(
+              line, r'DocumentRegionTableRuleDto', 'line'),
+        );
     replace(_$result);
     return _$result;
   }

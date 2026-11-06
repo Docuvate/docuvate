@@ -355,6 +355,94 @@ class DocumentsApi {
     );
   }
 
+  /// Persist a manual page orientation (no re-OCR)
+  /// 
+  ///
+  /// Parameters:
+  /// * [id] 
+  /// * [page] 
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
+  ///
+  /// Returns a [Future] containing a [Response] with a [JsonObject] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<JsonObject>> applyDocumentPageTransform({ 
+    required String id,
+    required String page,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/documents/{id}/pages/{page}/transform'.replaceAll('{' r'id' '}', encodeQueryParameter(_serializers, id, const FullType(String)).toString()).replaceAll('{' r'page' '}', encodeQueryParameter(_serializers, page, const FullType(String)).toString());
+    final _options = Options(
+      method: r'POST',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'apiKeyAuth',
+            'keyName': 'X-Docuvate-Api-Key',
+            'where': 'header',
+          },{
+            'type': 'http',
+            'scheme': 'bearer',
+            'name': 'bearerAuth',
+          },
+        ],
+        ...?extra,
+      },
+      validateStatus: validateStatus,
+    );
+
+    final _response = await _dio.request<Object>(
+      _path,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    JsonObject? _responseData;
+
+    try {
+      final rawResponse = _response.data;
+      _responseData = rawResponse == null ? null : _serializers.deserialize(
+        rawResponse,
+        specifiedType: const FullType(JsonObject),
+      ) as JsonObject;
+
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<JsonObject>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
+  }
+
   /// Create or update a table region correction
   /// 
   ///
@@ -1941,6 +2029,132 @@ class DocumentsApi {
     return _response;
   }
 
+  /// Export field values for the current library filter (or selected ids) as CSV or JSON
+  /// 
+  ///
+  /// Parameters:
+  /// * [format] - Download format for field values.
+  /// * [fieldFilters] - JSON array of { fieldKey, valueText } recognized field filters (AND).
+  /// * [withoutNonInboxLabel] - When true, only documents without a non-inbox label are returned.
+  /// * [unfiled] - When true, only documents without a folder assignment are returned.
+  /// * [inbox] - When true, only documents in the inbox label are returned.
+  /// * [includeTagSuggestions] - When true, include open tag suggestions on each document.
+  /// * [limit] - Maximum documents per page (default 50, max 200).
+  /// * [cursor] - Opaque cursor from a previous response `nextCursor` for the next page.
+  /// * [ids] - Optional comma-separated document UUIDs; when set, list filters are ignored.
+  /// * [q] 
+  /// * [status] 
+  /// * [tagId] 
+  /// * [tags] 
+  /// * [recognizedFieldKey] 
+  /// * [recognizedFieldValue] 
+  /// * [fieldFilterKey] 
+  /// * [fieldFilterValue] 
+  /// * [folderId] 
+  /// * [documentDateFrom] 
+  /// * [documentDateTo] 
+  /// * [sort] 
+  /// * [order] 
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
+  ///
+  /// Returns a [Future]
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<void>> exportDocumentFieldValues({ 
+    required String format,
+    String? fieldFilters,
+    bool? withoutNonInboxLabel,
+    bool? unfiled,
+    bool? inbox,
+    bool? includeTagSuggestions,
+    num? limit = 50,
+    String? cursor,
+    String? ids,
+    String? q,
+    String? status,
+    String? tagId,
+    String? tags,
+    String? recognizedFieldKey,
+    String? recognizedFieldValue,
+    String? fieldFilterKey,
+    String? fieldFilterValue,
+    String? folderId,
+    String? documentDateFrom,
+    String? documentDateTo,
+    String? sort,
+    String? order,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/documents/export';
+    final _options = Options(
+      method: r'GET',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'apiKeyAuth',
+            'keyName': 'X-Docuvate-Api-Key',
+            'where': 'header',
+          },{
+            'type': 'http',
+            'scheme': 'bearer',
+            'name': 'bearerAuth',
+          },
+        ],
+        ...?extra,
+      },
+      validateStatus: validateStatus,
+    );
+
+    final _queryParameters = <String, dynamic>{
+      if (fieldFilters != null) r'fieldFilters': encodeQueryParameter(_serializers, fieldFilters, const FullType(String)),
+      if (withoutNonInboxLabel != null) r'withoutNonInboxLabel': encodeQueryParameter(_serializers, withoutNonInboxLabel, const FullType(bool)),
+      if (unfiled != null) r'unfiled': encodeQueryParameter(_serializers, unfiled, const FullType(bool)),
+      if (inbox != null) r'inbox': encodeQueryParameter(_serializers, inbox, const FullType(bool)),
+      if (includeTagSuggestions != null) r'includeTagSuggestions': encodeQueryParameter(_serializers, includeTagSuggestions, const FullType(bool)),
+      if (limit != null) r'limit': encodeQueryParameter(_serializers, limit, const FullType(num)),
+      if (cursor != null) r'cursor': encodeQueryParameter(_serializers, cursor, const FullType(String)),
+      r'format': encodeQueryParameter(_serializers, format, const FullType(String)),
+      if (ids != null) r'ids': encodeQueryParameter(_serializers, ids, const FullType(String)),
+      if (q != null) r'q': encodeQueryParameter(_serializers, q, const FullType(String)),
+      if (status != null) r'status': encodeQueryParameter(_serializers, status, const FullType(String)),
+      if (tagId != null) r'tagId': encodeQueryParameter(_serializers, tagId, const FullType(String)),
+      if (tags != null) r'tags': encodeQueryParameter(_serializers, tags, const FullType(String)),
+      if (recognizedFieldKey != null) r'recognizedFieldKey': encodeQueryParameter(_serializers, recognizedFieldKey, const FullType(String)),
+      if (recognizedFieldValue != null) r'recognizedFieldValue': encodeQueryParameter(_serializers, recognizedFieldValue, const FullType(String)),
+      if (fieldFilterKey != null) r'fieldFilterKey': encodeQueryParameter(_serializers, fieldFilterKey, const FullType(String)),
+      if (fieldFilterValue != null) r'fieldFilterValue': encodeQueryParameter(_serializers, fieldFilterValue, const FullType(String)),
+      if (folderId != null) r'folderId': encodeQueryParameter(_serializers, folderId, const FullType(String)),
+      if (documentDateFrom != null) r'documentDateFrom': encodeQueryParameter(_serializers, documentDateFrom, const FullType(String)),
+      if (documentDateTo != null) r'documentDateTo': encodeQueryParameter(_serializers, documentDateTo, const FullType(String)),
+      if (sort != null) r'sort': encodeQueryParameter(_serializers, sort, const FullType(String)),
+      if (order != null) r'order': encodeQueryParameter(_serializers, order, const FullType(String)),
+    };
+
+    final _response = await _dio.request<Object>(
+      _path,
+      options: _options,
+      queryParameters: _queryParameters,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    return _response;
+  }
+
   /// Extraction Arena Rating
   /// 
   ///
@@ -2871,6 +3085,92 @@ class DocumentsApi {
     );
   }
 
+  /// Active field suggestion decisions (rejects) for a document
+  /// 
+  ///
+  /// Parameters:
+  /// * [id] 
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
+  ///
+  /// Returns a [Future] containing a [Response] with a [JsonObject] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<JsonObject>> listDocumentFieldSuggestionDecisions({ 
+    required String id,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/documents/{id}/field-suggestion-decisions'.replaceAll('{' r'id' '}', encodeQueryParameter(_serializers, id, const FullType(String)).toString());
+    final _options = Options(
+      method: r'GET',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'apiKeyAuth',
+            'keyName': 'X-Docuvate-Api-Key',
+            'where': 'header',
+          },{
+            'type': 'http',
+            'scheme': 'bearer',
+            'name': 'bearerAuth',
+          },
+        ],
+        ...?extra,
+      },
+      validateStatus: validateStatus,
+    );
+
+    final _response = await _dio.request<Object>(
+      _path,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    JsonObject? _responseData;
+
+    try {
+      final rawResponse = _response.data;
+      _responseData = rawResponse == null ? null : _serializers.deserialize(
+        rawResponse,
+        specifiedType: const FullType(JsonObject),
+      ) as JsonObject;
+
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<JsonObject>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
+  }
+
   /// Layout IR tokens for a document page
   /// 
   ///
@@ -2953,6 +3253,92 @@ class DocumentsApi {
     }
 
     return Response<DocumentLayoutTokensResponseDto>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
+  }
+
+  /// Per-page orientation transforms
+  /// 
+  ///
+  /// Parameters:
+  /// * [id] 
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
+  ///
+  /// Returns a [Future] containing a [Response] with a [JsonObject] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<JsonObject>> listDocumentPageTransforms({ 
+    required String id,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/documents/{id}/page-transforms'.replaceAll('{' r'id' '}', encodeQueryParameter(_serializers, id, const FullType(String)).toString());
+    final _options = Options(
+      method: r'GET',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'apiKeyAuth',
+            'keyName': 'X-Docuvate-Api-Key',
+            'where': 'header',
+          },{
+            'type': 'http',
+            'scheme': 'bearer',
+            'name': 'bearerAuth',
+          },
+        ],
+        ...?extra,
+      },
+      validateStatus: validateStatus,
+    );
+
+    final _response = await _dio.request<Object>(
+      _path,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    JsonObject? _responseData;
+
+    try {
+      final rawResponse = _response.data;
+      _responseData = rawResponse == null ? null : _serializers.deserialize(
+        rawResponse,
+        specifiedType: const FullType(JsonObject),
+      ) as JsonObject;
+
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<JsonObject>(
       data: _responseData,
       headers: _response.headers,
       isRedirect: _response.isRedirect,

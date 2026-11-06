@@ -845,7 +845,7 @@
     "layoutSuggestionNotInSchemaHint": "Feld zum Schema hinzufügen, um es bei künftigen Dokumenten zu erfassen.",
     "layoutComparePageLegend": "Bernsteinfarben: Seiten-SSIM unter dem Qualitätsboden.",
     "layoutSuggestionAccept": "Als Feld übernehmen",
-    "layoutSuggestionDismiss": "Verwerfen",
+    "layoutSuggestionDismiss": "Vorschlag verwerfen",
     "layoutTablesEmpty": "Keine Tabellen erkannt.",
     "layoutTableLabel": "Tabelle {{n}}",
     "layoutCorrectedTableLabel": "Korrigierte Tabelle {{n}}",
@@ -1020,7 +1020,9 @@
     "fieldPositionCorrect": "Position korrigieren",
     "fieldBboxSave": "Position speichern",
     "fieldBboxHandle": "Griff {handle}",
-    "pageRotationSaved": "Seitendrehung gespeichert"
+    "pageRotationSaved": "Seitendrehung gespeichert",
+    "layoutSuggestionDismissTitle": "Vorschlag verwerfen",
+    "rejectedSuggestionsTitle": "Verworfene Vorschläge"
   },
   "settings": {
     "title": "Einstellungen",
@@ -2505,7 +2507,8 @@
       "state": {
         "confirmed": "Bestätigt",
         "suggested": "Vorschlag",
-        "review": "Offen"
+        "review": "Offen",
+        "rejected": "Verworfen"
       },
       "confidence": "{{percent}} %",
       "accept": "{{field}} übernehmen",
@@ -2522,7 +2525,11 @@
       "acceptedToast_one": "{{count}} Wert übernommen",
       "acceptedToast_other": "{{count}} Werte übernommen",
       "correctedToast": "Korrektur gespeichert",
-      "reassignedToast": "Wert zu {{field}} verschoben"
+      "reassignedToast": "Wert zu {{field}} verschoben",
+      "reject": "{{field}} Vorschlag verwerfen",
+      "rejectTooltip": "Vorschlag verwerfen",
+      "rejectedSection": "Verworfene Vorschläge",
+      "rejectUndo": "Verwerfen rückgängig"
     },
     "aspects": {
       "aria": "Stand der Strukturierung",

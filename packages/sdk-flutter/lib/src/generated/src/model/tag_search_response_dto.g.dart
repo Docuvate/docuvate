@@ -18,24 +18,14 @@ class _$TagSearchResponseDto extends TagSearchResponseDto {
 
   factory _$TagSearchResponseDto(
           [void Function(TagSearchResponseDtoBuilder)? updates]) =>
-      (new TagSearchResponseDtoBuilder()..update(updates))._build();
+      (TagSearchResponseDtoBuilder()..update(updates))._build();
 
   _$TagSearchResponseDto._(
       {required this.items,
       required this.nextCursor,
       required this.hasMore,
       required this.total})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        items, r'TagSearchResponseDto', 'items');
-    BuiltValueNullFieldError.checkNotNull(
-        nextCursor, r'TagSearchResponseDto', 'nextCursor');
-    BuiltValueNullFieldError.checkNotNull(
-        hasMore, r'TagSearchResponseDto', 'hasMore');
-    BuiltValueNullFieldError.checkNotNull(
-        total, r'TagSearchResponseDto', 'total');
-  }
-
+      : super._();
   @override
   TagSearchResponseDto rebuild(
           void Function(TagSearchResponseDtoBuilder) updates) =>
@@ -43,7 +33,7 @@ class _$TagSearchResponseDto extends TagSearchResponseDto {
 
   @override
   TagSearchResponseDtoBuilder toBuilder() =>
-      new TagSearchResponseDtoBuilder()..replace(this);
+      TagSearchResponseDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -83,7 +73,7 @@ class TagSearchResponseDtoBuilder
 
   ListBuilder<JsonObject>? _items;
   ListBuilder<JsonObject> get items =>
-      _$this._items ??= new ListBuilder<JsonObject>();
+      _$this._items ??= ListBuilder<JsonObject>();
   set items(ListBuilder<JsonObject>? items) => _$this._items = items;
 
   String? _nextCursor;
@@ -116,7 +106,6 @@ class TagSearchResponseDtoBuilder
 
   @override
   void replace(TagSearchResponseDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$TagSearchResponseDto;
   }
 
@@ -132,21 +121,22 @@ class TagSearchResponseDtoBuilder
     _$TagSearchResponseDto _$result;
     try {
       _$result = _$v ??
-          new _$TagSearchResponseDto._(
-              items: items.build(),
-              nextCursor: BuiltValueNullFieldError.checkNotNull(
-                  nextCursor, r'TagSearchResponseDto', 'nextCursor'),
-              hasMore: BuiltValueNullFieldError.checkNotNull(
-                  hasMore, r'TagSearchResponseDto', 'hasMore'),
-              total: BuiltValueNullFieldError.checkNotNull(
-                  total, r'TagSearchResponseDto', 'total'));
+          _$TagSearchResponseDto._(
+            items: items.build(),
+            nextCursor: BuiltValueNullFieldError.checkNotNull(
+                nextCursor, r'TagSearchResponseDto', 'nextCursor'),
+            hasMore: BuiltValueNullFieldError.checkNotNull(
+                hasMore, r'TagSearchResponseDto', 'hasMore'),
+            total: BuiltValueNullFieldError.checkNotNull(
+                total, r'TagSearchResponseDto', 'total'),
+          );
     } catch (_) {
       late String _$failedField;
       try {
         _$failedField = 'items';
         items.build();
       } catch (e) {
-        throw new BuiltValueNestedFieldError(
+        throw BuiltValueNestedFieldError(
             r'TagSearchResponseDto', _$failedField, e.toString());
       }
       rethrow;

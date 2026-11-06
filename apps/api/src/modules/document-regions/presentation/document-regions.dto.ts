@@ -270,9 +270,9 @@ export class ApplyFieldCorrectionRequestDto {
   @IsUUID()
   id!: string;
 
-  @ApiProperty({ enum: ['create', 'reanchor', 'edit_value', 'remove'] })
-  @IsIn(['create', 'reanchor', 'edit_value', 'remove'])
-  op!: 'create' | 'reanchor' | 'edit_value' | 'remove';
+  @ApiProperty({ enum: ['create', 'reanchor', 'edit_value', 'remove', 'reject_suggestion'] })
+  @IsIn(['create', 'reanchor', 'edit_value', 'remove', 'reject_suggestion'])
+  op!: 'create' | 'reanchor' | 'edit_value' | 'remove' | 'reject_suggestion';
 
   @ApiProperty()
   @IsString()

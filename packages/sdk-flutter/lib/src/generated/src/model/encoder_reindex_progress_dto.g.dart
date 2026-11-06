@@ -20,7 +20,7 @@ class _$EncoderReindexProgressDto extends EncoderReindexProgressDto {
 
   factory _$EncoderReindexProgressDto(
           [void Function(EncoderReindexProgressDtoBuilder)? updates]) =>
-      (new EncoderReindexProgressDtoBuilder()..update(updates))._build();
+      (EncoderReindexProgressDtoBuilder()..update(updates))._build();
 
   _$EncoderReindexProgressDto._(
       {required this.targetEncoderId,
@@ -28,19 +28,7 @@ class _$EncoderReindexProgressDto extends EncoderReindexProgressDto {
       required this.progressProcessed,
       required this.progressTotal,
       required this.progressPending})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        targetEncoderId, r'EncoderReindexProgressDto', 'targetEncoderId');
-    BuiltValueNullFieldError.checkNotNull(targetEncoderRevision,
-        r'EncoderReindexProgressDto', 'targetEncoderRevision');
-    BuiltValueNullFieldError.checkNotNull(
-        progressProcessed, r'EncoderReindexProgressDto', 'progressProcessed');
-    BuiltValueNullFieldError.checkNotNull(
-        progressTotal, r'EncoderReindexProgressDto', 'progressTotal');
-    BuiltValueNullFieldError.checkNotNull(
-        progressPending, r'EncoderReindexProgressDto', 'progressPending');
-  }
-
+      : super._();
   @override
   EncoderReindexProgressDto rebuild(
           void Function(EncoderReindexProgressDtoBuilder) updates) =>
@@ -48,7 +36,7 @@ class _$EncoderReindexProgressDto extends EncoderReindexProgressDto {
 
   @override
   EncoderReindexProgressDtoBuilder toBuilder() =>
-      new EncoderReindexProgressDtoBuilder()..replace(this);
+      EncoderReindexProgressDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -134,7 +122,6 @@ class EncoderReindexProgressDtoBuilder
 
   @override
   void replace(EncoderReindexProgressDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$EncoderReindexProgressDto;
   }
 
@@ -148,25 +135,22 @@ class EncoderReindexProgressDtoBuilder
 
   _$EncoderReindexProgressDto _build() {
     final _$result = _$v ??
-        new _$EncoderReindexProgressDto._(
-            targetEncoderId: BuiltValueNullFieldError.checkNotNull(
-                targetEncoderId,
-                r'EncoderReindexProgressDto',
-                'targetEncoderId'),
-            targetEncoderRevision: BuiltValueNullFieldError.checkNotNull(
-                targetEncoderRevision,
-                r'EncoderReindexProgressDto',
-                'targetEncoderRevision'),
-            progressProcessed: BuiltValueNullFieldError.checkNotNull(
-                progressProcessed,
-                r'EncoderReindexProgressDto',
-                'progressProcessed'),
-            progressTotal: BuiltValueNullFieldError.checkNotNull(
-                progressTotal, r'EncoderReindexProgressDto', 'progressTotal'),
-            progressPending: BuiltValueNullFieldError.checkNotNull(
-                progressPending,
-                r'EncoderReindexProgressDto',
-                'progressPending'));
+        _$EncoderReindexProgressDto._(
+          targetEncoderId: BuiltValueNullFieldError.checkNotNull(
+              targetEncoderId, r'EncoderReindexProgressDto', 'targetEncoderId'),
+          targetEncoderRevision: BuiltValueNullFieldError.checkNotNull(
+              targetEncoderRevision,
+              r'EncoderReindexProgressDto',
+              'targetEncoderRevision'),
+          progressProcessed: BuiltValueNullFieldError.checkNotNull(
+              progressProcessed,
+              r'EncoderReindexProgressDto',
+              'progressProcessed'),
+          progressTotal: BuiltValueNullFieldError.checkNotNull(
+              progressTotal, r'EncoderReindexProgressDto', 'progressTotal'),
+          progressPending: BuiltValueNullFieldError.checkNotNull(
+              progressPending, r'EncoderReindexProgressDto', 'progressPending'),
+        );
     replace(_$result);
     return _$result;
   }

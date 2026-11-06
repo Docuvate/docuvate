@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { DocumentDto, ExtractedField, FieldSuggestionRow } from '@docuvate/contracts';
-import { ArrowLeftRight, ArrowRight, Check, CheckCheck, Pencil } from 'lucide-react';
+import { ArrowLeftRight, ArrowRight, Check, CheckCheck, CircleSlash, Pencil } from 'lucide-react';
 import { type FormEvent, type KeyboardEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
@@ -10,6 +10,7 @@ import { confidenceLevelFromRatio } from '../../lib/confidenceLevel';
 import {
   openWorkbenchRowCount,
   safeConfirmKeys,
+  type SuggestionRejectRef,
   type WorkbenchRow,
   workbenchRows,
 } from '../../lib/reviewWorkbench';
@@ -42,6 +43,10 @@ interface DocumentReviewWorkbenchProps {
   onConfirmMany: (keys: string[]) => void;
   onSaveValue: (key: string, value: string) => void;
   onAcceptSuggestion: (key: string, value: string) => void;
+  /** Durable reject of this field+value for the document (status Verworfen). */
+  onRejectSuggestion: (key: string, value: string) => void;
+  rejects?: readonly SuggestionRejectRef[];
+  onUndoReject?: (correctionId: string) => void;
   onReassign: (fromKey: string, toKey: string) => void;
   /** Show where a value sits in the document (highlight + page jump). */
   onLocate: (value: string) => void;
@@ -80,6 +85,9 @@ export function DocumentReviewWorkbench({
   onConfirmMany,
   onSaveValue,
   onAcceptSuggestion,
+  onRejectSuggestion,
+  rejects = [],
+  onUndoReject,
   onReassign,
   onLocate,
   onCorrectPosition,
@@ -89,7 +97,10 @@ export function DocumentReviewWorkbench({
 }: DocumentReviewWorkbenchProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const rows = useMemo(() => workbenchRows(fields, suggestions), [fields, suggestions]);
+  const rows = useMemo(
+    () => workbenchRows(fields, suggestions, rejects),
+    [fields, suggestions, rejects]
+  );
   const open = openWorkbenchRowCount(rows);
   const safeKeys = safeConfirmKeys(rows);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -102,7 +113,7 @@ export function DocumentReviewWorkbench({
   const assigned = useMemo(() => new Set(doc.tags.map((tag) => tag.id)), [doc.tags]);
   const labelSuggestions = doc.tagSuggestions ?? [];
   const openLabels = labelSuggestions.filter((item) => !assigned.has(item.tag.id)).length;
-  const aspects = structuringAspects(doc, { fields, suggestions });
+  const aspects = structuringAspects(doc, { fields, suggestions, rejects });
   const reviewedPercent =
     rows.length === 0 ? 100 : Math.round(((rows.length - open) / rows.length) * 100);
 
@@ -149,6 +160,13 @@ export function DocumentReviewWorkbench({
     setActiveIndex(index);
     if (row.state === 'suggested') onAcceptSuggestion(row.key, row.value);
     else onConfirm(row.key);
+  }
+
+  function reject(row: WorkbenchRow, index: number) {
+    if (row.state === 'confirmed') return;
+    refocus.current = true;
+    setActiveIndex(index);
+    onRejectSuggestion(row.key, row.value);
   }
 
   function startEdit(row: WorkbenchRow, index: number) {
@@ -201,6 +219,9 @@ export function DocumentReviewWorkbench({
       case 'f':
         setActiveIndex(index);
         setMode({ key: row.key, kind: 'reassign' });
+        break;
+      case 'x':
+        reject(row, index);
         break;
       case 'n':
         if (!nextDocumentId) return;
@@ -341,7 +362,7 @@ export function DocumentReviewWorkbench({
                   }}
                   className="review-workbench-row-main"
                   tabIndex={index === activeIndex ? 0 : -1}
-                  aria-keyshortcuts="Enter E F ArrowUp ArrowDown"
+                  aria-keyshortcuts="Enter E F X ArrowUp ArrowDown"
                   onFocus={() => {
                     setActiveIndex(index);
                   }}
@@ -391,6 +412,20 @@ export function DocumentReviewWorkbench({
                       onClick={() => {
                         setActiveIndex(index);
                         setMode(rowMode === 'reassign' ? null : { key: row.key, kind: 'reassign' });
+                      }}
+                    />
+                  ) : null}
+                  {row.state !== 'confirmed' ? (
+                    <IconButton
+                      icon={CircleSlash}
+                      size="sm"
+                      className="review-workbench-reject"
+                      data-testid="review-workbench-reject"
+                      label={t('pipeline.workbench.reject', { field: label })}
+                      title={t('pipeline.workbench.rejectTooltip')}
+                      disabled={saving}
+                      onClick={() => {
+                        reject(row, index);
                       }}
                     />
                   ) : null}
@@ -503,6 +538,33 @@ export function DocumentReviewWorkbench({
           })}
         </ol>
       )}
+      {rejects.length > 0 ? (
+        <div className="review-workbench-rejected" data-testid="review-workbench-rejected">
+          <h3 className="review-workbench-subtitle">{t('pipeline.workbench.rejectedSection')}</h3>
+          <ul className="review-workbench-rejected-list">
+            {rejects.map((item) => (
+              <li key={`${item.fieldKey}:${item.valueNormalized}:${item.correctionId ?? ''}`}>
+                <span className="review-workbench-row-label">{fieldLabelForKey(item.fieldKey)}</span>
+                <span className="review-workbench-row-value">{item.value ?? item.valueNormalized}</span>
+                <span className="review-workbench-row-state">{t('pipeline.workbench.state.rejected')}</span>
+                {onUndoReject && item.correctionId ? (
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    disabled={saving}
+                    onClick={() => {
+                      onUndoReject(item.correctionId!);
+                    }}
+                  >
+                    {t('pipeline.workbench.rejectUndo')}
+                  </Button>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
       <p className="review-workbench-keys">{t('pipeline.workbench.keys')}</p>
     </section>
   );

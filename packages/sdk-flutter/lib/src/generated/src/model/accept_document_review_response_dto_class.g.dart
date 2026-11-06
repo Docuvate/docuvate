@@ -18,22 +18,13 @@ class _$AcceptDocumentReviewResponseDtoClass
   factory _$AcceptDocumentReviewResponseDtoClass(
           [void Function(AcceptDocumentReviewResponseDtoClassBuilder)?
               updates]) =>
-      (new AcceptDocumentReviewResponseDtoClassBuilder()..update(updates))
-          ._build();
+      (AcceptDocumentReviewResponseDtoClassBuilder()..update(updates))._build();
 
   _$AcceptDocumentReviewResponseDtoClass._(
       {required this.documentId,
       required this.acceptedLabels,
       required this.acceptedFields})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        documentId, r'AcceptDocumentReviewResponseDtoClass', 'documentId');
-    BuiltValueNullFieldError.checkNotNull(acceptedLabels,
-        r'AcceptDocumentReviewResponseDtoClass', 'acceptedLabels');
-    BuiltValueNullFieldError.checkNotNull(acceptedFields,
-        r'AcceptDocumentReviewResponseDtoClass', 'acceptedFields');
-  }
-
+      : super._();
   @override
   AcceptDocumentReviewResponseDtoClass rebuild(
           void Function(AcceptDocumentReviewResponseDtoClassBuilder) updates) =>
@@ -41,7 +32,7 @@ class _$AcceptDocumentReviewResponseDtoClass
 
   @override
   AcceptDocumentReviewResponseDtoClassBuilder toBuilder() =>
-      new AcceptDocumentReviewResponseDtoClassBuilder()..replace(this);
+      AcceptDocumentReviewResponseDtoClassBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -109,7 +100,6 @@ class AcceptDocumentReviewResponseDtoClassBuilder
 
   @override
   void replace(AcceptDocumentReviewResponseDtoClass other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$AcceptDocumentReviewResponseDtoClass;
   }
 
@@ -124,17 +114,14 @@ class AcceptDocumentReviewResponseDtoClassBuilder
 
   _$AcceptDocumentReviewResponseDtoClass _build() {
     final _$result = _$v ??
-        new _$AcceptDocumentReviewResponseDtoClass._(
-            documentId: BuiltValueNullFieldError.checkNotNull(documentId,
-                r'AcceptDocumentReviewResponseDtoClass', 'documentId'),
-            acceptedLabels: BuiltValueNullFieldError.checkNotNull(
-                acceptedLabels,
-                r'AcceptDocumentReviewResponseDtoClass',
-                'acceptedLabels'),
-            acceptedFields: BuiltValueNullFieldError.checkNotNull(
-                acceptedFields,
-                r'AcceptDocumentReviewResponseDtoClass',
-                'acceptedFields'));
+        _$AcceptDocumentReviewResponseDtoClass._(
+          documentId: BuiltValueNullFieldError.checkNotNull(documentId,
+              r'AcceptDocumentReviewResponseDtoClass', 'documentId'),
+          acceptedLabels: BuiltValueNullFieldError.checkNotNull(acceptedLabels,
+              r'AcceptDocumentReviewResponseDtoClass', 'acceptedLabels'),
+          acceptedFields: BuiltValueNullFieldError.checkNotNull(acceptedFields,
+              r'AcceptDocumentReviewResponseDtoClass', 'acceptedFields'),
+        );
     replace(_$result);
     return _$result;
   }

@@ -16,18 +16,11 @@ class _$AdminAuthSignInSettingsResponseDto
   factory _$AdminAuthSignInSettingsResponseDto(
           [void Function(AdminAuthSignInSettingsResponseDtoBuilder)?
               updates]) =>
-      (new AdminAuthSignInSettingsResponseDtoBuilder()..update(updates))
-          ._build();
+      (AdminAuthSignInSettingsResponseDtoBuilder()..update(updates))._build();
 
   _$AdminAuthSignInSettingsResponseDto._(
       {required this.passkeysEnabled, required this.oidcProviders})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(passkeysEnabled,
-        r'AdminAuthSignInSettingsResponseDto', 'passkeysEnabled');
-    BuiltValueNullFieldError.checkNotNull(
-        oidcProviders, r'AdminAuthSignInSettingsResponseDto', 'oidcProviders');
-  }
-
+      : super._();
   @override
   AdminAuthSignInSettingsResponseDto rebuild(
           void Function(AdminAuthSignInSettingsResponseDtoBuilder) updates) =>
@@ -35,7 +28,7 @@ class _$AdminAuthSignInSettingsResponseDto
 
   @override
   AdminAuthSignInSettingsResponseDtoBuilder toBuilder() =>
-      new AdminAuthSignInSettingsResponseDtoBuilder()..replace(this);
+      AdminAuthSignInSettingsResponseDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -76,7 +69,7 @@ class AdminAuthSignInSettingsResponseDtoBuilder
 
   ListBuilder<AdminOidcProviderResponseDto>? _oidcProviders;
   ListBuilder<AdminOidcProviderResponseDto> get oidcProviders =>
-      _$this._oidcProviders ??= new ListBuilder<AdminOidcProviderResponseDto>();
+      _$this._oidcProviders ??= ListBuilder<AdminOidcProviderResponseDto>();
   set oidcProviders(ListBuilder<AdminOidcProviderResponseDto>? oidcProviders) =>
       _$this._oidcProviders = oidcProviders;
 
@@ -96,7 +89,6 @@ class AdminAuthSignInSettingsResponseDtoBuilder
 
   @override
   void replace(AdminAuthSignInSettingsResponseDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$AdminAuthSignInSettingsResponseDto;
   }
 
@@ -113,19 +105,20 @@ class AdminAuthSignInSettingsResponseDtoBuilder
     _$AdminAuthSignInSettingsResponseDto _$result;
     try {
       _$result = _$v ??
-          new _$AdminAuthSignInSettingsResponseDto._(
-              passkeysEnabled: BuiltValueNullFieldError.checkNotNull(
-                  passkeysEnabled,
-                  r'AdminAuthSignInSettingsResponseDto',
-                  'passkeysEnabled'),
-              oidcProviders: oidcProviders.build());
+          _$AdminAuthSignInSettingsResponseDto._(
+            passkeysEnabled: BuiltValueNullFieldError.checkNotNull(
+                passkeysEnabled,
+                r'AdminAuthSignInSettingsResponseDto',
+                'passkeysEnabled'),
+            oidcProviders: oidcProviders.build(),
+          );
     } catch (_) {
       late String _$failedField;
       try {
         _$failedField = 'oidcProviders';
         oidcProviders.build();
       } catch (e) {
-        throw new BuiltValueNestedFieldError(
+        throw BuiltValueNestedFieldError(
             r'AdminAuthSignInSettingsResponseDto', _$failedField, e.toString());
       }
       rethrow;

@@ -26,12 +26,12 @@ DocumentRegionTableDtoTableTypeEnum
     case 'other':
       return _$documentRegionTableDtoTableTypeEnum_other;
     default:
-      throw new ArgumentError(name);
+      throw ArgumentError(name);
   }
 }
 
 final BuiltSet<DocumentRegionTableDtoTableTypeEnum>
-    _$documentRegionTableDtoTableTypeEnumValues = new BuiltSet<
+    _$documentRegionTableDtoTableTypeEnumValues = BuiltSet<
         DocumentRegionTableDtoTableTypeEnum>(const <DocumentRegionTableDtoTableTypeEnum>[
   _$documentRegionTableDtoTableTypeEnum_lineItems,
   _$documentRegionTableDtoTableTypeEnum_keyValue,
@@ -40,7 +40,7 @@ final BuiltSet<DocumentRegionTableDtoTableTypeEnum>
 
 Serializer<DocumentRegionTableDtoTableTypeEnum>
     _$documentRegionTableDtoTableTypeEnumSerializer =
-    new _$DocumentRegionTableDtoTableTypeEnumSerializer();
+    _$DocumentRegionTableDtoTableTypeEnumSerializer();
 
 class _$DocumentRegionTableDtoTableTypeEnumSerializer
     implements PrimitiveSerializer<DocumentRegionTableDtoTableTypeEnum> {
@@ -82,7 +82,15 @@ class _$DocumentRegionTableDto extends DocumentRegionTableDto {
   @override
   final num headerRows;
   @override
+  final num footerRows;
+  @override
   final num headerCols;
+  @override
+  final num trailingHeaderCols;
+  @override
+  final bool banded;
+  @override
+  final BuiltList<DocumentRegionTableRowRoleDto> rowRoles;
   @override
   final BuiltList<DocumentRegionTableRuleDto> rules;
   @override
@@ -92,30 +100,20 @@ class _$DocumentRegionTableDto extends DocumentRegionTableDto {
 
   factory _$DocumentRegionTableDto(
           [void Function(DocumentRegionTableDtoBuilder)? updates]) =>
-      (new DocumentRegionTableDtoBuilder()..update(updates))._build();
+      (DocumentRegionTableDtoBuilder()..update(updates))._build();
 
   _$DocumentRegionTableDto._(
       {required this.tableType,
       required this.headerRows,
+      required this.footerRows,
       required this.headerCols,
+      required this.trailingHeaderCols,
+      required this.banded,
+      required this.rowRoles,
       required this.rules,
       required this.merges,
       required this.cells})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        tableType, r'DocumentRegionTableDto', 'tableType');
-    BuiltValueNullFieldError.checkNotNull(
-        headerRows, r'DocumentRegionTableDto', 'headerRows');
-    BuiltValueNullFieldError.checkNotNull(
-        headerCols, r'DocumentRegionTableDto', 'headerCols');
-    BuiltValueNullFieldError.checkNotNull(
-        rules, r'DocumentRegionTableDto', 'rules');
-    BuiltValueNullFieldError.checkNotNull(
-        merges, r'DocumentRegionTableDto', 'merges');
-    BuiltValueNullFieldError.checkNotNull(
-        cells, r'DocumentRegionTableDto', 'cells');
-  }
-
+      : super._();
   @override
   DocumentRegionTableDto rebuild(
           void Function(DocumentRegionTableDtoBuilder) updates) =>
@@ -123,7 +121,7 @@ class _$DocumentRegionTableDto extends DocumentRegionTableDto {
 
   @override
   DocumentRegionTableDtoBuilder toBuilder() =>
-      new DocumentRegionTableDtoBuilder()..replace(this);
+      DocumentRegionTableDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -131,7 +129,11 @@ class _$DocumentRegionTableDto extends DocumentRegionTableDto {
     return other is DocumentRegionTableDto &&
         tableType == other.tableType &&
         headerRows == other.headerRows &&
+        footerRows == other.footerRows &&
         headerCols == other.headerCols &&
+        trailingHeaderCols == other.trailingHeaderCols &&
+        banded == other.banded &&
+        rowRoles == other.rowRoles &&
         rules == other.rules &&
         merges == other.merges &&
         cells == other.cells;
@@ -142,7 +144,11 @@ class _$DocumentRegionTableDto extends DocumentRegionTableDto {
     var _$hash = 0;
     _$hash = $jc(_$hash, tableType.hashCode);
     _$hash = $jc(_$hash, headerRows.hashCode);
+    _$hash = $jc(_$hash, footerRows.hashCode);
     _$hash = $jc(_$hash, headerCols.hashCode);
+    _$hash = $jc(_$hash, trailingHeaderCols.hashCode);
+    _$hash = $jc(_$hash, banded.hashCode);
+    _$hash = $jc(_$hash, rowRoles.hashCode);
     _$hash = $jc(_$hash, rules.hashCode);
     _$hash = $jc(_$hash, merges.hashCode);
     _$hash = $jc(_$hash, cells.hashCode);
@@ -155,7 +161,11 @@ class _$DocumentRegionTableDto extends DocumentRegionTableDto {
     return (newBuiltValueToStringHelper(r'DocumentRegionTableDto')
           ..add('tableType', tableType)
           ..add('headerRows', headerRows)
+          ..add('footerRows', footerRows)
           ..add('headerCols', headerCols)
+          ..add('trailingHeaderCols', trailingHeaderCols)
+          ..add('banded', banded)
+          ..add('rowRoles', rowRoles)
           ..add('rules', rules)
           ..add('merges', merges)
           ..add('cells', cells))
@@ -176,25 +186,44 @@ class DocumentRegionTableDtoBuilder
   num? get headerRows => _$this._headerRows;
   set headerRows(num? headerRows) => _$this._headerRows = headerRows;
 
+  num? _footerRows;
+  num? get footerRows => _$this._footerRows;
+  set footerRows(num? footerRows) => _$this._footerRows = footerRows;
+
   num? _headerCols;
   num? get headerCols => _$this._headerCols;
   set headerCols(num? headerCols) => _$this._headerCols = headerCols;
 
+  num? _trailingHeaderCols;
+  num? get trailingHeaderCols => _$this._trailingHeaderCols;
+  set trailingHeaderCols(num? trailingHeaderCols) =>
+      _$this._trailingHeaderCols = trailingHeaderCols;
+
+  bool? _banded;
+  bool? get banded => _$this._banded;
+  set banded(bool? banded) => _$this._banded = banded;
+
+  ListBuilder<DocumentRegionTableRowRoleDto>? _rowRoles;
+  ListBuilder<DocumentRegionTableRowRoleDto> get rowRoles =>
+      _$this._rowRoles ??= ListBuilder<DocumentRegionTableRowRoleDto>();
+  set rowRoles(ListBuilder<DocumentRegionTableRowRoleDto>? rowRoles) =>
+      _$this._rowRoles = rowRoles;
+
   ListBuilder<DocumentRegionTableRuleDto>? _rules;
   ListBuilder<DocumentRegionTableRuleDto> get rules =>
-      _$this._rules ??= new ListBuilder<DocumentRegionTableRuleDto>();
+      _$this._rules ??= ListBuilder<DocumentRegionTableRuleDto>();
   set rules(ListBuilder<DocumentRegionTableRuleDto>? rules) =>
       _$this._rules = rules;
 
   ListBuilder<DocumentRegionTableMergeDto>? _merges;
   ListBuilder<DocumentRegionTableMergeDto> get merges =>
-      _$this._merges ??= new ListBuilder<DocumentRegionTableMergeDto>();
+      _$this._merges ??= ListBuilder<DocumentRegionTableMergeDto>();
   set merges(ListBuilder<DocumentRegionTableMergeDto>? merges) =>
       _$this._merges = merges;
 
   ListBuilder<DocumentRegionTableCellDto>? _cells;
   ListBuilder<DocumentRegionTableCellDto> get cells =>
-      _$this._cells ??= new ListBuilder<DocumentRegionTableCellDto>();
+      _$this._cells ??= ListBuilder<DocumentRegionTableCellDto>();
   set cells(ListBuilder<DocumentRegionTableCellDto>? cells) =>
       _$this._cells = cells;
 
@@ -207,7 +236,11 @@ class DocumentRegionTableDtoBuilder
     if ($v != null) {
       _tableType = $v.tableType;
       _headerRows = $v.headerRows;
+      _footerRows = $v.footerRows;
       _headerCols = $v.headerCols;
+      _trailingHeaderCols = $v.trailingHeaderCols;
+      _banded = $v.banded;
+      _rowRoles = $v.rowRoles.toBuilder();
       _rules = $v.rules.toBuilder();
       _merges = $v.merges.toBuilder();
       _cells = $v.cells.toBuilder();
@@ -218,7 +251,6 @@ class DocumentRegionTableDtoBuilder
 
   @override
   void replace(DocumentRegionTableDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$DocumentRegionTableDto;
   }
 
@@ -234,19 +266,31 @@ class DocumentRegionTableDtoBuilder
     _$DocumentRegionTableDto _$result;
     try {
       _$result = _$v ??
-          new _$DocumentRegionTableDto._(
-              tableType: BuiltValueNullFieldError.checkNotNull(
-                  tableType, r'DocumentRegionTableDto', 'tableType'),
-              headerRows: BuiltValueNullFieldError.checkNotNull(
-                  headerRows, r'DocumentRegionTableDto', 'headerRows'),
-              headerCols: BuiltValueNullFieldError.checkNotNull(
-                  headerCols, r'DocumentRegionTableDto', 'headerCols'),
-              rules: rules.build(),
-              merges: merges.build(),
-              cells: cells.build());
+          _$DocumentRegionTableDto._(
+            tableType: BuiltValueNullFieldError.checkNotNull(
+                tableType, r'DocumentRegionTableDto', 'tableType'),
+            headerRows: BuiltValueNullFieldError.checkNotNull(
+                headerRows, r'DocumentRegionTableDto', 'headerRows'),
+            footerRows: BuiltValueNullFieldError.checkNotNull(
+                footerRows, r'DocumentRegionTableDto', 'footerRows'),
+            headerCols: BuiltValueNullFieldError.checkNotNull(
+                headerCols, r'DocumentRegionTableDto', 'headerCols'),
+            trailingHeaderCols: BuiltValueNullFieldError.checkNotNull(
+                trailingHeaderCols,
+                r'DocumentRegionTableDto',
+                'trailingHeaderCols'),
+            banded: BuiltValueNullFieldError.checkNotNull(
+                banded, r'DocumentRegionTableDto', 'banded'),
+            rowRoles: rowRoles.build(),
+            rules: rules.build(),
+            merges: merges.build(),
+            cells: cells.build(),
+          );
     } catch (_) {
       late String _$failedField;
       try {
+        _$failedField = 'rowRoles';
+        rowRoles.build();
         _$failedField = 'rules';
         rules.build();
         _$failedField = 'merges';
@@ -254,7 +298,7 @@ class DocumentRegionTableDtoBuilder
         _$failedField = 'cells';
         cells.build();
       } catch (e) {
-        throw new BuiltValueNestedFieldError(
+        throw BuiltValueNestedFieldError(
             r'DocumentRegionTableDto', _$failedField, e.toString());
       }
       rethrow;

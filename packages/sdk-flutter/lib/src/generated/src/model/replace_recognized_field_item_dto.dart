@@ -21,6 +21,7 @@ part 'replace_recognized_field_item_dto.g.dart';
 /// * [gateLabelMatch] 
 /// * [minLabelConfidence] 
 /// * [confidenceGateEnabled] 
+/// * [showInFilter] - Sent by the catalog editor on every save; without it the whitelist rejects the whole request.
 @BuiltValue()
 abstract class ReplaceRecognizedFieldItemDto implements Built<ReplaceRecognizedFieldItemDto, ReplaceRecognizedFieldItemDtoBuilder> {
   @BuiltValueField(wireName: r'key')
@@ -51,6 +52,10 @@ abstract class ReplaceRecognizedFieldItemDto implements Built<ReplaceRecognizedF
 
   @BuiltValueField(wireName: r'confidenceGateEnabled')
   bool? get confidenceGateEnabled;
+
+  /// Sent by the catalog editor on every save; without it the whitelist rejects the whole request.
+  @BuiltValueField(wireName: r'showInFilter')
+  bool? get showInFilter;
 
   ReplaceRecognizedFieldItemDto._();
 
@@ -131,6 +136,13 @@ class _$ReplaceRecognizedFieldItemDtoSerializer implements PrimitiveSerializer<R
       yield r'confidenceGateEnabled';
       yield serializers.serialize(
         object.confidenceGateEnabled,
+        specifiedType: const FullType(bool),
+      );
+    }
+    if (object.showInFilter != null) {
+      yield r'showInFilter';
+      yield serializers.serialize(
+        object.showInFilter,
         specifiedType: const FullType(bool),
       );
     }
@@ -219,6 +231,13 @@ class _$ReplaceRecognizedFieldItemDtoSerializer implements PrimitiveSerializer<R
             specifiedType: const FullType(bool),
           ) as bool;
           result.confidenceGateEnabled = valueDes;
+          break;
+        case r'showInFilter':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.showInFilter = valueDes;
           break;
         default:
           unhandled.add(key);

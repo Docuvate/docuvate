@@ -6,6 +6,7 @@ import type {
   LayoutIrDocument,
   RecognizedFieldDefinitionDto,
 } from '@docuvate/contracts';
+import { normalizeSuggestionDecisionValue } from '@docuvate/contracts';
 import {
   type KeyboardEvent,
   useCallback,
@@ -64,7 +65,8 @@ interface DocumentLayoutSidePanelProps {
   activeOverlayId: string | null;
   onOverlaySelect: (overlayId: string, page: number) => void;
   onAcceptSuggestion: (key: string, value: string) => void;
-  onDismissSuggestion: (key: string) => void;
+  onDismissSuggestion: (key: string, value: string) => void;
+  /** Identities `${fieldKey}\0${normalizedValue}` that were durably rejected. */
   dismissedSuggestions: Set<string>;
   heuristicSuggestions?: { key: string; value: string }[];
   recognizedCatalog?: RecognizedFieldDefinitionDto[];
@@ -195,7 +197,10 @@ export function DocumentLayoutSidePanel({
       return true;
     });
     return unique.filter(
-      (s) => !dismissedSuggestions.has(s.key) && !isDuplicateSuggestion(s.key, s.value)
+      (s) =>
+        !dismissedSuggestions.has(
+          `${s.key}\0${normalizeSuggestionDecisionValue(s.value)}`
+        ) && !isDuplicateSuggestion(s.key, s.value)
     );
   }, [
     layoutIr,
@@ -483,7 +488,7 @@ export function DocumentLayoutSidePanel({
                           type="button"
                           variant="ghost"
                           onClick={() => {
-                            onDismissSuggestion(s.key);
+                            onDismissSuggestion(s.key, s.value);
                           }}
                         >
                           {t('documents.layoutSuggestionDismiss')}

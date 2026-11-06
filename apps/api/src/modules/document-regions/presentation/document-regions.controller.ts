@@ -19,6 +19,7 @@ import {
 import { ApplyFieldCorrectionUseCase } from '../application/apply-field-correction.use-case.js';
 import { ApplyPageTransformUseCase } from '../application/apply-page-transform.use-case.js';
 import { ListPageTransformsUseCase } from '../application/list-page-transforms.use-case.js';
+import { ListFieldSuggestionDecisionsUseCase } from '../application/list-field-suggestion-decisions.use-case.js';
 import { ApplyTableCorrectionUseCase } from '../application/apply-table-correction.use-case.js';
 import { ConfirmDocumentFieldUseCase } from '../application/confirm-document-field.use-case.js';
 import { ListDocumentRegionsUseCase } from '../application/list-document-regions.use-case.js';
@@ -51,7 +52,8 @@ export class DocumentRegionsController {
     private readonly withdrawFieldCorrection: WithdrawFieldCorrectionUseCase,
     private readonly applyTableCorrection: ApplyTableCorrectionUseCase,
     private readonly withdrawTableCorrection: WithdrawTableCorrectionUseCase,
-    private readonly confirmField: ConfirmDocumentFieldUseCase
+    private readonly confirmField: ConfirmDocumentFieldUseCase,
+    private readonly listFieldSuggestionDecisions: ListFieldSuggestionDecisionsUseCase
   ) {}
 
   @Get(':id/layout/tokens')
@@ -171,6 +173,20 @@ export class DocumentRegionsController {
     @Body() body: ConfirmDocumentFieldRequestDto
   ): Promise<ConfirmDocumentFieldResponseDto> {
     return this.confirmField.execute(id, session.user.id, subject, body.fieldKey, body.value);
+  }
+
+
+  @Get(':id/field-suggestion-decisions')
+  @ApiDocuvateRoute({
+    operationId: 'listDocumentFieldSuggestionDecisions',
+    summary: 'Active field suggestion decisions (rejects) for a document',
+  })
+  async fieldSuggestionDecisions(
+    @Session() session: AuthSession,
+    @AuthSubject() subject: AuthorizationSubject,
+    @Param('id') id: string
+  ) {
+    return this.listFieldSuggestionDecisions.execute(id, session.user.id, subject);
   }
 
   @Get(':id/page-transforms')

@@ -13,7 +13,9 @@ import type pg from 'pg';
 import type { AuthorizationSubject } from '../../../../shared/domain/authorization.js';
 import { NotFoundError } from '../../../../shared/domain/errors.js';
 import {
+  DOCUMENT_REGION_REPOSITORY,
   DOCUMENT_REPOSITORY,
+  type DocumentRegionRepository,
   type DocumentRepository,
   TAXONOMY_REPOSITORY,
   type TaxonomyRepository,
@@ -30,6 +32,7 @@ import { GetDocumentUseCase } from '../get-document.use-case.js';
 import { UpdateDocumentUseCase } from '../update-document.use-case.js';
 import {
   buildReviewFieldSuggestions,
+  filterRejectedReviewFieldSuggestions,
   isoDateFromFieldValue,
 } from './document-review-field-display.js';
 import { isJunkReviewFieldSuggestion } from './review-field-junk-filter.js';
@@ -45,6 +48,7 @@ interface AcceptDocumentReviewOptions {
 export class AcceptDocumentReviewUseCase {
   constructor(
     @Inject(DOCUMENT_REPOSITORY) private readonly documents: DocumentRepository,
+    @Inject(DOCUMENT_REGION_REPOSITORY) private readonly regions: DocumentRegionRepository,
     @Inject(TAXONOMY_REPOSITORY) private readonly taxonomy: TaxonomyRepository,
     @Inject(PG_POOL) private readonly pool: pg.Pool,
     private readonly getDocument: GetDocumentUseCase,
@@ -111,12 +115,14 @@ export class AcceptDocumentReviewUseCase {
     const extractedText = doc.extraction?.text ?? '';
     const firstLine =
       extractedText.split('\n').find((line) => line.trim().length > 0) ?? null;
-    const reviewableFields = buildReviewFieldSuggestions(fields, catalogKeys, fieldDefinitions, {
+    const builtReviewableFields = buildReviewFieldSuggestions(fields, catalogKeys, fieldDefinitions, {
       title: doc.title,
       filename: doc.filename,
       firstLine,
       minConfidence,
     });
+    const rejects = await this.regions.listActiveFieldSuggestionRejects(documentId);
+    const reviewableFields = filterRejectedReviewFieldSuggestions(builtReviewableFields, rejects);
     const reviewableKeys = new Set(reviewableFields.map((field) => field.key));
 
     const { suggestions } = partitionRecognizedAndHeuristicSuggestions(fields, catalogKeys);

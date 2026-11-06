@@ -18,22 +18,14 @@ class _$DocumentDuplicateStackSummaryDtoClass
   factory _$DocumentDuplicateStackSummaryDtoClass(
           [void Function(DocumentDuplicateStackSummaryDtoClassBuilder)?
               updates]) =>
-      (new DocumentDuplicateStackSummaryDtoClassBuilder()..update(updates))
+      (DocumentDuplicateStackSummaryDtoClassBuilder()..update(updates))
           ._build();
 
   _$DocumentDuplicateStackSummaryDtoClass._(
       {required this.stackId,
       required this.versionCount,
       required this.pendingReview})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        stackId, r'DocumentDuplicateStackSummaryDtoClass', 'stackId');
-    BuiltValueNullFieldError.checkNotNull(
-        versionCount, r'DocumentDuplicateStackSummaryDtoClass', 'versionCount');
-    BuiltValueNullFieldError.checkNotNull(pendingReview,
-        r'DocumentDuplicateStackSummaryDtoClass', 'pendingReview');
-  }
-
+      : super._();
   @override
   DocumentDuplicateStackSummaryDtoClass rebuild(
           void Function(DocumentDuplicateStackSummaryDtoClassBuilder)
@@ -42,7 +34,7 @@ class _$DocumentDuplicateStackSummaryDtoClass
 
   @override
   DocumentDuplicateStackSummaryDtoClassBuilder toBuilder() =>
-      new DocumentDuplicateStackSummaryDtoClassBuilder()..replace(this);
+      DocumentDuplicateStackSummaryDtoClassBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -110,7 +102,6 @@ class DocumentDuplicateStackSummaryDtoClassBuilder
 
   @override
   void replace(DocumentDuplicateStackSummaryDtoClass other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$DocumentDuplicateStackSummaryDtoClass;
   }
 
@@ -125,13 +116,14 @@ class DocumentDuplicateStackSummaryDtoClassBuilder
 
   _$DocumentDuplicateStackSummaryDtoClass _build() {
     final _$result = _$v ??
-        new _$DocumentDuplicateStackSummaryDtoClass._(
-            stackId: BuiltValueNullFieldError.checkNotNull(
-                stackId, r'DocumentDuplicateStackSummaryDtoClass', 'stackId'),
-            versionCount: BuiltValueNullFieldError.checkNotNull(versionCount,
-                r'DocumentDuplicateStackSummaryDtoClass', 'versionCount'),
-            pendingReview: BuiltValueNullFieldError.checkNotNull(pendingReview,
-                r'DocumentDuplicateStackSummaryDtoClass', 'pendingReview'));
+        _$DocumentDuplicateStackSummaryDtoClass._(
+          stackId: BuiltValueNullFieldError.checkNotNull(
+              stackId, r'DocumentDuplicateStackSummaryDtoClass', 'stackId'),
+          versionCount: BuiltValueNullFieldError.checkNotNull(versionCount,
+              r'DocumentDuplicateStackSummaryDtoClass', 'versionCount'),
+          pendingReview: BuiltValueNullFieldError.checkNotNull(pendingReview,
+              r'DocumentDuplicateStackSummaryDtoClass', 'pendingReview'),
+        );
     replace(_$result);
     return _$result;
   }

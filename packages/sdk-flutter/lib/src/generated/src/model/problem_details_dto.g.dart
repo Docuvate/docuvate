@@ -19,10 +19,12 @@ class _$ProblemDetailsDto extends ProblemDetailsDto {
   final String detail;
   @override
   final String requestId;
+  @override
+  final BuiltList<String>? invalidParams;
 
   factory _$ProblemDetailsDto(
           [void Function(ProblemDetailsDtoBuilder)? updates]) =>
-      (new ProblemDetailsDtoBuilder()..update(updates))._build();
+      (ProblemDetailsDtoBuilder()..update(updates))._build();
 
   _$ProblemDetailsDto._(
       {required this.type,
@@ -30,26 +32,16 @@ class _$ProblemDetailsDto extends ProblemDetailsDto {
       required this.status,
       required this.code,
       required this.detail,
-      required this.requestId})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(type, r'ProblemDetailsDto', 'type');
-    BuiltValueNullFieldError.checkNotNull(title, r'ProblemDetailsDto', 'title');
-    BuiltValueNullFieldError.checkNotNull(
-        status, r'ProblemDetailsDto', 'status');
-    BuiltValueNullFieldError.checkNotNull(code, r'ProblemDetailsDto', 'code');
-    BuiltValueNullFieldError.checkNotNull(
-        detail, r'ProblemDetailsDto', 'detail');
-    BuiltValueNullFieldError.checkNotNull(
-        requestId, r'ProblemDetailsDto', 'requestId');
-  }
-
+      required this.requestId,
+      this.invalidParams})
+      : super._();
   @override
   ProblemDetailsDto rebuild(void Function(ProblemDetailsDtoBuilder) updates) =>
       (toBuilder()..update(updates)).build();
 
   @override
   ProblemDetailsDtoBuilder toBuilder() =>
-      new ProblemDetailsDtoBuilder()..replace(this);
+      ProblemDetailsDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -60,7 +52,8 @@ class _$ProblemDetailsDto extends ProblemDetailsDto {
         status == other.status &&
         code == other.code &&
         detail == other.detail &&
-        requestId == other.requestId;
+        requestId == other.requestId &&
+        invalidParams == other.invalidParams;
   }
 
   @override
@@ -72,6 +65,7 @@ class _$ProblemDetailsDto extends ProblemDetailsDto {
     _$hash = $jc(_$hash, code.hashCode);
     _$hash = $jc(_$hash, detail.hashCode);
     _$hash = $jc(_$hash, requestId.hashCode);
+    _$hash = $jc(_$hash, invalidParams.hashCode);
     _$hash = $jf(_$hash);
     return _$hash;
   }
@@ -84,7 +78,8 @@ class _$ProblemDetailsDto extends ProblemDetailsDto {
           ..add('status', status)
           ..add('code', code)
           ..add('detail', detail)
-          ..add('requestId', requestId))
+          ..add('requestId', requestId)
+          ..add('invalidParams', invalidParams))
         .toString();
   }
 }
@@ -117,6 +112,12 @@ class ProblemDetailsDtoBuilder
   String? get requestId => _$this._requestId;
   set requestId(String? requestId) => _$this._requestId = requestId;
 
+  ListBuilder<String>? _invalidParams;
+  ListBuilder<String> get invalidParams =>
+      _$this._invalidParams ??= ListBuilder<String>();
+  set invalidParams(ListBuilder<String>? invalidParams) =>
+      _$this._invalidParams = invalidParams;
+
   ProblemDetailsDtoBuilder() {
     ProblemDetailsDto._defaults(this);
   }
@@ -130,6 +131,7 @@ class ProblemDetailsDtoBuilder
       _code = $v.code;
       _detail = $v.detail;
       _requestId = $v.requestId;
+      _invalidParams = $v.invalidParams?.toBuilder();
       _$v = null;
     }
     return this;
@@ -137,7 +139,6 @@ class ProblemDetailsDtoBuilder
 
   @override
   void replace(ProblemDetailsDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$ProblemDetailsDto;
   }
 
@@ -150,8 +151,10 @@ class ProblemDetailsDtoBuilder
   ProblemDetailsDto build() => _build();
 
   _$ProblemDetailsDto _build() {
-    final _$result = _$v ??
-        new _$ProblemDetailsDto._(
+    _$ProblemDetailsDto _$result;
+    try {
+      _$result = _$v ??
+          _$ProblemDetailsDto._(
             type: BuiltValueNullFieldError.checkNotNull(
                 type, r'ProblemDetailsDto', 'type'),
             title: BuiltValueNullFieldError.checkNotNull(
@@ -163,7 +166,20 @@ class ProblemDetailsDtoBuilder
             detail: BuiltValueNullFieldError.checkNotNull(
                 detail, r'ProblemDetailsDto', 'detail'),
             requestId: BuiltValueNullFieldError.checkNotNull(
-                requestId, r'ProblemDetailsDto', 'requestId'));
+                requestId, r'ProblemDetailsDto', 'requestId'),
+            invalidParams: _invalidParams?.build(),
+          );
+    } catch (_) {
+      late String _$failedField;
+      try {
+        _$failedField = 'invalidParams';
+        _invalidParams?.build();
+      } catch (e) {
+        throw BuiltValueNestedFieldError(
+            r'ProblemDetailsDto', _$failedField, e.toString());
+      }
+      rethrow;
+    }
     replace(_$result);
     return _$result;
   }

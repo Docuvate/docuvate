@@ -26,12 +26,12 @@ UserSettingsResponseDtoThemePreferenceEnum
     case 'system':
       return _$userSettingsResponseDtoThemePreferenceEnum_system;
     default:
-      throw new ArgumentError(name);
+      throw ArgumentError(name);
   }
 }
 
 final BuiltSet<UserSettingsResponseDtoThemePreferenceEnum>
-    _$userSettingsResponseDtoThemePreferenceEnumValues = new BuiltSet<
+    _$userSettingsResponseDtoThemePreferenceEnumValues = BuiltSet<
         UserSettingsResponseDtoThemePreferenceEnum>(const <UserSettingsResponseDtoThemePreferenceEnum>[
   _$userSettingsResponseDtoThemePreferenceEnum_light,
   _$userSettingsResponseDtoThemePreferenceEnum_dark,
@@ -51,12 +51,12 @@ UserSettingsResponseDtoLocaleEnum _$userSettingsResponseDtoLocaleEnumValueOf(
     case 'en':
       return _$userSettingsResponseDtoLocaleEnum_en;
     default:
-      throw new ArgumentError(name);
+      throw ArgumentError(name);
   }
 }
 
 final BuiltSet<UserSettingsResponseDtoLocaleEnum>
-    _$userSettingsResponseDtoLocaleEnumValues = new BuiltSet<
+    _$userSettingsResponseDtoLocaleEnumValues = BuiltSet<
         UserSettingsResponseDtoLocaleEnum>(const <UserSettingsResponseDtoLocaleEnum>[
   _$userSettingsResponseDtoLocaleEnum_de,
   _$userSettingsResponseDtoLocaleEnum_en,
@@ -64,10 +64,10 @@ final BuiltSet<UserSettingsResponseDtoLocaleEnum>
 
 Serializer<UserSettingsResponseDtoThemePreferenceEnum>
     _$userSettingsResponseDtoThemePreferenceEnumSerializer =
-    new _$UserSettingsResponseDtoThemePreferenceEnumSerializer();
+    _$UserSettingsResponseDtoThemePreferenceEnumSerializer();
 Serializer<UserSettingsResponseDtoLocaleEnum>
     _$userSettingsResponseDtoLocaleEnumSerializer =
-    new _$UserSettingsResponseDtoLocaleEnumSerializer();
+    _$UserSettingsResponseDtoLocaleEnumSerializer();
 
 class _$UserSettingsResponseDtoThemePreferenceEnumSerializer
     implements PrimitiveSerializer<UserSettingsResponseDtoThemePreferenceEnum> {
@@ -153,7 +153,7 @@ class _$UserSettingsResponseDto extends UserSettingsResponseDto {
 
   factory _$UserSettingsResponseDto(
           [void Function(UserSettingsResponseDtoBuilder)? updates]) =>
-      (new UserSettingsResponseDtoBuilder()..update(updates))._build();
+      (UserSettingsResponseDtoBuilder()..update(updates))._build();
 
   _$UserSettingsResponseDto._(
       {required this.preferredExtractorEngine,
@@ -164,13 +164,7 @@ class _$UserSettingsResponseDto extends UserSettingsResponseDto {
       this.fieldExtractionRequiredLabelIds,
       this.themePreference,
       this.locale})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(preferredExtractorEngine,
-        r'UserSettingsResponseDto', 'preferredExtractorEngine');
-    BuiltValueNullFieldError.checkNotNull(useArenaWinnerAsDefault,
-        r'UserSettingsResponseDto', 'useArenaWinnerAsDefault');
-  }
-
+      : super._();
   @override
   UserSettingsResponseDto rebuild(
           void Function(UserSettingsResponseDtoBuilder) updates) =>
@@ -178,7 +172,7 @@ class _$UserSettingsResponseDto extends UserSettingsResponseDto {
 
   @override
   UserSettingsResponseDtoBuilder toBuilder() =>
-      new UserSettingsResponseDtoBuilder()..replace(this);
+      UserSettingsResponseDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -263,7 +257,7 @@ class UserSettingsResponseDtoBuilder
 
   ListBuilder<String>? _fieldExtractionRequiredLabelIds;
   ListBuilder<String> get fieldExtractionRequiredLabelIds =>
-      _$this._fieldExtractionRequiredLabelIds ??= new ListBuilder<String>();
+      _$this._fieldExtractionRequiredLabelIds ??= ListBuilder<String>();
   set fieldExtractionRequiredLabelIds(
           ListBuilder<String>? fieldExtractionRequiredLabelIds) =>
       _$this._fieldExtractionRequiredLabelIds = fieldExtractionRequiredLabelIds;
@@ -304,7 +298,6 @@ class UserSettingsResponseDtoBuilder
 
   @override
   void replace(UserSettingsResponseDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$UserSettingsResponseDto;
   }
 
@@ -320,30 +313,31 @@ class UserSettingsResponseDtoBuilder
     _$UserSettingsResponseDto _$result;
     try {
       _$result = _$v ??
-          new _$UserSettingsResponseDto._(
-              preferredExtractorEngine: BuiltValueNullFieldError.checkNotNull(
-                  preferredExtractorEngine,
-                  r'UserSettingsResponseDto',
-                  'preferredExtractorEngine'),
-              advancedFeaturesEnabled: advancedFeaturesEnabled,
-              useArenaWinnerAsDefault: BuiltValueNullFieldError.checkNotNull(
-                  useArenaWinnerAsDefault,
-                  r'UserSettingsResponseDto',
-                  'useArenaWinnerAsDefault'),
-              arenaWinnerEngine: arenaWinnerEngine,
-              fieldExtractionConfidenceGateEnabled:
-                  fieldExtractionConfidenceGateEnabled,
-              fieldExtractionRequiredLabelIds:
-                  _fieldExtractionRequiredLabelIds?.build(),
-              themePreference: themePreference,
-              locale: locale);
+          _$UserSettingsResponseDto._(
+            preferredExtractorEngine: BuiltValueNullFieldError.checkNotNull(
+                preferredExtractorEngine,
+                r'UserSettingsResponseDto',
+                'preferredExtractorEngine'),
+            advancedFeaturesEnabled: advancedFeaturesEnabled,
+            useArenaWinnerAsDefault: BuiltValueNullFieldError.checkNotNull(
+                useArenaWinnerAsDefault,
+                r'UserSettingsResponseDto',
+                'useArenaWinnerAsDefault'),
+            arenaWinnerEngine: arenaWinnerEngine,
+            fieldExtractionConfidenceGateEnabled:
+                fieldExtractionConfidenceGateEnabled,
+            fieldExtractionRequiredLabelIds:
+                _fieldExtractionRequiredLabelIds?.build(),
+            themePreference: themePreference,
+            locale: locale,
+          );
     } catch (_) {
       late String _$failedField;
       try {
         _$failedField = 'fieldExtractionRequiredLabelIds';
         _fieldExtractionRequiredLabelIds?.build();
       } catch (e) {
-        throw new BuiltValueNestedFieldError(
+        throw BuiltValueNestedFieldError(
             r'UserSettingsResponseDto', _$failedField, e.toString());
       }
       rethrow;

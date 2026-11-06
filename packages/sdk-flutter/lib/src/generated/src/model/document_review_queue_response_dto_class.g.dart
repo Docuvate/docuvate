@@ -20,25 +20,14 @@ class _$DocumentReviewQueueResponseDtoClass
   factory _$DocumentReviewQueueResponseDtoClass(
           [void Function(DocumentReviewQueueResponseDtoClassBuilder)?
               updates]) =>
-      (new DocumentReviewQueueResponseDtoClassBuilder()..update(updates))
-          ._build();
+      (DocumentReviewQueueResponseDtoClassBuilder()..update(updates))._build();
 
   _$DocumentReviewQueueResponseDtoClass._(
       {required this.items,
       required this.nextCursor,
       required this.hasMore,
       required this.total})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        items, r'DocumentReviewQueueResponseDtoClass', 'items');
-    BuiltValueNullFieldError.checkNotNull(
-        nextCursor, r'DocumentReviewQueueResponseDtoClass', 'nextCursor');
-    BuiltValueNullFieldError.checkNotNull(
-        hasMore, r'DocumentReviewQueueResponseDtoClass', 'hasMore');
-    BuiltValueNullFieldError.checkNotNull(
-        total, r'DocumentReviewQueueResponseDtoClass', 'total');
-  }
-
+      : super._();
   @override
   DocumentReviewQueueResponseDtoClass rebuild(
           void Function(DocumentReviewQueueResponseDtoClassBuilder) updates) =>
@@ -46,7 +35,7 @@ class _$DocumentReviewQueueResponseDtoClass
 
   @override
   DocumentReviewQueueResponseDtoClassBuilder toBuilder() =>
-      new DocumentReviewQueueResponseDtoClassBuilder()..replace(this);
+      DocumentReviewQueueResponseDtoClassBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -88,7 +77,7 @@ class DocumentReviewQueueResponseDtoClassBuilder
 
   ListBuilder<DocumentReviewQueueItemDtoClass>? _items;
   ListBuilder<DocumentReviewQueueItemDtoClass> get items =>
-      _$this._items ??= new ListBuilder<DocumentReviewQueueItemDtoClass>();
+      _$this._items ??= ListBuilder<DocumentReviewQueueItemDtoClass>();
   set items(ListBuilder<DocumentReviewQueueItemDtoClass>? items) =>
       _$this._items = items;
 
@@ -122,7 +111,6 @@ class DocumentReviewQueueResponseDtoClassBuilder
 
   @override
   void replace(DocumentReviewQueueResponseDtoClass other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$DocumentReviewQueueResponseDtoClass;
   }
 
@@ -139,24 +127,23 @@ class DocumentReviewQueueResponseDtoClassBuilder
     _$DocumentReviewQueueResponseDtoClass _$result;
     try {
       _$result = _$v ??
-          new _$DocumentReviewQueueResponseDtoClass._(
-              items: items.build(),
-              nextCursor: BuiltValueNullFieldError.checkNotNull(nextCursor,
-                  r'DocumentReviewQueueResponseDtoClass', 'nextCursor'),
-              hasMore: BuiltValueNullFieldError.checkNotNull(
-                  hasMore, r'DocumentReviewQueueResponseDtoClass', 'hasMore'),
-              total: BuiltValueNullFieldError.checkNotNull(
-                  total, r'DocumentReviewQueueResponseDtoClass', 'total'));
+          _$DocumentReviewQueueResponseDtoClass._(
+            items: items.build(),
+            nextCursor: BuiltValueNullFieldError.checkNotNull(nextCursor,
+                r'DocumentReviewQueueResponseDtoClass', 'nextCursor'),
+            hasMore: BuiltValueNullFieldError.checkNotNull(
+                hasMore, r'DocumentReviewQueueResponseDtoClass', 'hasMore'),
+            total: BuiltValueNullFieldError.checkNotNull(
+                total, r'DocumentReviewQueueResponseDtoClass', 'total'),
+          );
     } catch (_) {
       late String _$failedField;
       try {
         _$failedField = 'items';
         items.build();
       } catch (e) {
-        throw new BuiltValueNestedFieldError(
-            r'DocumentReviewQueueResponseDtoClass',
-            _$failedField,
-            e.toString());
+        throw BuiltValueNestedFieldError(r'DocumentReviewQueueResponseDtoClass',
+            _$failedField, e.toString());
       }
       rethrow;
     }

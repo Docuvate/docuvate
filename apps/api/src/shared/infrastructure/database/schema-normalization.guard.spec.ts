@@ -70,6 +70,7 @@ const FORWARD_SQL_ORDER = [
   'document-field-values-user-confirmed-up.sql',
   'document-region-table-structure-up.sql',
   'document-page-transforms-up.sql',
+  'field-suggestion-reject-up.sql',
 ];
 
 function loadForwardMigrationSql(): string {

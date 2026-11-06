@@ -16,18 +16,11 @@ class _$DocumentTagSuggestionsBatchItemDto
   factory _$DocumentTagSuggestionsBatchItemDto(
           [void Function(DocumentTagSuggestionsBatchItemDtoBuilder)?
               updates]) =>
-      (new DocumentTagSuggestionsBatchItemDtoBuilder()..update(updates))
-          ._build();
+      (DocumentTagSuggestionsBatchItemDtoBuilder()..update(updates))._build();
 
   _$DocumentTagSuggestionsBatchItemDto._(
       {required this.documentId, required this.suggestions})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        documentId, r'DocumentTagSuggestionsBatchItemDto', 'documentId');
-    BuiltValueNullFieldError.checkNotNull(
-        suggestions, r'DocumentTagSuggestionsBatchItemDto', 'suggestions');
-  }
-
+      : super._();
   @override
   DocumentTagSuggestionsBatchItemDto rebuild(
           void Function(DocumentTagSuggestionsBatchItemDtoBuilder) updates) =>
@@ -35,7 +28,7 @@ class _$DocumentTagSuggestionsBatchItemDto
 
   @override
   DocumentTagSuggestionsBatchItemDtoBuilder toBuilder() =>
-      new DocumentTagSuggestionsBatchItemDtoBuilder()..replace(this);
+      DocumentTagSuggestionsBatchItemDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -75,7 +68,7 @@ class DocumentTagSuggestionsBatchItemDtoBuilder
 
   ListBuilder<JsonObject>? _suggestions;
   ListBuilder<JsonObject> get suggestions =>
-      _$this._suggestions ??= new ListBuilder<JsonObject>();
+      _$this._suggestions ??= ListBuilder<JsonObject>();
   set suggestions(ListBuilder<JsonObject>? suggestions) =>
       _$this._suggestions = suggestions;
 
@@ -95,7 +88,6 @@ class DocumentTagSuggestionsBatchItemDtoBuilder
 
   @override
   void replace(DocumentTagSuggestionsBatchItemDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$DocumentTagSuggestionsBatchItemDto;
   }
 
@@ -112,17 +104,18 @@ class DocumentTagSuggestionsBatchItemDtoBuilder
     _$DocumentTagSuggestionsBatchItemDto _$result;
     try {
       _$result = _$v ??
-          new _$DocumentTagSuggestionsBatchItemDto._(
-              documentId: BuiltValueNullFieldError.checkNotNull(documentId,
-                  r'DocumentTagSuggestionsBatchItemDto', 'documentId'),
-              suggestions: suggestions.build());
+          _$DocumentTagSuggestionsBatchItemDto._(
+            documentId: BuiltValueNullFieldError.checkNotNull(documentId,
+                r'DocumentTagSuggestionsBatchItemDto', 'documentId'),
+            suggestions: suggestions.build(),
+          );
     } catch (_) {
       late String _$failedField;
       try {
         _$failedField = 'suggestions';
         suggestions.build();
       } catch (e) {
-        throw new BuiltValueNestedFieldError(
+        throw BuiltValueNestedFieldError(
             r'DocumentTagSuggestionsBatchItemDto', _$failedField, e.toString());
       }
       rethrow;

@@ -10,6 +10,7 @@ import { ExtractionFeedbackModule } from '../extraction-feedback/extraction-feed
 import { ApplyFieldCorrectionUseCase } from './application/apply-field-correction.use-case.js';
 import { ApplyPageTransformUseCase } from './application/apply-page-transform.use-case.js';
 import { ListPageTransformsUseCase } from './application/list-page-transforms.use-case.js';
+import { ListFieldSuggestionDecisionsUseCase } from './application/list-field-suggestion-decisions.use-case.js';
 import { ApplyTableCorrectionUseCase } from './application/apply-table-correction.use-case.js';
 import { ConfirmDocumentFieldUseCase } from './application/confirm-document-field.use-case.js';
 import { ListDocumentRegionsUseCase } from './application/list-document-regions.use-case.js';
@@ -29,6 +30,7 @@ import { DocumentRegionsController } from './presentation/document-regions.contr
     ListLayoutTokensUseCase,
     ListDocumentRegionsUseCase,
     ListPageTransformsUseCase,
+    ListFieldSuggestionDecisionsUseCase,
     ApplyPageTransformUseCase,
     ApplyFieldCorrectionUseCase,
     WithdrawFieldCorrectionUseCase,

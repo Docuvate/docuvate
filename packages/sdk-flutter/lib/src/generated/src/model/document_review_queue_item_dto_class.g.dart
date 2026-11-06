@@ -29,7 +29,7 @@ class _$DocumentReviewQueueItemDtoClass
 
   factory _$DocumentReviewQueueItemDtoClass(
           [void Function(DocumentReviewQueueItemDtoClassBuilder)? updates]) =>
-      (new DocumentReviewQueueItemDtoClassBuilder()..update(updates))._build();
+      (DocumentReviewQueueItemDtoClassBuilder()..update(updates))._build();
 
   _$DocumentReviewQueueItemDtoClass._(
       {required this.documentId,
@@ -41,21 +41,7 @@ class _$DocumentReviewQueueItemDtoClass
       required this.labelSuggestions,
       required this.fieldSuggestions,
       this.duplicateStack})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        documentId, r'DocumentReviewQueueItemDtoClass', 'documentId');
-    BuiltValueNullFieldError.checkNotNull(
-        title, r'DocumentReviewQueueItemDtoClass', 'title');
-    BuiltValueNullFieldError.checkNotNull(
-        filename, r'DocumentReviewQueueItemDtoClass', 'filename');
-    BuiltValueNullFieldError.checkNotNull(
-        uploadDate, r'DocumentReviewQueueItemDtoClass', 'uploadDate');
-    BuiltValueNullFieldError.checkNotNull(labelSuggestions,
-        r'DocumentReviewQueueItemDtoClass', 'labelSuggestions');
-    BuiltValueNullFieldError.checkNotNull(fieldSuggestions,
-        r'DocumentReviewQueueItemDtoClass', 'fieldSuggestions');
-  }
-
+      : super._();
   @override
   DocumentReviewQueueItemDtoClass rebuild(
           void Function(DocumentReviewQueueItemDtoClassBuilder) updates) =>
@@ -63,7 +49,7 @@ class _$DocumentReviewQueueItemDtoClass
 
   @override
   DocumentReviewQueueItemDtoClassBuilder toBuilder() =>
-      new DocumentReviewQueueItemDtoClassBuilder()..replace(this);
+      DocumentReviewQueueItemDtoClassBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -145,14 +131,14 @@ class DocumentReviewQueueItemDtoClassBuilder
 
   ListBuilder<JsonObject>? _labelSuggestions;
   ListBuilder<JsonObject> get labelSuggestions =>
-      _$this._labelSuggestions ??= new ListBuilder<JsonObject>();
+      _$this._labelSuggestions ??= ListBuilder<JsonObject>();
   set labelSuggestions(ListBuilder<JsonObject>? labelSuggestions) =>
       _$this._labelSuggestions = labelSuggestions;
 
   ListBuilder<DocumentReviewFieldSuggestionDtoClass>? _fieldSuggestions;
   ListBuilder<DocumentReviewFieldSuggestionDtoClass> get fieldSuggestions =>
       _$this._fieldSuggestions ??=
-          new ListBuilder<DocumentReviewFieldSuggestionDtoClass>();
+          ListBuilder<DocumentReviewFieldSuggestionDtoClass>();
   set fieldSuggestions(
           ListBuilder<DocumentReviewFieldSuggestionDtoClass>?
               fieldSuggestions) =>
@@ -160,8 +146,7 @@ class DocumentReviewQueueItemDtoClassBuilder
 
   DocumentDuplicateStackSummaryDtoClassBuilder? _duplicateStack;
   DocumentDuplicateStackSummaryDtoClassBuilder get duplicateStack =>
-      _$this._duplicateStack ??=
-          new DocumentDuplicateStackSummaryDtoClassBuilder();
+      _$this._duplicateStack ??= DocumentDuplicateStackSummaryDtoClassBuilder();
   set duplicateStack(
           DocumentDuplicateStackSummaryDtoClassBuilder? duplicateStack) =>
       _$this._duplicateStack = duplicateStack;
@@ -189,7 +174,6 @@ class DocumentReviewQueueItemDtoClassBuilder
 
   @override
   void replace(DocumentReviewQueueItemDtoClass other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$DocumentReviewQueueItemDtoClass;
   }
 
@@ -205,20 +189,21 @@ class DocumentReviewQueueItemDtoClassBuilder
     _$DocumentReviewQueueItemDtoClass _$result;
     try {
       _$result = _$v ??
-          new _$DocumentReviewQueueItemDtoClass._(
-              documentId: BuiltValueNullFieldError.checkNotNull(
-                  documentId, r'DocumentReviewQueueItemDtoClass', 'documentId'),
-              title: BuiltValueNullFieldError.checkNotNull(
-                  title, r'DocumentReviewQueueItemDtoClass', 'title'),
-              filename: BuiltValueNullFieldError.checkNotNull(
-                  filename, r'DocumentReviewQueueItemDtoClass', 'filename'),
-              documentDate: documentDate,
-              suggestedDocumentDate: suggestedDocumentDate,
-              uploadDate: BuiltValueNullFieldError.checkNotNull(
-                  uploadDate, r'DocumentReviewQueueItemDtoClass', 'uploadDate'),
-              labelSuggestions: labelSuggestions.build(),
-              fieldSuggestions: fieldSuggestions.build(),
-              duplicateStack: _duplicateStack?.build());
+          _$DocumentReviewQueueItemDtoClass._(
+            documentId: BuiltValueNullFieldError.checkNotNull(
+                documentId, r'DocumentReviewQueueItemDtoClass', 'documentId'),
+            title: BuiltValueNullFieldError.checkNotNull(
+                title, r'DocumentReviewQueueItemDtoClass', 'title'),
+            filename: BuiltValueNullFieldError.checkNotNull(
+                filename, r'DocumentReviewQueueItemDtoClass', 'filename'),
+            documentDate: documentDate,
+            suggestedDocumentDate: suggestedDocumentDate,
+            uploadDate: BuiltValueNullFieldError.checkNotNull(
+                uploadDate, r'DocumentReviewQueueItemDtoClass', 'uploadDate'),
+            labelSuggestions: labelSuggestions.build(),
+            fieldSuggestions: fieldSuggestions.build(),
+            duplicateStack: _duplicateStack?.build(),
+          );
     } catch (_) {
       late String _$failedField;
       try {
@@ -229,7 +214,7 @@ class DocumentReviewQueueItemDtoClassBuilder
         _$failedField = 'duplicateStack';
         _duplicateStack?.build();
       } catch (e) {
-        throw new BuiltValueNestedFieldError(
+        throw BuiltValueNestedFieldError(
             r'DocumentReviewQueueItemDtoClass', _$failedField, e.toString());
       }
       rethrow;

@@ -794,6 +794,15 @@ export interface DocumentRegionRecord extends DocumentRegionDto {
   supersededBy: string | null;
 }
 
+export interface FieldSuggestionRejectRecord {
+  id: string;
+  correctionId: string;
+  fieldKey: string;
+  value: string;
+  valueNormalized: string;
+  createdAt: string;
+}
+
 export interface InsertFieldCorrectionInput {
   id: string;
   userId: string;
@@ -858,6 +867,30 @@ export interface DocumentRegionRepository {
     correctionId: string
   ): Promise<InsertTableCorrectionInput | null>;
   withdrawFieldCorrection(documentId: string, correctionId: string): Promise<boolean>;
+  listActiveFieldSuggestionRejects(
+    documentId: string
+  ): Promise<FieldSuggestionRejectRecord[]>;
+  listActiveFieldSuggestionRejectsForDocuments(
+    documentIds: readonly string[]
+  ): Promise<Map<string, FieldSuggestionRejectRecord[]>>;
+  insertFieldSuggestionReject(input: {
+    id: string;
+    documentId: string;
+    userId: string;
+    fieldKey: string;
+    valueRaw: string;
+    valueNormalized: string;
+    correctionId: string;
+  }): Promise<boolean>;
+  withdrawFieldSuggestionRejectByCorrection(
+    documentId: string,
+    correctionId: string
+  ): Promise<boolean>;
+  findActiveFieldSuggestionReject(
+    documentId: string,
+    fieldKey: string,
+    valueNormalized: string
+  ): Promise<FieldSuggestionRejectRecord | null>;
   withdrawTableCorrection(documentId: string, correctionId: string): Promise<boolean>;
   replaceFieldTokenSpans(
     documentId: string,

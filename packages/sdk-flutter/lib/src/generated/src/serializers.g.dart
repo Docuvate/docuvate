@@ -6,7 +6,7 @@ part of 'serializers.dart';
 // BuiltValueGenerator
 // **************************************************************************
 
-Serializers _$serializers = (new Serializers().toBuilder()
+Serializers _$serializers = (Serializers().toBuilder()
       ..add(AcceptDocumentReviewBatchRequestDto.serializer)
       ..add(AcceptDocumentReviewBatchResponseDtoClass.serializer)
       ..add(AcceptDocumentReviewResponseDtoClass.serializer)
@@ -90,8 +90,11 @@ Serializers _$serializers = (new Serializers().toBuilder()
       ..add(DocumentRegionTableDto.serializer)
       ..add(DocumentRegionTableDtoTableTypeEnum.serializer)
       ..add(DocumentRegionTableMergeDto.serializer)
+      ..add(DocumentRegionTableRowRoleDto.serializer)
+      ..add(DocumentRegionTableRowRoleDtoRoleEnum.serializer)
       ..add(DocumentRegionTableRuleDto.serializer)
       ..add(DocumentRegionTableRuleDtoAxisEnum.serializer)
+      ..add(DocumentRegionTableRuleDtoLineEnum.serializer)
       ..add(DocumentResponseDto.serializer)
       ..add(DocumentResponseDtoStatusEnum.serializer)
       ..add(DocumentReviewFieldSuggestionDtoClass.serializer)
@@ -191,6 +194,12 @@ Serializers _$serializers = (new Serializers().toBuilder()
       ..add(SetMlModelLifecycleRequestDtoLifecycleEnum.serializer)
       ..add(SftpIngressCreateAccountBodyDto.serializer)
       ..add(StartMailOAuthRequestDto.serializer)
+      ..add(TableMergeInputDto.serializer)
+      ..add(TableRowRoleInputDto.serializer)
+      ..add(TableRowRoleInputDtoRoleEnum.serializer)
+      ..add(TableRuleLineInputDto.serializer)
+      ..add(TableRuleLineInputDtoAxisEnum.serializer)
+      ..add(TableRuleLineInputDtoLineEnum.serializer)
       ..add(TagCustomFieldListResponseDtoClass.serializer)
       ..add(TagListResponseDto.serializer)
       ..add(TagSearchResponseDto.serializer)
@@ -233,316 +242,333 @@ Serializers _$serializers = (new Serializers().toBuilder()
       ..addBuilderFactory(
           const FullType(
               BuiltList, const [const FullType(AdminOidcProviderResponseDto)]),
-          () => new ListBuilder<AdminOidcProviderResponseDto>())
+          () => ListBuilder<AdminOidcProviderResponseDto>())
       ..addBuilderFactory(
           const FullType(
               BuiltList, const [const FullType(AdminUserResponseDto)]),
-          () => new ListBuilder<AdminUserResponseDto>())
+          () => ListBuilder<AdminUserResponseDto>())
       ..addBuilderFactory(
           const FullType(BuiltList,
               const [const FullType(AuthOidcProviderPublicResponseDto)]),
-          () => new ListBuilder<AuthOidcProviderPublicResponseDto>())
+          () => ListBuilder<AuthOidcProviderPublicResponseDto>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [
             const FullType(
                 BuiltList, const [const FullType(LayoutIrTableCellDto)])
           ]),
-          () => new ListBuilder<BuiltList<LayoutIrTableCellDto>>())
+          () => ListBuilder<BuiltList<LayoutIrTableCellDto>>())
       ..addBuilderFactory(
           const FullType(
               BuiltList, const [const FullType(DashboardWidgetDtoClass)]),
-          () => new ListBuilder<DashboardWidgetDtoClass>())
+          () => ListBuilder<DashboardWidgetDtoClass>())
       ..addBuilderFactory(
           const FullType(
               BuiltList, const [const FullType(DashboardWidgetInputDto)]),
-          () => new ListBuilder<DashboardWidgetInputDto>())
+          () => ListBuilder<DashboardWidgetInputDto>())
       ..addBuilderFactory(
           const FullType(
               BuiltList, const [const FullType(DashboardWidgetInputDto)]),
-          () => new ListBuilder<DashboardWidgetInputDto>())
+          () => ListBuilder<DashboardWidgetInputDto>())
       ..addBuilderFactory(
           const FullType(BuiltList,
               const [const FullType(DocumentPipelineModuleDescriptorDto)]),
-          () => new ListBuilder<DocumentPipelineModuleDescriptorDto>())
+          () => ListBuilder<DocumentPipelineModuleDescriptorDto>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(DocumentRegionDto)]),
-          () => new ListBuilder<DocumentRegionDto>())
+          () => ListBuilder<DocumentRegionDto>())
+      ..addBuilderFactory(
+          const FullType(
+              BuiltList, const [const FullType(DocumentRegionTableRowRoleDto)]),
+          () => ListBuilder<DocumentRegionTableRowRoleDto>())
       ..addBuilderFactory(
           const FullType(
               BuiltList, const [const FullType(DocumentRegionTableRuleDto)]),
-          () => new ListBuilder<DocumentRegionTableRuleDto>())
+          () => ListBuilder<DocumentRegionTableRuleDto>())
       ..addBuilderFactory(
           const FullType(
               BuiltList, const [const FullType(DocumentRegionTableMergeDto)]),
-          () => new ListBuilder<DocumentRegionTableMergeDto>())
+          () => ListBuilder<DocumentRegionTableMergeDto>())
       ..addBuilderFactory(
           const FullType(
               BuiltList, const [const FullType(DocumentRegionTableCellDto)]),
-          () => new ListBuilder<DocumentRegionTableCellDto>())
+          () => ListBuilder<DocumentRegionTableCellDto>())
       ..addBuilderFactory(
           const FullType(BuiltList,
               const [const FullType(DocumentReviewQueueItemDtoClass)]),
-          () => new ListBuilder<DocumentReviewQueueItemDtoClass>())
+          () => ListBuilder<DocumentReviewQueueItemDtoClass>())
       ..addBuilderFactory(
           const FullType(BuiltList,
               const [const FullType(DocumentTagSuggestionsBatchItemDto)]),
-          () => new ListBuilder<DocumentTagSuggestionsBatchItemDto>())
+          () => ListBuilder<DocumentTagSuggestionsBatchItemDto>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(ExtractedFieldDto)]),
-          () => new ListBuilder<ExtractedFieldDto>())
+          () => ListBuilder<ExtractedFieldDto>())
       ..addBuilderFactory(
           const FullType(
               BuiltList, const [const FullType(DocumentExtractionImageDto)]),
-          () => new ListBuilder<DocumentExtractionImageDto>())
+          () => ListBuilder<DocumentExtractionImageDto>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [
             const FullType(DocumentExtractionSummaryDtoLayoutIrPagesInner)
           ]),
-          () =>
-              new ListBuilder<DocumentExtractionSummaryDtoLayoutIrPagesInner>())
+          () => ListBuilder<DocumentExtractionSummaryDtoLayoutIrPagesInner>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(JsonObject)]),
-          () => new ListBuilder<JsonObject>())
+          () => ListBuilder<JsonObject>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(JsonObject)]),
-          () => new ListBuilder<JsonObject>())
+          () => ListBuilder<JsonObject>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(JsonObject)]),
-          () => new ListBuilder<JsonObject>())
+          () => ListBuilder<JsonObject>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(JsonObject)]),
-          () => new ListBuilder<JsonObject>())
+          () => ListBuilder<JsonObject>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(JsonObject)]),
-          () => new ListBuilder<JsonObject>())
+          () => ListBuilder<JsonObject>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(JsonObject)]),
-          () => new ListBuilder<JsonObject>())
+          () => ListBuilder<JsonObject>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(JsonObject)]),
-          () => new ListBuilder<JsonObject>())
+          () => ListBuilder<JsonObject>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(JsonObject)]),
-          () => new ListBuilder<JsonObject>())
+          () => ListBuilder<JsonObject>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(JsonObject)]),
-          () => new ListBuilder<JsonObject>())
+          () => ListBuilder<JsonObject>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(JsonObject)]),
-          () => new ListBuilder<JsonObject>())
+          () => ListBuilder<JsonObject>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(JsonObject)]),
-          () => new ListBuilder<JsonObject>())
+          () => ListBuilder<JsonObject>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(JsonObject)]),
-          () => new ListBuilder<JsonObject>())
+          () => ListBuilder<JsonObject>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(JsonObject)]),
-          () => new ListBuilder<JsonObject>())
+          () => ListBuilder<JsonObject>())
       ..addBuilderFactory(
           const FullType(BuiltList,
               const [const FullType(DocumentReviewFieldSuggestionDtoClass)]),
-          () => new ListBuilder<DocumentReviewFieldSuggestionDtoClass>())
+          () => ListBuilder<DocumentReviewFieldSuggestionDtoClass>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(JsonObject)]),
-          () => new ListBuilder<JsonObject>())
+          () => ListBuilder<JsonObject>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(JsonObject)]),
-          () => new ListBuilder<JsonObject>())
+          () => ListBuilder<JsonObject>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(JsonObject)]),
-          () => new ListBuilder<JsonObject>())
+          () => ListBuilder<JsonObject>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(JsonObject)]),
-          () => new ListBuilder<JsonObject>())
+          () => ListBuilder<JsonObject>())
       ..addBuilderFactory(
           const FullType(
               BuiltList, const [const FullType(LayoutComparePageMetricDto)]),
-          () => new ListBuilder<LayoutComparePageMetricDto>())
+          () => ListBuilder<LayoutComparePageMetricDto>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(LayoutIrBlockDto)]),
-          () => new ListBuilder<LayoutIrBlockDto>())
+          () => ListBuilder<LayoutIrBlockDto>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(LayoutIrLineDto)]),
-          () => new ListBuilder<LayoutIrLineDto>())
+          () => ListBuilder<LayoutIrLineDto>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(LayoutIrTableDto)]),
-          () => new ListBuilder<LayoutIrTableDto>())
+          () => ListBuilder<LayoutIrTableDto>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(LayoutIrVectorDto)]),
-          () => new ListBuilder<LayoutIrVectorDto>())
+          () => ListBuilder<LayoutIrVectorDto>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(LayoutIrWidgetDto)]),
-          () => new ListBuilder<LayoutIrWidgetDto>())
+          () => ListBuilder<LayoutIrWidgetDto>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(LayoutIrPageDto)]),
-          () => new ListBuilder<LayoutIrPageDto>())
+          () => ListBuilder<LayoutIrPageDto>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(LayoutTokenDto)]),
-          () => new ListBuilder<LayoutTokenDto>())
+          () => ListBuilder<LayoutTokenDto>())
       ..addBuilderFactory(
           const FullType(
               BuiltList, const [const FullType(LibraryTableColumnId)]),
-          () => new ListBuilder<LibraryTableColumnId>())
+          () => ListBuilder<LibraryTableColumnId>())
       ..addBuilderFactory(
           const FullType(BuiltList,
               const [const FullType(SavedDocumentViewFieldFilterDtoClass)]),
-          () => new ListBuilder<SavedDocumentViewFieldFilterDtoClass>())
+          () => ListBuilder<SavedDocumentViewFieldFilterDtoClass>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(String)]),
-          () => new ListBuilder<String>())
+          () => ListBuilder<String>())
       ..addBuilderFactory(
           const FullType(
               BuiltList, const [const FullType(LibraryTableColumnId)]),
-          () => new ListBuilder<LibraryTableColumnId>())
+          () => ListBuilder<LibraryTableColumnId>())
       ..addBuilderFactory(
           const FullType(BuiltList,
               const [const FullType(SavedDocumentViewFieldFilterDtoClass)]),
-          () => new ListBuilder<SavedDocumentViewFieldFilterDtoClass>())
+          () => ListBuilder<SavedDocumentViewFieldFilterDtoClass>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(String)]),
-          () => new ListBuilder<String>())
+          () => ListBuilder<String>())
       ..addBuilderFactory(
           const FullType(
               BuiltList, const [const FullType(LibraryTableColumnId)]),
-          () => new ListBuilder<LibraryTableColumnId>())
+          () => ListBuilder<LibraryTableColumnId>())
       ..addBuilderFactory(
           const FullType(BuiltList,
               const [const FullType(SavedDocumentViewFieldFilterDtoClass)]),
-          () => new ListBuilder<SavedDocumentViewFieldFilterDtoClass>())
+          () => ListBuilder<SavedDocumentViewFieldFilterDtoClass>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(String)]),
-          () => new ListBuilder<String>())
+          () => ListBuilder<String>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(MlModelFamilyDto)]),
-          () => new ListBuilder<MlModelFamilyDto>())
+          () => ListBuilder<MlModelFamilyDto>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(MlModelVersionDto)]),
-          () => new ListBuilder<MlModelVersionDto>())
+          () => ListBuilder<MlModelVersionDto>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(MlRetrainJobDto)]),
-          () => new ListBuilder<MlRetrainJobDto>())
+          () => ListBuilder<MlRetrainJobDto>())
       ..addBuilderFactory(
           const FullType(BuiltList,
               const [const FullType(MoveDocumentsPreviousFolderDto)]),
-          () => new ListBuilder<MoveDocumentsPreviousFolderDto>())
+          () => ListBuilder<MoveDocumentsPreviousFolderDto>())
       ..addBuilderFactory(
           const FullType(
               BuiltList, const [const FullType(ReplaceRecognizedFieldItemDto)]),
-          () => new ListBuilder<ReplaceRecognizedFieldItemDto>())
+          () => ListBuilder<ReplaceRecognizedFieldItemDto>())
       ..addBuilderFactory(
           const FullType(
               BuiltList, const [const FullType(ReplaceTagCustomFieldItemDto)]),
-          () => new ListBuilder<ReplaceTagCustomFieldItemDto>())
+          () => ListBuilder<ReplaceTagCustomFieldItemDto>())
       ..addBuilderFactory(
           const FullType(
               BuiltList, const [const FullType(SavedDocumentViewDtoClass)]),
-          () => new ListBuilder<SavedDocumentViewDtoClass>())
+          () => ListBuilder<SavedDocumentViewDtoClass>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(String)]),
-          () => new ListBuilder<String>())
+          () => ListBuilder<String>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(String)]),
-          () => new ListBuilder<String>())
+          () => ListBuilder<String>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(String)]),
-          () => new ListBuilder<String>())
+          () => ListBuilder<String>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(String)]),
-          () => new ListBuilder<String>())
+          () => ListBuilder<String>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(String)]),
-          () => new ListBuilder<String>())
+          () => ListBuilder<String>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(String)]),
-          () => new ListBuilder<String>())
+          () => ListBuilder<String>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(String)]),
-          () => new ListBuilder<String>())
+          () => ListBuilder<String>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(String)]),
-          () => new ListBuilder<String>())
+          () => ListBuilder<String>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(String)]),
-          () => new ListBuilder<String>())
+          () => ListBuilder<String>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(String)]),
-          () => new ListBuilder<String>())
+          () => ListBuilder<String>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(String)]),
-          () => new ListBuilder<String>())
+          () => ListBuilder<String>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(String)]),
-          () => new ListBuilder<String>())
+          () => ListBuilder<String>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(String)]),
-          () => new ListBuilder<String>())
+          () => ListBuilder<String>())
+      ..addBuilderFactory(
+          const FullType(BuiltList, const [const FullType(String)]),
+          () => ListBuilder<String>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(ExtractedFieldDto)]),
-          () => new ListBuilder<ExtractedFieldDto>())
+          () => ListBuilder<ExtractedFieldDto>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(ExtractionBlockDto)]),
-          () => new ListBuilder<ExtractionBlockDto>())
+          () => ListBuilder<ExtractionBlockDto>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(String)]),
-          () => new ListBuilder<String>())
+          () => ListBuilder<String>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(String)]),
-          () => new ListBuilder<String>())
+          () => ListBuilder<String>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(num)]),
-          () => new ListBuilder<num>())
+          () => ListBuilder<num>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(num)]),
-          () => new ListBuilder<num>())
+          () => ListBuilder<num>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(num)]),
-          () => new ListBuilder<num>())
+          () => ListBuilder<num>())
+      ..addBuilderFactory(
+          const FullType(
+              BuiltList, const [const FullType(TableRowRoleInputDto)]),
+          () => ListBuilder<TableRowRoleInputDto>())
+      ..addBuilderFactory(
+          const FullType(
+              BuiltList, const [const FullType(TableRuleLineInputDto)]),
+          () => ListBuilder<TableRuleLineInputDto>())
+      ..addBuilderFactory(
+          const FullType(BuiltList, const [const FullType(TableMergeInputDto)]),
+          () => ListBuilder<TableMergeInputDto>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(num)]),
-          () => new ListBuilder<num>())
+          () => ListBuilder<num>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(num)]),
-          () => new ListBuilder<num>())
+          () => ListBuilder<num>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(num)]),
-          () => new ListBuilder<num>())
+          () => ListBuilder<num>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(num)]),
-          () => new ListBuilder<num>())
+          () => ListBuilder<num>())
       ..addBuilderFactory(
           const FullType(
               BuiltMap, const [const FullType(String), const FullType(String)]),
-          () => new MapBuilder<String, String>())
+          () => MapBuilder<String, String>())
       ..addBuilderFactory(
           const FullType(
               BuiltMap, const [const FullType(String), const FullType(String)]),
-          () => new MapBuilder<String, String>())
+          () => MapBuilder<String, String>())
       ..addBuilderFactory(
           const FullType(
               BuiltMap, const [const FullType(String), const FullType(String)]),
-          () => new MapBuilder<String, String>())
+          () => MapBuilder<String, String>())
       ..addBuilderFactory(
           const FullType(
               BuiltMap, const [const FullType(String), const FullType(String)]),
-          () => new MapBuilder<String, String>())
+          () => MapBuilder<String, String>())
       ..addBuilderFactory(
           const FullType(
               BuiltMap, const [const FullType(String), const FullType(String)]),
-          () => new MapBuilder<String, String>())
+          () => MapBuilder<String, String>())
       ..addBuilderFactory(
           const FullType(
               BuiltMap, const [const FullType(String), const FullType(num)]),
-          () => new MapBuilder<String, num>())
+          () => MapBuilder<String, num>())
       ..addBuilderFactory(
           const FullType(
               BuiltMap, const [const FullType(String), const FullType(num)]),
-          () => new MapBuilder<String, num>())
+          () => MapBuilder<String, num>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [
             const FullType(DashboardStatisticsDtoClassTopLabelsInner)
           ]),
-          () => new ListBuilder<DashboardStatisticsDtoClassTopLabelsInner>()))
+          () => ListBuilder<DashboardStatisticsDtoClassTopLabelsInner>()))
     .build();
 
 // ignore_for_file: deprecated_member_use_from_same_package,type=lint

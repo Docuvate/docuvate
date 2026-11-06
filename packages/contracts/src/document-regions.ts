@@ -8,7 +8,7 @@ export type DocumentRegionShape = 'rect' | 'polygon';
 export type DocumentRegionRole = 'field' | 'table' | 'block' | 'ignore';
 export type DocumentCorrectionKind = 'label' | 'field' | 'table' | 'block' | 'page';
 export type DocumentCorrectionStatus = 'active' | 'withdrawn';
-export type FieldCorrectionOp = 'create' | 'reanchor' | 'edit_value' | 'remove';
+export type FieldCorrectionOp = 'create' | 'reanchor' | 'edit_value' | 'remove' | 'reject_suggestion';
 export type FieldCorrectionScope = 'document' | 'label' | 'always';
 export type TableCorrectionOp = 'create' | 'set_headers' | 'edit_cell' | 'remove';
 export type DocumentRegionTableType = 'line_items' | 'key_value' | 'other';
@@ -129,6 +129,28 @@ export interface DocumentCorrectionDto {
   oldValue: string | null;
   newValue: string | null;
   createdAt: string;
+}
+
+
+/** Normalize a suggested/extracted value for durable reject identity (field + value). */
+export function normalizeSuggestionDecisionValue(value: string): string {
+  return value.replace(/\s+/g, ' ').trim().toLowerCase();
+}
+
+export type FieldSuggestionDecisionKind = 'rejected';
+
+export interface FieldSuggestionDecisionDto {
+  id: string;
+  correctionId: string;
+  fieldKey: string;
+  value: string;
+  valueNormalized: string;
+  decision: FieldSuggestionDecisionKind;
+  createdAt: string;
+}
+
+export interface FieldSuggestionDecisionsResponse {
+  items: FieldSuggestionDecisionDto[];
 }
 
 export interface ApplyFieldCorrectionResponse {

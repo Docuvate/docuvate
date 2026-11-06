@@ -340,6 +340,13 @@ export async function withdrawDocumentTableCorrection(
 }
 
 
+
+export async function listDocumentFieldSuggestionDecisions(
+  documentId: string
+): Promise<import('@docuvate/contracts').FieldSuggestionDecisionsResponse> {
+  return request(`/documents/${documentId}/field-suggestion-decisions`);
+}
+
 export async function listDocumentPageTransforms(
   documentId: string
 ): Promise<import('@docuvate/contracts').DocumentPageTransformsResponse> {

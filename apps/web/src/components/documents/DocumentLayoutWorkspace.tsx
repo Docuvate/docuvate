@@ -115,6 +115,8 @@ interface DocumentLayoutWorkspaceProps {
   onHighlightBlocks: (blocks: ExtractionBlock[]) => void;
   onBlocksChange: (blocks: ExtractionBlock[]) => void;
   onAcceptFieldSuggestion: (key: string, value: string) => void;
+  onRejectFieldSuggestion?: (key: string, value: string) => void;
+  rejectedSuggestionIdentities?: ReadonlySet<string>;
   /** Saves a typed field value (recorded as a correction). */
   onSaveFieldValue?: (key: string, value: string) => void;
   onFieldsChange?: (fields: ExtractedField[]) => void;
@@ -155,6 +157,8 @@ export function DocumentLayoutWorkspace({
   onHighlightBlocks,
   onBlocksChange,
   onAcceptFieldSuggestion,
+  onRejectFieldSuggestion,
+  rejectedSuggestionIdentities,
   onSaveFieldValue,
   onFieldsChange,
   recognizedCatalog = [],
@@ -207,7 +211,10 @@ export function DocumentLayoutWorkspace({
   const [activeOverlayId, setActiveOverlayId] = useState<string | null>(null);
   const [hoverOverlay, setHoverOverlay] = useState<PdfLayoutOverlay | null>(null);
   const [layoutZoom, setLayoutZoom] = useState<LayoutIrZoomStep>(100);
-  const [dismissedSuggestions, setDismissedSuggestions] = useState<Set<string>>(() => new Set());
+  const dismissedSuggestions = useMemo(
+    () => new Set(rejectedSuggestionIdentities ?? []),
+    [rejectedSuggestionIdentities]
+  );
   const [selectionTool, setSelectionTool] = useState<DocumentSelectionTool>('none');
   const [selectionDraft, setSelectionDraft] = useState<DocumentSelectionDraft | null>(null);
   const [reanchorFieldKey, setReanchorFieldKey] = useState<string | null>(null);
@@ -1057,10 +1064,9 @@ export function DocumentLayoutWorkspace({
           onOverlaySelect={onOverlaySelect}
           onAcceptSuggestion={(key, value) => {
             onAcceptFieldSuggestion(key, value);
-            setDismissedSuggestions((prev) => new Set(prev).add(key));
           }}
-          onDismissSuggestion={(key) => {
-            setDismissedSuggestions((prev) => new Set(prev).add(key));
+          onDismissSuggestion={(key, value) => {
+            onRejectFieldSuggestion?.(key, value);
           }}
           dismissedSuggestions={dismissedSuggestions}
           heuristicSuggestions={heuristicSuggestions}

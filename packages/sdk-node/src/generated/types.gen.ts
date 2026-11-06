@@ -87,7 +87,7 @@ export type AdminUserResponseDto = {
 
 export type ApplyFieldCorrectionRequestDto = {
     id: string;
-    op: 'create' | 'reanchor' | 'edit_value' | 'remove';
+    op: 'create' | 'reanchor' | 'edit_value' | 'remove' | 'reject_suggestion';
     fieldKey: string;
     page?: number;
     shape?: 'rect' | 'polygon';
@@ -3197,6 +3197,32 @@ export type ConfirmDocumentFieldResponses = {
 };
 
 export type ConfirmDocumentFieldResponse = ConfirmDocumentFieldResponses[keyof ConfirmDocumentFieldResponses];
+
+export type ListDocumentFieldSuggestionDecisionsData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/documents/{id}/field-suggestion-decisions';
+};
+
+export type ListDocumentFieldSuggestionDecisionsErrors = {
+    401: ProblemDetailsDto;
+    403: ProblemDetailsDto;
+    404: ProblemDetailsDto;
+    422: ProblemDetailsDto;
+};
+
+export type ListDocumentFieldSuggestionDecisionsError = ListDocumentFieldSuggestionDecisionsErrors[keyof ListDocumentFieldSuggestionDecisionsErrors];
+
+export type ListDocumentFieldSuggestionDecisionsResponses = {
+    200: {
+        [key: string]: unknown;
+    };
+};
+
+export type ListDocumentFieldSuggestionDecisionsResponse = ListDocumentFieldSuggestionDecisionsResponses[keyof ListDocumentFieldSuggestionDecisionsResponses];
 
 export type GetDocumentLayoutCompareMetricsData = {
     body?: never;

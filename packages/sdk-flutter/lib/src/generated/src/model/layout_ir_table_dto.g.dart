@@ -24,7 +24,7 @@ class _$LayoutIrTableDto extends LayoutIrTableDto {
 
   factory _$LayoutIrTableDto(
           [void Function(LayoutIrTableDtoBuilder)? updates]) =>
-      (new LayoutIrTableDtoBuilder()..update(updates))._build();
+      (LayoutIrTableDtoBuilder()..update(updates))._build();
 
   _$LayoutIrTableDto._(
       {required this.page,
@@ -34,25 +34,14 @@ class _$LayoutIrTableDto extends LayoutIrTableDto {
       required this.height,
       required this.columnCount,
       required this.rows})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(page, r'LayoutIrTableDto', 'page');
-    BuiltValueNullFieldError.checkNotNull(x, r'LayoutIrTableDto', 'x');
-    BuiltValueNullFieldError.checkNotNull(y, r'LayoutIrTableDto', 'y');
-    BuiltValueNullFieldError.checkNotNull(width, r'LayoutIrTableDto', 'width');
-    BuiltValueNullFieldError.checkNotNull(
-        height, r'LayoutIrTableDto', 'height');
-    BuiltValueNullFieldError.checkNotNull(
-        columnCount, r'LayoutIrTableDto', 'columnCount');
-    BuiltValueNullFieldError.checkNotNull(rows, r'LayoutIrTableDto', 'rows');
-  }
-
+      : super._();
   @override
   LayoutIrTableDto rebuild(void Function(LayoutIrTableDtoBuilder) updates) =>
       (toBuilder()..update(updates)).build();
 
   @override
   LayoutIrTableDtoBuilder toBuilder() =>
-      new LayoutIrTableDtoBuilder()..replace(this);
+      LayoutIrTableDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -125,7 +114,7 @@ class LayoutIrTableDtoBuilder
 
   ListBuilder<BuiltList<LayoutIrTableCellDto>>? _rows;
   ListBuilder<BuiltList<LayoutIrTableCellDto>> get rows =>
-      _$this._rows ??= new ListBuilder<BuiltList<LayoutIrTableCellDto>>();
+      _$this._rows ??= ListBuilder<BuiltList<LayoutIrTableCellDto>>();
   set rows(ListBuilder<BuiltList<LayoutIrTableCellDto>>? rows) =>
       _$this._rows = rows;
 
@@ -150,7 +139,6 @@ class LayoutIrTableDtoBuilder
 
   @override
   void replace(LayoutIrTableDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$LayoutIrTableDto;
   }
 
@@ -166,27 +154,28 @@ class LayoutIrTableDtoBuilder
     _$LayoutIrTableDto _$result;
     try {
       _$result = _$v ??
-          new _$LayoutIrTableDto._(
-              page: BuiltValueNullFieldError.checkNotNull(
-                  page, r'LayoutIrTableDto', 'page'),
-              x: BuiltValueNullFieldError.checkNotNull(
-                  x, r'LayoutIrTableDto', 'x'),
-              y: BuiltValueNullFieldError.checkNotNull(
-                  y, r'LayoutIrTableDto', 'y'),
-              width: BuiltValueNullFieldError.checkNotNull(
-                  width, r'LayoutIrTableDto', 'width'),
-              height: BuiltValueNullFieldError.checkNotNull(
-                  height, r'LayoutIrTableDto', 'height'),
-              columnCount: BuiltValueNullFieldError.checkNotNull(
-                  columnCount, r'LayoutIrTableDto', 'columnCount'),
-              rows: rows.build());
+          _$LayoutIrTableDto._(
+            page: BuiltValueNullFieldError.checkNotNull(
+                page, r'LayoutIrTableDto', 'page'),
+            x: BuiltValueNullFieldError.checkNotNull(
+                x, r'LayoutIrTableDto', 'x'),
+            y: BuiltValueNullFieldError.checkNotNull(
+                y, r'LayoutIrTableDto', 'y'),
+            width: BuiltValueNullFieldError.checkNotNull(
+                width, r'LayoutIrTableDto', 'width'),
+            height: BuiltValueNullFieldError.checkNotNull(
+                height, r'LayoutIrTableDto', 'height'),
+            columnCount: BuiltValueNullFieldError.checkNotNull(
+                columnCount, r'LayoutIrTableDto', 'columnCount'),
+            rows: rows.build(),
+          );
     } catch (_) {
       late String _$failedField;
       try {
         _$failedField = 'rows';
         rows.build();
       } catch (e) {
-        throw new BuiltValueNestedFieldError(
+        throw BuiltValueNestedFieldError(
             r'LayoutIrTableDto', _$failedField, e.toString());
       }
       rethrow;

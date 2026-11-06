@@ -17,17 +17,13 @@ class _$DashboardWidgetDocumentPreviewsResponseDtoClass
           [void Function(
                   DashboardWidgetDocumentPreviewsResponseDtoClassBuilder)?
               updates]) =>
-      (new DashboardWidgetDocumentPreviewsResponseDtoClassBuilder()
+      (DashboardWidgetDocumentPreviewsResponseDtoClassBuilder()
             ..update(updates))
           ._build();
 
   _$DashboardWidgetDocumentPreviewsResponseDtoClass._(
       {required this.items, this.attentionCount})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        items, r'DashboardWidgetDocumentPreviewsResponseDtoClass', 'items');
-  }
-
+      : super._();
   @override
   DashboardWidgetDocumentPreviewsResponseDtoClass rebuild(
           void Function(DashboardWidgetDocumentPreviewsResponseDtoClassBuilder)
@@ -36,8 +32,7 @@ class _$DashboardWidgetDocumentPreviewsResponseDtoClass
 
   @override
   DashboardWidgetDocumentPreviewsResponseDtoClassBuilder toBuilder() =>
-      new DashboardWidgetDocumentPreviewsResponseDtoClassBuilder()
-        ..replace(this);
+      DashboardWidgetDocumentPreviewsResponseDtoClassBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -74,7 +69,7 @@ class DashboardWidgetDocumentPreviewsResponseDtoClassBuilder
 
   ListBuilder<JsonObject>? _items;
   ListBuilder<JsonObject> get items =>
-      _$this._items ??= new ListBuilder<JsonObject>();
+      _$this._items ??= ListBuilder<JsonObject>();
   set items(ListBuilder<JsonObject>? items) => _$this._items = items;
 
   num? _attentionCount;
@@ -98,7 +93,6 @@ class DashboardWidgetDocumentPreviewsResponseDtoClassBuilder
 
   @override
   void replace(DashboardWidgetDocumentPreviewsResponseDtoClass other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$DashboardWidgetDocumentPreviewsResponseDtoClass;
   }
 
@@ -116,15 +110,17 @@ class DashboardWidgetDocumentPreviewsResponseDtoClassBuilder
     _$DashboardWidgetDocumentPreviewsResponseDtoClass _$result;
     try {
       _$result = _$v ??
-          new _$DashboardWidgetDocumentPreviewsResponseDtoClass._(
-              items: items.build(), attentionCount: attentionCount);
+          _$DashboardWidgetDocumentPreviewsResponseDtoClass._(
+            items: items.build(),
+            attentionCount: attentionCount,
+          );
     } catch (_) {
       late String _$failedField;
       try {
         _$failedField = 'items';
         items.build();
       } catch (e) {
-        throw new BuiltValueNestedFieldError(
+        throw BuiltValueNestedFieldError(
             r'DashboardWidgetDocumentPreviewsResponseDtoClass',
             _$failedField,
             e.toString());

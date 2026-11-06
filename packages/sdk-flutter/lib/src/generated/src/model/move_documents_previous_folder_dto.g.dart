@@ -14,17 +14,11 @@ class _$MoveDocumentsPreviousFolderDto extends MoveDocumentsPreviousFolderDto {
 
   factory _$MoveDocumentsPreviousFolderDto(
           [void Function(MoveDocumentsPreviousFolderDtoBuilder)? updates]) =>
-      (new MoveDocumentsPreviousFolderDtoBuilder()..update(updates))._build();
+      (MoveDocumentsPreviousFolderDtoBuilder()..update(updates))._build();
 
   _$MoveDocumentsPreviousFolderDto._(
       {required this.documentId, required this.folderId})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        documentId, r'MoveDocumentsPreviousFolderDto', 'documentId');
-    BuiltValueNullFieldError.checkNotNull(
-        folderId, r'MoveDocumentsPreviousFolderDto', 'folderId');
-  }
-
+      : super._();
   @override
   MoveDocumentsPreviousFolderDto rebuild(
           void Function(MoveDocumentsPreviousFolderDtoBuilder) updates) =>
@@ -32,7 +26,7 @@ class _$MoveDocumentsPreviousFolderDto extends MoveDocumentsPreviousFolderDto {
 
   @override
   MoveDocumentsPreviousFolderDtoBuilder toBuilder() =>
-      new MoveDocumentsPreviousFolderDtoBuilder()..replace(this);
+      MoveDocumentsPreviousFolderDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -90,7 +84,6 @@ class MoveDocumentsPreviousFolderDtoBuilder
 
   @override
   void replace(MoveDocumentsPreviousFolderDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$MoveDocumentsPreviousFolderDto;
   }
 
@@ -104,11 +97,12 @@ class MoveDocumentsPreviousFolderDtoBuilder
 
   _$MoveDocumentsPreviousFolderDto _build() {
     final _$result = _$v ??
-        new _$MoveDocumentsPreviousFolderDto._(
-            documentId: BuiltValueNullFieldError.checkNotNull(
-                documentId, r'MoveDocumentsPreviousFolderDto', 'documentId'),
-            folderId: BuiltValueNullFieldError.checkNotNull(
-                folderId, r'MoveDocumentsPreviousFolderDto', 'folderId'));
+        _$MoveDocumentsPreviousFolderDto._(
+          documentId: BuiltValueNullFieldError.checkNotNull(
+              documentId, r'MoveDocumentsPreviousFolderDto', 'documentId'),
+          folderId: BuiltValueNullFieldError.checkNotNull(
+              folderId, r'MoveDocumentsPreviousFolderDto', 'folderId'),
+        );
     replace(_$result);
     return _$result;
   }

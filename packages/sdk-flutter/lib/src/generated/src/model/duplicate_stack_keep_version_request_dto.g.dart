@@ -14,15 +14,10 @@ class _$DuplicateStackKeepVersionRequestDto
   factory _$DuplicateStackKeepVersionRequestDto(
           [void Function(DuplicateStackKeepVersionRequestDtoBuilder)?
               updates]) =>
-      (new DuplicateStackKeepVersionRequestDtoBuilder()..update(updates))
-          ._build();
+      (DuplicateStackKeepVersionRequestDtoBuilder()..update(updates))._build();
 
   _$DuplicateStackKeepVersionRequestDto._({required this.versionDocumentId})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(versionDocumentId,
-        r'DuplicateStackKeepVersionRequestDto', 'versionDocumentId');
-  }
-
+      : super._();
   @override
   DuplicateStackKeepVersionRequestDto rebuild(
           void Function(DuplicateStackKeepVersionRequestDtoBuilder) updates) =>
@@ -30,7 +25,7 @@ class _$DuplicateStackKeepVersionRequestDto
 
   @override
   DuplicateStackKeepVersionRequestDtoBuilder toBuilder() =>
-      new DuplicateStackKeepVersionRequestDtoBuilder()..replace(this);
+      DuplicateStackKeepVersionRequestDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -81,7 +76,6 @@ class DuplicateStackKeepVersionRequestDtoBuilder
 
   @override
   void replace(DuplicateStackKeepVersionRequestDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$DuplicateStackKeepVersionRequestDto;
   }
 
@@ -96,11 +90,12 @@ class DuplicateStackKeepVersionRequestDtoBuilder
 
   _$DuplicateStackKeepVersionRequestDto _build() {
     final _$result = _$v ??
-        new _$DuplicateStackKeepVersionRequestDto._(
-            versionDocumentId: BuiltValueNullFieldError.checkNotNull(
-                versionDocumentId,
-                r'DuplicateStackKeepVersionRequestDto',
-                'versionDocumentId'));
+        _$DuplicateStackKeepVersionRequestDto._(
+          versionDocumentId: BuiltValueNullFieldError.checkNotNull(
+              versionDocumentId,
+              r'DuplicateStackKeepVersionRequestDto',
+              'versionDocumentId'),
+        );
     replace(_$result);
     return _$result;
   }

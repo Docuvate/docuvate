@@ -6661,6 +6661,85 @@
         ]
       }
     },
+    "/documents/{id}/field-suggestion-decisions": {
+      "get": {
+        "operationId": "listDocumentFieldSuggestionDecisions",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Active field suggestion decisions (rejects) for a document",
+        "tags": [
+          "Documents"
+        ]
+      }
+    },
     "/documents/{id}/layout-compare/metrics": {
       "get": {
         "operationId": "getDocumentLayoutCompareMetrics",
@@ -13079,7 +13158,8 @@
               "create",
               "reanchor",
               "edit_value",
-              "remove"
+              "remove",
+              "reject_suggestion"
             ],
             "type": "string"
           },

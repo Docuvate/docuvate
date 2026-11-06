@@ -33,7 +33,7 @@ abstract class ApplyFieldCorrectionRequestDto implements Built<ApplyFieldCorrect
 
   @BuiltValueField(wireName: r'op')
   ApplyFieldCorrectionRequestDtoOpEnum get op;
-  // enum opEnum {  create,  reanchor,  edit_value,  remove,  };
+  // enum opEnum {  create,  reanchor,  edit_value,  remove,  reject_suggestion,  };
 
   @BuiltValueField(wireName: r'fieldKey')
   String get fieldKey;
@@ -348,6 +348,8 @@ class ApplyFieldCorrectionRequestDtoOpEnum extends EnumClass {
   static const ApplyFieldCorrectionRequestDtoOpEnum editValue = _$applyFieldCorrectionRequestDtoOpEnum_editValue;
   @BuiltValueEnumConst(wireName: r'remove')
   static const ApplyFieldCorrectionRequestDtoOpEnum remove = _$applyFieldCorrectionRequestDtoOpEnum_remove;
+  @BuiltValueEnumConst(wireName: r'reject_suggestion')
+  static const ApplyFieldCorrectionRequestDtoOpEnum rejectSuggestion = _$applyFieldCorrectionRequestDtoOpEnum_rejectSuggestion;
 
   static Serializer<ApplyFieldCorrectionRequestDtoOpEnum> get serializer => _$applyFieldCorrectionRequestDtoOpEnumSerializer;
 

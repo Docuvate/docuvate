@@ -73,6 +73,7 @@ export const BASELINE_MARKER_MIGRATION_NAMES = [
   'DocumentFieldValuesUserConfirmed20261105120000',
   'DocumentRegionTableStructure20261106090000',
   'DocumentPageTransforms20261106180000',
+  'FieldSuggestionReject20261106190000',
 ] as const;
 
 async function featureFlagMlKeysConstraintPresent(runner: QueryRunner): Promise<boolean> {
@@ -289,6 +290,8 @@ export async function migrationSchemaPresent(
       return regClassExists(runner, 'public.document_region_table_row_roles');
     case 'DocumentPageTransforms20261106180000':
       return regClassExists(runner, 'public.document_page_transforms');
+    case 'FieldSuggestionReject20261106190000':
+      return regClassExists(runner, 'public.document_field_suggestion_decisions');
     default:
       return false;
   }

@@ -203,3 +203,44 @@ test.describe('review queue, field bbox and table overlay', () => {
   });
 
 });
+
+test('rejecting a field suggestion removes it from open work and survives reload', async ({
+  page,
+}) => {
+  const log = await installStructuringMocks(page);
+  await page.goto(`/documents/${LAYOUT_DOCUMENT_ID}?review=1`);
+  const workbench = page.locator('.review-workbench');
+  await expect(workbench).toBeVisible();
+  const amountRow = workbench.locator('[data-field-key="total_amount"]');
+  await expect(amountRow).toBeVisible();
+  const openBefore = Number(await workbench.getAttribute('data-open-count'));
+  expect(openBefore).toBeGreaterThan(0);
+
+  await amountRow.getByTestId('review-workbench-reject').click();
+  await expect(amountRow).toHaveCount(0);
+
+  const rejectPosts = log.fieldCorrections.filter(
+    (item) =>
+      typeof item === 'object' &&
+      item !== null &&
+      'op' in item &&
+      item.op === 'reject_suggestion'
+  );
+  expect(rejectPosts.length).toBeGreaterThan(0);
+
+  const openAfter = Number(await workbench.getAttribute('data-open-count'));
+  expect(openAfter).toBe(openBefore - 1);
+
+  await page.screenshot({
+    path: path.join(shotDir, 'field-suggestion-reject.png'),
+    fullPage: false,
+  });
+
+  await page.reload();
+  await expect(page.locator('.review-workbench')).toBeVisible();
+  await expect(page.locator('.review-workbench [data-field-key="total_amount"]')).toHaveCount(0);
+  // Raw OCR / document fields must still be present in details; open work must not resurrect.
+  expect(Number(await page.locator('.review-workbench').getAttribute('data-open-count'))).toBe(
+    openAfter
+  );
+});

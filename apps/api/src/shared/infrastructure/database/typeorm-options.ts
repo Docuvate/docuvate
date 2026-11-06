@@ -69,6 +69,7 @@ import { JobOutbox20261105080000 } from './migrations/20261105080000-job-outbox.
 import { DocumentFieldValuesUserConfirmed20261105120000 } from './migrations/20261105120000-document-field-values-user-confirmed.js';
 import { DocumentRegionTableStructure20261106090000 } from './migrations/20261106090000-document-region-table-structure.js';
 import { DocumentPageTransforms20261106180000 } from './migrations/20261106180000-document-page-transforms.js';
+import { FieldSuggestionReject20261106190000 } from './migrations/20261106190000-field-suggestion-reject.js';
 
 /** Set only by `scripts/export-openapi.mts` to skip TypeORM during OpenAPI export; `main.ts` refuses to boot when this is set. */
 export function isOpenApiHeadlessMode(): boolean {
@@ -157,6 +158,7 @@ export function buildTypeOrmOptions(): DataSourceOptions {
       DocumentFieldValuesUserConfirmed20261105120000,
       DocumentRegionTableStructure20261106090000,
       DocumentPageTransforms20261106180000,
+      FieldSuggestionReject20261106190000,
     ],
     migrationsTableName: 'migrations',
     synchronize: false,

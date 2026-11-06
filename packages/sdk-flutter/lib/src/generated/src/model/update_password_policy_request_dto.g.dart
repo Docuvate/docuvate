@@ -22,7 +22,7 @@ class _$UpdatePasswordPolicyRequestDto extends UpdatePasswordPolicyRequestDto {
 
   factory _$UpdatePasswordPolicyRequestDto(
           [void Function(UpdatePasswordPolicyRequestDtoBuilder)? updates]) =>
-      (new UpdatePasswordPolicyRequestDtoBuilder()..update(updates))._build();
+      (UpdatePasswordPolicyRequestDtoBuilder()..update(updates))._build();
 
   _$UpdatePasswordPolicyRequestDto._(
       {required this.minLength,
@@ -31,21 +31,7 @@ class _$UpdatePasswordPolicyRequestDto extends UpdatePasswordPolicyRequestDto {
       required this.requireDigit,
       required this.requireSymbol,
       required this.checkBreached})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        minLength, r'UpdatePasswordPolicyRequestDto', 'minLength');
-    BuiltValueNullFieldError.checkNotNull(
-        requireLower, r'UpdatePasswordPolicyRequestDto', 'requireLower');
-    BuiltValueNullFieldError.checkNotNull(
-        requireUpper, r'UpdatePasswordPolicyRequestDto', 'requireUpper');
-    BuiltValueNullFieldError.checkNotNull(
-        requireDigit, r'UpdatePasswordPolicyRequestDto', 'requireDigit');
-    BuiltValueNullFieldError.checkNotNull(
-        requireSymbol, r'UpdatePasswordPolicyRequestDto', 'requireSymbol');
-    BuiltValueNullFieldError.checkNotNull(
-        checkBreached, r'UpdatePasswordPolicyRequestDto', 'checkBreached');
-  }
-
+      : super._();
   @override
   UpdatePasswordPolicyRequestDto rebuild(
           void Function(UpdatePasswordPolicyRequestDtoBuilder) updates) =>
@@ -53,7 +39,7 @@ class _$UpdatePasswordPolicyRequestDto extends UpdatePasswordPolicyRequestDto {
 
   @override
   UpdatePasswordPolicyRequestDtoBuilder toBuilder() =>
-      new UpdatePasswordPolicyRequestDtoBuilder()..replace(this);
+      UpdatePasswordPolicyRequestDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -145,7 +131,6 @@ class UpdatePasswordPolicyRequestDtoBuilder
 
   @override
   void replace(UpdatePasswordPolicyRequestDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$UpdatePasswordPolicyRequestDto;
   }
 
@@ -159,19 +144,20 @@ class UpdatePasswordPolicyRequestDtoBuilder
 
   _$UpdatePasswordPolicyRequestDto _build() {
     final _$result = _$v ??
-        new _$UpdatePasswordPolicyRequestDto._(
-            minLength: BuiltValueNullFieldError.checkNotNull(
-                minLength, r'UpdatePasswordPolicyRequestDto', 'minLength'),
-            requireLower: BuiltValueNullFieldError.checkNotNull(
-                requireLower, r'UpdatePasswordPolicyRequestDto', 'requireLower'),
-            requireUpper: BuiltValueNullFieldError.checkNotNull(
-                requireUpper, r'UpdatePasswordPolicyRequestDto', 'requireUpper'),
-            requireDigit: BuiltValueNullFieldError.checkNotNull(requireDigit,
-                r'UpdatePasswordPolicyRequestDto', 'requireDigit'),
-            requireSymbol: BuiltValueNullFieldError.checkNotNull(requireSymbol,
-                r'UpdatePasswordPolicyRequestDto', 'requireSymbol'),
-            checkBreached: BuiltValueNullFieldError.checkNotNull(checkBreached,
-                r'UpdatePasswordPolicyRequestDto', 'checkBreached'));
+        _$UpdatePasswordPolicyRequestDto._(
+          minLength: BuiltValueNullFieldError.checkNotNull(
+              minLength, r'UpdatePasswordPolicyRequestDto', 'minLength'),
+          requireLower: BuiltValueNullFieldError.checkNotNull(
+              requireLower, r'UpdatePasswordPolicyRequestDto', 'requireLower'),
+          requireUpper: BuiltValueNullFieldError.checkNotNull(
+              requireUpper, r'UpdatePasswordPolicyRequestDto', 'requireUpper'),
+          requireDigit: BuiltValueNullFieldError.checkNotNull(
+              requireDigit, r'UpdatePasswordPolicyRequestDto', 'requireDigit'),
+          requireSymbol: BuiltValueNullFieldError.checkNotNull(requireSymbol,
+              r'UpdatePasswordPolicyRequestDto', 'requireSymbol'),
+          checkBreached: BuiltValueNullFieldError.checkNotNull(checkBreached,
+              r'UpdatePasswordPolicyRequestDto', 'checkBreached'),
+        );
     replace(_$result);
     return _$result;
   }

@@ -40,8 +40,10 @@ type AspectDocument = Pick<
 >;
 
 interface FieldEvidence {
-  fields: readonly Pick<ExtractedField, 'value' | 'userConfirmed'>[];
+  fields: readonly Pick<ExtractedField, 'key' | 'value' | 'userConfirmed'>[];
   suggestions: readonly FieldSuggestionRow[];
+  /** Durable rejects for field+value; excluded from open counts. */
+  rejects?: readonly { fieldKey: string; valueNormalized: string }[];
 }
 
 function technicalState(status: DocumentDto['status']): AspectState | null {
@@ -100,9 +102,17 @@ function fieldStatus(doc: AspectDocument, evidence: FieldEvidence | null): Aspec
   const technical = dependentState(doc.status);
   if (technical) return { aspect: 'fields', state: technical, open: null };
   if (!evidence) return { aspect: 'fields', state: 'unknown', open: null };
+  const rejects = evidence.rejects ?? [];
+  const rejectId = (fieldKey: string, value: string) => {
+    const norm = value.replace(/\s+/g, ' ').trim().toLowerCase();
+    return rejects.some((r) => r.fieldKey === fieldKey && r.valueNormalized === norm);
+  };
   const values = evidence.fields.filter((field) => field.value.trim() !== '');
-  const open =
-    values.filter((field) => field.userConfirmed !== true).length + evidence.suggestions.length;
+  const openValues = values.filter(
+    (field) => field.userConfirmed !== true && !rejectId(field.key, field.value)
+  );
+  const openSuggestions = evidence.suggestions.filter((s) => !rejectId(s.key, s.value));
+  const open = openValues.length + openSuggestions.length;
   if (open > 0) return { aspect: 'fields', state: 'open', open };
   if (values.length === 0) return { aspect: 'fields', state: 'no_open_items', open: null };
   return { aspect: 'fields', state: 'confirmed', open: null };

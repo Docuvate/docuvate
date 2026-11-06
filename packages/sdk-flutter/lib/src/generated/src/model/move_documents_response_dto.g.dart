@@ -14,17 +14,11 @@ class _$MoveDocumentsResponseDto extends MoveDocumentsResponseDto {
 
   factory _$MoveDocumentsResponseDto(
           [void Function(MoveDocumentsResponseDtoBuilder)? updates]) =>
-      (new MoveDocumentsResponseDtoBuilder()..update(updates))._build();
+      (MoveDocumentsResponseDtoBuilder()..update(updates))._build();
 
   _$MoveDocumentsResponseDto._(
       {required this.previousFolderIds, required this.affected})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        previousFolderIds, r'MoveDocumentsResponseDto', 'previousFolderIds');
-    BuiltValueNullFieldError.checkNotNull(
-        affected, r'MoveDocumentsResponseDto', 'affected');
-  }
-
+      : super._();
   @override
   MoveDocumentsResponseDto rebuild(
           void Function(MoveDocumentsResponseDtoBuilder) updates) =>
@@ -32,7 +26,7 @@ class _$MoveDocumentsResponseDto extends MoveDocumentsResponseDto {
 
   @override
   MoveDocumentsResponseDtoBuilder toBuilder() =>
-      new MoveDocumentsResponseDtoBuilder()..replace(this);
+      MoveDocumentsResponseDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -68,7 +62,7 @@ class MoveDocumentsResponseDtoBuilder
   ListBuilder<MoveDocumentsPreviousFolderDto>? _previousFolderIds;
   ListBuilder<MoveDocumentsPreviousFolderDto> get previousFolderIds =>
       _$this._previousFolderIds ??=
-          new ListBuilder<MoveDocumentsPreviousFolderDto>();
+          ListBuilder<MoveDocumentsPreviousFolderDto>();
   set previousFolderIds(
           ListBuilder<MoveDocumentsPreviousFolderDto>? previousFolderIds) =>
       _$this._previousFolderIds = previousFolderIds;
@@ -93,7 +87,6 @@ class MoveDocumentsResponseDtoBuilder
 
   @override
   void replace(MoveDocumentsResponseDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$MoveDocumentsResponseDto;
   }
 
@@ -109,17 +102,18 @@ class MoveDocumentsResponseDtoBuilder
     _$MoveDocumentsResponseDto _$result;
     try {
       _$result = _$v ??
-          new _$MoveDocumentsResponseDto._(
-              previousFolderIds: previousFolderIds.build(),
-              affected: BuiltValueNullFieldError.checkNotNull(
-                  affected, r'MoveDocumentsResponseDto', 'affected'));
+          _$MoveDocumentsResponseDto._(
+            previousFolderIds: previousFolderIds.build(),
+            affected: BuiltValueNullFieldError.checkNotNull(
+                affected, r'MoveDocumentsResponseDto', 'affected'),
+          );
     } catch (_) {
       late String _$failedField;
       try {
         _$failedField = 'previousFolderIds';
         previousFolderIds.build();
       } catch (e) {
-        throw new BuiltValueNestedFieldError(
+        throw BuiltValueNestedFieldError(
             r'MoveDocumentsResponseDto', _$failedField, e.toString());
       }
       rethrow;

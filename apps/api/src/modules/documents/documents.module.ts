@@ -5,6 +5,7 @@ import { Module } from '@nestjs/common';
 import { JOB_OUTBOX_RELAY } from '../../shared/domain/ports.js';
 import { DocumentPipelineModule } from '../document-pipeline/document-pipeline.module.js';
 import { DuplicatesModule } from '../duplicates/duplicates.module.js';
+import { DocumentRegionsModule } from '../document-regions/document-regions.module.js';
 import { ExactFactsModule } from '../exact-facts/exact-facts.module.js';
 import { ExtractionQueueService } from '../extraction/infrastructure/extraction-queue.service.js';
 import { ExtractionFeedbackModule } from '../extraction-feedback/extraction-feedback.module.js';
@@ -58,6 +59,7 @@ import { ReviewQueueController } from './presentation/review-queue.controller.js
 
 @Module({
   imports: [
+    DocumentRegionsModule,
     LabelsModule,
     DuplicatesModule,
     SettingsModule,

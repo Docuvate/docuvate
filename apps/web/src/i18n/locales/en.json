@@ -845,7 +845,7 @@
     "layoutSuggestionNotInSchemaHint": "Add this field to your schema to track it on future documents.",
     "layoutComparePageLegend": "Amber outline: page SSIM below the quality floor.",
     "layoutSuggestionAccept": "Accept as field",
-    "layoutSuggestionDismiss": "Dismiss",
+    "layoutSuggestionDismiss": "Dismiss suggestion",
     "layoutTablesEmpty": "No tables detected.",
     "layoutTableLabel": "Table {{n}}",
     "layoutCorrectedTableLabel": "Corrected table {{n}}",
@@ -1020,7 +1020,9 @@
     "fieldPositionCorrect": "Fix position",
     "fieldBboxSave": "Save position",
     "fieldBboxHandle": "Handle {handle}",
-    "pageRotationSaved": "Page rotation saved"
+    "pageRotationSaved": "Page rotation saved",
+    "layoutSuggestionDismissTitle": "Dismiss suggestion",
+    "rejectedSuggestionsTitle": "Rejected suggestions"
   },
   "settings": {
     "title": "Settings",
@@ -2505,7 +2507,8 @@
       "state": {
         "confirmed": "Confirmed",
         "suggested": "Suggestion",
-        "review": "Open"
+        "review": "Open",
+        "rejected": "Rejected"
       },
       "confidence": "{{percent}}%",
       "accept": "Accept {{field}}",
@@ -2522,7 +2525,11 @@
       "acceptedToast_one": "{{count}} value accepted",
       "acceptedToast_other": "{{count}} values accepted",
       "correctedToast": "Correction saved",
-      "reassignedToast": "Value moved to {{field}}"
+      "reassignedToast": "Value moved to {{field}}",
+      "reject": "Dismiss suggestion for {{field}}",
+      "rejectTooltip": "Dismiss suggestion",
+      "rejectedSection": "Rejected suggestions",
+      "rejectUndo": "Undo dismiss"
     },
     "aspects": {
       "aria": "Structuring status",
