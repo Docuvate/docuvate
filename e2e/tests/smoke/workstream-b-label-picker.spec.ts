@@ -411,13 +411,8 @@ test.describe('Workstream B label picker', () => {
     await page.waitForLoadState('networkidle');
     await setTheme(page, 'light');
 
-    const compactBar = page.locator('.upload-compact-bar');
-    if (await compactBar.isVisible().catch(() => false)) {
-      await compactBar.getByRole('button', { name: /^upload$|^hochladen$/i }).click();
-    }
-    const uploadSection = page.locator('.library-page .upload-section').first();
-    await expect(uploadSection).toBeVisible({ timeout: 90_000 });
-    const fileInput = uploadSection.locator('input[type="file"]');
+    // Upload lives in the library ribbon; the queue appears in the page while files upload.
+    const fileInput = page.getByTestId('app-ribbon').locator('input[type="file"]').first();
     await expect(fileInput).toBeAttached({ timeout: 30_000 });
 
     const queueFiles = Array.from({ length: 13 }, (_, index) => ({

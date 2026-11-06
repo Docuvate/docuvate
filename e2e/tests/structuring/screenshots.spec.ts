@@ -60,17 +60,50 @@ for (const theme of ['light', 'dark'] as const) {
     await page.setViewportSize({ width: 1440, height: 900 });
     const log = await installStructuringMocks(page, { theme });
     await page.goto(`/documents/${LAYOUT_DOCUMENT_ID}`);
-    await page.locator('.layout-side-tabs').getByRole('tab', { name: /Tabellen/ }).click();
+    await page
+      .locator('.layout-side-tabs')
+      .getByRole('tab', { name: /Tabellen/ })
+      .click();
     const card = page.getByTestId('corrected-table-card').first();
     await card.getByRole('button', { name: 'Layout für Tabelle 1 wählen' }).click();
     const picker = page.getByTestId('table-layout-picker');
-    await picker.getByText('Positionen mit Summe').click();
+    await picker.getByText('Finanzlayout').click();
+    await picker.getByText('Struktur anpassen').click();
     await page.evaluate(async () => {
       await document.fonts.ready;
     });
     await page.waitForTimeout(1_000);
     await card.scrollIntoViewIfNeeded();
     await page.screenshot({ path: path.join(shotDir, `table-layout-desktop-${theme}.png`) });
+    await picker.getByRole('button', { name: 'Layout übernehmen' }).click();
+    await expect(picker).toHaveCount(0);
+    await page.waitForTimeout(500);
+    await card.locator('table').scrollIntoViewIfNeeded();
+    await card.screenshot({ path: path.join(shotDir, `table-structure-desktop-${theme}.png`) });
     expect(log.unmatched).toEqual([]);
   });
 }
+
+test('screenshot navigation drawer · mobile · light', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const log = await installStructuringMocks(page, { theme: 'light' });
+  await page.goto('/documents');
+  await page.locator('[data-ux="page-title"]').first().waitFor({ state: 'visible' });
+  await page.locator('.topbar-menu-trigger').click();
+  await expect(page.locator('.app-sidebar')).toBeVisible();
+  await page.waitForTimeout(400);
+  await page.screenshot({ path: path.join(shotDir, 'nav-drawer-mobile-light.png') });
+  await page.keyboard.press('Escape');
+  await expect(page.locator('.app-sidebar')).toBeHidden();
+  expect(log.unmatched).toEqual([]);
+});
+
+test('screenshot library · tablet · light', async ({ page }) => {
+  await page.setViewportSize({ width: 1024, height: 800 });
+  const log = await installStructuringMocks(page, { theme: 'light' });
+  await page.goto('/documents');
+  await page.locator('[data-ux="page-title"]').first().waitFor({ state: 'visible' });
+  await page.waitForTimeout(500);
+  await page.screenshot({ path: path.join(shotDir, 'library-tablet-light.png'), fullPage: true });
+  expect(log.unmatched).toEqual([]);
+});

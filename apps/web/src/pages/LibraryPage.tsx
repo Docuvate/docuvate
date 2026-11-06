@@ -1,9 +1,11 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import { Plug } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 
+import { AppRibbon, RibbonGroup } from '../components/layout/AppRibbon';
 import { LibraryFilterDrawer } from '../components/library/LibraryFilterDrawer';
 import { LibraryFilterPanel } from '../components/library/LibraryFilterPanel';
 import { LibrarySavedViewsMenu } from '../components/library/LibrarySavedViewsMenu';
@@ -13,10 +15,12 @@ import { LibraryExportMenu, LibraryStageTabs, usePipelineOverview } from '../com
 import { useToastNotify } from '../components/save/ToastProvider';
 import { Select } from '../components/ui/Select';
 import { DocumentUploadProvider } from '../components/upload/DocumentUploadProvider';
+import { UploadFileTrigger } from '../components/upload/UploadFileTrigger';
 import { UploadDropzone } from '../components/UploadDropzone';
 import { resolveLibraryDropTarget } from '../lib/documentUploadAssignment';
 import { countLibraryActiveFilters } from '../lib/libraryActiveFilterCount';
 import { librarySortSelectOptions, parseLibrarySortSelectValue } from '../lib/librarySortOptions';
+import { routes } from '../lib/routes';
 import { LibraryPageDocumentSection } from './library/LibraryPageDocumentSection';
 import { useLibraryDocumentContextMenu } from './library/useLibraryDocumentContextMenu';
 import { useLibraryPageData } from './library/useLibraryPageData';
@@ -39,10 +43,14 @@ export function LibraryPage() {
 
   useEffect(() => {
     const mq = window.matchMedia('(max-width: 1279px)');
-    const sync = () => { setNarrowFilters(mq.matches); };
+    const sync = () => {
+      setNarrowFilters(mq.matches);
+    };
     sync();
     mq.addEventListener('change', sync);
-    return () => { mq.removeEventListener('change', sync); };
+    return () => {
+      mq.removeEventListener('change', sync);
+    };
   }, []);
   const sortOptions = useMemo(() => librarySortSelectOptions(t), [t]);
   const activeFilterCount = useMemo(() => countLibraryActiveFilters(data.filters), [data.filters]);
@@ -79,44 +87,53 @@ export function LibraryPage() {
   return (
     <DocumentUploadProvider dropTarget={dropTarget} onUploaded={onUploaded}>
       <div className="page library-page" data-ux="page">
-        <header className="page-header library-page-header">
-          <div className="library-page-heading">
-            <h1 data-ux="page-title">{data.activeViewName ?? data.pageTitle}</h1>
-            {data.activeViewName ? (
-              <p className="muted">
-                {t('savedViews.activeViewLead', { name: data.activeViewName })}
-              </p>
-            ) : subtitle ? (
-              <p className={`muted${data.hasDocuments && subtitle === pipelineLead ? ' library-page-lead' : ''}`}>
-                {subtitle}
-              </p>
-            ) : null}
-          </div>
-          <div className="library-toolbar">
-            <LibrarySavedViewsMenu
-              onSaveView={() => { setSaveViewOpen(true); }}
-              onUpdateActiveView={
-                data.activeViewId
-                  ? () => {
-                      void data
-                        .updateActiveSavedView()
-                        .then(() => { pushSuccess(t('common.saved')); })
-                        .catch((err: unknown) => { pushError(err instanceof Error ? err.message : t('errors.generic')); });
-                    }
-                  : undefined
-              }
-            />
-            <LibraryViewSwitcher value={data.viewMode} onChange={data.onViewModeChange} />
-            <Select
-              className="library-toolbar-sort"
-              value={`${data.filters.sort ?? 'updatedAt'}:${data.filters.order ?? 'desc'}`}
-              onChange={(value) => {
-                const { sort, order } = parseLibrarySortSelectValue(value);
-                data.toggleFilter({ sort, order });
-              }}
-              options={[...sortOptions]}
-              aria-label={t('library.sortLabel')}
-            />
+        <AppRibbon>
+          <RibbonGroup label={t('ribbon.capture')}>
+            <UploadFileTrigger variant="primary" size="sm" />
+            <Link
+              to={routes.settingsConnectors}
+              className="ribbon-link"
+              aria-label={t('pipeline.library.importSources')}
+            >
+              <Plug size={14} strokeWidth={1.75} aria-hidden />
+              <span className="ribbon-link-label">{t('pipeline.library.importSources')}</span>
+            </Link>
+          </RibbonGroup>
+          <RibbonGroup label={t('ribbon.display')}>
+            <div className="library-toolbar">
+              <LibraryViewSwitcher value={data.viewMode} onChange={data.onViewModeChange} />
+              <Select
+                className="library-toolbar-sort"
+                value={`${data.filters.sort ?? 'updatedAt'}:${data.filters.order ?? 'desc'}`}
+                onChange={(value) => {
+                  const { sort, order } = parseLibrarySortSelectValue(value);
+                  data.toggleFilter({ sort, order });
+                }}
+                options={[...sortOptions]}
+                aria-label={t('library.sortLabel')}
+              />
+              <LibrarySavedViewsMenu
+                onSaveView={() => {
+                  setSaveViewOpen(true);
+                }}
+                onUpdateActiveView={
+                  data.activeViewId
+                    ? () => {
+                        void data
+                          .updateActiveSavedView()
+                          .then(() => {
+                            pushSuccess(t('common.saved'));
+                          })
+                          .catch((err: unknown) => {
+                            pushError(err instanceof Error ? err.message : t('errors.generic'));
+                          });
+                      }
+                    : undefined
+                }
+              />
+            </div>
+          </RibbonGroup>
+          <RibbonGroup label={t('ribbon.output')}>
             <LibraryExportMenu
               busy={data.exportBusy}
               disabled={!data.hasDocuments}
@@ -125,6 +142,22 @@ export function LibraryPage() {
                 void data.exportFieldValues(format);
               }}
             />
+          </RibbonGroup>
+        </AppRibbon>
+        <header className="page-header library-page-header">
+          <div className="library-page-heading">
+            <h1 data-ux="page-title">{data.activeViewName ?? data.pageTitle}</h1>
+            {data.activeViewName ? (
+              <p className="muted">
+                {t('savedViews.activeViewLead', { name: data.activeViewName })}
+              </p>
+            ) : subtitle ? (
+              <p
+                className={`muted${data.hasDocuments && subtitle === pipelineLead ? ' library-page-lead' : ''}`}
+              >
+                {subtitle}
+              </p>
+            ) : null}
           </div>
         </header>
 
@@ -136,7 +169,7 @@ export function LibraryPage() {
           }}
         />
 
-        <UploadDropzone compact={data.hasDocuments} />
+        <UploadDropzone compact={data.hasDocuments} showBar={false} />
 
         <div
           className={`library-layout${filtersOpen ? ' library-layout--filters-open' : ''}${narrowFilters ? ' library-layout--drawer-filters' : ''}`}
@@ -165,7 +198,9 @@ export function LibraryPage() {
               filterToggle={{
                 expanded: filtersOpen,
                 activeCount: activeFilterCount,
-                onToggle: () => { setFiltersOpen((open) => !open); },
+                onToggle: () => {
+                  setFiltersOpen((open) => !open);
+                },
                 buttonRef: filterToggleRef,
               }}
             />
@@ -175,7 +210,9 @@ export function LibraryPage() {
         {narrowFilters ? (
           <LibraryFilterDrawer
             open={filtersOpen}
-            onClose={() => { setFiltersOpen(false); }}
+            onClose={() => {
+              setFiltersOpen(false);
+            }}
             returnFocusRef={filterToggleRef}
           >
             <LibraryFilterPanel
@@ -195,7 +232,13 @@ export function LibraryPage() {
           </LibraryFilterDrawer>
         ) : null}
 
-        <SaveViewDialog open={saveViewOpen} onClose={() => { setSaveViewOpen(false); }} data={data} />
+        <SaveViewDialog
+          open={saveViewOpen}
+          onClose={() => {
+            setSaveViewOpen(false);
+          }}
+          data={data}
+        />
       </div>
     </DocumentUploadProvider>
   );

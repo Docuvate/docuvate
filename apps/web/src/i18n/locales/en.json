@@ -8,9 +8,12 @@
     "folders": "Folders",
     "correspondents": "Correspondents",
     "settings": "Settings",
-    "collapseSidebar": "Collapse navigation",
-    "expandSidebar": "Expand navigation",
-    "home": "Start"
+    "home": "Start",
+    "allDocuments": "All documents",
+    "review": "Review",
+    "duplicates": "Duplicates",
+    "manageViews": "Manage views",
+    "unassigned": "Without folder"
   },
   "shell": {
     "globalSearch": "Global search",
@@ -1984,7 +1987,7 @@
     "visibilityLabel": "Visibility",
     "visibilityPrivate": "Private",
     "visibilityShared": "Shared with everyone",
-    "pinSidebar": "Pin to sidebar",
+    "pinSidebar": "Pin to navigation",
     "sidebarGroup": "Saved views",
     "sidebarGroupShort": "Saved",
     "manageSettingsAria": "Manage saved views",
@@ -1993,7 +1996,7 @@
     "manageLead": "Your private views and views shared with everyone on this installation.",
     "openLibrary": "Open documents",
     "rename": "Rename",
-    "unpin": "Unpin from sidebar",
+    "unpin": "Unpin from navigation",
     "deleteTitle": "Delete saved view?",
     "deleteLead": "“{{name}}” will be removed for everyone who could see it.",
     "updateFromFilters": "Update view with current filters",
@@ -2573,5 +2576,15 @@
     "cellAria": "Row {{row}}, column {{col}}, {{rowSpan}} × {{colSpan}}",
     "span": "{{rowSpan}} × {{colSpan}}",
     "applied": "Table layout applied"
+  },
+  "ribbon": {
+    "stock": "Records",
+    "views": "Views",
+    "area": "Area",
+    "structure": "Structure",
+    "capture": "Capture",
+    "display": "Display",
+    "output": "Output",
+    "work": "Work"
   }
 }

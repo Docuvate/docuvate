@@ -8,9 +8,12 @@
     "folders": "Ordner",
     "correspondents": "Korrespondenten",
     "settings": "Einstellungen",
-    "collapseSidebar": "Navigation einklappen",
-    "expandSidebar": "Navigation ausklappen",
-    "home": "Start"
+    "home": "Start",
+    "allDocuments": "Alle Dokumente",
+    "review": "Prüfen",
+    "duplicates": "Duplikate",
+    "manageViews": "Ansichten verwalten",
+    "unassigned": "Ohne Ordner"
   },
   "shell": {
     "globalSearch": "Globale Suche",
@@ -1984,7 +1987,7 @@
     "visibilityLabel": "Sichtbarkeit",
     "visibilityPrivate": "Privat",
     "visibilityShared": "Für alle freigegeben",
-    "pinSidebar": "In der Seitenleiste anheften",
+    "pinSidebar": "In der Navigation anheften",
     "sidebarGroup": "Gespeicherte Ansichten",
     "sidebarGroupShort": "Gespeichert",
     "manageSettingsAria": "Gespeicherte Ansichten verwalten",
@@ -2573,5 +2576,15 @@
     "cellAria": "Zeile {{row}}, Spalte {{col}}, {{rowSpan}} × {{colSpan}}",
     "span": "{{rowSpan}} × {{colSpan}}",
     "applied": "Tabellenlayout übernommen"
+  },
+  "ribbon": {
+    "stock": "Bestand",
+    "views": "Ansichten",
+    "area": "Bereich",
+    "structure": "Struktur",
+    "capture": "Erfassen",
+    "display": "Darstellung",
+    "output": "Ausgabe",
+    "work": "Arbeiten"
   }
 }

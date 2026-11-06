@@ -9,12 +9,14 @@ import { useDocumentUploadContext } from './documentUploadContext';
 
 interface UploadFileTriggerProps {
   variant?: 'primary' | 'secondary' | 'ghost';
+  size?: 'sm' | 'md';
   disabledTitle?: string;
   onDisabledClick?: () => void;
 }
 
 export function UploadFileTrigger({
   variant = 'secondary',
+  size = 'md',
   disabledTitle,
   onDisabledClick,
 }: UploadFileTriggerProps) {
@@ -37,6 +39,7 @@ export function UploadFileTrigger({
       <Button
         type="button"
         variant={variant}
+        size={size}
         data-ux={variant === 'primary' ? 'primary-action' : undefined}
         title={disabled && disabledTitle ? disabledTitle : undefined}
         onClick={() => {

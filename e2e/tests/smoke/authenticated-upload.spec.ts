@@ -39,17 +39,11 @@ async function uploadSyntheticPdfViaUi(
   page: import('@playwright/test').Page,
   uploadTitle: string
 ): Promise<string> {
-  const compactBar = page.locator('.upload-compact-bar');
-  if (await compactBar.isVisible().catch(() => false)) {
-    await compactBar.getByRole('button', { name: /^upload$|^hochladen$/i }).click();
-  }
-
-  const uploadSection = page.locator('.library-page .upload-section').first();
-  await expect(uploadSection).toBeVisible({ timeout: 90_000 });
-  const chooseFiles = uploadSection
-    .getByRole('button', { name: /choose files|dateien auswählen/i })
-    .first();
-  await expect(chooseFiles).toBeVisible({ timeout: 30_000 });
+  // Upload lives in the library ribbon's capture group.
+  const ribbon = page.getByTestId('app-ribbon');
+  await expect(ribbon.getByRole('button', { name: /^upload$|^hochladen$/i })).toBeVisible({
+    timeout: 90_000,
+  });
 
   const uploadResponse = page.waitForResponse(
     (res) =>
@@ -58,7 +52,7 @@ async function uploadSyntheticPdfViaUi(
       res.status() < 500,
     { timeout: 180_000 }
   );
-  const fileInput = uploadSection.locator('input[type="file"]');
+  const fileInput = ribbon.locator('input[type="file"]').first();
   await expect(fileInput).toBeAttached({ timeout: 30_000 });
   await fileInput.setInputFiles(
     {
@@ -198,8 +192,9 @@ test.describe('Authenticated compose smoke', () => {
       (await titleLink.isVisible().catch(() => false)) ||
       (await titleLinkByName.isVisible().catch(() => false));
     if (listLinkVisible) {
-      const listLink =
-        (await titleLink.isVisible().catch(() => false)) ? titleLink : titleLinkByName;
+      const listLink = (await titleLink.isVisible().catch(() => false))
+        ? titleLink
+        : titleLinkByName;
       const docItem = page.locator('tr, .doc-card').filter({ has: listLink });
       await expect(docItem.first()).toBeVisible({ timeout: 30_000 });
       await expect(docItem.first().locator('.badge-ready, .badge.badge-ready')).toBeVisible({
@@ -214,7 +209,9 @@ test.describe('Authenticated compose smoke', () => {
     }
     await expect(page).toHaveURL(/\/documents\/[0-9a-f-]+/i, { timeout: 30_000 });
 
-    await expect(page.getByText(/loading pdf|pdf wird geladen/i)).toHaveCount(0, { timeout: 180_000 });
+    await expect(page.getByText(/loading pdf|pdf wird geladen/i)).toHaveCount(0, {
+      timeout: 180_000,
+    });
     const layoutWorkspace = page.locator('.layout-workspace');
     const pdfCanvas = page.locator('.pdf-page-canvas').first();
     if (await layoutWorkspace.isVisible().catch(() => false)) {

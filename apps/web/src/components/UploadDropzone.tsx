@@ -14,9 +14,14 @@ import { UploadCompactBar } from './UploadCompactBar';
 interface UploadDropzoneProps {
   /** When true, show a compact bar until expanded. */
   compact?: boolean;
+  /**
+   * When false, a compact dropzone shows no intake bar of its own (the upload action lives in
+   * the header ribbon); it still appears while files are dragged in or uploading.
+   */
+  showBar?: boolean;
 }
 
-export function UploadDropzone({ compact = false }: UploadDropzoneProps) {
+export function UploadDropzone({ compact = false, showBar = true }: UploadDropzoneProps) {
   const { t } = useTranslation();
   const { dropTarget, queue, enqueueFiles } = useDocumentUploadContext();
   const inputId = useId();
@@ -51,7 +56,7 @@ export function UploadDropzone({ compact = false }: UploadDropzoneProps) {
 
   return (
     <div className={`upload-section${compact ? ' upload-section-compact' : ''}`}>
-      {compact && !showFullDropzone ? (
+      {compact && showBar && !showFullDropzone ? (
         <UploadCompactBar
           onExpand={() => {
             if (narrowViewport) {
