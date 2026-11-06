@@ -12,13 +12,9 @@ class _$MlModelFamilyListResponseDto extends MlModelFamilyListResponseDto {
 
   factory _$MlModelFamilyListResponseDto(
           [void Function(MlModelFamilyListResponseDtoBuilder)? updates]) =>
-      (new MlModelFamilyListResponseDtoBuilder()..update(updates))._build();
+      (MlModelFamilyListResponseDtoBuilder()..update(updates))._build();
 
-  _$MlModelFamilyListResponseDto._({required this.families}) : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        families, r'MlModelFamilyListResponseDto', 'families');
-  }
-
+  _$MlModelFamilyListResponseDto._({required this.families}) : super._();
   @override
   MlModelFamilyListResponseDto rebuild(
           void Function(MlModelFamilyListResponseDtoBuilder) updates) =>
@@ -26,7 +22,7 @@ class _$MlModelFamilyListResponseDto extends MlModelFamilyListResponseDto {
 
   @override
   MlModelFamilyListResponseDtoBuilder toBuilder() =>
-      new MlModelFamilyListResponseDtoBuilder()..replace(this);
+      MlModelFamilyListResponseDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -58,7 +54,7 @@ class MlModelFamilyListResponseDtoBuilder
 
   ListBuilder<MlModelFamilyDto>? _families;
   ListBuilder<MlModelFamilyDto> get families =>
-      _$this._families ??= new ListBuilder<MlModelFamilyDto>();
+      _$this._families ??= ListBuilder<MlModelFamilyDto>();
   set families(ListBuilder<MlModelFamilyDto>? families) =>
       _$this._families = families;
 
@@ -77,7 +73,6 @@ class MlModelFamilyListResponseDtoBuilder
 
   @override
   void replace(MlModelFamilyListResponseDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$MlModelFamilyListResponseDto;
   }
 
@@ -93,14 +88,16 @@ class MlModelFamilyListResponseDtoBuilder
     _$MlModelFamilyListResponseDto _$result;
     try {
       _$result = _$v ??
-          new _$MlModelFamilyListResponseDto._(families: families.build());
+          _$MlModelFamilyListResponseDto._(
+            families: families.build(),
+          );
     } catch (_) {
       late String _$failedField;
       try {
         _$failedField = 'families';
         families.build();
       } catch (e) {
-        throw new BuiltValueNestedFieldError(
+        throw BuiltValueNestedFieldError(
             r'MlModelFamilyListResponseDto', _$failedField, e.toString());
       }
       rethrow;

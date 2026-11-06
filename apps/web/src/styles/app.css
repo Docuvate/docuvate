@@ -17506,3 +17506,224 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
     display: none;
   }
 }
+
+/* --- Review next-work queue (replaces legacy wizard) --- */
+.review-next-hero {
+  display: grid;
+  gap: var(--dv-space-3);
+  margin-block: var(--dv-space-4);
+}
+.review-next-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--dv-space-3);
+  padding: var(--dv-space-4);
+}
+.review-next-card-main {
+  display: flex;
+  gap: var(--dv-space-3);
+  align-items: center;
+  min-width: 0;
+}
+.review-next-filename {
+  font-weight: 600;
+  margin: 0;
+}
+.review-open-structuring {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--dv-space-2);
+  text-decoration: none;
+}
+.review-next-items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--dv-space-2);
+}
+.review-next-item-link {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: var(--dv-space-3);
+  align-items: center;
+  padding: var(--dv-space-3);
+  border-radius: var(--dv-radius-md);
+  background: var(--dv-color-surface-raised);
+  text-decoration: none;
+  color: inherit;
+}
+.review-next-item-index {
+  font-variant-numeric: tabular-nums;
+  color: var(--dv-color-text-muted);
+}
+
+/* --- Table family thumbnails --- */
+.table-family-menu-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--dv-space-2);
+  max-width: 18rem;
+}
+.table-family-menu-scroll {
+  max-height: 20rem;
+  overflow: auto;
+  padding: var(--dv-space-2);
+  display: grid;
+  gap: var(--dv-space-1);
+}
+.table-family-option {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--dv-space-2);
+  align-items: center;
+  text-align: start;
+}
+.table-family-copy {
+  display: grid;
+  gap: 0.15rem;
+}
+.table-family-title {
+  font-weight: 600;
+}
+.table-family-hint {
+  font-size: 0.8rem;
+  line-height: 1.3;
+}
+.table-family-thumb {
+  flex: none;
+  background: var(--dv-color-surface);
+  border-radius: 3px;
+}
+.table-family-cell--header { fill: color-mix(in srgb, var(--dv-color-accent) 55%, transparent); }
+.table-family-cell--footer { fill: color-mix(in srgb, var(--dv-color-accent) 35%, transparent); }
+.table-family-cell--index { fill: color-mix(in srgb, var(--dv-color-text) 28%, transparent); }
+.table-family-cell--section { fill: color-mix(in srgb, var(--dv-color-text) 18%, transparent); }
+.table-family-cell--body { fill: color-mix(in srgb, var(--dv-color-text) 10%, transparent); }
+
+/* --- Field bbox editor --- */
+.field-bbox-editor {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: calc(var(--dv-z-base) + 4);
+}
+.field-bbox-box {
+  position: absolute;
+  border: 2px solid var(--dv-color-accent);
+  background: color-mix(in srgb, var(--dv-color-accent) 12%, transparent);
+  pointer-events: auto;
+  cursor: move;
+  box-sizing: border-box;
+}
+.field-bbox-handle {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  background: var(--dv-color-accent);
+  border: 0;
+  padding: 0;
+  pointer-events: auto;
+}
+.field-bbox-handle--n { left: 50%; top: -5px; transform: translateX(-50%); cursor: ns-resize; }
+.field-bbox-handle--s { left: 50%; bottom: -5px; transform: translateX(-50%); cursor: ns-resize; }
+.field-bbox-handle--e { right: -5px; top: 50%; transform: translateY(-50%); cursor: ew-resize; }
+.field-bbox-handle--w { left: -5px; top: 50%; transform: translateY(-50%); cursor: ew-resize; }
+.field-bbox-handle--ne { right: -5px; top: -5px; cursor: nesw-resize; }
+.field-bbox-handle--nw { left: -5px; top: -5px; cursor: nwse-resize; }
+.field-bbox-handle--se { right: -5px; bottom: -5px; cursor: nwse-resize; }
+.field-bbox-handle--sw { left: -5px; bottom: -5px; cursor: nesw-resize; }
+.field-bbox-actions {
+  position: absolute;
+  right: var(--dv-space-3);
+  bottom: var(--dv-space-3);
+  display: flex;
+  gap: var(--dv-space-2);
+  pointer-events: auto;
+  z-index: calc(var(--dv-z-base) + 5);
+}
+
+/* Keep interactive overlays above static layout marks and unclipped by page chrome. */
+.pdf-page-wrap .field-bbox-editor,
+.pdf-page-wrap .table-pdf-overlay {
+  z-index: calc(var(--dv-z-base) + 6);
+}
+.layout-viewer-stage[data-table-overlay='1'] .pdf-viewer-scroll,
+.layout-viewer-stage[data-field-bbox='1'] .pdf-viewer-scroll {
+  overflow: auto;
+}
+.layout-viewer-stage[data-table-overlay='1'] .pdf-page-wrap,
+.layout-viewer-stage[data-field-bbox='1'] .pdf-page-wrap {
+  overflow: visible;
+}
+.table-family-menu {
+  z-index: calc(var(--dv-z-popover) + 1);
+  max-width: min(28rem, 92vw);
+}
+.table-family-item .table-family-option {
+  align-items: flex-start;
+}
+.table-family-menu-trigger .table-family-hint {
+  display: none;
+}
+.table-family-menu-trigger .table-family-option {
+  gap: var(--dv-space-2);
+}
+
+/* --- Table PDF overlay --- */
+.table-pdf-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: calc(var(--dv-z-base) + 3);
+}
+.table-pdf-overlay-box {
+  position: absolute;
+  border: 2px solid var(--dv-color-accent);
+  background: color-mix(in srgb, var(--dv-color-accent) 8%, transparent);
+  pointer-events: auto;
+  box-sizing: border-box;
+}
+.table-pdf-guide {
+  position: absolute;
+  background: color-mix(in srgb, var(--dv-color-accent) 45%, transparent);
+  pointer-events: none;
+}
+.table-pdf-guide-row { left: 0; right: 0; height: 1px; }
+.table-pdf-guide-col { top: 0; bottom: 0; width: 1px; }
+.table-pdf-cell {
+  position: absolute;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+}
+.table-pdf-cell-selected {
+  outline: 2px solid var(--dv-color-accent);
+  outline-offset: -2px;
+  background: color-mix(in srgb, var(--dv-color-accent) 18%, transparent);
+}
+.table-pdf-bounds-handle {
+  position: absolute;
+  right: -6px;
+  bottom: -6px;
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  border: 0;
+  background: var(--dv-color-accent);
+  cursor: nwse-resize;
+  padding: 0;
+}
+.table-pdf-overlay-actions {
+  position: absolute;
+  left: var(--dv-space-3);
+  bottom: var(--dv-space-3);
+  display: flex;
+  gap: var(--dv-space-2);
+  pointer-events: auto;
+  z-index: calc(var(--dv-z-base) + 5);
+}

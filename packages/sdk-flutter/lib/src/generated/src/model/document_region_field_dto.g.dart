@@ -14,17 +14,11 @@ class _$DocumentRegionFieldDto extends DocumentRegionFieldDto {
 
   factory _$DocumentRegionFieldDto(
           [void Function(DocumentRegionFieldDtoBuilder)? updates]) =>
-      (new DocumentRegionFieldDtoBuilder()..update(updates))._build();
+      (DocumentRegionFieldDtoBuilder()..update(updates))._build();
 
   _$DocumentRegionFieldDto._(
       {required this.fieldKey, required this.valueOverride})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        fieldKey, r'DocumentRegionFieldDto', 'fieldKey');
-    BuiltValueNullFieldError.checkNotNull(
-        valueOverride, r'DocumentRegionFieldDto', 'valueOverride');
-  }
-
+      : super._();
   @override
   DocumentRegionFieldDto rebuild(
           void Function(DocumentRegionFieldDtoBuilder) updates) =>
@@ -32,7 +26,7 @@ class _$DocumentRegionFieldDto extends DocumentRegionFieldDto {
 
   @override
   DocumentRegionFieldDtoBuilder toBuilder() =>
-      new DocumentRegionFieldDtoBuilder()..replace(this);
+      DocumentRegionFieldDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -89,7 +83,6 @@ class DocumentRegionFieldDtoBuilder
 
   @override
   void replace(DocumentRegionFieldDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$DocumentRegionFieldDto;
   }
 
@@ -103,11 +96,12 @@ class DocumentRegionFieldDtoBuilder
 
   _$DocumentRegionFieldDto _build() {
     final _$result = _$v ??
-        new _$DocumentRegionFieldDto._(
-            fieldKey: BuiltValueNullFieldError.checkNotNull(
-                fieldKey, r'DocumentRegionFieldDto', 'fieldKey'),
-            valueOverride: BuiltValueNullFieldError.checkNotNull(
-                valueOverride, r'DocumentRegionFieldDto', 'valueOverride'));
+        _$DocumentRegionFieldDto._(
+          fieldKey: BuiltValueNullFieldError.checkNotNull(
+              fieldKey, r'DocumentRegionFieldDto', 'fieldKey'),
+          valueOverride: BuiltValueNullFieldError.checkNotNull(
+              valueOverride, r'DocumentRegionFieldDto', 'valueOverride'),
+        );
     replace(_$result);
     return _$result;
   }

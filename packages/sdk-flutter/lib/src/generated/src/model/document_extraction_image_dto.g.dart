@@ -21,12 +21,12 @@ DocumentExtractionImageDtoKindEnum _$documentExtractionImageDtoKindEnumValueOf(
     case 'figure':
       return _$documentExtractionImageDtoKindEnum_figure;
     default:
-      throw new ArgumentError(name);
+      throw ArgumentError(name);
   }
 }
 
 final BuiltSet<DocumentExtractionImageDtoKindEnum>
-    _$documentExtractionImageDtoKindEnumValues = new BuiltSet<
+    _$documentExtractionImageDtoKindEnumValues = BuiltSet<
         DocumentExtractionImageDtoKindEnum>(const <DocumentExtractionImageDtoKindEnum>[
   _$documentExtractionImageDtoKindEnum_embedded,
   _$documentExtractionImageDtoKindEnum_figure,
@@ -34,7 +34,7 @@ final BuiltSet<DocumentExtractionImageDtoKindEnum>
 
 Serializer<DocumentExtractionImageDtoKindEnum>
     _$documentExtractionImageDtoKindEnumSerializer =
-    new _$DocumentExtractionImageDtoKindEnumSerializer();
+    _$DocumentExtractionImageDtoKindEnumSerializer();
 
 class _$DocumentExtractionImageDtoKindEnumSerializer
     implements PrimitiveSerializer<DocumentExtractionImageDtoKindEnum> {
@@ -86,7 +86,7 @@ class _$DocumentExtractionImageDto extends DocumentExtractionImageDto {
 
   factory _$DocumentExtractionImageDto(
           [void Function(DocumentExtractionImageDtoBuilder)? updates]) =>
-      (new DocumentExtractionImageDtoBuilder()..update(updates))._build();
+      (DocumentExtractionImageDtoBuilder()..update(updates))._build();
 
   _$DocumentExtractionImageDto._(
       {required this.id,
@@ -97,23 +97,7 @@ class _$DocumentExtractionImageDto extends DocumentExtractionImageDto {
       required this.height,
       required this.kind,
       this.caption})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        id, r'DocumentExtractionImageDto', 'id');
-    BuiltValueNullFieldError.checkNotNull(
-        page, r'DocumentExtractionImageDto', 'page');
-    BuiltValueNullFieldError.checkNotNull(
-        x, r'DocumentExtractionImageDto', 'x');
-    BuiltValueNullFieldError.checkNotNull(
-        y, r'DocumentExtractionImageDto', 'y');
-    BuiltValueNullFieldError.checkNotNull(
-        width, r'DocumentExtractionImageDto', 'width');
-    BuiltValueNullFieldError.checkNotNull(
-        height, r'DocumentExtractionImageDto', 'height');
-    BuiltValueNullFieldError.checkNotNull(
-        kind, r'DocumentExtractionImageDto', 'kind');
-  }
-
+      : super._();
   @override
   DocumentExtractionImageDto rebuild(
           void Function(DocumentExtractionImageDtoBuilder) updates) =>
@@ -121,7 +105,7 @@ class _$DocumentExtractionImageDto extends DocumentExtractionImageDto {
 
   @override
   DocumentExtractionImageDtoBuilder toBuilder() =>
-      new DocumentExtractionImageDtoBuilder()..replace(this);
+      DocumentExtractionImageDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -226,7 +210,6 @@ class DocumentExtractionImageDtoBuilder
 
   @override
   void replace(DocumentExtractionImageDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$DocumentExtractionImageDto;
   }
 
@@ -240,22 +223,23 @@ class DocumentExtractionImageDtoBuilder
 
   _$DocumentExtractionImageDto _build() {
     final _$result = _$v ??
-        new _$DocumentExtractionImageDto._(
-            id: BuiltValueNullFieldError.checkNotNull(
-                id, r'DocumentExtractionImageDto', 'id'),
-            page: BuiltValueNullFieldError.checkNotNull(
-                page, r'DocumentExtractionImageDto', 'page'),
-            x: BuiltValueNullFieldError.checkNotNull(
-                x, r'DocumentExtractionImageDto', 'x'),
-            y: BuiltValueNullFieldError.checkNotNull(
-                y, r'DocumentExtractionImageDto', 'y'),
-            width: BuiltValueNullFieldError.checkNotNull(
-                width, r'DocumentExtractionImageDto', 'width'),
-            height: BuiltValueNullFieldError.checkNotNull(
-                height, r'DocumentExtractionImageDto', 'height'),
-            kind: BuiltValueNullFieldError.checkNotNull(
-                kind, r'DocumentExtractionImageDto', 'kind'),
-            caption: caption);
+        _$DocumentExtractionImageDto._(
+          id: BuiltValueNullFieldError.checkNotNull(
+              id, r'DocumentExtractionImageDto', 'id'),
+          page: BuiltValueNullFieldError.checkNotNull(
+              page, r'DocumentExtractionImageDto', 'page'),
+          x: BuiltValueNullFieldError.checkNotNull(
+              x, r'DocumentExtractionImageDto', 'x'),
+          y: BuiltValueNullFieldError.checkNotNull(
+              y, r'DocumentExtractionImageDto', 'y'),
+          width: BuiltValueNullFieldError.checkNotNull(
+              width, r'DocumentExtractionImageDto', 'width'),
+          height: BuiltValueNullFieldError.checkNotNull(
+              height, r'DocumentExtractionImageDto', 'height'),
+          kind: BuiltValueNullFieldError.checkNotNull(
+              kind, r'DocumentExtractionImageDto', 'kind'),
+          caption: caption,
+        );
     replace(_$result);
     return _$result;
   }

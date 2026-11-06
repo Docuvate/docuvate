@@ -12,7 +12,9 @@ import type pg from 'pg';
 import { DocumentAuthorizationService } from '../../../../shared/application/document-authorization.service.js';
 import type { AuthorizationSubject } from '../../../../shared/domain/authorization.js';
 import {
+  DOCUMENT_REGION_REPOSITORY,
   DOCUMENT_REPOSITORY,
+  type DocumentRegionRepository,
   type DocumentRepository,
   DUPLICATE_STACK_REPOSITORY,
   type DuplicateStackRepository,
@@ -27,6 +29,7 @@ import { toTagSuggestionDto } from '../../../taxonomy/presentation/taxonomy.mapp
 import { PgDocumentReviewQueueRepository } from '../../infrastructure/pg-document-review-queue.repository.js';
 import {
   buildReviewFieldSuggestions,
+  filterRejectedReviewFieldSuggestions,
   isoDateFromFieldValue,
 } from './document-review-field-display.js';
 import { PromoteHighConfidenceExtractionSuggestionsUseCase } from './promote-extraction-suggestions.use-case.js';
@@ -37,6 +40,7 @@ export class ListDocumentReviewQueueUseCase {
     private readonly reviewQueueRepo: PgDocumentReviewQueueRepository,
     @Inject(DOCUMENT_REPOSITORY) private readonly documents: DocumentRepository,
     @Inject(DUPLICATE_STACK_REPOSITORY) private readonly stacks: DuplicateStackRepository,
+    @Inject(DOCUMENT_REGION_REPOSITORY) private readonly regions: DocumentRegionRepository,
     @Inject(PG_POOL) private readonly pool: pg.Pool,
     private readonly loadSuggestions: LoadDocumentLabelSuggestionsUseCase,
     private readonly listRecognizedFields: ListRecognizedFieldsUseCase,
@@ -88,7 +92,7 @@ export class ListDocumentReviewQueueUseCase {
       const extractedText = entity.extraction?.text ?? '';
       const firstLine =
         extractedText.split('\n').find((line) => line.trim().length > 0) ?? null;
-      const fieldSuggestions = buildReviewFieldSuggestions(
+      const builtFieldSuggestions = buildReviewFieldSuggestions(
         fields,
         catalogKeys,
         fieldDefinitions,
@@ -97,6 +101,11 @@ export class ListDocumentReviewQueueUseCase {
           filename: entity.filename,
           firstLine,
         }
+      );
+      const rejects = await this.regions.listActiveFieldSuggestionRejects(row.id);
+      const fieldSuggestions = filterRejectedReviewFieldSuggestions(
+        builtFieldSuggestions,
+        rejects
       );
       const stackSummaries = await this.stacks.summariesForPrimaryDocuments(userId, [row.id]);
       const duplicateStack = stackSummaries.get(row.id) ?? null;

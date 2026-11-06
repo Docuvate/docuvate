@@ -62,13 +62,13 @@ def _ocr_backend() -> str:
     return os.environ.get("DOCUVATE_OCR_BACKEND", "paddle").strip().lower()
 
 
-def _ocr_pdf(content: bytes) -> tuple[str, list[ExtractionBlock]]:
+def _ocr_pdf(content: bytes) -> tuple[str, list[ExtractionBlock], tuple[int, ...]]:
     if _ocr_backend() == "rapidocr":
         return rapidocr_ocr_pdf_bytes(content)
     return paddle_ocr_pdf_bytes(content)
 
 
-def _ocr_image(content: bytes) -> tuple[str, list[ExtractionBlock]]:
+def _ocr_image(content: bytes) -> tuple[str, list[ExtractionBlock], tuple[int, ...]]:
     if _ocr_backend() == "rapidocr":
         return rapidocr_ocr_image_bytes(content)
     return paddle_ocr_image_bytes(content)
@@ -82,12 +82,13 @@ def _release_ocr_backends() -> None:
         release_rapidocr()
 
 
-def _ocr_pdf_in_page_chunks(content: bytes) -> tuple[str, list[ExtractionBlock]]:
+def _ocr_pdf_in_page_chunks(content: bytes) -> tuple[str, list[ExtractionBlock], tuple[int, ...]]:
     pages = pdf_page_count(content)
     chunk_pages = pdf_chunk_page_size()
     specs = iter_pdf_page_chunk_specs(pages, chunk_pages)
     merged_texts: list[str] = []
     merged_blocks: list[ExtractionBlock] = []
+    merged_turns: list[int] = []
     block_index = 0
     release_onnx_encoder()
     try:
@@ -103,10 +104,12 @@ def _ocr_pdf_in_page_chunks(content: bytes) -> tuple[str, list[ExtractionBlock]]
                     shifted,
                     block_index_start=block_index,
                 )
+                page_count = max((b.page for b in shifted), default=0) - spec.page_offset
+                merged_turns.extend([0] * max(0, page_count))
                 continue
             sub_pdf = slice_pdf_bytes(content, spec.first_page, spec.last_page)
             try:
-                text, blocks = _ocr_pdf(sub_pdf)
+                text, blocks, turns = _ocr_pdf(sub_pdf)
             finally:
                 del sub_pdf
                 reclaim_python_heap()
@@ -119,11 +122,12 @@ def _ocr_pdf_in_page_chunks(content: bytes) -> tuple[str, list[ExtractionBlock]]
                 shifted,
                 block_index_start=block_index,
             )
-            del text, blocks, shifted
+            merged_turns.extend(list(turns))
+            del text, blocks, shifted, turns
             reclaim_python_heap()
     finally:
         _release_ocr_backends()
-    return "\n\n".join(merged_texts).strip(), merged_blocks
+    return "\n\n".join(merged_texts).strip(), merged_blocks, tuple(merged_turns)
 
 
 def run_ocr_stage(state: PipelineMutableState) -> StageEnvelope[OcrStageData]:
@@ -145,11 +149,12 @@ def run_ocr_stage(state: PipelineMutableState) -> StageEnvelope[OcrStageData]:
                 )
             release_onnx_encoder()
             if should_chunk_scanned_pdf(state.content, state.mime_type, requires_ocr=True):
-                text, blocks = _ocr_pdf_in_page_chunks(state.content)
+                text, blocks, turns = _ocr_pdf_in_page_chunks(state.content)
             else:
-                text, blocks = _ocr_pdf(state.content)
+                text, blocks, turns = _ocr_pdf(state.content)
             state.text = text.strip()
             state.blocks = list(blocks or [])
+            state.page_quarter_turns = turns
             _release_ocr_backends()
             reclaim_python_heap()
             return (
@@ -163,9 +168,10 @@ def run_ocr_stage(state: PipelineMutableState) -> StageEnvelope[OcrStageData]:
             )
         if state.mime_type.startswith("image/"):
             release_onnx_encoder()
-            text, blocks = _ocr_image(state.content)
+            text, blocks, turns = _ocr_image(state.content)
             state.text = text.strip()
             state.blocks = list(blocks or [])
+            state.page_quarter_turns = turns
             _release_ocr_backends()
             return (
                 OcrStageData(

@@ -10,6 +10,10 @@ from typing import Any
 
 import numpy as np
 
+from docuvate_worker.domain.cpu_pipeline.page_orientation import (
+    map_norm_box_to_unrotated,
+    orient_page_for_ocr,
+)
 from docuvate_worker.domain.extraction_geometry import (
     PageDimensions,
     extraction_block_from_absolute,
@@ -76,10 +80,13 @@ def _blocks_from_ocr_result(
     page: int,
     page_size: PageDimensions,
     block_offset: int = 0,
+    quarter_turns_cw: int = 0,
+    source_page_size: PageDimensions | None = None,
 ) -> tuple[str, list[ExtractionBlock]]:
     lines: list[str] = []
     blocks: list[ExtractionBlock] = []
     block_index = block_offset
+    unrotated_size = source_page_size or page_size
     for quad, text, _conf in ocr_result or []:
         cleaned = text.strip()
         if not cleaned:
@@ -98,20 +105,83 @@ def _blocks_from_ocr_result(
         )
         if block is None:
             continue
+        if quarter_turns_cw:
+            nx, ny, nw, nh = map_norm_box_to_unrotated(
+                block.x, block.y, block.width, block.height, quarter_turns_cw
+            )
+            block = ExtractionBlock(
+                page=block.page,
+                x=nx,
+                y=ny,
+                width=nw,
+                height=nh,
+                text=block.text,
+                block_index=block.block_index,
+            )
+            # Clamp against the source (unrotated) page; values already normalized.
+            _ = unrotated_size
         lines.append(cleaned)
         blocks.append(block)
         block_index += 1
     return "\n".join(lines), blocks
 
 
-def ocr_image_bytes(content: bytes) -> tuple[str, list[ExtractionBlock]]:
+def _orientation_enabled() -> bool:
+    raw = os.environ.get("DOCUVATE_OCR_ORIENT", "1").strip().lower()
+    return raw not in {"0", "false", "no", "off"}
+
+
+def _ocr_orientation_score(ocr: RapidOcrEngine, array: np.ndarray) -> float:
+    result, _ = ocr(array, use_cls=True)
+    if not result:
+        return 0.0
+    score = 0.0
+    for _quad, text, conf in result:
+        cleaned = (text or "").strip()
+        if not cleaned:
+            continue
+        weight = max(1, len(cleaned))
+        score += float(conf) * weight
+    return score
+
+
+def _ocr_oriented_page(
+    ocr: RapidOcrEngine,
+    array: np.ndarray,
+    *,
+    page: int,
+    block_offset: int,
+) -> tuple[str, list[ExtractionBlock], int]:
+    source_h, source_w = array.shape[:2]
+    source_size = PageDimensions(width=float(source_w), height=float(source_h))
+    if _orientation_enabled():
+        oriented = orient_page_for_ocr(
+            array, lambda img: _ocr_orientation_score(ocr, img)
+        )
+    else:
+        oriented = orient_page_for_ocr(array, forced_quarter_turns_cw=0)
+    page_h, page_w = oriented.image.shape[:2]
+    page_size = PageDimensions(width=float(page_w), height=float(page_h))
+    result, _ = ocr(oriented.image, use_cls=True)
+    text, blocks = _blocks_from_ocr_result(
+        result,
+        page=page,
+        page_size=page_size,
+        block_offset=block_offset,
+        quarter_turns_cw=oriented.quarter_turns_cw,
+        source_page_size=source_size,
+    )
+    return text, blocks, oriented.quarter_turns_cw
+
+
+def ocr_image_bytes(
+    content: bytes,
+) -> tuple[str, list[ExtractionBlock], tuple[int, ...]]:
     with open_image_bounded(content, raster_max_pixels_per_page()) as decoded:
         array = np.asarray(decoded.convert("RGB"))
-    page_height, page_width = array.shape[:2]
     ocr = _get_rapidocr()
-    result, _ = ocr(array, use_cls=False)
-    page_size = PageDimensions(width=float(page_width), height=float(page_height))
-    return _blocks_from_ocr_result(result, page=1, page_size=page_size)
+    text, blocks, turns = _ocr_oriented_page(ocr, array, page=1, block_offset=0)
+    return text, blocks, (turns,)
 
 
 def _ocr_pdf_dpi() -> int:
@@ -121,25 +191,21 @@ def _ocr_pdf_dpi() -> int:
 
 def ocr_pdf_bytes(
     content: bytes, *, max_pages: int | None = None
-) -> tuple[str, list[ExtractionBlock]]:
+) -> tuple[str, list[ExtractionBlock], tuple[int, ...]]:
     ocr = _get_rapidocr()
     all_lines: list[str] = []
     blocks: list[ExtractionBlock] = []
+    page_turns: list[int] = []
     block_index = 0
     dpi = _ocr_pdf_dpi()
     try:
         for page_index, page in iter_pdf_page_images(content, dpi=dpi, max_pages=max_pages):
             try:
                 array = np.asarray(page.convert("RGB"))
-                page_h, page_w = array.shape[:2]
-                page_size = PageDimensions(width=float(page_w), height=float(page_h))
-                result, _ = ocr(array, use_cls=False)
-                text, page_blocks = _blocks_from_ocr_result(
-                    result,
-                    page=page_index,
-                    page_size=page_size,
-                    block_offset=block_index,
+                text, page_blocks, turns = _ocr_oriented_page(
+                    ocr, array, page=page_index, block_offset=block_index
                 )
+                page_turns.append(turns)
                 if text.strip():
                     all_lines.append(text)
                 blocks.extend(page_blocks)
@@ -149,7 +215,7 @@ def ocr_pdf_bytes(
                 reclaim_python_heap()
     finally:
         reclaim_python_heap()
-    return "\n\n".join(all_lines).strip(), blocks
+    return "\n\n".join(all_lines).strip(), blocks, tuple(page_turns)
 
 
 def prewarm_rapidocr_models() -> None:

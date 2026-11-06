@@ -12,14 +12,10 @@ class _$DocumentListLibraryUiDto extends DocumentListLibraryUiDto {
 
   factory _$DocumentListLibraryUiDto(
           [void Function(DocumentListLibraryUiDtoBuilder)? updates]) =>
-      (new DocumentListLibraryUiDtoBuilder()..update(updates))._build();
+      (DocumentListLibraryUiDtoBuilder()..update(updates))._build();
 
   _$DocumentListLibraryUiDto._({required this.showDocumentOwnerLine})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(showDocumentOwnerLine,
-        r'DocumentListLibraryUiDto', 'showDocumentOwnerLine');
-  }
-
+      : super._();
   @override
   DocumentListLibraryUiDto rebuild(
           void Function(DocumentListLibraryUiDtoBuilder) updates) =>
@@ -27,7 +23,7 @@ class _$DocumentListLibraryUiDto extends DocumentListLibraryUiDto {
 
   @override
   DocumentListLibraryUiDtoBuilder toBuilder() =>
-      new DocumentListLibraryUiDtoBuilder()..replace(this);
+      DocumentListLibraryUiDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -77,7 +73,6 @@ class DocumentListLibraryUiDtoBuilder
 
   @override
   void replace(DocumentListLibraryUiDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$DocumentListLibraryUiDto;
   }
 
@@ -91,11 +86,12 @@ class DocumentListLibraryUiDtoBuilder
 
   _$DocumentListLibraryUiDto _build() {
     final _$result = _$v ??
-        new _$DocumentListLibraryUiDto._(
-            showDocumentOwnerLine: BuiltValueNullFieldError.checkNotNull(
-                showDocumentOwnerLine,
-                r'DocumentListLibraryUiDto',
-                'showDocumentOwnerLine'));
+        _$DocumentListLibraryUiDto._(
+          showDocumentOwnerLine: BuiltValueNullFieldError.checkNotNull(
+              showDocumentOwnerLine,
+              r'DocumentListLibraryUiDto',
+              'showDocumentOwnerLine'),
+        );
     replace(_$result);
     return _$result;
   }

@@ -18,22 +18,14 @@ class _$AcceptDocumentReviewBatchResponseDtoClass
   factory _$AcceptDocumentReviewBatchResponseDtoClass(
           [void Function(AcceptDocumentReviewBatchResponseDtoClassBuilder)?
               updates]) =>
-      (new AcceptDocumentReviewBatchResponseDtoClassBuilder()..update(updates))
+      (AcceptDocumentReviewBatchResponseDtoClassBuilder()..update(updates))
           ._build();
 
   _$AcceptDocumentReviewBatchResponseDtoClass._(
       {required this.documentsProcessed,
       required this.acceptedLabels,
       required this.acceptedFields})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(documentsProcessed,
-        r'AcceptDocumentReviewBatchResponseDtoClass', 'documentsProcessed');
-    BuiltValueNullFieldError.checkNotNull(acceptedLabels,
-        r'AcceptDocumentReviewBatchResponseDtoClass', 'acceptedLabels');
-    BuiltValueNullFieldError.checkNotNull(acceptedFields,
-        r'AcceptDocumentReviewBatchResponseDtoClass', 'acceptedFields');
-  }
-
+      : super._();
   @override
   AcceptDocumentReviewBatchResponseDtoClass rebuild(
           void Function(AcceptDocumentReviewBatchResponseDtoClassBuilder)
@@ -42,7 +34,7 @@ class _$AcceptDocumentReviewBatchResponseDtoClass
 
   @override
   AcceptDocumentReviewBatchResponseDtoClassBuilder toBuilder() =>
-      new AcceptDocumentReviewBatchResponseDtoClassBuilder()..replace(this);
+      AcceptDocumentReviewBatchResponseDtoClassBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -112,7 +104,6 @@ class AcceptDocumentReviewBatchResponseDtoClassBuilder
 
   @override
   void replace(AcceptDocumentReviewBatchResponseDtoClass other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$AcceptDocumentReviewBatchResponseDtoClass;
   }
 
@@ -128,19 +119,16 @@ class AcceptDocumentReviewBatchResponseDtoClassBuilder
 
   _$AcceptDocumentReviewBatchResponseDtoClass _build() {
     final _$result = _$v ??
-        new _$AcceptDocumentReviewBatchResponseDtoClass._(
-            documentsProcessed: BuiltValueNullFieldError.checkNotNull(
-                documentsProcessed,
-                r'AcceptDocumentReviewBatchResponseDtoClass',
-                'documentsProcessed'),
-            acceptedLabels: BuiltValueNullFieldError.checkNotNull(
-                acceptedLabels,
-                r'AcceptDocumentReviewBatchResponseDtoClass',
-                'acceptedLabels'),
-            acceptedFields: BuiltValueNullFieldError.checkNotNull(
-                acceptedFields,
-                r'AcceptDocumentReviewBatchResponseDtoClass',
-                'acceptedFields'));
+        _$AcceptDocumentReviewBatchResponseDtoClass._(
+          documentsProcessed: BuiltValueNullFieldError.checkNotNull(
+              documentsProcessed,
+              r'AcceptDocumentReviewBatchResponseDtoClass',
+              'documentsProcessed'),
+          acceptedLabels: BuiltValueNullFieldError.checkNotNull(acceptedLabels,
+              r'AcceptDocumentReviewBatchResponseDtoClass', 'acceptedLabels'),
+          acceptedFields: BuiltValueNullFieldError.checkNotNull(acceptedFields,
+              r'AcceptDocumentReviewBatchResponseDtoClass', 'acceptedFields'),
+        );
     replace(_$result);
     return _$result;
   }

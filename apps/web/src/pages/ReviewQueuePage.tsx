@@ -1,13 +1,11 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useQuery } from '@tanstack/react-query';
-import { Check } from 'lucide-react';
+import { ArrowRight, Check, FileText } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
-import { DocumentStageTrack } from '../components/pipeline';
-import { ReviewWizardView } from '../components/review/ReviewWizardView';
 import { useToastNotify } from '../components/save/ToastProvider';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
@@ -23,6 +21,14 @@ import { flattenCursorPages } from '../lib/pagination/useCursorInfiniteQuery';
 import { useDocumentReviewQueueInfiniteQuery } from '../lib/review/useDocumentReviewQueueInfiniteQuery';
 import { routes } from '../lib/routes';
 
+function reviewHref(documentId: string): string {
+  return `${routes.documents}/${documentId}?review=1`;
+}
+
+/**
+ * Next-work queue for structuring. Opens the document workbench directly instead of a
+ * second wizard that competed with the viewer inspector.
+ */
 export function ReviewQueuePage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -47,14 +53,11 @@ export function ReviewQueuePage() {
   });
   const refetchSummary = summary.refetch;
   const pendingCount = summary.data?.pendingCount;
+  const nextItem = items[0] ?? null;
 
   const reload = useCallback(async () => {
     await Promise.all([refetch(), refetchSummary()]);
   }, [refetch, refetchSummary]);
-
-  const loadMore = useCallback(() => {
-    void fetchNextPage();
-  }, [fetchNextPage]);
 
   async function onBatchHighConfidence() {
     setBatchBusy(true);
@@ -75,66 +78,13 @@ export function ReviewQueuePage() {
     }
   }
 
-  const showWizard = !loading && !loadError && items.length > 0;
-
   return (
-    <div className="page review-queue-page" data-ux="page">
+    <div className="page review-queue-page" data-ux="page" data-testid="review-next-work">
       <PageHeader
         className="review-queue-header"
-        eyebrow={
-          <DocumentStageTrack
-            state="review"
-            className="review-queue-pipeline"
-            ariaLabel={t('pipeline.railAria')}
-          />
-        }
         title={t('reviewQueue.title')}
-        description={t('reviewQueue.lead')}
-        actions={
-          showWizard ? (
-            <div className="review-queue-header-actions">
-              <Button type="button" variant="ghost" onClick={() => { navigate(routes.home); }}>
-                {t('reviewWizard.exit')}
-              </Button>
-            </div>
-          ) : undefined
-        }
+        description={t('reviewQueue.nextWorkLead')}
       />
-
-      {showWizard ? (
-        <section
-          className="review-queue-bulk"
-          aria-labelledby="review-queue-bulk-title"
-          data-testid="review-queue-bulk"
-        >
-          <div className="review-queue-bulk-text">
-            <h2 id="review-queue-bulk-title" className="review-queue-bulk-title">
-              {pendingCount != null
-                ? t('reviewQueue.bulkTitleCount', { count: pendingCount })
-                : t('reviewQueue.bulkTitle')}
-            </h2>
-            <p className="muted review-queue-bulk-lead">{t('reviewQueue.bulkLead')}</p>
-          </div>
-          <div className="review-queue-bulk-actions">
-            <Button
-              type="button"
-              variant="primary"
-              disabled={batchBusy}
-              onClick={() => { setBatchConfirmOpen(true); }}
-            >
-              {t('reviewQueue.batchHighConfidence')}
-            </Button>
-            <Button
-              type="button"
-              variant="secondary"
-              disabled={batchBusy}
-              onClick={() => { setArchiveConfirmOpen(true); }}
-            >
-              {t('reviewQueue.archiveHashIdenticalDuplicates')}
-            </Button>
-          </div>
-        </section>
-      ) : null}
 
       {loading ? <p className="muted">{t('reviewQueue.loading')}</p> : null}
       {loadError ? (
@@ -164,16 +114,83 @@ export function ReviewQueuePage() {
         </Card>
       ) : null}
 
-      {showWizard ? (
-          <ReviewWizardView
-            items={items}
-            batchBusy={batchBusy}
-            onReload={reload}
-            totalDocuments={pendingCount}
-            canLoadMore={hasNextPage}
-            loadingMore={isFetchingNextPage}
-            onLoadMore={loadMore}
-          />
+      {!loading && !loadError && items.length > 0 ? (
+        <>
+          <section className="review-next-hero" aria-labelledby="review-next-title">
+            <p className="muted review-next-count">
+              {pendingCount != null
+                ? t('reviewQueue.bulkTitleCount', { count: pendingCount })
+                : t('reviewQueue.bulkTitle')}
+            </p>
+            <h2 id="review-next-title" className="review-next-title">
+              {t('reviewQueue.nextDocument')}
+            </h2>
+            <Card className="review-next-card">
+                <div className="review-next-card-main">
+                  <FileText size={22} aria-hidden />
+                  <div>
+                    <p className="review-next-filename">{nextItem.filename}</p>
+                    <p className="muted">
+                      {t('reviewQueue.openFieldsHint', {
+                        fields: nextItem.fieldSuggestions.length,
+                        labels: nextItem.labelSuggestions.length,
+                      })}
+                    </p>
+                  </div>
+                </div>
+                <Link
+                  className="btn btn-primary review-open-structuring"
+                  data-testid="review-open-structuring"
+                  to={reviewHref(nextItem.documentId)}
+                >
+                  {t('reviewQueue.openStructuring')}
+                  <ArrowRight size={16} aria-hidden />
+                </Link>
+              </Card>
+            <div className="review-queue-bulk-actions">
+              <Button
+                type="button"
+                variant="secondary"
+                disabled={batchBusy}
+                onClick={() => { setBatchConfirmOpen(true); }}
+              >
+                {t('reviewQueue.batchHighConfidence')}
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                disabled={batchBusy}
+                onClick={() => { setArchiveConfirmOpen(true); }}
+              >
+                {t('reviewQueue.archiveHashIdenticalDuplicates')}
+              </Button>
+            </div>
+          </section>
+
+          <section className="review-next-list" aria-label={t('reviewQueue.queueListAria')}>
+            <ol className="review-next-items">
+              {items.map((item, index) => (
+                <li key={item.documentId} className="review-next-item">
+                  <Link className="review-next-item-link" to={reviewHref(item.documentId)}>
+                    <span className="review-next-item-index">{index + 1}</span>
+                    <span className="review-next-item-name">{item.filename}</span>
+                    <span className="muted">{t('reviewQueue.structureAction')}</span>
+                  </Link>
+                </li>
+              ))}
+            </ol>
+            {hasNextPage ? (
+              <Button
+                type="button"
+                variant="secondary"
+                disabled={isFetchingNextPage}
+                onClick={() => { void fetchNextPage(); }}
+              >
+                {t('common.loadMore')}
+              </Button>
+            ) : null}
+          </section>
+        </>
       ) : null}
 
       <ConfirmDialog

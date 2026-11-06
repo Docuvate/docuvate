@@ -20,7 +20,7 @@ class _$DocumentListResponseDto extends DocumentListResponseDto {
 
   factory _$DocumentListResponseDto(
           [void Function(DocumentListResponseDtoBuilder)? updates]) =>
-      (new DocumentListResponseDtoBuilder()..update(updates))._build();
+      (DocumentListResponseDtoBuilder()..update(updates))._build();
 
   _$DocumentListResponseDto._(
       {required this.nextCursor,
@@ -28,17 +28,7 @@ class _$DocumentListResponseDto extends DocumentListResponseDto {
       required this.total,
       this.libraryUi,
       required this.items})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        nextCursor, r'DocumentListResponseDto', 'nextCursor');
-    BuiltValueNullFieldError.checkNotNull(
-        hasMore, r'DocumentListResponseDto', 'hasMore');
-    BuiltValueNullFieldError.checkNotNull(
-        total, r'DocumentListResponseDto', 'total');
-    BuiltValueNullFieldError.checkNotNull(
-        items, r'DocumentListResponseDto', 'items');
-  }
-
+      : super._();
   @override
   DocumentListResponseDto rebuild(
           void Function(DocumentListResponseDtoBuilder) updates) =>
@@ -46,7 +36,7 @@ class _$DocumentListResponseDto extends DocumentListResponseDto {
 
   @override
   DocumentListResponseDtoBuilder toBuilder() =>
-      new DocumentListResponseDtoBuilder()..replace(this);
+      DocumentListResponseDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -102,13 +92,13 @@ class DocumentListResponseDtoBuilder
 
   DocumentListLibraryUiDtoBuilder? _libraryUi;
   DocumentListLibraryUiDtoBuilder get libraryUi =>
-      _$this._libraryUi ??= new DocumentListLibraryUiDtoBuilder();
+      _$this._libraryUi ??= DocumentListLibraryUiDtoBuilder();
   set libraryUi(DocumentListLibraryUiDtoBuilder? libraryUi) =>
       _$this._libraryUi = libraryUi;
 
   ListBuilder<JsonObject>? _items;
   ListBuilder<JsonObject> get items =>
-      _$this._items ??= new ListBuilder<JsonObject>();
+      _$this._items ??= ListBuilder<JsonObject>();
   set items(ListBuilder<JsonObject>? items) => _$this._items = items;
 
   DocumentListResponseDtoBuilder() {
@@ -130,7 +120,6 @@ class DocumentListResponseDtoBuilder
 
   @override
   void replace(DocumentListResponseDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$DocumentListResponseDto;
   }
 
@@ -146,15 +135,16 @@ class DocumentListResponseDtoBuilder
     _$DocumentListResponseDto _$result;
     try {
       _$result = _$v ??
-          new _$DocumentListResponseDto._(
-              nextCursor: BuiltValueNullFieldError.checkNotNull(
-                  nextCursor, r'DocumentListResponseDto', 'nextCursor'),
-              hasMore: BuiltValueNullFieldError.checkNotNull(
-                  hasMore, r'DocumentListResponseDto', 'hasMore'),
-              total: BuiltValueNullFieldError.checkNotNull(
-                  total, r'DocumentListResponseDto', 'total'),
-              libraryUi: _libraryUi?.build(),
-              items: items.build());
+          _$DocumentListResponseDto._(
+            nextCursor: BuiltValueNullFieldError.checkNotNull(
+                nextCursor, r'DocumentListResponseDto', 'nextCursor'),
+            hasMore: BuiltValueNullFieldError.checkNotNull(
+                hasMore, r'DocumentListResponseDto', 'hasMore'),
+            total: BuiltValueNullFieldError.checkNotNull(
+                total, r'DocumentListResponseDto', 'total'),
+            libraryUi: _libraryUi?.build(),
+            items: items.build(),
+          );
     } catch (_) {
       late String _$failedField;
       try {
@@ -163,7 +153,7 @@ class DocumentListResponseDtoBuilder
         _$failedField = 'items';
         items.build();
       } catch (e) {
-        throw new BuiltValueNestedFieldError(
+        throw BuiltValueNestedFieldError(
             r'DocumentListResponseDto', _$failedField, e.toString());
       }
       rethrow;

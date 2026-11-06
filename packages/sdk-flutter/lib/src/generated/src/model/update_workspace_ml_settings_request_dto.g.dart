@@ -27,13 +27,12 @@ UpdateWorkspaceMlSettingsRequestDtoLabelAutoAssignEnum
     case 'normal':
       return _$updateWorkspaceMlSettingsRequestDtoLabelAutoAssignEnum_normal;
     default:
-      throw new ArgumentError(name);
+      throw ArgumentError(name);
   }
 }
 
 final BuiltSet<UpdateWorkspaceMlSettingsRequestDtoLabelAutoAssignEnum>
-    _$updateWorkspaceMlSettingsRequestDtoLabelAutoAssignEnumValues =
-    new BuiltSet<
+    _$updateWorkspaceMlSettingsRequestDtoLabelAutoAssignEnumValues = BuiltSet<
         UpdateWorkspaceMlSettingsRequestDtoLabelAutoAssignEnum>(const <UpdateWorkspaceMlSettingsRequestDtoLabelAutoAssignEnum>[
   _$updateWorkspaceMlSettingsRequestDtoLabelAutoAssignEnum_off,
   _$updateWorkspaceMlSettingsRequestDtoLabelAutoAssignEnum_cautious,
@@ -61,13 +60,12 @@ UpdateWorkspaceMlSettingsRequestDtoLabelSuggestionsEnum
     case 'many':
       return _$updateWorkspaceMlSettingsRequestDtoLabelSuggestionsEnum_many;
     default:
-      throw new ArgumentError(name);
+      throw ArgumentError(name);
   }
 }
 
 final BuiltSet<UpdateWorkspaceMlSettingsRequestDtoLabelSuggestionsEnum>
-    _$updateWorkspaceMlSettingsRequestDtoLabelSuggestionsEnumValues =
-    new BuiltSet<
+    _$updateWorkspaceMlSettingsRequestDtoLabelSuggestionsEnumValues = BuiltSet<
         UpdateWorkspaceMlSettingsRequestDtoLabelSuggestionsEnum>(const <UpdateWorkspaceMlSettingsRequestDtoLabelSuggestionsEnum>[
   _$updateWorkspaceMlSettingsRequestDtoLabelSuggestionsEnum_few,
   _$updateWorkspaceMlSettingsRequestDtoLabelSuggestionsEnum_normal,
@@ -96,13 +94,13 @@ UpdateWorkspaceMlSettingsRequestDtoDuplicateDetectionEnum
     case 'similar':
       return _$updateWorkspaceMlSettingsRequestDtoDuplicateDetectionEnum_similar;
     default:
-      throw new ArgumentError(name);
+      throw ArgumentError(name);
   }
 }
 
 final BuiltSet<UpdateWorkspaceMlSettingsRequestDtoDuplicateDetectionEnum>
     _$updateWorkspaceMlSettingsRequestDtoDuplicateDetectionEnumValues =
-    new BuiltSet<
+    BuiltSet<
         UpdateWorkspaceMlSettingsRequestDtoDuplicateDetectionEnum>(const <UpdateWorkspaceMlSettingsRequestDtoDuplicateDetectionEnum>[
   _$updateWorkspaceMlSettingsRequestDtoDuplicateDetectionEnum_off,
   _$updateWorkspaceMlSettingsRequestDtoDuplicateDetectionEnum_exact,
@@ -130,13 +128,12 @@ UpdateWorkspaceMlSettingsRequestDtoFieldAcceptanceEnum
     case 'generous':
       return _$updateWorkspaceMlSettingsRequestDtoFieldAcceptanceEnum_generous;
     default:
-      throw new ArgumentError(name);
+      throw ArgumentError(name);
   }
 }
 
 final BuiltSet<UpdateWorkspaceMlSettingsRequestDtoFieldAcceptanceEnum>
-    _$updateWorkspaceMlSettingsRequestDtoFieldAcceptanceEnumValues =
-    new BuiltSet<
+    _$updateWorkspaceMlSettingsRequestDtoFieldAcceptanceEnumValues = BuiltSet<
         UpdateWorkspaceMlSettingsRequestDtoFieldAcceptanceEnum>(const <UpdateWorkspaceMlSettingsRequestDtoFieldAcceptanceEnum>[
   _$updateWorkspaceMlSettingsRequestDtoFieldAcceptanceEnum_cautious,
   _$updateWorkspaceMlSettingsRequestDtoFieldAcceptanceEnum_normal,
@@ -145,16 +142,16 @@ final BuiltSet<UpdateWorkspaceMlSettingsRequestDtoFieldAcceptanceEnum>
 
 Serializer<UpdateWorkspaceMlSettingsRequestDtoLabelAutoAssignEnum>
     _$updateWorkspaceMlSettingsRequestDtoLabelAutoAssignEnumSerializer =
-    new _$UpdateWorkspaceMlSettingsRequestDtoLabelAutoAssignEnumSerializer();
+    _$UpdateWorkspaceMlSettingsRequestDtoLabelAutoAssignEnumSerializer();
 Serializer<UpdateWorkspaceMlSettingsRequestDtoLabelSuggestionsEnum>
     _$updateWorkspaceMlSettingsRequestDtoLabelSuggestionsEnumSerializer =
-    new _$UpdateWorkspaceMlSettingsRequestDtoLabelSuggestionsEnumSerializer();
+    _$UpdateWorkspaceMlSettingsRequestDtoLabelSuggestionsEnumSerializer();
 Serializer<UpdateWorkspaceMlSettingsRequestDtoDuplicateDetectionEnum>
     _$updateWorkspaceMlSettingsRequestDtoDuplicateDetectionEnumSerializer =
-    new _$UpdateWorkspaceMlSettingsRequestDtoDuplicateDetectionEnumSerializer();
+    _$UpdateWorkspaceMlSettingsRequestDtoDuplicateDetectionEnumSerializer();
 Serializer<UpdateWorkspaceMlSettingsRequestDtoFieldAcceptanceEnum>
     _$updateWorkspaceMlSettingsRequestDtoFieldAcceptanceEnumSerializer =
-    new _$UpdateWorkspaceMlSettingsRequestDtoFieldAcceptanceEnumSerializer();
+    _$UpdateWorkspaceMlSettingsRequestDtoFieldAcceptanceEnumSerializer();
 
 class _$UpdateWorkspaceMlSettingsRequestDtoLabelAutoAssignEnumSerializer
     implements
@@ -320,8 +317,7 @@ class _$UpdateWorkspaceMlSettingsRequestDto
   factory _$UpdateWorkspaceMlSettingsRequestDto(
           [void Function(UpdateWorkspaceMlSettingsRequestDtoBuilder)?
               updates]) =>
-      (new UpdateWorkspaceMlSettingsRequestDtoBuilder()..update(updates))
-          ._build();
+      (UpdateWorkspaceMlSettingsRequestDtoBuilder()..update(updates))._build();
 
   _$UpdateWorkspaceMlSettingsRequestDto._(
       {this.labelAutoAssign,
@@ -329,7 +325,6 @@ class _$UpdateWorkspaceMlSettingsRequestDto
       this.duplicateDetection,
       this.fieldAcceptance})
       : super._();
-
   @override
   UpdateWorkspaceMlSettingsRequestDto rebuild(
           void Function(UpdateWorkspaceMlSettingsRequestDtoBuilder) updates) =>
@@ -337,7 +332,7 @@ class _$UpdateWorkspaceMlSettingsRequestDto
 
   @override
   UpdateWorkspaceMlSettingsRequestDtoBuilder toBuilder() =>
-      new UpdateWorkspaceMlSettingsRequestDtoBuilder()..replace(this);
+      UpdateWorkspaceMlSettingsRequestDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -428,7 +423,6 @@ class UpdateWorkspaceMlSettingsRequestDtoBuilder
 
   @override
   void replace(UpdateWorkspaceMlSettingsRequestDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$UpdateWorkspaceMlSettingsRequestDto;
   }
 
@@ -443,11 +437,12 @@ class UpdateWorkspaceMlSettingsRequestDtoBuilder
 
   _$UpdateWorkspaceMlSettingsRequestDto _build() {
     final _$result = _$v ??
-        new _$UpdateWorkspaceMlSettingsRequestDto._(
-            labelAutoAssign: labelAutoAssign,
-            labelSuggestions: labelSuggestions,
-            duplicateDetection: duplicateDetection,
-            fieldAcceptance: fieldAcceptance);
+        _$UpdateWorkspaceMlSettingsRequestDto._(
+          labelAutoAssign: labelAutoAssign,
+          labelSuggestions: labelSuggestions,
+          duplicateDetection: duplicateDetection,
+          fieldAcceptance: fieldAcceptance,
+        );
     replace(_$result);
     return _$result;
   }

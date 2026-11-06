@@ -17,21 +17,13 @@ class _$ConfirmDocumentFieldResponseDto
 
   factory _$ConfirmDocumentFieldResponseDto(
           [void Function(ConfirmDocumentFieldResponseDtoBuilder)? updates]) =>
-      (new ConfirmDocumentFieldResponseDtoBuilder()..update(updates))._build();
+      (ConfirmDocumentFieldResponseDtoBuilder()..update(updates))._build();
 
   _$ConfirmDocumentFieldResponseDto._(
       {required this.confirmed,
       required this.fieldKey,
       required this.valueSha256})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        confirmed, r'ConfirmDocumentFieldResponseDto', 'confirmed');
-    BuiltValueNullFieldError.checkNotNull(
-        fieldKey, r'ConfirmDocumentFieldResponseDto', 'fieldKey');
-    BuiltValueNullFieldError.checkNotNull(
-        valueSha256, r'ConfirmDocumentFieldResponseDto', 'valueSha256');
-  }
-
+      : super._();
   @override
   ConfirmDocumentFieldResponseDto rebuild(
           void Function(ConfirmDocumentFieldResponseDtoBuilder) updates) =>
@@ -39,7 +31,7 @@ class _$ConfirmDocumentFieldResponseDto
 
   @override
   ConfirmDocumentFieldResponseDtoBuilder toBuilder() =>
-      new ConfirmDocumentFieldResponseDtoBuilder()..replace(this);
+      ConfirmDocumentFieldResponseDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -105,7 +97,6 @@ class ConfirmDocumentFieldResponseDtoBuilder
 
   @override
   void replace(ConfirmDocumentFieldResponseDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$ConfirmDocumentFieldResponseDto;
   }
 
@@ -119,13 +110,14 @@ class ConfirmDocumentFieldResponseDtoBuilder
 
   _$ConfirmDocumentFieldResponseDto _build() {
     final _$result = _$v ??
-        new _$ConfirmDocumentFieldResponseDto._(
-            confirmed: BuiltValueNullFieldError.checkNotNull(
-                confirmed, r'ConfirmDocumentFieldResponseDto', 'confirmed'),
-            fieldKey: BuiltValueNullFieldError.checkNotNull(
-                fieldKey, r'ConfirmDocumentFieldResponseDto', 'fieldKey'),
-            valueSha256: BuiltValueNullFieldError.checkNotNull(valueSha256,
-                r'ConfirmDocumentFieldResponseDto', 'valueSha256'));
+        _$ConfirmDocumentFieldResponseDto._(
+          confirmed: BuiltValueNullFieldError.checkNotNull(
+              confirmed, r'ConfirmDocumentFieldResponseDto', 'confirmed'),
+          fieldKey: BuiltValueNullFieldError.checkNotNull(
+              fieldKey, r'ConfirmDocumentFieldResponseDto', 'fieldKey'),
+          valueSha256: BuiltValueNullFieldError.checkNotNull(
+              valueSha256, r'ConfirmDocumentFieldResponseDto', 'valueSha256'),
+        );
     replace(_$result);
     return _$result;
   }

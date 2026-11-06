@@ -545,6 +545,26 @@ export class PgDocumentRepository implements DocumentRepository {
         );
         await replaceDocumentExtractionBlocks(client, id, result.blocks ?? []);
       }
+      if (result.pageTransforms && result.pageTransforms.length > 0) {
+        await client.query(
+          `DELETE FROM document_page_transforms WHERE document_id = $1 AND source = 'pipeline'`,
+          [id]
+        );
+        for (const item of result.pageTransforms) {
+          if (item.rotationQuarterTurns === 0) continue;
+          await client.query(
+            `INSERT INTO document_page_transforms (
+               document_id, page, rotation_quarter_turns, deskew_deg, source, updated_at
+             ) VALUES ($1, $2, $3, 0, 'pipeline', now())
+             ON CONFLICT (document_id, page) DO UPDATE SET
+               rotation_quarter_turns = EXCLUDED.rotation_quarter_turns,
+               deskew_deg = 0,
+               source = 'pipeline',
+               updated_at = now()`,
+            [id, item.page, item.rotationQuarterTurns]
+          );
+        }
+      }
       await client.query('COMMIT');
     } catch (error) {
       await client.query('ROLLBACK');

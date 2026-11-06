@@ -10,6 +10,7 @@ import type {
 } from '@docuvate/contracts';
 import {
   FIELD_ACCEPTANCE_LABEL_CONFIDENCE,
+  normalizeSuggestionDecisionValue,
   parseSuggestionStorageKey,
   semanticFieldKey,
 } from '@docuvate/contracts';
@@ -46,11 +47,14 @@ import {
   getDocument,
   getUserSettings,
   getWorkspaceMlSettings,
+  applyDocumentFieldCorrection,
+  listDocumentFieldSuggestionDecisions,
   listFolders,
   listRecognizedFields,
   listTags,
   requeueDocumentExtraction,
   updateDocument,
+  withdrawDocumentFieldCorrection,
 } from '../lib/api';
 import { formatUserFacingError } from '../lib/apiErrors';
 import { authClient, authSessionUserId } from '../lib/auth-client';
@@ -97,6 +101,8 @@ import {
   confirmFieldKeys,
   nextReviewDocumentId,
   reassignFieldValue,
+  type SuggestionRejectRef,
+  suggestionRejectIdentity,
 } from '../lib/reviewWorkbench';
 import { routes } from '../lib/routes';
 import { notifySaved, notifySaveError } from '../lib/saveNotify';
@@ -150,6 +156,7 @@ export function DocumentDetailPage() {
     undefined
   );
   const [layoutSideTab, setLayoutSideTab] = useState<LayoutSideTab>('fields');
+  const [positionEditFieldKey, setPositionEditFieldKey] = useState<string | null>(null);
   const [correctionSheetOpen, setCorrectionSheetOpen] = useState(false);
   const [viewerPage, setViewerPage] = useState(1);
   const [activeBlockIndex, setActiveBlockIndex] = useState<number | null>(null);
@@ -157,6 +164,7 @@ export function DocumentDetailPage() {
   const [documentDate, setDocumentDate] = useState('');
   const [notes, setNotes] = useState('');
   const [fields, setFields] = useState<ExtractedField[]>([]);
+  const [suggestionRejects, setSuggestionRejects] = useState<SuggestionRejectRef[]>([]);
   const [blocks, setBlocks] = useState<ExtractionBlock[]>([]);
   const [baselineFields, setBaselineFields] = useState<ExtractedField[]>([]);
   const [baselineBlocks, setBaselineBlocks] = useState<ExtractionBlock[]>([]);
@@ -225,9 +233,20 @@ export function DocumentDetailPage() {
 
   const load = useCallback(async () => {
     if (!id) return;
-    const loaded = await getDocument(id);
+    const [loaded, decisions] = await Promise.all([
+      getDocument(id),
+      listDocumentFieldSuggestionDecisions(id).catch(() => ({ items: [] })),
+    ]);
     const prev = docRef.current;
     if (prev && isSameDocumentSnapshot(prev, loaded)) {
+      setSuggestionRejects(
+        decisions.items.map((item) => ({
+          fieldKey: item.fieldKey,
+          valueNormalized: item.valueNormalized,
+          correctionId: item.correctionId,
+          value: item.value,
+        }))
+      );
       return;
     }
     setDoc(loaded);
@@ -242,6 +261,14 @@ export function DocumentDetailPage() {
     setBaselineBlocks(nextBlocks);
     setFolderId(loaded.folderId ?? '');
     setMetadataBaseline(metadataFromDocument(loaded));
+    setSuggestionRejects(
+      decisions.items.map((item) => ({
+        fieldKey: item.fieldKey,
+        valueNormalized: item.valueNormalized,
+        correctionId: item.correctionId,
+        value: item.value,
+      }))
+    );
   }, [id]);
 
   useEffect(() => {
@@ -558,6 +585,14 @@ export function DocumentDetailPage() {
     setDocumentDate(pick.isoDate);
     setDocumentDateAuto(true);
   }, [documentDate, documentDateAuto, recognizedFields]);
+  const rejectedSuggestionIdentities = useMemo(() => {
+    const set = new Set<string>();
+    for (const item of suggestionRejects) {
+      set.add(`${item.fieldKey}\0${item.valueNormalized}`);
+    }
+    return set;
+  }, [suggestionRejects]);
+
 
   const fieldLabelForKey = useCallback(
     (key: string) => {
@@ -639,10 +674,75 @@ export function DocumentDetailPage() {
         setDocumentDateAuto(false);
       }
     }
+    // Accepting supersedes a prior reject of the same field+value.
+    const identity = suggestionRejectIdentity(key, value);
+    const prior = suggestionRejects.find(
+      (item) => suggestionRejectIdentity(item.fieldKey, item.value ?? item.valueNormalized) === identity
+        || `${item.fieldKey}\0${item.valueNormalized}` === identity
+    );
+    if (prior?.correctionId && id) {
+      void withdrawDocumentFieldCorrection(id, prior.correctionId).catch(() => undefined);
+      setSuggestionRejects((prev) =>
+        prev.filter(
+          (item) => `${item.fieldKey}\0${item.valueNormalized}` !== identity
+        )
+      );
+    }
     saveFieldsWithUndo(
       acceptSuggestedField(fields, key, value),
       t('documents.fieldConfirmedToast')
     );
+  }
+
+  function rejectSuggestionAndSave(key: string, value: string) {
+    if (!id) return;
+    const valueNormalized = normalizeSuggestionDecisionValue(value);
+    const identity = `${key}\0${valueNormalized}`;
+    if (suggestionRejects.some((item) => `${item.fieldKey}\0${item.valueNormalized}` === identity)) {
+      return;
+    }
+    const correctionId = crypto.randomUUID();
+    const optimistic: SuggestionRejectRef = {
+      fieldKey: key,
+      valueNormalized,
+      correctionId,
+      value,
+    };
+    setSuggestionRejects((prev) => [...prev, optimistic]);
+    void applyDocumentFieldCorrection(id, {
+      id: correctionId,
+      op: 'reject_suggestion',
+      fieldKey: key,
+      valueOverride: value,
+    }).then((result) => {
+      if (result?.noChange && result.correction) {
+        setSuggestionRejects((prev) =>
+          prev.map((item) =>
+            item.correctionId === correctionId
+              ? {
+                  ...item,
+                  correctionId: result.correction!.id,
+                }
+              : item
+          )
+        );
+      }
+      void refetchReviewQueue();
+    }).catch(() => {
+      setSuggestionRejects((prev) => prev.filter((item) => item.correctionId !== correctionId));
+    });
+  }
+
+  function undoRejectSuggestion(correctionId: string) {
+    if (!id) return;
+    setSuggestionRejects((prev) => prev.filter((item) => item.correctionId !== correctionId));
+    void withdrawDocumentFieldCorrection(id, correctionId)
+      .then(() => {
+        void refetchReviewQueue();
+      })
+      .catch(() => {
+        void load();
+      });
   }
 
   function locateValue(value: string) {
@@ -781,6 +881,8 @@ export function DocumentDetailPage() {
               onHighlightBlocks={onHighlightBlocks}
               onBlocksChange={setBlocks}
               onAcceptFieldSuggestion={onAcceptFieldSuggestion}
+              onRejectFieldSuggestion={rejectSuggestionAndSave}
+              rejectedSuggestionIdentities={rejectedSuggestionIdentities}
               requeueBusy={requeueBusy}
               onRequeueExtraction={() => void onRequeueExtraction()}
               textEditOpen={layoutTextEditOpen}
@@ -791,6 +893,10 @@ export function DocumentDetailPage() {
               saving={saving}
               onSaveBlocks={() => void persist({ extractionBlocks: blocks })}
               onCorrectionSheetOpenChange={setCorrectionSheetOpen}
+              positionEditFieldKey={positionEditFieldKey}
+              onPositionEditHandled={() => {
+                setPositionEditFieldKey(null);
+              }}
             />
           ) : (
             <div className="detail-workspace">
@@ -879,6 +985,9 @@ export function DocumentDetailPage() {
                     );
                   }}
                   onAcceptSuggestion={acceptSuggestionAndSave}
+                  onRejectSuggestion={rejectSuggestionAndSave}
+                  rejects={suggestionRejects}
+                  onUndoReject={undoRejectSuggestion}
                   onReassign={(fromKey, toKey) => {
                     saveFieldsWithUndo(
                       reassignFieldValue(fields, fromKey, toKey),
@@ -886,6 +995,10 @@ export function DocumentDetailPage() {
                     );
                   }}
                   onLocate={locateValue}
+                  onCorrectPosition={(fieldKey) => {
+                    setPositionEditFieldKey(fieldKey);
+                    setInspectorChoice('fields');
+                  }}
                   onLabelsUpdated={refreshDocumentLabels}
                   onOpenAspect={(aspect) => {
                     if (aspect === 'labels') {

@@ -64,7 +64,10 @@ import type { DocumentSelectionTool } from './DocumentSelectionTools';
 import { DocumentTableCorrectionSheet } from './DocumentTableCorrectionSheet';
 import { ExtractedLayoutHtmlFrame, type LayoutIrZoomStep } from './ExtractedLayoutHtmlFrame';
 import { ExtractedTextPanel } from './ExtractedTextPanel';
+import { FieldBoundingBoxEditor } from './FieldBoundingBoxEditor';
 import { type PdfLayoutOverlay, PdfViewer } from './PdfViewer';
+import { TablePdfOverlay } from './table/TablePdfOverlay';
+import { useDocumentPageTransforms } from '../../lib/useDocumentPageTransforms';
 
 type AdvancedViewerMode = 'reconstruction' | 'compare';
 
@@ -112,6 +115,8 @@ interface DocumentLayoutWorkspaceProps {
   onHighlightBlocks: (blocks: ExtractionBlock[]) => void;
   onBlocksChange: (blocks: ExtractionBlock[]) => void;
   onAcceptFieldSuggestion: (key: string, value: string) => void;
+  onRejectFieldSuggestion?: (key: string, value: string) => void;
+  rejectedSuggestionIdentities?: ReadonlySet<string>;
   /** Saves a typed field value (recorded as a correction). */
   onSaveFieldValue?: (key: string, value: string) => void;
   onFieldsChange?: (fields: ExtractedField[]) => void;
@@ -129,6 +134,9 @@ interface DocumentLayoutWorkspaceProps {
   layoutSideTab: LayoutSideTab;
   onLayoutSideTabChange: (tab: LayoutSideTab) => void;
   onCorrectionSheetOpenChange?: (open: boolean) => void;
+  /** When set, open the field bounding-box editor for this key. */
+  positionEditFieldKey?: string | null;
+  onPositionEditHandled?: () => void;
 }
 
 export function DocumentLayoutWorkspace({
@@ -149,6 +157,8 @@ export function DocumentLayoutWorkspace({
   onHighlightBlocks,
   onBlocksChange,
   onAcceptFieldSuggestion,
+  onRejectFieldSuggestion,
+  rejectedSuggestionIdentities,
   onSaveFieldValue,
   onFieldsChange,
   recognizedCatalog = [],
@@ -165,6 +175,8 @@ export function DocumentLayoutWorkspace({
   layoutSideTab,
   onLayoutSideTabChange,
   onCorrectionSheetOpenChange,
+  positionEditFieldKey = null,
+  onPositionEditHandled,
 }: DocumentLayoutWorkspaceProps) {
   const { t, i18n } = useTranslation();
   const toast = useToast();
@@ -184,14 +196,25 @@ export function DocumentLayoutWorkspace({
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const [advancedView, setAdvancedView] = useState<AdvancedViewerMode>('reconstruction');
   const [overlayEnabled, setOverlayEnabled] = useState(true);
-  const [displayRotationDeg, setDisplayRotationDeg] = useState<0 | 90 | 180 | 270>(0);
+  const { rotationForPage, rotatePageClockwise } = useDocumentPageTransforms(doc.id);
+  const displayRotationDeg = rotationForPage(viewerPage);
   const rotateClockwise = useCallback(() => {
-    setDisplayRotationDeg((prev) => (prev === 270 ? 0 : prev === 0 ? 90 : prev === 90 ? 180 : 270));
-  }, []);
+    void rotatePageClockwise(viewerPage).then(() => {
+      // toast is optional; keep UI snappy
+    });
+  }, [rotatePageClockwise, viewerPage]);
+  const [bboxEditRect, setBboxEditRect] = useState<{ page: number; x0: number; y0: number; x1: number; y1: number } | null>(null);
+  const [tableOverlayOpen, setTableOverlayOpen] = useState(false);
+  const [tableOverlayCell, setTableOverlayCell] = useState<{ row: number; col: number } | null>(null);
+
+
   const [activeOverlayId, setActiveOverlayId] = useState<string | null>(null);
   const [hoverOverlay, setHoverOverlay] = useState<PdfLayoutOverlay | null>(null);
   const [layoutZoom, setLayoutZoom] = useState<LayoutIrZoomStep>(100);
-  const [dismissedSuggestions, setDismissedSuggestions] = useState<Set<string>>(() => new Set());
+  const dismissedSuggestions = useMemo(
+    () => new Set(rejectedSuggestionIdentities ?? []),
+    [rejectedSuggestionIdentities]
+  );
   const [selectionTool, setSelectionTool] = useState<DocumentSelectionTool>('none');
   const [selectionDraft, setSelectionDraft] = useState<DocumentSelectionDraft | null>(null);
   const [reanchorFieldKey, setReanchorFieldKey] = useState<string | null>(null);
@@ -205,6 +228,27 @@ export function DocumentLayoutWorkspace({
     viewerPage,
     layoutIrRevision
   );
+  useEffect(() => {
+    if (!positionEditFieldKey) return;
+    const region = findFieldRegion(positionEditFieldKey, fieldRegions);
+    if (!region) {
+      setReanchorFieldKey(positionEditFieldKey);
+      setSelectionTool('rect');
+      onPositionEditHandled?.();
+      return;
+    }
+    setSelectedFieldKey(positionEditFieldKey);
+    setBboxEditRect({
+      page: region.page,
+      x0: region.x0,
+      y0: region.y0,
+      x1: region.x1,
+      y1: region.y1,
+    });
+    onViewerPageChange(region.page);
+    onPositionEditHandled?.();
+  }, [positionEditFieldKey, fieldRegions, onViewerPageChange, onPositionEditHandled]);
+
 
   const fieldOptions = useMemo(() => {
     const keys = new Set<string>(knownFieldKeys);
@@ -710,6 +754,8 @@ export function DocumentLayoutWorkspace({
           <div
             className="layout-viewer-stage"
             data-testid="layout-viewer-stage"
+            data-table-overlay={tableOverlayOpen ? '1' : '0'}
+            data-field-bbox={bboxEditRect ? '1' : '0'}
             ref={fieldMarking.viewerStageRef}
           >
             {leftMode === 'text' ? (
@@ -805,6 +851,80 @@ export function DocumentLayoutWorkspace({
                     onDraftChange={setSelectionDraft}
                   />
                 ) : null}
+                {bboxEditRect && bboxEditRect.page === viewerPage ? (
+                  <FieldBoundingBoxEditor
+                    page={bboxEditRect.page}
+                    rect={bboxEditRect}
+                    active
+                    pageRotationDeg={displayRotationDeg}
+                    onCancel={() => {
+                      setBboxEditRect(null);
+                    }}
+                    onCommit={(rect) => {
+                      const fieldKey = selectedFieldKey ?? reanchorFieldKey;
+                      if (!fieldKey) {
+                        setBboxEditRect(null);
+                        return;
+                      }
+                      void runFieldCorrection(
+                        {
+                          id: crypto.randomUUID(),
+                          op: 'reanchor',
+                          fieldKey,
+                          page: bboxEditRect.page,
+                          shape: 'rect',
+                          x0: rect.x0,
+                          y0: rect.y0,
+                          x1: rect.x1,
+                          y1: rect.y1,
+                        },
+                        t('documents.fieldCorrectionSaved', { name: fieldLabelForKey(fieldKey) })
+                      )
+                        .then(() => {
+                          setBboxEditRect(null);
+                        })
+                        .catch((err: unknown) => {
+                          toast.error(formatUserFacingError(err, 'errors.generic'));
+                        });
+                    }}
+                  />
+                ) : null}
+                {tableOverlayOpen && selectedTableId
+                  ? (() => {
+                      const region = tableRegions.find((item) => item.id === selectedTableId);
+                      if (!region?.table || region.page !== viewerPage) return null;
+                      return (
+                        <TablePdfOverlay
+                          region={region}
+                          table={region.table}
+                          active
+                          pageRotationDeg={displayRotationDeg}
+                          selectedCell={tableOverlayCell}
+                          onSelectCell={(row, col) => {
+                            setTableOverlayCell({ row, col });
+                          }}
+                          onClose={() => {
+                            setTableOverlayOpen(false);
+                          }}
+                          onBoundsCommit={(rect) => {
+                            submitTableCorrection(
+                              {
+                                id: crypto.randomUUID(),
+                                op: 'set_headers',
+                                beforeRegionId: region.id,
+                                page: region.page,
+                                x0: rect.x0,
+                                y0: rect.y0,
+                                x1: rect.x1,
+                                y1: rect.y1,
+                              },
+                              t('tableLayouts.saveBounds')
+                            );
+                          }}
+                        />
+                      );
+                    })()
+                  : null}
                 {selectionDraft ? (
                   <DocumentFieldContextBar
                     draft={selectionDraft}
@@ -944,16 +1064,21 @@ export function DocumentLayoutWorkspace({
           onOverlaySelect={onOverlaySelect}
           onAcceptSuggestion={(key, value) => {
             onAcceptFieldSuggestion(key, value);
-            setDismissedSuggestions((prev) => new Set(prev).add(key));
           }}
-          onDismissSuggestion={(key) => {
-            setDismissedSuggestions((prev) => new Set(prev).add(key));
+          onDismissSuggestion={(key, value) => {
+            onRejectFieldSuggestion?.(key, value);
           }}
           dismissedSuggestions={dismissedSuggestions}
           heuristicSuggestions={heuristicSuggestions}
           recognizedCatalog={recognizedCatalog}
           fieldRegions={fieldRegions}
           tableRegions={tableRegions}
+          onTableEditInDocument={(regionId) => {
+            setSelectedTableId(regionId);
+            setTableOverlayOpen(true);
+            const region = tableRegions.find((item) => item.id === regionId);
+            if (region) onViewerPageChange(region.page);
+          }}
           onTableLayoutApply={applyTableLayoutChoice}
           onTableCellChange={(regionId, row, col, text) => {
             submitTableCorrection({

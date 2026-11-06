@@ -53,12 +53,12 @@ SetAdminUserFeatureFlagRequestDtoFlagEnum
     case 'layoutKeyValueRoles':
       return _$setAdminUserFeatureFlagRequestDtoFlagEnum_layoutKeyValueRoles;
     default:
-      throw new ArgumentError(name);
+      throw ArgumentError(name);
   }
 }
 
 final BuiltSet<SetAdminUserFeatureFlagRequestDtoFlagEnum>
-    _$setAdminUserFeatureFlagRequestDtoFlagEnumValues = new BuiltSet<
+    _$setAdminUserFeatureFlagRequestDtoFlagEnumValues = BuiltSet<
         SetAdminUserFeatureFlagRequestDtoFlagEnum>(const <SetAdminUserFeatureFlagRequestDtoFlagEnum>[
   _$setAdminUserFeatureFlagRequestDtoFlagEnum_layoutReconstructionCompare,
   _$setAdminUserFeatureFlagRequestDtoFlagEnum_sourceConnectors,
@@ -72,7 +72,7 @@ final BuiltSet<SetAdminUserFeatureFlagRequestDtoFlagEnum>
 
 Serializer<SetAdminUserFeatureFlagRequestDtoFlagEnum>
     _$setAdminUserFeatureFlagRequestDtoFlagEnumSerializer =
-    new _$SetAdminUserFeatureFlagRequestDtoFlagEnumSerializer();
+    _$SetAdminUserFeatureFlagRequestDtoFlagEnumSerializer();
 
 class _$SetAdminUserFeatureFlagRequestDtoFlagEnumSerializer
     implements PrimitiveSerializer<SetAdminUserFeatureFlagRequestDtoFlagEnum> {
@@ -127,18 +127,11 @@ class _$SetAdminUserFeatureFlagRequestDto
 
   factory _$SetAdminUserFeatureFlagRequestDto(
           [void Function(SetAdminUserFeatureFlagRequestDtoBuilder)? updates]) =>
-      (new SetAdminUserFeatureFlagRequestDtoBuilder()..update(updates))
-          ._build();
+      (SetAdminUserFeatureFlagRequestDtoBuilder()..update(updates))._build();
 
   _$SetAdminUserFeatureFlagRequestDto._(
       {required this.flag, required this.enabled})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        flag, r'SetAdminUserFeatureFlagRequestDto', 'flag');
-    BuiltValueNullFieldError.checkNotNull(
-        enabled, r'SetAdminUserFeatureFlagRequestDto', 'enabled');
-  }
-
+      : super._();
   @override
   SetAdminUserFeatureFlagRequestDto rebuild(
           void Function(SetAdminUserFeatureFlagRequestDtoBuilder) updates) =>
@@ -146,7 +139,7 @@ class _$SetAdminUserFeatureFlagRequestDto
 
   @override
   SetAdminUserFeatureFlagRequestDtoBuilder toBuilder() =>
-      new SetAdminUserFeatureFlagRequestDtoBuilder()..replace(this);
+      SetAdminUserFeatureFlagRequestDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -205,7 +198,6 @@ class SetAdminUserFeatureFlagRequestDtoBuilder
 
   @override
   void replace(SetAdminUserFeatureFlagRequestDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$SetAdminUserFeatureFlagRequestDto;
   }
 
@@ -220,11 +212,12 @@ class SetAdminUserFeatureFlagRequestDtoBuilder
 
   _$SetAdminUserFeatureFlagRequestDto _build() {
     final _$result = _$v ??
-        new _$SetAdminUserFeatureFlagRequestDto._(
-            flag: BuiltValueNullFieldError.checkNotNull(
-                flag, r'SetAdminUserFeatureFlagRequestDto', 'flag'),
-            enabled: BuiltValueNullFieldError.checkNotNull(
-                enabled, r'SetAdminUserFeatureFlagRequestDto', 'enabled'));
+        _$SetAdminUserFeatureFlagRequestDto._(
+          flag: BuiltValueNullFieldError.checkNotNull(
+              flag, r'SetAdminUserFeatureFlagRequestDto', 'flag'),
+          enabled: BuiltValueNullFieldError.checkNotNull(
+              enabled, r'SetAdminUserFeatureFlagRequestDto', 'enabled'),
+        );
     replace(_$result);
     return _$result;
   }

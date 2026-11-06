@@ -60,6 +60,7 @@ from docuvate_worker.presentation.extracted_fact_response import extracted_facts
 from docuvate_worker.presentation.extraction_block_response import extraction_blocks_to_models
 from docuvate_worker.presentation.representation_response import document_representation_to_response
 from docuvate_worker.presentation.schemas import (
+    PageTransformModel,
     BuildFactsFromTextRequest,
     BuildFactsFromTextResponse,
     CeDiscoveredField,
@@ -299,6 +300,10 @@ async def extract(
                 thumbnail_png_base64=base64.b64encode(img.thumbnail_png).decode("ascii"),
             )
             for img in (result.images or [])
+        ],
+        page_transforms=[
+            PageTransformModel(page=page, rotation_quarter_turns=turns)
+            for page, turns in (result.page_transforms or ())
         ],
     )
 

@@ -68,6 +68,12 @@ def extract_with_cpu_pipeline(
         ),
         document_representation=state_representation(integrated),
         extracted_facts=integrated.exact_fact_index.data.facts if build_exact_fact_index else None,
+        page_transforms=tuple(
+            (index + 1, int(round(deg / 90.0)) % 4)
+            for index, deg in enumerate(integrated.rotation.data.page_rotations_deg)
+            if deg != 0.0
+        )
+        or None,
     )
 
 

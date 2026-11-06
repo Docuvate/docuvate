@@ -11,13 +11,15 @@ part 'confirm_document_field_request_dto.g.dart';
 /// ConfirmDocumentFieldRequestDto
 ///
 /// Properties:
-/// * [fieldKey] 
-/// * [value] 
+/// * [fieldKey] - Storage key of the field as returned in `extraction.fields[].key`.
+/// * [value] - Value the person confirms. An empty string keeps the stored value.
 @BuiltValue()
 abstract class ConfirmDocumentFieldRequestDto implements Built<ConfirmDocumentFieldRequestDto, ConfirmDocumentFieldRequestDtoBuilder> {
+  /// Storage key of the field as returned in `extraction.fields[].key`.
   @BuiltValueField(wireName: r'fieldKey')
   String get fieldKey;
 
+  /// Value the person confirms. An empty string keeps the stored value.
   @BuiltValueField(wireName: r'value')
   String get value;
 

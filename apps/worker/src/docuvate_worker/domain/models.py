@@ -57,3 +57,5 @@ class ExtractionResult:
     extracted_facts: tuple[ExtractedFact, ...] | None = None
     preview_pdf: bytes | None = None
     images: list[ExtractedDocumentImage] | None = None
+    # page (1-based) → clockwise quarter turns applied before OCR
+    page_transforms: tuple[tuple[int, int], ...] | None = None

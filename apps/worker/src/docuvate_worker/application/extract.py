@@ -41,6 +41,7 @@ def _with_markdown(result: ExtractionResult) -> ExtractionResult:
         extracted_facts=result.extracted_facts,
         preview_pdf=result.preview_pdf,
         images=result.images,
+        page_transforms=result.page_transforms,
     )
 
 
@@ -74,6 +75,7 @@ def _with_document_images(
         extracted_facts=result.extracted_facts,
         preview_pdf=result.preview_pdf,
         images=images,
+        page_transforms=result.page_transforms,
     )
 
 
@@ -116,6 +118,7 @@ def _with_layout_ir(result: ExtractionResult, content: bytes, mime_type: str) ->
         extracted_facts=result.extracted_facts,
         preview_pdf=result.preview_pdf,
         images=result.images,
+        page_transforms=result.page_transforms,
     )
 
 

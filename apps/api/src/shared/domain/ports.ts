@@ -794,6 +794,15 @@ export interface DocumentRegionRecord extends DocumentRegionDto {
   supersededBy: string | null;
 }
 
+export interface FieldSuggestionRejectRecord {
+  id: string;
+  correctionId: string;
+  fieldKey: string;
+  value: string;
+  valueNormalized: string;
+  createdAt: string;
+}
+
 export interface InsertFieldCorrectionInput {
   id: string;
   userId: string;
@@ -858,6 +867,30 @@ export interface DocumentRegionRepository {
     correctionId: string
   ): Promise<InsertTableCorrectionInput | null>;
   withdrawFieldCorrection(documentId: string, correctionId: string): Promise<boolean>;
+  listActiveFieldSuggestionRejects(
+    documentId: string
+  ): Promise<FieldSuggestionRejectRecord[]>;
+  listActiveFieldSuggestionRejectsForDocuments(
+    documentIds: readonly string[]
+  ): Promise<Map<string, FieldSuggestionRejectRecord[]>>;
+  insertFieldSuggestionReject(input: {
+    id: string;
+    documentId: string;
+    userId: string;
+    fieldKey: string;
+    valueRaw: string;
+    valueNormalized: string;
+    correctionId: string;
+  }): Promise<boolean>;
+  withdrawFieldSuggestionRejectByCorrection(
+    documentId: string,
+    correctionId: string
+  ): Promise<boolean>;
+  findActiveFieldSuggestionReject(
+    documentId: string,
+    fieldKey: string,
+    valueNormalized: string
+  ): Promise<FieldSuggestionRejectRecord | null>;
   withdrawTableCorrection(documentId: string, correctionId: string): Promise<boolean>;
   replaceFieldTokenSpans(
     documentId: string,
@@ -872,6 +905,25 @@ export interface DocumentRegionRepository {
 }
 
 export const DOCUMENT_REGION_REPOSITORY = Symbol('DOCUMENT_REGION_REPOSITORY');
+
+export interface DocumentPageTransformRepository {
+  listForDocument(documentId: string): Promise<import('@docuvate/contracts').DocumentPageTransformDto[]>;
+  replacePipelineTransforms(
+    documentId: string,
+    transforms: Array<{ page: number; rotationQuarterTurns: 0 | 1 | 2 | 3 }>
+  ): Promise<void>;
+  upsertUserTransform(input: {
+    documentId: string;
+    page: number;
+    rotationQuarterTurns: 0 | 1 | 2 | 3;
+    deskewDeg: number;
+    userId: string;
+    correctionId: string;
+  }): Promise<import('@docuvate/contracts').DocumentPageTransformDto>;
+}
+
+export const DOCUMENT_PAGE_TRANSFORM_REPOSITORY = Symbol('DOCUMENT_PAGE_TRANSFORM_REPOSITORY');
+
 
 export interface JobOutboxRepository {
   /** Inserts or reactivates an outbox row and sets the document status to queued in one transaction. */

@@ -14,13 +14,11 @@ class _$TestPaperlessInstallationConnectionRequestDto
   factory _$TestPaperlessInstallationConnectionRequestDto(
           [void Function(TestPaperlessInstallationConnectionRequestDtoBuilder)?
               updates]) =>
-      (new TestPaperlessInstallationConnectionRequestDtoBuilder()
-            ..update(updates))
+      (TestPaperlessInstallationConnectionRequestDtoBuilder()..update(updates))
           ._build();
 
   _$TestPaperlessInstallationConnectionRequestDto._({this.credentials})
       : super._();
-
   @override
   TestPaperlessInstallationConnectionRequestDto rebuild(
           void Function(TestPaperlessInstallationConnectionRequestDtoBuilder)
@@ -29,7 +27,7 @@ class _$TestPaperlessInstallationConnectionRequestDto
 
   @override
   TestPaperlessInstallationConnectionRequestDtoBuilder toBuilder() =>
-      new TestPaperlessInstallationConnectionRequestDtoBuilder()..replace(this);
+      TestPaperlessInstallationConnectionRequestDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -63,7 +61,7 @@ class TestPaperlessInstallationConnectionRequestDtoBuilder
 
   MapBuilder<String, String>? _credentials;
   MapBuilder<String, String> get credentials =>
-      _$this._credentials ??= new MapBuilder<String, String>();
+      _$this._credentials ??= MapBuilder<String, String>();
   set credentials(MapBuilder<String, String>? credentials) =>
       _$this._credentials = credentials;
 
@@ -82,7 +80,6 @@ class TestPaperlessInstallationConnectionRequestDtoBuilder
 
   @override
   void replace(TestPaperlessInstallationConnectionRequestDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$TestPaperlessInstallationConnectionRequestDto;
   }
 
@@ -100,15 +97,16 @@ class TestPaperlessInstallationConnectionRequestDtoBuilder
     _$TestPaperlessInstallationConnectionRequestDto _$result;
     try {
       _$result = _$v ??
-          new _$TestPaperlessInstallationConnectionRequestDto._(
-              credentials: _credentials?.build());
+          _$TestPaperlessInstallationConnectionRequestDto._(
+            credentials: _credentials?.build(),
+          );
     } catch (_) {
       late String _$failedField;
       try {
         _$failedField = 'credentials';
         _credentials?.build();
       } catch (e) {
-        throw new BuiltValueNestedFieldError(
+        throw BuiltValueNestedFieldError(
             r'TestPaperlessInstallationConnectionRequestDto',
             _$failedField,
             e.toString());

@@ -8,6 +8,7 @@ import type { reconstructionQualityTone } from '../../lib/layoutReconstructionQu
 import { ribbonActionClass } from '../../lib/ribbonAction';
 import { segmentedToolbarClass } from '../../lib/segmentedControlClasses';
 import { Button } from '../ui/Button';
+import { IconButton } from '../ui/IconButton';
 import { MenuItem } from '../ui/MenuItem';
 import { Menu, MenuContent, MenuTrigger } from '../ui/overlay/Menu';
 import { SegmentedControl } from '../ui/SegmentedControl';
@@ -100,6 +101,15 @@ export function DocumentLayoutViewerToolbar({
         </span>
       ) : null}
       <div className="layout-viewer-toolbar-actions">
+        {onRotate ? (
+          <IconButton
+            icon={RotateCw}
+            size="sm"
+            data-testid="pdf-viewer-rotate-clockwise"
+            label={t('documents.pdfRotateClockwise')}
+            onClick={onRotate}
+          />
+        ) : null}
         {leftMode === 'text' ? (
           <Button
             type="button"
@@ -164,6 +174,7 @@ export function DocumentLayoutViewerToolbar({
                 role="menuitem"
                 icon={RotateCw}
                 label={t('documents.pdfRotateClockwise')}
+                data-testid="layout-view-rotate-clockwise"
                 onClick={onRotate}
               />
             ) : null}

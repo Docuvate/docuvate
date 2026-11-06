@@ -4,6 +4,7 @@ import {
   type ExtractedField,
   type ExtractionBlock,
   type FieldSuggestionRow,
+  normalizeSuggestionDecisionValue,
   parseSuggestionStorageKey,
 } from '@docuvate/contracts';
 
@@ -14,6 +15,30 @@ const SAFE_CONFIDENCE = 0.9;
 
 /** `review`: extracted, nobody looked yet. `suggested`: heuristic value not yet a field. */
 export type WorkbenchRowState = 'review' | 'suggested' | 'confirmed';
+
+/** Active reject of a concrete field+value on this document (durable). */
+export interface SuggestionRejectRef {
+  fieldKey: string;
+  valueNormalized: string;
+  correctionId?: string;
+  value?: string;
+}
+
+export function suggestionRejectIdentity(fieldKey: string, value: string): string {
+  return `${fieldKey}\0${normalizeSuggestionDecisionValue(value)}`;
+}
+
+export function isRejectedSuggestion(
+  fieldKey: string,
+  value: string,
+  rejects: readonly SuggestionRejectRef[]
+): boolean {
+  if (rejects.length === 0) return false;
+  const id = suggestionRejectIdentity(fieldKey, value);
+  return rejects.some(
+    (item) => `${item.fieldKey}\0${item.valueNormalized}` === id
+  );
+}
 
 export interface WorkbenchRow {
   key: string;
@@ -30,10 +55,16 @@ const STATE_ORDER: Record<WorkbenchRowState, number> = { review: 0, suggested: 1
  */
 export function workbenchRows(
   fields: readonly ExtractedField[],
-  suggestions: readonly FieldSuggestionRow[]
+  suggestions: readonly FieldSuggestionRow[],
+  rejects: readonly SuggestionRejectRef[] = []
 ): WorkbenchRow[] {
   const rows: WorkbenchRow[] = fields
     .filter((field) => field.value.trim() !== '')
+    .filter((field) =>
+      isUserConfirmedField(field)
+        ? true
+        : !isRejectedSuggestion(field.key, field.value, rejects)
+    )
     .map((field) => ({
       key: field.key,
       value: field.value,
@@ -42,6 +73,7 @@ export function workbenchRows(
     }));
   for (const suggestion of suggestions) {
     if (rows.some((row) => row.key === suggestion.key)) continue;
+    if (isRejectedSuggestion(suggestion.key, suggestion.value, rejects)) continue;
     rows.push({
       key: suggestion.key,
       value: suggestion.value,

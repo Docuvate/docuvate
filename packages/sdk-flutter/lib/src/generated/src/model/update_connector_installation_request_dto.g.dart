@@ -16,13 +16,12 @@ class _$UpdateConnectorInstallationRequestDto
   factory _$UpdateConnectorInstallationRequestDto(
           [void Function(UpdateConnectorInstallationRequestDtoBuilder)?
               updates]) =>
-      (new UpdateConnectorInstallationRequestDtoBuilder()..update(updates))
+      (UpdateConnectorInstallationRequestDtoBuilder()..update(updates))
           ._build();
 
   _$UpdateConnectorInstallationRequestDto._(
       {this.displayName, this.sourceScope})
       : super._();
-
   @override
   UpdateConnectorInstallationRequestDto rebuild(
           void Function(UpdateConnectorInstallationRequestDtoBuilder)
@@ -31,7 +30,7 @@ class _$UpdateConnectorInstallationRequestDto
 
   @override
   UpdateConnectorInstallationRequestDtoBuilder toBuilder() =>
-      new UpdateConnectorInstallationRequestDtoBuilder()..replace(this);
+      UpdateConnectorInstallationRequestDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -90,7 +89,6 @@ class UpdateConnectorInstallationRequestDtoBuilder
 
   @override
   void replace(UpdateConnectorInstallationRequestDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$UpdateConnectorInstallationRequestDto;
   }
 
@@ -105,8 +103,10 @@ class UpdateConnectorInstallationRequestDtoBuilder
 
   _$UpdateConnectorInstallationRequestDto _build() {
     final _$result = _$v ??
-        new _$UpdateConnectorInstallationRequestDto._(
-            displayName: displayName, sourceScope: sourceScope);
+        _$UpdateConnectorInstallationRequestDto._(
+          displayName: displayName,
+          sourceScope: sourceScope,
+        );
     replace(_$result);
     return _$result;
   }

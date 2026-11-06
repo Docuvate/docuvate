@@ -16,6 +16,7 @@ import {
   canonicalRegionPayload,
   joinedTokenText,
   normalizeRect,
+  normalizeSuggestionDecisionValue,
   snapRectToTokenHull,
   tokensInsideRect,
 } from '@docuvate/contracts';
@@ -37,7 +38,7 @@ import {
 import { layoutTokensFromIr, uniqueBlockIndexes } from '../domain/layout-tokens.js';
 import { isUuid } from '../domain/parse-uuid.js';
 
-const FIELD_OPS = new Set<FieldCorrectionOp>(['create', 'reanchor', 'edit_value', 'remove']);
+const FIELD_OPS = new Set<FieldCorrectionOp>(['create', 'reanchor', 'edit_value', 'remove', 'reject_suggestion']);
 const SCOPES = new Set<FieldCorrectionScope>(['document', 'label', 'always']);
 
 function normalizeFieldKey(raw: string): string {
@@ -147,6 +148,10 @@ export class ApplyFieldCorrectionUseCase {
       throw new NotFoundError('Document');
     }
     await this.authorization.assert(subject, 'document:write', doc);
+
+    if (body.op === 'reject_suggestion') {
+      return this.rejectSuggestion(documentId, userId, body, fieldKey, scope);
+    }
 
     const snapshot = await this.regions.findLayoutIrSnapshot(documentId, userId);
     const tokens = snapshot ? layoutTokensFromIr(snapshot.ir) : [];
@@ -410,5 +415,114 @@ export class ApplyFieldCorrectionUseCase {
       next.push({ key: fieldKey, value, confidence: 1, userConfirmed: true });
     }
     return next;
+  }
+
+  /**
+   * Persist that this field+value suggestion is wrong for this document.
+   * Does not delete OCR/extraction or other candidates; open/review queues exclude it.
+   */
+  private async rejectSuggestion(
+    documentId: string,
+    userId: string,
+    body: ApplyFieldCorrectionRequest,
+    fieldKey: string,
+    scope: FieldCorrectionScope
+  ): Promise<ApplyFieldCorrectionResponse> {
+    const raw = (body.valueOverride ?? '').trim();
+    if (!raw) {
+      throw new ValidationError('documents.correctionValueRequired');
+    }
+    const valueNormalized = normalizeSuggestionDecisionValue(raw);
+    const existing = await this.regions.findActiveFieldSuggestionReject(
+      documentId,
+      fieldKey,
+      valueNormalized
+    );
+    if (existing) {
+      return {
+        noChange: true,
+        correction: toCorrectionDto(
+          {
+            id: existing.correctionId,
+            documentId,
+            op: 'reject_suggestion',
+            fieldKey,
+            beforeRegionId: null,
+            afterRegionId: null,
+            oldValue: null,
+            newValue: existing.value,
+          },
+          existing.createdAt
+        ),
+        region: null,
+      };
+    }
+
+    const inserted = await this.regions.insertFieldCorrection({
+      id: body.id,
+      userId,
+      documentId,
+      op: 'reject_suggestion',
+      fieldKey,
+      beforeRegionId: null,
+      afterRegionId: null,
+      oldValue: null,
+      newValue: raw,
+      scope,
+      tagId: scope === 'label' ? (body.tagId ?? null) : null,
+    });
+    if (!inserted) {
+      const replay = await this.regions.findActiveFieldSuggestionReject(
+        documentId,
+        fieldKey,
+        valueNormalized
+      );
+      return {
+        noChange: false,
+        correction: toCorrectionDto(
+          {
+            id: body.id,
+            documentId,
+            op: 'reject_suggestion',
+            fieldKey,
+            beforeRegionId: null,
+            afterRegionId: null,
+            oldValue: null,
+            newValue: raw,
+          },
+          replay?.createdAt ?? new Date().toISOString()
+        ),
+        region: null,
+      };
+    }
+
+    const decisionId = randomUUID();
+    await this.regions.insertFieldSuggestionReject({
+      id: decisionId,
+      documentId,
+      userId,
+      fieldKey,
+      valueRaw: raw,
+      valueNormalized,
+      correctionId: body.id,
+    });
+
+    return {
+      noChange: false,
+      correction: toCorrectionDto(
+        {
+          id: body.id,
+          documentId,
+          op: 'reject_suggestion',
+          fieldKey,
+          beforeRegionId: null,
+          afterRegionId: null,
+          oldValue: null,
+          newValue: raw,
+        },
+        new Date().toISOString()
+      ),
+      region: null,
+    };
   }
 }

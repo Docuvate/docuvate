@@ -362,3 +362,49 @@ export function canonicalRegionPayload(input: {
   }
   return JSON.stringify(body);
 }
+
+/**
+ * Inverse of {@link viewerPointToUnrotatedPage}: map an unrotated MediaBox point into
+ * the oriented viewer after `pageRotationDeg` clockwise quarter turns.
+ */
+export function unrotatedPointToViewerPage(
+  x: number,
+  y: number,
+  pageRotationDeg: number
+): { x: number; y: number } {
+  const turns = ((Math.round(pageRotationDeg / 90) % 4) + 4) % 4;
+  if (turns === 0) {
+    return { x: clampUnit(x), y: clampUnit(y) };
+  }
+  if (turns === 1) {
+    // 90° CW: viewer(x,y) ← unrotated(y, 1-x)
+    return { x: clampUnit(y), y: clampUnit(1 - x) };
+  }
+  if (turns === 2) {
+    return { x: clampUnit(1 - x), y: clampUnit(1 - y) };
+  }
+  // 270° CW: viewer(x,y) ← unrotated(1-y, x)
+  return { x: clampUnit(1 - y), y: clampUnit(x) };
+}
+
+/** Map an unrotated rectangle into viewer space after page rotation. */
+export function unrotatedRectToViewerPage(
+  rect: NormalizedRect,
+  pageRotationDeg: number
+): NormalizedRect | null {
+  const a = unrotatedPointToViewerPage(rect.x0, rect.y0, pageRotationDeg);
+  const b = unrotatedPointToViewerPage(rect.x1, rect.y1, pageRotationDeg);
+  return normalizeRect({ x0: a.x, y0: a.y, x1: b.x, y1: b.y });
+}
+
+/**
+ * OCR ran on a page rotated `quarterTurnsCw` clockwise from the source MediaBox.
+ * Map a normalized box from that OCR image back into unrotated MediaBox space.
+ */
+export function ocrRectToUnrotatedPage(
+  rect: NormalizedRect,
+  quarterTurnsCw: 0 | 1 | 2 | 3
+): NormalizedRect | null {
+  // OCR space == viewer after rotation; inverse is viewer→unrotated with the same turns.
+  return viewerRectToUnrotatedPage(rect, quarterTurnsCw * 90);
+}

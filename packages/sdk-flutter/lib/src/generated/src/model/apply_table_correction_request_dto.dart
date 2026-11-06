@@ -5,6 +5,9 @@
 // ignore_for_file: unused_element
 import 'package:docuvate/src/generated/src/model/document_region_table_cell_dto.dart';
 import 'package:built_collection/built_collection.dart';
+import 'package:docuvate/src/generated/src/model/table_merge_input_dto.dart';
+import 'package:docuvate/src/generated/src/model/table_rule_line_input_dto.dart';
+import 'package:docuvate/src/generated/src/model/table_row_role_input_dto.dart';
 import 'package:built_value/built_value.dart';
 import 'package:built_value/serializer.dart';
 
@@ -26,6 +29,12 @@ part 'apply_table_correction_request_dto.g.dart';
 /// * [tableType] 
 /// * [headerRows] 
 /// * [headerCols] 
+/// * [footerRows] 
+/// * [trailingHeaderCols] 
+/// * [banded] 
+/// * [rowRoles] - Section headings and subtotals; replaces all row roles on create and set_headers.
+/// * [ruleLines] - Line evidence for the listed grid rules; other rules keep theirs.
+/// * [merges] - Merged cells; replaces all merges on create and set_headers.
 /// * [cell] 
 @BuiltValue()
 abstract class ApplyTableCorrectionRequestDto implements Built<ApplyTableCorrectionRequestDto, ApplyTableCorrectionRequestDtoBuilder> {
@@ -70,6 +79,27 @@ abstract class ApplyTableCorrectionRequestDto implements Built<ApplyTableCorrect
 
   @BuiltValueField(wireName: r'headerCols')
   num? get headerCols;
+
+  @BuiltValueField(wireName: r'footerRows')
+  num? get footerRows;
+
+  @BuiltValueField(wireName: r'trailingHeaderCols')
+  num? get trailingHeaderCols;
+
+  @BuiltValueField(wireName: r'banded')
+  bool? get banded;
+
+  /// Section headings and subtotals; replaces all row roles on create and set_headers.
+  @BuiltValueField(wireName: r'rowRoles')
+  BuiltList<TableRowRoleInputDto>? get rowRoles;
+
+  /// Line evidence for the listed grid rules; other rules keep theirs.
+  @BuiltValueField(wireName: r'ruleLines')
+  BuiltList<TableRuleLineInputDto>? get ruleLines;
+
+  /// Merged cells; replaces all merges on create and set_headers.
+  @BuiltValueField(wireName: r'merges')
+  BuiltList<TableMergeInputDto>? get merges;
 
   @BuiltValueField(wireName: r'cell')
   DocumentRegionTableCellDto? get cell;
@@ -182,6 +212,48 @@ class _$ApplyTableCorrectionRequestDtoSerializer implements PrimitiveSerializer<
       yield serializers.serialize(
         object.headerCols,
         specifiedType: const FullType(num),
+      );
+    }
+    if (object.footerRows != null) {
+      yield r'footerRows';
+      yield serializers.serialize(
+        object.footerRows,
+        specifiedType: const FullType(num),
+      );
+    }
+    if (object.trailingHeaderCols != null) {
+      yield r'trailingHeaderCols';
+      yield serializers.serialize(
+        object.trailingHeaderCols,
+        specifiedType: const FullType(num),
+      );
+    }
+    if (object.banded != null) {
+      yield r'banded';
+      yield serializers.serialize(
+        object.banded,
+        specifiedType: const FullType(bool),
+      );
+    }
+    if (object.rowRoles != null) {
+      yield r'rowRoles';
+      yield serializers.serialize(
+        object.rowRoles,
+        specifiedType: const FullType(BuiltList, [FullType(TableRowRoleInputDto)]),
+      );
+    }
+    if (object.ruleLines != null) {
+      yield r'ruleLines';
+      yield serializers.serialize(
+        object.ruleLines,
+        specifiedType: const FullType(BuiltList, [FullType(TableRuleLineInputDto)]),
+      );
+    }
+    if (object.merges != null) {
+      yield r'merges';
+      yield serializers.serialize(
+        object.merges,
+        specifiedType: const FullType(BuiltList, [FullType(TableMergeInputDto)]),
       );
     }
     if (object.cell != null) {
@@ -304,6 +376,48 @@ class _$ApplyTableCorrectionRequestDtoSerializer implements PrimitiveSerializer<
             specifiedType: const FullType(num),
           ) as num;
           result.headerCols = valueDes;
+          break;
+        case r'footerRows':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(num),
+          ) as num;
+          result.footerRows = valueDes;
+          break;
+        case r'trailingHeaderCols':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(num),
+          ) as num;
+          result.trailingHeaderCols = valueDes;
+          break;
+        case r'banded':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.banded = valueDes;
+          break;
+        case r'rowRoles':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(BuiltList, [FullType(TableRowRoleInputDto)]),
+          ) as BuiltList<TableRowRoleInputDto>;
+          result.rowRoles.replace(valueDes);
+          break;
+        case r'ruleLines':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(BuiltList, [FullType(TableRuleLineInputDto)]),
+          ) as BuiltList<TableRuleLineInputDto>;
+          result.ruleLines.replace(valueDes);
+          break;
+        case r'merges':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(BuiltList, [FullType(TableMergeInputDto)]),
+          ) as BuiltList<TableMergeInputDto>;
+          result.merges.replace(valueDes);
           break;
         case r'cell':
           final valueDes = serializers.deserialize(

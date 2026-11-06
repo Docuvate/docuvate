@@ -27,12 +27,12 @@ DocumentCorrectionDtoKindEnum _$documentCorrectionDtoKindEnumValueOf(
     case 'block':
       return _$documentCorrectionDtoKindEnum_block;
     default:
-      throw new ArgumentError(name);
+      throw ArgumentError(name);
   }
 }
 
 final BuiltSet<DocumentCorrectionDtoKindEnum>
-    _$documentCorrectionDtoKindEnumValues = new BuiltSet<
+    _$documentCorrectionDtoKindEnumValues = BuiltSet<
         DocumentCorrectionDtoKindEnum>(const <DocumentCorrectionDtoKindEnum>[
   _$documentCorrectionDtoKindEnum_label,
   _$documentCorrectionDtoKindEnum_field,
@@ -54,12 +54,12 @@ DocumentCorrectionDtoStatusEnum _$documentCorrectionDtoStatusEnumValueOf(
     case 'withdrawn':
       return _$documentCorrectionDtoStatusEnum_withdrawn;
     default:
-      throw new ArgumentError(name);
+      throw ArgumentError(name);
   }
 }
 
 final BuiltSet<DocumentCorrectionDtoStatusEnum>
-    _$documentCorrectionDtoStatusEnumValues = new BuiltSet<
+    _$documentCorrectionDtoStatusEnumValues = BuiltSet<
         DocumentCorrectionDtoStatusEnum>(const <DocumentCorrectionDtoStatusEnum>[
   _$documentCorrectionDtoStatusEnum_active,
   _$documentCorrectionDtoStatusEnum_withdrawn,
@@ -67,10 +67,10 @@ final BuiltSet<DocumentCorrectionDtoStatusEnum>
 
 Serializer<DocumentCorrectionDtoKindEnum>
     _$documentCorrectionDtoKindEnumSerializer =
-    new _$DocumentCorrectionDtoKindEnumSerializer();
+    _$DocumentCorrectionDtoKindEnumSerializer();
 Serializer<DocumentCorrectionDtoStatusEnum>
     _$documentCorrectionDtoStatusEnumSerializer =
-    new _$DocumentCorrectionDtoStatusEnumSerializer();
+    _$DocumentCorrectionDtoStatusEnumSerializer();
 
 class _$DocumentCorrectionDtoKindEnumSerializer
     implements PrimitiveSerializer<DocumentCorrectionDtoKindEnum> {
@@ -162,7 +162,7 @@ class _$DocumentCorrectionDto extends DocumentCorrectionDto {
 
   factory _$DocumentCorrectionDto(
           [void Function(DocumentCorrectionDtoBuilder)? updates]) =>
-      (new DocumentCorrectionDtoBuilder()..update(updates))._build();
+      (DocumentCorrectionDtoBuilder()..update(updates))._build();
 
   _$DocumentCorrectionDto._(
       {required this.id,
@@ -176,29 +176,7 @@ class _$DocumentCorrectionDto extends DocumentCorrectionDto {
       required this.oldValue,
       required this.newValue,
       required this.createdAt})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(id, r'DocumentCorrectionDto', 'id');
-    BuiltValueNullFieldError.checkNotNull(
-        documentId, r'DocumentCorrectionDto', 'documentId');
-    BuiltValueNullFieldError.checkNotNull(
-        kind, r'DocumentCorrectionDto', 'kind');
-    BuiltValueNullFieldError.checkNotNull(
-        status, r'DocumentCorrectionDto', 'status');
-    BuiltValueNullFieldError.checkNotNull(op, r'DocumentCorrectionDto', 'op');
-    BuiltValueNullFieldError.checkNotNull(
-        fieldKey, r'DocumentCorrectionDto', 'fieldKey');
-    BuiltValueNullFieldError.checkNotNull(
-        beforeRegionId, r'DocumentCorrectionDto', 'beforeRegionId');
-    BuiltValueNullFieldError.checkNotNull(
-        afterRegionId, r'DocumentCorrectionDto', 'afterRegionId');
-    BuiltValueNullFieldError.checkNotNull(
-        oldValue, r'DocumentCorrectionDto', 'oldValue');
-    BuiltValueNullFieldError.checkNotNull(
-        newValue, r'DocumentCorrectionDto', 'newValue');
-    BuiltValueNullFieldError.checkNotNull(
-        createdAt, r'DocumentCorrectionDto', 'createdAt');
-  }
-
+      : super._();
   @override
   DocumentCorrectionDto rebuild(
           void Function(DocumentCorrectionDtoBuilder) updates) =>
@@ -206,7 +184,7 @@ class _$DocumentCorrectionDto extends DocumentCorrectionDto {
 
   @override
   DocumentCorrectionDtoBuilder toBuilder() =>
-      new DocumentCorrectionDtoBuilder()..replace(this);
+      DocumentCorrectionDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -337,7 +315,6 @@ class DocumentCorrectionDtoBuilder
 
   @override
   void replace(DocumentCorrectionDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$DocumentCorrectionDto;
   }
 
@@ -351,27 +328,30 @@ class DocumentCorrectionDtoBuilder
 
   _$DocumentCorrectionDto _build() {
     final _$result = _$v ??
-        new _$DocumentCorrectionDto._(
-            id: BuiltValueNullFieldError.checkNotNull(
-                id, r'DocumentCorrectionDto', 'id'),
-            documentId: BuiltValueNullFieldError.checkNotNull(
-                documentId, r'DocumentCorrectionDto', 'documentId'),
-            kind: BuiltValueNullFieldError.checkNotNull(
-                kind, r'DocumentCorrectionDto', 'kind'),
-            status: BuiltValueNullFieldError.checkNotNull(
-                status, r'DocumentCorrectionDto', 'status'),
-            op: BuiltValueNullFieldError.checkNotNull(
-                op, r'DocumentCorrectionDto', 'op'),
-            fieldKey: BuiltValueNullFieldError.checkNotNull(
-                fieldKey, r'DocumentCorrectionDto', 'fieldKey'),
-            beforeRegionId: BuiltValueNullFieldError.checkNotNull(
-                beforeRegionId, r'DocumentCorrectionDto', 'beforeRegionId'),
-            afterRegionId: BuiltValueNullFieldError.checkNotNull(
-                afterRegionId, r'DocumentCorrectionDto', 'afterRegionId'),
-            oldValue: BuiltValueNullFieldError.checkNotNull(
-                oldValue, r'DocumentCorrectionDto', 'oldValue'),
-            newValue: BuiltValueNullFieldError.checkNotNull(newValue, r'DocumentCorrectionDto', 'newValue'),
-            createdAt: BuiltValueNullFieldError.checkNotNull(createdAt, r'DocumentCorrectionDto', 'createdAt'));
+        _$DocumentCorrectionDto._(
+          id: BuiltValueNullFieldError.checkNotNull(
+              id, r'DocumentCorrectionDto', 'id'),
+          documentId: BuiltValueNullFieldError.checkNotNull(
+              documentId, r'DocumentCorrectionDto', 'documentId'),
+          kind: BuiltValueNullFieldError.checkNotNull(
+              kind, r'DocumentCorrectionDto', 'kind'),
+          status: BuiltValueNullFieldError.checkNotNull(
+              status, r'DocumentCorrectionDto', 'status'),
+          op: BuiltValueNullFieldError.checkNotNull(
+              op, r'DocumentCorrectionDto', 'op'),
+          fieldKey: BuiltValueNullFieldError.checkNotNull(
+              fieldKey, r'DocumentCorrectionDto', 'fieldKey'),
+          beforeRegionId: BuiltValueNullFieldError.checkNotNull(
+              beforeRegionId, r'DocumentCorrectionDto', 'beforeRegionId'),
+          afterRegionId: BuiltValueNullFieldError.checkNotNull(
+              afterRegionId, r'DocumentCorrectionDto', 'afterRegionId'),
+          oldValue: BuiltValueNullFieldError.checkNotNull(
+              oldValue, r'DocumentCorrectionDto', 'oldValue'),
+          newValue: BuiltValueNullFieldError.checkNotNull(
+              newValue, r'DocumentCorrectionDto', 'newValue'),
+          createdAt: BuiltValueNullFieldError.checkNotNull(
+              createdAt, r'DocumentCorrectionDto', 'createdAt'),
+        );
     replace(_$result);
     return _$result;
   }

@@ -1,0 +1,4 @@
+DROP INDEX IF EXISTS public.document_field_suggestion_decisions_correction_idx;
+DROP INDEX IF EXISTS public.document_field_suggestion_decisions_document_idx;
+DROP INDEX IF EXISTS public.document_field_suggestion_decisions_active_uidx;
+DROP TABLE IF EXISTS public.document_field_suggestion_decisions;

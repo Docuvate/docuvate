@@ -14,6 +14,8 @@ part 'extracted_field_dto.g.dart';
 /// * [key] 
 /// * [value] 
 /// * [confidence] 
+/// * [tagId] - Label id for label-scoped custom fields (`label:{tagId}:{key}`).
+/// * [userConfirmed] - True once a person confirmed or corrected the value.
 @BuiltValue()
 abstract class ExtractedFieldDto implements Built<ExtractedFieldDto, ExtractedFieldDtoBuilder> {
   @BuiltValueField(wireName: r'key')
@@ -24,6 +26,14 @@ abstract class ExtractedFieldDto implements Built<ExtractedFieldDto, ExtractedFi
 
   @BuiltValueField(wireName: r'confidence')
   num? get confidence;
+
+  /// Label id for label-scoped custom fields (`label:{tagId}:{key}`).
+  @BuiltValueField(wireName: r'tagId')
+  String? get tagId;
+
+  /// True once a person confirmed or corrected the value.
+  @BuiltValueField(wireName: r'userConfirmed')
+  bool? get userConfirmed;
 
   ExtractedFieldDto._();
 
@@ -63,6 +73,20 @@ class _$ExtractedFieldDtoSerializer implements PrimitiveSerializer<ExtractedFiel
       yield serializers.serialize(
         object.confidence,
         specifiedType: const FullType(num),
+      );
+    }
+    if (object.tagId != null) {
+      yield r'tagId';
+      yield serializers.serialize(
+        object.tagId,
+        specifiedType: const FullType(String),
+      );
+    }
+    if (object.userConfirmed != null) {
+      yield r'userConfirmed';
+      yield serializers.serialize(
+        object.userConfirmed,
+        specifiedType: const FullType(bool),
       );
     }
   }
@@ -108,6 +132,20 @@ class _$ExtractedFieldDtoSerializer implements PrimitiveSerializer<ExtractedFiel
             specifiedType: const FullType(num),
           ) as num;
           result.confidence = valueDes;
+          break;
+        case r'tagId':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.tagId = valueDes;
+          break;
+        case r'userConfirmed':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.userConfirmed = valueDes;
           break;
         default:
           unhandled.add(key);

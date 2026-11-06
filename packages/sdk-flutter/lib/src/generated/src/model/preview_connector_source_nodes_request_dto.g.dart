@@ -16,16 +16,12 @@ class _$PreviewConnectorSourceNodesRequestDto
   factory _$PreviewConnectorSourceNodesRequestDto(
           [void Function(PreviewConnectorSourceNodesRequestDtoBuilder)?
               updates]) =>
-      (new PreviewConnectorSourceNodesRequestDtoBuilder()..update(updates))
+      (PreviewConnectorSourceNodesRequestDtoBuilder()..update(updates))
           ._build();
 
   _$PreviewConnectorSourceNodesRequestDto._(
       {required this.credentials, this.parentPath})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        credentials, r'PreviewConnectorSourceNodesRequestDto', 'credentials');
-  }
-
+      : super._();
   @override
   PreviewConnectorSourceNodesRequestDto rebuild(
           void Function(PreviewConnectorSourceNodesRequestDtoBuilder)
@@ -34,7 +30,7 @@ class _$PreviewConnectorSourceNodesRequestDto
 
   @override
   PreviewConnectorSourceNodesRequestDtoBuilder toBuilder() =>
-      new PreviewConnectorSourceNodesRequestDtoBuilder()..replace(this);
+      PreviewConnectorSourceNodesRequestDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -71,7 +67,7 @@ class PreviewConnectorSourceNodesRequestDtoBuilder
 
   MapBuilder<String, String>? _credentials;
   MapBuilder<String, String> get credentials =>
-      _$this._credentials ??= new MapBuilder<String, String>();
+      _$this._credentials ??= MapBuilder<String, String>();
   set credentials(MapBuilder<String, String>? credentials) =>
       _$this._credentials = credentials;
 
@@ -95,7 +91,6 @@ class PreviewConnectorSourceNodesRequestDtoBuilder
 
   @override
   void replace(PreviewConnectorSourceNodesRequestDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$PreviewConnectorSourceNodesRequestDto;
   }
 
@@ -112,15 +107,17 @@ class PreviewConnectorSourceNodesRequestDtoBuilder
     _$PreviewConnectorSourceNodesRequestDto _$result;
     try {
       _$result = _$v ??
-          new _$PreviewConnectorSourceNodesRequestDto._(
-              credentials: credentials.build(), parentPath: parentPath);
+          _$PreviewConnectorSourceNodesRequestDto._(
+            credentials: credentials.build(),
+            parentPath: parentPath,
+          );
     } catch (_) {
       late String _$failedField;
       try {
         _$failedField = 'credentials';
         credentials.build();
       } catch (e) {
-        throw new BuiltValueNestedFieldError(
+        throw BuiltValueNestedFieldError(
             r'PreviewConnectorSourceNodesRequestDto',
             _$failedField,
             e.toString());

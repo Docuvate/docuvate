@@ -22,7 +22,7 @@ class _$PasswordPolicyResponseDto extends PasswordPolicyResponseDto {
 
   factory _$PasswordPolicyResponseDto(
           [void Function(PasswordPolicyResponseDtoBuilder)? updates]) =>
-      (new PasswordPolicyResponseDtoBuilder()..update(updates))._build();
+      (PasswordPolicyResponseDtoBuilder()..update(updates))._build();
 
   _$PasswordPolicyResponseDto._(
       {required this.minLength,
@@ -31,21 +31,7 @@ class _$PasswordPolicyResponseDto extends PasswordPolicyResponseDto {
       required this.requireDigit,
       required this.requireSymbol,
       required this.checkBreached})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        minLength, r'PasswordPolicyResponseDto', 'minLength');
-    BuiltValueNullFieldError.checkNotNull(
-        requireLower, r'PasswordPolicyResponseDto', 'requireLower');
-    BuiltValueNullFieldError.checkNotNull(
-        requireUpper, r'PasswordPolicyResponseDto', 'requireUpper');
-    BuiltValueNullFieldError.checkNotNull(
-        requireDigit, r'PasswordPolicyResponseDto', 'requireDigit');
-    BuiltValueNullFieldError.checkNotNull(
-        requireSymbol, r'PasswordPolicyResponseDto', 'requireSymbol');
-    BuiltValueNullFieldError.checkNotNull(
-        checkBreached, r'PasswordPolicyResponseDto', 'checkBreached');
-  }
-
+      : super._();
   @override
   PasswordPolicyResponseDto rebuild(
           void Function(PasswordPolicyResponseDtoBuilder) updates) =>
@@ -53,7 +39,7 @@ class _$PasswordPolicyResponseDto extends PasswordPolicyResponseDto {
 
   @override
   PasswordPolicyResponseDtoBuilder toBuilder() =>
-      new PasswordPolicyResponseDtoBuilder()..replace(this);
+      PasswordPolicyResponseDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -144,7 +130,6 @@ class PasswordPolicyResponseDtoBuilder
 
   @override
   void replace(PasswordPolicyResponseDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$PasswordPolicyResponseDto;
   }
 
@@ -158,19 +143,20 @@ class PasswordPolicyResponseDtoBuilder
 
   _$PasswordPolicyResponseDto _build() {
     final _$result = _$v ??
-        new _$PasswordPolicyResponseDto._(
-            minLength: BuiltValueNullFieldError.checkNotNull(
-                minLength, r'PasswordPolicyResponseDto', 'minLength'),
-            requireLower: BuiltValueNullFieldError.checkNotNull(
-                requireLower, r'PasswordPolicyResponseDto', 'requireLower'),
-            requireUpper: BuiltValueNullFieldError.checkNotNull(
-                requireUpper, r'PasswordPolicyResponseDto', 'requireUpper'),
-            requireDigit: BuiltValueNullFieldError.checkNotNull(
-                requireDigit, r'PasswordPolicyResponseDto', 'requireDigit'),
-            requireSymbol: BuiltValueNullFieldError.checkNotNull(
-                requireSymbol, r'PasswordPolicyResponseDto', 'requireSymbol'),
-            checkBreached: BuiltValueNullFieldError.checkNotNull(
-                checkBreached, r'PasswordPolicyResponseDto', 'checkBreached'));
+        _$PasswordPolicyResponseDto._(
+          minLength: BuiltValueNullFieldError.checkNotNull(
+              minLength, r'PasswordPolicyResponseDto', 'minLength'),
+          requireLower: BuiltValueNullFieldError.checkNotNull(
+              requireLower, r'PasswordPolicyResponseDto', 'requireLower'),
+          requireUpper: BuiltValueNullFieldError.checkNotNull(
+              requireUpper, r'PasswordPolicyResponseDto', 'requireUpper'),
+          requireDigit: BuiltValueNullFieldError.checkNotNull(
+              requireDigit, r'PasswordPolicyResponseDto', 'requireDigit'),
+          requireSymbol: BuiltValueNullFieldError.checkNotNull(
+              requireSymbol, r'PasswordPolicyResponseDto', 'requireSymbol'),
+          checkBreached: BuiltValueNullFieldError.checkNotNull(
+              checkBreached, r'PasswordPolicyResponseDto', 'checkBreached'),
+        );
     replace(_$result);
     return _$result;
   }

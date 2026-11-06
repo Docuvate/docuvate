@@ -18,6 +18,7 @@ import type {
   DocumentLayoutIrSnapshot,
   DocumentRegionRecord,
   DocumentRegionRepository,
+  FieldSuggestionRejectRecord,
   InsertDocumentRegionInput,
   InsertFieldCorrectionInput,
   InsertTableCorrectionInput,
@@ -64,6 +65,7 @@ function parseOp(value: unknown): FieldCorrectionOp {
     case 'reanchor':
     case 'edit_value':
     case 'remove':
+    case 'reject_suggestion':
       return op;
     default:
       return 'create';
@@ -638,12 +640,14 @@ export class PgDocumentRegionRepository implements DocumentRegionRepository {
   ): Promise<InsertFieldCorrectionInput | null> {
     const result = await this.pool.query(
       `SELECT c.id, c.user_id, c.document_id, ch.op, ch.before_region_id, ch.after_region_id,
-              fv.old_value, fv.new_value, sc.scope, sc.tag_id, f.field_key
+              fv.old_value, fv.new_value, sc.scope, sc.tag_id,
+              COALESCE(f.field_key, d.field_key) AS field_key
        FROM corrections c
        INNER JOIN correction_region_changes ch ON ch.correction_id = c.id
        LEFT JOIN correction_field_values fv ON fv.correction_id = c.id
        LEFT JOIN correction_field_scopes sc ON sc.correction_id = c.id
        LEFT JOIN document_region_fields f ON f.region_id IN (ch.after_region_id, ch.before_region_id)
+       LEFT JOIN document_field_suggestion_decisions d ON d.correction_id = c.id
        WHERE c.id = $1 AND c.document_id = $2 AND c.kind = 'field'
        LIMIT 1`,
       [correctionId, documentId]
@@ -689,6 +693,12 @@ export class PgDocumentRegionRepository implements DocumentRegionRepository {
          SET status = 'withdrawn', withdrawn_at = now()
          WHERE id = $1`,
         [correctionId]
+      );
+      await client.query(
+        `UPDATE document_field_suggestion_decisions
+         SET withdrawn_at = now()
+         WHERE correction_id = $1 AND document_id = $2 AND withdrawn_at IS NULL`,
+        [correctionId, documentId]
       );
       const beforeId = parseOptionalString(row.before_region_id);
       const afterId = parseOptionalString(row.after_region_id);
@@ -881,5 +891,114 @@ export class PgDocumentRegionRepository implements DocumentRegionRepository {
     } finally {
       client.release();
     }
+  }
+
+  private mapSuggestionReject(row: Record<string, unknown>): FieldSuggestionRejectRecord {
+    return {
+      id: parseString(row.id),
+      correctionId: parseString(row.correction_id),
+      fieldKey: parseString(row.field_key),
+      value: parseString(row.value_raw),
+      valueNormalized: parseString(row.value_normalized),
+      createdAt: parseString(row.created_at),
+    };
+  }
+
+  async listActiveFieldSuggestionRejects(
+    documentId: string
+  ): Promise<FieldSuggestionRejectRecord[]> {
+    const result = await this.pool.query(
+      `SELECT id, correction_id, field_key, value_raw, value_normalized, created_at::text AS created_at
+       FROM document_field_suggestion_decisions
+       WHERE document_id = $1 AND withdrawn_at IS NULL AND decision = 'rejected'
+       ORDER BY created_at ASC`,
+      [documentId]
+    );
+    return result.rows
+      .map((raw) => recordFromUnknown(raw))
+      .filter((row): row is Record<string, unknown> => row != null)
+      .map((row) => this.mapSuggestionReject(row));
+  }
+
+  async listActiveFieldSuggestionRejectsForDocuments(
+    documentIds: readonly string[]
+  ): Promise<Map<string, FieldSuggestionRejectRecord[]>> {
+    const out = new Map<string, FieldSuggestionRejectRecord[]>();
+    if (documentIds.length === 0) {
+      return out;
+    }
+    const result = await this.pool.query(
+      `SELECT id, document_id, correction_id, field_key, value_raw, value_normalized, created_at::text AS created_at
+       FROM document_field_suggestion_decisions
+       WHERE document_id = ANY($1::uuid[]) AND withdrawn_at IS NULL AND decision = 'rejected'
+       ORDER BY created_at ASC`,
+      [documentIds]
+    );
+    for (const raw of result.rows) {
+      const row = recordFromUnknown(raw);
+      if (!row) continue;
+      const documentId = parseString(row.document_id);
+      const list = out.get(documentId) ?? [];
+      list.push(this.mapSuggestionReject(row));
+      out.set(documentId, list);
+    }
+    return out;
+  }
+
+  async findActiveFieldSuggestionReject(
+    documentId: string,
+    fieldKey: string,
+    valueNormalized: string
+  ): Promise<FieldSuggestionRejectRecord | null> {
+    const result = await this.pool.query(
+      `SELECT id, correction_id, field_key, value_raw, value_normalized, created_at::text AS created_at
+       FROM document_field_suggestion_decisions
+       WHERE document_id = $1 AND field_key = $2 AND value_normalized = $3
+         AND withdrawn_at IS NULL AND decision = 'rejected'
+       LIMIT 1`,
+      [documentId, fieldKey, valueNormalized]
+    );
+    const row = recordFromUnknown(result.rows[0]);
+    return row ? this.mapSuggestionReject(row) : null;
+  }
+
+  async insertFieldSuggestionReject(input: {
+    id: string;
+    documentId: string;
+    userId: string;
+    fieldKey: string;
+    valueRaw: string;
+    valueNormalized: string;
+    correctionId: string;
+  }): Promise<boolean> {
+    const result = await this.pool.query(
+      `INSERT INTO document_field_suggestion_decisions
+         (id, document_id, user_id, field_key, value_raw, value_normalized, decision, correction_id)
+       VALUES ($1, $2, $3, $4, $5, $6, 'rejected', $7)
+       ON CONFLICT DO NOTHING`,
+      [
+        input.id,
+        input.documentId,
+        input.userId,
+        input.fieldKey,
+        input.valueRaw,
+        input.valueNormalized,
+        input.correctionId,
+      ]
+    );
+    return (result.rowCount ?? 0) > 0;
+  }
+
+  async withdrawFieldSuggestionRejectByCorrection(
+    documentId: string,
+    correctionId: string
+  ): Promise<boolean> {
+    const result = await this.pool.query(
+      `UPDATE document_field_suggestion_decisions
+       SET withdrawn_at = now()
+       WHERE document_id = $1 AND correction_id = $2 AND withdrawn_at IS NULL`,
+      [documentId, correctionId]
+    );
+    return (result.rowCount ?? 0) > 0;
   }
 }

@@ -16,18 +16,11 @@ class _$SavedDocumentViewFieldFilterDtoClass
   factory _$SavedDocumentViewFieldFilterDtoClass(
           [void Function(SavedDocumentViewFieldFilterDtoClassBuilder)?
               updates]) =>
-      (new SavedDocumentViewFieldFilterDtoClassBuilder()..update(updates))
-          ._build();
+      (SavedDocumentViewFieldFilterDtoClassBuilder()..update(updates))._build();
 
   _$SavedDocumentViewFieldFilterDtoClass._(
       {required this.fieldKey, required this.valueText})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        fieldKey, r'SavedDocumentViewFieldFilterDtoClass', 'fieldKey');
-    BuiltValueNullFieldError.checkNotNull(
-        valueText, r'SavedDocumentViewFieldFilterDtoClass', 'valueText');
-  }
-
+      : super._();
   @override
   SavedDocumentViewFieldFilterDtoClass rebuild(
           void Function(SavedDocumentViewFieldFilterDtoClassBuilder) updates) =>
@@ -35,7 +28,7 @@ class _$SavedDocumentViewFieldFilterDtoClass
 
   @override
   SavedDocumentViewFieldFilterDtoClassBuilder toBuilder() =>
-      new SavedDocumentViewFieldFilterDtoClassBuilder()..replace(this);
+      SavedDocumentViewFieldFilterDtoClassBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -93,7 +86,6 @@ class SavedDocumentViewFieldFilterDtoClassBuilder
 
   @override
   void replace(SavedDocumentViewFieldFilterDtoClass other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$SavedDocumentViewFieldFilterDtoClass;
   }
 
@@ -108,11 +100,12 @@ class SavedDocumentViewFieldFilterDtoClassBuilder
 
   _$SavedDocumentViewFieldFilterDtoClass _build() {
     final _$result = _$v ??
-        new _$SavedDocumentViewFieldFilterDtoClass._(
-            fieldKey: BuiltValueNullFieldError.checkNotNull(
-                fieldKey, r'SavedDocumentViewFieldFilterDtoClass', 'fieldKey'),
-            valueText: BuiltValueNullFieldError.checkNotNull(valueText,
-                r'SavedDocumentViewFieldFilterDtoClass', 'valueText'));
+        _$SavedDocumentViewFieldFilterDtoClass._(
+          fieldKey: BuiltValueNullFieldError.checkNotNull(
+              fieldKey, r'SavedDocumentViewFieldFilterDtoClass', 'fieldKey'),
+          valueText: BuiltValueNullFieldError.checkNotNull(
+              valueText, r'SavedDocumentViewFieldFilterDtoClass', 'valueText'),
+        );
     replace(_$result);
     return _$result;
   }

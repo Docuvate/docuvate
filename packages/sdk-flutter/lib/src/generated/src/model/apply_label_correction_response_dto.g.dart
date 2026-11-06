@@ -17,21 +17,13 @@ class _$ApplyLabelCorrectionResponseDto
 
   factory _$ApplyLabelCorrectionResponseDto(
           [void Function(ApplyLabelCorrectionResponseDtoBuilder)? updates]) =>
-      (new ApplyLabelCorrectionResponseDtoBuilder()..update(updates))._build();
+      (ApplyLabelCorrectionResponseDtoBuilder()..update(updates))._build();
 
   _$ApplyLabelCorrectionResponseDto._(
       {required this.ok,
       required this.correctionId,
       required this.similarDocumentsUpdated})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        ok, r'ApplyLabelCorrectionResponseDto', 'ok');
-    BuiltValueNullFieldError.checkNotNull(
-        correctionId, r'ApplyLabelCorrectionResponseDto', 'correctionId');
-    BuiltValueNullFieldError.checkNotNull(similarDocumentsUpdated,
-        r'ApplyLabelCorrectionResponseDto', 'similarDocumentsUpdated');
-  }
-
+      : super._();
   @override
   ApplyLabelCorrectionResponseDto rebuild(
           void Function(ApplyLabelCorrectionResponseDtoBuilder) updates) =>
@@ -39,7 +31,7 @@ class _$ApplyLabelCorrectionResponseDto
 
   @override
   ApplyLabelCorrectionResponseDtoBuilder toBuilder() =>
-      new ApplyLabelCorrectionResponseDtoBuilder()..replace(this);
+      ApplyLabelCorrectionResponseDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -106,7 +98,6 @@ class ApplyLabelCorrectionResponseDtoBuilder
 
   @override
   void replace(ApplyLabelCorrectionResponseDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$ApplyLabelCorrectionResponseDto;
   }
 
@@ -120,15 +111,16 @@ class ApplyLabelCorrectionResponseDtoBuilder
 
   _$ApplyLabelCorrectionResponseDto _build() {
     final _$result = _$v ??
-        new _$ApplyLabelCorrectionResponseDto._(
-            ok: BuiltValueNullFieldError.checkNotNull(
-                ok, r'ApplyLabelCorrectionResponseDto', 'ok'),
-            correctionId: BuiltValueNullFieldError.checkNotNull(correctionId,
-                r'ApplyLabelCorrectionResponseDto', 'correctionId'),
-            similarDocumentsUpdated: BuiltValueNullFieldError.checkNotNull(
-                similarDocumentsUpdated,
-                r'ApplyLabelCorrectionResponseDto',
-                'similarDocumentsUpdated'));
+        _$ApplyLabelCorrectionResponseDto._(
+          ok: BuiltValueNullFieldError.checkNotNull(
+              ok, r'ApplyLabelCorrectionResponseDto', 'ok'),
+          correctionId: BuiltValueNullFieldError.checkNotNull(
+              correctionId, r'ApplyLabelCorrectionResponseDto', 'correctionId'),
+          similarDocumentsUpdated: BuiltValueNullFieldError.checkNotNull(
+              similarDocumentsUpdated,
+              r'ApplyLabelCorrectionResponseDto',
+              'similarDocumentsUpdated'),
+        );
     replace(_$result);
     return _$result;
   }

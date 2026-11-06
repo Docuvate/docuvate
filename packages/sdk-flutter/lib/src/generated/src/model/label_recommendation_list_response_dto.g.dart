@@ -21,12 +21,12 @@ LabelRecommendationListResponseDtoStateEnum
     case 'warming':
       return _$labelRecommendationListResponseDtoStateEnum_warming;
     default:
-      throw new ArgumentError(name);
+      throw ArgumentError(name);
   }
 }
 
 final BuiltSet<LabelRecommendationListResponseDtoStateEnum>
-    _$labelRecommendationListResponseDtoStateEnumValues = new BuiltSet<
+    _$labelRecommendationListResponseDtoStateEnumValues = BuiltSet<
         LabelRecommendationListResponseDtoStateEnum>(const <LabelRecommendationListResponseDtoStateEnum>[
   _$labelRecommendationListResponseDtoStateEnum_ready,
   _$labelRecommendationListResponseDtoStateEnum_warming,
@@ -34,7 +34,7 @@ final BuiltSet<LabelRecommendationListResponseDtoStateEnum>
 
 Serializer<LabelRecommendationListResponseDtoStateEnum>
     _$labelRecommendationListResponseDtoStateEnumSerializer =
-    new _$LabelRecommendationListResponseDtoStateEnumSerializer();
+    _$LabelRecommendationListResponseDtoStateEnumSerializer();
 
 class _$LabelRecommendationListResponseDtoStateEnumSerializer
     implements
@@ -79,18 +79,11 @@ class _$LabelRecommendationListResponseDto
   factory _$LabelRecommendationListResponseDto(
           [void Function(LabelRecommendationListResponseDtoBuilder)?
               updates]) =>
-      (new LabelRecommendationListResponseDtoBuilder()..update(updates))
-          ._build();
+      (LabelRecommendationListResponseDtoBuilder()..update(updates))._build();
 
   _$LabelRecommendationListResponseDto._(
       {required this.items, required this.state})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        items, r'LabelRecommendationListResponseDto', 'items');
-    BuiltValueNullFieldError.checkNotNull(
-        state, r'LabelRecommendationListResponseDto', 'state');
-  }
-
+      : super._();
   @override
   LabelRecommendationListResponseDto rebuild(
           void Function(LabelRecommendationListResponseDtoBuilder) updates) =>
@@ -98,7 +91,7 @@ class _$LabelRecommendationListResponseDto
 
   @override
   LabelRecommendationListResponseDtoBuilder toBuilder() =>
-      new LabelRecommendationListResponseDtoBuilder()..replace(this);
+      LabelRecommendationListResponseDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -134,7 +127,7 @@ class LabelRecommendationListResponseDtoBuilder
 
   ListBuilder<JsonObject>? _items;
   ListBuilder<JsonObject> get items =>
-      _$this._items ??= new ListBuilder<JsonObject>();
+      _$this._items ??= ListBuilder<JsonObject>();
   set items(ListBuilder<JsonObject>? items) => _$this._items = items;
 
   LabelRecommendationListResponseDtoStateEnum? _state;
@@ -158,7 +151,6 @@ class LabelRecommendationListResponseDtoBuilder
 
   @override
   void replace(LabelRecommendationListResponseDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$LabelRecommendationListResponseDto;
   }
 
@@ -175,17 +167,18 @@ class LabelRecommendationListResponseDtoBuilder
     _$LabelRecommendationListResponseDto _$result;
     try {
       _$result = _$v ??
-          new _$LabelRecommendationListResponseDto._(
-              items: items.build(),
-              state: BuiltValueNullFieldError.checkNotNull(
-                  state, r'LabelRecommendationListResponseDto', 'state'));
+          _$LabelRecommendationListResponseDto._(
+            items: items.build(),
+            state: BuiltValueNullFieldError.checkNotNull(
+                state, r'LabelRecommendationListResponseDto', 'state'),
+          );
     } catch (_) {
       late String _$failedField;
       try {
         _$failedField = 'items';
         items.build();
       } catch (e) {
-        throw new BuiltValueNestedFieldError(
+        throw BuiltValueNestedFieldError(
             r'LabelRecommendationListResponseDto', _$failedField, e.toString());
       }
       rethrow;

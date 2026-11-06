@@ -17,19 +17,11 @@ class _$DocumentLayoutTokensResponseDto
 
   factory _$DocumentLayoutTokensResponseDto(
           [void Function(DocumentLayoutTokensResponseDtoBuilder)? updates]) =>
-      (new DocumentLayoutTokensResponseDtoBuilder()..update(updates))._build();
+      (DocumentLayoutTokensResponseDtoBuilder()..update(updates))._build();
 
   _$DocumentLayoutTokensResponseDto._(
       {required this.page, required this.irSha256, required this.tokens})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        page, r'DocumentLayoutTokensResponseDto', 'page');
-    BuiltValueNullFieldError.checkNotNull(
-        irSha256, r'DocumentLayoutTokensResponseDto', 'irSha256');
-    BuiltValueNullFieldError.checkNotNull(
-        tokens, r'DocumentLayoutTokensResponseDto', 'tokens');
-  }
-
+      : super._();
   @override
   DocumentLayoutTokensResponseDto rebuild(
           void Function(DocumentLayoutTokensResponseDtoBuilder) updates) =>
@@ -37,7 +29,7 @@ class _$DocumentLayoutTokensResponseDto
 
   @override
   DocumentLayoutTokensResponseDtoBuilder toBuilder() =>
-      new DocumentLayoutTokensResponseDtoBuilder()..replace(this);
+      DocumentLayoutTokensResponseDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -84,7 +76,7 @@ class DocumentLayoutTokensResponseDtoBuilder
 
   ListBuilder<LayoutTokenDto>? _tokens;
   ListBuilder<LayoutTokenDto> get tokens =>
-      _$this._tokens ??= new ListBuilder<LayoutTokenDto>();
+      _$this._tokens ??= ListBuilder<LayoutTokenDto>();
   set tokens(ListBuilder<LayoutTokenDto>? tokens) => _$this._tokens = tokens;
 
   DocumentLayoutTokensResponseDtoBuilder() {
@@ -104,7 +96,6 @@ class DocumentLayoutTokensResponseDtoBuilder
 
   @override
   void replace(DocumentLayoutTokensResponseDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$DocumentLayoutTokensResponseDto;
   }
 
@@ -120,19 +111,20 @@ class DocumentLayoutTokensResponseDtoBuilder
     _$DocumentLayoutTokensResponseDto _$result;
     try {
       _$result = _$v ??
-          new _$DocumentLayoutTokensResponseDto._(
-              page: BuiltValueNullFieldError.checkNotNull(
-                  page, r'DocumentLayoutTokensResponseDto', 'page'),
-              irSha256: BuiltValueNullFieldError.checkNotNull(
-                  irSha256, r'DocumentLayoutTokensResponseDto', 'irSha256'),
-              tokens: tokens.build());
+          _$DocumentLayoutTokensResponseDto._(
+            page: BuiltValueNullFieldError.checkNotNull(
+                page, r'DocumentLayoutTokensResponseDto', 'page'),
+            irSha256: BuiltValueNullFieldError.checkNotNull(
+                irSha256, r'DocumentLayoutTokensResponseDto', 'irSha256'),
+            tokens: tokens.build(),
+          );
     } catch (_) {
       late String _$failedField;
       try {
         _$failedField = 'tokens';
         tokens.build();
       } catch (e) {
-        throw new BuiltValueNestedFieldError(
+        throw BuiltValueNestedFieldError(
             r'DocumentLayoutTokensResponseDto', _$failedField, e.toString());
       }
       rethrow;
