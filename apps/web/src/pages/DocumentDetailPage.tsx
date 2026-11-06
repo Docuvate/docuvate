@@ -150,6 +150,7 @@ export function DocumentDetailPage() {
     undefined
   );
   const [layoutSideTab, setLayoutSideTab] = useState<LayoutSideTab>('fields');
+  const [positionEditFieldKey, setPositionEditFieldKey] = useState<string | null>(null);
   const [correctionSheetOpen, setCorrectionSheetOpen] = useState(false);
   const [viewerPage, setViewerPage] = useState(1);
   const [activeBlockIndex, setActiveBlockIndex] = useState<number | null>(null);
@@ -791,6 +792,10 @@ export function DocumentDetailPage() {
               saving={saving}
               onSaveBlocks={() => void persist({ extractionBlocks: blocks })}
               onCorrectionSheetOpenChange={setCorrectionSheetOpen}
+              positionEditFieldKey={positionEditFieldKey}
+              onPositionEditHandled={() => {
+                setPositionEditFieldKey(null);
+              }}
             />
           ) : (
             <div className="detail-workspace">
@@ -886,6 +891,10 @@ export function DocumentDetailPage() {
                     );
                   }}
                   onLocate={locateValue}
+                  onCorrectPosition={(fieldKey) => {
+                    setPositionEditFieldKey(fieldKey);
+                    setInspectorChoice('fields');
+                  }}
                   onLabelsUpdated={refreshDocumentLabels}
                   onOpenAspect={(aspect) => {
                     if (aspect === 'labels') {

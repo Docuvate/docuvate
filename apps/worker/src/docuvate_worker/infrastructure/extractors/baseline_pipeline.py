@@ -28,9 +28,9 @@ def extract_baseline_pipeline(content: bytes, mime_type: str) -> ExtractionResul
                 blocks=blocks or None,
             )
         logger.info("PDF has little/no text layer — falling back to PaddleOCR.")
-        text, blocks = ocr_pdf_bytes(content)
+        text, blocks, _turns = ocr_pdf_bytes(content)
     elif mime_type.startswith("image/"):
-        text, blocks = ocr_image_bytes(content)
+        text, blocks, _turns = ocr_image_bytes(content)
     else:
         text, blocks = "", []
 

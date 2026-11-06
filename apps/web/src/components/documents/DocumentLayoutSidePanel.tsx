@@ -72,6 +72,7 @@ interface DocumentLayoutSidePanelProps {
   tableRegions?: DocumentRegionDto[];
   onTableLayoutApply?: (regionId: string, choice: TableStructureChoice) => void;
   onTableCellChange?: (regionId: string, row: number, col: number, text: string) => void;
+  onTableEditInDocument?: (regionId: string) => void;
   onConfirmField?: (key: string, value: string) => void;
   onCorrectField?: (key: string) => void;
   /** Saves a typed value for a field (recorded as a correction). */
@@ -101,6 +102,7 @@ export function DocumentLayoutSidePanel({
   tableRegions = [],
   onTableLayoutApply,
   onTableCellChange,
+  onTableEditInDocument,
   onConfirmField,
   onCorrectField,
   onSaveFieldValue,
@@ -515,6 +517,13 @@ export function DocumentLayoutSidePanel({
                       onTableLayoutApply
                         ? (choice) => {
                             onTableLayoutApply(region.id, choice);
+                          }
+                        : undefined
+                    }
+                    onEditInDocument={
+                      onTableEditInDocument
+                        ? () => {
+                            onTableEditInDocument(region.id);
                           }
                         : undefined
                     }

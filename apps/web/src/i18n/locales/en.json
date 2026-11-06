@@ -351,7 +351,8 @@
     "copied": "Copied",
     "loading": "Loading…",
     "showPassword": "Show password",
-    "hidePassword": "Hide password"
+    "hidePassword": "Hide password",
+    "loadMore": "Load more"
   },
   "save": {
     "saved": "Saved",
@@ -1015,7 +1016,11 @@
       "text": "Sweep over text on the page and assign it to a field.",
       "rect": "Drag an area: capture it as a field, table or section."
     },
-    "layoutViewMenuAria": "View: {{view}}"
+    "layoutViewMenuAria": "View: {{view}}",
+    "fieldPositionCorrect": "Fix position",
+    "fieldBboxSave": "Save position",
+    "fieldBboxHandle": "Handle {handle}",
+    "pageRotationSaved": "Page rotation saved"
   },
   "settings": {
     "title": "Settings",
@@ -2085,7 +2090,13 @@
     "bulkTitleCount_other": "{{count}} documents waiting for review",
     "bulkLead": "Confident suggestions can be accepted in one go; review the rest below step by step.",
     "batchConfirmTitle": "Accept all confident suggestions?",
-    "batchConfirmBody": "Applies to every waiting document, not only the ones shown: labels and fields with at least 90 % confidence are saved. All other suggestions stay for review."
+    "batchConfirmBody": "Applies to every waiting document, not only the ones shown: labels and fields with at least 90 % confidence are saved. All other suggestions stay for review.",
+    "nextWorkLead": "Open the next document and structure values in the viewer — no second wizard.",
+    "nextDocument": "Structure next",
+    "openStructuring": "Structure document",
+    "openFieldsHint": "{fields} fields · {labels} labels open",
+    "queueListAria": "More documents in the queue",
+    "structureAction": "Structure"
   },
   "dashboard": {
     "title": "Start",
@@ -2582,7 +2593,20 @@
       "subtotal": "Subtotal",
       "footer": "Result"
     },
-    "rowKindAria": "Kind of row {{row}}"
+    "rowKindAria": "Kind of row {{row}}",
+    "familyHints": {
+      "simple": "Plain rows and columns with one header row.",
+      "matrix": "First column as row labels.",
+      "nested": "Two header rows, e.g. grouped columns.",
+      "financial": "Footer rows for totals and tax.",
+      "grouped": "Sections with subtotals in the body.",
+      "key_value": "Label on the left, value on the right — no grid."
+    },
+    "editInDocument": "Edit on document",
+    "exitDocumentEdit": "Close overlay",
+    "saveBounds": "Save table frame",
+    "resizeBounds": "Resize table frame",
+    "cellAria": "Cell row {row}, column {col}"
   },
   "ribbon": {
     "stock": "Records",

@@ -357,7 +357,7 @@ class DocumentCorrectionDto {
   documentId!: string;
 
   @ApiProperty({ enum: ['label', 'field', 'table', 'block'] })
-  kind!: 'label' | 'field' | 'table' | 'block';
+  kind!: 'label' | 'field' | 'table' | 'block' | 'page';
 
   @ApiProperty({ enum: ['active', 'withdrawn'] })
   status!: 'active' | 'withdrawn';

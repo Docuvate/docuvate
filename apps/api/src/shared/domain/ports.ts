@@ -873,6 +873,25 @@ export interface DocumentRegionRepository {
 
 export const DOCUMENT_REGION_REPOSITORY = Symbol('DOCUMENT_REGION_REPOSITORY');
 
+export interface DocumentPageTransformRepository {
+  listForDocument(documentId: string): Promise<import('@docuvate/contracts').DocumentPageTransformDto[]>;
+  replacePipelineTransforms(
+    documentId: string,
+    transforms: Array<{ page: number; rotationQuarterTurns: 0 | 1 | 2 | 3 }>
+  ): Promise<void>;
+  upsertUserTransform(input: {
+    documentId: string;
+    page: number;
+    rotationQuarterTurns: 0 | 1 | 2 | 3;
+    deskewDeg: number;
+    userId: string;
+    correctionId: string;
+  }): Promise<import('@docuvate/contracts').DocumentPageTransformDto>;
+}
+
+export const DOCUMENT_PAGE_TRANSFORM_REPOSITORY = Symbol('DOCUMENT_PAGE_TRANSFORM_REPOSITORY');
+
+
 export interface JobOutboxRepository {
   /** Inserts or reactivates an outbox row and sets the document status to queued in one transaction. */
   scheduleDocumentExtraction(

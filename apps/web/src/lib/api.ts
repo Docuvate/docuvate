@@ -339,6 +339,24 @@ export async function withdrawDocumentTableCorrection(
   });
 }
 
+
+export async function listDocumentPageTransforms(
+  documentId: string
+): Promise<import('@docuvate/contracts').DocumentPageTransformsResponse> {
+  return request(`/documents/${documentId}/page-transforms`);
+}
+
+export async function applyDocumentPageTransform(
+  documentId: string,
+  page: number,
+  body: import('@docuvate/contracts').ApplyPageTransformRequest
+): Promise<import('@docuvate/contracts').ApplyPageTransformResponse> {
+  return request(`/documents/${documentId}/pages/${String(page)}/transform`, {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+}
+
 export async function confirmDocumentField(
   documentId: string,
   fieldKey: string,

@@ -176,6 +176,15 @@ class RepresentationFromTextRequest(BaseModel):
     text: str = Field(min_length=1)
 
 
+class PageTransformModel(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
+    page: int = Field(ge=1)
+    rotation_quarter_turns: int = Field(
+        ge=0, le=3, serialization_alias="rotationQuarterTurns"
+    )
+
+
 class CpuPipelineExtractModel(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
@@ -213,6 +222,9 @@ class ExtractResponse(BaseModel):
     )
     preview_pdf_base64: str | None = Field(default=None, serialization_alias="previewPdfBase64")
     images: list[ExtractionImageModel] = Field(default_factory=list)
+    page_transforms: list[PageTransformModel] = Field(
+        default_factory=list, serialization_alias="pageTransforms"
+    )
 
 
 class BuildFactsFromTextRequest(BaseModel):

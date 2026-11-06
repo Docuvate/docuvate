@@ -376,16 +376,45 @@ export async function installStructuringMocks(
     rowRoles: [],
     rules: fixtureTable.rules.map((rule) => ({ ...rule, line: 'unknown' })),
   };
-  const layoutTableRegion = () => ({
+  let tableBounds = {
+    x0: LAYOUT_FIXTURE.tableRegion.x0,
+    y0: LAYOUT_FIXTURE.tableRegion.y0,
+    x1: LAYOUT_FIXTURE.tableRegion.x1,
+    y1: LAYOUT_FIXTURE.tableRegion.y1,
+  };
+  let pageTransforms: Array<{
+    page: number;
+    rotationQuarterTurns: 0 | 1 | 2 | 3;
+    deskewDeg: number;
+    source: string;
+    updatedAt: string;
+  }> = [];
+  const layoutFieldRegion = () => ({
+    id: 'synthetic-field-total',
+    documentId: LAYOUT_DOCUMENT_ID,
+    page: 1,
+    shape: 'rect' as const,
+    role: 'field' as const,
+    x0: 0.55,
+    y0: 0.72,
+    x1: 0.88,
+    y1: 0.78,
+    irSha256: 'synthetic',
+    needsReview: false,
+    blockIndexes: [],
+    field: { fieldKey: 'total_amount', valueOverride: null },
+    createdAt: NOW,
+  });
+    const layoutTableRegion = () => ({
     id: `synthetic-table-${String(tableRevision)}`,
     documentId: LAYOUT_DOCUMENT_ID,
     page: 1,
     shape: 'rect',
     role: 'table',
-    x0: LAYOUT_FIXTURE.tableRegion.x0,
-    y0: LAYOUT_FIXTURE.tableRegion.y0,
-    x1: LAYOUT_FIXTURE.tableRegion.x1,
-    y1: LAYOUT_FIXTURE.tableRegion.y1,
+    x0: tableBounds.x0,
+    y0: tableBounds.y0,
+    x1: tableBounds.x1,
+    y1: tableBounds.y1,
     irSha256: 'synthetic',
     needsReview: false,
     blockIndexes: [],
@@ -482,7 +511,10 @@ export async function installStructuringMocks(
     }
     if (p === `/documents/${LAYOUT_DOCUMENT_ID}/regions`) {
       const role = url.searchParams.get('role');
-      const items = role && role !== 'table' ? [] : [layoutTableRegion()];
+      const field = layoutFieldRegion();
+      const table = layoutTableRegion();
+      const items =
+        role === 'table' ? [table] : role === 'field' ? [field] : [field, table];
       return json(route, { irSha256: 'synthetic', items });
     }
     if (p === `/documents/${LAYOUT_DOCUMENT_ID}/table-corrections` && method === 'POST') {
@@ -522,6 +554,15 @@ export async function installStructuringMocks(
             (m: unknown): m is SyntheticTable['merges'][number] =>
               typeof m === 'object' && m !== null && 'row0' in m && 'colSpan' in m
           );
+        }
+        if (
+          'x0' in body &&
+          typeof body.x0 === 'number' &&
+          typeof body.y0 === 'number' &&
+          typeof body.x1 === 'number' &&
+          typeof body.y1 === 'number'
+        ) {
+          tableBounds = { x0: body.x0, y0: body.y0, x1: body.x1, y1: body.y1 };
         }
         layoutTable = next;
       }
@@ -573,6 +614,28 @@ export async function installStructuringMocks(
       /^\/documents\/[^/]+\/extraction\/requeue/.test(p)
     ) {
       return json(route, {});
+    }
+    if (p.match(/^\/documents\/[^/]+\/page-transforms$/) && method === 'GET') {
+      return json(route, { transforms: pageTransforms });
+    }
+    if (p.match(/^\/documents\/[^/]+\/pages\/\d+\/transform$/) && method === 'POST') {
+      const body = route.request().postDataJSON() as {
+        id: string;
+        rotationQuarterTurns: 0 | 1 | 2 | 3;
+      };
+      const page = Number(p.split('/')[4]);
+      const transform = {
+        page,
+        rotationQuarterTurns: body.rotationQuarterTurns,
+        deskewDeg: 0,
+        source: 'user',
+        updatedAt: NOW,
+      };
+      pageTransforms = [
+        ...pageTransforms.filter((item) => item.page !== page),
+        transform,
+      ];
+      return json(route, { correctionId: body.id, transform });
     }
     if (p === '/review-queue/summary')
       return json(route, { pendingCount: options.empty ? 0 : REVIEW_ITEMS.length });

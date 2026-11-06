@@ -23,13 +23,11 @@ import {
   type GridSize,
   MAX_BAND_ROWS,
   mergeAt,
-  TABLE_FAMILIES,
   TABLE_INDEX_POSITIONS,
   TABLE_ROW_KINDS,
   TABLE_RULING_CHOICES,
   type TableDesign,
   tableDesignOf,
-  type TableFamily,
   type TableRowKind,
   tableRowKind,
   type TableStructureChoice,
@@ -38,6 +36,7 @@ import {
   withRowKind,
 } from '../../lib/tableLayouts';
 import { Button } from '../ui/Button';
+import { TableFamilyMenu } from './table/TableFamilyMenu';
 
 const BANDS: readonly TableBand[] = ['header', 'body', 'footer'];
 const BAND_SECTION = { header: 'thead', body: 'tbody', footer: 'tfoot' } as const;
@@ -126,6 +125,8 @@ interface CorrectedTableCardProps {
   index: number;
   active: boolean;
   onSelect: () => void;
+  /** Open the spatial table overlay on the PDF. */
+  onEditInDocument?: () => void;
   onCellChange?: (row: number, col: number, text: string) => void;
   /** Bands, index columns, row roles, spans and lines in one correction. */
   onLayoutApply?: (choice: TableStructureChoice) => void;
@@ -141,6 +142,7 @@ export function CorrectedTableCard({
   index,
   active,
   onSelect,
+  onEditInDocument,
   onCellChange,
   onLayoutApply,
 }: CorrectedTableCardProps) {
@@ -156,6 +158,7 @@ export function CorrectedTableCard({
       index={index}
       active={active}
       onSelect={onSelect}
+      onEditInDocument={onEditInDocument}
       onCellChange={onCellChange}
       onLayoutApply={onLayoutApply}
     />
@@ -168,6 +171,7 @@ function TableEditor({
   index,
   active,
   onSelect,
+  onEditInDocument,
   onCellChange,
   onLayoutApply,
 }: CorrectedTableCardProps & { table: DocumentRegionTableDto }) {
@@ -266,23 +270,26 @@ function TableEditor({
           data-testid="table-structure-tools"
         >
           <div className="table-tools-row">
-            <label className="table-tool-field">
+            <div className="table-tool-field">
               <span className="table-tool-label">{t('tableLayouts.template')}</span>
-              <select
-                className="table-tool-select"
+              <TableFamilyMenu
                 value={design.family}
-                onChange={(event) => {
-                  const family = TABLE_FAMILIES.find((item) => item === event.target.value);
-                  if (family) applyDesign(familyDesign(family));
+                onChange={(family) => {
+                  applyDesign(familyDesign(family));
                 }}
+              />
+            </div>
+            {onEditInDocument ? (
+              <Button
+                type="button"
+                size="sm"
+                variant="secondary"
+                data-testid="table-edit-in-document"
+                onClick={onEditInDocument}
               >
-                {TABLE_FAMILIES.map((family: TableFamily) => (
-                  <option key={family} value={family}>
-                    {t(`tableLayouts.families.${family}`)}
-                  </option>
-                ))}
-              </select>
-            </label>
+                {t('tableLayouts.editInDocument')}
+              </Button>
+            ) : null}
             <Stepper
               label={t('documents.tableHeaderRows')}
               value={draft.headerRows}

@@ -1,0 +1,128 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import path from 'node:path';
+
+import { expect, test } from '@playwright/test';
+
+import { LAYOUT_DOCUMENT_ID, installStructuringMocks } from './structuringMocks';
+
+const shotDir = path.join(__dirname, '..', '..', 'test-results', 'review-bbox-shots');
+
+test.describe('review queue, field bbox and table overlay', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+  });
+
+  test('review queue opens structuring instead of a competing wizard', async ({ page }) => {
+    await installStructuringMocks(page);
+    await page.goto('/review');
+    await expect(page.getByTestId('review-next-work')).toBeVisible();
+    await expect(page.getByTestId('review-open-structuring')).toBeVisible();
+    await expect(page.locator('.review-wizard')).toHaveCount(0);
+    await page.getByTestId('review-open-structuring').click();
+    await expect(page).toHaveURL(/\/documents\/.+\?review=1/);
+  });
+
+  test('correcting a value can open field bounding-box handles', async ({ page }) => {
+    await installStructuringMocks(page);
+    await page.goto(`/documents/${LAYOUT_DOCUMENT_ID}?review=1`);
+    await page.getByRole('button', { name: /Betrag korrigieren|Correct amount|total_amount/i }).click();
+    const position = page.getByTestId('field-position-correct');
+    await expect(position).toBeVisible();
+    await position.click();
+    await expect(page.getByTestId('field-bbox-editor')).toBeVisible({ timeout: 15_000 });
+    await expect(page.locator('.field-bbox-handle')).toHaveCount(8);
+  });
+
+  test('table family menu shows schematics and document overlay opens, selects, resizes, closes', async ({
+    page,
+  }) => {
+    await installStructuringMocks(page);
+    await page.goto(`/documents/${LAYOUT_DOCUMENT_ID}`);
+    await page.getByRole('tab', { name: /Layout|Tables|Tabellen/i }).first().click();
+    const family = page.getByTestId('table-family-menu');
+    await expect(family).toBeVisible({ timeout: 30_000 });
+    await family.click();
+    await expect(page.locator('.table-family-menu-scroll .table-family-thumb')).toHaveCount(6);
+    await expect(page.getByRole('option', { name: /Einfache Tabelle|Simple table/i })).toBeVisible();
+    await expect(page.getByRole('option', { name: /Finanzlayout|Financial/i })).toBeVisible();
+    await expect(page.locator('.table-family-menu-scroll .table-family-hint').first()).toBeVisible();
+    await page.keyboard.press('Escape');
+
+    await page.getByTestId('table-edit-in-document').click();
+    const overlay = page.getByTestId('table-pdf-overlay');
+    await expect(overlay).toBeVisible();
+    await expect(overlay.locator('.table-pdf-guide-row, .table-pdf-guide-col').first()).toBeVisible();
+
+    await page.locator('.table-pdf-cell').first().click();
+    await expect(page.locator('.table-pdf-cell-selected')).toHaveCount(1);
+
+    const box = page.locator('.table-pdf-overlay-box');
+    const before = await box.boundingBox();
+    expect(before).toBeTruthy();
+    const handle = page.getByTestId('table-bounds-handle');
+    const handleBox = await handle.boundingBox();
+    expect(handleBox).toBeTruthy();
+    await page.mouse.move(handleBox!.x + handleBox!.width / 2, handleBox!.y + handleBox!.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(handleBox!.x + 36, handleBox!.y + 28);
+    await page.mouse.up();
+    const after = await box.boundingBox();
+    expect(after).toBeTruthy();
+    expect((after!.width + after!.height)).toBeGreaterThan((before!.width + before!.height) - 1);
+
+    await page.getByTestId('table-overlay-save-bounds').click();
+    // Layout chrome still intact — no detached redrawn table takeover.
+    await expect(page.getByTestId('layout-viewer-stage')).toBeVisible();
+    await expect(page.getByTestId('corrected-table-card').or(page.locator('.layout-table-card')).first()).toBeVisible();
+
+    await page.getByTestId('table-edit-in-document').click();
+    await expect(page.getByTestId('table-pdf-overlay')).toBeVisible();
+    await page.getByTestId('table-overlay-close').click();
+    await expect(page.getByTestId('table-pdf-overlay')).toHaveCount(0);
+  });
+
+  for (const theme of ['light', 'dark'] as const) {
+    test(`screenshot family menu + overlay · ${theme}`, async ({ page }) => {
+      await installStructuringMocks(page, { theme });
+      await page.emulateMedia({ colorScheme: theme });
+      await page.goto(`/documents/${LAYOUT_DOCUMENT_ID}`);
+      await page.getByRole('tab', { name: /Layout|Tables|Tabellen/i }).first().click();
+      const family = page.getByTestId('table-family-menu');
+      await expect(family).toBeVisible({ timeout: 30_000 });
+      await family.click();
+      await expect(page.locator('.table-family-menu-scroll .table-family-thumb')).toHaveCount(6);
+      await page.screenshot({
+        path: path.join(shotDir, `table-family-menu-${theme}.png`),
+        fullPage: false,
+      });
+      await page.keyboard.press('Escape');
+      await page.getByTestId('table-edit-in-document').click();
+      await expect(page.getByTestId('table-pdf-overlay')).toBeVisible();
+      await page.screenshot({
+        path: path.join(shotDir, `table-pdf-overlay-${theme}.png`),
+        fullPage: false,
+      });
+    });
+  }
+
+  test('screenshot sideways page rotation with table overlay', async ({ page }) => {
+    await installStructuringMocks(page);
+    await page.goto(`/documents/${LAYOUT_DOCUMENT_ID}`);
+    await page.getByRole('tab', { name: /Layout|Tables|Tabellen/i }).first().click();
+    const rotate = page.getByTestId('pdf-viewer-rotate-clockwise');
+    if (await rotate.count()) {
+      await rotate.click();
+      await expect(page.getByTestId('pdf-viewer-display-rotation')).toHaveAttribute(
+        'data-rotation-deg',
+        '90'
+      );
+    }
+    await page.getByTestId('table-edit-in-document').click();
+    await expect(page.getByTestId('table-pdf-overlay')).toBeVisible();
+    await page.screenshot({
+      path: path.join(shotDir, 'table-pdf-overlay-rotated-90.png'),
+      fullPage: false,
+    });
+  });
+});

@@ -6,7 +6,7 @@ import type { TableRowRole, TableRuleLine } from './table-structure.js';
 
 export type DocumentRegionShape = 'rect' | 'polygon';
 export type DocumentRegionRole = 'field' | 'table' | 'block' | 'ignore';
-export type DocumentCorrectionKind = 'label' | 'field' | 'table' | 'block';
+export type DocumentCorrectionKind = 'label' | 'field' | 'table' | 'block' | 'page';
 export type DocumentCorrectionStatus = 'active' | 'withdrawn';
 export type FieldCorrectionOp = 'create' | 'reanchor' | 'edit_value' | 'remove';
 export type FieldCorrectionScope = 'document' | 'label' | 'always';

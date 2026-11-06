@@ -318,6 +318,8 @@ export interface ExtractionResult {
   documentRepresentation?: DocumentRepresentationDto;
   /** Exact fact index from worker when `exactAnswers` is enabled (persisted separately). */
   extractedFacts?: ExtractedFactDto[];
+  /** Per-page orientation applied before OCR; persisted as document_page_transforms. */
+  pageTransforms?: Array<{ page: number; rotationQuarterTurns: 0 | 1 | 2 | 3 }>;
 }
 
 /** Document GET/API extraction payload (no internal worker fields). */
@@ -1547,6 +1549,7 @@ export {
 } from './duplicate-set-groups.js';
 export type { DuplicatePairEdge, DuplicatePairMetaEdge } from './duplicate-set-groups.js';
 export * from './document-regions.js';
+export * from './page-transforms.js';
 export {
   TOKEN_COVERAGE_THRESHOLD,
   GEOMETRY_HASH_DECIMALS,
@@ -1569,6 +1572,9 @@ export {
   roundGeometry,
   canonicalRegionPayload,
   viewerPointToUnrotatedPage,
+  unrotatedPointToViewerPage,
+  unrotatedRectToViewerPage,
+  ocrRectToUnrotatedPage,
   viewerRectToUnrotatedPage,
   selectionRectForTokenSpace,
 } from './region-geometry.js';

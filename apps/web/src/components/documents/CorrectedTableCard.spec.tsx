@@ -77,9 +77,8 @@ describe('CorrectedTableCard', () => {
       />
     );
     expect(screen.queryByRole('button', { name: 'Übernehmen' })).toBeNull();
-    fireEvent.change(screen.getByRole('combobox', { name: 'Vorlage' }), {
-      target: { value: 'financial' },
-    });
+    fireEvent.click(screen.getByTestId('table-family-menu'));
+    fireEvent.click(screen.getByRole('option', { name: /Finanzlayout|Financial/i }));
     // The draft is previewed on the real table before it is applied.
     expect(screen.getByDisplayValue('Summe').closest('tfoot')).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: 'Übernehmen' }));
@@ -115,9 +114,8 @@ describe('CorrectedTableCard', () => {
         onLayoutApply={onLayoutApply}
       />
     );
-    fireEvent.change(screen.getByRole('combobox', { name: 'Vorlage' }), {
-      target: { value: 'matrix' },
-    });
+    fireEvent.click(screen.getByTestId('table-family-menu'));
+    fireEvent.click(screen.getByRole('option', { name: /Matrix/i }));
     fireEvent.click(screen.getByRole('button', { name: 'Darstellung' }));
     fireEvent.change(screen.getByRole('combobox', { name: 'Indexspalte' }), {
       target: { value: 'right' },

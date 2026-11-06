@@ -286,6 +286,8 @@ export async function migrationSchemaPresent(
       return columnExists(runner, 'document_field_values', 'user_confirmed');
     case 'DocumentRegionTableStructure20261106090000':
       return regClassExists(runner, 'public.document_region_table_row_roles');
+    case 'DocumentPageTransforms20261106180000':
+      return regClassExists(runner, 'public.document_page_transforms');
     default:
       return false;
   }

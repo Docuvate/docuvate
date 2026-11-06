@@ -42,8 +42,13 @@ def run_rotation_stage(state: PipelineMutableState) -> StageEnvelope[RotationSta
     """
 
     def _run() -> RotationStageData:
-        layout = _pdf_layout(state)
-        rotations = page_rotations_deg(layout.pages) if layout is not None else ()
+        # Prefer orientation already applied before OCR (scanned pages). Fall back to
+        # measuring dominant glyph rotation on native PDF text layers.
+        if state.page_quarter_turns:
+            rotations = tuple(float(turns * 90) for turns in state.page_quarter_turns)
+        else:
+            layout = _pdf_layout(state)
+            rotations = page_rotations_deg(layout.pages) if layout is not None else ()
         return RotationStageData(
             blocks=tuple(state.blocks),
             page_rotations_deg=rotations,

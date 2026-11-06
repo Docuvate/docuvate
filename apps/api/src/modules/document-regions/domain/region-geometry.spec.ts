@@ -15,6 +15,8 @@ import {
   tokensInsideRect,
   tokensMatchingSelectedText,
   viewerPointToUnrotatedPage,
+  unrotatedPointToViewerPage,
+  ocrRectToUnrotatedPage,
 } from '@docuvate/contracts';
 import { describe, expect, it } from 'vitest';
 
@@ -253,5 +255,23 @@ describe('text-tool selection padding', () => {
       x1: 0.63,
       y1: 0.63,
     });
+  });
+});
+
+describe('page rotation remapping', () => {
+  it('round-trips a point through 90° clockwise viewer space', () => {
+    const viewer = unrotatedPointToViewerPage(0.25, 0.1, 90);
+    const back = viewerPointToUnrotatedPage(viewer.x, viewer.y, 90);
+    expect(back.x).toBeCloseTo(0.25);
+    expect(back.y).toBeCloseTo(0.1);
+  });
+
+  it('maps an OCR box from a 90° CW page back to the MediaBox', () => {
+    const mapped = ocrRectToUnrotatedPage({ x0: 0, y0: 0, x1: 0.1, y1: 0.2 }, 1);
+    expect(mapped).not.toBeNull();
+    expect(mapped!.x0).toBeCloseTo(0.8);
+    expect(mapped!.y0).toBeCloseTo(0);
+    expect(mapped!.x1).toBeCloseTo(1);
+    expect(mapped!.y1).toBeCloseTo(0.1);
   });
 });

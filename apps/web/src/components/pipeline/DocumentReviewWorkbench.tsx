@@ -45,6 +45,8 @@ interface DocumentReviewWorkbenchProps {
   onReassign: (fromKey: string, toKey: string) => void;
   /** Show where a value sits in the document (highlight + page jump). */
   onLocate: (value: string) => void;
+  /** Start bounding-box correction for the active field. */
+  onCorrectPosition?: (fieldKey: string) => void;
   onLabelsUpdated: () => void | Promise<void>;
   /** Jump to the correction mode of OCR, labels or layout. */
   onOpenAspect: (aspect: Exclude<StructuringAspect, 'fields'>) => void;
@@ -80,6 +82,7 @@ export function DocumentReviewWorkbench({
   onAcceptSuggestion,
   onReassign,
   onLocate,
+  onCorrectPosition,
   onLabelsUpdated,
   onOpenAspect,
   autoFocusFirst = false,
@@ -413,6 +416,19 @@ export function DocumentReviewWorkbench({
                         }
                       }}
                     />
+                    {onCorrectPosition ? (
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="secondary"
+                        data-testid="field-position-correct"
+                        onClick={() => {
+                          onCorrectPosition(row.key);
+                        }}
+                      >
+                        {t('documents.fieldPositionCorrect')}
+                      </Button>
+                    ) : null}
                     <Button type="submit" size="sm" disabled={saving}>
                       {t('pipeline.workbench.save')}
                     </Button>
