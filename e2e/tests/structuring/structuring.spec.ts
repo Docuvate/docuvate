@@ -108,13 +108,14 @@ test.describe('structuring journey', () => {
     const track = page.getByRole('list', { name: 'Fortschritt dieses Dokuments' });
     await expect(track.locator('[aria-current="step"]')).toHaveAttribute('data-stage', 'review');
     await expect(track.locator('[data-step-status="done"]')).toHaveCount(2);
-    const next = page.locator('.pipeline-doc-header');
-    await expect(next).toContainText('Prüfen und bestätigen');
-    await expect(next).toContainText('1 Feld mit niedriger Sicherheit.');
-    await next.getByRole('button', { name: 'Felder prüfen' }).click();
-    await expect(page.locator('#document-detail-panel-details')).toBeVisible();
-    await next.getByRole('button', { name: 'Labels prüfen' }).click();
-    await expect(page.locator('#document-detail-panel-labels')).toBeVisible();
+    // Review state: the split workbench replaces the header band and lists the worst value first.
+    await expect(page.locator('.pipeline-doc-header')).toHaveCount(0);
+    const workbench = page.locator('.review-workbench');
+    await expect(workbench).toContainText('Prüfen und korrigieren');
+    await expect(workbench.locator('.review-workbench-row').first()).toHaveAttribute(
+      'data-field-key',
+      'total_amount'
+    );
 
     // Viewer: a structured document exports exactly its own field values.
     await page.goto('/documents/synthetic-doc-0007');
@@ -198,7 +199,7 @@ test.describe('structuring journey', () => {
         for (const [route, ready] of [
           ['/', '.structuring-hero'],
           ['/documents', '.library-stage-tabs'],
-          ['/documents/synthetic-doc-0001', '.pipeline-doc-header'],
+          ['/documents/synthetic-doc-0001', '.review-workbench'],
           ['/documents/synthetic-doc-0006', '.pipeline-doc-header'],
         ] as const) {
           await page.goto(route);

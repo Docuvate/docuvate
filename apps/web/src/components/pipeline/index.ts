@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 /** Public API of the `pipeline` feature (Upload → Structure → Review → Export). */
 export { DocumentPipelineHeader } from './DocumentPipelineHeader';
+export { DocumentReviewWorkbench } from './DocumentReviewWorkbench';
 export { DocumentStageTrack } from './DocumentStageTrack';
 export { LibraryExportMenu } from './LibraryExportMenu';
 export { LibraryStageTabs } from './LibraryStageTabs';

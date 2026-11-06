@@ -2466,6 +2466,40 @@
         "json": "Als JSON exportieren",
         "busy": "Export läuft…"
       }
+    },
+    "workbench": {
+      "title": "Prüfen und korrigieren",
+      "open_one": "{{count}} offen",
+      "open_other": "{{count}} offen",
+      "done": "Alles geprüft",
+      "progressAria": "Geprüfte Werte",
+      "acceptSafe_one": "{{count}} sicheren Wert übernehmen",
+      "acceptSafe_other": "{{count}} sichere Werte übernehmen",
+      "next": "Nächstes Dokument",
+      "labels": "Labelvorschläge",
+      "empty": "Für dieses Dokument wurden keine Felder erkannt. Sie können Felder unter „Details“ ergänzen.",
+      "listAria": "Erkannte Werte",
+      "state": {
+        "confirmed": "Bestätigt",
+        "suggested": "Vorschlag",
+        "review": "Offen"
+      },
+      "confidence": "{{percent}} %",
+      "accept": "{{field}} übernehmen",
+      "correct": "{{field}} korrigieren",
+      "reassign": "{{field}}: Wert einem anderen Feld zuordnen",
+      "editAria": "Neuer Wert für {{field}}",
+      "save": "Speichern",
+      "reassignPlaceholder": "Gehört zu Feld …",
+      "reassignAria": "Anderes Feld für den Wert von {{field}}",
+      "keys": "Tastatur: ↑ ↓ wählen · Enter übernehmen · E korrigieren · F anderes Feld · N nächstes Dokument",
+      "overwrite": "{{field}} enthält schon den bestätigten Wert „{{value}}“. Überschreiben?",
+      "overwriteConfirm": "Überschreiben",
+      "sideAria": "Prüfen und Details",
+      "acceptedToast_one": "{{count}} Wert übernommen",
+      "acceptedToast_other": "{{count}} Werte übernommen",
+      "correctedToast": "Korrektur gespeichert",
+      "reassignedToast": "Wert zu {{field}} verschoben"
     }
   }
 }

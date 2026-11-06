@@ -887,3 +887,277 @@
 .review-queue-pipeline {
   margin-bottom: var(--dv-space-xs);
 }
+
+/* ---------- Viewer: split review workbench ---------- */
+
+.document-workbench {
+  display: grid;
+  gap: var(--dv-space-sm);
+  min-width: 0;
+}
+
+.document-workbench-main,
+.document-workbench-side {
+  display: grid;
+  align-content: start;
+  gap: var(--dv-space-sm);
+  min-width: 0;
+}
+
+/* Small screens: decisions first, the document below. */
+.document-workbench-side {
+  order: -1;
+}
+
+@media (min-width: 1200px) {
+  .document-workbench {
+    grid-template-columns: minmax(0, 1fr) minmax(22rem, 26rem);
+    align-items: start;
+  }
+
+  .document-workbench-side {
+    order: 0;
+    position: sticky;
+    top: var(--dv-space-sm);
+    max-block-size: calc(100dvh - var(--dv-layout-topbar-height) - var(--dv-space-lg));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .document-workbench-side .document-detail-tab-region {
+    margin: 0;
+  }
+}
+
+/* Narrow screens: while the correction bottom sheet is open it is the decision surface, so the
+   document has to stay visible above it (smoke: overflow-check assertCorrectionsBottomSheet). */
+@media (max-width: 1199px) {
+  .document-detail-page[data-correction-sheet-open='1'] .document-workbench-side,
+  .document-detail-page[data-correction-sheet-open='1'] .pipeline-doc-header {
+    display: none;
+  }
+}
+
+/* The workbench owns the right column, so the preview gets the full main width. */
+@media (min-width: 1200px) and (max-width: 1679px) {
+  .document-workbench-main .detail-workspace,
+  .document-workbench-main .layout-workspace {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.review-workbench {
+  display: grid;
+  gap: var(--dv-space-xs);
+  padding: var(--dv-space-sm);
+  border: var(--dv-border-width-hairline) solid var(--dv-color-border);
+  border-radius: var(--dv-radius-md);
+  background: var(--dv-color-bg-raised);
+  min-width: 0;
+}
+
+.review-workbench-head {
+  display: grid;
+  gap: var(--dv-space-xs);
+}
+
+.review-workbench-title-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--dv-space-xs);
+}
+
+.review-workbench-title {
+  margin: 0;
+  font-size: var(--dv-type-section-title-size);
+  line-height: var(--dv-type-section-title-line-height);
+  font-weight: var(--dv-type-section-title-weight);
+}
+
+.review-workbench-count {
+  color: var(--dv-color-accent-text);
+  font-size: var(--dv-font-size-sm);
+  font-weight: var(--dv-font-weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+.review-workbench-progress {
+  block-size: var(--dv-space-3xs);
+  border-radius: var(--dv-radius-chip);
+  background: var(--dv-color-bg-muted);
+  overflow: hidden;
+}
+
+.review-workbench-progress > span {
+  display: block;
+  block-size: 100%;
+  background: var(--dv-color-accent-fill);
+  transition: inline-size var(--dv-motion-duration-slow) var(--dv-motion-easing-standard);
+}
+
+.review-workbench-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--dv-space-2xs);
+}
+
+.review-workbench-next {
+  margin-inline-start: auto;
+}
+
+.review-workbench-subtitle {
+  margin: 0 0 var(--dv-space-2xs);
+  color: var(--dv-color-text-muted);
+  font-size: var(--dv-type-label-size);
+  font-weight: var(--dv-type-label-weight);
+}
+
+.review-workbench-labels {
+  padding-block: var(--dv-space-2xs);
+  border-block-start: var(--dv-border-width-hairline) solid var(--dv-color-border);
+}
+
+.review-workbench-list {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-block-start: var(--dv-border-width-hairline) solid var(--dv-color-border);
+}
+
+.review-workbench-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: var(--dv-space-2xs);
+  border-block-end: var(--dv-border-width-hairline) solid var(--dv-color-border);
+  border-inline-start: var(--dv-border-width-thick) solid transparent;
+}
+
+.review-workbench-row--review {
+  border-inline-start-color: var(--dv-color-accent);
+}
+
+.review-workbench-row--suggested {
+  border-inline-start-color: var(--dv-color-inbox);
+}
+
+.review-workbench-row--active {
+  background: var(--dv-color-accent-soft);
+}
+
+.review-workbench-row-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    'label state'
+    'value state';
+  align-items: center;
+  column-gap: var(--dv-space-xs);
+  min-block-size: var(--dv-control-touch-target);
+  padding: var(--dv-space-3xs) var(--dv-space-xs);
+  border: 0;
+  background: transparent;
+  color: var(--dv-color-text);
+  text-align: start;
+  font: inherit;
+  cursor: pointer;
+}
+
+.review-workbench-row-main:focus-visible {
+  outline: var(--dv-focus-ring-width) solid var(--dv-color-focus);
+  outline-offset: calc(-1 * var(--dv-focus-ring-width));
+}
+
+.review-workbench-row-label {
+  grid-area: label;
+  overflow: hidden;
+  color: var(--dv-color-text-muted);
+  font-size: var(--dv-font-size-xs);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.review-workbench-row-value {
+  grid-area: value;
+  overflow-wrap: anywhere;
+  font-weight: var(--dv-font-weight-semibold);
+  line-height: var(--dv-font-line-height-snug);
+}
+
+.review-workbench-row-state {
+  grid-area: state;
+  color: var(--dv-color-text-subtle);
+  font-size: var(--dv-font-size-xs);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.review-workbench-row-state--low {
+  color: var(--dv-color-danger-strong);
+  font-weight: var(--dv-font-weight-semibold);
+}
+
+.review-workbench-row-state--medium {
+  color: var(--dv-color-warn-strong);
+  font-weight: var(--dv-font-weight-semibold);
+}
+
+.review-workbench-row-state--high {
+  color: var(--dv-color-ok);
+}
+
+.review-workbench-row--confirmed .review-workbench-row-value {
+  color: var(--dv-color-text-muted);
+  font-weight: var(--dv-font-weight-medium);
+}
+
+.review-workbench-row-tools {
+  display: flex;
+  gap: var(--dv-space-3xs);
+  padding-inline-end: var(--dv-space-2xs);
+}
+
+.review-workbench-accept {
+  color: var(--dv-color-ok);
+}
+
+.review-workbench-edit {
+  display: flex;
+  flex-wrap: wrap;
+  grid-column: 1 / -1;
+  align-items: center;
+  gap: var(--dv-space-2xs);
+  padding: 0 var(--dv-space-xs) var(--dv-space-xs);
+}
+
+.review-workbench-edit > .input,
+.review-workbench-edit > .custom-select {
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+
+.review-workbench-overwrite p {
+  flex: 1 1 100%;
+  margin: 0;
+  color: var(--dv-color-danger-strong);
+  font-size: var(--dv-font-size-sm);
+}
+
+.review-workbench-empty,
+.review-workbench-keys {
+  margin: 0;
+  color: var(--dv-color-text-muted);
+  font-size: var(--dv-font-size-xs);
+}
+
+@media (max-width: 767px) {
+  .review-workbench-keys {
+    display: none;
+  }
+
+  .review-workbench-labels .document-label-suggestion-chip-btn {
+    min-block-size: var(--dv-control-touch-target);
+  }
+}

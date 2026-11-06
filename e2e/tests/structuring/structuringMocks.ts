@@ -199,6 +199,50 @@ export interface StructuringMockOptions {
 export interface StructuringMockLog {
   unmatched: string[];
   calls: string[];
+  /** Field lists sent with each document PATCH, in order (synthetic). */
+  fieldWrites: { documentId: string; fields: SyntheticField[] }[];
+}
+
+export interface SyntheticField {
+  key: string;
+  value: string;
+  confidence?: number;
+  userConfirmed?: boolean;
+}
+
+/** Catalog so the synthetic fields count as recognized (not heuristic) values. */
+const RECOGNIZED_CATALOG = [
+  ['invoice_number', 'Rechnungsnummer'],
+  ['total_amount', 'Betrag'],
+  ['net_amount', 'Nettobetrag'],
+  ['date', 'Datum'],
+].map(([key, label], index) => ({
+  id: `00000000-0000-4000-8000-0000000001${String(index).padStart(2, '0')}`,
+  key,
+  label,
+  fieldType: 'text',
+  sortOrder: index,
+  extractForAllDocuments: true,
+  gateLabelIds: [],
+  gateLabelMatch: 'any',
+  minLabelConfidence: null,
+  confidenceGateEnabled: null,
+  showInFilter: false,
+}));
+
+function isSyntheticFieldList(value: unknown): value is SyntheticField[] {
+  return (
+    Array.isArray(value) &&
+    value.every(
+      (row: unknown) =>
+        typeof row === 'object' &&
+        row !== null &&
+        'key' in row &&
+        'value' in row &&
+        typeof row.key === 'string' &&
+        typeof row.value === 'string'
+    )
+  );
 }
 
 function filterDocuments(url: URL) {
@@ -218,7 +262,13 @@ export async function installStructuringMocks(
   options: StructuringMockOptions = {}
 ): Promise<StructuringMockLog> {
   const theme = options.theme ?? 'light';
-  const log: StructuringMockLog = { unmatched: [], calls: [] };
+  const log: StructuringMockLog = { unmatched: [], calls: [], fieldWrites: [] };
+  const fieldOverrides = new Map<string, SyntheticField[]>();
+  const withOverrides = (detail: NonNullable<ReturnType<typeof detailFor>>) => {
+    const override = fieldOverrides.get(detail.id);
+    if (!override || !detail.extraction) return detail;
+    return { ...detail, extraction: { ...detail.extraction, fields: override } };
+  };
   const docs = options.empty ? [] : STRUCTURING_DOCUMENTS;
   const byStatus = { uploaded: 0, queued: 0, extracting: 0, ready: 0, failed: 0 };
   for (const d of docs) byStatus[d.status] += 1;
@@ -300,8 +350,21 @@ export async function installStructuringMocks(
     if (detailMatch?.[1]) {
       const detail = detailFor(detailMatch[1]);
       if (!detail) return json(route, { message: 'Not found' }, 404);
-      if (method === 'GET') return json(route, detail);
-      return json(route, detail);
+      if (method === 'GET') return json(route, withOverrides(detail));
+      const body: unknown = route.request().postDataJSON();
+      const fields =
+        typeof body === 'object' && body !== null && 'extractionFields' in body
+          ? body.extractionFields
+          : undefined;
+      if (isSyntheticFieldList(fields)) {
+        fieldOverrides.set(detail.id, fields);
+        log.fieldWrites.push({ documentId: detail.id, fields });
+      }
+      return json(route, {
+        document: withOverrides(detail),
+        fieldCorrectionsRecorded: 0,
+        fieldConfirmationsRecorded: 0,
+      });
     }
     if (/^\/documents\/[^/]+\/(duplicate-candidates|duplicates)/.test(p))
       return json(route, { items: [] });
@@ -381,7 +444,8 @@ export async function installStructuringMocks(
     }
     if (p === '/connectors/catalog')
       return json(route, { categories: [], plugins: [], viewerIsServerAdmin: true });
-    if (p === '/saved-views' || p === '/recognized-fields' || p === '/folders')
+    if (p === '/recognized-fields') return json(route, { items: RECOGNIZED_CATALOG });
+    if (p === '/saved-views' || p === '/folders')
       return json(route, { items: [] });
     if (p === '/duplicate-sets') return json(route, EMPTY_PAGE);
     if (method !== 'GET') return json(route, {});

@@ -2466,6 +2466,40 @@
         "json": "Export as JSON",
         "busy": "Exporting…"
       }
+    },
+    "workbench": {
+      "title": "Review and correct",
+      "open_one": "{{count}} open",
+      "open_other": "{{count}} open",
+      "done": "All reviewed",
+      "progressAria": "Reviewed values",
+      "acceptSafe_one": "Accept {{count}} safe value",
+      "acceptSafe_other": "Accept {{count}} safe values",
+      "next": "Next document",
+      "labels": "Label suggestions",
+      "empty": "No fields were recognized for this document. You can add fields under “Details”.",
+      "listAria": "Recognized values",
+      "state": {
+        "confirmed": "Confirmed",
+        "suggested": "Suggestion",
+        "review": "Open"
+      },
+      "confidence": "{{percent}}%",
+      "accept": "Accept {{field}}",
+      "correct": "Correct {{field}}",
+      "reassign": "{{field}}: assign value to another field",
+      "editAria": "New value for {{field}}",
+      "save": "Save",
+      "reassignPlaceholder": "Belongs to field …",
+      "reassignAria": "Other field for the value of {{field}}",
+      "keys": "Keyboard: ↑ ↓ select · Enter accept · E correct · F other field · N next document",
+      "overwrite": "{{field}} already holds the confirmed value “{{value}}”. Overwrite it?",
+      "overwriteConfirm": "Overwrite",
+      "sideAria": "Review and details",
+      "acceptedToast_one": "{{count}} value accepted",
+      "acceptedToast_other": "{{count}} values accepted",
+      "correctedToast": "Correction saved",
+      "reassignedToast": "Value moved to {{field}}"
     }
   }
 }
