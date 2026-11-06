@@ -932,7 +932,12 @@
 /* Narrow screens: while the correction bottom sheet is open it is the decision surface, so the
    document has to stay visible above it (smoke: overflow-check assertCorrectionsBottomSheet). */
 @media (max-width: 1199px) {
-  .document-detail-page[data-correction-sheet-open='1'] .document-workbench-side,
+  /* The decision list steps aside; the detail tabs stay reachable below the document. */
+  .document-detail-page[data-correction-sheet-open='1'] .document-workbench-side {
+    order: 1;
+  }
+
+  .document-detail-page[data-correction-sheet-open='1'] .review-workbench,
   .document-detail-page[data-correction-sheet-open='1'] .pipeline-doc-header {
     display: none;
   }
