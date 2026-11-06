@@ -64,6 +64,7 @@ import { DocumentTableCorrectionSheet } from './DocumentTableCorrectionSheet';
 import { ExtractedLayoutHtmlFrame, type LayoutIrZoomStep } from './ExtractedLayoutHtmlFrame';
 import { ExtractedTextPanel } from './ExtractedTextPanel';
 import { type PdfLayoutOverlay, PdfViewer } from './PdfViewer';
+import type { TableStructureChoice } from './TableLayoutPicker';
 
 type AdvancedViewerMode = 'reconstruction' | 'compare';
 
@@ -376,6 +377,22 @@ export function DocumentLayoutWorkspace({
     },
     [doc.id, onLayoutSideTabChange, refreshRegions, toast]
   );
+
+  const submitTableCorrection = useCallback(
+    (body: ApplyTableCorrectionRequest, message = t('documents.tableCorrectionSaved')) => {
+      runTableCorrection(body, message).catch((err: unknown) => {
+        toast.error(formatUserFacingError(err, 'errors.generic'));
+      });
+    },
+    [runTableCorrection, t, toast]
+  );
+
+  const applyTableLayoutChoice = (regionId: string, choice: TableStructureChoice) => {
+    submitTableCorrection(
+      { id: crypto.randomUUID(), op: 'set_headers', beforeRegionId: regionId, ...choice },
+      t('tableLayouts.applied')
+    );
+  };
 
   const layoutPageCount = layoutIr?.pages.length ?? layoutIrPages?.length ?? 1;
   const { metricsByPage, metrics: compareMetrics } = useLayoutCompare(
@@ -825,23 +842,16 @@ export function DocumentLayoutWorkspace({
                       reanchorFieldKey
                         ? undefined
                         : () => {
-                            void runTableCorrection(
-                              {
-                                id: crypto.randomUUID(),
-                                op: 'create',
-                                page: selectionDraft.page,
-                                shape: 'rect',
-                                x0: selectionDraft.rect.x0,
-                                y0: selectionDraft.rect.y0,
-                                x1: selectionDraft.rect.x1,
-                                y1: selectionDraft.rect.y1,
-                                blockIndexes: selectionDraft.tokens.map(
-                                  (token) => token.blockIndex
-                                ),
-                              },
-                              t('documents.tableCorrectionSaved')
-                            ).catch((err: unknown) => {
-                              toast.error(formatUserFacingError(err, 'errors.generic'));
+                            submitTableCorrection({
+                              id: crypto.randomUUID(),
+                              op: 'create',
+                              page: selectionDraft.page,
+                              shape: 'rect',
+                              x0: selectionDraft.rect.x0,
+                              y0: selectionDraft.rect.y0,
+                              x1: selectionDraft.rect.x1,
+                              y1: selectionDraft.rect.y1,
+                              blockIndexes: selectionDraft.tokens.map((token) => token.blockIndex),
                             });
                           }
                     }
@@ -964,30 +974,21 @@ export function DocumentLayoutWorkspace({
           fieldRegions={fieldRegions}
           tableRegions={tableRegions}
           onTableHeaderChange={(regionId, headerRows, headerCols) => {
-            void runTableCorrection(
-              {
-                id: crypto.randomUUID(),
-                op: 'set_headers',
-                beforeRegionId: regionId,
-                headerRows,
-                headerCols,
-              },
-              t('documents.tableCorrectionSaved')
-            ).catch((err: unknown) => {
-              toast.error(formatUserFacingError(err, 'errors.generic'));
+            submitTableCorrection({
+              id: crypto.randomUUID(),
+              op: 'set_headers',
+              beforeRegionId: regionId,
+              headerRows,
+              headerCols,
             });
           }}
+          onTableLayoutApply={applyTableLayoutChoice}
           onTableCellChange={(regionId, row, col, text) => {
-            void runTableCorrection(
-              {
-                id: crypto.randomUUID(),
-                op: 'edit_cell',
-                beforeRegionId: regionId,
-                cell: { row, col, text },
-              },
-              t('documents.tableCorrectionSaved')
-            ).catch((err: unknown) => {
-              toast.error(formatUserFacingError(err, 'errors.generic'));
+            submitTableCorrection({
+              id: crypto.randomUUID(),
+              op: 'edit_cell',
+              beforeRegionId: regionId,
+              cell: { row, col, text },
             });
           }}
           onConfirmField={confirmField}
@@ -1052,34 +1053,31 @@ export function DocumentLayoutWorkspace({
           onHeaderChange={
             selectedTableId
               ? (headerRows, headerCols) => {
-                  void runTableCorrection(
-                    {
-                      id: crypto.randomUUID(),
-                      op: 'set_headers',
-                      beforeRegionId: selectedTableId,
-                      headerRows,
-                      headerCols,
-                    },
-                    t('documents.tableCorrectionSaved')
-                  ).catch((err: unknown) => {
-                    toast.error(formatUserFacingError(err, 'errors.generic'));
+                  submitTableCorrection({
+                    id: crypto.randomUUID(),
+                    op: 'set_headers',
+                    beforeRegionId: selectedTableId,
+                    headerRows,
+                    headerCols,
                   });
+                }
+              : undefined
+          }
+          onLayoutApply={
+            selectedTableId
+              ? (choice) => {
+                  applyTableLayoutChoice(selectedTableId, choice);
                 }
               : undefined
           }
           onCellChange={
             selectedTableId
               ? (row, col, text) => {
-                  void runTableCorrection(
-                    {
-                      id: crypto.randomUUID(),
-                      op: 'edit_cell',
-                      beforeRegionId: selectedTableId,
-                      cell: { row, col, text },
-                    },
-                    t('documents.tableCorrectionSaved')
-                  ).catch((err: unknown) => {
-                    toast.error(formatUserFacingError(err, 'errors.generic'));
+                  submitTableCorrection({
+                    id: crypto.randomUUID(),
+                    op: 'edit_cell',
+                    beforeRegionId: selectedTableId,
+                    cell: { row, col, text },
                   });
                 }
               : undefined

@@ -1573,7 +1573,8 @@ export {
   selectionRectForTokenSpace,
 } from './region-geometry.js';
 export type { NormalizedRect, LayoutToken, RemappedRegionTokens } from './region-geometry.js';
-export { inferTableGrid } from './table-geometry.js';
+export type { TableGridMerge } from './table-geometry.js';
+export { inferTableGrid, tableGridSize, validTableMerges } from './table-geometry.js';
 export type {
   TableGridAxis,
   TableGridRule,

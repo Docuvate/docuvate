@@ -35,7 +35,11 @@ function median(values: number[]): number {
   return atMid ?? 0;
 }
 
-function clusterTokens(tokens: readonly LayoutToken[], axis: TableGridAxis, minGap: number): LayoutToken[][] {
+function clusterTokens(
+  tokens: readonly LayoutToken[],
+  axis: TableGridAxis,
+  minGap: number
+): LayoutToken[][] {
   if (tokens.length === 0) {
     return [];
   }
@@ -83,7 +87,11 @@ function extent(tokens: readonly LayoutToken[], axis: TableGridAxis): { min: num
   return { min, max };
 }
 
-function rulePositions(extents: { min: number; max: number }[], start: number, end: number): number[] {
+function rulePositions(
+  extents: { min: number; max: number }[],
+  start: number,
+  end: number
+): number[] {
   const positions = [start];
   for (let index = 0; index < extents.length - 1; index += 1) {
     const current = extents[index];
@@ -173,5 +181,67 @@ export function inferTableGrid(
     headerCols: 0,
     rules,
     cells,
+  };
+}
+
+export interface TableGridMerge {
+  row0: number;
+  col0: number;
+  rowSpan: number;
+  colSpan: number;
+}
+
+/**
+ * True when every merge covers at least two cells, stays inside a `rows` x `cols` grid and no
+ * two merges overlap. Shared by the API (rejects bad input) and the editor (disables apply).
+ */
+export function validTableMerges(
+  merges: readonly TableGridMerge[],
+  rows: number,
+  cols: number
+): boolean {
+  const covered = new Set<number>();
+  for (const merge of merges) {
+    const ints = [merge.row0, merge.col0, merge.rowSpan, merge.colSpan].every(Number.isInteger);
+    if (!ints || merge.row0 < 0 || merge.col0 < 0 || merge.rowSpan < 1 || merge.colSpan < 1) {
+      return false;
+    }
+    if (merge.rowSpan * merge.colSpan < 2) {
+      return false;
+    }
+    if (merge.row0 + merge.rowSpan > rows || merge.col0 + merge.colSpan > cols) {
+      return false;
+    }
+    for (let row = merge.row0; row < merge.row0 + merge.rowSpan; row += 1) {
+      for (let col = merge.col0; col < merge.col0 + merge.colSpan; col += 1) {
+        const key = row * cols + col;
+        if (covered.has(key)) {
+          return false;
+        }
+        covered.add(key);
+      }
+    }
+  }
+  return true;
+}
+
+/** Grid size of a stored table: rules are frame edges plus dividers, so n rules bound n-1 bands. */
+export function tableGridSize(table: {
+  rules: readonly TableGridRule[];
+  cells: readonly TableGridCell[];
+}): { rows: number; cols: number } {
+  const fromRules = (axis: TableGridAxis) =>
+    Math.max(0, table.rules.filter((rule) => rule.axis === axis).length - 1);
+  const fromCells = (pick: (cell: TableGridCell) => number) =>
+    table.cells.reduce((max, cell) => Math.max(max, pick(cell) + 1), 0);
+  return {
+    rows: Math.max(
+      fromRules('row'),
+      fromCells((cell) => cell.row)
+    ),
+    cols: Math.max(
+      fromRules('col'),
+      fromCells((cell) => cell.col)
+    ),
   };
 }

@@ -1002,7 +1002,8 @@
     "layoutFieldsFilterAria": "Erkannte Felder filtern",
     "layoutFieldsFilterEmpty": "Kein Feld passt zu „{{query}}“.",
     "fieldMarkHint": "Ziehen Sie auf dem Dokument einen Rahmen um den Wert für „{{name}}“.",
-    "fieldMarkHintCancel": "Markieren abbrechen"
+    "fieldMarkHintCancel": "Markieren abbrechen",
+    "tableMergesInvalid": "Verbundene Zellen passen nicht zur Tabelle (außerhalb oder überlappend)."
   },
   "settings": {
     "title": "Einstellungen",
@@ -2522,6 +2523,30 @@
       "openCount_one": "{{count}} offen",
       "openCount_other": "{{count}} offen",
       "itemAria": "{{aspect}}: {{state}}"
+    }
+  },
+  "tableLayouts": {
+    "title": "Tabellenlayout",
+    "more": "Weitere Layouts",
+    "apply": "Layout übernehmen",
+    "choose": "Layout",
+    "chooseAria": "Layout für Tabelle {{n}} wählen",
+    "mergeHint": "Zelle wählen, dann eine zweite Zelle mit Umschalt+Klick oder Taste M: der Bereich wird verbunden. Denselben Bereich erneut verbinden trennt ihn.",
+    "mergeAria": "Verbundene Zellen festlegen",
+    "cellAria": "Zeile {{row}}, Spalte {{col}}, {{rowSpan}} × {{colSpan}}",
+    "span": "{{rowSpan}} × {{colSpan}}",
+    "applied": "Tabellenlayout übernommen",
+    "names": {
+      "grid": "Einfaches Raster",
+      "header_row": "Kopfzeile",
+      "header_row_col": "Kopfzeile und Kopfspalte",
+      "line_items_totals": "Positionen mit Summe",
+      "key_value": "Schlüssel und Wert",
+      "grouped_rows": "Gruppierte Zeilen",
+      "multi_level_header": "Mehrstufiger Kopf",
+      "matrix_stub": "Matrix mit Vorspalte",
+      "transposed_key_value": "Schlüssel und Wert, quer",
+      "form_grid": "Formularraster"
     }
   }
 }

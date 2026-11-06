@@ -40,6 +40,7 @@ import { FieldValueRow } from '../ui/FieldValueRow';
 import { Input } from '../ui/Input';
 import { SourceChip } from '../ui/SourceChip';
 import { CorrectedTableCard } from './CorrectedTableCard';
+import type { TableStructureChoice } from './TableLayoutPicker';
 
 export type LayoutSideTab = 'fields' | 'tables' | 'outline';
 
@@ -62,6 +63,7 @@ interface DocumentLayoutSidePanelProps {
   fieldRegions?: DocumentRegionDto[];
   tableRegions?: DocumentRegionDto[];
   onTableHeaderChange?: (regionId: string, headerRows: number, headerCols: number) => void;
+  onTableLayoutApply?: (regionId: string, choice: TableStructureChoice) => void;
   onTableCellChange?: (regionId: string, row: number, col: number, text: string) => void;
   onConfirmField?: (key: string, value: string) => void;
   onCorrectField?: (key: string) => void;
@@ -91,6 +93,7 @@ export function DocumentLayoutSidePanel({
   fieldRegions = [],
   tableRegions = [],
   onTableHeaderChange,
+  onTableLayoutApply,
   onTableCellChange,
   onConfirmField,
   onCorrectField,
@@ -468,6 +471,13 @@ export function DocumentLayoutSidePanel({
                     onCellChange={(row, col, text) => {
                       onTableCellChange?.(region.id, row, col, text);
                     }}
+                    onLayoutApply={
+                      onTableLayoutApply
+                        ? (choice) => {
+                            onTableLayoutApply(region.id, choice);
+                          }
+                        : undefined
+                    }
                   />
                 ))}
             {tables.length === 0 && tableRegions.length === 0 ? (

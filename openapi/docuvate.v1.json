@@ -13123,6 +13123,14 @@
             "type": "number",
             "minimum": 0
           },
+          "merges": {
+            "maxItems": 500,
+            "description": "Merged cells; replaces all merges on create and set_headers.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TableMergeInputDto"
+            }
+          },
           "cell": {
             "$ref": "#/components/schemas/DocumentRegionTableCellDto"
           }
@@ -16389,6 +16397,33 @@
         },
         "required": [
           "displayName"
+        ]
+      },
+      "TableMergeInputDto": {
+        "type": "object",
+        "properties": {
+          "row0": {
+            "type": "number",
+            "minimum": 0
+          },
+          "col0": {
+            "type": "number",
+            "minimum": 0
+          },
+          "rowSpan": {
+            "type": "number",
+            "minimum": 1
+          },
+          "colSpan": {
+            "type": "number",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "row0",
+          "col0",
+          "rowSpan",
+          "colSpan"
         ]
       },
       "TagCustomFieldListResponseDtoClass": {

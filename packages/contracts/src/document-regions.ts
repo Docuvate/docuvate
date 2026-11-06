@@ -127,6 +127,8 @@ export interface ApplyTableCorrectionRequest {
   tableType?: DocumentRegionTableType;
   headerRows?: number;
   headerCols?: number;
+  /** Merged cells (rowSpan/colSpan); replaces all merges on `create` and `set_headers`. */
+  merges?: DocumentRegionTableMergeDto[];
   cell?: DocumentRegionTableCellDto;
 }
 

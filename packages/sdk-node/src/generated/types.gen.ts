@@ -132,6 +132,10 @@ export type ApplyTableCorrectionRequestDto = {
     tableType?: 'line_items' | 'key_value' | 'other';
     headerRows?: number;
     headerCols?: number;
+    /**
+     * Merged cells; replaces all merges on create and set_headers.
+     */
+    merges?: Array<TableMergeInputDto>;
     cell?: DocumentRegionTableCellDto;
 };
 
@@ -1056,6 +1060,13 @@ export type SftpIngressCreateAccountBodyDto = {
 export type StartMailOAuthRequestDto = {
     displayName: string;
     accountHint?: string;
+};
+
+export type TableMergeInputDto = {
+    row0: number;
+    col0: number;
+    rowSpan: number;
+    colSpan: number;
 };
 
 export type TagCustomFieldListResponseDtoClass = {

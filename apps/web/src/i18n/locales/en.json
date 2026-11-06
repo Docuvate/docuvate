@@ -1002,7 +1002,8 @@
     "layoutFieldsFilterAria": "Filter recognized fields",
     "layoutFieldsFilterEmpty": "No field matches “{{query}}”.",
     "fieldMarkHint": "Drag a box around the value for “{{name}}” on the document.",
-    "fieldMarkHintCancel": "Cancel marking"
+    "fieldMarkHintCancel": "Cancel marking",
+    "tableMergesInvalid": "Merged cells do not fit the table (outside the grid or overlapping)."
   },
   "settings": {
     "title": "Settings",
@@ -2522,6 +2523,30 @@
       "openCount_one": "{{count}} open",
       "openCount_other": "{{count}} open",
       "itemAria": "{{aspect}}: {{state}}"
+    }
+  },
+  "tableLayouts": {
+    "title": "Table layout",
+    "more": "More layouts",
+    "apply": "Apply layout",
+    "choose": "Layout",
+    "chooseAria": "Choose a layout for table {{n}}",
+    "mergeHint": "Select a cell, then Shift+click a second cell or press M on it to merge the area. Merging the same area again splits it.",
+    "mergeAria": "Set merged cells",
+    "cellAria": "Row {{row}}, column {{col}}, {{rowSpan}} × {{colSpan}}",
+    "span": "{{rowSpan}} × {{colSpan}}",
+    "applied": "Table layout applied",
+    "names": {
+      "grid": "Simple grid",
+      "header_row": "Header row",
+      "header_row_col": "Header row and column",
+      "line_items_totals": "Line items with total",
+      "key_value": "Key and value",
+      "grouped_rows": "Grouped rows",
+      "multi_level_header": "Multi level header",
+      "matrix_stub": "Matrix with stub column",
+      "transposed_key_value": "Key and value, transposed",
+      "form_grid": "Form grid"
     }
   }
 }

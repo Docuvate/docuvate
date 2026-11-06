@@ -1222,14 +1222,6 @@ button.aspect-strip-btn:hover {
   font-weight: var(--dv-font-weight-semibold);
 }
 
-.aspect-strip--compact .aspect-strip-btn {
-  padding: var(--dv-space-3xs);
-}
-
-.library-row-aspects {
-  margin-block-start: var(--dv-space-3xs);
-}
-
 @media (max-width: 767px) {
   .review-workbench-aspects button.aspect-strip-btn {
     min-block-size: var(--dv-control-touch-target);

@@ -16,8 +16,6 @@ interface StructuringAspectStripProps {
   statuses: readonly AspectStatus[];
   /** Opens the correction mode for an aspect; omit for a read-only strip. */
   onOpen?: (aspect: StructuringAspect) => void;
-  /** Library rows: icons with state colour only (text stays available to assistive tech). */
-  compact?: boolean;
   className?: string;
 }
 
@@ -25,13 +23,12 @@ interface StructuringAspectStripProps {
 export function StructuringAspectStrip({
   statuses,
   onOpen,
-  compact = false,
   className = '',
 }: StructuringAspectStripProps) {
   const { t } = useTranslation();
   return (
     <ul
-      className={`aspect-strip${compact ? ' aspect-strip--compact' : ''}${className ? ` ${className}` : ''}`}
+      className={`aspect-strip${className ? ` ${className}` : ''}`}
       aria-label={t('pipeline.aspects.aria')}
     >
       {statuses.map((status) => {
@@ -44,15 +41,9 @@ export function StructuringAspectStrip({
         const label = t('pipeline.aspects.itemAria', { aspect: name, state: stateText });
         const content = (
           <>
-            <Icon size={compact ? 14 : 16} strokeWidth={2} aria-hidden />
-            {compact ? (
-              <span className="visually-hidden">{label}</span>
-            ) : (
-              <>
-                <span className="aspect-strip-name">{name}</span>
-                <span className="aspect-strip-state">{stateText}</span>
-              </>
-            )}
+            <Icon size={14} strokeWidth={2} aria-hidden />
+            <span className="aspect-strip-name">{name}</span>
+            <span className="aspect-strip-state">{stateText}</span>
           </>
         );
         const openable =
@@ -63,7 +54,6 @@ export function StructuringAspectStrip({
             className={`aspect-strip-item aspect-strip-item--${status.state}`}
             data-aspect={status.aspect}
             data-aspect-state={status.state}
-            title={compact ? label : undefined}
           >
             {openable ? (
               <button

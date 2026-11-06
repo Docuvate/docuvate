@@ -33,6 +33,7 @@ import {
 } from '../../../shared/domain/ports.js';
 import { layoutTokensFromIr, uniqueBlockIndexes } from '../domain/layout-tokens.js';
 import { isUuid } from '../domain/parse-uuid.js';
+import { serializeTableMerges, withTableMerges } from '../domain/table-merges.js';
 
 const TABLE_OPS = new Set<TableCorrectionOp>(['create', 'set_headers', 'edit_cell', 'remove']);
 
@@ -94,6 +95,8 @@ function tableAttributes(
     headerRows: table.headerRows,
     headerCols: table.headerCols,
     cells,
+    // Only present when merges exist, so payloads of tables without spans stay unchanged.
+    ...(table.merges.length > 0 ? { merges: serializeTableMerges(table.merges) } : {}),
   };
 }
 
@@ -337,6 +340,17 @@ export class ApplyTableCorrectionUseCase {
   }
 
   private nextTable(
+    body: ApplyTableCorrectionRequest,
+    existing: DocumentRegionRecord | null,
+    tokens: LayoutToken[],
+    rect: { x0: number; y0: number; x1: number; y1: number }
+  ): DocumentRegionTableDto {
+    const table = this.nextTableStructure(body, existing, tokens, rect);
+    const structural = body.op === 'create' || body.op === 'set_headers';
+    return structural && body.merges !== undefined ? withTableMerges(table, body.merges) : table;
+  }
+
+  private nextTableStructure(
     body: ApplyTableCorrectionRequest,
     existing: DocumentRegionRecord | null,
     tokens: LayoutToken[],

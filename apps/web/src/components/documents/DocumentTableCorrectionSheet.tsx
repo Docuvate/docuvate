@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 
 import { BottomSheet } from '../ui/overlay/BottomSheet';
 import { CorrectedTableCard } from './CorrectedTableCard';
+import type { TableStructureChoice } from './TableLayoutPicker';
 
 interface DocumentTableCorrectionSheetProps {
   open: boolean;
@@ -14,6 +15,7 @@ interface DocumentTableCorrectionSheetProps {
   onSelect: () => void;
   onHeaderChange?: (headerRows: number, headerCols: number) => void;
   onCellChange?: (row: number, col: number, text: string) => void;
+  onLayoutApply?: (choice: TableStructureChoice) => void;
 }
 
 export function DocumentTableCorrectionSheet({
@@ -24,6 +26,7 @@ export function DocumentTableCorrectionSheet({
   onSelect,
   onHeaderChange,
   onCellChange,
+  onLayoutApply,
 }: DocumentTableCorrectionSheetProps) {
   const { t } = useTranslation();
   return (
@@ -41,6 +44,7 @@ export function DocumentTableCorrectionSheet({
           onSelect={onSelect}
           onHeaderChange={onHeaderChange}
           onCellChange={onCellChange}
+          onLayoutApply={onLayoutApply}
         />
       ) : (
         <p className="muted">{t('documents.layoutTablesEmpty')}</p>

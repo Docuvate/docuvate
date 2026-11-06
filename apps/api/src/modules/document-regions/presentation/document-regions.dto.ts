@@ -7,6 +7,7 @@ import type {
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
+  ArrayMaxSize,
   IsArray,
   IsIn,
   IsInt,
@@ -84,6 +85,32 @@ class DocumentRegionTableMergeDto {
   rowSpan!: number;
 
   @ApiProperty()
+  colSpan!: number;
+}
+
+class TableMergeInputDto {
+  @ApiProperty()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  row0!: number;
+
+  @ApiProperty()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  col0!: number;
+
+  @ApiProperty()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  rowSpan!: number;
+
+  @ApiProperty()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
   colSpan!: number;
 }
 
@@ -436,6 +463,17 @@ export class ApplyTableCorrectionRequestDto {
   @IsInt()
   @Min(0)
   headerCols?: number;
+
+  @ApiPropertyOptional({
+    type: [TableMergeInputDto],
+    description: 'Merged cells; replaces all merges on create and set_headers.',
+  })
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(500)
+  @ValidateNested({ each: true })
+  @Type(() => TableMergeInputDto)
+  merges?: TableMergeInputDto[];
 
   @ApiPropertyOptional({ type: DocumentRegionTableCellDto })
   @IsOptional()

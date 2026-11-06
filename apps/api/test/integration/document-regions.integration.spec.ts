@@ -108,7 +108,7 @@ describe('document regions (Testcontainers Postgres)', () => {
     expect(remapped?.irSha256).toBe(nextHash);
   });
 
-  it('stores a table region with header rows and cell texts', async () => {
+  it('stores a table region with header rows, merged cells and cell texts', async () => {
     const created = await regions.insertRegion({
       id: randomUUID(),
       documentId,
@@ -134,7 +134,7 @@ describe('document regions (Testcontainers Postgres)', () => {
           { axis: 'col', ord: 1, pos: 0.35 },
           { axis: 'col', ord: 2, pos: 0.6 },
         ],
-        merges: [],
+        merges: [{ row0: 1, col0: 0, rowSpan: 1, colSpan: 2 }],
         cells: [
           { row: 0, col: 0, text: 'Item' },
           { row: 0, col: 1, text: 'Qty' },
@@ -146,8 +146,10 @@ describe('document regions (Testcontainers Postgres)', () => {
     expect(created.table?.headerRows).toBe(1);
     expect(created.table?.cells).toHaveLength(4);
     const listed = await regions.listActiveRegions(documentId, 'table');
-    expect(listed.some((region) => region.id === created.id && region.table?.cells[0]?.text === 'Item')).toBe(
-      true
-    );
+    expect(
+      listed.some((region) => region.id === created.id && region.table?.cells[0]?.text === 'Item')
+    ).toBe(true);
+    const stored = listed.find((region) => region.id === created.id);
+    expect(stored?.table?.merges).toEqual([{ row0: 1, col0: 0, rowSpan: 1, colSpan: 2 }]);
   });
 });
