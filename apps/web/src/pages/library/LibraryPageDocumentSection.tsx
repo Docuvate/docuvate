@@ -260,10 +260,6 @@ export function LibraryPageDocumentSection({
                 onRefresh={() => {
                   void data.load();
                 }}
-                onRequeueDocument={(documentId) => {
-                  void data.requeueDocument(documentId);
-                }}
-                requeueBusyIds={data.requeueBusyIds}
                 onContextMenu={ctx.openDocumentContextMenu}
                 onRowMenu={ctx.openDocumentContextMenuFromRowAction}
                 onContextMenuKeyboard={ctx.openDocumentContextMenuFromKeyboard}

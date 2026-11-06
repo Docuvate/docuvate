@@ -3169,7 +3169,7 @@ mark.global-search-mark {
   max-width: 100%;
   min-height: 0;
   border: 1px solid var(--dv-color-border);
-  border-radius: var(--dv-radius-md);
+  border-radius: var(--dv-radius-surface);
   background: var(--dv-color-bg-raised);
   overflow: hidden;
 }
@@ -3687,7 +3687,7 @@ mark.global-search-mark {
 }
 
 .review-wizard-steps {
-  padding: var(--dv-space-lg) var(--dv-space-md);
+  padding: var(--dv-space-md);
 }
 
 .review-wizard-step-list {
@@ -3695,7 +3695,7 @@ mark.global-search-mark {
   margin: 0;
   padding: 0;
   display: grid;
-  gap: var(--dv-space-md);
+  gap: var(--dv-density-group-gap);
 }
 
 .review-wizard-step {
@@ -3733,8 +3733,8 @@ mark.global-search-mark {
 
 .review-wizard-card {
   max-width: 44rem;
-  margin: 0 auto;
-  padding: var(--dv-space-xl) var(--dv-space-lg);
+  margin: 0;
+  padding: var(--dv-space-lg);
   display: grid;
   gap: var(--dv-space-md);
 }

@@ -88,11 +88,11 @@
   display: grid;
   margin-bottom: 0;
   grid-template-columns: minmax(0, 1fr) minmax(15rem, 20rem);
-  gap: var(--dv-space-xl);
+  gap: var(--dv-space-lg);
   align-items: stretch;
-  padding: var(--dv-space-xl);
+  padding: var(--dv-space-lg);
   border: var(--dv-border-width-hairline) solid var(--dv-color-border);
-  border-radius: var(--dv-radius-lg);
+  border-radius: var(--dv-radius-surface);
   background:
     radial-gradient(
       120% 140% at 100% 0%,
@@ -156,7 +156,7 @@
   display: grid;
   align-content: center;
   gap: var(--dv-space-xs);
-  padding: var(--dv-space-lg);
+  padding: var(--dv-space-md);
   border: var(--dv-border-width-hairline) solid var(--dv-color-border);
   border-radius: var(--dv-radius-md);
   background: var(--dv-color-bg);
@@ -254,7 +254,7 @@
   block-size: 100%;
   padding: var(--dv-space-md);
   border: var(--dv-border-width-hairline) solid var(--dv-color-border);
-  border-radius: var(--dv-radius-md);
+  border-radius: var(--dv-radius-surface);
   background: var(--dv-color-bg-raised);
   color: var(--dv-color-text);
   text-decoration: none;
@@ -356,7 +356,7 @@
   padding: 0;
   list-style: none;
   border: var(--dv-border-width-hairline) solid var(--dv-color-border);
-  border-radius: var(--dv-radius-md);
+  border-radius: var(--dv-radius-surface);
   background: var(--dv-color-bg-raised);
   overflow: hidden;
 }
@@ -431,7 +431,7 @@
   margin: 0;
   padding: var(--dv-space-md);
   border: var(--dv-border-width-hairline) dashed var(--dv-color-border-strong);
-  border-radius: var(--dv-radius-md);
+  border-radius: var(--dv-radius-surface);
   color: var(--dv-color-text-muted);
 }
 
@@ -696,7 +696,7 @@
   margin-bottom: var(--dv-space-md);
   padding: var(--dv-space-sm) var(--dv-space-md);
   border: var(--dv-border-width-hairline) solid var(--dv-color-border);
-  border-radius: var(--dv-radius-md);
+  border-radius: var(--dv-radius-surface);
   background: var(--dv-color-bg-raised);
 }
 
@@ -956,7 +956,7 @@
   gap: var(--dv-density-group-gap);
   padding: var(--dv-density-panel-inset);
   border: var(--dv-border-width-hairline) solid var(--dv-color-border);
-  border-radius: var(--dv-radius-md);
+  border-radius: var(--dv-radius-surface);
   background: var(--dv-color-bg-raised);
   min-width: 0;
 }
