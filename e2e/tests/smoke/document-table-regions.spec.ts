@@ -218,7 +218,7 @@ test.describe('document table regions', () => {
         await assertTableCorrectionSheet(page);
         await assertToastMissesSheetActions(
           page,
-          '[data-testid="table-correction-sheet"] .layout-table-header-controls'
+          '[data-testid="table-correction-sheet"] [data-testid="table-structure-tools"]'
         );
       } else {
         await expect(page.locator('[data-testid="table-correction-sheet"]')).toHaveCount(0);
