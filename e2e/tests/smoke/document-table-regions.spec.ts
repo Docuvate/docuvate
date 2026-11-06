@@ -142,11 +142,11 @@ test.describe('document table regions', () => {
     ).toBeVisible({ timeout: 30_000 });
     await assertNoHorizontalOverflow(page);
 
-    // Named table layout: header band, table type and merged cells saved as one correction.
+    // Table family: header band, result footer, lines and merged cells saved as one correction.
     await card.first().getByRole('button', { name: /Layout für Tabelle 1|layout for table 1/i }).click();
     const picker = page.getByTestId('table-layout-picker');
     await expect(picker).toBeVisible();
-    await picker.getByRole('radio', { name: /Positionen mit Summe|Line items with total/i }).check({ force: true });
+    await picker.getByRole('radio', { name: /Finanzlayout|Financial layout/i }).check({ force: true });
     await Promise.all([
       waitForTableCorrectionSave(page),
       picker.getByRole('button', { name: /Layout übernehmen|Apply layout/i }).click(),
