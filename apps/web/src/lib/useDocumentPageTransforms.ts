@@ -5,7 +5,7 @@ import { useCallback, useEffect, useState } from 'react';
 
 import { applyDocumentPageTransform, listDocumentPageTransforms } from './api';
 
-export type PageRotationDeg = 0 | 90 | 180 | 270;
+type PageRotationDeg = 0 | 90 | 180 | 270;
 
 export function useDocumentPageTransforms(documentId: string | undefined) {
   const [byPage, setByPage] = useState<Record<number, PageRotationDeg>>({});

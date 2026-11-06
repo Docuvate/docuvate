@@ -98,7 +98,7 @@ function distanceToBlock(nx: number, ny: number, block: ExtractionBlock): number
 }
 
 /** Pick the extraction block at normalized page coordinates (0–1), if any. */
-export function findBlockAtPoint(
+function findBlockAtPoint(
   blocks: ExtractionBlock[],
   page: number,
   nx: number,

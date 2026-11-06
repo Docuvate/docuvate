@@ -4,7 +4,6 @@
 export { useDocumentFieldExport } from './DocumentExportMenu';
 export { DocumentPipelineHeader } from './DocumentPipelineHeader';
 export { DocumentReviewWorkbench } from './DocumentReviewWorkbench';
-export { DocumentStageTrack } from './DocumentStageTrack';
 export { LibraryExportMenu } from './LibraryExportMenu';
 export { LibraryStageTabs } from './LibraryStageTabs';
 export { StagePill } from './StagePill';
