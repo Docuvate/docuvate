@@ -36,6 +36,8 @@ async function dragRectangleFraction(
 ): Promise<void> {
   const canvas = page.locator('.pdf-page-canvas').first();
   await expect(canvas).toBeVisible({ timeout: 180_000 });
+  // On phones the review workbench sits above the document; bring the page into view first.
+  await canvas.scrollIntoViewIfNeeded();
   const box = await canvas.boundingBox();
   expect(box).toBeTruthy();
   if (!box) {
