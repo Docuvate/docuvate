@@ -7,8 +7,10 @@
  * 1. Every var(--x) without a fallback must resolve to a generated token (@docuvate/tokens),
  *    a property defined in app CSS, or one set at runtime from TSX (style={{ '--x': … }}).
  *    Undefined custom properties silently drop the declaration — this is a hard failure.
- * 2. Ratchet: raw literals (font sizes, radii, shadows, transition timings, rgb()/hsl() colours)
- *    may only go down. Baseline: scripts/design-token-baseline.json.
+ * 2. Ratchet: raw literals (font sizes, radii, shadows, transition timings, rgb()/hsl() colours,
+ *    and px/rem lengths in padding / margin / gap / inset) may only go down. em stays allowed for
+ *    text-relative insets (kbd, mark). Spacing comes from
+ *    --dv-space-* or the semantic --dv-density-* aliases. Baseline: scripts/design-token-baseline.json.
  *    After removing literals run with --update to lock in the lower count.
  */
 import fs from 'node:fs';
@@ -69,6 +71,14 @@ const RULES = {
   'raw-rgb-hsl': /\b(?:rgba?|hsla?)\(/g,
 };
 
+const SPACING_DECL =
+  /(?:^|[;{\s])(?:padding|margin|gap|row-gap|column-gap|inset)(?:-[a-z]+)*\s*:[^;{}]*/g;
+const LENGTH_LITERAL = /(?<![\w.-])(?:\d*\.\d+|[1-9]\d*)(?:px|rem)\b/;
+
+function countRawSpacing(text) {
+  return (text.match(SPACING_DECL) ?? []).filter((decl) => LENGTH_LITERAL.test(decl)).length;
+}
+
 const cssFiles = files.filter((f) => f.endsWith('.css'));
 const counts = {};
 for (const file of cssFiles) {
@@ -80,6 +90,11 @@ for (const file of cssFiles) {
       counts[rel] ??= {};
       counts[rel][rule] = n;
     }
+  }
+  const spacing = countRawSpacing(text);
+  if (spacing > 0) {
+    counts[rel] ??= {};
+    counts[rel]['raw-spacing'] = spacing;
   }
 }
 

@@ -953,8 +953,8 @@
 
 .review-workbench {
   display: grid;
-  gap: var(--dv-space-xs);
-  padding: var(--dv-space-sm);
+  gap: var(--dv-density-group-gap);
+  padding: var(--dv-density-panel-inset);
   border: var(--dv-border-width-hairline) solid var(--dv-color-border);
   border-radius: var(--dv-radius-md);
   background: var(--dv-color-bg-raised);
@@ -1153,6 +1153,8 @@
 .review-workbench-empty,
 .review-workbench-keys {
   margin: 0;
+  padding-block-start: var(--dv-density-item-gap);
+  border-top: var(--dv-border-width-hairline) solid var(--dv-color-border);
   color: var(--dv-color-text-muted);
   font-size: var(--dv-font-size-xs);
 }

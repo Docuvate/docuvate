@@ -167,7 +167,7 @@ a.btn:hover {
 
 .password-input-wrap .password-input {
   width: 100%;
-  padding-right: calc(2.75rem + var(--dv-space-xs));
+  padding-right: calc(var(--dv-control-touch-target) + var(--dv-space-xs));
 }
 
 .password-input-toggle {
@@ -233,7 +233,7 @@ a.btn:hover {
   display: inline-flex;
   align-items: center;
   border-radius: var(--dv-radius-sm);
-  padding: 2px var(--dv-space-xs);
+  padding: var(--dv-space-3xs) var(--dv-space-xs);
   font-size: var(--dv-font-size-xs);
   font-weight: var(--dv-font-weight-semibold);
   border: 1px solid var(--dv-color-border);
@@ -263,7 +263,7 @@ a.btn:hover {
   align-items: center;
   gap: var(--dv-space-2xs);
   border-radius: var(--dv-radius-md);
-  padding: 2px var(--dv-space-xs);
+  padding: var(--dv-space-3xs) var(--dv-space-xs);
   font-size: var(--dv-font-size-xs);
   font-weight: var(--dv-font-weight-semibold);
   line-height: 1.5;
@@ -387,7 +387,7 @@ a.btn:hover {
   cursor: pointer;
   font-size: 14px;
   line-height: 1;
-  padding: 0 2px;
+  padding: 0 var(--dv-space-3xs);
   opacity: 0.85;
 }
 

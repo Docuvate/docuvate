@@ -13,6 +13,32 @@
     "2xl": { "value": "3rem", "comment": "Hero / empty-state breathing room." },
     "3xl": { "value": "4.5rem", "comment": "Marketing / docs layouts only." }
   },
+  "density": {
+    "panel-inset": {
+      "value": "{space.sm}",
+      "comment": "Padding inside workbench panels, cards and sheets (12px)."
+    },
+    "group-gap": {
+      "value": "{space.sm}",
+      "comment": "Gap between groups inside one panel (12px)."
+    },
+    "item-gap": {
+      "value": "{space.xs}",
+      "comment": "Gap between sibling items in a group: options, buttons, chips (8px)."
+    },
+    "inline-gap": {
+      "value": "{space.2xs}",
+      "comment": "Gap between an icon and its label inside a control (4px)."
+    },
+    "row-pad-y": {
+      "value": "{space.xs}",
+      "comment": "Vertical padding of compact list and table rows (8px)."
+    },
+    "row-pad-x": {
+      "value": "{space.sm}",
+      "comment": "Horizontal padding of compact list and table rows (12px)."
+    }
+  },
   "control": {
     "height-sm": {
       "value": "2rem",

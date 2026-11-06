@@ -44,29 +44,33 @@ export function CorrectedTableCard({
       data-testid="corrected-table-card"
       data-layout-overlay-target={`region-table-${region.id}`}
     >
-      <button type="button" className="layout-table-card-head" onClick={onSelect}>
-        <span>{t('documents.layoutCorrectedTableLabel', { n: index + 1 })}</span>
-        <span className="muted">
-          {t('documents.layoutTableMeta', {
-            rows: rowCount,
-            cols: colCount,
-          })}
-        </span>
-      </button>
-      {onLayoutApply ? (
-        <button
-          type="button"
-          className="layout-table-layout-toggle"
-          aria-expanded={layoutOpen}
-          aria-label={t('tableLayouts.chooseAria', { n: index + 1 })}
-          onClick={() => {
-            setLayoutOpen((open) => !open);
-          }}
-        >
-          <LayoutTemplate size={14} aria-hidden />
-          {t('tableLayouts.choose')}
+      <div className="layout-table-card-bar">
+        <button type="button" className="layout-table-card-head" onClick={onSelect}>
+          <span className="layout-table-card-title">
+            {t('documents.layoutCorrectedTableLabel', { n: index + 1 })}
+          </span>
+          <span className="muted">
+            {t('documents.layoutTableMeta', {
+              rows: rowCount,
+              cols: colCount,
+            })}
+          </span>
         </button>
-      ) : null}
+        {onLayoutApply ? (
+          <button
+            type="button"
+            className="layout-table-layout-toggle"
+            aria-expanded={layoutOpen}
+            aria-label={t('tableLayouts.chooseAria', { n: index + 1 })}
+            onClick={() => {
+              setLayoutOpen((open) => !open);
+            }}
+          >
+            <LayoutTemplate size={14} aria-hidden />
+            {t('tableLayouts.choose')}
+          </button>
+        ) : null}
+      </div>
       {onLayoutApply && layoutOpen ? (
         <TableLayoutPicker
           table={table}

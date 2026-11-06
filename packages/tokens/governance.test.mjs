@@ -69,6 +69,10 @@ for (const t of tokens.filter((x) => x.id.startsWith('space.'))) {
 for (const t of tokens.filter((x) => x.id.startsWith('radius.'))) {
   if (remPx(t.resolved) > 12) fail(`${t.id} = ${t.resolved} exceeds the 12px radius cap`);
 }
+// Density tokens are semantic names for the spacing scale, never new values.
+for (const t of tokens.filter((x) => x.id.startsWith('density.'))) {
+  if (!t.aliasOf?.startsWith('space.')) fail(`${t.id} must alias a space.* token`);
+}
 const touch = tokens.find((t) => t.id === 'control.touch-target');
 if (!touch || remPx(touch.resolved) < 44) fail('control.touch-target must be >= 44px');
 
