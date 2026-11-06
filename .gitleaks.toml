@@ -12,4 +12,6 @@ paths = [
 regexes = [
   '''docuvate-secret''',
   '''(LabelsScreenshot1!|ReadmeScreenshot1!|TestPass123!)''',
+  # Synthetic OCR test phrase, not a credential.
+  '''E2E_SYNTHETIC_FIXTURE_PHRASE_\w*''',
 ]
