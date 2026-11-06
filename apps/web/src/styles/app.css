@@ -17608,7 +17608,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  z-index: 4;
+  z-index: calc(var(--dv-z-base) + 4);
 }
 .field-bbox-box {
   position: absolute;
@@ -17643,13 +17643,13 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   display: flex;
   gap: var(--dv-space-2);
   pointer-events: auto;
-  z-index: 5;
+  z-index: calc(var(--dv-z-base) + 5);
 }
 
 /* Keep interactive overlays above static layout marks and unclipped by page chrome. */
 .pdf-page-wrap .field-bbox-editor,
 .pdf-page-wrap .table-pdf-overlay {
-  z-index: calc(var(--dv-z-base, 0) + 6);
+  z-index: calc(var(--dv-z-base) + 6);
 }
 .layout-viewer-stage[data-table-overlay='1'] .pdf-viewer-scroll,
 .layout-viewer-stage[data-field-bbox='1'] .pdf-viewer-scroll {
@@ -17660,7 +17660,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   overflow: visible;
 }
 .table-family-menu {
-  z-index: calc(var(--dv-z-popover, 40) + 1);
+  z-index: calc(var(--dv-z-popover) + 1);
   max-width: min(28rem, 92vw);
 }
 .table-family-item .table-family-option {
@@ -17678,7 +17678,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  z-index: 3;
+  z-index: calc(var(--dv-z-base) + 3);
 }
 .table-pdf-overlay-box {
   position: absolute;
@@ -17725,5 +17725,5 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   display: flex;
   gap: var(--dv-space-2);
   pointer-events: auto;
-  z-index: 5;
+  z-index: calc(var(--dv-z-base) + 5);
 }
