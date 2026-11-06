@@ -64,15 +64,16 @@ async function applyGermanLocale(page: Page): Promise<void> {
 
 async function setLabelsTabOpen(page: Page, open: boolean): Promise<void> {
   const labels = page.getByRole('tab', { name: /^Labels/i });
-  const selected = (await labels.getAttribute('aria-selected')) === 'true';
-  if (open === selected) {
-    return;
-  }
-  if (open) {
-    await labels.click({ force: true });
-    return;
-  }
-  await page.getByRole('tab', { name: /^Details/i }).click({ force: true });
+  const target = open ? labels : page.getByRole('tab', { name: /^Details/i });
+  // Activate by keyboard: a toast or the bottom sheet can sit over the tab strip on phones,
+  // and a forced pointer click would land on that overlay instead.
+  await expect(async () => {
+    if ((await target.getAttribute('aria-selected')) !== 'true') {
+      await target.focus();
+      await page.keyboard.press('Enter');
+    }
+    await expect(target).toHaveAttribute('aria-selected', 'true', { timeout: 2_000 });
+  }).toPass({ timeout: 30_000 });
 }
 
 async function openFieldCorrectionSheet(page: Page): Promise<void> {
