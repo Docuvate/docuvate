@@ -31,49 +31,51 @@ export function StructuringAspectStrip({
       className={`aspect-strip${className ? ` ${className}` : ''}`}
       aria-label={t('pipeline.aspects.aria')}
     >
-      {statuses.map((status) => {
-        const Icon = ASPECT_ICONS[status.aspect];
-        const name = t(`pipeline.aspects.name.${status.aspect}`);
-        const stateText =
-          status.state === 'open' && status.open != null
-            ? t('pipeline.aspects.openCount', { count: status.open })
-            : t(`pipeline.aspects.state.${status.state}`);
-        const label = t('pipeline.aspects.itemAria', { aspect: name, state: stateText });
-        // Settled aspects show only their name in green; text appears where something needs a look.
-        const settled = status.state === 'no_open_items' || status.state === 'confirmed';
-        const content = (
-          <>
-            <Icon size={14} strokeWidth={2} aria-hidden />
-            <span className="aspect-strip-name">{name}</span>
-            {settled ? null : <span className="aspect-strip-state">{stateText}</span>}
-          </>
-        );
-        const openable =
-          onOpen !== undefined && status.state !== 'unavailable' && status.state !== 'unknown';
-        return (
-          <li
-            key={status.aspect}
-            className={`aspect-strip-item aspect-strip-item--${status.state}`}
-            data-aspect={status.aspect}
-            data-aspect-state={status.state}
-          >
-            {openable ? (
-              <button
-                type="button"
-                className="aspect-strip-btn"
-                aria-label={label}
-                onClick={() => {
-                  onOpen(status.aspect);
-                }}
-              >
-                {content}
-              </button>
-            ) : (
-              <span className="aspect-strip-btn">{content}</span>
-            )}
-          </li>
-        );
-      })}
+      {statuses
+        // An aspect without data to work on (e.g. no layout for an image) is not a to-do.
+        .filter((status) => status.state !== 'unavailable' && status.state !== 'unknown')
+        .map((status) => {
+          const Icon = ASPECT_ICONS[status.aspect];
+          const name = t(`pipeline.aspects.name.${status.aspect}`);
+          const stateText =
+            status.state === 'open' && status.open != null
+              ? t('pipeline.aspects.openCount', { count: status.open })
+              : t(`pipeline.aspects.state.${status.state}`);
+          const label = t('pipeline.aspects.itemAria', { aspect: name, state: stateText });
+          // Settled aspects show only their name in green; text appears where something needs a look.
+          const settled = status.state === 'no_open_items' || status.state === 'confirmed';
+          const content = (
+            <>
+              <Icon size={14} strokeWidth={2} aria-hidden />
+              <span className="aspect-strip-name">{name}</span>
+              {settled ? null : <span className="aspect-strip-state">{stateText}</span>}
+            </>
+          );
+          const openable = onOpen !== undefined;
+          return (
+            <li
+              key={status.aspect}
+              className={`aspect-strip-item aspect-strip-item--${status.state}`}
+              data-aspect={status.aspect}
+              data-aspect-state={status.state}
+            >
+              {openable ? (
+                <button
+                  type="button"
+                  className="aspect-strip-btn"
+                  aria-label={label}
+                  onClick={() => {
+                    onOpen(status.aspect);
+                  }}
+                >
+                  {content}
+                </button>
+              ) : (
+                <span className="aspect-strip-btn">{content}</span>
+              )}
+            </li>
+          );
+        })}
     </ul>
   );
 }
