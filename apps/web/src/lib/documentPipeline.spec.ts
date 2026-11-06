@@ -47,12 +47,12 @@ describe('stage mapping and next action', () => {
     expect(stageOfState('structuring')).toBe('structure');
     expect(stageOfState('failed')).toBe('structure');
     expect(stageOfState('review')).toBe('review');
-    expect(stageOfState('structured')).toBe('export');
+    expect(stageOfState('structured')).toBe('record');
     expect(nextDocumentAction('intake')).toBe('wait');
     expect(nextDocumentAction('structuring')).toBe('wait');
     expect(nextDocumentAction('failed')).toBe('retry');
     expect(nextDocumentAction('review')).toBe('review');
-    expect(nextDocumentAction('structured')).toBe('export');
+    expect(nextDocumentAction('structured')).toBe('none');
   });
 
   it('derives stepper statuses', () => {

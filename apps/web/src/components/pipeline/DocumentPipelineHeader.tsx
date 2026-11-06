@@ -126,8 +126,8 @@ export function DocumentPipelineHeader({
       );
       break;
     }
-    case 'export':
-      // Export lives in the document header menu; nothing to prompt here.
+    case 'none':
+      // A record needs no prompt; export lives in the document header menu.
       return null;
   }
 

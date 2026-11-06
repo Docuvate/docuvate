@@ -2333,13 +2333,13 @@
       "upload": "Upload",
       "structure": "Recognize",
       "review": "Structure",
-      "export": "Export"
+      "record": "Records"
     },
     "stageHint": {
       "upload": "PDFs, scans and photos via upload or an import source",
       "structure": "Text recognition, layout and fields, automatic",
       "review": "Keep refining labels, fields, layout and text",
-      "export": "Any time: field values as CSV or JSON"
+      "record": "Searchable and usable; export when needed"
     },
     "stepStatus": {
       "done": "done",
@@ -2366,14 +2366,14 @@
       "review_one": "{{count}} document open",
       "review_other": "{{count}} documents open",
       "reviewNone": "All reviewed",
-      "ready_one": "{{count}} document exportable",
-      "ready_other": "{{count}} documents exportable",
-      "readyNone": "Nothing ready yet"
+      "ready_one": "{{count}} document on record",
+      "ready_other": "{{count}} documents on record",
+      "readyNone": "No records yet"
     },
     "hub": {
       "eyebrow": "Structure documents",
       "title": "Turn documents into data.",
-      "lead": "Upload documents. Docuvate recognizes text, fields and labels, you confirm in one click and export structured values.",
+      "lead": "Upload documents. Docuvate recognizes text, fields and labels, you confirm in one click, and every document stays searchable as a structured record.",
       "importSources": "Connect an import source",
       "openReview": "Start review",
       "progressTitle": "Progress",
@@ -2401,7 +2401,7 @@
       "unlabeled": {
         "title_one": "{{count}} document without a label",
         "title_other": "{{count}} documents without a label",
-        "text": "Without a label the document is missing from views and filtered exports.",
+        "text": "Without a label the document is missing from views and filters.",
         "action": "Add labels"
       },
       "structuring": {
@@ -2418,7 +2418,7 @@
       }
     },
     "library": {
-      "lead": "Filter by status, structure and export any time.",
+      "lead": "Filter by status, structure and keep using each document as a record.",
       "tabsAria": "Filter by status",
       "tab": {
         "all": "All",
@@ -2426,7 +2426,7 @@
         "unlabeled": "No label",
         "structuring": "Being read",
         "failed": "Failed",
-        "ready": "Recognized"
+        "ready": "Records"
       },
       "intakeTitle": "New documents",
       "importSources": "Import sources",

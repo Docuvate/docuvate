@@ -11,20 +11,23 @@ import { routes } from './routes';
 
 /**
  * The structuring pipeline every document moves through:
- * Upload → Structure (OCR + field extraction) → Review (labels / fields) → Export.
+ * Upload → Structure (OCR + field extraction) → Review (labels / fields) → Record.
+ *
+ * A record is the durable, structured state of a document; it stays refinable. Export is an
+ * action on records, not a stage, so the model leaves room for versioned records later.
  *
  * Pure derivation from existing API data (status, tags, suggestions, statistics); no extra
  * backend state. Used by the dashboard hub, the library stage tabs and the viewer stepper so all
  * three screens describe a document's progress the same way.
  */
-export const PIPELINE_STAGES = ['upload', 'structure', 'review', 'export'] as const;
+export const PIPELINE_STAGES = ['upload', 'structure', 'review', 'record'] as const;
 export type PipelineStage = (typeof PIPELINE_STAGES)[number];
 
 /** Where a single document currently is. */
 export type DocumentStageState = 'intake' | 'structuring' | 'failed' | 'review' | 'structured';
 
 /** What the user should do next with a document. */
-type DocumentNextAction = 'wait' | 'retry' | 'review' | 'export';
+type DocumentNextAction = 'wait' | 'retry' | 'review' | 'none';
 
 type PipelineStepStatus = 'done' | 'current' | 'error' | 'todo';
 
@@ -74,7 +77,7 @@ export function stageOfState(state: DocumentStageState): PipelineStage {
     case 'review':
       return 'review';
     case 'structured':
-      return 'export';
+      return 'record';
   }
 }
 
@@ -88,7 +91,7 @@ export function nextDocumentAction(state: DocumentStageState): DocumentNextActio
     case 'review':
       return 'review';
     case 'structured':
-      return 'export';
+      return 'none';
   }
 }
 
@@ -102,7 +105,7 @@ export function pipelineStepStatus(
   if (index < current) return 'done';
   if (index > current) return 'todo';
   if (state === 'failed') return 'error';
-  // A structured document has finished every stage; export is available, not pending.
+  // A structured document is a record: every stage is done, it simply stays refinable.
   if (state === 'structured') return 'done';
   return 'current';
 }

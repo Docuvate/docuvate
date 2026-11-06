@@ -2333,13 +2333,13 @@
       "upload": "Hochladen",
       "structure": "Erkennen",
       "review": "Strukturieren",
-      "export": "Exportieren"
+      "record": "Bestand"
     },
     "stageHint": {
       "upload": "PDFs, Scans und Fotos per Upload oder Importquelle",
       "structure": "Texterkennung, Layout und Felder, automatisch",
       "review": "Labels, Felder, Layout und Text laufend verfeinern",
-      "export": "Jederzeit: Feldwerte als CSV oder JSON"
+      "record": "Durchsuchbar und auswertbar; Export bei Bedarf"
     },
     "stepStatus": {
       "done": "erledigt",
@@ -2366,14 +2366,14 @@
       "review_one": "{{count}} Dokument offen",
       "review_other": "{{count}} Dokumente offen",
       "reviewNone": "Alles geprüft",
-      "ready_one": "{{count}} Dokument exportierbar",
-      "ready_other": "{{count}} Dokumente exportierbar",
-      "readyNone": "Noch nichts bereit"
+      "ready_one": "{{count}} Dokument im Bestand",
+      "ready_other": "{{count}} Dokumente im Bestand",
+      "readyNone": "Noch keine Dokumente im Bestand"
     },
     "hub": {
       "eyebrow": "Dokumente strukturieren",
       "title": "Aus Dokumenten werden Daten.",
-      "lead": "Laden Sie Dokumente hoch. Docuvate erkennt Text, Felder und Labels, Sie bestätigen mit einem Klick und exportieren strukturierte Werte.",
+      "lead": "Laden Sie Dokumente hoch. Docuvate erkennt Text, Felder und Labels, Sie bestätigen mit einem Klick, und jedes Dokument bleibt als strukturierter Datensatz durchsuchbar.",
       "importSources": "Importquelle verbinden",
       "openReview": "Prüfen starten",
       "progressTitle": "Fortschritt",
@@ -2401,7 +2401,7 @@
       "unlabeled": {
         "title_one": "{{count}} Dokument ohne Label",
         "title_other": "{{count}} Dokumente ohne Label",
-        "text": "Ohne Label fehlt das Dokument in Ansichten und gefilterten Exporten.",
+        "text": "Ohne Label fehlt das Dokument in Ansichten und Filtern.",
         "action": "Labels vergeben"
       },
       "structuring": {
@@ -2418,7 +2418,7 @@
       }
     },
     "library": {
-      "lead": "Nach Stand filtern, strukturieren und jederzeit exportieren.",
+      "lead": "Nach Stand filtern, strukturieren und als Datensatz weiter nutzen.",
       "tabsAria": "Nach Stand filtern",
       "tab": {
         "all": "Alle",
@@ -2426,7 +2426,7 @@
         "unlabeled": "Ohne Label",
         "structuring": "Wird erkannt",
         "failed": "Fehler",
-        "ready": "Erkannt"
+        "ready": "Bestand"
       },
       "intakeTitle": "Neue Dokumente",
       "importSources": "Importquellen",

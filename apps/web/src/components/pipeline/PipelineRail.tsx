@@ -63,7 +63,7 @@ export function PipelineRail({ overview, className = '' }: PipelineRailProps) {
       emphasis: overview.review > 0,
     },
     {
-      stage: 'export',
+      stage: 'record',
       count: overview.ready,
       caption:
         overview.ready > 0

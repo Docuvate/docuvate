@@ -33,9 +33,15 @@ correct structured data in as few decisions as possible. This is not a general-p
 
 ## 3. Document state: structuring is the normal state
 
-Documents stay in structuring as long as anyone works on them; there is no forced terminal stage.
-Export is an action available at any time. Processing status (queued, reading, failed) is technical and
-kept apart from the human work.
+Docuvate is a durable repository, not a conversion step. The pipeline reads Upload → Recognize →
+Structure → Records: once recognized and labelled, a document is a structured record that stays
+searchable and can be refined at any time. There is no forced terminal stage and no "exported" state;
+export (CSV, JSON, Typst) is a secondary action on records. Processing status (queued, reading,
+failed) is technical and kept apart from the human work.
+
+The UI does not promise versioning or GoBD retention yet, but nothing contradicts them: records are
+never "finished and gone", corrections are edits to a record, and an immutable or versioned record
+can later sit behind the same "Records" stage without changing the navigation.
 
 To help people find what is left, the viewer shows one quiet strip with four aspects: Text, Labels,
 Layout and Fields. Each says "n open", "nothing open" or "not processed" and jumps to the matching

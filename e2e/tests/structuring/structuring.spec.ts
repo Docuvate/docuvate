@@ -67,7 +67,7 @@ test.describe('structuring journey', () => {
     await expect(rail.locator('[data-stage]')).toHaveCount(4);
     await expect(rail.locator('[data-stage="review"] .pipeline-rail-count')).toHaveText('3');
     await expect(rail.locator('[data-stage="upload"] .pipeline-rail-count')).toHaveText('2');
-    await expect(rail.locator('[data-stage="export"] .pipeline-rail-count')).toHaveText('8');
+    await expect(rail.locator('[data-stage="record"] .pipeline-rail-count')).toHaveText('8');
     const tasks = page.locator('.pipeline-task');
     await expect(tasks.first()).toHaveAttribute('data-task', 'review');
     await expect(tasks).toHaveCount(5);
