@@ -61,6 +61,16 @@ for (const width of [390, 1024, 1280, 1440]) {
       return hits;
     });
     expect(clipped).toEqual([]);
+    if (width < 769) {
+      // Touch: every control in the bar is at least 44px tall.
+      const heights = await toolbar.evaluate((bar) =>
+        Array.from(bar.querySelectorAll('[role="radio"], button[aria-haspopup]')).map(
+          (node) => node.getBoundingClientRect().height
+        )
+      );
+      expect(heights.length).toBeGreaterThan(3);
+      expect(heights.filter((height) => height < 43)).toEqual([]);
+    }
     expect(log.unmatched).toEqual([]);
   });
 }

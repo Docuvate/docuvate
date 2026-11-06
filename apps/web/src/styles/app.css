@@ -17493,6 +17493,14 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   }
 }
 
+@media (max-width: 768px) {
+  .layout-viewer-toolbar .document-selection-tools .segmented-control__option,
+  .layout-viewer-toolbar .layout-view-menu-trigger {
+    height: auto;
+    min-height: var(--dv-touch-target-min);
+  }
+}
+
 @media (max-width: 480px) {
   .layout-viewer-toolbar .document-selection-tools .segmented-option-content > svg {
     display: none;
