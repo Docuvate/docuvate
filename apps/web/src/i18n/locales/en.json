@@ -130,6 +130,7 @@
   },
   "errors": {
     "loadFailed": "Failed to load",
+    "previewLoadFailed": "Could not load the preview.",
     "saveFailed": "Failed to save",
     "actionFailed": "Action failed",
     "deleteFailed": "Delete failed",

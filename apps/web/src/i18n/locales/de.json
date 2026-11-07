@@ -130,6 +130,7 @@
   },
   "errors": {
     "loadFailed": "Laden fehlgeschlagen",
+    "previewLoadFailed": "Vorschau konnte nicht geladen werden.",
     "saveFailed": "Speichern fehlgeschlagen",
     "actionFailed": "Aktion fehlgeschlagen",
     "deleteFailed": "Löschen fehlgeschlagen",

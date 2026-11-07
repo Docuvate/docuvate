@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { DocumentDto } from '@docuvate/contracts';
 
+import { formatCalendarDate } from '../../lib/formatCustomerDate';
+
 function resolveLocaleTag(locale: string): string {
   return locale.startsWith('de') ? 'de-DE' : 'en-US';
 }
@@ -29,11 +31,15 @@ export function documentDisplayDateParts(
   locale = 'de-DE',
   style: DocumentDateDisplayStyle = 'full'
 ): { text: string; isUploadFallback: boolean } {
-  const isUploadFallback = !doc.documentDate;
-  const raw = doc.documentDate ?? doc.createdAt;
+  if (doc.documentDate) {
+    return {
+      text: formatCalendarDate(doc.documentDate, locale),
+      isUploadFallback: false,
+    };
+  }
   return {
-    text: formatLocaleDate(raw, locale, style),
-    isUploadFallback,
+    text: formatLocaleDate(doc.createdAt, locale, style),
+    isUploadFallback: true,
   };
 }
 

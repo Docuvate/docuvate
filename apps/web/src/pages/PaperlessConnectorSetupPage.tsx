@@ -93,7 +93,7 @@ function formsEqual(a: FormState, b: FormState): boolean {
 
 export function PaperlessConnectorSetupPage() {
   const { connectionId: installationId = '' } = useParams();
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const [installationMeta, setInstallationMeta] = useState<PaperlessInstallationDto | null>(null);
   const [storedFlags, setStoredFlags] = useState<StoredFlags>({
     hasStoredApiToken: false,
@@ -114,10 +114,6 @@ export function PaperlessConnectorSetupPage() {
   const [errors, setErrors] = useState<PaperlessImportRunErrorDto[]>([]);
   const [importBusy, setImportBusy] = useState(false);
   const [retryBusy, setRetryBusy] = useState(false);
-
-  useEffect(() => {
-    void i18n.changeLanguage('de');
-  }, [i18n]);
 
   const dirty = useMemo(() => !formsEqual(form, savedForm), [form, savedForm]);
   const importLocked = run?.status === 'pending' || run?.status === 'running';
@@ -188,7 +184,9 @@ export function PaperlessConnectorSetupPage() {
         }
       })();
     }, 2000);
-    return () => { window.clearInterval(timer); };
+    return () => {
+      window.clearInterval(timer);
+    };
   }, [installationId, run]);
 
   function validateBaseUrl(): boolean {
@@ -345,7 +343,9 @@ export function PaperlessConnectorSetupPage() {
         saving={saving}
         error={saveError}
         onSave={() => void handleSave()}
-        onDiscard={() => { setForm(savedForm); }}
+        onDiscard={() => {
+          setForm(savedForm);
+        }}
       />
 
       {loading ? (
@@ -366,8 +366,9 @@ export function PaperlessConnectorSetupPage() {
                 <Input
                   className="paperless-control"
                   value={form.displayName}
-                  onChange={(event) => { setForm((prev) => ({ ...prev, displayName: event.target.value })); }
-                  }
+                  onChange={(event) => {
+                    setForm((prev) => ({ ...prev, displayName: event.target.value }));
+                  }}
                 />
               </label>
               <div className="settings-field">
@@ -408,8 +409,9 @@ export function PaperlessConnectorSetupPage() {
                       ? secretPlaceholder
                       : t('connectors.plugins.paperless.apiTokenHelp')
                   }
-                  onChange={(event) => { setForm((prev) => ({ ...prev, apiToken: event.target.value })); }
-                  }
+                  onChange={(event) => {
+                    setForm((prev) => ({ ...prev, apiToken: event.target.value }));
+                  }}
                   autoComplete="off"
                 />
                 {storedFlags.hasStoredApiToken && !form.apiToken ? (
@@ -426,8 +428,9 @@ export function PaperlessConnectorSetupPage() {
                   placeholder={
                     storedFlags.hasStoredUsername && !form.username ? secretPlaceholder : undefined
                   }
-                  onChange={(event) => { setForm((prev) => ({ ...prev, username: event.target.value })); }
-                  }
+                  onChange={(event) => {
+                    setForm((prev) => ({ ...prev, username: event.target.value }));
+                  }}
                   autoComplete="off"
                 />
               </label>
@@ -439,8 +442,9 @@ export function PaperlessConnectorSetupPage() {
                   placeholder={
                     storedFlags.hasStoredPassword && !form.password ? secretPlaceholder : undefined
                   }
-                  onChange={(event) => { setForm((prev) => ({ ...prev, password: event.target.value })); }
-                  }
+                  onChange={(event) => {
+                    setForm((prev) => ({ ...prev, password: event.target.value }));
+                  }}
                   autoComplete="new-password"
                 />
               </label>
@@ -469,12 +473,13 @@ export function PaperlessConnectorSetupPage() {
                 <input
                   type="checkbox"
                   checked={form.keepOcrText}
-                  onChange={(event) => { setForm((prev) => ({
+                  onChange={(event) => {
+                    setForm((prev) => ({
                       ...prev,
                       keepOcrText: event.target.checked,
                       rerunOcr: event.target.checked ? false : prev.rerunOcr,
-                    })); }
-                  }
+                    }));
+                  }}
                 />
                 <span>{t('connectors.plugins.paperless.keepOcr')}</span>
               </label>
@@ -482,12 +487,13 @@ export function PaperlessConnectorSetupPage() {
                 <input
                   type="checkbox"
                   checked={form.rerunOcr}
-                  onChange={(event) => { setForm((prev) => ({
+                  onChange={(event) => {
+                    setForm((prev) => ({
                       ...prev,
                       rerunOcr: event.target.checked,
                       keepOcrText: event.target.checked ? false : prev.keepOcrText,
-                    })); }
-                  }
+                    }));
+                  }}
                 />
                 <span>{t('connectors.plugins.paperless.rerunOcr')}</span>
               </label>
@@ -495,8 +501,9 @@ export function PaperlessConnectorSetupPage() {
                 <input
                   type="checkbox"
                   checked={form.includeArchivedPdf}
-                  onChange={(event) => { setForm((prev) => ({ ...prev, includeArchivedPdf: event.target.checked })); }
-                  }
+                  onChange={(event) => {
+                    setForm((prev) => ({ ...prev, includeArchivedPdf: event.target.checked }));
+                  }}
                 />
                 <span>{t('connectors.plugins.paperless.includeArchived')}</span>
               </label>
