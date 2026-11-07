@@ -12,6 +12,9 @@ interface ResultRow {
   durationMs: number;
 }
 
+// Rows stay limited to the test title, project, status, and duration.
+// Do not add page text, document names, emails, passwords, or error bodies.
+
 function classify(result: TestResult): ResultRow['status'] {
   const reason = `${result.error?.message ?? ''}\n${result.errors.map((entry) => entry.message).join('\n')}`;
   if (result.status === 'skipped' && reason.includes('BLOCKED:')) return 'blocked';

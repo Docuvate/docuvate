@@ -16,27 +16,39 @@ If the web app is down, or credentials are missing, the affected tests are **blo
 
 ## Setup
 
-Use a dedicated directory. If you already have only this folder, run the commands inside it and skip the `cp`. Example on a Mac where `node` and `npm` are already installed:
+Use a dedicated directory. Do not change the global npm profile. From the standalone archive:
 
 ```bash
 mkdir -p /tmp/docuvate-library-admin-audit
-cp -R tools/library-admin-audit/. /tmp/docuvate-library-admin-audit/
-cd /tmp/docuvate-library-admin-audit
-npm ci
+tar -xzf docuvate-library-admin-audit.tgz -C /tmp/docuvate-library-admin-audit
+cd /tmp/docuvate-library-admin-audit/library-admin-audit
 export PLAYWRIGHT_BROWSERS_PATH="$PWD/.playwright-browsers"
+npm ci
 npx playwright install chromium
 ```
 
-`PLAYWRIGHT_BROWSERS_PATH` keeps the browser download inside this directory.
+`npm ci` installs only `@playwright/test` 1.64.0, `playwright` 1.64.0, and `playwright-core` 1.64.0 from `registry.npmjs.org`. The lockfile records no install scripts. `PLAYWRIGHT_BROWSERS_PATH` keeps the Chromium download inside this directory. `npx playwright install chromium` is the browser download. It is not an audit telemetry report.
 
-Run against the local web app (default `http://127.0.0.1:5173`):
+## Public read-only smoke
+
+This is the first local command. It does not read `DOCUVATE_AUDIT_EMAIL` or `DOCUVATE_AUDIT_PASSWORD`. Leave those unset. It opens `/login`, `/register`, and `/forgot-password` with GET navigation and checks that signed-out app routes return to login. It does not submit forms, does not click buttons, and does not send import, export, upload, or connector requests.
 
 ```bash
 export DOCUVATE_WEB_BASE_URL="http://127.0.0.1:5173"
-npm test
+unset DOCUVATE_AUDIT_EMAIL DOCUVATE_AUDIT_PASSWORD
+unset DOCUVATE_AUDIT_SYNTHETIC_WRITES DOCUVATE_AUDIT_SYNTHETIC_UPLOAD
+npm run test:public
 ```
 
-Signed-in coverage:
+`DOCUVATE_WEB_BASE_URL` is copied into the JSON as `baseURL`. Use an origin with no username or password in the URL.
+
+If `http://127.0.0.1:5173` does not respond, every public test is `blocked`. That is an environment block, not a product pass.
+
+Evidence is `results/library-admin-audit-results.json`. Each row is `title`, `project`, `status`, and `durationMs`. The file does not contain screenshots, traces, document names, emails, or passwords. Screenshots, traces, and video are off for every project in this pack. Copy that JSON back. Do not copy `test-results/` or page output.
+
+## Signed-in steps, after the public JSON exists
+
+Create the account yourself on the register screen. Put the email and password only in the shell environment for that terminal. Do not paste them into chat, tickets, or the JSON you send back. If either variable is missing, signed-in tests stay `BLOCKED`. This pack does not scrape sessions, cookies, or secret files.
 
 ```bash
 export DOCUVATE_AUDIT_EMAIL="audit@example.com"
@@ -44,7 +56,7 @@ export DOCUVATE_AUDIT_PASSWORD="the-account-password"
 npm run test:readonly
 ```
 
-Create the account yourself in the Docuvate register screen first. This pack does not register, does not send mail, and does not call connector import or connection-test actions.
+`test:readonly` signs in through the login form and opens dashboard, library, saved views, labels, fields, folders, duplicates, settings, and connectors. It does not submit search, change sort, or click import, connection test, dry-run, export, delete, or reprocess.
 
 Optional label write, still on that same account:
 
@@ -60,7 +72,7 @@ export DOCUVATE_AUDIT_SYNTHETIC_UPLOAD=1
 npm run test:synthetic
 ```
 
-Results are written to `results/library-admin-audit-results.json`. `blocked` means setup was missing. `failed` means the target responded and an assertion did not hold.
+`blocked` means setup was missing. `failed` means the target responded and an assertion did not hold.
 
 The inventory of use cases, including cloud unit evidence and items that still need this Mac run, is `matrix/library-admin-use-cases.json`.
 

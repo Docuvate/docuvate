@@ -12,8 +12,9 @@ export default defineConfig({
   reporter: [['list'], ['./reporters/matrix-reporter.ts']],
   use: {
     baseURL,
-    trace: 'retain-on-failure',
-    screenshot: 'only-on-failure',
+    trace: 'off',
+    screenshot: 'off',
+    video: 'off',
   },
   projects: [
     {
