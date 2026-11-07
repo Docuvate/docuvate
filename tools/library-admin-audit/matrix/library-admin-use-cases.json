@@ -113,7 +113,7 @@
       "finding": "defect: saved-view widget opened the unfiltered library",
       "severity": "medium",
       "regressionTest": "DashboardWidgets.savedViewLink.spec.tsx",
-      "fixCommit": null,
+      "fixCommit": "37340d18b48832942075042ef99caa7df4d470b3",
       "localMachine": "not-tested"
     },
     {
@@ -177,7 +177,7 @@
       "finding": "defect: repeated ArrowDown did not advance",
       "severity": "high",
       "regressionTest": "moves focus with each ArrowDown",
-      "fixCommit": null,
+      "fixCommit": "37340d18b48832942075042ef99caa7df4d470b3",
       "localMachine": "not-tested"
     },
     {
@@ -193,7 +193,7 @@
       "finding": "defect: date-only values shifted west of UTC and focus rows stayed on the German default locale",
       "severity": "medium",
       "regressionTest": "keeps a YYYY-MM-DD document date; formats the document calendar date",
-      "fixCommit": null,
+      "fixCommit": "37340d18b48832942075042ef99caa7df4d470b3",
       "localMachine": "not-tested"
     },
     {
@@ -209,7 +209,7 @@
       "finding": "defect: hard-coded German preview error",
       "severity": "medium",
       "regressionTest": "translated preview error; fetchDocumentContentBlob errors",
-      "fixCommit": null,
+      "fixCommit": "37340d18b48832942075042ef99caa7df4d470b3",
       "localMachine": "not-tested"
     },
     {
@@ -417,7 +417,7 @@
       "finding": "defect: import setup forced German",
       "severity": "high",
       "regressionTest": "does not force the interface language to German",
-      "fixCommit": null,
+      "fixCommit": "37340d18b48832942075042ef99caa7df4d470b3",
       "localMachine": "not-tested"
     },
     {
