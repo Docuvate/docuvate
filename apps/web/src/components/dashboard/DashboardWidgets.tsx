@@ -60,6 +60,13 @@ function widgetTitle(type: DashboardWidgetDto['type'], t: (k: string) => string)
   }
 }
 
+function dashboardWidgetLibraryHref(widget: DashboardWidgetDto): string {
+  if (widget.type === 'saved_view' && widget.savedViewId) {
+    return `${routes.documents}?view=${encodeURIComponent(widget.savedViewId)}`;
+  }
+  return routes.documents;
+}
+
 function widgetHeaderAside(
   widget: DashboardWidgetDto,
   attentionCount: number,
@@ -73,9 +80,14 @@ function widgetHeaderAside(
         </Link>
       );
     case 'recent_documents':
-    case 'saved_view':
       return (
         <Link to={routes.documents} className="dashboard-widget-link">
+          {t('dashboard.viewAll')}
+        </Link>
+      );
+    case 'saved_view':
+      return (
+        <Link to={dashboardWidgetLibraryHref(widget)} className="dashboard-widget-link">
           {t('dashboard.viewAll')}
         </Link>
       );
