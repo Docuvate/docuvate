@@ -2,7 +2,12 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { documentExtractionConcurrency } from './extraction-queue.config.js';
+import {
+  documentExtractionConcurrency,
+  extractionQueueLockDurationMs,
+  outboxEnqueuedLeaseMs,
+  outboxRunningLeaseMs,
+} from './extraction-queue.config.js';
 
 describe('documentExtractionConcurrency', () => {
   const previous = process.env['DOCUMENT_EXTRACTION_CONCURRENCY'];
@@ -35,5 +40,42 @@ describe('documentExtractionConcurrency', () => {
     delete process.env['DOCUMENT_EXTRACTION_CONCURRENCY'];
     expect(documentExtractionConcurrency(0)).toBe(1);
     expect(documentExtractionConcurrency(Number.NaN)).toBe(1);
+  });
+});
+
+describe('outbox lease windows', () => {
+  const previousEnqueued = process.env['JOB_OUTBOX_LEASE_MS'];
+  const previousRunning = process.env['JOB_OUTBOX_RUNNING_LEASE_MS'];
+  const previousLock = process.env['DOCUMENT_EXTRACTION_LOCK_DURATION_MS'];
+
+  afterEach(() => {
+    if (previousEnqueued === undefined) {
+      delete process.env['JOB_OUTBOX_LEASE_MS'];
+    } else {
+      process.env['JOB_OUTBOX_LEASE_MS'] = previousEnqueued;
+    }
+    if (previousRunning === undefined) {
+      delete process.env['JOB_OUTBOX_RUNNING_LEASE_MS'];
+    } else {
+      process.env['JOB_OUTBOX_RUNNING_LEASE_MS'] = previousRunning;
+    }
+    if (previousLock === undefined) {
+      delete process.env['DOCUMENT_EXTRACTION_LOCK_DURATION_MS'];
+    } else {
+      process.env['DOCUMENT_EXTRACTION_LOCK_DURATION_MS'] = previousLock;
+    }
+  });
+
+  it('keeps a live running attempt past the BullMQ lock unless a test override is set', () => {
+    delete process.env['JOB_OUTBOX_LEASE_MS'];
+    delete process.env['JOB_OUTBOX_RUNNING_LEASE_MS'];
+    delete process.env['DOCUMENT_EXTRACTION_LOCK_DURATION_MS'];
+    expect(outboxRunningLeaseMs()).toBeGreaterThanOrEqual(extractionQueueLockDurationMs());
+    expect(outboxRunningLeaseMs()).toBeGreaterThan(outboxEnqueuedLeaseMs());
+  });
+
+  it('honours an explicit running lease shorter than the lock', () => {
+    process.env['JOB_OUTBOX_RUNNING_LEASE_MS'] = '1000';
+    expect(outboxRunningLeaseMs()).toBe(1000);
   });
 });

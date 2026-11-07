@@ -24,6 +24,29 @@ export function extractionQueueLockDurationMs(): number {
   return parsePositiveInt(process.env['DOCUMENT_EXTRACTION_LOCK_DURATION_MS'], DEFAULT_LOCK_MS);
 }
 
+const DEFAULT_OUTBOX_ENQUEUED_LEASE_MS = 15 * 60 * 1000;
+
+/** How long an `enqueued` outbox row may sit before the relay assumes Valkey lost it. */
+export function outboxEnqueuedLeaseMs(): number {
+  return parsePositiveInt(process.env['JOB_OUTBOX_LEASE_MS'], DEFAULT_OUTBOX_ENQUEUED_LEASE_MS);
+}
+
+/**
+ * How long a `running` row may go without an update before it is treated as worker death.
+ * Defaults to at least the BullMQ lock so a live extraction is not reclaimed mid-run.
+ * `JOB_OUTBOX_RUNNING_LEASE_MS` overrides the floor (disposable stacks and tests only).
+ */
+export function outboxRunningLeaseMs(): number {
+  const raw = process.env['JOB_OUTBOX_RUNNING_LEASE_MS'];
+  if (raw) {
+    const parsed = Number.parseInt(raw, 10);
+    if (Number.isFinite(parsed) && parsed > 0) {
+      return parsed;
+    }
+  }
+  return Math.max(outboxEnqueuedLeaseMs(), extractionQueueLockDurationMs());
+}
+
 export function extractionQueueStalledIntervalMs(): number {
   return parsePositiveInt(
     process.env['DOCUMENT_EXTRACTION_STALLED_INTERVAL_MS'],

@@ -997,7 +997,8 @@
       "worker_error": "The extraction service reported an error.",
       "claim_busy": "Extraction for this document was already in progress.",
       "internal_error": "Extraction failed due to an internal error.",
-      "orphan_requeue_exhausted": "Extraction was restarted too often without finishing and was stopped."
+      "orphan_requeue_exhausted": "Extraction was restarted too often without finishing and was stopped.",
+      "attempts_exhausted": "Extraction failed after the allowed number of attempts."
     },
     "layoutFieldsMissing": "Not found ({{count}})",
     "layoutFieldsFilterPlaceholder": "Filter fields…",

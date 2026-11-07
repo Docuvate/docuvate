@@ -3,6 +3,7 @@
 import { Test } from '@nestjs/testing';
 import { describe, expect, it, vi } from 'vitest';
 
+import { ForbiddenError } from '../../../shared/domain/errors.js';
 import {
   DOCUMENT_REPOSITORY,
   type DocumentRepository,
@@ -69,11 +70,7 @@ describe('QueueExtractionUseCase', () => {
       Promise.resolve({ outboxId: 'o1', created: true })
     );
     const relayOnce = vi.fn(() => Promise.resolve(1));
-    const useCase = await buildUseCase(
-      documents,
-      { scheduleDocumentExtraction },
-      { relayOnce }
-    );
+    const useCase = await buildUseCase(documents, { scheduleDocumentExtraction }, { relayOnce });
 
     await useCase.execute('d1', 'u1');
 
@@ -91,22 +88,36 @@ describe('QueueExtractionUseCase', () => {
       Promise.reject(new Error('outbox insert failed'))
     );
     const relayOnce = vi.fn(() => Promise.resolve(0));
-    const useCase = await buildUseCase(
-      documents,
-      { scheduleDocumentExtraction },
-      { relayOnce }
-    );
+    const useCase = await buildUseCase(documents, { scheduleDocumentExtraction }, { relayOnce });
 
     await useCase.execute('d1', 'u1');
 
     const failedCall = documents.updateStatus.mock.calls.find(
-      (call): call is [string, Extract<DocumentStatus, 'failed'>, { failureReason?: string | null }] =>
+      (
+        call
+      ): call is [string, Extract<DocumentStatus, 'failed'>, { failureReason?: string | null }] =>
         call[1] === 'failed'
     );
     expect(failedCall?.[0]).toBe('d1');
     expect(typeof failedCall?.[2]?.failureReason).toBe('string');
     expect(String(failedCall?.[2]?.failureReason).length).toBeGreaterThan(0);
     expect(relayOnce).not.toHaveBeenCalled();
+  });
+
+  it('does not mark another tenant document failed when schedule refuses it', async () => {
+    const documents = {
+      findByIdForUser: vi.fn(() => Promise.resolve({ id: 'd1', userId: 'u1' })),
+      updateStatus: vi.fn<UpdateStatusFn>(),
+    };
+    const scheduleDocumentExtraction = vi.fn(() => Promise.reject(new ForbiddenError('document')));
+    const useCase = await buildUseCase(
+      documents,
+      { scheduleDocumentExtraction },
+      { relayOnce: vi.fn(() => Promise.resolve(0)) }
+    );
+
+    await expect(useCase.execute('d1', 'u1')).rejects.toBeInstanceOf(ForbiddenError);
+    expect(documents.updateStatus).not.toHaveBeenCalled();
   });
 
   it('rethrows schedule errors when throwOnEnqueueFailure is set', async () => {
@@ -134,11 +145,7 @@ describe('QueueExtractionUseCase', () => {
       Promise.resolve({ outboxId: 'o1', created: true })
     );
     const relayOnce = vi.fn(() => Promise.reject(new Error('valkey down')));
-    const useCase = await buildUseCase(
-      documents,
-      { scheduleDocumentExtraction },
-      { relayOnce }
-    );
+    const useCase = await buildUseCase(documents, { scheduleDocumentExtraction }, { relayOnce });
 
     await useCase.execute('d1', 'u1');
 

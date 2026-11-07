@@ -4,7 +4,12 @@ import { describe, expect, it } from 'vitest';
 
 import type { DocumentStatus } from '../../documents/domain/document.entity.js';
 import { ExtractionFailure } from './extraction-failure.js';
-import { planExtractionJobFailed, planProcessorFailure } from './plan-extraction-job-failure.js';
+import {
+  planExtractionAttemptFailure,
+  planExtractionJobFailed,
+  planProcessorFailure,
+  shouldPersistTerminalExtractionFailure,
+} from './plan-extraction-job-failure.js';
 
 describe('planProcessorFailure', () => {
   it('makes permanent typed failures unrecoverable', () => {
@@ -45,6 +50,70 @@ describe('planProcessorFailure', () => {
   });
 });
 
+describe('planExtractionAttemptFailure', () => {
+  it('does not retry a permanent failure on the first outbox attempt', () => {
+    const plan = planExtractionAttemptFailure({
+      failure: new ExtractionFailure('document_unprocessable', 'unsupported'),
+      outboxAttempts: 1,
+      maxAttempts: 5,
+      deadlineMaxRetries: 3,
+    });
+    expect(plan).toEqual({ allowRetry: false, delayMs: 0 });
+  });
+
+  it('retries a busy worker with backoff until the outbox cap', () => {
+    expect(
+      planExtractionAttemptFailure({
+        failure: new ExtractionFailure('worker_busy', '503'),
+        outboxAttempts: 1,
+        maxAttempts: 5,
+        deadlineMaxRetries: 3,
+      })
+    ).toEqual({ allowRetry: true, delayMs: 2_000 });
+    expect(
+      planExtractionAttemptFailure({
+        failure: new ExtractionFailure('worker_busy', '503'),
+        outboxAttempts: 5,
+        maxAttempts: 5,
+        deadlineMaxRetries: 3,
+      }).allowRetry
+    ).toBe(false);
+  });
+
+  it('stops deadline retries from the outbox attempt count, not BullMQ attemptsMade', () => {
+    expect(
+      planExtractionAttemptFailure({
+        failure: new ExtractionFailure('worker_deadline', '503'),
+        outboxAttempts: 2,
+        maxAttempts: 5,
+        deadlineMaxRetries: 3,
+      }).allowRetry
+    ).toBe(true);
+    expect(
+      planExtractionAttemptFailure({
+        failure: new ExtractionFailure('worker_deadline', '503'),
+        outboxAttempts: 3,
+        maxAttempts: 5,
+        deadlineMaxRetries: 3,
+      }).allowRetry
+    ).toBe(false);
+  });
+});
+
+describe('shouldPersistTerminalExtractionFailure', () => {
+  it('leaves a pending outbox retry visible as in progress', () => {
+    expect(shouldPersistTerminalExtractionFailure('pending')).toBe(false);
+    expect(shouldPersistTerminalExtractionFailure('enqueued')).toBe(false);
+    expect(shouldPersistTerminalExtractionFailure('running')).toBe(false);
+    expect(shouldPersistTerminalExtractionFailure('done')).toBe(false);
+  });
+
+  it('persists when the outbox row is failed or the job has no outbox', () => {
+    expect(shouldPersistTerminalExtractionFailure('failed')).toBe(true);
+    expect(shouldPersistTerminalExtractionFailure(null)).toBe(true);
+  });
+});
+
 describe('planExtractionJobFailed', () => {
   const busy = new ExtractionFailure('worker_busy', 'worker HTTP 503');
 
@@ -71,7 +140,11 @@ describe('planExtractionJobFailed', () => {
   });
 
   it('does nothing while a retry is pending, for terminal documents, or other job names', () => {
-    const base: { jobName: string; jobFinallyFailed: boolean; documentStatus: DocumentStatus | null } = {
+    const base: {
+      jobName: string;
+      jobFinallyFailed: boolean;
+      documentStatus: DocumentStatus | null;
+    } = {
       jobName: 'extract',
       jobFinallyFailed: true,
       documentStatus: 'queued',

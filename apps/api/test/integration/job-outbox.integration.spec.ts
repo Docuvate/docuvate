@@ -11,9 +11,11 @@ import {
   startValkeyContainer,
 } from '../../../../packages/testing/src/containers/index.js';
 import { extractionJobId } from '../../src/modules/extraction/domain/extraction-queue.config.js';
+import { OUTBOX_ATTEMPTS_EXHAUSTED_REASON } from '../../src/modules/job-outbox/domain/job-outbox.types.js';
 import type { ExtractionOutboxEnqueuer } from '../../src/modules/job-outbox/infrastructure/outbox-relay.service.js';
 import { OutboxRelayService } from '../../src/modules/job-outbox/infrastructure/outbox-relay.service.js';
 import { PgJobOutboxRepository } from '../../src/modules/job-outbox/infrastructure/pg-job-outbox.repository.js';
+import { ForbiddenError } from '../../src/shared/domain/errors.js';
 import { closeIntegrationPool, getIntegrationPool } from './pg-pool.js';
 import {
   deleteSyntheticUser,
@@ -225,5 +227,142 @@ describe('job outbox + Valkey relay (Testcontainers)', () => {
     );
     expect(doc.rows[0]?.status).toBe('failed');
     expect(doc.rows[0]?.reason).toBe('fetch failed');
+  });
+
+  it('does not queue a document owned by another user', async () => {
+    const otherUserId = newIsolationUserId();
+    const documentId = randomUUID();
+    const client = await pool.connect();
+    try {
+      await insertSyntheticUser(client, {
+        id: otherUserId,
+        name: 'Other tenant',
+        email: `${otherUserId}@example.test`,
+      });
+      await client.query(
+        `INSERT INTO documents (id, user_id, filename, mime_type, storage_key, status)
+         VALUES ($1, $2, 'other.pdf', 'application/pdf', $3, 'uploaded')`,
+        [documentId, otherUserId, `outbox/other/${documentId}`]
+      );
+    } finally {
+      client.release();
+    }
+
+    await expect(outbox.scheduleDocumentExtraction(documentId, userId)).rejects.toBeInstanceOf(
+      ForbiddenError
+    );
+    const status = await pool.query<{ status: string }>(
+      `SELECT status FROM documents WHERE id = $1`,
+      [documentId]
+    );
+    expect(status.rows[0]?.status).toBe('uploaded');
+    const jobs = await pool.query<{ count: string }>(
+      `SELECT count(*)::text AS count FROM job_outbox WHERE document_id = $1`,
+      [documentId]
+    );
+    expect(jobs.rows[0]?.count).toBe('0');
+    await deleteSyntheticUser(pool, otherUserId);
+  });
+
+  it('does not move an in-flight extraction back to queued', async () => {
+    const documentId = randomUUID();
+    await pool.query(
+      `INSERT INTO documents (id, user_id, filename, mime_type, storage_key, status)
+       VALUES ($1, $2, 'live.pdf', 'application/pdf', $3, 'uploaded')`,
+      [documentId, userId, `outbox/live/${documentId}`]
+    );
+    const scheduled = await outbox.scheduleDocumentExtraction(documentId, userId);
+    await outbox.markEnqueued(scheduled.outboxId);
+    await outbox.markRunning(scheduled.outboxId);
+    await pool.query(`UPDATE documents SET status = 'extracting' WHERE id = $1 AND user_id = $2`, [
+      documentId,
+      userId,
+    ]);
+
+    await outbox.scheduleDocumentExtraction(documentId, userId);
+
+    const status = await pool.query<{ status: string }>(
+      `SELECT status FROM documents WHERE id = $1`,
+      [documentId]
+    );
+    expect(status.rows[0]?.status).toBe('extracting');
+    const row = await outbox.findById(scheduled.outboxId);
+    expect(row?.status).toBe('running');
+  });
+
+  it('fails a leased running job that already used its attempts instead of enqueueing it', async () => {
+    const documentId = randomUUID();
+    await pool.query(
+      `INSERT INTO documents (id, user_id, filename, mime_type, storage_key, status)
+       VALUES ($1, $2, 'capped.pdf', 'application/pdf', $3, 'uploaded')`,
+      [documentId, userId, `outbox/capped/${documentId}`]
+    );
+    const scheduled = await outbox.scheduleDocumentExtraction(documentId, userId, {
+      maxAttempts: 1,
+    });
+    await outbox.markEnqueued(scheduled.outboxId);
+    await outbox.markRunning(scheduled.outboxId);
+    await pool.query(
+      `UPDATE job_outbox SET updated_at = now() - interval '10 seconds' WHERE id = $1`,
+      [scheduled.outboxId]
+    );
+    const previous = process.env['JOB_OUTBOX_RUNNING_LEASE_MS'];
+    process.env['JOB_OUTBOX_RUNNING_LEASE_MS'] = '1000';
+    let enqueued = false;
+    const relay = new OutboxRelayService(outbox, {
+      isReady: () => true,
+      enqueueFromOutbox: () => {
+        enqueued = true;
+        return Promise.resolve();
+      },
+    });
+    try {
+      const count = await relay.relayOnce();
+      expect(count).toBe(0);
+      expect(enqueued).toBe(false);
+    } finally {
+      if (previous === undefined) {
+        delete process.env['JOB_OUTBOX_RUNNING_LEASE_MS'];
+      } else {
+        process.env['JOB_OUTBOX_RUNNING_LEASE_MS'] = previous;
+      }
+    }
+    const row = await outbox.findById(scheduled.outboxId);
+    expect(row?.status).toBe('failed');
+    const doc = await pool.query<{ status: string; reason: string | null }>(
+      `SELECT status, extraction_failure_reason AS reason FROM documents WHERE id = $1`,
+      [documentId]
+    );
+    expect(doc.rows[0]?.status).toBe('failed');
+    expect(doc.rows[0]?.reason).toBe(OUTBOX_ATTEMPTS_EXHAUSTED_REASON);
+  });
+
+  it('fails a non-retryable attempt without consuming the remaining cap', async () => {
+    const documentId = randomUUID();
+    await pool.query(
+      `INSERT INTO documents (id, user_id, filename, mime_type, storage_key, status)
+       VALUES ($1, $2, 'permanent.pdf', 'application/pdf', $3, 'uploaded')`,
+      [documentId, userId, `outbox/permanent/${documentId}`]
+    );
+    const scheduled = await outbox.scheduleDocumentExtraction(documentId, userId, {
+      maxAttempts: 5,
+    });
+    await outbox.markEnqueued(scheduled.outboxId);
+    await outbox.markRunning(scheduled.outboxId);
+    const status = await outbox.markFailedOrRetry(
+      scheduled.outboxId,
+      'document_unprocessable: bad pdf',
+      2_000,
+      { allowRetry: false }
+    );
+    expect(status).toBe('failed');
+    const doc = await pool.query<{ status: string; reason: string | null }>(
+      `SELECT status, extraction_failure_reason AS reason FROM documents WHERE id = $1`,
+      [documentId]
+    );
+    expect(doc.rows[0]?.status).toBe('failed');
+    expect(doc.rows[0]?.reason).toBe('document_unprocessable: bad pdf');
+    const row = await outbox.findById(scheduled.outboxId);
+    expect(row?.attempts).toBe(1);
   });
 });
