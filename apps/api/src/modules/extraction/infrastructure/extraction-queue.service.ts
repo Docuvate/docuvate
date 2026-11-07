@@ -25,7 +25,6 @@ import {
 import { RunArenaSampleCompareUseCase } from '../../documents/application/run-arena-sample-compare.use-case.js';
 import { RunExtractionUseCase } from '../../documents/application/run-extraction.use-case.js';
 import { ResolveFeatureFlagsUseCase } from '../../feature-flags/application/resolve-feature-flags.use-case.js';
-import { computeRetryDelayMs } from '../../job-outbox/domain/job-outbox.types.js';
 import { extractionDeadlineMaxRetries } from '../domain/extraction-deadline.config.js';
 import { toExtractionFailure } from '../domain/extraction-failure.js';
 import {
@@ -36,8 +35,10 @@ import {
   extractionQueueStalledIntervalMs,
 } from '../domain/extraction-queue.config.js';
 import {
+  planExtractionAttemptFailure,
   planExtractionJobFailed,
   planProcessorFailure,
+  shouldPersistTerminalExtractionFailure,
 } from '../domain/plan-extraction-job-failure.js';
 import type { ExtractionReconcileJob } from '../domain/plan-extraction-reconcile.js';
 import { WorkerExtractCapacityCoordinator } from './worker-extract-capacity.coordinator.js';
@@ -174,19 +175,24 @@ export class ExtractionQueueService implements OnModuleInit, OnModuleDestroy {
             });
             if (outboxId) {
               const after = await this.outbox.findById(outboxId);
-              const attempts = after?.attempts ?? 1;
-              const delayMs = computeRetryDelayMs(attempts);
+              const decision = planExtractionAttemptFailure({
+                failure,
+                outboxAttempts: after?.attempts ?? 1,
+                maxAttempts: after?.maxAttempts ?? 1,
+                deadlineMaxRetries: extractionDeadlineMaxRetries(),
+              });
               const nextStatus = await this.outbox.markFailedOrRetry(
                 outboxId,
                 failure.message,
-                delayMs
+                decision.delayMs,
+                { allowRetry: decision.allowRetry }
               );
               if (nextStatus === 'pending') {
                 this.logger.warn(
                   `Extraction ${documentId} will retry via outbox ${outboxId}: ${failure.message}`
                 );
-                throw new UnrecoverableError(failure.message);
               }
+              throw new UnrecoverableError(failure.message);
             } else if (plan.kind === 'fail_document') {
               await this.documents.updateStatus(documentId, 'failed', {
                 failureReason: plan.failureReason,
@@ -315,6 +321,13 @@ export class ExtractionQueueService implements OnModuleInit, OnModuleDestroy {
 
   private async persistFinalJobFailure(job: Job, error: Error): Promise<void> {
     const documentId = parseExtractionJobDocumentId(job.data);
+    const payload = readOutboxPayload(job.data);
+    if (payload?.outboxId) {
+      const row = await this.outbox.findById(payload.outboxId);
+      if (!shouldPersistTerminalExtractionFailure(row?.status ?? null)) {
+        return;
+      }
+    }
     const state = await job.getState();
     const document = await this.documents.findById(documentId);
     const failureReason = planExtractionJobFailed({

@@ -20,6 +20,45 @@ function isOleMagic(buffer: Buffer): boolean {
   );
 }
 
+function isTiffMagic(buffer: Buffer): boolean {
+  if (buffer.length < 4) {
+    return false;
+  }
+  const littleEndian =
+    buffer[0] === 0x49 && buffer[1] === 0x49 && buffer[2] === 0x2a && buffer[3] === 0x00;
+  const bigEndian =
+    buffer[0] === 0x4d && buffer[1] === 0x4d && buffer[2] === 0x00 && buffer[3] === 0x2a;
+  return littleEndian || bigEndian;
+}
+
+function isWebpMagic(buffer: Buffer): boolean {
+  return (
+    buffer.length >= 12 && readAscii(buffer, 0, 4) === 'RIFF' && readAscii(buffer, 8, 4) === 'WEBP'
+  );
+}
+
+function headerLine(head: string, name: string): boolean {
+  const pattern = new RegExp(`^${name}:\\s+\\S`, 'm');
+  return pattern.test(head);
+}
+
+/** RFC822 or mbox. A prose line that merely starts with "From" is not mail. */
+function isRfc822Payload(buffer: Buffer): boolean {
+  const head = buffer.subarray(0, Math.min(buffer.length, 4096)).toString('latin1');
+  const evidence =
+    headerLine(head, 'Subject') ||
+    headerLine(head, 'Date') ||
+    headerLine(head, 'To') ||
+    headerLine(head, 'MIME-Version');
+  if (!evidence) {
+    return false;
+  }
+  if (headerLine(head, 'From')) {
+    return true;
+  }
+  return head.startsWith('From ');
+}
+
 function sniffOoxmlKind(buffer: Buffer): string | null {
   if (!isZipMagic(buffer)) {
     return null;
@@ -60,12 +99,19 @@ export function sniffUploadMime(payload: Uint8Array, filename: string): string |
   if (buffer.length >= 4 && readAscii(buffer, 0, 4) === 'GIF8') {
     return 'image/gif';
   }
+  if (isWebpMagic(buffer)) {
+    return 'image/webp';
+  }
+  if (isTiffMagic(buffer)) {
+    return 'image/tiff';
+  }
   const ooxml = sniffOoxmlKind(buffer);
   if (ooxml) {
     return ooxml;
   }
   if (isOleMagic(buffer)) {
     const lower = filename.toLowerCase();
+    if (lower.endsWith('.msg')) return 'application/vnd.ms-outlook';
     if (lower.endsWith('.xls')) return 'application/vnd.ms-excel';
     if (lower.endsWith('.ppt')) return 'application/vnd.ms-powerpoint';
     return 'application/msword';
@@ -73,11 +119,8 @@ export function sniffUploadMime(payload: Uint8Array, filename: string): string |
   if (buffer.length >= 5 && readAscii(buffer, 0, 5) === '{\\rtf') {
     return 'application/rtf';
   }
-  if (buffer.length >= 4 && readAscii(buffer, 0, 4) === 'From') {
+  if (isRfc822Payload(buffer)) {
     return 'message/rfc822';
-  }
-  if (isOleMagic(buffer) && filename.toLowerCase().endsWith('.msg')) {
-    return 'application/vnd.ms-outlook';
   }
   const head = buffer.subarray(0, Math.min(buffer.length, 256)).toString('utf8').trimStart();
   if (head.startsWith('<!DOCTYPE') || head.startsWith('<html') || head.startsWith('<HTML')) {

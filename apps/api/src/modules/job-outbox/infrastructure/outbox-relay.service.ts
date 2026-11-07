@@ -2,17 +2,17 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 
+import { JOB_OUTBOX_REPOSITORY, type JobOutboxRepository } from '../../../shared/domain/ports.js';
 import {
-  JOB_OUTBOX_REPOSITORY,
-  type JobOutboxRepository,
-} from '../../../shared/domain/ports.js';
+  outboxEnqueuedLeaseMs,
+  outboxRunningLeaseMs,
+} from '../../extraction/domain/extraction-queue.config.js';
 import {
   type ExtractionOutboxJobPayload,
   ExtractionQueueService,
 } from '../../extraction/infrastructure/extraction-queue.service.js';
 
 const DEFAULT_INTERVAL_MS = 2_000;
-const DEFAULT_LEASE_MS = 15 * 60 * 1_000;
 const DEFAULT_BATCH = 50;
 
 export interface ExtractionOutboxEnqueuer {
@@ -37,15 +37,20 @@ export class OutboxRelayService implements OnModuleInit, OnModuleDestroy {
   private timer: ReturnType<typeof setInterval> | null = null;
   private running = false;
   private readonly intervalMs: number;
-  private readonly leaseMs: number;
+  private readonly enqueuedLeaseMs: number;
+  private readonly runningLeaseMs: number;
   private readonly batchSize: number;
 
   constructor(
     @Inject(JOB_OUTBOX_REPOSITORY) private readonly outbox: JobOutboxRepository,
     @Inject(ExtractionQueueService) private readonly extractionQueue: ExtractionOutboxEnqueuer
   ) {
-    this.intervalMs = readPositiveInt(process.env['JOB_OUTBOX_RELAY_INTERVAL_MS'], DEFAULT_INTERVAL_MS);
-    this.leaseMs = readPositiveInt(process.env['JOB_OUTBOX_LEASE_MS'], DEFAULT_LEASE_MS);
+    this.intervalMs = readPositiveInt(
+      process.env['JOB_OUTBOX_RELAY_INTERVAL_MS'],
+      DEFAULT_INTERVAL_MS
+    );
+    this.enqueuedLeaseMs = outboxEnqueuedLeaseMs();
+    this.runningLeaseMs = outboxRunningLeaseMs();
     this.batchSize = readPositiveInt(process.env['JOB_OUTBOX_RELAY_BATCH'], DEFAULT_BATCH);
   }
 
@@ -76,8 +81,11 @@ export class OutboxRelayService implements OnModuleInit, OnModuleDestroy {
     }
     this.running = true;
     try {
-      const leaseOlderThan = new Date(Date.now() - this.leaseMs);
-      const due = await this.outbox.claimForRelay(this.batchSize, leaseOlderThan);
+      const now = Date.now();
+      const due = await this.outbox.claimForRelay(this.batchSize, {
+        enqueuedLeaseOlderThan: new Date(now - this.enqueuedLeaseMs),
+        runningLeaseOlderThan: new Date(now - this.runningLeaseMs),
+      });
       let enqueued = 0;
       for (const job of due) {
         try {
