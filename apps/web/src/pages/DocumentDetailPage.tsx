@@ -13,6 +13,7 @@ import {
   normalizeSuggestionDecisionValue,
   parseSuggestionStorageKey,
   semanticFieldKey,
+  suggestionRejectIdentityKeys,
 } from '@docuvate/contracts';
 import { ArrowLeft, X } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -41,13 +42,13 @@ import { DocumentPipelineHeader, DocumentReviewWorkbench } from '../components/p
 import { PageFormSaveKit } from '../components/save/PageFormSaveKit';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import {
+  applyDocumentFieldCorrection,
   deleteDocument,
   fetchDocumentContentBlob,
   fetchDocumentPreviewBlob,
   getDocument,
   getUserSettings,
   getWorkspaceMlSettings,
-  applyDocumentFieldCorrection,
   listDocumentFieldSuggestionDecisions,
   listFolders,
   listRecognizedFields,
@@ -101,8 +102,8 @@ import {
   confirmFieldKeys,
   nextReviewDocumentId,
   reassignFieldValue,
+  releasedSuggestionRejects,
   type SuggestionRejectRef,
-  suggestionRejectIdentity,
 } from '../lib/reviewWorkbench';
 import { routes } from '../lib/routes';
 import { notifySaved, notifySaveError } from '../lib/saveNotify';
@@ -588,7 +589,9 @@ export function DocumentDetailPage() {
   const rejectedSuggestionIdentities = useMemo(() => {
     const set = new Set<string>();
     for (const item of suggestionRejects) {
-      set.add(`${item.fieldKey}\0${item.valueNormalized}`);
+      for (const key of suggestionRejectIdentityKeys(item.fieldKey)) {
+        set.add(`${key}\0${item.valueNormalized}`);
+      }
     }
     return set;
   }, [suggestionRejects]);
@@ -636,6 +639,7 @@ export function DocumentDetailPage() {
         : row
     );
     setFields(nextFields);
+    releaseMatchingSuggestionRejects(field.key, field.value);
     void persist({ extractionFields: nextFields }).then(() => {
       notifySaved(t('documents.fieldConfirmedToast'), () => {
         const restored = fields.map((row) =>
@@ -666,6 +670,16 @@ export function DocumentDetailPage() {
     });
   }
 
+  function releaseMatchingSuggestionRejects(fieldKey: string, value: string) {
+    if (!id) return;
+    const released = releasedSuggestionRejects(suggestionRejects, fieldKey, value);
+    if (released.remaining.length === suggestionRejects.length) return;
+    setSuggestionRejects(released.remaining);
+    for (const correctionId of released.correctionIds) {
+      void withdrawDocumentFieldCorrection(id, correctionId).catch(() => undefined);
+    }
+  }
+
   function acceptSuggestionAndSave(key: string, value: string) {
     if (key === 'date' || semanticFieldKey({ key, value }) === 'date') {
       const iso = isoDateFromExtractedValue(value);
@@ -674,20 +688,7 @@ export function DocumentDetailPage() {
         setDocumentDateAuto(false);
       }
     }
-    // Accepting supersedes a prior reject of the same field+value.
-    const identity = suggestionRejectIdentity(key, value);
-    const prior = suggestionRejects.find(
-      (item) => suggestionRejectIdentity(item.fieldKey, item.value ?? item.valueNormalized) === identity
-        || `${item.fieldKey}\0${item.valueNormalized}` === identity
-    );
-    if (prior?.correctionId && id) {
-      void withdrawDocumentFieldCorrection(id, prior.correctionId).catch(() => undefined);
-      setSuggestionRejects((prev) =>
-        prev.filter(
-          (item) => `${item.fieldKey}\0${item.valueNormalized}` !== identity
-        )
-      );
-    }
+    releaseMatchingSuggestionRejects(key, value);
     saveFieldsWithUndo(
       acceptSuggestedField(fields, key, value),
       t('documents.fieldConfirmedToast')
@@ -715,14 +716,12 @@ export function DocumentDetailPage() {
       fieldKey: key,
       valueOverride: value,
     }).then((result) => {
-      if (result?.noChange && result.correction) {
+      const correction = result?.correction;
+      if (result?.noChange && correction) {
         setSuggestionRejects((prev) =>
           prev.map((item) =>
             item.correctionId === correctionId
-              ? {
-                  ...item,
-                  correctionId: result.correction!.id,
-                }
+              ? { ...item, correctionId: correction.id }
               : item
           )
         );
@@ -979,6 +978,7 @@ export function DocumentDetailPage() {
                     );
                   }}
                   onSaveValue={(key, value) => {
+                    releaseMatchingSuggestionRejects(key, value);
                     saveFieldsWithUndo(
                       withSavedFieldValue(fields, key, value),
                       t('pipeline.workbench.correctedToast')
@@ -989,6 +989,10 @@ export function DocumentDetailPage() {
                   rejects={suggestionRejects}
                   onUndoReject={undoRejectSuggestion}
                   onReassign={(fromKey, toKey) => {
+                    const source = fields.find((field) => field.key === fromKey);
+                    if (source) {
+                      releaseMatchingSuggestionRejects(toKey, source.value);
+                    }
                     saveFieldsWithUndo(
                       reassignFieldValue(fields, fromKey, toKey),
                       t('pipeline.workbench.reassignedToast', { field: fieldLabelForKey(toKey) })

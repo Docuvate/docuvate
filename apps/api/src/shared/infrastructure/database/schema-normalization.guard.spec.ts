@@ -71,6 +71,7 @@ const FORWARD_SQL_ORDER = [
   'document-region-table-structure-up.sql',
   'document-page-transforms-up.sql',
   'field-suggestion-reject-up.sql',
+  'field-suggestion-decision-user-text-up.sql',
 ];
 
 function loadForwardMigrationSql(): string {

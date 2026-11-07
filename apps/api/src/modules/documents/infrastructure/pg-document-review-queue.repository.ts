@@ -15,6 +15,7 @@ import {
   decodeIdTiebreakerCursor,
   encodeIdTiebreakerCursor,
 } from '../../../shared/infrastructure/pagination/id-tiebreaker-cursor.js';
+import { suggestionRowStillOpenSql } from './review-queue-pending-sql.js';
 
 interface PendingReviewDocumentRow {
   id: string;
@@ -139,6 +140,7 @@ export class PgDocumentReviewQueueRepository {
           AND v.field_storage_key LIKE 'suggestion:%'
           AND length(trim(v.value_text)) > 0
           AND COALESCE(v.confidence, 0) >= 0.85
+          AND ${suggestionRowStillOpenSql('v.document_id', 'v.field_storage_key', 'v.value_text')}
           AND NOT (
             v.field_storage_key IN ('suggestion:vendor', 'suggestion:sender', 'suggestion:correspondent')
             AND (

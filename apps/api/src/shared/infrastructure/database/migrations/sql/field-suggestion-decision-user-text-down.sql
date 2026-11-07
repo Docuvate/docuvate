@@ -1,0 +1,2 @@
+ALTER TABLE public.document_field_suggestion_decisions
+  DROP CONSTRAINT IF EXISTS document_field_suggestion_decisions_user_id_fkey;

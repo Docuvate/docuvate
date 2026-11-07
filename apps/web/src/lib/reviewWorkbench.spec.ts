@@ -9,6 +9,7 @@ import {
   nextReviewDocumentId,
   openWorkbenchRowCount,
   reassignFieldValue,
+  releasedSuggestionRejects,
   safeConfirmKeys,
   workbenchRows,
 } from './reviewWorkbench';
@@ -115,6 +116,23 @@ describe('suggestion reject filtering', () => {
     );
     expect(rows.map((r) => r.key)).toEqual(['global:date', 'global:amount']);
     expect(openWorkbenchRowCount(rows)).toBe(2);
+  });
+
+  it('matches a legacy global: decision to the bare review row without hiding another field', () => {
+    const rows = workbenchRows(
+      [{ key: 'vendor', value: 'ACME GmbH', confidence: 0.4, userConfirmed: false }],
+      [{ key: 'absender', value: 'ACME GmbH', confidence: 0.4 }],
+      [{ fieldKey: 'global:vendor', valueNormalized: 'acme gmbh' }]
+    );
+    expect(rows.map((row) => row.key)).toEqual(['absender']);
+    expect(openWorkbenchRowCount(rows)).toBe(1);
+    expect(
+      releasedSuggestionRejects(
+        [{ fieldKey: 'global:vendor', valueNormalized: 'acme gmbh', correctionId: 'c-1' }],
+        'vendor',
+        'ACME GmbH'
+      )
+    ).toEqual({ remaining: [], correctionIds: ['c-1'] });
   });
 
   it('keeps confirmed rows even when the same value was previously rejected', () => {

@@ -80,6 +80,18 @@ describe('structuringAspects', () => {
     expect(states(doc(), { fields: [], suggestions: [] }).fields).toBe('no_open_items');
   });
 
+  it('excludes a rejected review row from the open count and keeps a different field', () => {
+    const open = structuringAspects(doc(), {
+      fields: [
+        { key: 'vendor', value: 'ACME', userConfirmed: false },
+        { key: 'absender', value: 'ACME', userConfirmed: false },
+      ],
+      suggestions: [],
+      rejects: [{ fieldKey: 'global:vendor', valueNormalized: 'acme' }],
+    });
+    expect(open[3]).toEqual({ aspect: 'fields', state: 'open', open: 1 });
+  });
+
   it('marks failed and open aspects as needing work', () => {
     const statuses = structuringAspects(doc({ status: 'failed', tags: [inbox] }));
     expect(statuses.filter(aspectNeedsWork).map((s) => s.aspect)).toEqual(['ocr', 'labels']);

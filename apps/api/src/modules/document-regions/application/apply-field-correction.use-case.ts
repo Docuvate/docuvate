@@ -18,6 +18,7 @@ import {
   normalizeRect,
   normalizeSuggestionDecisionValue,
   snapRectToTokenHull,
+  suggestionDecisionFieldKey,
   tokensInsideRect,
 } from '@docuvate/contracts';
 import { Inject, Injectable } from '@nestjs/common';
@@ -37,6 +38,10 @@ import {
 } from '../../../shared/domain/ports.js';
 import { layoutTokensFromIr, uniqueBlockIndexes } from '../domain/layout-tokens.js';
 import { isUuid } from '../domain/parse-uuid.js';
+import {
+  findActiveSuggestionReject,
+  withdrawSuggestionRejectsForValue,
+} from '../domain/withdraw-suggestion-reject.js';
 
 const FIELD_OPS = new Set<FieldCorrectionOp>(['create', 'reanchor', 'edit_value', 'remove', 'reject_suggestion']);
 const SCOPES = new Set<FieldCorrectionScope>(['document', 'label', 'always']);
@@ -150,7 +155,7 @@ export class ApplyFieldCorrectionUseCase {
     await this.authorization.assert(subject, 'document:write', doc);
 
     if (body.op === 'reject_suggestion') {
-      return this.rejectSuggestion(documentId, userId, body, fieldKey, scope);
+      return this.rejectSuggestion(documentId, userId, body, body.fieldKey, scope);
     }
 
     const snapshot = await this.regions.findLayoutIrSnapshot(documentId, userId);
@@ -306,6 +311,9 @@ export class ApplyFieldCorrectionUseCase {
 
     const nextFields = this.mergeFields(currentFields, fieldKey, nextValue, body.op === 'remove');
     await this.documents.updateForUser(documentId, userId, { extractionFields: nextFields });
+    if ((body.op === 'create' || body.op === 'edit_value') && nextValue.trim().length > 0) {
+      await withdrawSuggestionRejectsForValue(this.regions, documentId, body.fieldKey, nextValue);
+    }
 
     const region = afterRegion
       ? stripSuperseded(afterRegion)
@@ -432,10 +440,15 @@ export class ApplyFieldCorrectionUseCase {
     if (!raw) {
       throw new ValidationError('documents.correctionValueRequired');
     }
+    const decisionKey = suggestionDecisionFieldKey(fieldKey);
+    if (!decisionKey) {
+      throw new ValidationError('documents.fieldKeyRequired');
+    }
     const valueNormalized = normalizeSuggestionDecisionValue(raw);
-    const existing = await this.regions.findActiveFieldSuggestionReject(
+    const existing = await findActiveSuggestionReject(
+      this.regions,
       documentId,
-      fieldKey,
+      decisionKey,
       valueNormalized
     );
     if (existing) {
@@ -446,7 +459,7 @@ export class ApplyFieldCorrectionUseCase {
             id: existing.correctionId,
             documentId,
             op: 'reject_suggestion',
-            fieldKey,
+            fieldKey: existing.fieldKey,
             beforeRegionId: null,
             afterRegionId: null,
             oldValue: null,
@@ -463,7 +476,7 @@ export class ApplyFieldCorrectionUseCase {
       userId,
       documentId,
       op: 'reject_suggestion',
-      fieldKey,
+      fieldKey: decisionKey,
       beforeRegionId: null,
       afterRegionId: null,
       oldValue: null,
@@ -472,9 +485,10 @@ export class ApplyFieldCorrectionUseCase {
       tagId: scope === 'label' ? (body.tagId ?? null) : null,
     });
     if (!inserted) {
-      const replay = await this.regions.findActiveFieldSuggestionReject(
+      const replay = await findActiveSuggestionReject(
+        this.regions,
         documentId,
-        fieldKey,
+        decisionKey,
         valueNormalized
       );
       return {
@@ -484,7 +498,7 @@ export class ApplyFieldCorrectionUseCase {
             id: body.id,
             documentId,
             op: 'reject_suggestion',
-            fieldKey,
+            fieldKey: decisionKey,
             beforeRegionId: null,
             afterRegionId: null,
             oldValue: null,
@@ -501,7 +515,7 @@ export class ApplyFieldCorrectionUseCase {
       id: decisionId,
       documentId,
       userId,
-      fieldKey,
+      fieldKey: decisionKey,
       valueRaw: raw,
       valueNormalized,
       correctionId: body.id,
@@ -514,7 +528,7 @@ export class ApplyFieldCorrectionUseCase {
           id: body.id,
           documentId,
           op: 'reject_suggestion',
-          fieldKey,
+          fieldKey: decisionKey,
           beforeRegionId: null,
           afterRegionId: null,
           oldValue: null,

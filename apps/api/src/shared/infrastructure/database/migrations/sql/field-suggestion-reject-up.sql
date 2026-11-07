@@ -3,7 +3,7 @@
 CREATE TABLE IF NOT EXISTS public.document_field_suggestion_decisions (
   id uuid PRIMARY KEY,
   document_id uuid NOT NULL REFERENCES public.documents(id) ON DELETE CASCADE,
-  user_id uuid NOT NULL,
+  user_id text NOT NULL REFERENCES public."user"(id) ON DELETE CASCADE,
   field_key text NOT NULL,
   value_raw text NOT NULL,
   value_normalized text NOT NULL,

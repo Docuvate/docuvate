@@ -69,4 +69,94 @@ describe('review queue keyset pagination', () => {
     const page = await repo.listPendingDocumentPage(userId, CURSOR_LIST_DEFAULT_LIMIT);
     expect(page.rows.length).toBeLessThanOrEqual(CURSOR_LIST_DEFAULT_LIMIT);
   });
+
+  it('drops a document whose only suggestion was rejected and keeps a different field', async () => {
+    const client = await pool.connect();
+    const rejectedId = randomUUID();
+    const keptId = randomUUID();
+    const otherUserId = newIsolationUserId();
+    try {
+      const other = buildSyntheticUser({ id: otherUserId });
+      await insertSyntheticUser(client, other);
+      const createdAt = new Date();
+      await client.query(
+        `INSERT INTO documents (id, user_id, filename, title, status, storage_key, mime_type, updated_at, created_at)
+         VALUES ($1, $2, 'rejected.pdf', 'Rejected', 'ready', $3, 'application/pdf', $4, $4),
+                ($5, $2, 'kept.pdf', 'Kept', 'ready', $6, 'application/pdf', $4, $4)`,
+        [rejectedId, userId, `storage/${rejectedId}`, createdAt, keptId, `storage/${keptId}`]
+      );
+      await client.query(
+        `INSERT INTO document_field_values (document_id, field_storage_key, value_text, confidence)
+         VALUES ($1, 'suggestion:vendor', 'ACME GmbH', 0.95),
+                ($2, 'suggestion:vendor', 'ACME GmbH', 0.95),
+                ($2, 'suggestion:amount', '12,00', 0.95)`,
+        [rejectedId, keptId]
+      );
+      const correctionId = randomUUID();
+      await client.query(
+        `INSERT INTO corrections (id, user_id, document_id, kind, created_by, status)
+         VALUES ($1, $2, $3, 'field', $2, 'active')`,
+        [correctionId, userId, rejectedId]
+      );
+      await client.query(
+        `INSERT INTO document_field_suggestion_decisions
+           (id, document_id, user_id, field_key, value_raw, value_normalized, decision, correction_id)
+         VALUES ($1, $2, $3, 'vendor', 'ACME GmbH', 'acme gmbh', 'rejected', $4)`,
+        [randomUUID(), rejectedId, userId, correctionId]
+      );
+      const amountOnly = randomUUID();
+      await client.query(
+        `INSERT INTO corrections (id, user_id, document_id, kind, created_by, status)
+         VALUES ($1, $2, $3, 'field', $2, 'active')`,
+        [amountOnly, userId, keptId]
+      );
+      await client.query(
+        `INSERT INTO document_field_suggestion_decisions
+           (id, document_id, user_id, field_key, value_raw, value_normalized, decision, correction_id)
+         VALUES ($1, $2, $3, 'global:vendor', 'ACME GmbH', 'acme gmbh', 'rejected', $4)`,
+        [randomUUID(), keptId, userId, amountOnly]
+      );
+
+      const pending = await repo.listPendingDocumentPage(userId, 20);
+      const ids = pending.rows.map((row) => row.id);
+      expect(ids).not.toContain(rejectedId);
+      expect(ids).toContain(keptId);
+      expect(await repo.countPendingDocuments(userId)).toBe(5);
+
+      await client.query(
+        `UPDATE document_field_values SET value_text = '  ACME   GmbH ' WHERE document_id = $1`,
+        [rejectedId]
+      );
+      expect((await repo.listPendingDocumentPage(userId, 20)).rows.map((row) => row.id)).not.toContain(
+        rejectedId
+      );
+
+      await client.query(
+        `UPDATE document_field_suggestion_decisions SET withdrawn_at = now() WHERE document_id = $1`,
+        [rejectedId]
+      );
+      expect((await repo.listPendingDocumentPage(userId, 20)).rows.map((row) => row.id)).toContain(
+        rejectedId
+      );
+
+      const otherDoc = randomUUID();
+      await client.query(
+        `INSERT INTO documents (id, user_id, filename, title, status, storage_key, mime_type, updated_at, created_at)
+         VALUES ($1, $2, 'other.pdf', 'Other', 'ready', $3, 'application/pdf', $4, $4)`,
+        [otherDoc, otherUserId, `storage/${otherDoc}`, createdAt]
+      );
+      await client.query(
+        `INSERT INTO document_field_values (document_id, field_storage_key, value_text, confidence)
+         VALUES ($1, 'suggestion:vendor', 'Other GmbH', 0.95)`,
+        [otherDoc]
+      );
+      const isolated = await repo.countPendingDocuments(userId);
+      const withOther = await repo.countPendingDocuments(otherUserId);
+      expect(withOther).toBe(1);
+      expect(isolated).toBe((await repo.listPendingDocumentPage(userId, 50)).rows.length);
+    } finally {
+      client.release();
+      await deleteSyntheticUser(pool, otherUserId);
+    }
+  });
 });
