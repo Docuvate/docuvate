@@ -4,8 +4,8 @@ import {
   type ExtractedField,
   type ExtractionBlock,
   type FieldSuggestionRow,
-  normalizeSuggestionDecisionValue,
   parseSuggestionStorageKey,
+  suggestionRejectMatches,
 } from '@docuvate/contracts';
 
 import { isUserConfirmedField, withSavedFieldValue } from './documentFieldValueRowState';
@@ -24,19 +24,33 @@ export interface SuggestionRejectRef {
   value?: string;
 }
 
-export function suggestionRejectIdentity(fieldKey: string, value: string): string {
-  return `${fieldKey}\0${normalizeSuggestionDecisionValue(value)}`;
+export function releasedSuggestionRejects(
+  rejects: readonly SuggestionRejectRef[],
+  fieldKey: string,
+  value: string
+): { remaining: SuggestionRejectRef[]; correctionIds: string[] } {
+  const remaining: SuggestionRejectRef[] = [];
+  const correctionIds: string[] = [];
+  for (const item of rejects) {
+    if (!suggestionRejectMatches(item.fieldKey, item.valueNormalized, fieldKey, value)) {
+      remaining.push(item);
+      continue;
+    }
+    if (item.correctionId) {
+      correctionIds.push(item.correctionId);
+    }
+  }
+  return { remaining, correctionIds };
 }
 
-export function isRejectedSuggestion(
+function isRejectedSuggestion(
   fieldKey: string,
   value: string,
   rejects: readonly SuggestionRejectRef[]
 ): boolean {
   if (rejects.length === 0) return false;
-  const id = suggestionRejectIdentity(fieldKey, value);
-  return rejects.some(
-    (item) => `${item.fieldKey}\0${item.valueNormalized}` === id
+  return rejects.some((item) =>
+    suggestionRejectMatches(item.fieldKey, item.valueNormalized, fieldKey, value)
   );
 }
 

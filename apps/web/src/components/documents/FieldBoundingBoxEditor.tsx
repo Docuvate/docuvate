@@ -6,6 +6,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 
+import { clientPointToLocalRatio, findPdfPageWrap } from '../../lib/viewerGeometry';
 import { Button } from '../ui/Button';
 
 type Handle = 'move' | 'n' | 's' | 'e' | 'w' | 'ne' | 'nw' | 'se' | 'sw';
@@ -61,14 +62,7 @@ export function FieldBoundingBoxEditor({
       return;
     }
     const sync = () => {
-      const wraps = document.querySelectorAll('.pdf-page-wrap');
-      for (const node of wraps) {
-        if (node instanceof HTMLElement) {
-          setHost(node);
-          return;
-        }
-      }
-      setHost(null);
+      setHost(findPdfPageWrap(page));
     };
     sync();
     const observer = new MutationObserver(sync);
@@ -85,16 +79,22 @@ export function FieldBoundingBoxEditor({
       event.stopPropagation();
       const host = event.currentTarget.closest('.pdf-page-wrap') ?? event.currentTarget.parentElement;
       if (!(host instanceof HTMLElement)) return;
-      const bounds = host.getBoundingClientRect();
+      const point = clientPointToLocalRatio(
+        event.clientX,
+        event.clientY,
+        host.getBoundingClientRect(),
+        { width: host.offsetWidth, height: host.offsetHeight },
+        pageRotationDeg
+      );
       drag.current = {
         handle,
-        startX: (event.clientX - bounds.left) / Math.max(1, bounds.width),
-        startY: (event.clientY - bounds.top) / Math.max(1, bounds.height),
+        startX: point.x,
+        startY: point.y,
         origin: draft,
       };
       event.currentTarget.setPointerCapture(event.pointerId);
     },
-    [active, draft]
+    [active, draft, pageRotationDeg]
   );
 
   const onPointerMove = useCallback(
@@ -103,9 +103,15 @@ export function FieldBoundingBoxEditor({
       if (!state) return;
       const host = event.currentTarget.closest('.pdf-page-wrap') ?? event.currentTarget;
       if (!(host instanceof HTMLElement)) return;
-      const bounds = host.getBoundingClientRect();
-      const x = (event.clientX - bounds.left) / Math.max(1, bounds.width);
-      const y = (event.clientY - bounds.top) / Math.max(1, bounds.height);
+      const point = clientPointToLocalRatio(
+        event.clientX,
+        event.clientY,
+        host.getBoundingClientRect(),
+        { width: host.offsetWidth, height: host.offsetHeight },
+        pageRotationDeg
+      );
+      const x = point.x;
+      const y = point.y;
       const dx = x - state.startX;
       const dy = y - state.startY;
       const o = state.origin;
@@ -122,7 +128,7 @@ export function FieldBoundingBoxEditor({
       }
       setDraft(clampRect(next));
     },
-    []
+    [pageRotationDeg]
   );
 
   const onPointerUp = useCallback(() => {

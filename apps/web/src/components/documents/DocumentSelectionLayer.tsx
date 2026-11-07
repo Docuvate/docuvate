@@ -12,6 +12,12 @@ import {
 } from '@docuvate/contracts';
 import { useCallback, useEffect, useState } from 'react';
 
+import {
+  clientPointToLocalRatio,
+  clientRectToLocalRatio,
+  findPdfPageWrap,
+  readDatasetRotation,
+} from '../../lib/viewerGeometry';
 import type { DocumentSelectionTool } from './DocumentSelectionTools';
 
 export interface DocumentSelectionDraft {
@@ -49,27 +55,16 @@ function pageWrapForEvent(target: EventTarget | null): HTMLElement | null {
   return null;
 }
 
-function pageWrapForPage(page: number): HTMLElement | null {
-  const wraps = document.querySelectorAll('.pdf-page-wrap');
-  for (const candidate of wraps) {
-    if (!(candidate instanceof HTMLElement)) {
-      continue;
-    }
-    if (candidate.dataset.page === String(page)) {
-      return candidate;
-    }
-  }
-  const first = wraps.item(0);
-  return first instanceof HTMLElement ? first : null;
+function readPageRotationDeg(wrap: HTMLElement): number {
+  return readDatasetRotation(wrap.dataset.pdfRotate);
 }
 
-function readPageRotationDeg(wrap: HTMLElement): number {
-  const raw = wrap.dataset.pdfRotate;
-  if (raw == null || raw === '') {
-    return 0;
-  }
-  const parsed = Number(raw);
-  return Number.isFinite(parsed) ? parsed : 0;
+function readDisplayRotationDeg(wrap: HTMLElement): number {
+  return readDatasetRotation(wrap.dataset.displayRotation);
+}
+
+function localBox(wrap: HTMLElement): { width: number; height: number } {
+  return { width: wrap.offsetWidth, height: wrap.offsetHeight };
 }
 
 /**
@@ -85,25 +80,23 @@ function clientToNormalized(
   clientX: number,
   clientY: number
 ): { x: number; y: number } {
-  const bounds = wrap.getBoundingClientRect();
-  const width = bounds.width || 1;
-  const height = bounds.height || 1;
-  return {
-    x: Math.min(1, Math.max(0, (clientX - bounds.left) / width)),
-    y: Math.min(1, Math.max(0, (clientY - bounds.top) / height)),
-  };
+  return clientPointToLocalRatio(
+    clientX,
+    clientY,
+    wrap.getBoundingClientRect(),
+    localBox(wrap),
+    readDisplayRotationDeg(wrap)
+  );
 }
 
 function clientRectToNormalized(wrap: HTMLElement, client: DOMRect): NormalizedRect | null {
-  const bounds = wrap.getBoundingClientRect();
-  const width = bounds.width || 1;
-  const height = bounds.height || 1;
-  return normalizeRect({
-    x0: (client.left - bounds.left) / width,
-    y0: (client.top - bounds.top) / height,
-    x1: (client.right - bounds.left) / width,
-    y1: (client.bottom - bounds.top) / height,
-  });
+  const mapped = clientRectToLocalRatio(
+    client,
+    wrap.getBoundingClientRect(),
+    localBox(wrap),
+    readDisplayRotationDeg(wrap)
+  );
+  return normalizeRect(mapped);
 }
 
 function unionClientRects(wrap: HTMLElement, rects: DOMRectList): NormalizedRect | null {
@@ -249,7 +242,7 @@ export function DocumentSelectionLayer({
         return;
       }
       const range = selection.getRangeAt(0);
-      const wrap = pageWrapForEvent(range.commonAncestorContainer) ?? pageWrapForPage(page);
+      const wrap = pageWrapForEvent(range.commonAncestorContainer) ?? findPdfPageWrap(page);
       if (!wrap) {
         return;
       }
@@ -279,7 +272,7 @@ export function DocumentSelectionLayer({
   }, [onDraftChange, page, tokens, tool]);
 
   useEffect(() => {
-    const wrap = pageWrapForPage(page);
+    const wrap = findPdfPageWrap(page);
     if (!(wrap instanceof HTMLElement) || !liveRect || tool !== 'rect') {
       const stale = document.querySelector('[data-testid="document-selection-rect"]');
       stale?.remove();

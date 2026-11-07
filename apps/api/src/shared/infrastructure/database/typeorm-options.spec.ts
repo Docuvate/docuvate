@@ -71,6 +71,7 @@ import { DocumentFieldValuesUserConfirmed20261105120000 } from './migrations/202
 import { DocumentRegionTableStructure20261106090000 } from './migrations/20261106090000-document-region-table-structure.js';
 import { DocumentPageTransforms20261106180000 } from './migrations/20261106180000-document-page-transforms.js';
 import { FieldSuggestionReject20261106190000 } from './migrations/20261106190000-field-suggestion-reject.js';
+import { FieldSuggestionDecisionUserText20261107120000 } from './migrations/20261107120000-field-suggestion-decision-user-text.js';
 import { buildTypeOrmOptions } from './typeorm-options.js';
 
 const EXPECTED_MIGRATIONS = [
@@ -141,6 +142,7 @@ const EXPECTED_MIGRATIONS = [
   DocumentRegionTableStructure20261106090000,
   DocumentPageTransforms20261106180000,
   FieldSuggestionReject20261106190000,
+  FieldSuggestionDecisionUserText20261107120000,
 ];
 
 describe('buildTypeOrmOptions', () => {

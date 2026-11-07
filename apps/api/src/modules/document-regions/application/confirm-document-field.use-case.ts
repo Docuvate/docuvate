@@ -7,13 +7,16 @@ import { DocumentAuthorizationService } from '../../../shared/application/docume
 import type { AuthorizationSubject } from '../../../shared/domain/authorization.js';
 import { NotFoundError, ValidationError } from '../../../shared/domain/errors.js';
 import {
+  DOCUMENT_REGION_REPOSITORY,
   DOCUMENT_REPOSITORY,
+  type DocumentRegionRepository,
   type DocumentRepository,
   EXTRACTION_FIELD_FEEDBACK_REPOSITORY,
   type ExtractionFieldFeedbackRepository,
 } from '../../../shared/domain/ports.js';
 import { ResolveConfirmationPositionsService } from '../../extraction-feedback/application/resolve-confirmation-positions.service.js';
 import { hashFieldValueHex } from '../domain/ir-hash.js';
+import { withdrawSuggestionRejectsForValue } from '../domain/withdraw-suggestion-reject.js';
 
 @Injectable()
 export class ConfirmDocumentFieldUseCase {
@@ -22,7 +25,8 @@ export class ConfirmDocumentFieldUseCase {
     @Inject(EXTRACTION_FIELD_FEEDBACK_REPOSITORY)
     private readonly feedback: ExtractionFieldFeedbackRepository,
     private readonly positions: ResolveConfirmationPositionsService,
-    private readonly authorization: DocumentAuthorizationService
+    private readonly authorization: DocumentAuthorizationService,
+    @Inject(DOCUMENT_REGION_REPOSITORY) private readonly regions: DocumentRegionRepository
   ) {}
 
   async execute(
@@ -64,6 +68,7 @@ export class ConfirmDocumentFieldUseCase {
       field.key === key ? { ...field, value: confirmedValue, confidence: 1, userConfirmed: true } : field
     );
     await this.documents.updateForUser(documentId, userId, { extractionFields: nextFields });
+    await withdrawSuggestionRejectsForValue(this.regions, documentId, key, confirmedValue);
     return {
       confirmed: true,
       fieldKey: key,

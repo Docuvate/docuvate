@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { DocumentReviewFieldSuggestionDto, ExtractedField } from '@docuvate/contracts';
 import {
-  normalizeSuggestionDecisionValue,
   parseSuggestionStorageKey,
   partitionRecognizedAndHeuristicSuggestions,
   semanticFieldKey,
+  suggestionRejectMatches,
 } from '@docuvate/contracts';
 
 import {
@@ -105,10 +105,10 @@ export function filterRejectedReviewFieldSuggestions<T extends { key: string; va
   if (rejects.length === 0) {
     return [...suggestions];
   }
-  const banned = new Set(
-    rejects.map((item) => `${item.fieldKey}\0${item.valueNormalized}`)
-  );
   return suggestions.filter(
-    (s) => !banned.has(`${s.key}\0${normalizeSuggestionDecisionValue(s.value)}`)
+    (suggestion) =>
+      !rejects.some((item) =>
+        suggestionRejectMatches(item.fieldKey, item.valueNormalized, suggestion.key, suggestion.value)
+      )
   );
 }

@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { DocumentDto, ExtractedField, FieldSuggestionRow } from '@docuvate/contracts';
+import { suggestionRejectMatches } from '@docuvate/contracts';
 
 /**
  * Structuring is the lasting working state of a document, not a stage it passes through.
@@ -103,15 +104,15 @@ function fieldStatus(doc: AspectDocument, evidence: FieldEvidence | null): Aspec
   if (technical) return { aspect: 'fields', state: technical, open: null };
   if (!evidence) return { aspect: 'fields', state: 'unknown', open: null };
   const rejects = evidence.rejects ?? [];
-  const rejectId = (fieldKey: string, value: string) => {
-    const norm = value.replace(/\s+/g, ' ').trim().toLowerCase();
-    return rejects.some((r) => r.fieldKey === fieldKey && r.valueNormalized === norm);
-  };
+  const rejected = (fieldKey: string, value: string) =>
+    rejects.some((item) =>
+      suggestionRejectMatches(item.fieldKey, item.valueNormalized, fieldKey, value)
+    );
   const values = evidence.fields.filter((field) => field.value.trim() !== '');
   const openValues = values.filter(
-    (field) => field.userConfirmed !== true && !rejectId(field.key, field.value)
+    (field) => field.userConfirmed !== true && !rejected(field.key, field.value)
   );
-  const openSuggestions = evidence.suggestions.filter((s) => !rejectId(s.key, s.value));
+  const openSuggestions = evidence.suggestions.filter((s) => !rejected(s.key, s.value));
   const open = openValues.length + openSuggestions.length;
   if (open > 0) return { aspect: 'fields', state: 'open', open };
   if (values.length === 0) return { aspect: 'fields', state: 'no_open_items', open: null };

@@ -39,6 +39,7 @@ import { segmentedToolbarClass } from '../../lib/segmentedControlClasses';
 import { sourceChipPageLabel } from '../../lib/sourceChipLabel';
 import type { TableStructureChoice } from '../../lib/tableLayouts';
 import { useDocumentLayoutIr } from '../../lib/useDocumentLayoutIr';
+import { useDocumentPageTransforms } from '../../lib/useDocumentPageTransforms';
 import { useDocumentRegionLayers } from '../../lib/useDocumentRegionLayers';
 import { useLayoutCompare } from '../../lib/useLayoutCompare';
 import { useViewportMaxWidth } from '../../lib/useViewportMaxWidth';
@@ -67,7 +68,6 @@ import { ExtractedTextPanel } from './ExtractedTextPanel';
 import { FieldBoundingBoxEditor } from './FieldBoundingBoxEditor';
 import { type PdfLayoutOverlay, PdfViewer } from './PdfViewer';
 import { TablePdfOverlay } from './table/TablePdfOverlay';
-import { useDocumentPageTransforms } from '../../lib/useDocumentPageTransforms';
 
 type AdvancedViewerMode = 'reconstruction' | 'compare';
 
@@ -196,7 +196,7 @@ export function DocumentLayoutWorkspace({
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const [advancedView, setAdvancedView] = useState<AdvancedViewerMode>('reconstruction');
   const [overlayEnabled, setOverlayEnabled] = useState(true);
-  const { rotationForPage, rotatePageClockwise } = useDocumentPageTransforms(doc.id);
+  const { rotationForPage, rotatePageClockwise, byPage } = useDocumentPageTransforms(doc.id);
   const displayRotationDeg = rotationForPage(viewerPage);
   const rotateClockwise = useCallback(() => {
     void rotatePageClockwise(viewerPage).then(() => {
@@ -840,7 +840,7 @@ export function DocumentLayoutWorkspace({
                     paginated
                     fitWidth
                     onPageClick={selectionTool === 'none' ? onPdfPageClick : undefined}
-                    displayRotationDeg={displayRotationDeg}
+                    displayRotationDeg={displayRotationDeg} pageRotations={byPage}
                   />
                 )}
                 {!showAdvancedStage ? (
@@ -851,7 +851,7 @@ export function DocumentLayoutWorkspace({
                     onDraftChange={setSelectionDraft}
                   />
                 ) : null}
-                {bboxEditRect && bboxEditRect.page === viewerPage ? (
+                {bboxEditRect?.page === viewerPage ? (
                   <FieldBoundingBoxEditor
                     page={bboxEditRect.page}
                     rect={bboxEditRect}

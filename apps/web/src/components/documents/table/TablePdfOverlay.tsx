@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 
+import { clientPointToLocalRatio, findPdfPageWrap } from '../../../lib/viewerGeometry';
 import { Button } from '../../ui/Button';
 
 interface TablePdfOverlayProps {
@@ -19,14 +20,6 @@ interface TablePdfOverlayProps {
   onSelectCell: (row: number, col: number) => void;
   onBoundsCommit: (rect: NormalizedRect) => void;
   onClose: () => void;
-}
-
-function findPageWrap(): HTMLElement | null {
-  const wraps = document.querySelectorAll('.pdf-page-wrap');
-  for (const node of wraps) {
-    if (node instanceof HTMLElement) return node;
-  }
-  return null;
 }
 
 /** Spatial table editor anchored to the detected region on the PDF page. */
@@ -59,7 +52,7 @@ export function TablePdfOverlay({
       return;
     }
     const sync = () => {
-      setHost(findPageWrap());
+      setHost(findPdfPageWrap(region.page));
     };
     sync();
     const observer = new MutationObserver(sync);
@@ -156,11 +149,17 @@ export function TablePdfOverlay({
             event.stopPropagation();
             const wrap = event.currentTarget.closest('.pdf-page-wrap');
             if (!(wrap instanceof HTMLElement)) return;
-            const bounds = wrap.getBoundingClientRect();
             const origin = draftBounds;
             const onMove = (moveEvent: PointerEvent) => {
-              const x = (moveEvent.clientX - bounds.left) / Math.max(1, bounds.width);
-              const y = (moveEvent.clientY - bounds.top) / Math.max(1, bounds.height);
+              const point = clientPointToLocalRatio(
+                moveEvent.clientX,
+                moveEvent.clientY,
+                wrap.getBoundingClientRect(),
+                { width: wrap.offsetWidth, height: wrap.offsetHeight },
+                pageRotationDeg
+              );
+              const x = point.x;
+              const y = point.y;
               setDraftBounds(
                 normalizeRect({
                   x0: origin.x0,
