@@ -1,0 +1,19 @@
+{
+  "name": "docuvate-library-admin-audit",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Self-contained Docuvate CE library/admin use-case audit. Copy this directory to /tmp; it does not need the Docuvate checkout.",
+  "license": "LicenseRef-Docuvate-SUL-1.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "playwright test",
+    "test:public": "playwright test --project=public-readonly",
+    "test:readonly": "playwright test --project=authenticated-readonly",
+    "test:synthetic": "playwright test --project=authenticated-synthetic"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.0"
+  }
+}

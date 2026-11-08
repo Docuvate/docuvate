@@ -473,6 +473,12 @@ importers:
         specifier: ^5.6.0
         version: 5.9.3
 
+  tools/library-admin-audit:
+    devDependencies:
+      '@playwright/test':
+        specifier: 1.64.0
+        version: 1.64.0
+
   tools/ux-metrics:
     dependencies:
       '@axe-core/playwright':

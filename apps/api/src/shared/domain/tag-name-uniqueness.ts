@@ -42,11 +42,7 @@ export function assertTagNameNotNearDuplicate(
   }
   const trimmed = name.trim();
   if (normalizeLabelKey(duplicate.name) === normalizeLabelKey(trimmed)) {
-    throw new ValidationError(
-      `Label „${trimmed}" existiert bereits als „${duplicate.name}". Bitte das vorhandene Label verwenden.`
-    );
+    throw new ValidationError('labels.errors.alreadyExists');
   }
-  throw new ValidationError(
-    `Sehr ähnlich zu vorhandenem Label „${duplicate.name}". Bitte zusammenführen oder umbenennen statt ein neues Label anzulegen.`
-  );
+  throw new ValidationError('labels.errors.nearDuplicate');
 }

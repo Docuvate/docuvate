@@ -96,6 +96,7 @@ import type {
   WorkspaceMlSettingsDto,
 } from '@docuvate/contracts';
 
+import i18n from '../i18n';
 import { apiBaseUrl } from './apiBaseUrl';
 import { isRecord, notifyApiRequestSucceeded, throwApiRequestError } from './apiErrors';
 import type {
@@ -180,7 +181,7 @@ export async function fetchDocumentPreviewBlob(id: string): Promise<Blob> {
   const response = await fetch(documentPreviewUrl(id), {
     credentials: 'include',
   });
-  if (!response.ok) throw new Error('Vorschau konnte nicht geladen werden');
+  if (!response.ok) throw new Error(i18n.t('errors.previewLoadFailed'));
   return response.blob();
 }
 
@@ -188,7 +189,7 @@ export async function fetchDocumentContentBlob(id: string): Promise<Blob> {
   const response = await fetch(`${baseURL}/documents/${id}/content`, {
     credentials: 'include',
   });
-  if (!response.ok) throw new Error('Vorschau konnte nicht geladen werden');
+  if (!response.ok) throw new Error(i18n.t('errors.previewLoadFailed'));
   return response.blob();
 }
 
@@ -269,7 +270,6 @@ export async function exportDocumentFieldValues(
   notifyApiRequestSucceeded();
   return response.blob();
 }
-
 
 export async function getDocument(id: string): Promise<DocumentDto> {
   return request<DocumentDto>(`/documents/${id}`);
