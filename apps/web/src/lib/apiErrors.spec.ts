@@ -30,7 +30,12 @@ describe('toUserFacingError', () => {
 
   it('translates API message i18n keys directly', () => {
     const facing = toUserFacingError(
-      new ApiRequestError(422, 'VALIDATION_FAILED', 'connectors.errors.displayNameRequired', 'req-1'),
+      new ApiRequestError(
+        422,
+        'VALIDATION_FAILED',
+        'connectors.errors.displayNameRequired',
+        'req-1'
+      ),
       'errors.saveFailed'
     );
     expect(facing.i18nKey).toBe('connectors.errors.displayNameRequired');
@@ -86,6 +91,15 @@ describe('formatUserFacingError', () => {
   beforeEach(async () => {
     await i18n.changeLanguage('de');
     vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+  });
+
+  it('translates a near-duplicate label key in English', async () => {
+    await i18n.changeLanguage('en');
+    const text = formatUserFacingError(
+      new ApiRequestError(422, 'VALIDATION_FAILED', 'labels.errors.nearDuplicate', 'req-5'),
+      'errors.saveFailed'
+    );
+    expect(text).toBe('Too similar to an existing label. Rename it or use the existing one.');
   });
 
   it('returns localized string', () => {

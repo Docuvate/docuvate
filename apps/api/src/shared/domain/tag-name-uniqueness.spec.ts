@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it } from 'vitest';
 
-import { ValidationError } from './errors.js';
 import { assertTagNameNotNearDuplicate, findNearDuplicateTag } from './tag-name-uniqueness.js';
 
 describe('tag-name-uniqueness', () => {
@@ -23,7 +22,15 @@ describe('tag-name-uniqueness', () => {
     expect(findNearDuplicateTag('Vertrag', tags, '1')).toBeNull();
   });
 
-  it('throws on create conflict', () => {
-    expect(() => { assertTagNameNotNearDuplicate('vertrag', tags); }).toThrow(ValidationError);
+  it('throws a translated key for an existing label', () => {
+    expect(() => {
+      assertTagNameNotNearDuplicate('vertrag', tags);
+    }).toThrow('labels.errors.alreadyExists');
+  });
+
+  it('throws a translated key for a near-duplicate spelling', () => {
+    expect(() => {
+      assertTagNameNotNearDuplicate('Rechnungen', tags);
+    }).toThrow('labels.errors.nearDuplicate');
   });
 });

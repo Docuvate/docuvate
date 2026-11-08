@@ -1501,6 +1501,10 @@
     "colorPresetOrange": "Orange",
     "assignNever": "Nie",
     "assignRecommend": "Bei ähnlichen Dokumenten",
+    "errors": {
+      "alreadyExists": "Dieses Label gibt es schon. Bitte das vorhandene verwenden.",
+      "nearDuplicate": "Zu ähnlich zu einem vorhandenen Label. Bitte umbenennen oder das vorhandene verwenden."
+    },
     "assignInbox": "Bei allen neuen Dokumenten",
     "matchingAlgorithm": "Automatisch zuordnen",
     "matchText": "Suchtext",
