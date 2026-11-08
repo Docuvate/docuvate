@@ -44,6 +44,7 @@ import { useViewportMaxWidth } from '../../lib/useViewportMaxWidth';
 import {
   buildWorkspaceLayoutOverlays,
   buildWorkspacePdfOverlays,
+  regionTableOverlayId,
 } from '../../lib/workspacePdfOverlays';
 import { useToast } from '../save';
 import { Button } from '../ui/Button';
@@ -86,10 +87,6 @@ function regionIdFromFieldOverlay(overlayId: string): string | null {
     return null;
   }
   return overlayId.slice(REGION_FIELD_OVERLAY_PREFIX.length);
-}
-
-function regionTableOverlayId(regionId: string): string {
-  return `${REGION_TABLE_OVERLAY_PREFIX}${regionId}`;
 }
 
 function regionIdFromTableOverlay(overlayId: string): string | null {
