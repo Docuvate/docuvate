@@ -237,7 +237,7 @@ function revealPageWrap(page: number): boolean {
   }
   const bounds = wrap.getBoundingClientRect();
   const view = scroller.getBoundingClientRect();
-  const topInView = bounds.top >= view.top && bounds.top < view.bottom;
+  const topInView = bounds.top >= view.top && view.bottom > bounds.top;
   if (topInView) {
     return true;
   }
