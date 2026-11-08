@@ -172,6 +172,37 @@ async function bottomRadius(locator: ReturnType<Page['locator']>): Promise<strin
   return locator.evaluate((node) => getComputedStyle(node).borderBottomLeftRadius);
 }
 
+async function paint(locator: ReturnType<Page['locator']>): Promise<{
+  background: string;
+  borderTop: string;
+  shadow: string;
+}> {
+  return locator.evaluate((node) => {
+    const style = getComputedStyle(node);
+    return {
+      background: style.backgroundColor,
+      borderTop: style.borderTopWidth,
+      shadow: style.boxShadow,
+    };
+  });
+}
+
+async function shootJunction(page: Page, name: string): Promise<void> {
+  const header = page.locator('.app-header');
+  await header.screenshot({ path: path.join(shots, `${name}.png`) });
+  const box = await header.boundingBox();
+  if (!box) return;
+  await page.screenshot({
+    path: path.join(shots, `${name}-zoom.png`),
+    clip: {
+      x: box.x,
+      y: box.y,
+      width: Math.min(640, box.width),
+      height: box.height,
+    },
+  });
+}
+
 test('a selected parent flows into the next band', async ({ page }) => {
   await openViewer(page, 1280, 'light');
   const documents = page.getByRole('navigation', { name: 'Hauptnavigation' }).getByRole('link', { name: 'Dokumente' });
@@ -184,27 +215,39 @@ test('a selected parent flows into the next band', async ({ page }) => {
   expect(Math.abs(documentsBox.y + documentsBox.height - ribbonBox.y)).toBeLessThanOrEqual(2);
   expect(await bottomRadius(documents)).toBe('0px');
   expect(await bottomRadius(start)).not.toBe('0px');
-  const surfaces = await page.evaluate(() => {
-    const tab = document.querySelector('.app-primary-nav-link.active');
-    const band = document.querySelector('[data-testid="app-ribbon"]');
-    if (!(tab instanceof HTMLElement) || !(band instanceof HTMLElement)) return null;
-    return {
-      tab: getComputedStyle(tab).backgroundColor,
-      band: getComputedStyle(band).backgroundColor,
-    };
-  });
-  expect(surfaces?.tab).toBe(surfaces?.band);
+  const documentsPaint = await paint(documents);
+  const ribbonPaint = await paint(ribbon);
+  const headerPaint = await paint(page.locator('.app-header'));
+  const topbarBorder = await page.locator('.app-topbar').evaluate((node) => getComputedStyle(node).borderBottomWidth);
+  expect(documentsPaint.borderTop).toBe('0px');
+  expect(documentsPaint.shadow).toBe('none');
+  expect(documentsPaint.background).toBe(ribbonPaint.background);
+  expect(documentsPaint.background).not.toBe(headerPaint.background);
+  expect(ribbonPaint.borderTop).toBe('0px');
+  expect(topbarBorder).toBe('0px');
 
   await page.getByTestId('structuring-primary-ocr').click();
   const text = page.getByTestId('structuring-primary-ocr');
+  const labels = page.getByTestId('structuring-primary-labels');
   const context = page.getByTestId('app-ribbon-context');
   const textBox = await text.boundingBox();
   const contextBox = await context.boundingBox();
   if (!textBox || !contextBox) throw new Error('text junction has no box');
   expect(Math.abs(textBox.y + textBox.height - contextBox.y)).toBeLessThanOrEqual(2);
   expect(await bottomRadius(text)).toBe('0px');
+  const textPaint = await paint(text);
+  const contextPaint = await paint(context);
+  const labelsPaint = await paint(labels);
+  expect(textPaint.borderTop).toBe('0px');
+  expect(textPaint.shadow).toBe('none');
+  expect(contextPaint.borderTop).toBe('0px');
+  expect(contextPaint.shadow).toBe('none');
+  expect(textPaint.background).toBe(contextPaint.background);
+  expect(textPaint.background).not.toBe(ribbonPaint.background);
+  expect(labelsPaint.background).not.toBe(contextPaint.background);
   await expect(context.locator('.ribbon-group-label')).toHaveCount(0);
-  await page.screenshot({ path: path.join(shots, 'ribbon-flow-1280-light.png') });
+  await expect(page.getByRole('group', { name: 'Struktur' }).locator('.ribbon-group-label')).toHaveCount(0);
+  await shootJunction(page, 'ribbon-junction-1280-light');
 
   await page.getByTestId('structuring-primary-labels').click();
   await expect(context).toBeHidden();
@@ -218,8 +261,11 @@ test('a selected parent flows into the next band', async ({ page }) => {
   });
   expect(Number.parseFloat(motion)).toBeLessThan(0.05);
   await expect(page.getByTestId('app-ribbon-context')).toBeVisible();
-  await page.screenshot({ path: path.join(shots, 'ribbon-flow-1280-dark.png') });
+  await shootJunction(page, 'ribbon-junction-1280-dark');
   await page.setViewportSize({ width: 390, height: 800 });
   await expect(page.getByTestId('app-ribbon-context').getByRole('radio')).toHaveCount(3);
-  await page.screenshot({ path: path.join(shots, 'ribbon-flow-390-dark.png') });
+  await shootJunction(page, 'ribbon-junction-390-dark');
+  await openViewer(page, 390, 'light');
+  await page.getByTestId('structuring-primary-ocr').click();
+  await shootJunction(page, 'ribbon-junction-390-light');
 });

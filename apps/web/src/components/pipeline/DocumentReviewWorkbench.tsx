@@ -248,7 +248,7 @@ export function DocumentReviewWorkbench({
       data-open-count={open}
     >
       <AppRibbon>
-        <RibbonGroup label={t('ribbon.structure')} kind="navigate" order={1}>
+        <RibbonGroup label={t('ribbon.structure')} kind="navigate" order={1} showCaption={false}>
           <StructuringAspectStrip
             statuses={aspects}
             className="review-workbench-aspects"

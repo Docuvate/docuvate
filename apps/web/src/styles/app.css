@@ -394,6 +394,8 @@
 }
 
 .app-header {
+  --dv-ribbon-band: var(--dv-color-bg-raised);
+  --dv-ribbon-panel: color-mix(in srgb, var(--dv-color-bg-raised) 68%, var(--dv-color-bg-muted));
   position: relative;
   z-index: var(--dv-z-sticky);
   flex: none;
@@ -457,8 +459,12 @@
   box-shadow: var(--dv-surface-highlight), var(--dv-elevation-1);
 }
 
-/* The open section is the mouth of the ribbon. Its bottom edge is square and
-   the same surface, so the tab flows into the band instead of floating above it. */
+/* The open section is the same surface as the ribbon. No stroke, no shadow:
+   the header stays the parent band, and only the colour changes beside it. */
+.app-header:has(.app-ribbon .ribbon-group) .app-topbar {
+  border-bottom: 0;
+}
+
 .app-header:has(.app-ribbon .ribbon-group) .app-primary-nav {
   align-self: stretch;
   align-items: flex-end;
@@ -467,13 +473,11 @@
 }
 
 .app-header:has(.app-ribbon .ribbon-group) .app-primary-nav-link.active {
-  border: var(--dv-border-width-hairline) solid
-    color-mix(in srgb, var(--dv-color-border) 80%, transparent);
-  border-bottom-color: var(--dv-color-bg-raised);
+  border: 0;
   border-radius: var(--dv-radius-lg) var(--dv-radius-lg) 0 0;
-  background: var(--dv-color-bg-raised);
+  background: var(--dv-ribbon-band);
   box-shadow: none;
-  margin-bottom: calc(-1 * var(--dv-border-width-hairline));
+  margin-bottom: -2px;
 }
 
 .app-primary-nav-link.active svg {
@@ -16996,9 +17000,9 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   align-items: stretch;
   gap: 0;
   padding: var(--dv-space-2xs) var(--dv-space-lg) var(--dv-space-xs);
-  border-top: var(--dv-border-width-hairline) solid
-    color-mix(in srgb, var(--dv-color-border) 80%, transparent);
-  background: var(--dv-color-bg-raised);
+  border-top: 0;
+  background: var(--dv-ribbon-band, var(--dv-color-bg-raised));
+  box-shadow: none;
 }
 
 .app-ribbon:has(.app-ribbon-context:not(:empty)) {
@@ -17023,12 +17027,12 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   align-items: center;
   width: 100%;
   min-width: 0;
-  margin-top: 0;
-  padding-top: var(--dv-space-2xs);
+  margin-top: -2px;
+  padding-top: calc(var(--dv-space-2xs) + 2px);
   padding-bottom: var(--dv-space-xs);
-  border-top: var(--dv-border-width-hairline) solid
-    color-mix(in srgb, var(--dv-color-border) 80%, transparent);
-  background: var(--dv-color-bg-raised);
+  border-top: 0;
+  background: var(--dv-ribbon-panel, var(--dv-color-bg-raised));
+  box-shadow: none;
 }
 
 .app-ribbon-context > .ribbon-group {
@@ -17297,22 +17301,23 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 
 .app-ribbon .aspect-strip-btn[aria-pressed='true'] {
   border-color: transparent;
-  background: color-mix(in srgb, var(--dv-color-bg-muted) 70%, var(--dv-color-bg-raised));
+  background: color-mix(in srgb, var(--dv-color-bg-muted) 40%, transparent);
   color: var(--dv-color-text);
   font-weight: var(--dv-font-weight-semibold);
   box-shadow: none;
 }
 
-/* Text or Layout owns the tool band. The pressed control opens downward into it. */
-.app-ribbon:has(.app-ribbon-context:not(:empty)) .aspect-strip-btn[aria-pressed='true'] {
+/* The selected category is the tool panel. Unselected categories stay on the band.
+   No outline and no rule through the join. */
+.app-ribbon:has(.app-ribbon-context:not(:empty)) .aspect-strip-btn[aria-pressed='true'],
+.app-ribbon:has(.app-ribbon-context:not(:empty)) .aspect-strip-btn[aria-pressed='true']:hover {
   position: relative;
   z-index: 1;
-  border: var(--dv-border-width-hairline) solid
-    color-mix(in srgb, var(--dv-color-border) 80%, transparent);
-  border-bottom-color: var(--dv-color-bg-raised);
-  border-radius: var(--dv-radius-control) var(--dv-radius-control) 0 0;
-  background: var(--dv-color-bg-raised);
-  margin-bottom: calc(-1 * var(--dv-border-width-hairline));
+  border-width: 0;
+  border-radius: 0;
+  background: var(--dv-ribbon-panel, var(--dv-color-bg-raised));
+  background-clip: border-box;
+  box-shadow: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
