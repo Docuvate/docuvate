@@ -30,6 +30,36 @@ An earlier pass on Node v22.23.4 ran `node --test tools/audit/proc-ingestion-rel
 
 Health is not E2E. A ready worker does not prove OCR, labels, NER, or tables.
 
+## Disposable combined stack (snapshot)
+
+Not part of this pull request's branch. The worktree was local and was not pushed. Images were rebuilt from it and the api, web, and worker containers were recreated on compose project `dvcombined`. `/health` was only a precondition.
+
+Commit tuple fetched immediately before the run:
+
+- PR 121 `3fe55df4f8d13ad30968013af9144e9572cf5a1e` on `cursor/viewer-review-orientation-40cd`, which includes PR 118 `4f1f5dc52d2b22aeae36fb8718b217c5071fa2ff`
+- PR 119 `7c764bd0ddd201ace9487aa029b67d2167b53497`
+- PR 120 `9595d3e4d34a1dd6a2e8f50277b7394a378fa354`
+
+The viewer agent owns the product ribbon and will move PR 121 past `3fe55df`. This section is evidence for that tuple only. It is not combined readiness. The ribbon was not implemented here. Bbox and table actions did not finish, so those steps have to be rerun on the later viewer commit.
+
+Env: `E2E_WEB_URL=http://localhost:5173`, `E2E_API_URL=http://localhost:3001`, `DATABASE_URL=postgresql://docuvate:docuvate@127.0.0.1:5433/docuvate`. The browser origin and the API host are both `localhost`. `E2E_API_URL=http://127.0.0.1:3001` returned 401 from the page because the session cookie is for host `localhost`. `psql` 16 sent the seed statement to Postgres 18.
+
+Official spec `e2e/real-stack/viewer-review-persist.spec.ts` with `playwright.real-stack.config.ts`, Chromium, retries 0:
+
+- Signup, upload of a generated one-page PDF, and poll to `ready` succeeded.
+- Three documents on this stack (two from that spec, one from a local continuation) each store `extracted_text` `NORTH 1842` and `INVOICE TOTAL`, two extraction blocks with those strings, status `ready`, and one `job_outbox` row `document-extraction` with status `done` and `attempts` 1.
+- The worker wrote no `suggestion:%` row. The spec then inserted `suggestion:vendor` = `ACME GmbH` at confidence 0.55. Playwright printed `INSERT 0 1`. That reject is not extraction proof.
+- The browser reject stored `document_field_suggestion_decisions` decision `rejected` for field `vendor`. The spec read that back after reload.
+- `GET /v1/review-queue/summary` `pendingCount` stayed 0. The queue counts a suggestion only when confidence is at least 0.85 (`pg-document-review-queue.repository.ts`). The seeded 0.55 row is visible in the workbench and is not a pending queue document. The spec expected the count to fall and failed there. The official spec did not reach undo, rotation, bbox, or the table overlay.
+
+A local continuation, not the committed spec and not pushed, logged the same 0 and 0 counts and went on:
+
+- Undo set `withdrawn_at` on that decision.
+- Clockwise rotate stored `document_page_transforms` page 1, `rotation_quarter_turns` 1, source `user`. The API readback assertion passed.
+- `field-position-correct` never appeared. On this commit it is rendered only inside the workbench edit form, after Correct is opened (`DocumentReviewWorkbench.tsx`). The spec clicks it immediately. The run waited until the 240s timeout. No `document_regions` rows were written. The table overlay was not attempted.
+
+CI run `42456109793` on `9595d3e` failed `quick-checks` because knip reported unused exported type `ExtractionAttemptFailurePlan`. The following commit keeps that type in the file and stops exporting it. The failure plan is unchanged.
+
 ## Code inventory (not a live probe)
 
 Upload allow-list in `packages/contracts/src/upload-formats.ts`: PDF, JPEG, PNG, WebP, GIF, TIFF, DOC/DOCX, XLS/XLSX, PPT/PPTX, ODT/ODS/ODP, RTF, CSV, plain text, Markdown, HTML, EML, MSG.
@@ -98,4 +128,4 @@ Jobs that arrive without an outbox id still use `planProcessorFailure` and BullM
 
 ## Not claimed
 
-These tests do not prove the Mac stack, a rotated scan, label/NER/table quality, or connector import. They do not prove that no other regression exists.
+These tests do not prove the Mac stack, a rotated scan, label/NER/table quality, or connector import. They do not prove that no other regression exists. The disposable stack read an upright digital PDF. It does not prove 180° OCR, a bbox, or a table overlay, and it is not a ribbon sign-off.
