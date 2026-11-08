@@ -225,6 +225,8 @@ test('a selected parent flows into the next band', async ({ page }) => {
   expect(documentsPaint.background).not.toBe(headerPaint.background);
   expect(ribbonPaint.borderTop).toBe('0px');
   expect(topbarBorder).toBe('0px');
+  const bandPad = await ribbon.evaluate((node) => Number.parseFloat(getComputedStyle(node).paddingTop));
+  expect(bandPad).toBeGreaterThanOrEqual(12);
 
   await page.getByTestId('structuring-primary-ocr').click();
   const text = page.getByTestId('structuring-primary-ocr');
@@ -242,6 +244,8 @@ test('a selected parent flows into the next band', async ({ page }) => {
   expect(textPaint.shadow).toBe('none');
   expect(contextPaint.borderTop).toBe('0px');
   expect(contextPaint.shadow).toBe('none');
+  const panelPad = await context.evaluate((node) => Number.parseFloat(getComputedStyle(node).paddingTop));
+  expect(panelPad).toBeGreaterThanOrEqual(12);
   expect(textPaint.background).toBe(contextPaint.background);
   expect(textPaint.background).not.toBe(ribbonPaint.background);
   expect(labelsPaint.background).not.toBe(contextPaint.background);
