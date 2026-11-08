@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 
 import { formatUserFacingError } from '../../lib/apiErrors';
 import { computeVirtualPageWindow, layoutOverlayPercentStyles } from '../../lib/pdfViewerVirtual';
+import { applyPageDisplayRotation, visualWidthAfterQuarterTurn } from '../../lib/viewerGeometry';
 import { Button } from '../ui/Button';
 
 pdfjs.GlobalWorkerOptions.workerSrc = `${import.meta.env.BASE_URL}pdf.worker.min.mjs`;
@@ -54,8 +55,10 @@ interface PdfViewerProps {
   onLayoutOverlayClear?: () => void;
   /** Renders in the PDF chrome row (e.g. layout overlay toggle on narrow viewports). */
   toolbarAccessory?: ReactNode;
-  /** Client-only preview rotation in degrees (0/90/180/270). */
+  /** Client-only preview rotation in degrees (0/90/180/270) for the current page. */
   displayRotationDeg?: 0 | 90 | 180 | 270;
+  /** Manual rotation per page. Falls back to displayRotationDeg for the current page. */
+  pageRotations?: Readonly<Partial<Record<number, 0 | 90 | 180 | 270>>>;
   onRotateClockwise?: () => void;
 }
 
@@ -226,7 +229,8 @@ async function resolveRenderScale(
   pdf: pdfjs.PDFDocumentProxy,
   pageNum: number,
   fitWidth: boolean,
-  containerWidth: number | null
+  containerWidth: number | null,
+  rotationDeg: number
 ): Promise<number> {
   if (!fitWidth || containerWidth == null || containerWidth <= 0) {
     return DEFAULT_PAGE_SCALE;
@@ -234,10 +238,27 @@ async function resolveRenderScale(
   const page = await pdf.getPage(pageNum);
   const base = page.getViewport({ scale: 1 });
   const available = containerWidth - PDF_PAGES_HORIZONTAL_PADDING_PX;
-  if (available <= 0 || base.width <= 0) {
+  const visualWidth = visualWidthAfterQuarterTurn(base.width, base.height, rotationDeg);
+  if (available <= 0 || visualWidth <= 0) {
     return DEFAULT_PAGE_SCALE;
   }
-  return Math.min(DEFAULT_PAGE_SCALE, available / base.width);
+  return Math.min(DEFAULT_PAGE_SCALE, available / visualWidth);
+}
+
+function rotationForRenderedPage(
+  pageNum: number,
+  currentPage: number,
+  displayRotationDeg: 0 | 90 | 180 | 270,
+  pageRotations: Readonly<Partial<Record<number, 0 | 90 | 180 | 270>>> | undefined
+): 0 | 90 | 180 | 270 {
+  const stored = pageRotations?.[pageNum];
+  if (stored != null) {
+    return stored;
+  }
+  if (pageNum === currentPage) {
+    return displayRotationDeg;
+  }
+  return 0;
 }
 
 export function PdfViewer({
@@ -257,6 +278,7 @@ export function PdfViewer({
   onPageClick,
   toolbarAccessory,
   displayRotationDeg = 0,
+  pageRotations,
   onRotateClockwise,
 }: PdfViewerProps) {
   const { t } = useTranslation();
@@ -293,6 +315,10 @@ export function PdfViewer({
 
   const isControlled = controlledPage !== undefined && onPageChange !== undefined;
   const currentPage = isControlled ? controlledPage : internalPage;
+  const currentPageRef = useRef(currentPage);
+  useEffect(() => {
+    currentPageRef.current = currentPage;
+  }, [currentPage]);
   const highlightKey = JSON.stringify(highlightBlocks);
   const overlayKey = JSON.stringify({
     overlays: layoutOverlays,
@@ -350,7 +376,7 @@ export function PdfViewer({
         );
         if (generation !== effectGenerationRef.current) return;
         setPageSizes(sizes);
-        setVirtualRenderWindow(computeVirtualPageWindow([1], pdf.numPages));
+        setVirtualRenderWindow(computeVirtualPageWindow([currentPageRef.current], pdf.numPages));
         virtualSlotsBuiltRef.current = false;
         setDocToken((t) => t + 1);
       } catch (err) {
@@ -415,9 +441,15 @@ export function PdfViewer({
       try {
         const highlights = highlightBlocks;
 
-        const scale = await resolveRenderScale(pdf, currentPage, fitWidth, containerWidth);
+        const pageRotation = rotationForRenderedPage(
+          currentPage,
+          currentPage,
+          displayRotationDeg,
+          pageRotations
+        );
+        const scale = await resolveRenderScale(pdf, currentPage, fitWidth, containerWidth, pageRotation);
 
-        const renderKey = `${String(docToken)}:${String(currentPage)}:${String(Math.round(scale * 1000))}:${String(containerWidth ?? 0)}:${highlightKey}:${overlayKey}:paginated`;
+        const renderKey = `${String(docToken)}:${String(currentPage)}:${String(pageRotation)}:${String(Math.round(scale * 1000))}:${String(containerWidth ?? 0)}:${highlightKey}:${overlayKey}:paginated`;
         if (lastPageRenderKeyRef.current === renderKey && pagesHost.childElementCount > 0) {
           return;
         }
@@ -441,6 +473,7 @@ export function PdfViewer({
           (id) => onLayoutOverlaySelectRef.current?.(id),
           (o) => onLayoutOverlayHoverRef.current?.(o)
         );
+        applyPageDisplayRotation(wrap, pageRotation);
         if (generation !== effectGenerationRef.current) return;
         pagesHost.replaceChildren(wrap);
         setRenderedPages(1);
@@ -469,6 +502,8 @@ export function PdfViewer({
     activeLayoutOverlayId,
     fitWidth,
     containerWidth,
+    displayRotationDeg,
+    pageRotations,
     t,
   ]);
 
@@ -483,8 +518,9 @@ export function PdfViewer({
     const generation = ++effectGenerationRef.current;
     void (async () => {
       try {
-        const scale = await resolveRenderScale(pdf, 1, fitWidth, containerWidth);
-        const layoutKey = `${String(docToken)}:${String(Math.round(scale * 1000))}:${String(containerWidth ?? 0)}:${String(pageCount)}`;
+        const pageOneRotation = rotationForRenderedPage(1, currentPage, displayRotationDeg, pageRotations);
+        const scale = await resolveRenderScale(pdf, 1, fitWidth, containerWidth, pageOneRotation);
+        const layoutKey = `${String(docToken)}:${String(pageOneRotation)}:${String(Math.round(scale * 1000))}:${String(containerWidth ?? 0)}:${String(pageCount)}`;
         if (lastVirtualLayoutKeyRef.current === layoutKey && virtualSlotsBuiltRef.current) {
           return;
         }
@@ -495,9 +531,17 @@ export function PdfViewer({
           const slot = document.createElement('div');
           slot.className = 'pdf-page-slot';
           slot.dataset.page = String(pageNum);
-          if (size.width > 0) {
-            slot.style.width = `${String(size.width * scale)}px`;
-            slot.style.minHeight = `${String(size.height * scale)}px`;
+          const pageRotation = rotationForRenderedPage(
+            pageNum,
+            currentPage,
+            displayRotationDeg,
+            pageRotations
+          );
+          const visualWidth = visualWidthAfterQuarterTurn(size.width, size.height, pageRotation);
+          const visualHeight = visualWidthAfterQuarterTurn(size.height, size.width, pageRotation);
+          if (visualWidth > 0) {
+            slot.style.width = `${String(visualWidth * scale)}px`;
+            slot.style.minHeight = `${String(visualHeight * scale)}px`;
           }
           pagesHost.appendChild(slot);
         }
@@ -515,7 +559,18 @@ export function PdfViewer({
     return () => {
       effectGenerationRef.current += 1;
     };
-  }, [paginated, docToken, pageCount, pageSizes, fitWidth, containerWidth, currentPage, t]);
+  }, [
+    paginated,
+    docToken,
+    pageCount,
+    pageSizes,
+    fitWidth,
+    containerWidth,
+    currentPage,
+    displayRotationDeg,
+    pageRotations,
+    t,
+  ]);
 
   useEffect(() => {
     if (paginated) return;
@@ -529,8 +584,10 @@ export function PdfViewer({
     void (async () => {
       try {
         const highlights = highlightBlocks;
-        const scale = await resolveRenderScale(pdf, 1, fitWidth, containerWidth);
-        const renderStamp = `${String(Math.round(scale * 1000))}:${overlayKey}:${highlightKey}`;
+        const pageOneRotation = rotationForRenderedPage(1, currentPage, displayRotationDeg, pageRotations);
+        const scale = await resolveRenderScale(pdf, 1, fitWidth, containerWidth, pageOneRotation);
+        const rotationKey = `${String(displayRotationDeg)}:${JSON.stringify(pageRotations ?? {})}`;
+        const renderStamp = `${String(Math.round(scale * 1000))}:${overlayKey}:${highlightKey}:${rotationKey}`;
 
         for (let pageNum = 1; pageNum <= pageCount; pageNum += 1) {
           if (virtualRenderWindow.has(pageNum)) continue;
@@ -565,6 +622,10 @@ export function PdfViewer({
               (id) => onLayoutOverlaySelectRef.current?.(id),
               (o) => onLayoutOverlayHoverRef.current?.(o)
             );
+            applyPageDisplayRotation(
+              wrap,
+              rotationForRenderedPage(pageNum, currentPage, displayRotationDeg, pageRotations)
+            );
             if (generation !== effectGenerationRef.current) return;
             slot.replaceChildren(wrap);
             slot.dataset.renderStamp = renderStamp;
@@ -596,6 +657,9 @@ export function PdfViewer({
     activeLayoutOverlayId,
     fitWidth,
     containerWidth,
+    displayRotationDeg,
+    pageRotations,
+    currentPage,
     t,
   ]);
 
@@ -730,13 +794,8 @@ export function PdfViewer({
         data-rotation-deg={String(displayRotationDeg)}
       >
         <div
-          className={`pdf-pages${paginated ? ' pdf-pages-single' : ''}${displayRotationDeg !== 0 ? ' pdf-pages-display-rotated' : ''}`}
+          className={`pdf-pages${paginated ? ' pdf-pages-single' : ''}`}
           ref={pagesRef}
-          style={
-            displayRotationDeg === 0
-              ? undefined
-              : { transform: `rotate(${String(displayRotationDeg)}deg)` }
-          }
         />
       </div>
     </div>

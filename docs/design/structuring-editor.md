@@ -201,8 +201,14 @@ not delete OCR or other candidates.
 
 - Inline action beside Accept and Correct (slash-circle, tooltip "Vorschlag verwerfen"). No
   confirmation dialog.
-- Identity is `(documentId, fieldKey, normalize(value))` where normalize trims, collapses
-  whitespace and lowercases. Rejecting one value does not suppress other values for the same field.
+- Identity is `(documentId, review-row field key, normalize(value))`. Normalize trims,
+  collapses whitespace and lowercases. The review-row key is the key the workbench shows,
+  with a `suggestion:` storage prefix removed. It is not rewritten to `global:` and it does
+  not collapse aliases (`vendor` stays distinct from `absender`, and a label-scoped key stays
+  distinct from the shared key). The same field key plus the same normalized value is one
+  decision: the queue has one value per field, not one row per box. A bounding-box move is
+  a separate reanchor. A decision stored as `global:<key>` before this rule still matches
+  the bare review-row key so it does not come back after reload.
 - Persistence: `corrections` row with `op = reject_suggestion` plus
   `document_field_suggestion_decisions` (3NF). Withdraw the correction to undo.
 - Open counts and the review queue exclude active rejects. History/Details can list

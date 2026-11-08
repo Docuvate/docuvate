@@ -28,6 +28,7 @@ import { hashNormalizedExtractedText } from '../../duplicates/domain/normalized-
 import { globalFieldStorageKey } from '../../recognized-fields/domain/recognized-field.entity.js';
 import { upsertDocumentFieldValue } from '../../search/infrastructure/document-field-value-index.js';
 import type { DocumentEntity, DocumentStatus } from '../domain/document.entity.js';
+import { rewriteLayoutIrText } from '../domain/layout-ir-text.js';
 import {
   type DocumentExtractionRows,
   loadExtractionForDocument,
@@ -686,8 +687,29 @@ export class PgDocumentRepository implements DocumentRepository {
           await replaceDocumentExtractionFields(client, id, userId, nextFields);
         }
         if (nextBlocks !== undefined) {
+          const stored = await client.query(
+            `SELECT ir FROM document_layout_ir WHERE document_id = $1 FOR UPDATE`,
+            [id]
+          );
+          const previousBlocks = (await loadExtractionForDocument(client, id)).blocks;
           await replaceDocumentExtractionBlocks(client, id, nextBlocks);
-          await client.query(`DELETE FROM document_layout_ir WHERE document_id = $1`, [id]);
+          const row = recordFromUnknown(stored.rows[0]);
+          const raw = row?.ir;
+          const parsedObject = recordFromUnknown(raw);
+          const parsedString =
+            parsedObject == null && typeof raw === 'string' && raw.trim().length > 0
+              ? recordFromUnknown(parseJsonString(raw))
+              : null;
+          const parsed = parsedObject ?? parsedString;
+          if (parsed) {
+            const rewritten = rewriteLayoutIrText(parsed, previousBlocks, nextBlocks);
+            await client.query(
+              `UPDATE document_layout_ir
+               SET ir = $2::jsonb, ir_sha256 = decode($3, 'hex')
+               WHERE document_id = $1`,
+              [id, JSON.stringify(rewritten), hashLayoutIrHex(rewritten)]
+            );
+          }
         }
         await client.query('COMMIT');
       } catch (error) {

@@ -825,6 +825,10 @@
     "layoutTextEdit": "Text",
     "layoutTextEditDone": "Done",
     "layoutTextEditHint": "Edit extracted text below. Save changes with Save.",
+    "ribbonEditText": "Correct text",
+    "ribbonSaveText": "Save text",
+    "ribbonSaveTextUnavailable": "Nothing to save yet",
+    "ribbonOverlayUnavailable": "No recognised regions on this page",
     "layoutSidePanelAria": "Document layout",
     "fieldKey": {
       "brutto": "Gross amount",
@@ -2632,6 +2636,8 @@
     "work": "Work",
     "review": "Review",
     "inspector": "Inspector",
+    "toolsText": "Text",
+    "toolsLayout": "Layout",
     "autoImport": "Auto-import",
     "autoImportHint": "Set up connections that import documents automatically: mailbox, scanner/SFTP or Paperless-ngx"
   }

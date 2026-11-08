@@ -54,7 +54,9 @@ interface DocumentReviewWorkbenchProps {
   onCorrectPosition?: (fieldKey: string) => void;
   onLabelsUpdated: () => void | Promise<void>;
   /** Jump to the correction mode of OCR, labels or layout. */
-  onOpenAspect: (aspect: Exclude<StructuringAspect, 'fields'>) => void;
+  onOpenAspect: (aspect: StructuringAspect) => void;
+  /** Pressed primary in the structuring group. */
+  activeAspect?: StructuringAspect | null;
   /** Focus the first open value when the document opens (arriving from "next document"). */
   autoFocusFirst?: boolean;
 }
@@ -93,6 +95,7 @@ export function DocumentReviewWorkbench({
   onCorrectPosition,
   onLabelsUpdated,
   onOpenAspect,
+  activeAspect = null,
   autoFocusFirst = false,
 }: DocumentReviewWorkbenchProps) {
   const { t } = useTranslation();
@@ -245,15 +248,14 @@ export function DocumentReviewWorkbench({
       data-open-count={open}
     >
       <AppRibbon>
-        <RibbonGroup label={t('ribbon.structure')} kind="navigate" order={1}>
+        <RibbonGroup label={t('ribbon.structure')} kind="navigate" order={1} showCaption={false}>
           <StructuringAspectStrip
             statuses={aspects}
             className="review-workbench-aspects"
+            active={activeAspect}
             onOpen={(aspect) => {
-              if (aspect !== 'fields') {
-                onOpenAspect(aspect);
-                return;
-              }
+              onOpenAspect(aspect);
+              if (aspect !== 'fields') return;
               const firstOpen = rows.findIndex((row) => row.state !== 'confirmed');
               focusRow(firstOpen >= 0 ? firstOpen : 0);
             }}
@@ -553,6 +555,7 @@ export function DocumentReviewWorkbench({
                     size="sm"
                     variant="ghost"
                     disabled={saving}
+                    data-testid="review-workbench-undo-reject"
                     onClick={() => {
                       const correctionId = item.correctionId;
                       if (!correctionId) return;

@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { DocumentDto, ExtractedField, ExtractionBlock } from '@docuvate/contracts';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useAdvancedFeaturesEnabled } from '../../lib/advancedFeatures';
@@ -32,6 +32,8 @@ interface DocumentExtractionSectionProps {
   sourceFileMissing?: boolean;
   /** Kept for API compatibility; fields live in Details tab only. */
   fields?: ExtractedField[];
+  /** Ribbon Text mode asks this section to open its correction editor. */
+  textCorrection?: boolean;
   onFieldsChange?: (fields: ExtractedField[]) => void;
   onSaveFields?: () => void;
 }
@@ -52,6 +54,7 @@ export function DocumentExtractionSection({
   requeueBusy = false,
   onRequeueExtraction,
   sourceFileMissing = false,
+  textCorrection = false,
 }: DocumentExtractionSectionProps) {
   const { t } = useTranslation();
   const { advancedFeaturesEnabled } = useAdvancedFeaturesEnabled();
@@ -62,6 +65,9 @@ export function DocumentExtractionSection({
   const layoutIrAvailable = doc.extraction?.layoutIrAvailable === true;
   const layoutIrPages = doc.extraction?.layoutIrPages;
   const [editMode, setEditMode] = useState(false);
+  useEffect(() => {
+    if (textCorrection) setEditMode(true);
+  }, [textCorrection]);
   const arenaDetailsRef = useRef<HTMLDetailsElement>(null);
   const hasContent = hasExtractedContent(doc, blocks);
   const pending = isExtractionPending(doc.status);

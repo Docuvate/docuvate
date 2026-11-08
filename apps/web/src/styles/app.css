@@ -394,6 +394,8 @@
 }
 
 .app-header {
+  --dv-ribbon-band: var(--dv-color-bg-raised);
+  --dv-ribbon-panel: color-mix(in srgb, var(--dv-color-bg-raised) 68%, var(--dv-color-bg-muted));
   position: relative;
   z-index: var(--dv-z-sticky);
   flex: none;
@@ -447,13 +449,35 @@
   text-decoration: none;
 }
 
-/* Selected area: a quiet raised pill, no accent rule. */
+/* Selected area: a quiet raised pill, no accent rule. Settings stays a pill:
+   it does not own the ribbon under the section tabs. */
 .app-primary-nav-link.active,
 .topbar-settings-link.active {
   background: var(--dv-color-bg-raised);
   color: var(--dv-color-header-fg);
   font-weight: var(--dv-font-weight-semibold);
   box-shadow: var(--dv-surface-highlight), var(--dv-elevation-1);
+}
+
+/* The open section is the same surface as the ribbon. No stroke, no shadow:
+   the header stays the parent band, and only the colour changes beside it. */
+.app-header:has(.app-ribbon .ribbon-group) .app-topbar {
+  border-bottom: 0;
+}
+
+.app-header:has(.app-ribbon .ribbon-group) .app-primary-nav {
+  align-self: stretch;
+  align-items: flex-end;
+  z-index: calc(var(--dv-z-base) + 1);
+  margin-bottom: calc(-1 * var(--dv-space-xs));
+}
+
+.app-header:has(.app-ribbon .ribbon-group) .app-primary-nav-link.active {
+  border: 0;
+  border-radius: var(--dv-radius-lg) var(--dv-radius-lg) 0 0;
+  background: var(--dv-ribbon-band);
+  box-shadow: none;
+  margin-bottom: -2px;
 }
 
 .app-primary-nav-link.active svg {
@@ -600,7 +624,10 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .global-search-trigger {
+  .global-search-trigger,
+  .app-primary-nav-link,
+  .ribbon-link,
+  .app-ribbon .aspect-strip-btn {
     transition: none;
   }
 }
@@ -9669,6 +9696,12 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   outline-offset: 1px;
 }
 
+/* Area and text tools draw on the page. A saved field mark must not take the gesture. */
+.layout-viewer-stage[data-selection-tool='rect'] .pdf-layout-overlay,
+.layout-viewer-stage[data-selection-tool='text'] .pdf-layout-overlay {
+  pointer-events: none;
+}
+
 .pdf-layout-overlay:focus-visible {
   outline: 2px solid var(--dv-color-accent);
   outline-offset: 2px;
@@ -16128,6 +16161,8 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   border: 1px solid var(--dv-color-border);
   border-radius: var(--dv-radius-md);
   background: var(--dv-color-bg-raised);
+  scroll-margin-top: 12rem;
+  scroll-margin-bottom: 2rem;
 }
 
 .document-field-context-bar-text,
@@ -16955,11 +16990,54 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 
 .app-ribbon {
   display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+  padding: var(--dv-space-sm) var(--dv-space-lg) var(--dv-space-xs);
+  border-top: 0;
+  background: var(--dv-ribbon-band, var(--dv-color-bg-raised));
+  box-shadow: none;
+}
+
+.app-ribbon:has(.app-ribbon-context:not(:empty)) {
+  padding-bottom: 0;
+}
+
+.app-ribbon-primary {
+  display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
-  gap: var(--dv-space-2xs) 0;
-  padding: var(--dv-space-2xs) var(--dv-space-lg) var(--dv-space-xs);
-  background: color-mix(in srgb, var(--dv-color-bg-raised) 55%, transparent);
+  width: 100%;
+  min-width: 0;
+}
+
+.app-ribbon-context:empty {
+  display: none;
+}
+
+.app-ribbon-context {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+  margin-top: -2px;
+  padding-top: calc(var(--dv-space-sm) + var(--dv-space-3xs));
+  padding-bottom: var(--dv-space-sm);
+  border-top: 0;
+  background: var(--dv-ribbon-panel, var(--dv-color-bg-raised));
+  box-shadow: none;
+}
+
+.app-ribbon-context > .ribbon-group {
+  width: 100%;
+  box-sizing: border-box;
+  border-inline-start: 0;
+  padding-inline: 0;
+}
+
+.app-ribbon-context .ribbon-group-items {
+  gap: var(--dv-space-xs);
 }
 
 .app-ribbon:not(:has(.ribbon-group)) {
@@ -16984,7 +17062,8 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 }
 
 /* The first group of the row starts flush; the right-aligned part needs no rule, space separates it. */
-.app-ribbon > :first-child > .ribbon-group:first-child {
+.app-ribbon-nav > .ribbon-group:first-child,
+.app-ribbon-primary > .app-ribbon-actions:first-child > .ribbon-group:first-child {
   padding-inline-start: 0;
   border-inline-start: 0;
 }
@@ -16994,7 +17073,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   border-inline-start: 0;
 }
 
-.app-ribbon > :last-child > .ribbon-group:last-child {
+.app-ribbon-actions > .ribbon-group:last-child {
   padding-inline-end: 0;
 }
 
@@ -17075,10 +17154,10 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 }
 
 .ribbon-link.active {
-  background: var(--dv-color-bg-raised);
+  background: color-mix(in srgb, var(--dv-color-bg-muted) 70%, var(--dv-color-bg-raised));
   color: var(--dv-color-text);
   font-weight: var(--dv-font-weight-semibold);
-  box-shadow: var(--dv-surface-highlight), var(--dv-elevation-1);
+  box-shadow: none;
 }
 
 /* --- Actions --- */
@@ -17202,7 +17281,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 
 .app-ribbon .aspect-strip {
   flex-wrap: nowrap;
-  gap: var(--dv-ribbon-item-gap);
+  gap: var(--dv-space-xs);
   margin: 0;
 }
 
@@ -17216,6 +17295,36 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   border-color: color-mix(in srgb, var(--dv-color-border) 70%, transparent);
   background: var(--dv-color-bg-raised);
   box-shadow: var(--dv-surface-highlight), var(--dv-elevation-1);
+}
+
+.app-ribbon .aspect-strip-btn[aria-pressed='true'] {
+  border-color: transparent;
+  background: color-mix(in srgb, var(--dv-color-bg-muted) 40%, transparent);
+  color: var(--dv-color-text);
+  font-weight: var(--dv-font-weight-semibold);
+  box-shadow: none;
+}
+
+/* The selected category is the tool panel. Unselected categories stay on the band.
+   No outline and no rule through the join. */
+.app-ribbon:has(.app-ribbon-context:not(:empty)) .aspect-strip-btn[aria-pressed='true'],
+.app-ribbon:has(.app-ribbon-context:not(:empty)) .aspect-strip-btn[aria-pressed='true']:hover {
+  position: relative;
+  z-index: calc(var(--dv-z-base) + 1);
+  border-width: 0;
+  border-radius: 0;
+  background: var(--dv-ribbon-panel, var(--dv-color-bg-raised));
+  background-clip: border-box;
+  box-shadow: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-primary-nav-link,
+  .ribbon-link,
+  .app-ribbon .aspect-strip-btn,
+  .app-ribbon .ribbon-action {
+    transition: none;
+  }
 }
 
 .app-ribbon .aspect-strip-btn > svg {
@@ -17332,7 +17441,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
     flex-wrap: nowrap;
     align-items: stretch;
     gap: 0;
-    padding: 0;
+    padding: var(--dv-space-xs) 0 0;
   }
 
   .app-ribbon-nav,
@@ -17341,13 +17450,17 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
     flex-wrap: nowrap;
     align-items: center;
     gap: 0;
-    padding: var(--dv-space-3xs) var(--dv-space-sm);
+    padding: var(--dv-space-xs) var(--dv-space-sm);
     overflow-x: auto;
     scrollbar-width: none;
   }
 
   .app-ribbon-actions:empty {
     display: none;
+  }
+
+  .app-ribbon-context {
+    padding-inline: var(--dv-space-sm);
   }
 
   .app-ribbon-nav + .app-ribbon-actions:not(:empty) {
@@ -17480,8 +17593,30 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   color: var(--dv-color-text-muted);
 }
 
+.structuring-context {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--dv-ribbon-item-gap);
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.structuring-context-hint {
+  flex: 1 1 12rem;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  color: var(--dv-color-text-muted);
+  font-size: var(--dv-font-size-sm);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 @media (max-width: 1023px) {
   .layout-viewer-toolbar-hint,
+  .structuring-context-hint,
   .document-selection-tool-key {
     display: none;
   }
@@ -17489,7 +17624,9 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 
 @media (max-width: 768px) {
   .layout-viewer-toolbar .document-selection-tools .segmented-control__option,
-  .layout-viewer-toolbar .layout-view-menu-trigger {
+  .layout-viewer-toolbar .layout-view-menu-trigger,
+  .app-ribbon-context .document-selection-tools .segmented-control__option,
+  .app-ribbon-context .ribbon-action {
     height: auto;
     min-height: var(--dv-touch-target-min);
   }

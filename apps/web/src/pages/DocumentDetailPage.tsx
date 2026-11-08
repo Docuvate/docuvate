@@ -13,6 +13,7 @@ import {
   normalizeSuggestionDecisionValue,
   parseSuggestionStorageKey,
   semanticFieldKey,
+  suggestionRejectIdentityKeys,
 } from '@docuvate/contracts';
 import { ArrowLeft, X } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -101,18 +102,42 @@ import {
   confirmFieldKeys,
   nextReviewDocumentId,
   reassignFieldValue,
-  suggestionRejectIdentity,
+  releasedSuggestionRejects,
   type SuggestionRejectRef,
 } from '../lib/reviewWorkbench';
 import { routes } from '../lib/routes';
 import { notifySaved, notifySaveError } from '../lib/saveNotify';
 import { pushRecentDocument } from '../lib/search/searchRecent';
+import { primaryForAspect, type StructuringCommand } from '../lib/structuringRibbon';
+import { useStructuringPrimary } from '../lib/useStructuringPrimary';
 
 interface DocumentMetadataBaseline {
   title: string;
   documentDate: string;
   notes: string;
   folderId: string;
+}
+
+function applyStructuringChrome(
+  command: StructuringCommand,
+  setLayoutSideTab: (tab: LayoutSideTab) => void,
+  openInspector: (panel: InspectorPanel) => void
+): void {
+  if (command.layoutTab) setLayoutSideTab(command.layoutTab);
+  if (command.inspector) openInspector(command.inspector);
+}
+
+/**
+ * Store a field correction and show it on the overview.
+ * Layout mode opens the tables tab, and that tab unmounts the field rows that carry the page chip.
+ */
+function showCorrectedFieldsOnOverview(
+  nextFields: ExtractedField[],
+  setFields: (fields: ExtractedField[]) => void,
+  setLayoutSideTab: (tab: LayoutSideTab) => void
+): void {
+  setFields(nextFields);
+  setLayoutSideTab('fields');
 }
 
 function metadataFromDocument(doc: DocumentDto): DocumentMetadataBaseline {
@@ -181,8 +206,7 @@ export function DocumentDetailPage() {
     folderId: '',
   });
   const [metadataSaveError, setMetadataSaveError] = useState<string | null>(null);
-  const [layoutTextEditOpen, setLayoutTextEditOpen] = useState(false);
-  const [layoutEditMode, setLayoutEditMode] = useState(false);
+  const structuring = useStructuringPrimary();
   const [showTechnicalDetails, setShowTechnicalDetails] = useState(false);
   const [recognizedCatalog, setRecognizedCatalog] = useState<RecognizedFieldDefinitionDto[]>([]);
   const [fieldGateSettings, setFieldGateSettings] = useState<CatalogFieldGateSettings>({
@@ -588,7 +612,9 @@ export function DocumentDetailPage() {
   const rejectedSuggestionIdentities = useMemo(() => {
     const set = new Set<string>();
     for (const item of suggestionRejects) {
-      set.add(`${item.fieldKey}\0${item.valueNormalized}`);
+      for (const key of suggestionRejectIdentityKeys(item.fieldKey)) {
+        set.add(`${key}\0${item.valueNormalized}`);
+      }
     }
     return set;
   }, [suggestionRejects]);
@@ -636,6 +662,7 @@ export function DocumentDetailPage() {
         : row
     );
     setFields(nextFields);
+    releaseMatchingSuggestionRejects(field.key, field.value);
     void persist({ extractionFields: nextFields }).then(() => {
       notifySaved(t('documents.fieldConfirmedToast'), () => {
         const restored = fields.map((row) =>
@@ -666,6 +693,16 @@ export function DocumentDetailPage() {
     });
   }
 
+  function releaseMatchingSuggestionRejects(fieldKey: string, value: string) {
+    if (!id) return;
+    const released = releasedSuggestionRejects(suggestionRejects, fieldKey, value);
+    if (released.remaining.length === suggestionRejects.length) return;
+    setSuggestionRejects(released.remaining);
+    for (const correctionId of released.correctionIds) {
+      void withdrawDocumentFieldCorrection(id, correctionId).catch(() => undefined);
+    }
+  }
+
   function acceptSuggestionAndSave(key: string, value: string) {
     if (key === 'date' || semanticFieldKey({ key, value }) === 'date') {
       const iso = isoDateFromExtractedValue(value);
@@ -674,20 +711,7 @@ export function DocumentDetailPage() {
         setDocumentDateAuto(false);
       }
     }
-    // Accepting supersedes a prior reject of the same field+value.
-    const identity = suggestionRejectIdentity(key, value);
-    const prior = suggestionRejects.find(
-      (item) => suggestionRejectIdentity(item.fieldKey, item.value ?? item.valueNormalized) === identity
-        || `${item.fieldKey}\0${item.valueNormalized}` === identity
-    );
-    if (prior?.correctionId && id) {
-      void withdrawDocumentFieldCorrection(id, prior.correctionId).catch(() => undefined);
-      setSuggestionRejects((prev) =>
-        prev.filter(
-          (item) => `${item.fieldKey}\0${item.valueNormalized}` !== identity
-        )
-      );
-    }
+    releaseMatchingSuggestionRejects(key, value);
     saveFieldsWithUndo(
       acceptSuggestedField(fields, key, value),
       t('documents.fieldConfirmedToast')
@@ -867,7 +891,9 @@ export function DocumentDetailPage() {
                 setFields(nextFields);
                 void persist({ extractionFields: nextFields });
               }}
-              onFieldsChange={setFields}
+              onFieldsChange={(nextFields) => {
+                showCorrectedFieldsOnOverview(nextFields, setFields, setLayoutSideTab);
+              }}
               heuristicSuggestions={heuristicSuggestions}
               highlightBlocks={highlightBlocks}
               viewerPage={viewerPage}
@@ -883,10 +909,14 @@ export function DocumentDetailPage() {
               rejectedSuggestionIdentities={rejectedSuggestionIdentities}
               requeueBusy={requeueBusy}
               onRequeueExtraction={() => void onRequeueExtraction()}
-              textEditOpen={layoutTextEditOpen}
-              onTextEditOpenChange={setLayoutTextEditOpen}
-              editMode={layoutEditMode}
-              onEditModeChange={setLayoutEditMode}
+              textEditOpen={structuring.textOpen}
+              onTextEditOpenChange={structuring.onTextOpenChange}
+              structuringPrimary={structuring.primary}
+              onStructuringPrimaryChange={(primary) => {
+                applyStructuringChrome(structuring.select(primary), setLayoutSideTab, openInspector);
+              }}
+              editMode={structuring.textEditing}
+              onEditModeChange={structuring.setTextEditing}
               blocksDirty={blocksDirty}
               saving={saving}
               onSaveBlocks={() => void persist({ extractionBlocks: blocks })}
@@ -928,6 +958,7 @@ export function DocumentDetailPage() {
                 onActiveBlockIndexChange={setActiveBlockIndex}
                 onBlocksChange={setBlocks}
                 onHighlightBlocks={onHighlightBlocks}
+                textCorrection={structuring.primary === 'text'}
                 onSaveBlocks={() => void persist({ extractionBlocks: blocks })}
                 onExtractionRefresh={load}
               />
@@ -977,6 +1008,7 @@ export function DocumentDetailPage() {
                     );
                   }}
                   onSaveValue={(key, value) => {
+                    releaseMatchingSuggestionRejects(key, value);
                     saveFieldsWithUndo(
                       withSavedFieldValue(fields, key, value),
                       t('pipeline.workbench.correctedToast')
@@ -987,6 +1019,10 @@ export function DocumentDetailPage() {
                   rejects={suggestionRejects}
                   onUndoReject={undoRejectSuggestion}
                   onReassign={(fromKey, toKey) => {
+                    const source = fields.find((field) => field.key === fromKey);
+                    if (source) {
+                      releaseMatchingSuggestionRejects(toKey, source.value);
+                    }
                     saveFieldsWithUndo(
                       reassignFieldValue(fields, fromKey, toKey),
                       t('pipeline.workbench.reassignedToast', { field: fieldLabelForKey(toKey) })
@@ -995,21 +1031,17 @@ export function DocumentDetailPage() {
                   onLocate={locateValue}
                   onCorrectPosition={(fieldKey) => {
                     setPositionEditFieldKey(fieldKey);
+                    applyStructuringChrome(structuring.select('layout'), setLayoutSideTab, openInspector);
                     setInspectorChoice('fields');
                   }}
                   onLabelsUpdated={refreshDocumentLabels}
+                  activeAspect={structuring.activeAspect}
                   onOpenAspect={(aspect) => {
-                    if (aspect === 'labels') {
-                      openInspector('labels');
-                      return;
-                    }
-                    if (aspect === 'layout' && layoutWorkspace) setLayoutSideTab('outline');
-                    if (aspect === 'ocr' && layoutWorkspace) setLayoutTextEditOpen(true);
-                    window.requestAnimationFrame(() => {
-                      document
-                        .querySelector('.document-workbench-main')
-                        ?.scrollIntoView({ block: 'start', behavior: 'smooth' });
-                    });
+                    applyStructuringChrome(
+                      structuring.select(primaryForAspect(aspect)),
+                      setLayoutSideTab,
+                      openInspector
+                    );
                   }}
                 />
               </div>

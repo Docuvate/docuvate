@@ -9,6 +9,8 @@ import shutil
 
 import pytest
 from PIL import Image
+from pypdf import PdfReader, PdfWriter
+from pypdf.generic import RectangleObject
 
 from docuvate_worker.infrastructure.extract_memory.admission import layout_compare_peak_bytes
 from docuvate_worker.infrastructure.extract_memory.bounded_raster import (
@@ -43,8 +45,56 @@ def test_pdf_page_size_reads_the_mediabox() -> None:
     assert pdf_page_size_pt(pdf, 1) == (float(_PHONE_SCAN_PX[0]), float(_PHONE_SCAN_PX[1]))
 
 
+def _rotate_pdf(pdf: bytes, degrees: int) -> bytes:
+    reader = PdfReader(io.BytesIO(pdf))
+    writer = PdfWriter()
+    page = reader.pages[0]
+    page.rotate(degrees)
+    writer.add_page(page)
+    out = io.BytesIO()
+    writer.write(out)
+    return out.getvalue()
+
+
+def _crop_pdf(pdf: bytes, width: float, height: float) -> bytes:
+    reader = PdfReader(io.BytesIO(pdf))
+    writer = PdfWriter()
+    page = reader.pages[0]
+    page.cropbox = RectangleObject((0, 0, width, height))
+    writer.add_page(page)
+    out = io.BytesIO()
+    writer.write(out)
+    return out.getvalue()
+
+
 def test_pdf_page_size_falls_back_to_letter_for_unreadable_input() -> None:
     assert pdf_page_size_pt(b"not a pdf", 1) == (612.0, 792.0)
+
+
+def test_native_rotate_swaps_the_emitted_axes() -> None:
+    pdf = _pdf_with_page_pt(595, 842)
+    assert pdf_page_size_pt(_rotate_pdf(pdf, 90), 1) == (842.0, 595.0)
+    assert pdf_page_size_pt(_rotate_pdf(pdf, 270), 1) == (842.0, 595.0)
+    assert pdf_page_size_pt(_rotate_pdf(pdf, 180), 1) == (595.0, 842.0)
+
+
+def test_default_budget_uses_mediabox_not_the_smaller_cropbox() -> None:
+    cropped = _crop_pdf(_pdf_with_page_pt(2000, 2000), 200, 300)
+    assert pdf_page_size_pt(cropped, 1) == (2000.0, 2000.0)
+    assert pdf_page_size_pt(cropped, 1, use_cropbox=True) == (200.0, 300.0)
+    budget = 1_000_000
+    default_dpi = bounded_page_dpi(cropped, 1, dpi=72, max_pixels=budget)
+    crop_dpi = bounded_page_dpi(cropped, 1, dpi=72, max_pixels=budget, use_cropbox=True)
+    assert default_dpi < crop_dpi
+
+
+def test_quarter_turn_does_not_raise_the_pixel_budget() -> None:
+    upright = _pdf_with_page_pt(*_PHONE_SCAN_PX)
+    turned = _rotate_pdf(upright, 90)
+    budget = 1_000_000
+    assert bounded_page_dpi(turned, 1, dpi=DEFAULT_COMPARE_DPI, max_pixels=budget) == (
+        bounded_page_dpi(upright, 1, dpi=DEFAULT_COMPARE_DPI, max_pixels=budget)
+    )
 
 
 def test_bounded_dpi_keeps_standard_paper_at_the_compare_resolution() -> None:
@@ -111,6 +161,29 @@ def test_open_image_bounded_keeps_small_images_unchanged() -> None:
     Image.new("RGB", (320, 200)).save(buf, format="PNG")
     with open_image_bounded(buf.getvalue(), 1_000_000) as image:
         assert image.size == (320, 200)
+
+
+@_needs_poppler
+def test_rotated_render_matches_the_budgeted_size() -> None:
+    pdf = _rotate_pdf(_pdf_with_page_pt(595, 842), 90)
+    size = pdf_page_size_pt(pdf, 1)
+    image = render_pdf_page_bounded(pdf, 1, dpi=72, max_pixels=2_000_000)
+    assert image is not None
+    with image:
+        assert image.size == (round(size[0]), round(size[1]))
+
+
+@_needs_poppler
+def test_default_render_keeps_the_mediabox_when_cropbox_is_smaller() -> None:
+    pdf = _crop_pdf(_pdf_with_page_pt(400, 400), 100, 120)
+    image = render_pdf_page_bounded(pdf, 1, dpi=72, max_pixels=2_000_000)
+    assert image is not None
+    with image:
+        assert image.size == (400, 400)
+    cropped = render_pdf_page_bounded(pdf, 1, dpi=72, max_pixels=2_000_000, use_cropbox=True)
+    assert cropped is not None
+    with cropped:
+        assert cropped.size == (100, 120)
 
 
 def test_compare_peak_estimate_follows_the_compare_budget(

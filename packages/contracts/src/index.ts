@@ -1549,6 +1549,7 @@ export {
 } from './duplicate-set-groups.js';
 export type { DuplicatePairEdge, DuplicatePairMetaEdge } from './duplicate-set-groups.js';
 export * from './document-regions.js';
+export * from './suggestion-decisions.js';
 export * from './page-transforms.js';
 export {
   TOKEN_COVERAGE_THRESHOLD,

@@ -74,6 +74,7 @@ export const BASELINE_MARKER_MIGRATION_NAMES = [
   'DocumentRegionTableStructure20261106090000',
   'DocumentPageTransforms20261106180000',
   'FieldSuggestionReject20261106190000',
+  'FieldSuggestionDecisionUserText20261107120000',
 ] as const;
 
 async function featureFlagMlKeysConstraintPresent(runner: QueryRunner): Promise<boolean> {
@@ -120,6 +121,25 @@ async function foldersOnlySchemaPresent(runner: QueryRunner): Promise<boolean> {
     return false;
   }
   return true;
+}
+
+async function columnTypeIs(
+  runner: QueryRunner,
+  tableName: string,
+  columnName: string,
+  dataType: string
+): Promise<boolean> {
+  const rows: unknown = await runner.query(
+    `SELECT 1 AS ok
+     FROM information_schema.columns
+     WHERE table_schema = 'public'
+       AND table_name = $1
+       AND column_name = $2
+       AND data_type = $3
+     LIMIT 1`,
+    [tableName, columnName, dataType]
+  );
+  return Array.isArray(rows) && rows.length > 0;
 }
 
 export async function columnExists(
@@ -292,6 +312,8 @@ export async function migrationSchemaPresent(
       return regClassExists(runner, 'public.document_page_transforms');
     case 'FieldSuggestionReject20261106190000':
       return regClassExists(runner, 'public.document_field_suggestion_decisions');
+    case 'FieldSuggestionDecisionUserText20261107120000':
+      return columnTypeIs(runner, 'document_field_suggestion_decisions', 'user_id', 'text');
     default:
       return false;
   }

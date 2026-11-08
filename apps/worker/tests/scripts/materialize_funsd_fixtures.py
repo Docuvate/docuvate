@@ -12,6 +12,8 @@ from __future__ import annotations
 
 import argparse
 import json
+import time
+import urllib.error
 import urllib.request
 from pathlib import Path
 
@@ -21,11 +23,37 @@ HF_ROWS = (
 )
 DEFAULT_CACHE = Path(__file__).resolve().parents[1] / ".cache" / "funsd_ocr_eval"
 PAGE_COUNT = 5
+_TRANSIENT_HTTP = frozenset({502, 503, 504})
+_READ_ATTEMPTS = 4
+
+
+def _read_url(url: str, timeout: int) -> bytes:
+    """Download one URL. Retry a gateway or connection failure, then raise it."""
+    delay = 0.5
+    last: Exception | None = None
+    for attempt in range(_READ_ATTEMPTS):
+        try:
+            with urllib.request.urlopen(url, timeout=timeout) as response:
+                body = response.read()
+        except urllib.error.HTTPError as exc:
+            if exc.code not in _TRANSIENT_HTTP:
+                raise
+            last = exc
+        except urllib.error.URLError as exc:
+            last = exc
+        else:
+            return bytes(body)
+        if attempt + 1 < _READ_ATTEMPTS:
+            time.sleep(delay)
+            delay *= 2
+    if last is None:
+        msg = "FUNSD download failed"
+        raise RuntimeError(msg)
+    raise last
 
 
 def _fetch_row(offset: int) -> dict[str, object]:
-    with urllib.request.urlopen(HF_ROWS.format(offset=offset), timeout=60) as response:
-        payload = json.loads(response.read().decode("utf-8"))
+    payload = json.loads(_read_url(HF_ROWS.format(offset=offset), timeout=60).decode("utf-8"))
     rows = payload.get("rows")
     if not isinstance(rows, list) or not rows:
         msg = f"no FUNSD row at offset {offset}"
@@ -45,8 +73,7 @@ def _download_image(image_field: object, dest: Path) -> None:
     if not isinstance(src, str):
         msg = "FUNSD image src missing"
         raise RuntimeError(msg)
-    with urllib.request.urlopen(src, timeout=120) as response:
-        dest.write_bytes(response.read())
+    dest.write_bytes(_read_url(src, timeout=120))
 
 
 def materialize(cache_dir: Path) -> None:

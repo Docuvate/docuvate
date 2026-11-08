@@ -14,7 +14,16 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
-  { variant = 'primary', size = 'md', loading = false, disabled, className = '', children, ...props },
+  {
+    variant = 'primary',
+    size = 'md',
+    loading = false,
+    disabled,
+    className = '',
+    children,
+    type = 'button',
+    ...props
+  },
   ref
 ) {
   const sizeClass = size === 'sm' ? 'btn-sm' : '';
@@ -22,6 +31,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
   return (
     <button
       ref={ref}
+      type={type}
       className={`btn btn-${variant} ${sizeClass} ${className}`.trim()}
       disabled={Boolean(disabled) || loading}
       aria-busy={loading || undefined}

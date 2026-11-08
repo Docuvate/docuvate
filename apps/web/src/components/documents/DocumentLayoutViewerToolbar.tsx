@@ -7,12 +7,10 @@ import { useTranslation } from 'react-i18next';
 import type { reconstructionQualityTone } from '../../lib/layoutReconstructionQuality';
 import { ribbonActionClass } from '../../lib/ribbonAction';
 import { segmentedToolbarClass } from '../../lib/segmentedControlClasses';
-import { Button } from '../ui/Button';
 import { IconButton } from '../ui/IconButton';
 import { MenuItem } from '../ui/MenuItem';
 import { Menu, MenuContent, MenuTrigger } from '../ui/overlay/Menu';
 import { SegmentedControl } from '../ui/SegmentedControl';
-import { type DocumentSelectionTool, DocumentSelectionTools } from './DocumentSelectionTools';
 import { LAYOUT_IR_ZOOM_STEPS, type LayoutIrZoomStep } from './ExtractedLayoutHtmlFrame';
 
 export type LeftDocumentMode = 'original' | 'text';
@@ -21,15 +19,11 @@ interface DocumentLayoutViewerToolbarProps {
   leftMode: LeftDocumentMode;
   onLeftModeChange: (mode: LeftDocumentMode) => void;
   showAdvancedStage: boolean;
-  selectionTool: DocumentSelectionTool;
-  onSelectionToolChange: (tool: DocumentSelectionTool) => void;
   zoom: LayoutIrZoomStep;
   onZoomChange: (zoom: LayoutIrZoomStep) => void;
   showTechnicalDetails: boolean;
   qualityTone: ReturnType<typeof reconstructionQualityTone>;
   qualityPage: number;
-  editMode: boolean;
-  onEditModeChange: (next: boolean) => void;
   /** Recognised regions drawn over the page; undefined when there is nothing to show. */
   overlay?: { enabled: boolean; onChange: (enabled: boolean) => void };
   /** Turn the page view; undefined where the view cannot rotate. */
@@ -37,23 +31,18 @@ interface DocumentLayoutViewerToolbarProps {
 }
 
 /**
- * One bar above the page. The structuring task leads: how a click on the page behaves (pick,
- * mark text, drag an area) with a one-line hint. How the page is shown (original or recognised
- * text, regions, rotation) is a single "Ansicht" menu at the end, not a second mode bar.
+ * Page chrome that stays with the document: zoom, rotation, and the original/text menu.
+ * Pointer, text selection, and region tools live on the layout row of the ribbon.
  */
 export function DocumentLayoutViewerToolbar({
   leftMode,
   onLeftModeChange,
   showAdvancedStage,
-  selectionTool,
-  onSelectionToolChange,
   zoom,
   onZoomChange,
   showTechnicalDetails,
   qualityTone,
   qualityPage,
-  editMode,
-  onEditModeChange,
   overlay,
   onRotate,
 }: DocumentLayoutViewerToolbarProps) {
@@ -62,20 +51,11 @@ export function DocumentLayoutViewerToolbar({
     () => LAYOUT_IR_ZOOM_STEPS.map((step) => ({ value: String(step), label: `${String(step)}%` })),
     []
   );
-  const marking = leftMode === 'original' && !showAdvancedStage;
   const viewLabel =
     leftMode === 'text' ? t('documents.layoutViewText') : t('documents.layoutViewOriginal');
 
   return (
     <div className="layout-viewer-toolbar" data-testid="layout-viewer-toolbar">
-      {marking ? (
-        <>
-          <DocumentSelectionTools value={selectionTool} onChange={onSelectionToolChange} />
-          <p className="layout-viewer-toolbar-hint" aria-live="polite">
-            {t(`documents.selectionToolHint.${selectionTool}`)}
-          </p>
-        </>
-      ) : null}
       {showAdvancedStage || leftMode === 'text' ? (
         <SegmentedControl
           ariaLabel={t('documents.layoutZoomAria')}
@@ -109,19 +89,6 @@ export function DocumentLayoutViewerToolbar({
             label={t('documents.pdfRotateClockwise')}
             onClick={onRotate}
           />
-        ) : null}
-        {leftMode === 'text' ? (
-          <Button
-            type="button"
-            size="sm"
-            variant={editMode ? 'secondary' : 'ghost'}
-            aria-pressed={editMode}
-            onClick={() => {
-              onEditModeChange(!editMode);
-            }}
-          >
-            {editMode ? t('documents.layoutTextEditDone') : t('documents.layoutTextEdit')}
-          </Button>
         ) : null}
         <Menu>
           <MenuTrigger

@@ -114,7 +114,12 @@ export function DocumentFieldContextBar({
           {acceptLabel}
         </Button>
         {onMarkTable ? (
-          <Button type="button" variant="secondary" onClick={onMarkTable}>
+          <Button
+            type="button"
+            variant="secondary"
+            data-testid="selection-mark-table"
+            onClick={onMarkTable}
+          >
             {t('documents.selectionMarkTable')}
           </Button>
         ) : null}

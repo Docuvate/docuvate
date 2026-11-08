@@ -825,6 +825,10 @@
     "layoutTextEdit": "Text",
     "layoutTextEditDone": "Fertig",
     "layoutTextEditHint": "Korrigieren Sie extrahierten Text unten. Änderungen speichern Sie mit „Speichern“.",
+    "ribbonEditText": "Text korrigieren",
+    "ribbonSaveText": "Text speichern",
+    "ribbonSaveTextUnavailable": "Noch nichts zu speichern",
+    "ribbonOverlayUnavailable": "Keine erkannten Bereiche auf dieser Seite",
     "layoutSidePanelAria": "Dokument-Layout",
     "fieldKey": {
       "brutto": "Bruttobetrag",
@@ -2632,6 +2636,8 @@
     "work": "Arbeiten",
     "review": "Prüfen",
     "inspector": "Inspektor",
+    "toolsText": "Text",
+    "toolsLayout": "Layout",
     "autoImport": "Automatisch importieren",
     "autoImportHint": "Verbindungen einrichten, die Dokumente automatisch importieren: Postfach, Scanner/SFTP oder Paperless-ngx"
   }

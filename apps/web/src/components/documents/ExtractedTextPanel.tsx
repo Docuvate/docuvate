@@ -100,7 +100,10 @@ export function ExtractedTextPanel({
     () => (layoutIrDocument ? buildLayoutReadingBlocks(layoutIrDocument) : []),
     [layoutIrDocument]
   );
-  const readingMode = textOnly && readingBlocks.length > 0;
+  // Reading paragraphs are the closed view of layout IR. Correction edits the
+  // worker's extraction blocks, which stay separate even when the IR merges
+  // neighbouring lines into one paragraph.
+  const readingMode = textOnly && !editMode && readingBlocks.length > 0;
 
   // Reading mode renders layout IR text, so its pages must come from the layout IR — not from
   // extraction blocks, which can be empty while the IR carries the full OCR text.

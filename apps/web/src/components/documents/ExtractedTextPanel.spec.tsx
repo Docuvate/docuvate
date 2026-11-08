@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import type { LayoutIrDocument, LayoutIrPage } from '@docuvate/contracts';
+import type { ExtractionBlock, LayoutIrDocument, LayoutIrPage } from '@docuvate/contracts';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -87,6 +87,80 @@ describe('ExtractedTextPanel text view', () => {
     expect(prev).toHaveProperty('disabled', true);
     fireEvent.click(screen.getByRole('button', { name: 'documents.extractedTextPageNext' }));
     expect(onActivePageChange).toHaveBeenCalledWith(2);
+  });
+
+  it('edits worker extraction blocks when layout IR has merged them into one paragraph', () => {
+    const blocks: ExtractionBlock[] = [
+      { page: 1, x: 0.121, y: 0.123, width: 0.2, height: 0.021, text: 'NORTH 1842', blockIndex: 0 },
+      { page: 1, x: 0.121, y: 0.171, width: 0.28, height: 0.021, text: 'INVOICE TOTAL', blockIndex: 1 },
+    ];
+    const ir: LayoutIrDocument = {
+      version: 1,
+      pages: [
+        {
+          page: 1,
+          widthPt: 595,
+          heightPt: 842,
+          blocks: [],
+          lines: [
+            { page: 1, x: 0.121, y: 0.123, width: 0.2, height: 0.021, text: 'NORTH 1842', blockIndex: 0 },
+            { page: 1, x: 0.121, y: 0.171, width: 0.28, height: 0.021, text: 'INVOICE TOTAL', blockIndex: 1 },
+          ],
+        },
+      ],
+    };
+    const onBlocksChange = vi.fn();
+    const { container, rerender } = render(
+      <ExtractedTextPanel
+        documentId="doc-real-ocr"
+        fullText="NORTH 1842\nINVOICE TOTAL"
+        layoutIrAvailable
+        layoutIrDocument={ir}
+        blocks={blocks}
+        activePage={1}
+        activeBlockIndex={null}
+        pageSynced
+        editMode={false}
+        textOnly
+        onActivePageChange={vi.fn()}
+        onHighlightBlocks={vi.fn()}
+        onBlocksChange={onBlocksChange}
+        onActiveBlockIndexChange={vi.fn()}
+      />
+    );
+    expect(container.querySelectorAll('.extracted-text-reading-paragraph')).toHaveLength(1);
+    expect(screen.getByText('NORTH 1842 INVOICE TOTAL')).toBeTruthy();
+    expect(container.querySelector('.extracted-text-segment')).toBeNull();
+
+    rerender(
+      <ExtractedTextPanel
+        documentId="doc-real-ocr"
+        fullText="NORTH 1842\nINVOICE TOTAL"
+        layoutIrAvailable
+        layoutIrDocument={ir}
+        blocks={blocks}
+        activePage={1}
+        activeBlockIndex={null}
+        pageSynced
+        editMode
+        textOnly
+        onActivePageChange={vi.fn()}
+        onHighlightBlocks={vi.fn()}
+        onBlocksChange={onBlocksChange}
+        onActiveBlockIndexChange={vi.fn()}
+      />
+    );
+    expect(container.querySelector('.extracted-text-reading-paragraph')).toBeNull();
+    const segment = screen.getByText('NORTH 1842');
+    fireEvent.doubleClick(segment);
+    const input = screen.getByRole('textbox', { name: 'documents.extractedTextEditBlockAria' });
+    fireEvent.change(input, { target: { value: 'NORTH 1842 korrigiert' } });
+    expect(onBlocksChange).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({ text: 'NORTH 1842 korrigiert', blockIndex: 0 }),
+        expect.objectContaining({ text: 'INVOICE TOTAL', blockIndex: 1 }),
+      ])
+    );
   });
 
   it('highlights reading paragraphs that match the search', () => {
