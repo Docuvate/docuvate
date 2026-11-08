@@ -6,6 +6,7 @@ import {
   clientPointToLocalRatio,
   indexOfPageWrap,
   pageDisplayTransform,
+  selectionPaintWrapIndex,
   visualWidthAfterQuarterTurn,
 } from './viewerGeometry';
 
@@ -62,5 +63,13 @@ describe('viewerGeometry', () => {
     expect(indexOfPageWrap(['1', '2', '3'], 2)).toBe(1);
     expect(indexOfPageWrap(['1', '2'], 4)).toBeNull();
     expect(indexOfPageWrap([], 1)).toBeNull();
+  });
+
+  it('paints on the matching page, or the wrap the gesture already accepted', () => {
+    expect(selectionPaintWrapIndex(['1', '2'], 2, 0, true)).toBe(1);
+    expect(selectionPaintWrapIndex([null], 1, 0, true)).toBe(0);
+    expect(selectionPaintWrapIndex([null], 1, 0, false)).toBeNull();
+    expect(selectionPaintWrapIndex(['2'], 1, 0, true)).toBeNull();
+    expect(selectionPaintWrapIndex(['1'], 4, null, false)).toBeNull();
   });
 });

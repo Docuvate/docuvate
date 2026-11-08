@@ -140,6 +140,34 @@ export function indexOfPageWrap(pageAttributes: readonly (string | null)[], page
   return index >= 0 ? index : null;
 }
 
+/**
+ * Wrap that should show the live rectangle.
+ * The page-matched wrap wins. When none matches, the wrap the pointer already
+ * accepted is kept if it is still connected and does not name another page.
+ */
+export function selectionPaintWrapIndex(
+  pageAttributes: readonly (string | null)[],
+  page: number,
+  rememberedIndex: number | null,
+  rememberedConnected: boolean
+): number | null {
+  const matched = indexOfPageWrap(pageAttributes, page);
+  if (matched != null) {
+    return matched;
+  }
+  if (rememberedIndex == null || !rememberedConnected) {
+    return null;
+  }
+  if (rememberedIndex < 0 || rememberedIndex >= pageAttributes.length) {
+    return null;
+  }
+  const rememberedPage = pageAttributes[rememberedIndex];
+  if (rememberedPage != null && rememberedPage !== String(page)) {
+    return null;
+  }
+  return rememberedIndex;
+}
+
 export function findPdfPageWrap(page: number): HTMLElement | null {
   const wraps = [...document.querySelectorAll('.pdf-page-wrap')].filter(
     (node): node is HTMLElement => node instanceof HTMLElement

@@ -10,13 +10,14 @@ import {
   tokensInsideRect,
   tokensMatchingSelectedText,
 } from '@docuvate/contracts';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import {
   clientPointToLocalRatio,
   clientRectToLocalRatio,
   findPdfPageWrap,
   readDatasetRotation,
+  selectionPaintWrapIndex,
 } from '../../lib/viewerGeometry';
 import type { DocumentSelectionTool } from './DocumentSelectionTools';
 
@@ -53,6 +54,44 @@ function pageWrapForEvent(target: EventTarget | null): HTMLElement | null {
     node = node.parentNode;
   }
   return null;
+}
+
+function pageWraps(): HTMLElement[] {
+  return [...document.querySelectorAll('.pdf-page-wrap')].filter(
+    (node): node is HTMLElement => node instanceof HTMLElement
+  );
+}
+
+function wrapNamesPage(wrap: HTMLElement, page: number): boolean {
+  return wrap.dataset.page == null || wrap.dataset.page === String(page);
+}
+
+function pageWrapAtPoint(clientX: number, clientY: number, page: number): HTMLElement | null {
+  if (typeof document.elementsFromPoint !== 'function') {
+    return null;
+  }
+  for (const hit of document.elementsFromPoint(clientX, clientY)) {
+    const wrap = pageWrapForEvent(hit);
+    if (wrap != null && wrapNamesPage(wrap, page)) {
+      return wrap;
+    }
+  }
+  return null;
+}
+
+function paintWrap(page: number, remembered: HTMLElement | null): HTMLElement | null {
+  const wraps = pageWraps();
+  const rememberedIndex = remembered == null ? -1 : wraps.indexOf(remembered);
+  const index = selectionPaintWrapIndex(
+    wraps.map((wrap) => wrap.dataset.page ?? null),
+    page,
+    rememberedIndex >= 0 ? rememberedIndex : null,
+    remembered?.isConnected === true
+  );
+  if (index == null) {
+    return null;
+  }
+  return wraps[index] ?? null;
 }
 
 function readPageRotationDeg(wrap: HTMLElement): number {
@@ -161,6 +200,7 @@ export function DocumentSelectionLayer({
   onDraftChange,
 }: DocumentSelectionLayerProps) {
   const [liveRect, setLiveRect] = useState<NormalizedRect | null>(null);
+  const drawWrapRef = useRef<HTMLElement | null>(null);
 
   const commitViewerRect = useCallback(
     (next: NormalizedRect | null, wrap: HTMLElement | null) => {
@@ -190,17 +230,18 @@ export function DocumentSelectionLayer({
     let origin: { x: number; y: number } | null = null;
     let activeWrap: HTMLElement | null = null;
     function onPointerDown(event: PointerEvent) {
-      const wrap = pageWrapForEvent(event.target);
+      const fromTarget = pageWrapForEvent(event.target);
+      const wrap =
+        (fromTarget != null && wrapNamesPage(fromTarget, page) ? fromTarget : null) ??
+        pageWrapAtPoint(event.clientX, event.clientY, page);
       if (!wrap) {
-        return;
-      }
-      if (wrap.dataset.page != null && wrap.dataset.page !== String(page)) {
         return;
       }
       event.preventDefault();
       const start = clientToNormalized(wrap, event.clientX, event.clientY);
       origin = start;
       activeWrap = wrap;
+      drawWrapRef.current = wrap;
       commitViewerRect({ x0: start.x, y0: start.y, x1: start.x, y1: start.y }, wrap);
     }
     function onPointerMove(event: PointerEvent) {
@@ -272,25 +313,42 @@ export function DocumentSelectionLayer({
   }, [onDraftChange, page, tokens, tool]);
 
   useEffect(() => {
-    const wrap = findPdfPageWrap(page);
-    if (!(wrap instanceof HTMLElement) || !liveRect || tool !== 'rect') {
-      const stale = document.querySelector('[data-testid="document-selection-rect"]');
-      stale?.remove();
+    if (!liveRect || tool !== 'rect') {
+      drawWrapRef.current = null;
+      document.querySelector('[data-testid="document-selection-rect"]')?.remove();
       return;
     }
-    const existing = wrap.querySelector('[data-testid="document-selection-rect"]');
-    const mark = existing instanceof HTMLElement ? existing : document.createElement('div');
-    if (!(existing instanceof HTMLElement)) {
-      mark.className = 'document-selection-live-box';
-      mark.setAttribute('data-testid', 'document-selection-rect');
-      wrap.appendChild(mark);
+    let mark: HTMLElement | null = null;
+    const paint = () => {
+      const wrap = paintWrap(page, drawWrapRef.current);
+      if (!wrap) {
+        mark?.remove();
+        mark = null;
+        return;
+      }
+      drawWrapRef.current = wrap;
+      if (mark == null || !wrap.contains(mark)) {
+        mark?.remove();
+        mark = document.createElement('div');
+        mark.className = 'document-selection-live-box';
+        mark.setAttribute('data-testid', 'document-selection-rect');
+        wrap.appendChild(mark);
+      }
+      mark.style.left = `${String(liveRect.x0 * 100)}%`;
+      mark.style.top = `${String(liveRect.y0 * 100)}%`;
+      mark.style.width = `${String((liveRect.x1 - liveRect.x0) * 100)}%`;
+      mark.style.height = `${String((liveRect.y1 - liveRect.y0) * 100)}%`;
+    };
+    paint();
+    const observer = new MutationObserver(() => {
+      paint();
+    });
+    for (const host of document.querySelectorAll('.pdf-pages')) {
+      observer.observe(host, { childList: true, subtree: true });
     }
-    mark.style.left = `${String(liveRect.x0 * 100)}%`;
-    mark.style.top = `${String(liveRect.y0 * 100)}%`;
-    mark.style.width = `${String((liveRect.x1 - liveRect.x0) * 100)}%`;
-    mark.style.height = `${String((liveRect.y1 - liveRect.y0) * 100)}%`;
     return () => {
-      mark.remove();
+      observer.disconnect();
+      mark?.remove();
     };
   }, [liveRect, page, tool]);
 
