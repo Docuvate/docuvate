@@ -60,7 +60,6 @@ from docuvate_worker.presentation.extracted_fact_response import extracted_facts
 from docuvate_worker.presentation.extraction_block_response import extraction_blocks_to_models
 from docuvate_worker.presentation.representation_response import document_representation_to_response
 from docuvate_worker.presentation.schemas import (
-    PageTransformModel,
     BuildFactsFromTextRequest,
     BuildFactsFromTextResponse,
     CeDiscoveredField,
@@ -119,6 +118,7 @@ from docuvate_worker.presentation.schemas import (
     MlResolvedModelResponse,
     MlRetrainRunRequest,
     MlRetrainRunResponse,
+    PageTransformModel,
     RepresentationFromTextRequest,
     SmartDuplicateCandidateModel,
     SmartDuplicatesDetectRequest,

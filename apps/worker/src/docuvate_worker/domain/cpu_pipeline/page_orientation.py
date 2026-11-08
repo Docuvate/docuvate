@@ -67,8 +67,8 @@ def _downsample(image: np.ndarray, max_side: int = 512) -> np.ndarray:
     scale = min(1.0, float(max_side) / float(max(height, width)))
     if scale >= 0.999:
         return image
-    new_w = max(1, int(round(width * scale)))
-    new_h = max(1, int(round(height * scale)))
+    new_w = max(1, round(width * scale))
+    new_h = max(1, round(height * scale))
     # Nearest-neighbour via slicing strides — avoid a hard OpenCV dependency here.
     y_idx = (np.linspace(0, height - 1, new_h)).astype(np.int32)
     x_idx = (np.linspace(0, width - 1, new_w)).astype(np.int32)
@@ -77,10 +77,7 @@ def _downsample(image: np.ndarray, max_side: int = 512) -> np.ndarray:
 
 def _projection_sideways_hint(image: np.ndarray) -> bool:
     """True when vertical structure dominates — typical of a page scanned on its side."""
-    if image.ndim == 3:
-        gray = image.mean(axis=2)
-    else:
-        gray = image.astype(np.float64)
+    gray = image.mean(axis=2) if image.ndim == 3 else image.astype(np.float64)
     row_energy = float(np.var(gray.mean(axis=1)))
     col_energy = float(np.var(gray.mean(axis=0)))
     if row_energy <= 1e-9 and col_energy <= 1e-9:
@@ -101,11 +98,8 @@ def score_ocr_orientation(
     upright_score = ocr_score(probe)
     if not _projection_sideways_hint(probe) and upright_score > 0.0:
         return 0
-    candidates: tuple[QuarterTurns, ...]
-    if _projection_sideways_hint(probe):
-        candidates = (0, 1, 3)
-    else:
-        candidates = (0, 1, 2, 3)
+    sideways = _projection_sideways_hint(probe)
+    candidates: tuple[QuarterTurns, ...] = (0, 1, 3) if sideways else (0, 1, 2, 3)
     best_turns: QuarterTurns = 0
     best_score = float("-inf")
     for turns in candidates:
