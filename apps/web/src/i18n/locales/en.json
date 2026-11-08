@@ -510,7 +510,7 @@
       "withoutLabel": "Without label",
       "queryLabel": "Filter query",
       "queryPlaceholder": "in:inbox label:Invoice status:ready …",
-      "queryHint": "Tokens: in:inbox · label:Name · status:ready|extraction|queued|uploaded|error · free text or title:…",
+      "queryHint": "Tokens: in:inbox · label:Name · status:ready|extraction|queued|uploaded|error · from:YYYY-MM-DD · to:YYYY-MM-DD · free text or title:…",
       "parseUnknownKey": "Unknown filter “{{detail}}” in {{token}}.",
       "parseUnknownValue": "Unrecognized value in {{token}}.",
       "documentDate": "Document date",

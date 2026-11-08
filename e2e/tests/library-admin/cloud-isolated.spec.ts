@@ -57,6 +57,66 @@ async function shot(page: Page, name: string): Promise<void> {
   await page.screenshot({ path: path.join(shotDir, `${name}.png`), fullPage: true });
 }
 
+async function ensureEnglish(page: Page): Promise<void> {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto('/settings');
+  await page.getByRole('button', { name: 'User menu' }).click();
+  await page
+    .getByRole('radiogroup', { name: 'Language' })
+    .getByRole('radio', { name: 'English' })
+    .click();
+  await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+  await page.keyboard.press('Escape');
+}
+
+async function showClassicLibrary(page: Page): Promise<void> {
+  await page.goto('/documents');
+  await page.getByRole('radio', { name: 'Classic' }).click();
+}
+
+interface DocumentListSlice {
+  nextCursor: string | null;
+  titles: string[];
+}
+
+function readDocumentList(body: unknown): DocumentListSlice {
+  if (!isRecord(body) || !Array.isArray(body.items)) {
+    throw new Error('document list missing');
+  }
+  const titles: string[] = [];
+  for (const item of body.items) {
+    if (isRecord(item) && typeof item.title === 'string') {
+      titles.push(item.title);
+    }
+  }
+  return {
+    nextCursor: typeof body.nextCursor === 'string' ? body.nextCursor : null,
+    titles,
+  };
+}
+
+async function uploadSynthetic(page: Page, filename: string, bytes: Buffer): Promise<void> {
+  const uploaded = await page.request.post(`${apiBase}/v1/documents`, {
+    multipart: {
+      file: { name: filename, mimeType: 'application/pdf', buffer: bytes },
+    },
+  });
+  expect(uploaded.ok(), await uploaded.text()).toBe(true);
+}
+
+async function ensureSecondDocumentPage(page: Page): Promise<void> {
+  for (let index = 0; index < 60; index += 1) {
+    const listed = await page.request.get(`${apiBase}/v1/documents?limit=50`);
+    expect(listed.ok(), await listed.text()).toBe(true);
+    if (readDocumentList(await listed.json()).nextCursor) {
+      return;
+    }
+    const name = `lib-audit page ${String(index)} ${String(Date.now())}`;
+    await uploadSynthetic(page, `${name}.pdf`, await syntheticPdf(name));
+  }
+  throw new Error('library never reached a second page');
+}
+
 async function login(page: Page): Promise<void> {
   await page.goto('/login');
   await page.locator('input[type="email"]').fill(auditEmail());
@@ -349,5 +409,236 @@ test.describe('synthetic tenant', () => {
     ).toHaveCount(0);
     expect(calls).toEqual([]);
     await shot(page, 'LIB-033-paperless');
+  });
+
+  test('LIB-016 cards show the synthetic lease', async ({ page }) => {
+    await ensureEnglish(page);
+    await page.goto('/documents');
+    await page.getByRole('radio', { name: 'Cards' }).click();
+    const card = page.locator('.doc-card', { hasText: leaseTitle });
+    await expect(card).toBeVisible();
+    await expect(card.locator('a.doc-card-link')).toHaveAttribute('href', `/documents/${leaseId}`);
+    await shot(page, 'LIB-016-cards');
+  });
+
+  test('LIB-021 filter drawer keeps the dated lease and hides the notice', async ({ page }) => {
+    await ensureEnglish(page);
+    await page.setViewportSize({ width: 1100, height: 800 });
+    await showClassicLibrary(page);
+    await page.getByRole('button', { name: 'Show filters' }).click();
+    const drawer = page.getByRole('dialog', { name: 'Document filters' });
+    await expect(drawer).toBeVisible();
+    await drawer.getByRole('button', { name: 'Status' }).click();
+    await page.getByRole('option', { name: 'Failed' }).click();
+    await drawer.getByTestId('library-filter-date-from').fill('2026-10-22');
+    await drawer.getByRole('button', { name: 'Hide filters' }).click();
+    await expect(drawer).toBeHidden();
+    await expect(page).toHaveURL(/status%3Aerror/);
+    await expect(page).toHaveURL(/from%3A2026-10-22/);
+    await expect(page.getByRole('link', { name: leaseTitle, exact: true })).toBeVisible();
+    await expect(page.getByRole('link', { name: secondTitle, exact: true })).toHaveCount(0);
+    await page.reload();
+    await expect(page.getByRole('link', { name: leaseTitle, exact: true })).toBeVisible();
+    await expect(page.getByRole('link', { name: secondTitle, exact: true })).toHaveCount(0);
+    await shot(page, 'LIB-021-filters');
+  });
+
+  test('LIB-035 narrow layout opens the menu and Escape returns focus', async ({ page }) => {
+    await ensureEnglish(page);
+    await page.setViewportSize({ width: 390, height: 800 });
+    await page.goto('/documents');
+    const skip = page.locator('.skip-link');
+    await skip.focus();
+    await expect(skip).toBeVisible();
+    await skip.press('Enter');
+    await expect(page.locator('#app-main-content')).toBeFocused();
+    const menu = page.getByRole('button', { name: 'Main navigation' });
+    await menu.click();
+    await expect(menu).toHaveAttribute('aria-expanded', 'true');
+    const drawer = page.getByRole('complementary', { name: 'Main navigation' });
+    await expect(drawer.getByRole('link', { name: 'Documents' })).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(menu).toHaveAttribute('aria-expanded', 'false');
+    await expect(menu).toBeFocused();
+    await shot(page, 'LIB-035-narrow');
+  });
+
+  test('LIB-040 file input uploads one synthetic PDF', async ({ page }) => {
+    test.setTimeout(90_000);
+    await ensureEnglish(page);
+    const filename = `lib-audit-ui-${String(Date.now())}.pdf`;
+    const filePath = path.join('/tmp', filename);
+    await fs.writeFile(filePath, await syntheticPdf(filename));
+    await showClassicLibrary(page);
+    const chooserPromise = page.waitForEvent('filechooser');
+    await page.getByRole('button', { name: 'Upload', exact: true }).click();
+    const chooser = await chooserPromise;
+    await chooser.setFiles(filePath);
+    await expect(page.getByRole('link', { name: filename })).toBeVisible({ timeout: 30_000 });
+    await shot(page, 'LIB-040-file-input');
+  });
+
+  test('LIB-036 export downloads a CSV and the original PDF', async ({ page }) => {
+    test.setTimeout(90_000);
+    await ensureEnglish(page);
+    await showClassicLibrary(page);
+    const csvPromise = page.waitForEvent('download');
+    await page.getByRole('button', { name: 'Export field values' }).click();
+    await page.getByRole('menuitem', { name: 'CSV for spreadsheets' }).click();
+    const csv = await csvPromise;
+    expect(csv.suggestedFilename()).toMatch(/^docuvate-field-values-\d{4}-\d{2}-\d{2}\.csv$/);
+    const csvPath = path.join(shotDir, csv.suggestedFilename());
+    await csv.saveAs(csvPath);
+    const csvText = await fs.readFile(csvPath, 'utf8');
+    expect(csvText.startsWith('documentId,title,filename,fieldKey,value,confidence')).toBe(true);
+
+    await page.goto(`/documents/${leaseId}`);
+    const pdfPromise = page.waitForEvent('download');
+    await page.getByRole('button', { name: 'More actions' }).click();
+    await page.getByRole('menuitem', { name: 'Download original' }).click();
+    const pdf = await pdfPromise;
+    const pdfPath = path.join(shotDir, `LIB-036-${pdf.suggestedFilename()}`);
+    await pdf.saveAs(pdfPath);
+    const bytes = await fs.readFile(pdfPath);
+    expect(bytes.subarray(0, 5).toString('utf8')).toBe('%PDF-');
+    expect(bytes.length).toBeGreaterThan(100);
+    await shot(page, 'LIB-036-export');
+  });
+
+  test('LIB-025 pin and unpin a saved view persists', async ({ page }) => {
+    test.setTimeout(90_000);
+    await ensureEnglish(page);
+    const viewName = `lib-audit pin ${String(Date.now())}`;
+    await showClassicLibrary(page);
+    await page.getByRole('button', { name: 'Saved views: save, update, manage' }).click();
+    await page.getByRole('menuitem', { name: 'Save view' }).click();
+    const dialog = page.getByRole('dialog');
+    await dialog.getByLabel(/name/i).fill(viewName);
+    await dialog.getByRole('button', { name: /save/i }).click();
+    await expect(dialog).toBeHidden();
+
+    await page.goto('/documents/views');
+    const row = page.getByRole('row').filter({ hasText: viewName });
+    const pin = row.getByRole('switch', { name: 'Pin to navigation' });
+    await row.getByText('Pin to navigation', { exact: true }).click();
+    await expect(pin).toBeChecked();
+    await page.reload();
+    await expect(
+      page.getByRole('row').filter({ hasText: viewName }).getByRole('switch')
+    ).toBeChecked();
+    await page.goto('/documents');
+    const pinned = page.locator('a.ribbon-saved-view-link', { hasText: viewName });
+    await expect(pinned).toBeVisible();
+    await pinned.click();
+    await expect(page).toHaveURL(/view=/);
+    await shot(page, 'LIB-025-pinned');
+
+    await page.goto('/documents/views');
+    const unpinRow = page.getByRole('row').filter({ hasText: viewName });
+    const unpin = unpinRow.getByRole('switch');
+    await unpinRow.getByText('Pin to navigation', { exact: true }).click();
+    await expect(unpin).not.toBeChecked();
+    await page.reload();
+    await expect(
+      page.getByRole('row').filter({ hasText: viewName }).getByRole('switch')
+    ).not.toBeChecked();
+    await page.goto('/documents');
+    await expect(page.locator('a.ribbon-saved-view-link', { hasText: viewName })).toHaveCount(0);
+  });
+
+  test('LIB-028 edit one recognized field and keep it after reload', async ({ page }) => {
+    test.setTimeout(90_000);
+    await ensureEnglish(page);
+    const created = `Harbor audit ${String(Date.now())}`;
+    const renamed = `${created} revised`;
+    await page.goto('/structure/recognized-fields');
+    await page.getByRole('button', { name: 'Add field' }).click();
+    const dialog = page.getByRole('dialog');
+    await dialog.getByRole('textbox', { name: 'Name' }).fill(created);
+    await dialog.getByRole('radio', { name: 'Always' }).click();
+    await dialog.getByRole('button', { name: 'Save' }).click();
+    await expect(dialog).toBeHidden();
+    await expect(page.getByRole('row', { name: created })).toBeVisible();
+    await page.getByRole('row', { name: created }).getByRole('button', { name: 'Edit' }).click();
+    const editor = page.getByRole('dialog', { name: 'Edit field' });
+    await editor.getByRole('textbox', { name: 'Name' }).fill(renamed);
+    await editor.getByRole('button', { name: 'Save' }).click();
+    await expect(editor).toBeHidden();
+    await page.reload();
+    await expect(page.getByRole('row', { name: renamed })).toBeVisible();
+    await expect(page.getByRole('row', { name: created, exact: true })).toHaveCount(0);
+    await shot(page, 'LIB-028-field-edit');
+  });
+
+  test('LIB-031 resolve one exact duplicate pair as not a duplicate', async ({ page }) => {
+    test.setTimeout(90_000);
+    await ensureEnglish(page);
+    const pairName = `lib-audit pair ${String(Date.now())}`;
+    const bytes = await syntheticPdf(pairName);
+    await uploadSynthetic(page, `${pairName}-a.pdf`, bytes);
+    await uploadSynthetic(page, `${pairName}-b.pdf`, bytes);
+    await page.goto('/documents/duplicates');
+    const card = page
+      .getByTestId('duplicate-set-review-card')
+      .filter({ hasText: `${pairName}-a.pdf` });
+    await expect(card).toBeVisible();
+    await card.getByRole('button', { name: 'All: not duplicate' }).click();
+    await card.getByTestId('duplicate-set-apply-decisions').click();
+    await expect(card).toHaveCount(0);
+    await page.reload();
+    await expect(page.getByText(`${pairName}-a.pdf`)).toHaveCount(0);
+    await shot(page, 'LIB-031-resolved');
+  });
+
+  test('LIB-023 a second library page loads a distinct cursor', async ({ page }) => {
+    test.setTimeout(180_000);
+    await ensureEnglish(page);
+    await ensureSecondDocumentPage(page);
+    const pages: { cursor: string | null; titles: string[] }[] = [];
+    page.on('response', (response) => {
+      void (async () => {
+        if (response.request().method() !== 'GET' || !response.ok()) {
+          return;
+        }
+        const url = new URL(response.url());
+        if (url.pathname !== '/v1/documents') {
+          return;
+        }
+        pages.push({
+          cursor: url.searchParams.get('cursor'),
+          titles: readDocumentList(await response.json()).titles,
+        });
+      })();
+    });
+    await showClassicLibrary(page);
+    const scroll = page.getByTestId('library-doc-virtual-scroll');
+    await expect(scroll).toBeVisible();
+    await expect
+      .poll(async () => {
+        await scroll.evaluate((el) => {
+          el.scrollTop = el.scrollHeight;
+        });
+        return pages.filter((entry) => entry.cursor).length;
+      })
+      .toBeGreaterThan(0);
+    const cursors = pages.flatMap((entry) => (entry.cursor ? [entry.cursor] : []));
+    expect(new Set(cursors).size).toBe(cursors.length);
+    const firstTitles = new Set(pages.find((entry) => entry.cursor === null)?.titles ?? []);
+    const laterTitle = pages
+      .filter((entry) => entry.cursor)
+      .flatMap((entry) => entry.titles)
+      .find((title) => !firstTitles.has(title));
+    if (!laterTitle) {
+      throw new Error('second page did not include a title from outside the first page');
+    }
+    await expect
+      .poll(async () => {
+        await scroll.evaluate((el) => {
+          el.scrollTop = el.scrollHeight;
+        });
+        return page.getByRole('link', { name: laterTitle }).count();
+      })
+      .toBeGreaterThan(0);
+    await shot(page, 'LIB-023-pagination');
   });
 });
