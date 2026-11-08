@@ -10,7 +10,7 @@ import {
   tokensInsideRect,
   tokensMatchingSelectedText,
 } from '@docuvate/contracts';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 import {
   clientPointToLocalRatio,
@@ -222,7 +222,7 @@ export function DocumentSelectionLayer({
     [onDraftChange, page, tokens]
   );
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (tool !== 'rect') {
       setLiveRect(null);
       return;
@@ -312,7 +312,7 @@ export function DocumentSelectionLayer({
     };
   }, [onDraftChange, page, tokens, tool]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!liveRect || tool !== 'rect') {
       drawWrapRef.current = null;
       document.querySelector('[data-testid="document-selection-rect"]')?.remove();
@@ -343,9 +343,7 @@ export function DocumentSelectionLayer({
     const observer = new MutationObserver(() => {
       paint();
     });
-    for (const host of document.querySelectorAll('.pdf-pages')) {
-      observer.observe(host, { childList: true, subtree: true });
-    }
+    observer.observe(document.body, { childList: true, subtree: true });
     return () => {
       observer.disconnect();
       mark?.remove();

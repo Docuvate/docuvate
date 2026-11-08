@@ -9,19 +9,21 @@ from collections.abc import Callable
 from dataclasses import dataclass
 
 import numpy as np
+from numpy.typing import NDArray
 
 QuarterTurns = int  # 0..3 clockwise
+PageImage = NDArray[np.uint8]
 
 
 @dataclass(frozen=True)
 class OrientedPage:
     """Page raster ready for OCR plus the clockwise quarter turns applied to the source."""
 
-    image: np.ndarray
+    image: PageImage
     quarter_turns_cw: QuarterTurns
 
 
-def rotate_image_cw(image: np.ndarray, quarter_turns_cw: QuarterTurns) -> np.ndarray:
+def rotate_image_cw(image: PageImage, quarter_turns_cw: QuarterTurns) -> PageImage:
     turns = int(quarter_turns_cw) % 4
     if turns == 0:
         return image
@@ -63,7 +65,7 @@ def map_norm_box_to_unrotated(
     return nx0, ny0, max(0.0, nx1 - nx0), max(0.0, ny1 - ny0)
 
 
-def _downsample(image: np.ndarray, max_side: int = 512) -> np.ndarray:
+def _downsample(image: PageImage, max_side: int = 512) -> PageImage:
     height, width = image.shape[:2]
     scale = min(1.0, float(max_side) / float(max(height, width)))
     if scale >= 0.999:
@@ -81,7 +83,7 @@ def _downsample(image: np.ndarray, max_side: int = 512) -> np.ndarray:
 _LOW_TEXT_SCORE_FLOOR = 2.0
 
 
-def _projection_sideways_hint(image: np.ndarray) -> bool:
+def _projection_sideways_hint(image: PageImage) -> bool:
     """True when vertical structure dominates — a page scanned on its side.
 
     Upside-down text stays horizontal, so this hint never separates 0° from 180°.
@@ -95,9 +97,9 @@ def _projection_sideways_hint(image: np.ndarray) -> bool:
 
 
 def _score_at(
-    probe: np.ndarray,
+    probe: PageImage,
     turns: QuarterTurns,
-    ocr_score: Callable[[np.ndarray], float],
+    ocr_score: Callable[[PageImage], float],
 ) -> float:
     rotated = probe if turns == 0 else rotate_image_cw(probe, turns)
     return float(ocr_score(rotated))
@@ -114,8 +116,8 @@ def _best_turn(scores: dict[QuarterTurns, float]) -> tuple[QuarterTurns, float]:
 
 
 def score_ocr_orientation(
-    image: np.ndarray,
-    ocr_score: Callable[[np.ndarray], float],
+    image: PageImage,
+    ocr_score: Callable[[PageImage], float],
 ) -> QuarterTurns:
     """Pick 0/90/180/270 clockwise turns from a recognition score.
 
@@ -140,8 +142,8 @@ def score_ocr_orientation(
 
 
 def orient_page_for_ocr(
-    image: np.ndarray,
-    ocr_score: Callable[[np.ndarray], float] | None = None,
+    image: PageImage,
+    ocr_score: Callable[[PageImage], float] | None = None,
     *,
     forced_quarter_turns_cw: QuarterTurns | None = None,
 ) -> OrientedPage:
