@@ -29,8 +29,9 @@ export function areBlocksDirty(
 }
 
 /**
- * Blocks to send with a document update. Unchanged blocks are omitted because the API
- * treats any `extractionBlocks` payload as a text edit and drops the stored layout IR.
+ * Blocks to send with a document update. Unchanged blocks are omitted so a metadata
+ * save does not rewrite layout text. A real text edit sends the blocks, and the API
+ * writes those words into the stored layout instead of deleting it.
  */
 export function extractionBlocksForUpdate(
   patchBlocks: ExtractionBlock[] | undefined,

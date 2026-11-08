@@ -791,7 +791,6 @@ export async function installStructuringMocks(
           : undefined;
       if (isSyntheticBlockList(blocks)) {
         blockOverrides.set(detail.id, blocks);
-        layoutIrDropped.add(detail.id);
       }
       return json(route, {
         document: withOverrides(detail),

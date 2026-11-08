@@ -38,6 +38,7 @@ export function RibbonGroup({
   kind = 'act',
   align,
   order,
+  showCaption = true,
   children,
 }: {
   /** Visible caption where space permits; always the group's accessible name. */
@@ -47,6 +48,8 @@ export function RibbonGroup({
   align?: 'end';
   /** Position among groups portalled by different components of one screen. */
   order?: number;
+  /** Omit the visible caption when the parent tab already names this band. */
+  showCaption?: boolean;
   children: ReactNode;
 }) {
   return (
@@ -56,9 +59,11 @@ export function RibbonGroup({
       aria-label={label}
       style={order === undefined ? undefined : { order }}
     >
-      <span className="ribbon-group-label" aria-hidden>
-        {label}
-      </span>
+      {showCaption ? (
+        <span className="ribbon-group-label" aria-hidden>
+          {label}
+        </span>
+      ) : null}
       <div className="ribbon-group-items">{children}</div>
     </div>
   );

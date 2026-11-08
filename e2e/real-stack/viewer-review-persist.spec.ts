@@ -8,7 +8,7 @@ import path from 'node:path';
 import { expect, test, type Page } from '@playwright/test';
 import { PDFDocument, StandardFonts } from 'pdf-lib';
 
-import { dragOnPdfPage } from '../support/dragOnPage';
+import { dragAcrossText, dragOnPdfPage } from '../support/dragOnPage';
 
 const apiBase = (process.env['E2E_API_URL'] ?? 'http://127.0.0.1:3001').replace(/\/$/, '');
 
@@ -222,15 +222,23 @@ test('reject, undo, rotated bbox, and table overlay persist through the API', as
   expect(x1).toBeGreaterThan(x0 ?? 0);
   expect(y1).toBeGreaterThan(y0 ?? 0);
 
-  await page.keyboard.press('r');
-  await expect(page.getByRole('radio', { name: /Bereich|Area/ })).toBeChecked();
-  await dragOnPdfPage(page, 0.15, 0.55, 0.7, 0.85);
-  await expect(page.getByTestId('selection-mark-table')).toBeVisible();
+  const layout = page.getByTestId('structuring-primary-layout');
+  await expect(layout).toBeVisible();
+  await layout.click();
+  await expect(layout).toHaveAttribute('aria-pressed', 'true');
+  const area = page.getByRole('radio', { name: /Bereich|Area/ });
+  await area.click();
+  await expect(area).toBeChecked();
+  const invoice = page.locator('.pdf-page-wrap .textLayer span', { hasText: /INVOICE/ }).first();
+  await expect(invoice).toBeVisible();
+  await dragAcrossText(page, invoice);
+  const markTable = page.getByTestId('selection-mark-table');
+  await expect(markTable).toBeVisible();
   const created = page.waitForResponse(
     (response) =>
       response.url().includes('/table-corrections') && response.request().method() === 'POST' && response.ok()
   );
-  await page.getByTestId('selection-mark-table').click();
+  await markTable.click();
   await created;
   await page.getByTestId('table-edit-in-document').click();
   const bounds = page.waitForResponse(

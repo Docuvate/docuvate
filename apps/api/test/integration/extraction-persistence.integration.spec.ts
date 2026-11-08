@@ -222,4 +222,77 @@ describe('extraction persistence in normalized tables (Testcontainers Postgres)'
       { page: 2, widthPt: 612, heightPt: 792 },
     ]);
   });
+
+  it('keeps layout IR and writes the corrected block text into it', async () => {
+    const docId = randomUUID();
+    await pool.query(
+      `INSERT INTO documents (id, user_id, filename, mime_type, storage_key, status)
+       VALUES ($1, $2, 'revise.pdf', 'application/pdf', 'k5', 'ready')`,
+      [docId, userId]
+    );
+    await repo.saveExtraction(docId, {
+      text: 'NORTH 1842\nINVOICE TOTAL',
+      fields: [],
+      blocks: [
+        { page: 1, blockIndex: 0, x: 0.12, y: 0.12, width: 0.2, height: 0.02, text: 'NORTH 1842' },
+        { page: 1, blockIndex: 1, x: 0.12, y: 0.17, width: 0.28, height: 0.02, text: 'INVOICE TOTAL' },
+      ],
+      layoutIr: {
+        version: 1,
+        pages: [
+          {
+            page: 1,
+            widthPt: 595,
+            heightPt: 842,
+            blocks: [
+              { page: 1, x: 72, y: 100, width: 120, height: 18, text: 'NORTH 1842', blockIndex: 0 },
+              { page: 1, x: 72, y: 140, width: 160, height: 18, text: 'INVOICE TOTAL', blockIndex: 1 },
+            ],
+            tables: [
+              {
+                page: 1,
+                x: 40,
+                y: 200,
+                width: 400,
+                height: 80,
+                columnCount: 2,
+                rows: [[{ text: 'NORTH 1842', x: 40, y: 200, width: 80, height: 16, blockIndex: 0 }]],
+              },
+            ],
+          },
+        ],
+      },
+    });
+    await repo.updateForUser(docId, userId, {
+      extractionBlocks: [
+        { page: 1, blockIndex: 0, x: 0.12, y: 0.12, width: 0.2, height: 0.02, text: 'NORTH 1842 REVISED' },
+        { page: 1, blockIndex: 1, x: 0.12, y: 0.17, width: 0.28, height: 0.02, text: 'INVOICE TOTAL' },
+      ],
+    });
+    const layoutCount = await pool.query<{ c: number }>(
+      `SELECT count(*)::int AS c FROM document_layout_ir WHERE document_id = $1`,
+      [docId]
+    );
+    expect(layoutCount.rows[0]?.c).toBe(1);
+    const pages = await pool.query<{ c: number }>(
+      `SELECT count(*)::int AS c FROM document_layout_ir_pages WHERE document_id = $1`,
+      [docId]
+    );
+    expect(pages.rows[0]?.c).toBe(1);
+    const stored = await pool.query<{ ir: unknown }>(
+      `SELECT ir FROM document_layout_ir WHERE document_id = $1`,
+      [docId]
+    );
+    expect(JSON.stringify(stored.rows[0]?.ir)).toContain('NORTH 1842 REVISED');
+    expect(JSON.stringify(stored.rows[0]?.ir)).toContain('INVOICE TOTAL');
+    expect(JSON.stringify(stored.rows[0]?.ir)).toContain('"widthPt":595');
+    const loaded = await repo.findByIdForUser(docId, userId);
+    expect(loaded?.extraction?.layoutIrAvailable).toBe(true);
+    expect(loaded?.extraction?.layoutIrPages).toEqual([{ page: 1, widthPt: 595, heightPt: 842 }]);
+    expect(loaded?.extraction?.text).toContain('NORTH 1842 REVISED');
+    expect(loaded?.extraction?.blocks?.map((block) => block.text)).toEqual([
+      'NORTH 1842 REVISED',
+      'INVOICE TOTAL',
+    ]);
+  });
 });

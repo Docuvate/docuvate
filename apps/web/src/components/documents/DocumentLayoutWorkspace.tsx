@@ -585,9 +585,9 @@ export function DocumentLayoutWorkspace({
         });
       }
     };
-    window.addEventListener('keydown', onKey);
+    window.addEventListener('keydown', onKey, true);
     return () => {
-      window.removeEventListener('keydown', onKey);
+      window.removeEventListener('keydown', onKey, true);
     };
   }, [
     activeOverlayId,

@@ -55,7 +55,7 @@ export function StructuringContextRibbon({
     : t(`documents.selectionToolHint.${selectionTool}`);
 
   return createPortal(
-    <RibbonGroup label={label}>
+    <RibbonGroup label={label} showCaption={false}>
       <div className="structuring-context" data-testid="structuring-context" data-primary={primary}>
         {textTools ? (
           <>

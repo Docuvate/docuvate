@@ -92,8 +92,31 @@ test('text correction edits an OCR block, saves it, and shows it after reload', 
   await save.click();
   await saved;
   await page.reload();
-  await expect(page.getByText('NORTH 1842 korrigiert')).toBeVisible();
-  await expect(page.getByText('INVOICE TOTAL')).toBeVisible();
+  await page.getByTestId('structuring-primary-ocr').click();
+  await expect(page.locator('.extracted-text-segment', { hasText: 'NORTH 1842 korrigiert' })).toBeVisible();
+  await expect(page.locator('.extracted-text-segment', { hasText: 'INVOICE TOTAL' })).toBeVisible();
+  const detail: unknown = await page.evaluate(async (documentId) => {
+    const response = await fetch(`/api/documents/${documentId}`);
+    const payload: unknown = await response.json();
+    return payload;
+  }, LAYOUT_DOCUMENT_ID);
+  const extraction =
+    typeof detail === 'object' && detail !== null && 'extraction' in detail ? detail.extraction : null;
+  const available =
+    typeof extraction === 'object' && extraction !== null && 'layoutIrAvailable' in extraction
+      ? extraction.layoutIrAvailable
+      : null;
+  expect(available).toBe(true);
+  const layoutIr: unknown = await page.evaluate(async (documentId) => {
+    const response = await fetch(`/api/documents/${documentId}/layout-ir`);
+    const payload: unknown = await response.json();
+    return payload;
+  }, LAYOUT_DOCUMENT_ID);
+  const pages =
+    typeof layoutIr === 'object' && layoutIr !== null && 'pages' in layoutIr && Array.isArray(layoutIr.pages)
+      ? layoutIr.pages
+      : [];
+  expect(pages.length).toBeGreaterThan(0);
 });
 
 function postedTableCreate(value: unknown): { x0: number; x1: number; y0: number; y1: number } | null {
@@ -143,4 +166,60 @@ test('area drag across a saved field still offers mark as table after rotation',
     return item.x0 === posted.x0;
   });
   expect(stored).toBeTruthy();
+});
+
+async function bottomRadius(locator: ReturnType<Page['locator']>): Promise<string> {
+  return locator.evaluate((node) => getComputedStyle(node).borderBottomLeftRadius);
+}
+
+test('a selected parent flows into the next band', async ({ page }) => {
+  await openViewer(page, 1280, 'light');
+  const documents = page.getByRole('navigation', { name: 'Hauptnavigation' }).getByRole('link', { name: 'Dokumente' });
+  const start = page.getByRole('navigation', { name: 'Hauptnavigation' }).getByRole('link', { name: 'Start' });
+  const ribbon = page.getByTestId('app-ribbon');
+  await expect(documents).toHaveAttribute('aria-current', 'page');
+  const documentsBox = await documents.boundingBox();
+  const ribbonBox = await ribbon.boundingBox();
+  if (!documentsBox || !ribbonBox) throw new Error('ribbon junction has no box');
+  expect(Math.abs(documentsBox.y + documentsBox.height - ribbonBox.y)).toBeLessThanOrEqual(2);
+  expect(await bottomRadius(documents)).toBe('0px');
+  expect(await bottomRadius(start)).not.toBe('0px');
+  const surfaces = await page.evaluate(() => {
+    const tab = document.querySelector('.app-primary-nav-link.active');
+    const band = document.querySelector('[data-testid="app-ribbon"]');
+    if (!(tab instanceof HTMLElement) || !(band instanceof HTMLElement)) return null;
+    return {
+      tab: getComputedStyle(tab).backgroundColor,
+      band: getComputedStyle(band).backgroundColor,
+    };
+  });
+  expect(surfaces?.tab).toBe(surfaces?.band);
+
+  await page.getByTestId('structuring-primary-ocr').click();
+  const text = page.getByTestId('structuring-primary-ocr');
+  const context = page.getByTestId('app-ribbon-context');
+  const textBox = await text.boundingBox();
+  const contextBox = await context.boundingBox();
+  if (!textBox || !contextBox) throw new Error('text junction has no box');
+  expect(Math.abs(textBox.y + textBox.height - contextBox.y)).toBeLessThanOrEqual(2);
+  expect(await bottomRadius(text)).toBe('0px');
+  await expect(context.locator('.ribbon-group-label')).toHaveCount(0);
+  await page.screenshot({ path: path.join(shots, 'ribbon-flow-1280-light.png') });
+
+  await page.getByTestId('structuring-primary-labels').click();
+  await expect(context).toBeHidden();
+  expect(await bottomRadius(page.getByTestId('structuring-primary-labels'))).not.toBe('0px');
+
+  await page.emulateMedia({ colorScheme: 'dark', reducedMotion: 'reduce' });
+  await openViewer(page, 1280, 'dark');
+  await page.getByTestId('structuring-primary-layout').click();
+  const motion = await page.getByTestId('structuring-primary-layout').evaluate((node) => {
+    return getComputedStyle(node).transitionDuration;
+  });
+  expect(Number.parseFloat(motion)).toBeLessThan(0.05);
+  await expect(page.getByTestId('app-ribbon-context')).toBeVisible();
+  await page.screenshot({ path: path.join(shots, 'ribbon-flow-1280-dark.png') });
+  await page.setViewportSize({ width: 390, height: 800 });
+  await expect(page.getByTestId('app-ribbon-context').getByRole('radio')).toHaveCount(3);
+  await page.screenshot({ path: path.join(shots, 'ribbon-flow-390-dark.png') });
 });
