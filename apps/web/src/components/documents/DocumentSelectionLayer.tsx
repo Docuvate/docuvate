@@ -205,6 +205,46 @@ function clearMark(): void {
   document.querySelector('[data-testid="document-selection-rect"]')?.remove();
 }
 
+function scrollableAncestor(node: HTMLElement): HTMLElement | null {
+  let current: HTMLElement | null = node.parentElement;
+  let found: HTMLElement | null = null;
+  while (current) {
+    const overflow = getComputedStyle(current).overflowY;
+    if (
+      (overflow === 'auto' || overflow === 'scroll') &&
+      current.scrollHeight > current.clientHeight + 1
+    ) {
+      found = current;
+    }
+    current = current.parentElement;
+  }
+  return found;
+}
+
+/**
+ * The page can sit above the visible scroller after a side panel scrolls the
+ * document. A drag at the top of that page then misses it. Bring the top back
+ * only when it is outside the scroller; a page already in view stays put.
+ */
+function revealPageWrap(page: number): boolean {
+  const wrap = pageWrapForPage(page, null);
+  if (!wrap) {
+    return false;
+  }
+  const scroller = scrollableAncestor(wrap);
+  if (!scroller) {
+    return true;
+  }
+  const bounds = wrap.getBoundingClientRect();
+  const view = scroller.getBoundingClientRect();
+  const topInView = bounds.top >= view.top && bounds.top < view.bottom;
+  if (topInView) {
+    return true;
+  }
+  wrap.scrollIntoView({ block: 'start', inline: 'nearest', behavior: 'auto' });
+  return true;
+}
+
 export function DocumentSelectionLayer({
   tool,
   page,
@@ -215,6 +255,7 @@ export function DocumentSelectionLayer({
   const drawWrapRef = useRef<HTMLElement | null>(null);
   const originRef = useRef<{ x: number; y: number } | null>(null);
   const activeWrapRef = useRef<HTMLElement | null>(null);
+  const revealedRef = useRef(false);
 
   const commitViewerRect = useCallback(
     (next: NormalizedRect | null, wrap: HTMLElement | null) => {
@@ -244,9 +285,11 @@ export function DocumentSelectionLayer({
       originRef.current = null;
       activeWrapRef.current = null;
       drawnRectRef.current = null;
+      revealedRef.current = false;
       clearMark();
       return;
     }
+    revealedRef.current = revealPageWrap(page);
     function wrapForGesture(event: MouseEvent): HTMLElement | null {
       const fromTarget = pageWrapForEvent(event.target);
       if (fromTarget != null) {
@@ -364,6 +407,9 @@ export function DocumentSelectionLayer({
     // A page render replaces the wrap and drops the rectangle with it.
     // Put the same rectangle on the new wrap. Style updates are not observed.
     const restore = () => {
+      if (!revealedRef.current) {
+        revealedRef.current = revealPageWrap(page);
+      }
       const rect = drawnRectRef.current;
       if (!rect) {
         return;
