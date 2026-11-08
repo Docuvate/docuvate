@@ -55,6 +55,34 @@ function pageWrapForEvent(target: EventTarget | null): HTMLElement | null {
   return null;
 }
 
+function paintLiveRect(wrap: HTMLElement, rect: NormalizedRect): HTMLElement {
+  const existing = wrap.querySelector('[data-testid="document-selection-rect"]');
+  const mark = existing instanceof HTMLElement ? existing : document.createElement('div');
+  if (!(existing instanceof HTMLElement)) {
+    mark.className = 'document-selection-live-box';
+    mark.setAttribute('data-testid', 'document-selection-rect');
+    wrap.appendChild(mark);
+  }
+  mark.style.left = `${String(rect.x0 * 100)}%`;
+  mark.style.top = `${String(rect.y0 * 100)}%`;
+  mark.style.width = `${String((rect.x1 - rect.x0) * 100)}%`;
+  mark.style.height = `${String((rect.y1 - rect.y0) * 100)}%`;
+  return mark;
+}
+
+function wrapUnderPoint(clientX: number, clientY: number, page: number): HTMLElement | null {
+  if (typeof document.elementsFromPoint !== 'function') {
+    return null;
+  }
+  for (const hit of document.elementsFromPoint(clientX, clientY)) {
+    const wrap = pageWrapForEvent(hit);
+    if (wrap != null && (wrap.dataset.page == null || wrap.dataset.page === String(page))) {
+      return wrap;
+    }
+  }
+  return null;
+}
+
 function pageWrapForPage(page: number, remembered: HTMLElement | null): HTMLElement | null {
   const wraps = [...document.querySelectorAll('.pdf-page-wrap')].filter(
     (node): node is HTMLElement => node instanceof HTMLElement
@@ -212,49 +240,80 @@ export function DocumentSelectionLayer({
       setLiveRect(null);
       return;
     }
-    function onPointerDown(event: PointerEvent) {
-      const wrap = pageWrapForEvent(event.target);
-      if (!wrap) {
-        return;
+    let pointerStarted = false;
+    function wrapForGesture(event: MouseEvent): HTMLElement | null {
+      const fromTarget = pageWrapForEvent(event.target);
+      if (
+        fromTarget != null &&
+        (fromTarget.dataset.page == null || fromTarget.dataset.page === String(page))
+      ) {
+        return fromTarget;
       }
-      if (wrap.dataset.page != null && wrap.dataset.page !== String(page)) {
+      return wrapUnderPoint(event.clientX, event.clientY, page) ?? pageWrapForPage(page, fromTarget);
+    }
+    function beginDrag(event: MouseEvent) {
+      const wrap = wrapForGesture(event);
+      if (!wrap) {
         return;
       }
       event.preventDefault();
       const start = clientToNormalized(wrap, event.clientX, event.clientY);
+      const rect = { x0: start.x, y0: start.y, x1: start.x, y1: start.y };
       originRef.current = start;
       activeWrapRef.current = wrap;
       drawWrapRef.current = wrap;
-      commitViewerRect({ x0: start.x, y0: start.y, x1: start.x, y1: start.y }, wrap);
+      paintLiveRect(wrap, rect);
+      commitViewerRect(rect, wrap);
     }
-    function onPointerMove(event: PointerEvent) {
+    function moveDrag(event: MouseEvent) {
       const origin = originRef.current;
       const activeWrap = activeWrapRef.current;
       if (!origin || !activeWrap) {
         return;
       }
       const current = clientToNormalized(activeWrap, event.clientX, event.clientY);
-      commitViewerRect(
-        {
-          x0: Math.min(origin.x, current.x),
-          y0: Math.min(origin.y, current.y),
-          x1: Math.max(origin.x, current.x),
-          y1: Math.max(origin.y, current.y),
-        },
-        activeWrap
-      );
+      const rect = {
+        x0: Math.min(origin.x, current.x),
+        y0: Math.min(origin.y, current.y),
+        x1: Math.max(origin.x, current.x),
+        y1: Math.max(origin.y, current.y),
+      };
+      const wrap = activeWrap.isConnected ? activeWrap : wrapForGesture(event);
+      if (!wrap) {
+        return;
+      }
+      activeWrapRef.current = wrap;
+      drawWrapRef.current = wrap;
+      paintLiveRect(wrap, rect);
+      commitViewerRect(rect, wrap);
+    }
+    function onPointerDown(event: PointerEvent) {
+      pointerStarted = true;
+      beginDrag(event);
+    }
+    function onMouseDown(event: MouseEvent) {
+      if (pointerStarted) {
+        pointerStarted = false;
+        return;
+      }
+      beginDrag(event);
     }
     function onPointerUp() {
       originRef.current = null;
       activeWrapRef.current = null;
+      pointerStarted = false;
     }
-    document.addEventListener('pointerdown', onPointerDown);
-    document.addEventListener('pointermove', onPointerMove);
-    document.addEventListener('pointerup', onPointerUp);
+    document.addEventListener('pointerdown', onPointerDown, true);
+    document.addEventListener('pointermove', moveDrag, true);
+    document.addEventListener('pointerup', onPointerUp, true);
+    document.addEventListener('mousedown', onMouseDown, true);
+    document.addEventListener('mousemove', moveDrag, true);
     return () => {
-      document.removeEventListener('pointerdown', onPointerDown);
-      document.removeEventListener('pointermove', onPointerMove);
-      document.removeEventListener('pointerup', onPointerUp);
+      document.removeEventListener('pointerdown', onPointerDown, true);
+      document.removeEventListener('pointermove', moveDrag, true);
+      document.removeEventListener('pointerup', onPointerUp, true);
+      document.removeEventListener('mousedown', onMouseDown, true);
+      document.removeEventListener('mousemove', moveDrag, true);
     };
   }, [commitViewerRect, page, tool]);
 
@@ -300,21 +359,13 @@ export function DocumentSelectionLayer({
   useEffect(() => {
     const wrap = pageWrapForPage(page, drawWrapRef.current);
     if (!(wrap instanceof HTMLElement) || !liveRect || tool !== 'rect') {
-      document.querySelector('[data-testid="document-selection-rect"]')?.remove();
+      if (originRef.current == null) {
+        document.querySelector('[data-testid="document-selection-rect"]')?.remove();
+      }
       return;
     }
     drawWrapRef.current = wrap;
-    const existing = wrap.querySelector('[data-testid="document-selection-rect"]');
-    const mark = existing instanceof HTMLElement ? existing : document.createElement('div');
-    if (!(existing instanceof HTMLElement)) {
-      mark.className = 'document-selection-live-box';
-      mark.setAttribute('data-testid', 'document-selection-rect');
-      wrap.appendChild(mark);
-    }
-    mark.style.left = `${String(liveRect.x0 * 100)}%`;
-    mark.style.top = `${String(liveRect.y0 * 100)}%`;
-    mark.style.width = `${String((liveRect.x1 - liveRect.x0) * 100)}%`;
-    mark.style.height = `${String((liveRect.y1 - liveRect.y0) * 100)}%`;
+    const mark = paintLiveRect(wrap, liveRect);
     const host = wrap.parentElement;
     if (host == null) {
       return () => {
