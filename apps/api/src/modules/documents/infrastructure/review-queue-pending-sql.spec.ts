@@ -23,7 +23,7 @@ describe('open field suggestion', () => {
 });
 
 describe('suggestion row still open', () => {
-  it('excludes an active reject of the review-row key and the legacy global: spelling', () => {
+  it('excludes an active reject of the review-row key and the earlier global: spelling', () => {
     const sql = suggestionRowStillOpenSql('v.document_id', 'v.field_storage_key', 'v.value_text');
     expect(sql).toContain('document_field_suggestion_decisions');
     expect(sql).toContain("dec.decision = 'rejected'");

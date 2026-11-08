@@ -28,7 +28,7 @@ export function openFieldSuggestionExistsSql(documentIdSql: string): string {
 
 /**
  * SQL fragment: this suggestion row is still open work.
- * Active rejects of the same review-row key (including the legacy `global:`
+ * Active rejects of the same review-row key (including the earlier `global:`
  * spelling) and the same whitespace/case-normalized value are excluded.
  * Column names are fixed identifiers owned by the review-queue query.
  */

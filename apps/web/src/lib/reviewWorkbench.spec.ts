@@ -118,7 +118,7 @@ describe('suggestion reject filtering', () => {
     expect(openWorkbenchRowCount(rows)).toBe(2);
   });
 
-  it('matches a legacy global: decision to the bare review row without hiding another field', () => {
+  it('matches an earlier global: decision to the bare review row without hiding another field', () => {
     const rows = workbenchRows(
       [{ key: 'vendor', value: 'ACME GmbH', confidence: 0.4, userConfirmed: false }],
       [{ key: 'absender', value: 'ACME GmbH', confidence: 0.4 }],

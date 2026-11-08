@@ -22,7 +22,7 @@ export function suggestionDecisionFieldKey(raw: string): string {
 }
 
 /**
- * Spellings that identify one review row: the decision key, a legacy `global:`
+ * Spellings that identify one review row: the decision key, an earlier `global:`
  * prefix written before decisions used the review-row key, and the original
  * storage key when it differs only by `suggestion:`.
  */

@@ -46,7 +46,7 @@ describe('filterRejectedReviewFieldSuggestions', () => {
     expect(filterRejectedReviewFieldSuggestions(suggestions, rejects)).toEqual([]);
   });
 
-  it('hides a review row when the stored decision used the legacy global: prefix', () => {
+  it('hides a review row when the stored decision used the earlier global: prefix', () => {
     const suggestions = [{ key: 'vendor', value: 'ACME GmbH' }];
     const rejects = [
       {
