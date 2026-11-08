@@ -90,11 +90,11 @@ function parseExtractionBlock(value: unknown): ExtractionBlock | null {
 
 function parsePageTransforms(
   value: unknown
-): Array<{ page: number; rotationQuarterTurns: 0 | 1 | 2 | 3 }> | undefined {
+): { page: number; rotationQuarterTurns: 0 | 1 | 2 | 3 }[] | undefined {
   if (!Array.isArray(value)) {
     return undefined;
   }
-  const out: Array<{ page: number; rotationQuarterTurns: 0 | 1 | 2 | 3 }> = [];
+  const out: { page: number; rotationQuarterTurns: 0 | 1 | 2 | 3 }[] = [];
   for (const item of value) {
     if (!isRecord(item)) continue;
     const page = Number(item.page);
