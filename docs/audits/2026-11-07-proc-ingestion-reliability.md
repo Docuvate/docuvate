@@ -120,6 +120,50 @@ A second Chromium script on the same stack, `e2e/real-stack/viewer-text-save-nol
 - Segment `NORTH 1842` was edited to `NORTH 1842 REVISED` and `structuring-save-text` PATCHed the document. After reload the API text is `NORTH 1842 REVISED` and `INVOICE TOTAL`. The `INVOICE TOTAL` box is unchanged (`0.12073863468527866`, `0.17389113029489767`, `0.22940340405583598`, `0.021169361572787516`). The revised block keeps the previous `NORTH 1842` box.
 - After that save, `layoutIrAvailable` is false, layout pages are 0, and `document_layout_ir` count is 0. `document_layout_ir_pages` goes with that row. The field region, table region, quarter turn, both decision rows, the label, and the two extraction blocks read back equal. `PgDocumentRepository.updateForUser` deletes `document_layout_ir` when `extractionBlocks` is set. That is the derived layout IR. The manual rows above stayed.
 
+## Disposable combined stack after the layout-text rewrite
+
+Local worktree only, not pushed. The API image was rebuilt from the worktree that contains `1347d90` (`sha256:d9905846f869bf3652049d839a850432aefff735381c9dbd2adbb227b144d372`). The web image for this snapshot was `sha256:463e611622e24cf874ff4c311cb8aa54c7226180cdaa8f6779b415277b0c7dd2`. The worker image stayed `sha256:2eae8304f35299a91438234910c3fda0664f733b59686a88b0f392555d4b7860`. Browser origin `http://localhost:5173`, API `http://localhost:3001`, Postgres on host port 5433. `/health` was only a precondition.
+
+Tuple fetched before these runs:
+
+- PR 121 `1347d901176a375fb735cc75562735eb3aedea06` (includes PR 118 `4f1f5dc52d2b22aeae36fb8718b217c5071fa2ff`)
+- PR 119 `980d0a58d3ddb4d9b49c8888383ac1aa0904f5e8`
+- PR 120 `f952da4d09e72986ea460b4eeafc96fcfd78a37f`
+
+`extraction-persistence.integration.spec.ts` on Node v24.22.2 against Testcontainers Postgres: 6 passed (5.35s). The case `keeps layout IR and writes the corrected block text into it` is in that run. The invalid-version case logged `Skipping layout IR … version must be 1` from `PgDocumentRepository`. `layout-ir-text.spec.ts`: 2 passed. `Button.spec.tsx`: 1 passed. The unit files are not the browser proof. The integration file did run on Postgres.
+
+Official `e2e/real-stack/viewer-review-persist.spec.ts` with `playwright.real-stack.config.ts`, Chromium, retries 0. Normal pointer clicks. Document `08e42b73-8590-49a3-9305-c7062f33efa5`. 1 passed (11.7s).
+
+- The API corpus contained `NORTH 1842` and `INVOICE TOTAL`. Suggestion keys were empty before the seed. Status `ready`. Outbox `done`, `attempts` 1.
+- The workbench had no reject control, so the spec inserted `suggestion:vendor` = `ACME GmbH` at confidence 0.55. That row is seeded. It is separate from the OCR text.
+- Reject, undo, quarter turn 1, field region `x0` 0.200, `y0` 0.450, `x1` 0.573, `y1` 0.800, and table region `x0` 0.223, `y0` 0.128, `x1` 0.304, `y1` 0.149 are in Postgres. `document_layout_ir` count is 1. The table step clicks Layout (`aria-pressed=true`), the Area radio, drags the visible `INVOICE` span, and clicks `selection-mark-table` with Playwright's action click. The spec does not edit text, so this pass does not prove the rewrite.
+
+Local companion `e2e/real-stack/viewer-text-ir-retain.spec.ts` on the same images. Real `dblclick`, fill, Enter, and action clicks. No `force`. Document `df317597-7f0b-464b-ad47-e28bf9935984`. 1 passed (9.2s). A second run of the same file, document `ffe2fbde-dae4-458e-9f08-0d7163ee0fc8`, also passed and printed `IR_STALE false`.
+
+- OCR text and empty suggestion keys came first. The seeded 0.55 row was rejected and then undone. Label, quarter turn, field box, and table box were stored before the text save. Counts before the save: layout IR 1, layout pages 1, regions 2, transforms 1, tags 1, decisions 1, blocks 2. The IR text contained `NORTH 1842`, `INVOICE TOTAL`, and `vectors`.
+- `POST` table-corrections with rect `0.01,0.01,0.02,0.02` returned 422 and the body contained `documents.tableRegionEmpty`.
+- The `NORTH 1842` segment was saved as `NORTH 1842 REVISED`. After reload the API text contains that string and `INVOICE TOTAL`, and `layoutIrAvailable` is true. IR count stays 1. Removing `NORTH 1842 REVISED` from the IR text leaves no `NORTH 1842`. Geometry with `text` keys removed is deep-equal. The `INVOICE TOTAL` block remains. Region, transform, tag, decision, and block counts stay. Field and table regions stay above zero. The turn list contains 1. The stored decision is `rejected` with `withdrawn_at` set: the reject control was absent after the field step (`IR_ACTIVE_REJECT false`), so this companion did not create a second active reject. The tag name stayed. Field `0.200, 0.450, 0.573, 0.800`. Table `0.223, 0.128, 0.304, 0.149`. Outbox `done`, `attempts` 1.
+
+Button default `type="button"`. A scan of `apps/web/src` found 18 files with a `<Button` inside a `<form>`, and none of those buttons omit `type=`. Nineteen set `type="submit"`, including `RegisterPage`. The official spec signs up with `form.auth-form button[type="submit"]`, and that submit succeeded on this image. Web vitest, Node v24.22.2, with `@docuvate/contracts` resolved to a build of this worktree: 143 files, 425 tests passed. An earlier invocation that resolved contracts to the PR 120 package failed 3 tests because `suggestionRejectMatches` was missing there and `packages/tokens/dist/css/tokens.css` was absent in the worktree. That invocation is not the product result.
+
+The web package checks on this tree: UI literals passed, i18n reported 1507 keys, global-search token check passed. `check-z-index-tokens.mjs` fails on raw `z-index: 1` at `app.css:471` and `app.css:17309`. The same raw `z-index: 1` is already on `1347d90` (`app.css:465`). `check-design-tokens.mjs` fails on undefined custom properties that `1347d90` already contains (`--dv-space-3` and the same family, 9 uses) and on raw-border-radius 27 against a baseline of 24. Raw spacing is 2 against a baseline of 0. `1347d90` already contributes `gap: 0.15rem`.
+
+## Disposable combined stack after the ribbon stroke commit
+
+PR 121 moved to `b1304bff1a5d9d570291a794c1f0e669118f74bb` (`fix(web): drop the ribbon tab stroke`). The diff from `1347d90` is `DocumentReviewWorkbench.tsx` (`showCaption={false}` on the structure group), `apps/web/src/styles/app.css`, and the mocked `e2e/tests/structuring/structuring-primary.spec.ts`. `layout-ir-text.ts`, the repository rewrite, and `Button.tsx` are the same blobs. The API image stayed `sha256:d9905846f869`. The web image was rebuilt to `sha256:eef16ff7e731fdf555ac3a7e7b17f7cf6c18392920970dd558e76b1fccbb585f` and only the web container was recreated. The worker image stayed. The `1347d90` runs above were left as that snapshot.
+
+Tips fetched after `b1304bf` landed, and still the tips at the end of this note:
+
+- PR 121 `b1304bff1a5d9d570291a794c1f0e669118f74bb` (includes PR 118 `4f1f5dc52d2b22aeae36fb8718b217c5071fa2ff`)
+- PR 119 `980d0a58d3ddb4d9b49c8888383ac1aa0904f5e8`
+- PR 120 `f952da4d09e72986ea460b4eeafc96fcfd78a37f` before this note
+
+Official `viewer-review-persist.spec.ts` again, same config, same localhost cookie and Postgres 5433, against the new web and the unchanged API. Document `878b0996-7196-44ba-b0f1-c0cbd8057b0c`. 1 passed (10.0s). OCR text `NORTH 1842` / `INVOICE TOTAL` before the seed. Seeded `suggestion:vendor` at 0.55. Decision `rejected` with `withdrawn_at` set. Quarter turn 1. Field `0.200, 0.450, 0.573, 0.800`. Table `0.223, 0.128, 0.304, 0.149`. Layout IR count 1. Outbox `done`, `attempts` 1. This spec still does not edit text. The `df317597` save on the `1347d90` API image remains the rewrite proof.
+
+`b1304bf` adds one raw spacing literal, `padding-top: calc(var(--dv-space-2xs) + 2px)`. With the existing `gap: 0.15rem`, `check-design-tokens.mjs` reports raw-spacing 2 > baseline 0. That extra literal is the new static-check failure on this commit.
+
+Real-stack ribbon paint, `e2e/real-stack/viewer-ribbon-paint.spec.ts`, on the new web. Signup uses the submit button. Layout is clicked, the Area radio is visible, then the account menu's Dark radio is clicked. 1 passed (10.3s). Selected Layout and `app-ribbon-context` share a background, `border-top` `0px`, and shadow `none`, in light and in dark. The parent ribbon band background differs from that selected category. Dark `body` background is `rgb(30, 26, 19)`. Screenshots from that run: `/opt/cursor/artifacts/ribbon-hierarchy-light.png` and `/opt/cursor/artifacts/ribbon-hierarchy-dark.png`. The mocked structuring Playwright file was not executed. Its header says the API is mocked.
+
 ## Code inventory (not a live probe)
 
 Upload allow-list in `packages/contracts/src/upload-formats.ts`: PDF, JPEG, PNG, WebP, GIF, TIFF, DOC/DOCX, XLS/XLSX, PPT/PPTX, ODT/ODS/ODP, RTF, CSV, plain text, Markdown, HTML, EML, MSG.
@@ -188,4 +232,4 @@ Jobs that arrive without an outbox id still use `planProcessorFailure` and BullM
 
 ## Not claimed
 
-These tests do not prove the Mac stack, a rotated scan, label/NER/table quality, or connector import. They do not prove that no other regression exists. The `37544c8` disposable run stored one field box on an upright PDF after a quarter turn and did not save a table or an edited OCR string. The `e4ee4f7` run saved both, and it dropped `document_layout_ir` on that text save while the manual rows stayed. Neither run exercised 180° OCR.
+These tests do not prove the Mac stack, a rotated scan, label/NER/table quality, or connector import. They do not prove that no other regression exists. The `37544c8` disposable run stored one field box on an upright PDF after a quarter turn and did not save a table or an edited OCR string. The `e4ee4f7` run saved both, and it dropped `document_layout_ir` on that text save while the manual rows stayed. The `1347d90` save rewrote the matching line, left `document_layout_ir` at count 1, and kept the other line's geometry and the manual rows. The `b1304bf` web rerun repeated the official spec and did not edit text. None of these runs exercised 180° OCR.
