@@ -28,7 +28,7 @@ export function suggestionRejectIdentity(fieldKey: string, value: string): strin
   return `${fieldKey}\0${normalizeSuggestionDecisionValue(value)}`;
 }
 
-export function isRejectedSuggestion(
+function isRejectedSuggestion(
   fieldKey: string,
   value: string,
   rejects: readonly SuggestionRejectRef[]
