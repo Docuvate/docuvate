@@ -321,8 +321,8 @@
       "evidence": "/opt/cursor/artifacts/library-admin-cloud/LIB-026-near-duplicate.png",
       "finding": "defect: near-duplicate and exact-duplicate label errors were hard-coded German and collapsed to a generic validation message",
       "severity": "medium",
-      "regressionTest": "LIB-026",
-      "fixCommit": null,
+      "regressionTest": "tag-name-uniqueness.spec.ts; apiErrors.spec.ts; cloud-isolated.spec.ts",
+      "fixCommit": "4205664de223c67b357fd926b1e055ab4e3008da",
       "localMachine": "not-tested"
     },
     {
@@ -401,8 +401,8 @@
       "evidence": "/opt/cursor/artifacts/library-admin-cloud/LIB-032-settings-theme.png",
       "finding": "defect: signed-in desktop language switcher was hidden",
       "severity": "high",
-      "regressionTest": "LIB-032",
-      "fixCommit": null,
+      "regressionTest": "localeSwitcherPlacement.spec.ts; cloud-isolated.spec.ts",
+      "fixCommit": "4205664de223c67b357fd926b1e055ab4e3008da",
       "localMachine": "not-tested"
     },
     {
@@ -491,11 +491,11 @@
       "preconditions": "DOCUVATE_AUDIT_SYNTHETIC_UPLOAD=1. Default is off so extraction is not enqueued.",
       "actions": "Set one generated PDF on the library file input.",
       "expected": "The multiple file input accepts the new file. Existing documents are not reprocessed by this test.",
-      "actual": "Input is marked multiple in UploadFileTrigger. Not executed against the Mac. Without the flag the test is blocked.",
-      "build": "source review",
-      "environment": "local-playwright pending",
-      "evidence": "UploadFileTrigger.tsx; authenticated-synthetic.spec.ts",
-      "finding": "blocked unless the operator opts in",
+      "actual": "The Chromium setup uploaded two distinct generated PDFs through the API. They appeared in the library with status Failed because no extraction worker was running. The library file input was not used.",
+      "build": "cloud-chromium setup plus source review of the file input",
+      "environment": "API upload only; file-input UI not tested",
+      "evidence": "e2e/tests/library-admin/cloud-isolated.spec.ts beforeAll; LIB-015-library-list.png",
+      "finding": "file-input upload not tested; extraction Failed is the missing worker",
       "severity": "not-assessed",
       "regressionTest": "LIB-040",
       "fixCommit": null,
@@ -507,7 +507,7 @@
       "preconditions": "Out of this agent's ownership.",
       "actions": "Not audited here. PR 118 is unmerged, so its absence on main is not treated as a regression.",
       "expected": "No viewer or worker fixes in this branch.",
-      "actual": "Shared file apps/web/src/lib/api.ts only changes the preview/content fetch error string to the active language. Locale JSON gains errors.previewLoadFailed.",
+      "actual": "Shared with PR 118: apps/web/src/lib/api.ts and en.json/de.json. Shared with PR 120: en.json/de.json. git merge-tree --write-tree against origin/feat/review-bbox-page-rotation and origin/cursor/proc-ingest-reliability-a872 (merge-base 98b1f9f) exited 0. This branch was not merged into either.",
       "build": "source main plus this branch",
       "environment": "coordination note",
       "evidence": "apps/web/src/lib/api.ts",
@@ -524,6 +524,7 @@
     "tenant": "synthetic lib.audit@fixture.docuvate.test only",
     "command": "pnpm exec playwright test --config=e2e/playwright.library-admin.config.ts",
     "result": "25 passed",
+    "fixCommit": "4205664de223c67b357fd926b1e055ab4e3008da",
     "mac": "not-tested"
   }
 }
