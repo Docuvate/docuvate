@@ -29,6 +29,14 @@ import {
 import { smokeFixtureStoragePath } from '../../helpers/smoke-fixture-auth';
 import { findReadyLayoutDocument } from '../../helpers/wait-for-layout-ir';
 
+/** Region tools live in the Layout ribbon row. Builds without that row already show them. */
+async function showLayoutSelectionTools(page: Page): Promise<void> {
+  const layout = page.getByTestId('structuring-primary-layout');
+  if ((await layout.count()) === 0) return;
+  await layout.click();
+  await expect(layout).toHaveAttribute('aria-pressed', 'true');
+}
+
 const apiBase = process.env['E2E_API_URL'] ?? 'http://localhost:3001';
 const webOrigin = process.env['E2E_WEB_URL'] ?? 'http://localhost:5173';
 
@@ -302,6 +310,7 @@ test.describe('document field regions', () => {
       /^(?!0$)\d+$/,
       { timeout: 60_000 }
     );
+    await showLayoutSelectionTools(page);
     await page.getByRole('radio', { name: /^(Bereich|Area)/ }).click();
     await startRectangle(page);
     await expect(page.getByTestId('document-selection-rect')).toBeVisible({ timeout: 15_000 });
@@ -412,6 +421,7 @@ test.describe('document field regions', () => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await applyGermanLocale(page);
     await openLayoutDocumentPage(page, layoutDocId);
+    await showLayoutSelectionTools(page);
     await page.getByRole('radio', { name: /^(Text markieren|Mark text)/ }).click();
     const word = page.locator('.pdf-page-wrap .textLayer span').first();
     await expect(word).toBeVisible({ timeout: 60_000 });

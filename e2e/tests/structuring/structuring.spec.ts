@@ -155,12 +155,15 @@ test.describe('structuring journey', () => {
       .poll(() => lastCall(log, 'POST /documents/synthetic-doc-0006/extraction/requeue'))
       .toBeTruthy();
 
-    // Review: dashboard → review queue → one-click accept.
+    // Review: dashboard → next-work queue → the document workbench accepts one value.
     await page.goto('/');
     await page.locator('.pipeline-task[data-task="review"]').getByRole('link').click();
     await expect(page).toHaveURL(/\/review$/);
+    await expect(page.locator('.review-wizard')).toHaveCount(0);
     const before = log.calls.length;
-    await page.getByRole('button', { name: 'Übernehmen', exact: true }).click();
+    await page.getByTestId('review-open-structuring').click();
+    await expect(page).toHaveURL(/\/documents\/synthetic-doc-0001\?review=1$/);
+    await page.getByRole('button', { name: 'Betrag übernehmen' }).click();
     await expect
       .poll(() => log.calls.slice(before).some((call) => !call.startsWith('GET ')))
       .toBe(true);

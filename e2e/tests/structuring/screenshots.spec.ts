@@ -9,6 +9,7 @@ import { expect, test } from '@playwright/test';
 import fs from 'node:fs';
 import path from 'node:path';
 
+import { chooseTableFamily } from './chooseTableFamily';
 import { installStructuringMocks, LAYOUT_DOCUMENT_ID } from './structuringMocks';
 
 const shotDir =
@@ -66,7 +67,7 @@ for (const theme of ['light', 'dark'] as const) {
       .click();
     const card = page.getByTestId('corrected-table-card').first();
     const tools = card.getByTestId('table-structure-tools');
-    await tools.getByRole('combobox', { name: 'Vorlage' }).selectOption('financial');
+    await chooseTableFamily(tools, /Finanzlayout/);
     await card.getByLabel('Zelle Zeile 2 Spalte 1', { exact: true }).click();
     await card
       .getByLabel('Zelle Zeile 2 Spalte 2', { exact: true })
