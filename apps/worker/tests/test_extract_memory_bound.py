@@ -34,17 +34,18 @@ def test_chunked_pdf_ocr_peak_rss_bounded() -> None:
     page_count = 80
     pdf = _many_page_blank_pdf(page_count)
 
-    def _fake_ocr(_content: bytes) -> tuple[str, list[ExtractionBlock]]:
-        return ("x", [])
+    def _fake_ocr(_content: bytes) -> tuple[str, list[ExtractionBlock], tuple[int, ...]]:
+        return ("x", [], ())
 
     baseline = _peak_rss_mib()
     with patch(
         "docuvate_worker.application.cpu_document_pipeline.stages.ocr_stage._ocr_pdf",
         side_effect=_fake_ocr,
     ):
-        text, blocks = _ocr_pdf_in_page_chunks(pdf)
+        text, blocks, turns = _ocr_pdf_in_page_chunks(pdf)
     peak = _peak_rss_mib()
     delta = peak - baseline
     assert "x" in text
     assert blocks == []
+    assert turns == ()
     assert delta < 256.0
