@@ -56,11 +56,13 @@ function pageWrapForEvent(target: EventTarget | null): HTMLElement | null {
 }
 
 function paintLiveRect(wrap: HTMLElement, rect: NormalizedRect): HTMLElement {
-  const existing = wrap.querySelector('[data-testid="document-selection-rect"]');
+  const existing = document.querySelector('[data-testid="document-selection-rect"]');
   const mark = existing instanceof HTMLElement ? existing : document.createElement('div');
   if (!(existing instanceof HTMLElement)) {
     mark.className = 'document-selection-live-box';
     mark.setAttribute('data-testid', 'document-selection-rect');
+  }
+  if (mark.parentElement !== wrap) {
     wrap.appendChild(mark);
   }
   mark.style.left = `${String(rect.x0 * 100)}%`;
@@ -240,18 +242,19 @@ export function DocumentSelectionLayer({
       setLiveRect(null);
       return;
     }
-    let pointerStarted = false;
     function wrapForGesture(event: MouseEvent): HTMLElement | null {
       const fromTarget = pageWrapForEvent(event.target);
-      if (
-        fromTarget != null &&
-        (fromTarget.dataset.page == null || fromTarget.dataset.page === String(page))
-      ) {
+      if (fromTarget != null) {
+        if (fromTarget.dataset.page != null && fromTarget.dataset.page !== String(page)) {
+          return null;
+        }
         return fromTarget;
       }
-      return wrapUnderPoint(event.clientX, event.clientY, page) ?? pageWrapForPage(page, fromTarget);
+      // A toolbar click is not a page drag. Only a pointer that actually
+      // lands on this page may start or continue the gesture.
+      return wrapUnderPoint(event.clientX, event.clientY, page);
     }
-    function beginDrag(event: MouseEvent) {
+    function onPointerDown(event: PointerEvent) {
       const wrap = wrapForGesture(event);
       if (!wrap) {
         return;
@@ -265,7 +268,7 @@ export function DocumentSelectionLayer({
       paintLiveRect(wrap, rect);
       commitViewerRect(rect, wrap);
     }
-    function moveDrag(event: MouseEvent) {
+    function onPointerMove(event: PointerEvent) {
       const origin = originRef.current;
       const activeWrap = activeWrapRef.current;
       if (!origin || !activeWrap) {
@@ -287,33 +290,17 @@ export function DocumentSelectionLayer({
       paintLiveRect(wrap, rect);
       commitViewerRect(rect, wrap);
     }
-    function onPointerDown(event: PointerEvent) {
-      pointerStarted = true;
-      beginDrag(event);
-    }
-    function onMouseDown(event: MouseEvent) {
-      if (pointerStarted) {
-        pointerStarted = false;
-        return;
-      }
-      beginDrag(event);
-    }
     function onPointerUp() {
       originRef.current = null;
       activeWrapRef.current = null;
-      pointerStarted = false;
     }
-    document.addEventListener('pointerdown', onPointerDown, true);
-    document.addEventListener('pointermove', moveDrag, true);
-    document.addEventListener('pointerup', onPointerUp, true);
-    document.addEventListener('mousedown', onMouseDown, true);
-    document.addEventListener('mousemove', moveDrag, true);
+    document.addEventListener('pointerdown', onPointerDown);
+    document.addEventListener('pointermove', onPointerMove);
+    document.addEventListener('pointerup', onPointerUp);
     return () => {
-      document.removeEventListener('pointerdown', onPointerDown, true);
-      document.removeEventListener('pointermove', moveDrag, true);
-      document.removeEventListener('pointerup', onPointerUp, true);
-      document.removeEventListener('mousedown', onMouseDown, true);
-      document.removeEventListener('mousemove', moveDrag, true);
+      document.removeEventListener('pointerdown', onPointerDown);
+      document.removeEventListener('pointermove', onPointerMove);
+      document.removeEventListener('pointerup', onPointerUp);
     };
   }, [commitViewerRect, page, tool]);
 
@@ -357,33 +344,27 @@ export function DocumentSelectionLayer({
   }, [onDraftChange, page, tokens, tool]);
 
   useEffect(() => {
-    const wrap = pageWrapForPage(page, drawWrapRef.current);
-    if (!(wrap instanceof HTMLElement) || !liveRect || tool !== 'rect') {
+    if (!liveRect || tool !== 'rect') {
       if (originRef.current == null) {
         document.querySelector('[data-testid="document-selection-rect"]')?.remove();
       }
       return;
     }
-    drawWrapRef.current = wrap;
-    const mark = paintLiveRect(wrap, liveRect);
-    const host = wrap.parentElement;
-    if (host == null) {
-      return () => {
-        mark.remove();
-      };
-    }
-    const observer = new MutationObserver(() => {
-      const next = pageWrapForPage(page, drawWrapRef.current);
-      if (next == null || next.contains(mark)) {
+    const paint = () => {
+      const wrap = pageWrapForPage(page, drawWrapRef.current);
+      if (wrap == null) {
         return;
       }
-      next.appendChild(mark);
-      drawWrapRef.current = next;
-    });
-    observer.observe(host, { childList: true });
+      drawWrapRef.current = wrap;
+      paintLiveRect(wrap, liveRect);
+    };
+    paint();
+    // Page renders replace the wrap. Watch the document so the rectangle
+    // is put back on the new wrap instead of staying on the detached one.
+    const observer = new MutationObserver(paint);
+    observer.observe(document.body, { childList: true, subtree: true });
     return () => {
       observer.disconnect();
-      mark.remove();
     };
   }, [liveRect, page, tool]);
 
