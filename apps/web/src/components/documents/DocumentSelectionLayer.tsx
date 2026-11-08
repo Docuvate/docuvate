@@ -10,14 +10,13 @@ import {
   tokensInsideRect,
   tokensMatchingSelectedText,
 } from '@docuvate/contracts';
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import {
   clientPointToLocalRatio,
   clientRectToLocalRatio,
   findPdfPageWrap,
   readDatasetRotation,
-  selectionPaintWrapIndex,
 } from '../../lib/viewerGeometry';
 import type { DocumentSelectionTool } from './DocumentSelectionTools';
 
@@ -56,42 +55,24 @@ function pageWrapForEvent(target: EventTarget | null): HTMLElement | null {
   return null;
 }
 
-function pageWraps(): HTMLElement[] {
-  return [...document.querySelectorAll('.pdf-page-wrap')].filter(
+function pageWrapForPage(page: number, remembered: HTMLElement | null): HTMLElement | null {
+  const wraps = [...document.querySelectorAll('.pdf-page-wrap')].filter(
     (node): node is HTMLElement => node instanceof HTMLElement
   );
-}
-
-function wrapNamesPage(wrap: HTMLElement, page: number): boolean {
-  return wrap.dataset.page == null || wrap.dataset.page === String(page);
-}
-
-function pageWrapAtPoint(clientX: number, clientY: number, page: number): HTMLElement | null {
-  if (typeof document.elementsFromPoint !== 'function') {
-    return null;
+  const wanted = String(page);
+  const matched = wraps.find((wrap) => wrap.dataset.page === wanted);
+  if (matched != null) {
+    return matched;
   }
-  for (const hit of document.elementsFromPoint(clientX, clientY)) {
-    const wrap = pageWrapForEvent(hit);
-    if (wrap != null && wrapNamesPage(wrap, page)) {
-      return wrap;
-    }
+  if (
+    remembered != null &&
+    remembered.isConnected &&
+    wraps.includes(remembered) &&
+    (remembered.dataset.page == null || remembered.dataset.page === wanted)
+  ) {
+    return remembered;
   }
-  return null;
-}
-
-function paintWrap(page: number, remembered: HTMLElement | null): HTMLElement | null {
-  const wraps = pageWraps();
-  const rememberedIndex = remembered == null ? -1 : wraps.indexOf(remembered);
-  const index = selectionPaintWrapIndex(
-    wraps.map((wrap) => wrap.dataset.page ?? null),
-    page,
-    rememberedIndex >= 0 ? rememberedIndex : null,
-    remembered?.isConnected === true
-  );
-  if (index == null) {
-    return null;
-  }
-  return wraps[index] ?? null;
+  return wraps[0] ?? null;
 }
 
 function readPageRotationDeg(wrap: HTMLElement): number {
@@ -201,6 +182,8 @@ export function DocumentSelectionLayer({
 }: DocumentSelectionLayerProps) {
   const [liveRect, setLiveRect] = useState<NormalizedRect | null>(null);
   const drawWrapRef = useRef<HTMLElement | null>(null);
+  const originRef = useRef<{ x: number; y: number } | null>(null);
+  const activeWrapRef = useRef<HTMLElement | null>(null);
 
   const commitViewerRect = useCallback(
     (next: NormalizedRect | null, wrap: HTMLElement | null) => {
@@ -221,35 +204,39 @@ export function DocumentSelectionLayer({
     },
     [onDraftChange, page, tokens]
   );
+  const commitRef = useRef(commitViewerRect);
+  commitRef.current = commitViewerRect;
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (tool !== 'rect') {
+      originRef.current = null;
+      activeWrapRef.current = null;
       setLiveRect(null);
       return;
     }
-    let origin: { x: number; y: number } | null = null;
-    let activeWrap: HTMLElement | null = null;
     function onPointerDown(event: PointerEvent) {
-      const fromTarget = pageWrapForEvent(event.target);
-      const wrap =
-        (fromTarget != null && wrapNamesPage(fromTarget, page) ? fromTarget : null) ??
-        pageWrapAtPoint(event.clientX, event.clientY, page);
+      const wrap = pageWrapForEvent(event.target);
       if (!wrap) {
+        return;
+      }
+      if (wrap.dataset.page != null && wrap.dataset.page !== String(page)) {
         return;
       }
       event.preventDefault();
       const start = clientToNormalized(wrap, event.clientX, event.clientY);
-      origin = start;
-      activeWrap = wrap;
+      originRef.current = start;
+      activeWrapRef.current = wrap;
       drawWrapRef.current = wrap;
-      commitViewerRect({ x0: start.x, y0: start.y, x1: start.x, y1: start.y }, wrap);
+      commitRef.current({ x0: start.x, y0: start.y, x1: start.x, y1: start.y }, wrap);
     }
     function onPointerMove(event: PointerEvent) {
+      const origin = originRef.current;
+      const activeWrap = activeWrapRef.current;
       if (!origin || !activeWrap) {
         return;
       }
       const current = clientToNormalized(activeWrap, event.clientX, event.clientY);
-      commitViewerRect(
+      commitRef.current(
         {
           x0: Math.min(origin.x, current.x),
           y0: Math.min(origin.y, current.y),
@@ -260,18 +247,18 @@ export function DocumentSelectionLayer({
       );
     }
     function onPointerUp() {
-      origin = null;
-      activeWrap = null;
+      originRef.current = null;
+      activeWrapRef.current = null;
     }
-    document.addEventListener('pointerdown', onPointerDown, true);
-    document.addEventListener('pointermove', onPointerMove, true);
-    document.addEventListener('pointerup', onPointerUp, true);
+    document.addEventListener('pointerdown', onPointerDown);
+    document.addEventListener('pointermove', onPointerMove);
+    document.addEventListener('pointerup', onPointerUp);
     return () => {
-      document.removeEventListener('pointerdown', onPointerDown, true);
-      document.removeEventListener('pointermove', onPointerMove, true);
-      document.removeEventListener('pointerup', onPointerUp, true);
+      document.removeEventListener('pointerdown', onPointerDown);
+      document.removeEventListener('pointermove', onPointerMove);
+      document.removeEventListener('pointerup', onPointerUp);
     };
-  }, [commitViewerRect, page, tool]);
+  }, [page, tool]);
 
   useEffect(() => {
     if (tool !== 'text') {
@@ -312,41 +299,42 @@ export function DocumentSelectionLayer({
     };
   }, [onDraftChange, page, tokens, tool]);
 
-  useLayoutEffect(() => {
-    if (!liveRect || tool !== 'rect') {
-      drawWrapRef.current = null;
+  useEffect(() => {
+    const wrap = pageWrapForPage(page, drawWrapRef.current);
+    if (!(wrap instanceof HTMLElement) || !liveRect || tool !== 'rect') {
       document.querySelector('[data-testid="document-selection-rect"]')?.remove();
       return;
     }
-    let mark: HTMLElement | null = null;
-    const paint = () => {
-      const wrap = paintWrap(page, drawWrapRef.current);
-      if (!wrap) {
-        mark?.remove();
-        mark = null;
+    drawWrapRef.current = wrap;
+    const existing = wrap.querySelector('[data-testid="document-selection-rect"]');
+    const mark = existing instanceof HTMLElement ? existing : document.createElement('div');
+    if (!(existing instanceof HTMLElement)) {
+      mark.className = 'document-selection-live-box';
+      mark.setAttribute('data-testid', 'document-selection-rect');
+      wrap.appendChild(mark);
+    }
+    mark.style.left = `${String(liveRect.x0 * 100)}%`;
+    mark.style.top = `${String(liveRect.y0 * 100)}%`;
+    mark.style.width = `${String((liveRect.x1 - liveRect.x0) * 100)}%`;
+    mark.style.height = `${String((liveRect.y1 - liveRect.y0) * 100)}%`;
+    const host = wrap.parentElement;
+    if (host == null) {
+      return () => {
+        mark.remove();
+      };
+    }
+    const observer = new MutationObserver(() => {
+      const next = pageWrapForPage(page, drawWrapRef.current);
+      if (next == null || next.contains(mark)) {
         return;
       }
-      drawWrapRef.current = wrap;
-      if (mark == null || !wrap.contains(mark)) {
-        mark?.remove();
-        mark = document.createElement('div');
-        mark.className = 'document-selection-live-box';
-        mark.setAttribute('data-testid', 'document-selection-rect');
-        wrap.appendChild(mark);
-      }
-      mark.style.left = `${String(liveRect.x0 * 100)}%`;
-      mark.style.top = `${String(liveRect.y0 * 100)}%`;
-      mark.style.width = `${String((liveRect.x1 - liveRect.x0) * 100)}%`;
-      mark.style.height = `${String((liveRect.y1 - liveRect.y0) * 100)}%`;
-    };
-    paint();
-    const observer = new MutationObserver(() => {
-      paint();
+      next.appendChild(mark);
+      drawWrapRef.current = next;
     });
-    observer.observe(document.body, { childList: true, subtree: true });
+    observer.observe(host, { childList: true });
     return () => {
       observer.disconnect();
-      mark?.remove();
+      mark.remove();
     };
   }, [liveRect, page, tool]);
 
