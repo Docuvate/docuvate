@@ -468,7 +468,7 @@
 .app-header:has(.app-ribbon .ribbon-group) .app-primary-nav {
   align-self: stretch;
   align-items: flex-end;
-  z-index: 1;
+  z-index: calc(var(--dv-z-base) + 1);
   margin-bottom: calc(-1 * var(--dv-space-xs));
 }
 
@@ -17028,7 +17028,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   width: 100%;
   min-width: 0;
   margin-top: -2px;
-  padding-top: calc(var(--dv-space-sm) + 2px);
+  padding-top: calc(var(--dv-space-sm) + var(--dv-space-3xs));
   padding-bottom: var(--dv-space-sm);
   border-top: 0;
   background: var(--dv-ribbon-panel, var(--dv-color-bg-raised));
@@ -17316,7 +17316,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 .app-ribbon:has(.app-ribbon-context:not(:empty)) .aspect-strip-btn[aria-pressed='true'],
 .app-ribbon:has(.app-ribbon-context:not(:empty)) .aspect-strip-btn[aria-pressed='true']:hover {
   position: relative;
-  z-index: 1;
+  z-index: calc(var(--dv-z-base) + 1);
   border-width: 0;
   border-radius: 0;
   background: var(--dv-ribbon-panel, var(--dv-color-bg-raised));
