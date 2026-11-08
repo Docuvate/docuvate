@@ -40,6 +40,8 @@ Commit tuple fetched immediately before the run:
 - PR 119 `7c764bd0ddd201ace9487aa029b67d2167b53497`
 - PR 120 `9595d3e4d34a1dd6a2e8f50277b7394a378fa354`
 
+After that run, PR 119 moved to `980d0a58d3ddb4d9b49c8888383ac1aa0904f5e8` (`fix(web): keep document date filters and the page language` and two audit commits). Those commits were not in the images and were not retested.
+
 The viewer agent owns the product ribbon and will move PR 121 past `3fe55df`. This section is evidence for that tuple only. It is not combined readiness. The ribbon was not implemented here. Bbox and table actions did not finish, so those steps have to be rerun on the later viewer commit.
 
 Env: `E2E_WEB_URL=http://localhost:5173`, `E2E_API_URL=http://localhost:3001`, `DATABASE_URL=postgresql://docuvate:docuvate@127.0.0.1:5433/docuvate`. The browser origin and the API host are both `localhost`. `E2E_API_URL=http://127.0.0.1:3001` returned 401 from the page because the session cookie is for host `localhost`. `psql` 16 sent the seed statement to Postgres 18.
