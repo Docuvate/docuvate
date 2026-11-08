@@ -204,8 +204,6 @@ export function DocumentSelectionLayer({
     },
     [onDraftChange, page, tokens]
   );
-  const commitRef = useRef(commitViewerRect);
-  commitRef.current = commitViewerRect;
 
   useEffect(() => {
     if (tool !== 'rect') {
@@ -227,7 +225,7 @@ export function DocumentSelectionLayer({
       originRef.current = start;
       activeWrapRef.current = wrap;
       drawWrapRef.current = wrap;
-      commitRef.current({ x0: start.x, y0: start.y, x1: start.x, y1: start.y }, wrap);
+      commitViewerRect({ x0: start.x, y0: start.y, x1: start.x, y1: start.y }, wrap);
     }
     function onPointerMove(event: PointerEvent) {
       const origin = originRef.current;
@@ -236,7 +234,7 @@ export function DocumentSelectionLayer({
         return;
       }
       const current = clientToNormalized(activeWrap, event.clientX, event.clientY);
-      commitRef.current(
+      commitViewerRect(
         {
           x0: Math.min(origin.x, current.x),
           y0: Math.min(origin.y, current.y),
@@ -258,7 +256,7 @@ export function DocumentSelectionLayer({
       document.removeEventListener('pointermove', onPointerMove);
       document.removeEventListener('pointerup', onPointerUp);
     };
-  }, [page, tool]);
+  }, [commitViewerRect, page, tool]);
 
   useEffect(() => {
     if (tool !== 'text') {

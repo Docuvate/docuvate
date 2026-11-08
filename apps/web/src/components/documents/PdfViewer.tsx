@@ -316,7 +316,9 @@ export function PdfViewer({
   const isControlled = controlledPage !== undefined && onPageChange !== undefined;
   const currentPage = isControlled ? controlledPage : internalPage;
   const currentPageRef = useRef(currentPage);
-  currentPageRef.current = currentPage;
+  useEffect(() => {
+    currentPageRef.current = currentPage;
+  }, [currentPage]);
   const highlightKey = JSON.stringify(highlightBlocks);
   const overlayKey = JSON.stringify({
     overlays: layoutOverlays,
