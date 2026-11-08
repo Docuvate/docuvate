@@ -1284,12 +1284,6 @@ mark.global-search-mark {
   align-content: center;
 }
 
-@media (min-width: 769px) {
-  .locale-switcher-wrap--menu {
-    display: none !important;
-  }
-}
-
 @media (max-width: 768px) {
   .locale-switcher-wrap--topbar {
     display: none !important;

@@ -280,11 +280,22 @@ describe('PaperlessConnectorSetupPage', () => {
       },
     });
     renderPage();
-    await waitFor(() => screen.getByRole('button', { name: /Fehlgeschlagene erneut importieren/i }));
+    await waitFor(() =>
+      screen.getByRole('button', { name: /Fehlgeschlagene erneut importieren/i })
+    );
     fireEvent.click(screen.getByRole('button', { name: /Fehlgeschlagene erneut importieren/i }));
     await waitFor(() => {
       expect(api.retryFailedPaperlessImport).toHaveBeenCalledWith(installationId);
     });
+  });
+
+  it('does not force the interface language to German', async () => {
+    await i18n.changeLanguage('en');
+    renderPage();
+    await new Promise((resolve) => {
+      setTimeout(resolve, 50);
+    });
+    expect(i18n.resolvedLanguage?.startsWith('en')).toBe(true);
   });
 
   it('shows translated fatal error when run failed', async () => {

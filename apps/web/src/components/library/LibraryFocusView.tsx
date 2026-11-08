@@ -7,6 +7,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -41,7 +42,9 @@ export function LibraryFocusView({
   onRequeueDocument,
   requeueBusyIds,
 }: LibraryFocusViewProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const dateLocale = i18n.language.startsWith('de') ? 'de-DE' : 'en-US';
+  const listRef = useRef<HTMLUListElement>(null);
   const [focusId, setFocusId] = useState<string | null>(null);
   const [previewData, setPreviewData] = useState<ArrayBuffer | null>(null);
   const [previewError, setPreviewError] = useState<string | null>(null);
@@ -74,22 +77,32 @@ export function LibraryFocusView({
       .catch(() => {
         if (active) {
           setPreviewData(null);
-          setPreviewError('Vorschau konnte nicht geladen werden');
+          setPreviewError(t('errors.previewLoadFailed'));
         }
       });
 
     return () => {
       active = false;
     };
-  }, [previewDocumentId]);
+  }, [previewDocumentId, t]);
 
   const onListKeyDown = useCallback(
     (event: KeyboardEvent, index: number) => {
       if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
       event.preventDefault();
-      const next =
+      const nextIndex =
         event.key === 'ArrowDown' ? Math.min(index + 1, items.length - 1) : Math.max(index - 1, 0);
-      setFocusId(items[next].id);
+      const nextId = items[nextIndex]?.id;
+      if (!nextId) return;
+      setFocusId(nextId);
+      const buttons = listRef.current?.querySelectorAll('button[data-library-focus-id]');
+      if (!buttons) return;
+      for (const node of buttons) {
+        if (node instanceof HTMLButtonElement && node.dataset.libraryFocusId === nextId) {
+          node.focus();
+          break;
+        }
+      }
     },
     [items]
   );
@@ -103,7 +116,12 @@ export function LibraryFocusView({
 
   return (
     <div className="library-focus">
-      <ul className="library-focus-list" role="listbox" aria-label={t('library.documentListAria')}>
+      <ul
+        ref={listRef}
+        className="library-focus-list"
+        role="listbox"
+        aria-label={t('library.documentListAria')}
+      >
         {items.map((doc, index) => (
           <li key={doc.id}>
             <div
@@ -127,6 +145,7 @@ export function LibraryFocusView({
                 type="button"
                 className="library-focus-row-btn"
                 role="option"
+                data-library-focus-id={doc.id}
                 aria-selected={focused?.id === doc.id}
                 onClick={() => {
                   setFocusId(doc.id);
@@ -165,7 +184,7 @@ export function LibraryFocusView({
                       }
                     />
                   ) : null}
-                  <span className="muted">{documentDisplayDate(doc)}</span>
+                  <span className="muted">{documentDisplayDate(doc, dateLocale)}</span>
                 </span>
               </button>
             </div>

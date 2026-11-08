@@ -4,6 +4,7 @@ import i18n from 'i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 import { initReactI18next } from 'react-i18next';
 
+import { applyDocumentLanguage } from '../lib/documentLanguage';
 import de from './locales/de.json';
 import en from './locales/en.json';
 
@@ -25,6 +26,13 @@ void i18n
       lookupLocalStorage: LOCALE_STORAGE_KEY,
       caches: ['localStorage'],
     },
+  })
+  .then(() => {
+    applyDocumentLanguage(i18n.resolvedLanguage ?? i18n.language);
   });
+
+i18n.on('languageChanged', (language) => {
+  applyDocumentLanguage(language);
+});
 
 export default i18n;
