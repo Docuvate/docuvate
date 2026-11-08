@@ -62,6 +62,32 @@ A local continuation, not the committed spec and not pushed, logged the same 0 a
 
 CI run `42456109793` on `9595d3e` failed `quick-checks` because knip reported unused exported type `ExtractionAttemptFailurePlan`. The following commit keeps that type in the file and stops exporting it. The failure plan is unchanged.
 
+## Disposable combined stack after the ribbon commit
+
+Local worktree only, not pushed. API and web images were rebuilt from that worktree and recreated. The worker image was left in place: the worker tree did not change between `3fe55df` and this tuple. `/health` was only a precondition.
+
+Tuple fetched immediately before the browser run, and still the branch tips afterwards:
+
+- PR 121 `37544c8721b33f7942b4dff2ff63674d565a1485` (includes PR 118 `4f1f5dc52d2b22aeae36fb8718b217c5071fa2ff`)
+- PR 119 `980d0a58d3ddb4d9b49c8888383ac1aa0904f5e8`
+- PR 120 `94da10ca7a7257112449385eb8f23ab10ad852e5`
+
+`review-queue-pagination.integration.spec.ts` on Node v24.22.2 against disposable Postgres: 4 passed, including `counts an open suggestion below 0.85`. The running API image still applies the 0.82 floor to label suggestions and does not apply 0.85 to field suggestions.
+
+Official spec `e2e/real-stack/viewer-review-persist.spec.ts`, Chromium, `E2E_WEB_URL=http://localhost:5173`, `E2E_API_URL=http://localhost:3001`, `DATABASE_URL` on host port 5433. Document `ad76f238-e3c1-460b-87c8-a65c7de19e1d`:
+
+- The spec read `NORTH 1842` and `INVOICE TOTAL` from the document API and saw no `suggestion:` fields before any seed. Those assertions passed. The worker then had one `job_outbox` row `done` with `attempts` 1. Status `ready`.
+- The workbench had no reject control, so the spec inserted `suggestion:vendor` = `ACME GmbH` at confidence 0.55. That row is seeded. It is separate from the OCR text above.
+- Browser reject, reload, decision readback, `pendingCount` decrease, undo, reload, empty decisions, and `pendingCount` restore all passed. The decision row is `rejected` with `withdrawn_at` set. The 0.55 suggestion did enter the queue.
+- Clockwise rotate stored page 1, `rotation_quarter_turns` 1, source `user`. The API assertion passed.
+- Correct was opened, then `field-position-correct`. A field region was stored (`x0` 0.200, `y0` 0.45, `x1` 0.573, `y1` 0.80) and the API assertion passed.
+- `r` selected Area. The drag did not show `selection-mark-table`. No table region was written. The spec failed there. The assertion was left in place.
+
+A separate browser script on the same stack, not the official spec, checked the ribbon after the same OCR text and with no extracted suggestions:
+
+- Layout primary opened `app-ribbon-context` / `structuring-context` with `data-primary=layout`. `document-selection-tools` had three radios and sat in that row. `layout-viewer-toolbar` did not contain it. Area could be selected. Fields and Labels hid the context row.
+- Text primary opened `structuring-edit-text` pressed and `structuring-save-text` disabled. The stage rendered one reading paragraph, `NORTH 1842 INVOICE TOTAL`, and no `.extracted-text-segment`. Save was not clicked. The edited text was not reloaded.
+
 ## Code inventory (not a live probe)
 
 Upload allow-list in `packages/contracts/src/upload-formats.ts`: PDF, JPEG, PNG, WebP, GIF, TIFF, DOC/DOCX, XLS/XLSX, PPT/PPTX, ODT/ODS/ODP, RTF, CSV, plain text, Markdown, HTML, EML, MSG.
@@ -130,4 +156,4 @@ Jobs that arrive without an outbox id still use `planProcessorFailure` and BullM
 
 ## Not claimed
 
-These tests do not prove the Mac stack, a rotated scan, label/NER/table quality, or connector import. They do not prove that no other regression exists. The disposable stack read an upright digital PDF. It does not prove 180° OCR, a bbox, or a table overlay, and it is not a ribbon sign-off.
+These tests do not prove the Mac stack, a rotated scan, label/NER/table quality, or connector import. They do not prove that no other regression exists. The later disposable run stored one field box on an upright PDF after a quarter turn. It did not save a table overlay, did not save an edited OCR string, and did not exercise 180° OCR.
