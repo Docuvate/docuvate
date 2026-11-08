@@ -11,6 +11,7 @@ import {
   tokensMatchingSelectedText,
 } from '@docuvate/contracts';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 import {
   clientPointToLocalRatio,
@@ -53,23 +54,6 @@ function pageWrapForEvent(target: EventTarget | null): HTMLElement | null {
     node = node.parentNode;
   }
   return null;
-}
-
-function paintLiveRect(wrap: HTMLElement, rect: NormalizedRect): HTMLElement {
-  const existing = document.querySelector('[data-testid="document-selection-rect"]');
-  const mark = existing instanceof HTMLElement ? existing : document.createElement('div');
-  if (!(existing instanceof HTMLElement)) {
-    mark.className = 'document-selection-live-box';
-    mark.setAttribute('data-testid', 'document-selection-rect');
-  }
-  if (mark.parentElement !== wrap) {
-    wrap.appendChild(mark);
-  }
-  mark.style.left = `${String(rect.x0 * 100)}%`;
-  mark.style.top = `${String(rect.y0 * 100)}%`;
-  mark.style.width = `${String((rect.x1 - rect.x0) * 100)}%`;
-  mark.style.height = `${String((rect.y1 - rect.y0) * 100)}%`;
-  return mark;
 }
 
 function wrapUnderPoint(clientX: number, clientY: number, page: number): HTMLElement | null {
@@ -211,6 +195,7 @@ export function DocumentSelectionLayer({
   onDraftChange,
 }: DocumentSelectionLayerProps) {
   const [liveRect, setLiveRect] = useState<NormalizedRect | null>(null);
+  const [paintHost, setPaintHost] = useState<HTMLElement | null>(null);
   const drawWrapRef = useRef<HTMLElement | null>(null);
   const originRef = useRef<{ x: number; y: number } | null>(null);
   const activeWrapRef = useRef<HTMLElement | null>(null);
@@ -254,7 +239,7 @@ export function DocumentSelectionLayer({
       // lands on this page may start or continue the gesture.
       return wrapUnderPoint(event.clientX, event.clientY, page);
     }
-    function onPointerDown(event: PointerEvent) {
+    function onPointerDown(event: MouseEvent) {
       const wrap = wrapForGesture(event);
       if (!wrap) {
         return;
@@ -265,10 +250,9 @@ export function DocumentSelectionLayer({
       originRef.current = start;
       activeWrapRef.current = wrap;
       drawWrapRef.current = wrap;
-      paintLiveRect(wrap, rect);
       commitViewerRect(rect, wrap);
     }
-    function onPointerMove(event: PointerEvent) {
+    function onPointerMove(event: MouseEvent) {
       const origin = originRef.current;
       const activeWrap = activeWrapRef.current;
       if (!origin || !activeWrap) {
@@ -287,20 +271,27 @@ export function DocumentSelectionLayer({
       }
       activeWrapRef.current = wrap;
       drawWrapRef.current = wrap;
-      paintLiveRect(wrap, rect);
       commitViewerRect(rect, wrap);
     }
     function onPointerUp() {
       originRef.current = null;
       activeWrapRef.current = null;
     }
-    document.addEventListener('pointerdown', onPointerDown);
-    document.addEventListener('pointermove', onPointerMove);
-    document.addEventListener('pointerup', onPointerUp);
+    // Capture so a page control that stops the bubble still starts the drag.
+    // Mouse events cover a drag that only produces compatibility mouse input.
+    document.addEventListener('pointerdown', onPointerDown, true);
+    document.addEventListener('pointermove', onPointerMove, true);
+    document.addEventListener('pointerup', onPointerUp, true);
+    document.addEventListener('mousedown', onPointerDown, true);
+    document.addEventListener('mousemove', onPointerMove, true);
+    document.addEventListener('mouseup', onPointerUp, true);
     return () => {
-      document.removeEventListener('pointerdown', onPointerDown);
-      document.removeEventListener('pointermove', onPointerMove);
-      document.removeEventListener('pointerup', onPointerUp);
+      document.removeEventListener('pointerdown', onPointerDown, true);
+      document.removeEventListener('pointermove', onPointerMove, true);
+      document.removeEventListener('pointerup', onPointerUp, true);
+      document.removeEventListener('mousedown', onPointerDown, true);
+      document.removeEventListener('mousemove', onPointerMove, true);
+      document.removeEventListener('mouseup', onPointerUp, true);
     };
   }, [commitViewerRect, page, tool]);
 
@@ -344,36 +335,49 @@ export function DocumentSelectionLayer({
   }, [onDraftChange, page, tokens, tool]);
 
   useEffect(() => {
-    if (!liveRect || tool !== 'rect') {
-      if (originRef.current == null) {
-        document.querySelector('[data-testid="document-selection-rect"]')?.remove();
-      }
+    if (tool !== 'rect') {
+      setPaintHost(null);
       return;
     }
-    const paint = () => {
-      const wrap = pageWrapForPage(page, drawWrapRef.current);
-      if (wrap == null) {
-        return;
-      }
-      drawWrapRef.current = wrap;
-      paintLiveRect(wrap, liveRect);
+    const sync = () => {
+      const next = pageWrapForPage(page, drawWrapRef.current);
+      setPaintHost((current) => (current === next ? current : next));
     };
-    paint();
-    // Page renders replace the wrap. Watch the document so the rectangle
-    // is put back on the new wrap instead of staying on the detached one.
-    const observer = new MutationObserver(paint);
+    sync();
+    // A page render replaces the wrap. Follow the new one so the rectangle stays on the page.
+    const observer = new MutationObserver(sync);
     observer.observe(document.body, { childList: true, subtree: true });
     return () => {
       observer.disconnect();
     };
-  }, [liveRect, page, tool]);
+  }, [page, tool]);
+
+  const liveMark =
+    tool === 'rect' && liveRect && paintHost
+      ? createPortal(
+          <div
+            className="document-selection-live-box"
+            data-testid="document-selection-rect"
+            style={{
+              left: `${String(liveRect.x0 * 100)}%`,
+              top: `${String(liveRect.y0 * 100)}%`,
+              width: `${String((liveRect.x1 - liveRect.x0) * 100)}%`,
+              height: `${String((liveRect.y1 - liveRect.y0) * 100)}%`,
+            }}
+          />,
+          paintHost
+        )
+      : null;
 
   return (
-    <span
-      hidden
-      data-testid="document-selection-layer"
-      data-token-count={String(tokens.length)}
-      data-page={String(page)}
-    />
+    <>
+      <span
+        hidden
+        data-testid="document-selection-layer"
+        data-token-count={String(tokens.length)}
+        data-page={String(page)}
+      />
+      {liveMark}
+    </>
   );
 }
