@@ -998,7 +998,8 @@
       "worker_error": "Der Extraktionsdienst hat einen Fehler gemeldet.",
       "claim_busy": "Die Extraktion für dieses Dokument lief bereits.",
       "internal_error": "Die Extraktion ist wegen eines internen Fehlers fehlgeschlagen.",
-      "orphan_requeue_exhausted": "Die Extraktion wurde zu oft neu gestartet, ohne abzuschließen, und wurde beendet."
+      "orphan_requeue_exhausted": "Die Extraktion wurde zu oft neu gestartet, ohne abzuschließen, und wurde beendet.",
+      "attempts_exhausted": "Die Extraktion wurde nach der zulässigen Anzahl von Versuchen beendet."
     },
     "layoutFieldsMissing": "Nicht gefunden ({{count}})",
     "layoutFieldsFilterPlaceholder": "Felder filtern…",

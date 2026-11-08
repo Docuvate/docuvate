@@ -3,6 +3,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import type pg from 'pg';
 
+import { ForbiddenError } from '../../../shared/domain/errors.js';
 import type { JobOutboxRepository } from '../../../shared/domain/ports.js';
 import {
   parseNumber,
@@ -16,7 +17,9 @@ import {
   documentExtractionIdempotencyKey,
   JOB_TYPE_DOCUMENT_EXTRACTION,
   type JobOutboxRecord,
+  type JobOutboxRelayClaim,
   type JobOutboxStatus,
+  OUTBOX_ATTEMPTS_EXHAUSTED_REASON,
   parseJobOutboxStatus,
   parseJobTypeCode,
   type ScheduleDocumentExtractionResult,
@@ -76,15 +79,28 @@ export class PgJobOutboxRepository implements JobOutboxRepository {
     const client = await this.pool.connect();
     try {
       await client.query('BEGIN');
-      const existing = await client.query(`SELECT ${OUTBOX_COLUMNS} FROM job_outbox WHERE idempotency_key = $1 FOR UPDATE`, [
-        idempotencyKey,
-      ]);
+      const owned = await client.query<{ status: string }>(
+        `SELECT status FROM documents WHERE id = $1 AND user_id = $2 FOR UPDATE`,
+        [documentId, userId]
+      );
+      const documentStatus = owned.rows[0]?.status;
+      if (!documentStatus) {
+        throw new ForbiddenError('document');
+      }
+      const existing = await client.query(
+        `SELECT ${OUTBOX_COLUMNS} FROM job_outbox WHERE idempotency_key = $1 FOR UPDATE`,
+        [idempotencyKey]
+      );
       const current = mapOptionalRow(existing.rows[0]);
       let outboxId: string;
       let created: boolean;
 
       if (current) {
-        if (current.status === 'pending' || current.status === 'enqueued' || current.status === 'running') {
+        if (
+          current.status === 'pending' ||
+          current.status === 'enqueued' ||
+          current.status === 'running'
+        ) {
           outboxId = current.id;
           created = false;
         } else {
@@ -127,12 +143,19 @@ export class PgJobOutboxRepository implements JobOutboxRepository {
         created = true;
       }
 
-      await client.query(
-        `UPDATE documents
-         SET status = 'queued', extraction_failure_reason = NULL, updated_at = now()
-         WHERE id = $1`,
-        [documentId]
-      );
+      const outboxStillActive =
+        current !== null &&
+        (current.status === 'pending' ||
+          current.status === 'enqueued' ||
+          current.status === 'running');
+      if (!(outboxStillActive && documentStatus === 'extracting')) {
+        await client.query(
+          `UPDATE documents
+           SET status = 'queued', extraction_failure_reason = NULL, updated_at = now()
+           WHERE id = $1 AND user_id = $2`,
+          [documentId, userId]
+        );
+      }
       await client.query('COMMIT');
       return { outboxId, created };
     } catch (error) {
@@ -143,33 +166,66 @@ export class PgJobOutboxRepository implements JobOutboxRepository {
     }
   }
 
-  async claimForRelay(limit: number, leaseOlderThan: Date): Promise<JobOutboxRecord[]> {
+  async claimForRelay(limit: number, claim: JobOutboxRelayClaim): Promise<JobOutboxRecord[]> {
     const client = await this.pool.connect();
     try {
       await client.query('BEGIN');
-      const claimed = await client.query(
-        `WITH due AS (
-           SELECT id
-           FROM job_outbox
-           WHERE (
-             status = 'pending' AND next_attempt_at <= now()
-           ) OR (
-             status IN ('enqueued', 'running') AND updated_at < $1
-           )
-           ORDER BY next_attempt_at ASC, created_at ASC
-           FOR UPDATE SKIP LOCKED
-           LIMIT $2
+      const due = await client.query<{ id: string }>(
+        `SELECT id
+         FROM job_outbox
+         WHERE (
+           status = 'pending' AND next_attempt_at <= now()
+         ) OR (
+           status = 'enqueued' AND updated_at < $1
+         ) OR (
+           status = 'running' AND updated_at < $2
          )
-         UPDATE job_outbox AS j
+         ORDER BY next_attempt_at ASC, created_at ASC
+         FOR UPDATE SKIP LOCKED
+         LIMIT $3`,
+        [claim.enqueuedLeaseOlderThan, claim.runningLeaseOlderThan, limit]
+      );
+      const ids: string[] = [];
+      for (const raw of due.rows) {
+        ids.push(parseString(requireRecord(raw).id));
+      }
+      if (ids.length === 0) {
+        await client.query('COMMIT');
+        return [];
+      }
+      await client.query(
+        `UPDATE job_outbox
+         SET status = 'failed',
+             last_error = COALESCE(NULLIF(last_error, ''), $2),
+             finished_at = now(),
+             updated_at = now()
+         WHERE id = ANY($1::uuid[])
+           AND attempts >= max_attempts`,
+        [ids, OUTBOX_ATTEMPTS_EXHAUSTED_REASON]
+      );
+      await client.query(
+        `UPDATE documents AS d
+         SET status = 'failed',
+             extraction_failure_reason = left(j.last_error, 2000),
+             updated_at = now()
+         FROM job_outbox AS j
+         WHERE j.id = ANY($1::uuid[])
+           AND j.status = 'failed'
+           AND d.id = j.document_id
+           AND d.user_id = j.user_id
+           AND d.status IN ('queued', 'extracting', 'uploaded')`,
+        [ids]
+      );
+      const claimed = await client.query(
+        `UPDATE job_outbox AS j
          SET status = 'pending',
              updated_at = now(),
              next_attempt_at = now()
-         FROM due
-         WHERE j.id = due.id
-         RETURNING j.id, j.job_type, j.document_id, j.user_id, j.idempotency_key, j.status,
-                   j.attempts, j.max_attempts, j.next_attempt_at, j.last_error, j.created_at,
-                   j.updated_at, j.enqueued_at, j.started_at, j.finished_at`,
-        [leaseOlderThan, limit]
+         WHERE j.id = ANY($1::uuid[])
+           AND j.attempts < j.max_attempts
+           AND j.status IN ('pending', 'enqueued', 'running')
+         RETURNING ${OUTBOX_COLUMNS}`,
+        [ids]
       );
       await client.query('COMMIT');
       const records: JobOutboxRecord[] = [];
@@ -227,14 +283,16 @@ export class PgJobOutboxRepository implements JobOutboxRepository {
   async markFailedOrRetry(
     outboxId: string,
     errorMessage: string,
-    retryDelayMs: number
+    retryDelayMs: number,
+    options?: { allowRetry?: boolean }
   ): Promise<JobOutboxStatus> {
     const client = await this.pool.connect();
     try {
       await client.query('BEGIN');
-      const current = await client.query(`SELECT ${OUTBOX_COLUMNS} FROM job_outbox WHERE id = $1 FOR UPDATE`, [
-        outboxId,
-      ]);
+      const current = await client.query(
+        `SELECT ${OUTBOX_COLUMNS} FROM job_outbox WHERE id = $1 FOR UPDATE`,
+        [outboxId]
+      );
       const mapped = mapOptionalRow(current.rows[0]);
       if (!mapped) {
         await client.query('ROLLBACK');
@@ -242,8 +300,9 @@ export class PgJobOutboxRepository implements JobOutboxRepository {
       }
       const truncated =
         errorMessage.length > 2000 ? `${errorMessage.slice(0, 1997)}...` : errorMessage;
+      const allowRetry = options?.allowRetry !== false;
 
-      if (mapped.attempts >= mapped.maxAttempts) {
+      if (!allowRetry || mapped.attempts >= mapped.maxAttempts) {
         await client.query(
           `UPDATE job_outbox
            SET status = 'failed',
@@ -258,8 +317,8 @@ export class PgJobOutboxRepository implements JobOutboxRepository {
            SET status = 'failed',
                extraction_failure_reason = $2,
                updated_at = now()
-           WHERE id = $1`,
-          [mapped.documentId, truncated]
+           WHERE id = $1 AND user_id = $3`,
+          [mapped.documentId, truncated, mapped.userId]
         );
         await client.query('COMMIT');
         return 'failed';

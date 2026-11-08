@@ -28,6 +28,7 @@ import type {
 } from '../../modules/documents/domain/document.entity.js';
 import type {
   JobOutboxRecord,
+  JobOutboxRelayClaim,
   JobOutboxStatus,
   ScheduleDocumentExtractionResult,
 } from '../../modules/job-outbox/domain/job-outbox.types.js';
@@ -880,15 +881,16 @@ export interface JobOutboxRepository {
     userId: string,
     options?: { maxAttempts?: number }
   ): Promise<ScheduleDocumentExtractionResult>;
-  /** Claims due/stuck rows for relay (SKIP LOCKED). */
-  claimForRelay(limit: number, leaseOlderThan: Date): Promise<JobOutboxRecord[]>;
+  /** Claims due/stuck rows for relay (SKIP LOCKED). Rows already at max attempts are failed instead. */
+  claimForRelay(limit: number, claim: JobOutboxRelayClaim): Promise<JobOutboxRecord[]>;
   markEnqueued(outboxId: string): Promise<boolean>;
   markRunning(outboxId: string): Promise<boolean>;
   markDone(outboxId: string): Promise<boolean>;
   markFailedOrRetry(
     outboxId: string,
     errorMessage: string,
-    retryDelayMs: number
+    retryDelayMs: number,
+    options?: { allowRetry?: boolean }
   ): Promise<JobOutboxStatus>;
   findById(outboxId: string): Promise<JobOutboxRecord | null>;
   findActiveByDocumentId(documentId: string): Promise<JobOutboxRecord | null>;
@@ -902,7 +904,6 @@ export interface JobOutboxRelay {
 }
 
 export const JOB_OUTBOX_RELAY = Symbol('JOB_OUTBOX_RELAY');
-
 
 export const CLOCK = Symbol('CLOCK');
 export const ID_GENERATOR = Symbol('ID_GENERATOR');

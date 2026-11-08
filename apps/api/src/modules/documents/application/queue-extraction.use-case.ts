@@ -46,6 +46,9 @@ export class QueueExtractionUseCase {
         );
       }
     } catch (error: unknown) {
+      if (error instanceof ForbiddenError || error instanceof NotFoundError) {
+        throw error;
+      }
       this.logger.error(
         `Extraction outbox schedule failed for ${documentId}: ${
           error instanceof Error ? error.message : String(error)
