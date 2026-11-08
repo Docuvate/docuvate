@@ -77,6 +77,20 @@ describe('serialize and parse roundtrip', () => {
     }
   });
 
+  it('roundtrips a document date range with a failed status', () => {
+    const serialized = serializeDocumentFilterQuery(
+      { status: 'failed', documentDateFrom: '2026-10-22', documentDateTo: '2026-10-31' },
+      '',
+      tags
+    );
+    expect(serialized).toBe('status:error from:2026-10-22 to:2026-10-31');
+    const parsed = resolveDocumentFilterFields(parseDocumentFilterQuery(serialized), tags);
+    expect(parsed.issues).toHaveLength(0);
+    expect(parsed.fields.status).toBe('failed');
+    expect(parsed.fields.documentDateFrom).toBe('2026-10-22');
+    expect(parsed.fields.documentDateTo).toBe('2026-10-31');
+  });
+
   it('quotes free-text search phrases with spaces', () => {
     const serialized = serializeDocumentFilterQuery({}, 'foo bar', tags);
     expect(serialized).toBe('"foo bar"');
