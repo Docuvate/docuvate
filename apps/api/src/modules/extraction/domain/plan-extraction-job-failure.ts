@@ -3,6 +3,10 @@
 
 import type { DocumentStatus } from '../../documents/domain/document.entity.js';
 import {
+  computeRetryDelayMs,
+  type JobOutboxStatus,
+} from '../../job-outbox/domain/job-outbox.types.js';
+import {
   type ExtractionFailure,
   extractionFailureReasonKey,
   toExtractionFailure,
@@ -25,6 +29,44 @@ export function planProcessorFailure(input: {
     return { kind: 'fail_document', failureReason: extractionFailureReasonKey(failure.code) };
   }
   return { kind: 'retry' };
+}
+
+interface ExtractionAttemptFailurePlan {
+  allowRetry: boolean;
+  delayMs: number;
+}
+
+/**
+ * Outbox attempt count is 1-based (incremented when the attempt starts).
+ * BullMQ `attemptsMade` is not the retry counter: each outbox delivery uses `attempts: 1`.
+ */
+export function planExtractionAttemptFailure(input: {
+  failure: ExtractionFailure;
+  outboxAttempts: number;
+  maxAttempts: number;
+  deadlineMaxRetries: number;
+}): ExtractionAttemptFailurePlan {
+  const deadlineCap = input.failure.code === 'worker_deadline' ? input.deadlineMaxRetries : null;
+  const cappedByDeadline = deadlineCap !== null && input.outboxAttempts >= deadlineCap;
+  const cappedByOutbox = input.outboxAttempts >= input.maxAttempts;
+  if (!input.failure.retryable || cappedByDeadline || cappedByOutbox) {
+    return { allowRetry: false, delayMs: 0 };
+  }
+  return { allowRetry: true, delayMs: computeRetryDelayMs(input.outboxAttempts) };
+}
+
+/**
+ * The BullMQ `failed` event fires for an outbox retry that was deliberately finished
+ * as unrecoverable in the queue. Only a terminal outbox row may persist document failure.
+ * `null` means the job has no outbox row.
+ */
+export function shouldPersistTerminalExtractionFailure(
+  outboxStatus: JobOutboxStatus | null
+): boolean {
+  if (outboxStatus === null) {
+    return true;
+  }
+  return outboxStatus === 'failed';
 }
 
 const NON_TERMINAL_STATUSES: ReadonlySet<DocumentStatus> = new Set<DocumentStatus>([

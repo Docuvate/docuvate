@@ -43,13 +43,23 @@ export function documentExtractionIdempotencyKey(documentId: string): string {
   return `${JOB_TYPE_DOCUMENT_EXTRACTION}:${documentId}`;
 }
 
+/** Stored on the document when a crashed attempt is retired because the cap is already spent. */
+export const OUTBOX_ATTEMPTS_EXHAUSTED_REASON =
+  'documents.extractionFailureCode.attempts_exhausted';
+
+export interface JobOutboxRelayClaim {
+  /** `enqueued` rows older than this are treated as a lost Valkey job. */
+  enqueuedLeaseOlderThan: Date;
+  /** `running` rows older than this are treated as a dead worker. Must outlive the BullMQ lock. */
+  runningLeaseOlderThan: Date;
+}
+
 /** Exponential backoff: 2s, 4s, 8s, … capped at 60s. */
 export function computeRetryDelayMs(attemptsAfterFailure: number): number {
   const baseMs = 2_000;
   const exp = Math.max(0, attemptsAfterFailure - 1);
   return Math.min(baseMs * 2 ** exp, 60_000);
 }
-
 
 export function parseJobOutboxStatus(value: string): JobOutboxStatus | null {
   for (const status of JOB_OUTBOX_STATUSES) {
