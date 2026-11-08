@@ -25,7 +25,7 @@ from docuvate_worker.infrastructure.extract_memory.raster_settings import (
 )
 from docuvate_worker.infrastructure.extractors.pdf_raster import iter_pdf_page_images
 from docuvate_worker.infrastructure.extractors.rapidocr_loader import build_rapidocr_engine
-from docuvate_worker.infrastructure.extractors.rapidocr_protocol import RapidOcrEngine
+from docuvate_worker.infrastructure.extractors.rapidocr_protocol import OcrImage, RapidOcrEngine
 from docuvate_worker.infrastructure.ml.docai.paths import docai_model_dir
 from docuvate_worker.infrastructure.onnx_runtime_env import configure_onnx_runtime_env
 from docuvate_worker.infrastructure.worker_memory_hygiene import reclaim_python_heap
@@ -131,7 +131,7 @@ def _orientation_enabled() -> bool:
     return raw not in {"0", "false", "no", "off"}
 
 
-def _ocr_orientation_score(ocr: RapidOcrEngine, array: np.ndarray) -> float:
+def _ocr_orientation_score(ocr: RapidOcrEngine, array: OcrImage) -> float:
     result, _ = ocr(array, use_cls=True)
     if not result:
         return 0.0
@@ -147,7 +147,7 @@ def _ocr_orientation_score(ocr: RapidOcrEngine, array: np.ndarray) -> float:
 
 def _ocr_oriented_page(
     ocr: RapidOcrEngine,
-    array: np.ndarray,
+    array: OcrImage,
     *,
     page: int,
     block_offset: int,
