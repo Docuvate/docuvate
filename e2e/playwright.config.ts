@@ -6,6 +6,8 @@ const apiBase = process.env['E2E_API_URL'] ?? 'http://localhost:3001';
 export default defineConfig({
   globalSetup: './global-search.global-setup.ts',
   testDir: './tests',
+  // Isolated-stack cases live in playwright.library-admin.config.ts.
+  testIgnore: ['**/library-admin/**'],
   fullyParallel: false,
   forbidOnly: Boolean(process.env['CI']),
   retries: process.env['CI'] ? 2 : 0,

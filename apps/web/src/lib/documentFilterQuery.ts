@@ -10,7 +10,13 @@ import {
 
 type LibraryFilterFields = Pick<
   DocumentListQuery,
-  'inbox' | 'tagIds' | 'status' | 'folderId' | 'withoutNonInboxLabel'
+  | 'inbox'
+  | 'tagIds'
+  | 'status'
+  | 'folderId'
+  | 'withoutNonInboxLabel'
+  | 'documentDateFrom'
+  | 'documentDateTo'
 > & {
   q?: string;
 };
@@ -45,6 +51,28 @@ const STATUS_ALIASES: Record<string, DocumentStatus> = {
   error: 'failed',
   fehler: 'failed',
 };
+
+function parseCalendarDate(value: string): string | null {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return null;
+  }
+  const [yearText, monthText, dayText] = value.split('-');
+  const year = Number(yearText);
+  const month = Number(monthText);
+  const day = Number(dayText);
+  if (!year || !month || !day) {
+    return null;
+  }
+  const utc = new Date(Date.UTC(year, month - 1, day));
+  if (
+    utc.getUTCFullYear() !== year ||
+    utc.getUTCMonth() !== month - 1 ||
+    utc.getUTCDate() !== day
+  ) {
+    return null;
+  }
+  return value;
+}
 
 function parseInboxValue(raw: string): boolean | null {
   const v = raw.toLowerCase();
@@ -119,6 +147,24 @@ export function parseDocumentFilterQuery(input: string): {
       case 'q':
         freeText.push(value);
         break;
+      case 'from':
+      case 'to': {
+        const calendarDate = parseCalendarDate(value);
+        if (!calendarDate) {
+          issues.push({
+            token,
+            messageKey: 'library.filter.parseUnknownValue',
+            detail: value,
+          });
+          break;
+        }
+        if (key === 'from') {
+          fields.documentDateFrom = calendarDate;
+        } else {
+          fields.documentDateTo = calendarDate;
+        }
+        break;
+      }
       case 'folder':
         issues.push({
           token,
@@ -206,6 +252,12 @@ export function serializeDocumentFilterQuery(
 
   if (filters.status) {
     parts.push(`status:${filters.status === 'failed' ? 'error' : filters.status}`);
+  }
+  if (filters.documentDateFrom) {
+    parts.push(`from:${filters.documentDateFrom}`);
+  }
+  if (filters.documentDateTo) {
+    parts.push(`to:${filters.documentDateTo}`);
   }
 
   const q = (query || (filters.q ?? '')).trim();

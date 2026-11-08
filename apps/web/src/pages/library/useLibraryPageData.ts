@@ -152,6 +152,8 @@ export function useLibraryPageData(mode: 'all' | 'folder' | 'unassigned' | 'ordn
         tagIds: fields.tagIds,
         status: fields.status,
         withoutNonInboxLabel: fields.withoutNonInboxLabel ?? undefined,
+        documentDateFrom: fields.documentDateFrom,
+        documentDateTo: fields.documentDateTo,
       };
       setFilters(merged);
       const applyFreeText = options?.applyFreeText ?? true;

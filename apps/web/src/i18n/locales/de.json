@@ -130,6 +130,7 @@
   },
   "errors": {
     "loadFailed": "Laden fehlgeschlagen",
+    "previewLoadFailed": "Vorschau konnte nicht geladen werden.",
     "saveFailed": "Speichern fehlgeschlagen",
     "actionFailed": "Aktion fehlgeschlagen",
     "deleteFailed": "Löschen fehlgeschlagen",
@@ -510,7 +511,7 @@
       "withoutLabel": "Ohne Label",
       "queryLabel": "Filterabfrage",
       "queryPlaceholder": "in:inbox label:Rechnung status:ready …",
-      "queryHint": "Token: in:inbox · label:Name · status:ready|extraction|queued|uploaded|error · Freitext oder title:…",
+      "queryHint": "Token: in:inbox · label:Name · status:ready|extraction|queued|uploaded|error · from:JJJJ-MM-TT · to:JJJJ-MM-TT · Freitext oder title:…",
       "parseUnknownKey": "Unbekannter Filter „{{detail}}“ in {{token}}.",
       "parseUnknownValue": "Unbekannter Wert in {{token}}.",
       "documentDate": "Dokumentdatum",
@@ -1507,6 +1508,10 @@
     "colorPresetOrange": "Orange",
     "assignNever": "Nie",
     "assignRecommend": "Bei ähnlichen Dokumenten",
+    "errors": {
+      "alreadyExists": "Dieses Label gibt es schon. Bitte das vorhandene verwenden.",
+      "nearDuplicate": "Zu ähnlich zu einem vorhandenen Label. Bitte umbenennen oder das vorhandene verwenden."
+    },
     "assignInbox": "Bei allen neuen Dokumenten",
     "matchingAlgorithm": "Automatisch zuordnen",
     "matchText": "Suchtext",

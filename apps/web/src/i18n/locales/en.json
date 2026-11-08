@@ -130,6 +130,7 @@
   },
   "errors": {
     "loadFailed": "Failed to load",
+    "previewLoadFailed": "Could not load the preview.",
     "saveFailed": "Failed to save",
     "actionFailed": "Action failed",
     "deleteFailed": "Delete failed",
@@ -510,7 +511,7 @@
       "withoutLabel": "Without label",
       "queryLabel": "Filter query",
       "queryPlaceholder": "in:inbox label:Invoice status:ready …",
-      "queryHint": "Tokens: in:inbox · label:Name · status:ready|extraction|queued|uploaded|error · free text or title:…",
+      "queryHint": "Tokens: in:inbox · label:Name · status:ready|extraction|queued|uploaded|error · from:YYYY-MM-DD · to:YYYY-MM-DD · free text or title:…",
       "parseUnknownKey": "Unknown filter “{{detail}}” in {{token}}.",
       "parseUnknownValue": "Unrecognized value in {{token}}.",
       "documentDate": "Document date",
@@ -1507,6 +1508,10 @@
     "colorPresetOrange": "Orange",
     "assignNever": "Never",
     "assignRecommend": "For similar documents",
+    "errors": {
+      "alreadyExists": "That label already exists. Use the existing one.",
+      "nearDuplicate": "Too similar to an existing label. Rename it or use the existing one."
+    },
     "assignInbox": "For all new documents",
     "matchingAlgorithm": "Automatic assignment",
     "matchText": "Search text",
