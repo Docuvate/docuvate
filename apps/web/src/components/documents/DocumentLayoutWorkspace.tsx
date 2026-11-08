@@ -448,9 +448,8 @@ export function DocumentLayoutWorkspace({
       setLeftMode(mode);
       if (mode === 'text') setAdvancedOpen(false);
       onTextEditOpenChange(mode === 'text');
-      if (mode === 'text') onStructuringPrimaryChange?.('text');
     },
-    [onStructuringPrimaryChange, onTextEditOpenChange]
+    [onTextEditOpenChange]
   );
 
   const frameLayoutIr =

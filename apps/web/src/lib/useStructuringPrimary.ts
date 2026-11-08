@@ -26,9 +26,10 @@ export function useStructuringPrimary(): {
 
   const onTextOpenChange = useCallback((open: boolean) => {
     if (open) {
+      // The view menu opens the reading text. The Text ribbon primary turns editing on.
       setPrimary('text');
       setTextOpen(true);
-      setTextEditing(true);
+      setTextEditing(false);
       return;
     }
     setTextOpen(false);
