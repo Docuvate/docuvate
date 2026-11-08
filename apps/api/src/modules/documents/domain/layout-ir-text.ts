@@ -22,7 +22,7 @@ function blockKey(page: number, blockIndex: number): string {
  * A block that disappears has its text cleared so the layout does not keep
  * the old words. Geometry is not part of this plan.
  */
-export function planLayoutTextEdits(
+function planLayoutTextEdits(
   previous: readonly ExtractionBlock[],
   next: readonly ExtractionBlock[]
 ): TextEdit[] {
