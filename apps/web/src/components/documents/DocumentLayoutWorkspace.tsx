@@ -549,11 +549,13 @@ export function DocumentLayoutWorkspace({
       }
       if (event.key === 't' || event.key === 'T') {
         onStructuringPrimaryChange?.('layout');
+        setReanchorFieldKey(null);
         setSelectionTool('text');
         return;
       }
       if (event.key === 'r' || event.key === 'R') {
         onStructuringPrimaryChange?.('layout');
+        setReanchorFieldKey(null);
         setSelectionTool('rect');
         return;
       }
@@ -594,6 +596,7 @@ export function DocumentLayoutWorkspace({
     runFieldCorrection,
     onStructuringPrimaryChange,
     selectionDraft,
+    setReanchorFieldKey,
     t,
     toast,
   ]);
@@ -716,6 +719,7 @@ export function DocumentLayoutWorkspace({
           <div
             className="layout-viewer-stage"
             data-testid="layout-viewer-stage"
+            data-selection-tool={structuringPrimary === 'layout' ? selectionTool : 'none'}
             data-table-overlay={tableOverlayOpen ? '1' : '0'}
             data-field-bbox={bboxEditRect ? '1' : '0'}
             ref={fieldMarking.viewerStageRef}

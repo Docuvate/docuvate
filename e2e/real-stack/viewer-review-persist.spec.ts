@@ -8,6 +8,8 @@ import path from 'node:path';
 import { expect, test, type Page } from '@playwright/test';
 import { PDFDocument, StandardFonts } from 'pdf-lib';
 
+import { dragOnPdfPage } from '../support/dragOnPage';
+
 const apiBase = (process.env['E2E_API_URL'] ?? 'http://127.0.0.1:3001').replace(/\/$/, '');
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -127,17 +129,6 @@ async function uploadPdf(page: Page): Promise<string> {
   throw new Error('document did not become ready');
 }
 
-async function dragOnPage(page: Page, x0: number, y0: number, x1: number, y1: number): Promise<void> {
-  const wrap = page.locator('.pdf-page-wrap').first();
-  await wrap.waitFor({ state: 'visible' });
-  const box = await wrap.boundingBox();
-  if (!box) throw new Error('pdf page wrap has no box');
-  await page.mouse.move(box.x + box.width * x0, box.y + box.height * y0);
-  await page.mouse.down();
-  await page.mouse.move(box.x + box.width * x1, box.y + box.height * y1, { steps: 8 });
-  await page.mouse.up();
-}
-
 test.describe.configure({ mode: 'serial' });
 
 test('reject, undo, rotated bbox, and table overlay persist through the API', async ({ page, request }) => {
@@ -209,7 +200,7 @@ test('reject, undo, rotated bbox, and table overlay persist through the API', as
   await expect(page.getByTestId('field-position-correct')).toBeVisible();
   await page.getByTestId('field-position-correct').click();
   await expect(page.getByRole('radio', { name: /Bereich|Area/ })).toBeChecked();
-  await dragOnPage(page, 0.2, 0.2, 0.55, 0.45);
+  await dragOnPdfPage(page, 0.2, 0.2, 0.55, 0.45);
   await expect(page.getByTestId('field-context-bar')).toBeVisible();
   const correction = page.waitForResponse(
     (response) => response.url().includes('/corrections') && response.request().method() === 'POST' && response.ok()
@@ -233,7 +224,7 @@ test('reject, undo, rotated bbox, and table overlay persist through the API', as
 
   await page.keyboard.press('r');
   await expect(page.getByRole('radio', { name: /Bereich|Area/ })).toBeChecked();
-  await dragOnPage(page, 0.15, 0.55, 0.7, 0.85);
+  await dragOnPdfPage(page, 0.15, 0.55, 0.7, 0.85);
   await expect(page.getByTestId('selection-mark-table')).toBeVisible();
   const created = page.waitForResponse(
     (response) =>

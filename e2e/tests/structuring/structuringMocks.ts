@@ -169,7 +169,6 @@ function documentAt(index: number) {
 export const STRUCTURING_DOCUMENTS = SPECS.map((_, index) => documentAt(index));
 
 function layoutDocumentDetail() {
-  const text = LAYOUT_FIXTURE.ir.pages.flatMap((pg) => pg.blocks.map((b) => b.text)).join('\n');
   return {
     ...documentAt(5),
     id: LAYOUT_DOCUMENT_ID,
@@ -182,13 +181,13 @@ function layoutDocumentDetail() {
     tagSuggestions: [],
     layoutIrAvailable: true,
     extraction: {
-      text,
+      text: 'NORTH 1842\nINVOICE TOTAL',
       fields: [
         { key: 'invoice_number', value: 'RE-2026-0042', confidence: 0.98, userConfirmed: true },
         { key: 'total_amount', value: '1.570,80 €', confidence: 0.95 },
         { key: 'date', value: '14.10.2026', confidence: 0.71 },
       ],
-      blocks: [],
+      blocks: WORKER_INVOICE_BLOCKS,
       layoutIrAvailable: true,
       layoutIrPages: [{ page: 1, widthPt: 595.28, heightPt: 841.89 }],
     },
@@ -310,6 +309,27 @@ export interface SyntheticField {
   userConfirmed?: boolean;
 }
 
+interface SyntheticExtractionBlock {
+  page: number;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  text: string;
+  blockIndex: number;
+}
+
+/**
+ * Two OCR rows from the synthetic invoice the real stack extracts
+ * (`NORTH 1842` at pdf-lib y=720, `INVOICE TOTAL` at y=680, page 595×842).
+ * Their normalized line gap is under the reading-paragraph merge, so a closed
+ * text view becomes one paragraph and correction must edit these blocks.
+ */
+const WORKER_INVOICE_BLOCKS: SyntheticExtractionBlock[] = [
+  { page: 1, x: 0.121, y: 0.123, width: 0.2, height: 0.021, text: 'NORTH 1842', blockIndex: 0 },
+  { page: 1, x: 0.121, y: 0.171, width: 0.28, height: 0.021, text: 'INVOICE TOTAL', blockIndex: 1 },
+];
+
 /** Catalog so the synthetic fields count as recognized (not heuristic) values. */
 const RECOGNIZED_CATALOG = [
   ['invoice_number', 'Rechnungsnummer'],
@@ -329,6 +349,27 @@ const RECOGNIZED_CATALOG = [
   confidenceGateEnabled: null,
   showInFilter: false,
 }));
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
+function isSyntheticBlockList(value: unknown): value is SyntheticExtractionBlock[] {
+  return (
+    Array.isArray(value) &&
+    value.every(
+      (row: unknown) =>
+        isRecord(row) &&
+        typeof row.text === 'string' &&
+        typeof row.page === 'number' &&
+        typeof row.x === 'number' &&
+        typeof row.y === 'number' &&
+        typeof row.width === 'number' &&
+        typeof row.height === 'number' &&
+        typeof row.blockIndex === 'number'
+    )
+  );
+}
 
 function isSyntheticFieldList(value: unknown): value is SyntheticField[] {
   return (
@@ -400,7 +441,7 @@ export async function installStructuringMocks(
   valueNormalized: string;
   createdAt: string;
 }> = [];
-  let fieldBounds = { x0: 0.55, y0: 0.72, x1: 0.88, y1: 0.78 };
+  let fieldBounds = { x0: 0.20004381, y0: 0.45, x1: 0.57337177, y1: 0.8 };
   const layoutFieldRegion = () => ({
     id: 'synthetic-field-total',
     documentId: LAYOUT_DOCUMENT_ID,
@@ -434,10 +475,24 @@ export async function installStructuringMocks(
     createdAt: NOW,
   });
   const fieldOverrides = new Map<string, SyntheticField[]>();
+  const blockOverrides = new Map<string, SyntheticExtractionBlock[]>();
+  const layoutIrDropped = new Set<string>();
   const withOverrides = (detail: NonNullable<ReturnType<typeof detailFor>>) => {
-    const override = fieldOverrides.get(detail.id);
-    if (!override || !detail.extraction) return detail;
-    return { ...detail, extraction: { ...detail.extraction, fields: override } };
+    if (!detail.extraction) return detail;
+    const fields = fieldOverrides.get(detail.id);
+    const blocks = blockOverrides.get(detail.id);
+    const dropIr = layoutIrDropped.has(detail.id);
+    if (!fields && !blocks && !dropIr) return detail;
+    return {
+      ...detail,
+      layoutIrAvailable: dropIr ? false : detail.layoutIrAvailable,
+      extraction: {
+        ...detail.extraction,
+        ...(fields ? { fields } : {}),
+        ...(blocks ? { blocks, text: blocks.map((block) => block.text).join('\n') } : {}),
+        ...(dropIr ? { layoutIrAvailable: false, layoutIrPages: [] } : {}),
+      },
+    };
   };
   const docs = options.empty ? [] : STRUCTURING_DOCUMENTS;
   const byStatus = { uploaded: 0, queued: 0, extracting: 0, ready: 0, failed: 0 };
@@ -517,7 +572,10 @@ export async function installStructuringMocks(
       const body = previewMatch[1] === LAYOUT_DOCUMENT_ID ? INVOICE_PDF : PDF;
       return route.fulfill({ status: 200, contentType: 'application/pdf', body });
     }
-    if (p === `/documents/${LAYOUT_DOCUMENT_ID}/layout-ir`) return json(route, LAYOUT_FIXTURE.ir);
+    if (p === `/documents/${LAYOUT_DOCUMENT_ID}/layout-ir`) {
+      if (layoutIrDropped.has(LAYOUT_DOCUMENT_ID)) return json(route, { version: 1, pages: [] });
+      return json(route, LAYOUT_FIXTURE.ir);
+    }
     if (p === `/documents/${LAYOUT_DOCUMENT_ID}/layout/tokens`) {
       return json(route, { page: null, irSha256: 'synthetic', tokens: LAYOUT_FIXTURE.tokens });
     }
@@ -726,6 +784,14 @@ export async function installStructuringMocks(
       if (isSyntheticFieldList(fields)) {
         fieldOverrides.set(detail.id, fields);
         log.fieldWrites.push({ documentId: detail.id, fields });
+      }
+      const blocks =
+        typeof body === 'object' && body !== null && 'extractionBlocks' in body
+          ? body.extractionBlocks
+          : undefined;
+      if (isSyntheticBlockList(blocks)) {
+        blockOverrides.set(detail.id, blocks);
+        layoutIrDropped.add(detail.id);
       }
       return json(route, {
         document: withOverrides(detail),

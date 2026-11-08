@@ -9675,6 +9675,12 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   outline-offset: 1px;
 }
 
+/* Area and text tools draw on the page. A saved field mark must not take the gesture. */
+.layout-viewer-stage[data-selection-tool='rect'] .pdf-layout-overlay,
+.layout-viewer-stage[data-selection-tool='text'] .pdf-layout-overlay {
+  pointer-events: none;
+}
+
 .pdf-layout-overlay:focus-visible {
   outline: 2px solid var(--dv-color-accent);
   outline-offset: 2px;
