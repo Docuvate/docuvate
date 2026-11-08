@@ -25,8 +25,7 @@ class _$CreateAdminOidcProviderRequestDto
 
   factory _$CreateAdminOidcProviderRequestDto(
           [void Function(CreateAdminOidcProviderRequestDtoBuilder)? updates]) =>
-      (new CreateAdminOidcProviderRequestDtoBuilder()..update(updates))
-          ._build();
+      (CreateAdminOidcProviderRequestDtoBuilder()..update(updates))._build();
 
   _$CreateAdminOidcProviderRequestDto._(
       {required this.providerId,
@@ -36,23 +35,7 @@ class _$CreateAdminOidcProviderRequestDto
       required this.clientSecret,
       required this.scopes,
       required this.enabled})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        providerId, r'CreateAdminOidcProviderRequestDto', 'providerId');
-    BuiltValueNullFieldError.checkNotNull(
-        displayName, r'CreateAdminOidcProviderRequestDto', 'displayName');
-    BuiltValueNullFieldError.checkNotNull(
-        issuer, r'CreateAdminOidcProviderRequestDto', 'issuer');
-    BuiltValueNullFieldError.checkNotNull(
-        clientId, r'CreateAdminOidcProviderRequestDto', 'clientId');
-    BuiltValueNullFieldError.checkNotNull(
-        clientSecret, r'CreateAdminOidcProviderRequestDto', 'clientSecret');
-    BuiltValueNullFieldError.checkNotNull(
-        scopes, r'CreateAdminOidcProviderRequestDto', 'scopes');
-    BuiltValueNullFieldError.checkNotNull(
-        enabled, r'CreateAdminOidcProviderRequestDto', 'enabled');
-  }
-
+      : super._();
   @override
   CreateAdminOidcProviderRequestDto rebuild(
           void Function(CreateAdminOidcProviderRequestDtoBuilder) updates) =>
@@ -60,7 +43,7 @@ class _$CreateAdminOidcProviderRequestDto
 
   @override
   CreateAdminOidcProviderRequestDtoBuilder toBuilder() =>
-      new CreateAdminOidcProviderRequestDtoBuilder()..replace(this);
+      CreateAdminOidcProviderRequestDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -158,7 +141,6 @@ class CreateAdminOidcProviderRequestDtoBuilder
 
   @override
   void replace(CreateAdminOidcProviderRequestDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$CreateAdminOidcProviderRequestDto;
   }
 
@@ -173,21 +155,22 @@ class CreateAdminOidcProviderRequestDtoBuilder
 
   _$CreateAdminOidcProviderRequestDto _build() {
     final _$result = _$v ??
-        new _$CreateAdminOidcProviderRequestDto._(
-            providerId: BuiltValueNullFieldError.checkNotNull(
-                providerId, r'CreateAdminOidcProviderRequestDto', 'providerId'),
-            displayName: BuiltValueNullFieldError.checkNotNull(
-                displayName, r'CreateAdminOidcProviderRequestDto', 'displayName'),
-            issuer: BuiltValueNullFieldError.checkNotNull(
-                issuer, r'CreateAdminOidcProviderRequestDto', 'issuer'),
-            clientId: BuiltValueNullFieldError.checkNotNull(
-                clientId, r'CreateAdminOidcProviderRequestDto', 'clientId'),
-            clientSecret: BuiltValueNullFieldError.checkNotNull(clientSecret,
-                r'CreateAdminOidcProviderRequestDto', 'clientSecret'),
-            scopes: BuiltValueNullFieldError.checkNotNull(
-                scopes, r'CreateAdminOidcProviderRequestDto', 'scopes'),
-            enabled: BuiltValueNullFieldError.checkNotNull(
-                enabled, r'CreateAdminOidcProviderRequestDto', 'enabled'));
+        _$CreateAdminOidcProviderRequestDto._(
+          providerId: BuiltValueNullFieldError.checkNotNull(
+              providerId, r'CreateAdminOidcProviderRequestDto', 'providerId'),
+          displayName: BuiltValueNullFieldError.checkNotNull(
+              displayName, r'CreateAdminOidcProviderRequestDto', 'displayName'),
+          issuer: BuiltValueNullFieldError.checkNotNull(
+              issuer, r'CreateAdminOidcProviderRequestDto', 'issuer'),
+          clientId: BuiltValueNullFieldError.checkNotNull(
+              clientId, r'CreateAdminOidcProviderRequestDto', 'clientId'),
+          clientSecret: BuiltValueNullFieldError.checkNotNull(clientSecret,
+              r'CreateAdminOidcProviderRequestDto', 'clientSecret'),
+          scopes: BuiltValueNullFieldError.checkNotNull(
+              scopes, r'CreateAdminOidcProviderRequestDto', 'scopes'),
+          enabled: BuiltValueNullFieldError.checkNotNull(
+              enabled, r'CreateAdminOidcProviderRequestDto', 'enabled'),
+        );
     replace(_$result);
     return _$result;
   }

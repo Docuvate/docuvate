@@ -14,15 +14,11 @@ class _$DocumentTagSuggestionsBatchRequestDto
   factory _$DocumentTagSuggestionsBatchRequestDto(
           [void Function(DocumentTagSuggestionsBatchRequestDtoBuilder)?
               updates]) =>
-      (new DocumentTagSuggestionsBatchRequestDtoBuilder()..update(updates))
+      (DocumentTagSuggestionsBatchRequestDtoBuilder()..update(updates))
           ._build();
 
   _$DocumentTagSuggestionsBatchRequestDto._({required this.documentIds})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        documentIds, r'DocumentTagSuggestionsBatchRequestDto', 'documentIds');
-  }
-
+      : super._();
   @override
   DocumentTagSuggestionsBatchRequestDto rebuild(
           void Function(DocumentTagSuggestionsBatchRequestDtoBuilder)
@@ -31,7 +27,7 @@ class _$DocumentTagSuggestionsBatchRequestDto
 
   @override
   DocumentTagSuggestionsBatchRequestDtoBuilder toBuilder() =>
-      new DocumentTagSuggestionsBatchRequestDtoBuilder()..replace(this);
+      DocumentTagSuggestionsBatchRequestDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -65,7 +61,7 @@ class DocumentTagSuggestionsBatchRequestDtoBuilder
 
   ListBuilder<String>? _documentIds;
   ListBuilder<String> get documentIds =>
-      _$this._documentIds ??= new ListBuilder<String>();
+      _$this._documentIds ??= ListBuilder<String>();
   set documentIds(ListBuilder<String>? documentIds) =>
       _$this._documentIds = documentIds;
 
@@ -84,7 +80,6 @@ class DocumentTagSuggestionsBatchRequestDtoBuilder
 
   @override
   void replace(DocumentTagSuggestionsBatchRequestDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$DocumentTagSuggestionsBatchRequestDto;
   }
 
@@ -101,15 +96,16 @@ class DocumentTagSuggestionsBatchRequestDtoBuilder
     _$DocumentTagSuggestionsBatchRequestDto _$result;
     try {
       _$result = _$v ??
-          new _$DocumentTagSuggestionsBatchRequestDto._(
-              documentIds: documentIds.build());
+          _$DocumentTagSuggestionsBatchRequestDto._(
+            documentIds: documentIds.build(),
+          );
     } catch (_) {
       late String _$failedField;
       try {
         _$failedField = 'documentIds';
         documentIds.build();
       } catch (e) {
-        throw new BuiltValueNestedFieldError(
+        throw BuiltValueNestedFieldError(
             r'DocumentTagSuggestionsBatchRequestDto',
             _$failedField,
             e.toString());

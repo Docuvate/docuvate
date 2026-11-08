@@ -352,7 +352,8 @@
     "copied": "Copied",
     "loading": "Loading…",
     "showPassword": "Show password",
-    "hidePassword": "Hide password"
+    "hidePassword": "Hide password",
+    "loadMore": "Load more"
   },
   "save": {
     "saved": "Saved",
@@ -845,7 +846,7 @@
     "layoutSuggestionNotInSchemaHint": "Add this field to your schema to track it on future documents.",
     "layoutComparePageLegend": "Amber outline: page SSIM below the quality floor.",
     "layoutSuggestionAccept": "Accept as field",
-    "layoutSuggestionDismiss": "Dismiss",
+    "layoutSuggestionDismiss": "Dismiss suggestion",
     "layoutTablesEmpty": "No tables detected.",
     "layoutTableLabel": "Table {{n}}",
     "layoutCorrectedTableLabel": "Corrected table {{n}}",
@@ -1017,7 +1018,13 @@
       "text": "Sweep over text on the page and assign it to a field.",
       "rect": "Drag an area: capture it as a field, table or section."
     },
-    "layoutViewMenuAria": "View: {{view}}"
+    "layoutViewMenuAria": "View: {{view}}",
+    "fieldPositionCorrect": "Fix position",
+    "fieldBboxSave": "Save position",
+    "fieldBboxHandle": "Handle {handle}",
+    "pageRotationSaved": "Page rotation saved",
+    "layoutSuggestionDismissTitle": "Dismiss suggestion",
+    "rejectedSuggestionsTitle": "Rejected suggestions"
   },
   "settings": {
     "title": "Settings",
@@ -2091,7 +2098,13 @@
     "bulkTitleCount_other": "{{count}} documents waiting for review",
     "bulkLead": "Confident suggestions can be accepted in one go; review the rest below step by step.",
     "batchConfirmTitle": "Accept all confident suggestions?",
-    "batchConfirmBody": "Applies to every waiting document, not only the ones shown: labels and fields with at least 90 % confidence are saved. All other suggestions stay for review."
+    "batchConfirmBody": "Applies to every waiting document, not only the ones shown: labels and fields with at least 90 % confidence are saved. All other suggestions stay for review.",
+    "nextWorkLead": "Open the next document and structure values in the viewer  -  no second wizard.",
+    "nextDocument": "Structure next",
+    "openStructuring": "Structure document",
+    "openFieldsHint": "{fields} fields · {labels} labels open",
+    "queueListAria": "More documents in the queue",
+    "structureAction": "Structure"
   },
   "dashboard": {
     "title": "Start",
@@ -2500,7 +2513,8 @@
       "state": {
         "confirmed": "Confirmed",
         "suggested": "Suggestion",
-        "review": "Open"
+        "review": "Open",
+        "rejected": "Rejected"
       },
       "confidence": "{{percent}}%",
       "accept": "Accept {{field}}",
@@ -2517,7 +2531,11 @@
       "acceptedToast_one": "{{count}} value accepted",
       "acceptedToast_other": "{{count}} values accepted",
       "correctedToast": "Correction saved",
-      "reassignedToast": "Value moved to {{field}}"
+      "reassignedToast": "Value moved to {{field}}",
+      "reject": "Dismiss suggestion for {{field}}",
+      "rejectTooltip": "Dismiss suggestion",
+      "rejectedSection": "Rejected suggestions",
+      "rejectUndo": "Undo dismiss"
     },
     "aspects": {
       "aria": "Structuring status",
@@ -2588,7 +2606,20 @@
       "subtotal": "Subtotal",
       "footer": "Result"
     },
-    "rowKindAria": "Kind of row {{row}}"
+    "rowKindAria": "Kind of row {{row}}",
+    "familyHints": {
+      "simple": "Plain rows and columns with one header row.",
+      "matrix": "First column as row labels.",
+      "nested": "Two header rows, e.g. grouped columns.",
+      "financial": "Footer rows for totals and tax.",
+      "grouped": "Sections with subtotals in the body.",
+      "key_value": "Label on the left, value on the right  -  no grid."
+    },
+    "editInDocument": "Edit on document",
+    "exitDocumentEdit": "Close overlay",
+    "saveBounds": "Save table frame",
+    "resizeBounds": "Resize table frame",
+    "cellAria": "Cell row {row}, column {col}"
   },
   "ribbon": {
     "stock": "Records",

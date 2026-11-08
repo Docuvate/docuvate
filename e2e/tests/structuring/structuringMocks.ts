@@ -299,6 +299,8 @@ export interface StructuringMockLog {
   fieldWrites: { documentId: string; fields: SyntheticField[] }[];
   /** Bodies of table correction POSTs (synthetic). */
   tableCorrections: unknown[];
+  /** Bodies of field correction POSTs (synthetic). */
+  fieldCorrections: unknown[];
 }
 
 export interface SyntheticField {
@@ -365,6 +367,7 @@ export async function installStructuringMocks(
     calls: [],
     fieldWrites: [],
     tableCorrections: [],
+    fieldCorrections: [],
   };
   let tableRevision = 0;
   const fixtureTable = LAYOUT_FIXTURE.tableRegion.table;
@@ -376,16 +379,54 @@ export async function installStructuringMocks(
     rowRoles: [],
     rules: fixtureTable.rules.map((rule) => ({ ...rule, line: 'unknown' })),
   };
-  const layoutTableRegion = () => ({
+  let tableBounds = {
+    x0: LAYOUT_FIXTURE.tableRegion.x0,
+    y0: LAYOUT_FIXTURE.tableRegion.y0,
+    x1: LAYOUT_FIXTURE.tableRegion.x1,
+    y1: LAYOUT_FIXTURE.tableRegion.y1,
+  };
+  let pageTransforms: Array<{
+    page: number;
+    rotationQuarterTurns: 0 | 1 | 2 | 3;
+    deskewDeg: number;
+    source: string;
+    updatedAt: string;
+  }> = [];
+  const fieldSuggestionRejects: Array<{
+  id: string;
+  correctionId: string;
+  fieldKey: string;
+  value: string;
+  valueNormalized: string;
+  createdAt: string;
+}> = [];
+  let fieldBounds = { x0: 0.55, y0: 0.72, x1: 0.88, y1: 0.78 };
+  const layoutFieldRegion = () => ({
+    id: 'synthetic-field-total',
+    documentId: LAYOUT_DOCUMENT_ID,
+    page: 1,
+    shape: 'rect' as const,
+    role: 'field' as const,
+    x0: fieldBounds.x0,
+    y0: fieldBounds.y0,
+    x1: fieldBounds.x1,
+    y1: fieldBounds.y1,
+    irSha256: 'synthetic',
+    needsReview: false,
+    blockIndexes: [],
+    field: { fieldKey: 'total_amount', valueOverride: null },
+    createdAt: NOW,
+  });
+    const layoutTableRegion = () => ({
     id: `synthetic-table-${String(tableRevision)}`,
     documentId: LAYOUT_DOCUMENT_ID,
     page: 1,
     shape: 'rect',
     role: 'table',
-    x0: LAYOUT_FIXTURE.tableRegion.x0,
-    y0: LAYOUT_FIXTURE.tableRegion.y0,
-    x1: LAYOUT_FIXTURE.tableRegion.x1,
-    y1: LAYOUT_FIXTURE.tableRegion.y1,
+    x0: tableBounds.x0,
+    y0: tableBounds.y0,
+    x1: tableBounds.x1,
+    y1: tableBounds.y1,
     irSha256: 'synthetic',
     needsReview: false,
     blockIndexes: [],
@@ -482,8 +523,125 @@ export async function installStructuringMocks(
     }
     if (p === `/documents/${LAYOUT_DOCUMENT_ID}/regions`) {
       const role = url.searchParams.get('role');
-      const items = role && role !== 'table' ? [] : [layoutTableRegion()];
+      const field = layoutFieldRegion();
+      const table = layoutTableRegion();
+      const items =
+        role === 'table' ? [table] : role === 'field' ? [field] : [field, table];
       return json(route, { irSha256: 'synthetic', items });
+    }
+    if (
+      (p === `/documents/${LAYOUT_DOCUMENT_ID}/field-suggestion-decisions` ||
+        /^\/documents\/[^/]+\/field-suggestion-decisions$/.test(p)) &&
+      method === 'GET'
+    ) {
+      return json(route, {
+        items: fieldSuggestionRejects.map((item) => ({
+          ...item,
+          decision: 'rejected' as const,
+        })),
+      });
+    }
+    if (p === `/documents/${LAYOUT_DOCUMENT_ID}/corrections` && method === 'POST') {
+      const body: unknown = route.request().postDataJSON();
+      log.fieldCorrections.push(body);
+      const op =
+        typeof body === 'object' && body && 'op' in body ? String(body.op) : 'reanchor';
+      const fieldKey =
+        typeof body === 'object' && body && 'fieldKey' in body
+          ? String(body.fieldKey)
+          : 'total_amount';
+      const valueOverride =
+        typeof body === 'object' &&
+        body &&
+        'valueOverride' in body &&
+        typeof body.valueOverride === 'string'
+          ? body.valueOverride
+          : null;
+      if (op === 'reject_suggestion' && valueOverride) {
+        const correctionId =
+          typeof body === 'object' && body && 'id' in body
+            ? String(body.id)
+            : `synthetic-reject-${String(fieldSuggestionRejects.length + 1)}`;
+        const valueNormalized = valueOverride.replace(/\s+/g, ' ').trim().toLowerCase();
+        const existing = fieldSuggestionRejects.find(
+          (item) => item.fieldKey === fieldKey && item.valueNormalized === valueNormalized
+        );
+        if (existing) {
+          return json(route, {
+            noChange: true,
+            correction: {
+              id: existing.correctionId,
+              documentId: LAYOUT_DOCUMENT_ID,
+              kind: 'field',
+              status: 'active',
+              op: 'reject_suggestion',
+              fieldKey,
+              beforeRegionId: null,
+              afterRegionId: null,
+              oldValue: null,
+              newValue: existing.value,
+              createdAt: existing.createdAt,
+            },
+            region: null,
+          });
+        }
+        fieldSuggestionRejects.push({
+          id: `synthetic-decision-${String(fieldSuggestionRejects.length + 1)}`,
+          correctionId,
+          fieldKey,
+          value: valueOverride,
+          valueNormalized,
+          createdAt: NOW,
+        });
+        return json(route, {
+          noChange: false,
+          correction: {
+            id: correctionId,
+            documentId: LAYOUT_DOCUMENT_ID,
+            kind: 'field',
+            status: 'active',
+            op: 'reject_suggestion',
+            fieldKey,
+            beforeRegionId: null,
+            afterRegionId: null,
+            oldValue: null,
+            newValue: valueOverride,
+            createdAt: NOW,
+          },
+          region: null,
+        });
+      }
+      const region = layoutFieldRegion();
+      let nextRegion = region;
+      if (
+        typeof body === 'object' &&
+        body !== null &&
+        'x0' in body &&
+        typeof body.x0 === 'number' &&
+        typeof body.y0 === 'number' &&
+        typeof body.x1 === 'number' &&
+        typeof body.y1 === 'number'
+      ) {
+        fieldBounds = { x0: body.x0, y0: body.y0, x1: body.x1, y1: body.y1 };
+        nextRegion = layoutFieldRegion();
+      }
+      return json(route, {
+        noChange: false,
+        correction: {
+          id: `synthetic-field-correction-${String(log.fieldCorrections.length)}`,
+          documentId: LAYOUT_DOCUMENT_ID,
+          kind: 'field',
+          status: 'active',
+          op,
+          fieldKey,
+          beforeRegionId: region.id,
+          afterRegionId: region.id,
+          oldValue: null,
+          newValue: null,
+          createdAt: NOW,
+        },
+        region: nextRegion,
+      });
     }
     if (p === `/documents/${LAYOUT_DOCUMENT_ID}/table-corrections` && method === 'POST') {
       const body: unknown = route.request().postDataJSON();
@@ -522,6 +680,15 @@ export async function installStructuringMocks(
             (m: unknown): m is SyntheticTable['merges'][number] =>
               typeof m === 'object' && m !== null && 'row0' in m && 'colSpan' in m
           );
+        }
+        if (
+          'x0' in body &&
+          typeof body.x0 === 'number' &&
+          typeof body.y0 === 'number' &&
+          typeof body.x1 === 'number' &&
+          typeof body.y1 === 'number'
+        ) {
+          tableBounds = { x0: body.x0, y0: body.y0, x1: body.x1, y1: body.y1 };
         }
         layoutTable = next;
       }
@@ -573,6 +740,28 @@ export async function installStructuringMocks(
       /^\/documents\/[^/]+\/extraction\/requeue/.test(p)
     ) {
       return json(route, {});
+    }
+    if (p.match(/^\/documents\/[^/]+\/page-transforms$/) && method === 'GET') {
+      return json(route, { transforms: pageTransforms });
+    }
+    if (p.match(/^\/documents\/[^/]+\/pages\/\d+\/transform$/) && method === 'POST') {
+      const body = route.request().postDataJSON() as {
+        id: string;
+        rotationQuarterTurns: 0 | 1 | 2 | 3;
+      };
+      const page = Number(p.split('/')[4]);
+      const transform = {
+        page,
+        rotationQuarterTurns: body.rotationQuarterTurns,
+        deskewDeg: 0,
+        source: 'user',
+        updatedAt: NOW,
+      };
+      pageTransforms = [
+        ...pageTransforms.filter((item) => item.page !== page),
+        transform,
+      ];
+      return json(route, { correctionId: body.id, transform });
     }
     if (p === '/review-queue/summary')
       return json(route, { pendingCount: options.empty ? 0 : REVIEW_ITEMS.length });

@@ -16,19 +16,13 @@ class _$LayoutHtmlResponseDto extends LayoutHtmlResponseDto {
 
   factory _$LayoutHtmlResponseDto(
           [void Function(LayoutHtmlResponseDtoBuilder)? updates]) =>
-      (new LayoutHtmlResponseDtoBuilder()..update(updates))._build();
+      (LayoutHtmlResponseDtoBuilder()..update(updates))._build();
 
   _$LayoutHtmlResponseDto._(
       {required this.html,
       required this.reconstructionReliable,
       this.unreliableReason})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        html, r'LayoutHtmlResponseDto', 'html');
-    BuiltValueNullFieldError.checkNotNull(reconstructionReliable,
-        r'LayoutHtmlResponseDto', 'reconstructionReliable');
-  }
-
+      : super._();
   @override
   LayoutHtmlResponseDto rebuild(
           void Function(LayoutHtmlResponseDtoBuilder) updates) =>
@@ -36,7 +30,7 @@ class _$LayoutHtmlResponseDto extends LayoutHtmlResponseDto {
 
   @override
   LayoutHtmlResponseDtoBuilder toBuilder() =>
-      new LayoutHtmlResponseDtoBuilder()..replace(this);
+      LayoutHtmlResponseDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -102,7 +96,6 @@ class LayoutHtmlResponseDtoBuilder
 
   @override
   void replace(LayoutHtmlResponseDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$LayoutHtmlResponseDto;
   }
 
@@ -116,14 +109,15 @@ class LayoutHtmlResponseDtoBuilder
 
   _$LayoutHtmlResponseDto _build() {
     final _$result = _$v ??
-        new _$LayoutHtmlResponseDto._(
-            html: BuiltValueNullFieldError.checkNotNull(
-                html, r'LayoutHtmlResponseDto', 'html'),
-            reconstructionReliable: BuiltValueNullFieldError.checkNotNull(
-                reconstructionReliable,
-                r'LayoutHtmlResponseDto',
-                'reconstructionReliable'),
-            unreliableReason: unreliableReason);
+        _$LayoutHtmlResponseDto._(
+          html: BuiltValueNullFieldError.checkNotNull(
+              html, r'LayoutHtmlResponseDto', 'html'),
+          reconstructionReliable: BuiltValueNullFieldError.checkNotNull(
+              reconstructionReliable,
+              r'LayoutHtmlResponseDto',
+              'reconstructionReliable'),
+          unreliableReason: unreliableReason,
+        );
     replace(_$result);
     return _$result;
   }

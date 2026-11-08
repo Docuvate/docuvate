@@ -81,6 +81,7 @@ export 'package:docuvate/src/generated/src/model/document_region_list_response_d
 export 'package:docuvate/src/generated/src/model/document_region_table_cell_dto.dart';
 export 'package:docuvate/src/generated/src/model/document_region_table_dto.dart';
 export 'package:docuvate/src/generated/src/model/document_region_table_merge_dto.dart';
+export 'package:docuvate/src/generated/src/model/document_region_table_row_role_dto.dart';
 export 'package:docuvate/src/generated/src/model/document_region_table_rule_dto.dart';
 export 'package:docuvate/src/generated/src/model/document_response_dto.dart';
 export 'package:docuvate/src/generated/src/model/document_review_field_suggestion_dto_class.dart';
@@ -155,6 +156,9 @@ export 'package:docuvate/src/generated/src/model/set_admin_user_role_request_dto
 export 'package:docuvate/src/generated/src/model/set_ml_model_lifecycle_request_dto.dart';
 export 'package:docuvate/src/generated/src/model/sftp_ingress_create_account_body_dto.dart';
 export 'package:docuvate/src/generated/src/model/start_mail_o_auth_request_dto.dart';
+export 'package:docuvate/src/generated/src/model/table_merge_input_dto.dart';
+export 'package:docuvate/src/generated/src/model/table_row_role_input_dto.dart';
+export 'package:docuvate/src/generated/src/model/table_rule_line_input_dto.dart';
 export 'package:docuvate/src/generated/src/model/tag_custom_field_list_response_dto_class.dart';
 export 'package:docuvate/src/generated/src/model/tag_list_response_dto.dart';
 export 'package:docuvate/src/generated/src/model/tag_search_response_dto.dart';

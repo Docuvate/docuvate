@@ -24,6 +24,7 @@ part 'document_response_dto.g.dart';
 /// * [tags] 
 /// * [createdAt] 
 /// * [updatedAt] 
+/// * [layoutIrAvailable] - True when persisted layout IR exists (list convenience).
 /// * [extraction] 
 @BuiltValue()
 abstract class DocumentResponseDto implements Built<DocumentResponseDto, DocumentResponseDtoBuilder> {
@@ -58,6 +59,10 @@ abstract class DocumentResponseDto implements Built<DocumentResponseDto, Documen
 
   @BuiltValueField(wireName: r'updatedAt')
   String get updatedAt;
+
+  /// True when persisted layout IR exists (list convenience).
+  @BuiltValueField(wireName: r'layoutIrAvailable')
+  bool? get layoutIrAvailable;
 
   @BuiltValueField(wireName: r'extraction')
   DocumentExtractionSummaryDto? get extraction;
@@ -137,6 +142,13 @@ class _$DocumentResponseDtoSerializer implements PrimitiveSerializer<DocumentRes
       object.updatedAt,
       specifiedType: const FullType(String),
     );
+    if (object.layoutIrAvailable != null) {
+      yield r'layoutIrAvailable';
+      yield serializers.serialize(
+        object.layoutIrAvailable,
+        specifiedType: const FullType(bool),
+      );
+    }
     if (object.extraction != null) {
       yield r'extraction';
       yield serializers.serialize(
@@ -236,6 +248,13 @@ class _$DocumentResponseDtoSerializer implements PrimitiveSerializer<DocumentRes
             specifiedType: const FullType(String),
           ) as String;
           result.updatedAt = valueDes;
+          break;
+        case r'layoutIrAvailable':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.layoutIrAvailable = valueDes;
           break;
         case r'extraction':
           final valueDes = serializers.deserialize(

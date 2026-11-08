@@ -13,25 +13,29 @@ class _$ExtractedFieldDto extends ExtractedFieldDto {
   final String value;
   @override
   final num? confidence;
+  @override
+  final String? tagId;
+  @override
+  final bool? userConfirmed;
 
   factory _$ExtractedFieldDto(
           [void Function(ExtractedFieldDtoBuilder)? updates]) =>
-      (new ExtractedFieldDtoBuilder()..update(updates))._build();
+      (ExtractedFieldDtoBuilder()..update(updates))._build();
 
   _$ExtractedFieldDto._(
-      {required this.key, required this.value, this.confidence})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(key, r'ExtractedFieldDto', 'key');
-    BuiltValueNullFieldError.checkNotNull(value, r'ExtractedFieldDto', 'value');
-  }
-
+      {required this.key,
+      required this.value,
+      this.confidence,
+      this.tagId,
+      this.userConfirmed})
+      : super._();
   @override
   ExtractedFieldDto rebuild(void Function(ExtractedFieldDtoBuilder) updates) =>
       (toBuilder()..update(updates)).build();
 
   @override
   ExtractedFieldDtoBuilder toBuilder() =>
-      new ExtractedFieldDtoBuilder()..replace(this);
+      ExtractedFieldDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -39,7 +43,9 @@ class _$ExtractedFieldDto extends ExtractedFieldDto {
     return other is ExtractedFieldDto &&
         key == other.key &&
         value == other.value &&
-        confidence == other.confidence;
+        confidence == other.confidence &&
+        tagId == other.tagId &&
+        userConfirmed == other.userConfirmed;
   }
 
   @override
@@ -48,6 +54,8 @@ class _$ExtractedFieldDto extends ExtractedFieldDto {
     _$hash = $jc(_$hash, key.hashCode);
     _$hash = $jc(_$hash, value.hashCode);
     _$hash = $jc(_$hash, confidence.hashCode);
+    _$hash = $jc(_$hash, tagId.hashCode);
+    _$hash = $jc(_$hash, userConfirmed.hashCode);
     _$hash = $jf(_$hash);
     return _$hash;
   }
@@ -57,7 +65,9 @@ class _$ExtractedFieldDto extends ExtractedFieldDto {
     return (newBuiltValueToStringHelper(r'ExtractedFieldDto')
           ..add('key', key)
           ..add('value', value)
-          ..add('confidence', confidence))
+          ..add('confidence', confidence)
+          ..add('tagId', tagId)
+          ..add('userConfirmed', userConfirmed))
         .toString();
   }
 }
@@ -78,6 +88,15 @@ class ExtractedFieldDtoBuilder
   num? get confidence => _$this._confidence;
   set confidence(num? confidence) => _$this._confidence = confidence;
 
+  String? _tagId;
+  String? get tagId => _$this._tagId;
+  set tagId(String? tagId) => _$this._tagId = tagId;
+
+  bool? _userConfirmed;
+  bool? get userConfirmed => _$this._userConfirmed;
+  set userConfirmed(bool? userConfirmed) =>
+      _$this._userConfirmed = userConfirmed;
+
   ExtractedFieldDtoBuilder() {
     ExtractedFieldDto._defaults(this);
   }
@@ -88,6 +107,8 @@ class ExtractedFieldDtoBuilder
       _key = $v.key;
       _value = $v.value;
       _confidence = $v.confidence;
+      _tagId = $v.tagId;
+      _userConfirmed = $v.userConfirmed;
       _$v = null;
     }
     return this;
@@ -95,7 +116,6 @@ class ExtractedFieldDtoBuilder
 
   @override
   void replace(ExtractedFieldDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$ExtractedFieldDto;
   }
 
@@ -109,12 +129,15 @@ class ExtractedFieldDtoBuilder
 
   _$ExtractedFieldDto _build() {
     final _$result = _$v ??
-        new _$ExtractedFieldDto._(
-            key: BuiltValueNullFieldError.checkNotNull(
-                key, r'ExtractedFieldDto', 'key'),
-            value: BuiltValueNullFieldError.checkNotNull(
-                value, r'ExtractedFieldDto', 'value'),
-            confidence: confidence);
+        _$ExtractedFieldDto._(
+          key: BuiltValueNullFieldError.checkNotNull(
+              key, r'ExtractedFieldDto', 'key'),
+          value: BuiltValueNullFieldError.checkNotNull(
+              value, r'ExtractedFieldDto', 'value'),
+          confidence: confidence,
+          tagId: tagId,
+          userConfirmed: userConfirmed,
+        );
     replace(_$result);
     return _$result;
   }

@@ -11,18 +11,15 @@ class _$OkResponseDto extends OkResponseDto {
   final bool ok;
 
   factory _$OkResponseDto([void Function(OkResponseDtoBuilder)? updates]) =>
-      (new OkResponseDtoBuilder()..update(updates))._build();
+      (OkResponseDtoBuilder()..update(updates))._build();
 
-  _$OkResponseDto._({required this.ok}) : super._() {
-    BuiltValueNullFieldError.checkNotNull(ok, r'OkResponseDto', 'ok');
-  }
-
+  _$OkResponseDto._({required this.ok}) : super._();
   @override
   OkResponseDto rebuild(void Function(OkResponseDtoBuilder) updates) =>
       (toBuilder()..update(updates)).build();
 
   @override
-  OkResponseDtoBuilder toBuilder() => new OkResponseDtoBuilder()..replace(this);
+  OkResponseDtoBuilder toBuilder() => OkResponseDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -68,7 +65,6 @@ class OkResponseDtoBuilder
 
   @override
   void replace(OkResponseDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$OkResponseDto;
   }
 
@@ -82,9 +78,9 @@ class OkResponseDtoBuilder
 
   _$OkResponseDto _build() {
     final _$result = _$v ??
-        new _$OkResponseDto._(
-            ok: BuiltValueNullFieldError.checkNotNull(
-                ok, r'OkResponseDto', 'ok'));
+        _$OkResponseDto._(
+          ok: BuiltValueNullFieldError.checkNotNull(ok, r'OkResponseDto', 'ok'),
+        );
     replace(_$result);
     return _$result;
   }

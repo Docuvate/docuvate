@@ -14,17 +14,11 @@ class _$ConfirmDocumentFieldRequestDto extends ConfirmDocumentFieldRequestDto {
 
   factory _$ConfirmDocumentFieldRequestDto(
           [void Function(ConfirmDocumentFieldRequestDtoBuilder)? updates]) =>
-      (new ConfirmDocumentFieldRequestDtoBuilder()..update(updates))._build();
+      (ConfirmDocumentFieldRequestDtoBuilder()..update(updates))._build();
 
   _$ConfirmDocumentFieldRequestDto._(
       {required this.fieldKey, required this.value})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        fieldKey, r'ConfirmDocumentFieldRequestDto', 'fieldKey');
-    BuiltValueNullFieldError.checkNotNull(
-        value, r'ConfirmDocumentFieldRequestDto', 'value');
-  }
-
+      : super._();
   @override
   ConfirmDocumentFieldRequestDto rebuild(
           void Function(ConfirmDocumentFieldRequestDtoBuilder) updates) =>
@@ -32,7 +26,7 @@ class _$ConfirmDocumentFieldRequestDto extends ConfirmDocumentFieldRequestDto {
 
   @override
   ConfirmDocumentFieldRequestDtoBuilder toBuilder() =>
-      new ConfirmDocumentFieldRequestDtoBuilder()..replace(this);
+      ConfirmDocumentFieldRequestDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -90,7 +84,6 @@ class ConfirmDocumentFieldRequestDtoBuilder
 
   @override
   void replace(ConfirmDocumentFieldRequestDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$ConfirmDocumentFieldRequestDto;
   }
 
@@ -104,11 +97,12 @@ class ConfirmDocumentFieldRequestDtoBuilder
 
   _$ConfirmDocumentFieldRequestDto _build() {
     final _$result = _$v ??
-        new _$ConfirmDocumentFieldRequestDto._(
-            fieldKey: BuiltValueNullFieldError.checkNotNull(
-                fieldKey, r'ConfirmDocumentFieldRequestDto', 'fieldKey'),
-            value: BuiltValueNullFieldError.checkNotNull(
-                value, r'ConfirmDocumentFieldRequestDto', 'value'));
+        _$ConfirmDocumentFieldRequestDto._(
+          fieldKey: BuiltValueNullFieldError.checkNotNull(
+              fieldKey, r'ConfirmDocumentFieldRequestDto', 'fieldKey'),
+          value: BuiltValueNullFieldError.checkNotNull(
+              value, r'ConfirmDocumentFieldRequestDto', 'value'),
+        );
     replace(_$result);
     return _$result;
   }

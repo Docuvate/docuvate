@@ -51,7 +51,7 @@ def test_funsd_pages_cer_within_baseline(monkeypatch: pytest.MonkeyPatch) -> Non
         reference = entry["reference"]
         with open(image_path, "rb") as handle:
             image_bytes = handle.read()
-        hypothesis, _blocks = ocr_image_bytes(image_bytes)
+        hypothesis, _blocks, _turns = ocr_image_bytes(image_bytes)
         total_cer += _character_error_rate(reference.casefold(), hypothesis.casefold())
     page_count = len(pages)
     mean_cer = total_cer / page_count

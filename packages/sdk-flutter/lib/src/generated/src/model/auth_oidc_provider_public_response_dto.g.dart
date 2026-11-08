@@ -15,18 +15,11 @@ class _$AuthOidcProviderPublicResponseDto
 
   factory _$AuthOidcProviderPublicResponseDto(
           [void Function(AuthOidcProviderPublicResponseDtoBuilder)? updates]) =>
-      (new AuthOidcProviderPublicResponseDtoBuilder()..update(updates))
-          ._build();
+      (AuthOidcProviderPublicResponseDtoBuilder()..update(updates))._build();
 
   _$AuthOidcProviderPublicResponseDto._(
       {required this.providerId, required this.displayName})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        providerId, r'AuthOidcProviderPublicResponseDto', 'providerId');
-    BuiltValueNullFieldError.checkNotNull(
-        displayName, r'AuthOidcProviderPublicResponseDto', 'displayName');
-  }
-
+      : super._();
   @override
   AuthOidcProviderPublicResponseDto rebuild(
           void Function(AuthOidcProviderPublicResponseDtoBuilder) updates) =>
@@ -34,7 +27,7 @@ class _$AuthOidcProviderPublicResponseDto
 
   @override
   AuthOidcProviderPublicResponseDtoBuilder toBuilder() =>
-      new AuthOidcProviderPublicResponseDtoBuilder()..replace(this);
+      AuthOidcProviderPublicResponseDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -92,7 +85,6 @@ class AuthOidcProviderPublicResponseDtoBuilder
 
   @override
   void replace(AuthOidcProviderPublicResponseDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$AuthOidcProviderPublicResponseDto;
   }
 
@@ -107,11 +99,12 @@ class AuthOidcProviderPublicResponseDtoBuilder
 
   _$AuthOidcProviderPublicResponseDto _build() {
     final _$result = _$v ??
-        new _$AuthOidcProviderPublicResponseDto._(
-            providerId: BuiltValueNullFieldError.checkNotNull(
-                providerId, r'AuthOidcProviderPublicResponseDto', 'providerId'),
-            displayName: BuiltValueNullFieldError.checkNotNull(displayName,
-                r'AuthOidcProviderPublicResponseDto', 'displayName'));
+        _$AuthOidcProviderPublicResponseDto._(
+          providerId: BuiltValueNullFieldError.checkNotNull(
+              providerId, r'AuthOidcProviderPublicResponseDto', 'providerId'),
+          displayName: BuiltValueNullFieldError.checkNotNull(
+              displayName, r'AuthOidcProviderPublicResponseDto', 'displayName'),
+        );
     replace(_$result);
     return _$result;
   }

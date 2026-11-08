@@ -91,3 +91,42 @@ describe('navigation helpers', () => {
     expect(nextReviewDocumentId([{ documentId: 'a' }], 'a')).toBeNull();
   });
 });
+
+describe('suggestion reject filtering', () => {
+  it('excludes rejected suggested and unconfirmed review rows from open work', () => {
+    const rejects = [
+      {
+        fieldKey: 'global:sender',
+        valueNormalized: 'bdew-strompreisanalyse',
+      },
+    ];
+    const rows = workbenchRows(
+      [
+        {
+          key: 'global:sender',
+          value: 'BDEW-Strompreisanalyse',
+          confidence: 0.97,
+          userConfirmed: false,
+        },
+        { key: 'global:date', value: '12.12.2023', confidence: 0.5, userConfirmed: false },
+      ],
+      [{ key: 'global:amount', value: '83.99', confidence: 0.8 }],
+      rejects
+    );
+    expect(rows.map((r) => r.key)).toEqual(['global:date', 'global:amount']);
+    expect(openWorkbenchRowCount(rows)).toBe(2);
+  });
+
+  it('keeps confirmed rows even when the same value was previously rejected', () => {
+    const rejects = [
+      { fieldKey: 'global:amount', valueNormalized: '83.99' },
+    ];
+    const rows = workbenchRows(
+      [{ key: 'global:amount', value: '83.99', confidence: 1, userConfirmed: true }],
+      [],
+      rejects
+    );
+    expect(rows).toHaveLength(1);
+    expect(rows[0]?.state).toBe('confirmed');
+  });
+});

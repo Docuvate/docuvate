@@ -19,24 +19,14 @@ class _$LayoutCompareMetricsResponseDto
 
   factory _$LayoutCompareMetricsResponseDto(
           [void Function(LayoutCompareMetricsResponseDtoBuilder)? updates]) =>
-      (new LayoutCompareMetricsResponseDtoBuilder()..update(updates))._build();
+      (LayoutCompareMetricsResponseDtoBuilder()..update(updates))._build();
 
   _$LayoutCompareMetricsResponseDto._(
       {required this.category,
       required this.ssimFloor,
       required this.pageCount,
       required this.pages})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        category, r'LayoutCompareMetricsResponseDto', 'category');
-    BuiltValueNullFieldError.checkNotNull(
-        ssimFloor, r'LayoutCompareMetricsResponseDto', 'ssimFloor');
-    BuiltValueNullFieldError.checkNotNull(
-        pageCount, r'LayoutCompareMetricsResponseDto', 'pageCount');
-    BuiltValueNullFieldError.checkNotNull(
-        pages, r'LayoutCompareMetricsResponseDto', 'pages');
-  }
-
+      : super._();
   @override
   LayoutCompareMetricsResponseDto rebuild(
           void Function(LayoutCompareMetricsResponseDtoBuilder) updates) =>
@@ -44,7 +34,7 @@ class _$LayoutCompareMetricsResponseDto
 
   @override
   LayoutCompareMetricsResponseDtoBuilder toBuilder() =>
-      new LayoutCompareMetricsResponseDtoBuilder()..replace(this);
+      LayoutCompareMetricsResponseDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -98,7 +88,7 @@ class LayoutCompareMetricsResponseDtoBuilder
 
   ListBuilder<LayoutComparePageMetricDto>? _pages;
   ListBuilder<LayoutComparePageMetricDto> get pages =>
-      _$this._pages ??= new ListBuilder<LayoutComparePageMetricDto>();
+      _$this._pages ??= ListBuilder<LayoutComparePageMetricDto>();
   set pages(ListBuilder<LayoutComparePageMetricDto>? pages) =>
       _$this._pages = pages;
 
@@ -120,7 +110,6 @@ class LayoutCompareMetricsResponseDtoBuilder
 
   @override
   void replace(LayoutCompareMetricsResponseDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$LayoutCompareMetricsResponseDto;
   }
 
@@ -136,21 +125,22 @@ class LayoutCompareMetricsResponseDtoBuilder
     _$LayoutCompareMetricsResponseDto _$result;
     try {
       _$result = _$v ??
-          new _$LayoutCompareMetricsResponseDto._(
-              category: BuiltValueNullFieldError.checkNotNull(
-                  category, r'LayoutCompareMetricsResponseDto', 'category'),
-              ssimFloor: BuiltValueNullFieldError.checkNotNull(
-                  ssimFloor, r'LayoutCompareMetricsResponseDto', 'ssimFloor'),
-              pageCount: BuiltValueNullFieldError.checkNotNull(
-                  pageCount, r'LayoutCompareMetricsResponseDto', 'pageCount'),
-              pages: pages.build());
+          _$LayoutCompareMetricsResponseDto._(
+            category: BuiltValueNullFieldError.checkNotNull(
+                category, r'LayoutCompareMetricsResponseDto', 'category'),
+            ssimFloor: BuiltValueNullFieldError.checkNotNull(
+                ssimFloor, r'LayoutCompareMetricsResponseDto', 'ssimFloor'),
+            pageCount: BuiltValueNullFieldError.checkNotNull(
+                pageCount, r'LayoutCompareMetricsResponseDto', 'pageCount'),
+            pages: pages.build(),
+          );
     } catch (_) {
       late String _$failedField;
       try {
         _$failedField = 'pages';
         pages.build();
       } catch (e) {
-        throw new BuiltValueNestedFieldError(
+        throw BuiltValueNestedFieldError(
             r'LayoutCompareMetricsResponseDto', _$failedField, e.toString());
       }
       rethrow;

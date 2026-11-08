@@ -17,9 +17,9 @@ class PaddleOnlyExtractor(ExtractorEngine):
 
     def extract(self, content: bytes, mime_type: str) -> ExtractionResult:
         if mime_type == "application/pdf":
-            text, blocks = ocr_pdf_bytes(content)
+            text, blocks, _turns = ocr_pdf_bytes(content)
         elif mime_type.startswith("image/"):
-            text, blocks = ocr_image_bytes(content)
+            text, blocks, _turns = ocr_image_bytes(content)
         else:
             text, blocks = "", []
 

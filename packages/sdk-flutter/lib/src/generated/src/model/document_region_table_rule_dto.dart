@@ -15,6 +15,7 @@ part 'document_region_table_rule_dto.g.dart';
 /// * [axis] 
 /// * [ord] 
 /// * [pos] 
+/// * [line] - Line evidence; unknown until observed or set.
 @BuiltValue()
 abstract class DocumentRegionTableRuleDto implements Built<DocumentRegionTableRuleDto, DocumentRegionTableRuleDtoBuilder> {
   @BuiltValueField(wireName: r'axis')
@@ -26,6 +27,11 @@ abstract class DocumentRegionTableRuleDto implements Built<DocumentRegionTableRu
 
   @BuiltValueField(wireName: r'pos')
   num get pos;
+
+  /// Line evidence; unknown until observed or set.
+  @BuiltValueField(wireName: r'line')
+  DocumentRegionTableRuleDtoLineEnum get line;
+  // enum lineEnum {  unknown,  none,  thin,  thick,  double,  };
 
   DocumentRegionTableRuleDto._();
 
@@ -64,6 +70,11 @@ class _$DocumentRegionTableRuleDtoSerializer implements PrimitiveSerializer<Docu
     yield serializers.serialize(
       object.pos,
       specifiedType: const FullType(num),
+    );
+    yield r'line';
+    yield serializers.serialize(
+      object.line,
+      specifiedType: const FullType(DocumentRegionTableRuleDtoLineEnum),
     );
   }
 
@@ -109,6 +120,13 @@ class _$DocumentRegionTableRuleDtoSerializer implements PrimitiveSerializer<Docu
           ) as num;
           result.pos = valueDes;
           break;
+        case r'line':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(DocumentRegionTableRuleDtoLineEnum),
+          ) as DocumentRegionTableRuleDtoLineEnum;
+          result.line = valueDes;
+          break;
         default:
           unhandled.add(key);
           unhandled.add(value);
@@ -151,5 +169,31 @@ class DocumentRegionTableRuleDtoAxisEnum extends EnumClass {
 
   static BuiltSet<DocumentRegionTableRuleDtoAxisEnum> get values => _$documentRegionTableRuleDtoAxisEnumValues;
   static DocumentRegionTableRuleDtoAxisEnum valueOf(String name) => _$documentRegionTableRuleDtoAxisEnumValueOf(name);
+}
+
+class DocumentRegionTableRuleDtoLineEnum extends EnumClass {
+
+  /// Line evidence; unknown until observed or set.
+  @BuiltValueEnumConst(wireName: r'unknown')
+  static const DocumentRegionTableRuleDtoLineEnum unknown = _$documentRegionTableRuleDtoLineEnum_unknown;
+  /// Line evidence; unknown until observed or set.
+  @BuiltValueEnumConst(wireName: r'none')
+  static const DocumentRegionTableRuleDtoLineEnum none = _$documentRegionTableRuleDtoLineEnum_none;
+  /// Line evidence; unknown until observed or set.
+  @BuiltValueEnumConst(wireName: r'thin')
+  static const DocumentRegionTableRuleDtoLineEnum thin = _$documentRegionTableRuleDtoLineEnum_thin;
+  /// Line evidence; unknown until observed or set.
+  @BuiltValueEnumConst(wireName: r'thick')
+  static const DocumentRegionTableRuleDtoLineEnum thick = _$documentRegionTableRuleDtoLineEnum_thick;
+  /// Line evidence; unknown until observed or set.
+  @BuiltValueEnumConst(wireName: r'double')
+  static const DocumentRegionTableRuleDtoLineEnum double_ = _$documentRegionTableRuleDtoLineEnum_double_;
+
+  static Serializer<DocumentRegionTableRuleDtoLineEnum> get serializer => _$documentRegionTableRuleDtoLineEnumSerializer;
+
+  const DocumentRegionTableRuleDtoLineEnum._(String name): super(name);
+
+  static BuiltSet<DocumentRegionTableRuleDtoLineEnum> get values => _$documentRegionTableRuleDtoLineEnumValues;
+  static DocumentRegionTableRuleDtoLineEnum valueOf(String name) => _$documentRegionTableRuleDtoLineEnumValueOf(name);
 }
 

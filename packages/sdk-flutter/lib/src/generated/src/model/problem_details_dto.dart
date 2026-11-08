@@ -3,6 +3,7 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:built_collection/built_collection.dart';
 import 'package:built_value/built_value.dart';
 import 'package:built_value/serializer.dart';
 
@@ -17,6 +18,7 @@ part 'problem_details_dto.g.dart';
 /// * [code] 
 /// * [detail] 
 /// * [requestId] 
+/// * [invalidParams] - Request properties that failed validation, as dotted paths. Only set for VALIDATION_FAILED.
 @BuiltValue()
 abstract class ProblemDetailsDto implements Built<ProblemDetailsDto, ProblemDetailsDtoBuilder> {
   @BuiltValueField(wireName: r'type')
@@ -36,6 +38,10 @@ abstract class ProblemDetailsDto implements Built<ProblemDetailsDto, ProblemDeta
 
   @BuiltValueField(wireName: r'requestId')
   String get requestId;
+
+  /// Request properties that failed validation, as dotted paths. Only set for VALIDATION_FAILED.
+  @BuiltValueField(wireName: r'invalidParams')
+  BuiltList<String>? get invalidParams;
 
   ProblemDetailsDto._();
 
@@ -90,6 +96,13 @@ class _$ProblemDetailsDtoSerializer implements PrimitiveSerializer<ProblemDetail
       object.requestId,
       specifiedType: const FullType(String),
     );
+    if (object.invalidParams != null) {
+      yield r'invalidParams';
+      yield serializers.serialize(
+        object.invalidParams,
+        specifiedType: const FullType(BuiltList, [FullType(String)]),
+      );
+    }
   }
 
   @override
@@ -154,6 +167,13 @@ class _$ProblemDetailsDtoSerializer implements PrimitiveSerializer<ProblemDetail
             specifiedType: const FullType(String),
           ) as String;
           result.requestId = valueDes;
+          break;
+        case r'invalidParams':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(BuiltList, [FullType(String)]),
+          ) as BuiltList<String>;
+          result.invalidParams.replace(valueDes);
           break;
         default:
           unhandled.add(key);

@@ -144,6 +144,7 @@ class IntegratedPipelineResult:
     exact_fact_index: StageEnvelope[ExactFactIndexStageData]
     prebuilt_layout_ir: LayoutIrDocument | None = None
     preview_pdf: bytes | None = None
+    page_quarter_turns: tuple[int, ...] = ()
 
     def latency_report_ms(self) -> dict[str, float]:
         return {
@@ -186,6 +187,7 @@ class PipelineMutableState:
     prebuilt_layout_ir: LayoutIrDocument | None = None
     cached_layout_pdf: LayoutIrDocument | None = None
     preview_pdf: bytes | None = None
+    page_quarter_turns: tuple[int, ...] = ()
 
 
 @dataclass(frozen=True)

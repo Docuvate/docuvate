@@ -32,7 +32,7 @@ class _$LayoutComparePageResponseDto extends LayoutComparePageResponseDto {
 
   factory _$LayoutComparePageResponseDto(
           [void Function(LayoutComparePageResponseDtoBuilder)? updates]) =>
-      (new LayoutComparePageResponseDtoBuilder()..update(updates))._build();
+      (LayoutComparePageResponseDtoBuilder()..update(updates))._build();
 
   _$LayoutComparePageResponseDto._(
       {required this.pageNumber,
@@ -46,23 +46,7 @@ class _$LayoutComparePageResponseDto extends LayoutComparePageResponseDto {
       required this.reconstructionPngBase64,
       this.heatmapPngBase64,
       this.errorCode})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        pageNumber, r'LayoutComparePageResponseDto', 'pageNumber');
-    BuiltValueNullFieldError.checkNotNull(
-        ssimFloor, r'LayoutComparePageResponseDto', 'ssimFloor');
-    BuiltValueNullFieldError.checkNotNull(
-        pageReliable, r'LayoutComparePageResponseDto', 'pageReliable');
-    BuiltValueNullFieldError.checkNotNull(
-        widthPx, r'LayoutComparePageResponseDto', 'widthPx');
-    BuiltValueNullFieldError.checkNotNull(
-        heightPx, r'LayoutComparePageResponseDto', 'heightPx');
-    BuiltValueNullFieldError.checkNotNull(originalPngBase64,
-        r'LayoutComparePageResponseDto', 'originalPngBase64');
-    BuiltValueNullFieldError.checkNotNull(reconstructionPngBase64,
-        r'LayoutComparePageResponseDto', 'reconstructionPngBase64');
-  }
-
+      : super._();
   @override
   LayoutComparePageResponseDto rebuild(
           void Function(LayoutComparePageResponseDtoBuilder) updates) =>
@@ -70,7 +54,7 @@ class _$LayoutComparePageResponseDto extends LayoutComparePageResponseDto {
 
   @override
   LayoutComparePageResponseDtoBuilder toBuilder() =>
-      new LayoutComparePageResponseDtoBuilder()..replace(this);
+      LayoutComparePageResponseDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -203,7 +187,6 @@ class LayoutComparePageResponseDtoBuilder
 
   @override
   void replace(LayoutComparePageResponseDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$LayoutComparePageResponseDto;
   }
 
@@ -217,27 +200,30 @@ class LayoutComparePageResponseDtoBuilder
 
   _$LayoutComparePageResponseDto _build() {
     final _$result = _$v ??
-        new _$LayoutComparePageResponseDto._(
-            pageNumber: BuiltValueNullFieldError.checkNotNull(
-                pageNumber, r'LayoutComparePageResponseDto', 'pageNumber'),
-            ssim: ssim,
-            inkDeviation: inkDeviation,
-            ssimFloor: BuiltValueNullFieldError.checkNotNull(
-                ssimFloor, r'LayoutComparePageResponseDto', 'ssimFloor'),
-            pageReliable: BuiltValueNullFieldError.checkNotNull(
-                pageReliable, r'LayoutComparePageResponseDto', 'pageReliable'),
-            widthPx: BuiltValueNullFieldError.checkNotNull(
-                widthPx, r'LayoutComparePageResponseDto', 'widthPx'),
-            heightPx: BuiltValueNullFieldError.checkNotNull(
-                heightPx, r'LayoutComparePageResponseDto', 'heightPx'),
-            originalPngBase64: BuiltValueNullFieldError.checkNotNull(
-                originalPngBase64, r'LayoutComparePageResponseDto', 'originalPngBase64'),
-            reconstructionPngBase64: BuiltValueNullFieldError.checkNotNull(
-                reconstructionPngBase64,
-                r'LayoutComparePageResponseDto',
-                'reconstructionPngBase64'),
-            heatmapPngBase64: heatmapPngBase64,
-            errorCode: errorCode);
+        _$LayoutComparePageResponseDto._(
+          pageNumber: BuiltValueNullFieldError.checkNotNull(
+              pageNumber, r'LayoutComparePageResponseDto', 'pageNumber'),
+          ssim: ssim,
+          inkDeviation: inkDeviation,
+          ssimFloor: BuiltValueNullFieldError.checkNotNull(
+              ssimFloor, r'LayoutComparePageResponseDto', 'ssimFloor'),
+          pageReliable: BuiltValueNullFieldError.checkNotNull(
+              pageReliable, r'LayoutComparePageResponseDto', 'pageReliable'),
+          widthPx: BuiltValueNullFieldError.checkNotNull(
+              widthPx, r'LayoutComparePageResponseDto', 'widthPx'),
+          heightPx: BuiltValueNullFieldError.checkNotNull(
+              heightPx, r'LayoutComparePageResponseDto', 'heightPx'),
+          originalPngBase64: BuiltValueNullFieldError.checkNotNull(
+              originalPngBase64,
+              r'LayoutComparePageResponseDto',
+              'originalPngBase64'),
+          reconstructionPngBase64: BuiltValueNullFieldError.checkNotNull(
+              reconstructionPngBase64,
+              r'LayoutComparePageResponseDto',
+              'reconstructionPngBase64'),
+          heatmapPngBase64: heatmapPngBase64,
+          errorCode: errorCode,
+        );
     replace(_$result);
     return _$result;
   }

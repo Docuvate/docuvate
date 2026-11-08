@@ -87,7 +87,7 @@ export type AdminUserResponseDto = {
 
 export type ApplyFieldCorrectionRequestDto = {
     id: string;
-    op: 'create' | 'reanchor' | 'edit_value' | 'remove';
+    op: 'create' | 'reanchor' | 'edit_value' | 'remove' | 'reject_suggestion';
     fieldKey: string;
     page?: number;
     shape?: 'rect' | 'polygon';
@@ -3198,6 +3198,32 @@ export type ConfirmDocumentFieldResponses = {
 
 export type ConfirmDocumentFieldResponse = ConfirmDocumentFieldResponses[keyof ConfirmDocumentFieldResponses];
 
+export type ListDocumentFieldSuggestionDecisionsData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/documents/{id}/field-suggestion-decisions';
+};
+
+export type ListDocumentFieldSuggestionDecisionsErrors = {
+    401: ProblemDetailsDto;
+    403: ProblemDetailsDto;
+    404: ProblemDetailsDto;
+    422: ProblemDetailsDto;
+};
+
+export type ListDocumentFieldSuggestionDecisionsError = ListDocumentFieldSuggestionDecisionsErrors[keyof ListDocumentFieldSuggestionDecisionsErrors];
+
+export type ListDocumentFieldSuggestionDecisionsResponses = {
+    200: {
+        [key: string]: unknown;
+    };
+};
+
+export type ListDocumentFieldSuggestionDecisionsResponse = ListDocumentFieldSuggestionDecisionsResponses[keyof ListDocumentFieldSuggestionDecisionsResponses];
+
 export type GetDocumentLayoutCompareMetricsData = {
     body?: never;
     path: {
@@ -3375,6 +3401,59 @@ export type ListDocumentLayoutTokensResponses = {
 };
 
 export type ListDocumentLayoutTokensResponse = ListDocumentLayoutTokensResponses[keyof ListDocumentLayoutTokensResponses];
+
+export type ListDocumentPageTransformsData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/documents/{id}/page-transforms';
+};
+
+export type ListDocumentPageTransformsErrors = {
+    401: ProblemDetailsDto;
+    403: ProblemDetailsDto;
+    404: ProblemDetailsDto;
+    422: ProblemDetailsDto;
+};
+
+export type ListDocumentPageTransformsError = ListDocumentPageTransformsErrors[keyof ListDocumentPageTransformsErrors];
+
+export type ListDocumentPageTransformsResponses = {
+    200: {
+        [key: string]: unknown;
+    };
+};
+
+export type ListDocumentPageTransformsResponse = ListDocumentPageTransformsResponses[keyof ListDocumentPageTransformsResponses];
+
+export type ApplyDocumentPageTransformData = {
+    body?: never;
+    path: {
+        id: string;
+        page: string;
+    };
+    query?: never;
+    url: '/documents/{id}/pages/{page}/transform';
+};
+
+export type ApplyDocumentPageTransformErrors = {
+    401: ProblemDetailsDto;
+    403: ProblemDetailsDto;
+    404: ProblemDetailsDto;
+    422: ProblemDetailsDto;
+};
+
+export type ApplyDocumentPageTransformError = ApplyDocumentPageTransformErrors[keyof ApplyDocumentPageTransformErrors];
+
+export type ApplyDocumentPageTransformResponses = {
+    201: {
+        [key: string]: unknown;
+    };
+};
+
+export type ApplyDocumentPageTransformResponse = ApplyDocumentPageTransformResponses[keyof ApplyDocumentPageTransformResponses];
 
 export type DocumentPreviewData = {
     body?: never;

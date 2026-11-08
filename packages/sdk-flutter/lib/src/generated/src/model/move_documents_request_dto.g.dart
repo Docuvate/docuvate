@@ -14,14 +14,10 @@ class _$MoveDocumentsRequestDto extends MoveDocumentsRequestDto {
 
   factory _$MoveDocumentsRequestDto(
           [void Function(MoveDocumentsRequestDtoBuilder)? updates]) =>
-      (new MoveDocumentsRequestDtoBuilder()..update(updates))._build();
+      (MoveDocumentsRequestDtoBuilder()..update(updates))._build();
 
   _$MoveDocumentsRequestDto._({required this.documentIds, this.folderId})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        documentIds, r'MoveDocumentsRequestDto', 'documentIds');
-  }
-
+      : super._();
   @override
   MoveDocumentsRequestDto rebuild(
           void Function(MoveDocumentsRequestDtoBuilder) updates) =>
@@ -29,7 +25,7 @@ class _$MoveDocumentsRequestDto extends MoveDocumentsRequestDto {
 
   @override
   MoveDocumentsRequestDtoBuilder toBuilder() =>
-      new MoveDocumentsRequestDtoBuilder()..replace(this);
+      MoveDocumentsRequestDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -64,7 +60,7 @@ class MoveDocumentsRequestDtoBuilder
 
   ListBuilder<String>? _documentIds;
   ListBuilder<String> get documentIds =>
-      _$this._documentIds ??= new ListBuilder<String>();
+      _$this._documentIds ??= ListBuilder<String>();
   set documentIds(ListBuilder<String>? documentIds) =>
       _$this._documentIds = documentIds;
 
@@ -88,7 +84,6 @@ class MoveDocumentsRequestDtoBuilder
 
   @override
   void replace(MoveDocumentsRequestDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$MoveDocumentsRequestDto;
   }
 
@@ -104,15 +99,17 @@ class MoveDocumentsRequestDtoBuilder
     _$MoveDocumentsRequestDto _$result;
     try {
       _$result = _$v ??
-          new _$MoveDocumentsRequestDto._(
-              documentIds: documentIds.build(), folderId: folderId);
+          _$MoveDocumentsRequestDto._(
+            documentIds: documentIds.build(),
+            folderId: folderId,
+          );
     } catch (_) {
       late String _$failedField;
       try {
         _$failedField = 'documentIds';
         documentIds.build();
       } catch (e) {
-        throw new BuiltValueNestedFieldError(
+        throw BuiltValueNestedFieldError(
             r'MoveDocumentsRequestDto', _$failedField, e.toString());
       }
       rethrow;

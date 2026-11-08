@@ -23,8 +23,7 @@ class _$UpdateAdminOidcProviderRequestDto
 
   factory _$UpdateAdminOidcProviderRequestDto(
           [void Function(UpdateAdminOidcProviderRequestDtoBuilder)? updates]) =>
-      (new UpdateAdminOidcProviderRequestDtoBuilder()..update(updates))
-          ._build();
+      (UpdateAdminOidcProviderRequestDtoBuilder()..update(updates))._build();
 
   _$UpdateAdminOidcProviderRequestDto._(
       {required this.displayName,
@@ -33,19 +32,7 @@ class _$UpdateAdminOidcProviderRequestDto
       this.clientSecret,
       required this.scopes,
       required this.enabled})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        displayName, r'UpdateAdminOidcProviderRequestDto', 'displayName');
-    BuiltValueNullFieldError.checkNotNull(
-        issuer, r'UpdateAdminOidcProviderRequestDto', 'issuer');
-    BuiltValueNullFieldError.checkNotNull(
-        clientId, r'UpdateAdminOidcProviderRequestDto', 'clientId');
-    BuiltValueNullFieldError.checkNotNull(
-        scopes, r'UpdateAdminOidcProviderRequestDto', 'scopes');
-    BuiltValueNullFieldError.checkNotNull(
-        enabled, r'UpdateAdminOidcProviderRequestDto', 'enabled');
-  }
-
+      : super._();
   @override
   UpdateAdminOidcProviderRequestDto rebuild(
           void Function(UpdateAdminOidcProviderRequestDtoBuilder) updates) =>
@@ -53,7 +40,7 @@ class _$UpdateAdminOidcProviderRequestDto
 
   @override
   UpdateAdminOidcProviderRequestDtoBuilder toBuilder() =>
-      new UpdateAdminOidcProviderRequestDtoBuilder()..replace(this);
+      UpdateAdminOidcProviderRequestDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -143,7 +130,6 @@ class UpdateAdminOidcProviderRequestDtoBuilder
 
   @override
   void replace(UpdateAdminOidcProviderRequestDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$UpdateAdminOidcProviderRequestDto;
   }
 
@@ -158,18 +144,19 @@ class UpdateAdminOidcProviderRequestDtoBuilder
 
   _$UpdateAdminOidcProviderRequestDto _build() {
     final _$result = _$v ??
-        new _$UpdateAdminOidcProviderRequestDto._(
-            displayName: BuiltValueNullFieldError.checkNotNull(displayName,
-                r'UpdateAdminOidcProviderRequestDto', 'displayName'),
-            issuer: BuiltValueNullFieldError.checkNotNull(
-                issuer, r'UpdateAdminOidcProviderRequestDto', 'issuer'),
-            clientId: BuiltValueNullFieldError.checkNotNull(
-                clientId, r'UpdateAdminOidcProviderRequestDto', 'clientId'),
-            clientSecret: clientSecret,
-            scopes: BuiltValueNullFieldError.checkNotNull(
-                scopes, r'UpdateAdminOidcProviderRequestDto', 'scopes'),
-            enabled: BuiltValueNullFieldError.checkNotNull(
-                enabled, r'UpdateAdminOidcProviderRequestDto', 'enabled'));
+        _$UpdateAdminOidcProviderRequestDto._(
+          displayName: BuiltValueNullFieldError.checkNotNull(
+              displayName, r'UpdateAdminOidcProviderRequestDto', 'displayName'),
+          issuer: BuiltValueNullFieldError.checkNotNull(
+              issuer, r'UpdateAdminOidcProviderRequestDto', 'issuer'),
+          clientId: BuiltValueNullFieldError.checkNotNull(
+              clientId, r'UpdateAdminOidcProviderRequestDto', 'clientId'),
+          clientSecret: clientSecret,
+          scopes: BuiltValueNullFieldError.checkNotNull(
+              scopes, r'UpdateAdminOidcProviderRequestDto', 'scopes'),
+          enabled: BuiltValueNullFieldError.checkNotNull(
+              enabled, r'UpdateAdminOidcProviderRequestDto', 'enabled'),
+        );
     replace(_$result);
     return _$result;
   }

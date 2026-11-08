@@ -14,15 +14,10 @@ class _$DocumentReviewQueueSummaryDtoClass
   factory _$DocumentReviewQueueSummaryDtoClass(
           [void Function(DocumentReviewQueueSummaryDtoClassBuilder)?
               updates]) =>
-      (new DocumentReviewQueueSummaryDtoClassBuilder()..update(updates))
-          ._build();
+      (DocumentReviewQueueSummaryDtoClassBuilder()..update(updates))._build();
 
   _$DocumentReviewQueueSummaryDtoClass._({required this.pendingCount})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        pendingCount, r'DocumentReviewQueueSummaryDtoClass', 'pendingCount');
-  }
-
+      : super._();
   @override
   DocumentReviewQueueSummaryDtoClass rebuild(
           void Function(DocumentReviewQueueSummaryDtoClassBuilder) updates) =>
@@ -30,7 +25,7 @@ class _$DocumentReviewQueueSummaryDtoClass
 
   @override
   DocumentReviewQueueSummaryDtoClassBuilder toBuilder() =>
-      new DocumentReviewQueueSummaryDtoClassBuilder()..replace(this);
+      DocumentReviewQueueSummaryDtoClassBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -80,7 +75,6 @@ class DocumentReviewQueueSummaryDtoClassBuilder
 
   @override
   void replace(DocumentReviewQueueSummaryDtoClass other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$DocumentReviewQueueSummaryDtoClass;
   }
 
@@ -95,9 +89,10 @@ class DocumentReviewQueueSummaryDtoClassBuilder
 
   _$DocumentReviewQueueSummaryDtoClass _build() {
     final _$result = _$v ??
-        new _$DocumentReviewQueueSummaryDtoClass._(
-            pendingCount: BuiltValueNullFieldError.checkNotNull(pendingCount,
-                r'DocumentReviewQueueSummaryDtoClass', 'pendingCount'));
+        _$DocumentReviewQueueSummaryDtoClass._(
+          pendingCount: BuiltValueNullFieldError.checkNotNull(pendingCount,
+              r'DocumentReviewQueueSummaryDtoClass', 'pendingCount'),
+        );
     replace(_$result);
     return _$result;
   }

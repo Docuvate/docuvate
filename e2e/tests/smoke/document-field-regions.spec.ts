@@ -29,6 +29,38 @@ import {
 import { smokeFixtureStoragePath } from '../../helpers/smoke-fixture-auth';
 import { findReadyLayoutDocument } from '../../helpers/wait-for-layout-ir';
 
+/** Region tools live in the Layout ribbon row. Builds without that row already show them. */
+async function showLayoutSelectionTools(page: Page): Promise<void> {
+  const layout = page.getByTestId('structuring-primary-layout');
+  if ((await layout.count()) === 0) return;
+  await layout.click();
+  await expect(layout).toHaveAttribute('aria-pressed', 'true');
+}
+
+/**
+ * Press Area or Mark text, then wait until that tool is the one the page will draw with.
+ * The rectangle and text regressions both start from this armed tool.
+ */
+async function armSelectionTool(
+  page: Page,
+  name: RegExp,
+  tool: 'rect' | 'text'
+): Promise<void> {
+  await showLayoutSelectionTools(page);
+  const tools = page.getByTestId('document-selection-tools');
+  const radio =
+    (await tools.count()) > 0
+      ? tools.getByRole('radio', { name })
+      : page.getByRole('radio', { name });
+  await radio.click();
+  await expect(radio).toHaveAttribute('aria-checked', 'true');
+  const stage = page.getByTestId('layout-viewer-stage');
+  if ((await stage.count()) === 0) return;
+  const marksTool = await stage.evaluate((node) => node.hasAttribute('data-selection-tool'));
+  if (!marksTool) return;
+  await expect(stage).toHaveAttribute('data-selection-tool', tool);
+}
+
 const apiBase = process.env['E2E_API_URL'] ?? 'http://localhost:3001';
 const webOrigin = process.env['E2E_WEB_URL'] ?? 'http://localhost:5173';
 
@@ -302,7 +334,7 @@ test.describe('document field regions', () => {
       /^(?!0$)\d+$/,
       { timeout: 60_000 }
     );
-    await page.getByRole('radio', { name: /^(Bereich|Area)/ }).click();
+    await armSelectionTool(page, /^(Bereich|Area)/, 'rect');
     await startRectangle(page);
     await expect(page.getByTestId('document-selection-rect')).toBeVisible({ timeout: 15_000 });
     await captureLoadedScreenshot(
@@ -412,7 +444,7 @@ test.describe('document field regions', () => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await applyGermanLocale(page);
     await openLayoutDocumentPage(page, layoutDocId);
-    await page.getByRole('radio', { name: /^(Text markieren|Mark text)/ }).click();
+    await armSelectionTool(page, /^(Text markieren|Mark text)/, 'text');
     const word = page.locator('.pdf-page-wrap .textLayer span').first();
     await expect(word).toBeVisible({ timeout: 60_000 });
     await word.evaluate((node) => {

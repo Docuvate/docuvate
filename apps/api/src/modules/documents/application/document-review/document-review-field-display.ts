@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { DocumentReviewFieldSuggestionDto, ExtractedField } from '@docuvate/contracts';
 import {
+  normalizeSuggestionDecisionValue,
   parseSuggestionStorageKey,
   partitionRecognizedAndHeuristicSuggestions,
   semanticFieldKey,
@@ -93,4 +94,21 @@ export function isoDateFromFieldValue(raw: string): string | null {
     return `${yearPart}-${monthPart.padStart(2, '0')}-01`;
   }
   return null;
+}
+
+
+/** Drop field suggestions whose field+normalized value was explicitly rejected on this document. */
+export function filterRejectedReviewFieldSuggestions<T extends { key: string; value: string }>(
+  suggestions: readonly T[],
+  rejects: readonly { fieldKey: string; valueNormalized: string }[]
+): T[] {
+  if (rejects.length === 0) {
+    return [...suggestions];
+  }
+  const banned = new Set(
+    rejects.map((item) => `${item.fieldKey}\0${item.valueNormalized}`)
+  );
+  return suggestions.filter(
+    (s) => !banned.has(`${s.key}\0${normalizeSuggestionDecisionValue(s.value)}`)
+  );
 }

@@ -17,8 +17,8 @@ const fixturePdf = path.join(process.cwd(), 'fixtures/synthetic-upload.pdf');
 
 const SUGGESTED_VALUE = 'Muster Handels GmbH';
 const CORRECTED_VALUE = 'Beispiel Lieferant AG';
-const WIZARD_CONTAINERS = ['.review-wizard', '.review-wizard-card', '.review-wizard-actions'];
-const MAX_SKIPS = 40;
+const QUEUE_CONTAINERS = ['.review-queue-page', '.review-next-card'];
+const WORKBENCH_CONTAINERS = ['.document-detail-page', '.review-workbench'];
 
 test.use({ storageState: smokeFixtureStoragePath() });
 
@@ -111,22 +111,26 @@ async function queuedFieldSuggestionValues(
   return values;
 }
 
-async function openWizardAt(page: Page, title: string): Promise<void> {
+async function openSuggestionInWorkbench(page: Page, docId: string): Promise<void> {
   await page.addInitScript(() => {
     window.localStorage.setItem('docuvate.locale', 'de');
   });
   await page.goto('/review', { waitUntil: 'domcontentloaded' });
   await applyDocuvateLocale(page, 'de');
-  const docTitle = page.locator('.review-wizard-doc-title');
-  await expect(docTitle).toBeVisible({ timeout: 60_000 });
-  for (let skips = 0; skips < MAX_SKIPS; skips += 1) {
-    const onTarget =
-      (await docTitle.textContent()) === title &&
-      (await page.locator('.review-wizard-field-name').count()) > 0;
-    if (onTarget) return;
-    await page.getByRole('button', { name: 'Überspringen', exact: true }).click();
-  }
-  throw new Error(`review wizard never reached "${title}"`);
+  await expect(page.getByTestId('review-next-work')).toBeVisible({ timeout: 60_000 });
+  await expect(page.locator('.review-wizard')).toHaveCount(0);
+  const openReview = page.locator(
+    `a[data-testid="review-open-structuring"][href*="${docId}"]`
+  );
+  const itemLink = page.locator(`a.review-next-item-link[href*="${docId}"]`);
+  await expect(openReview).toBeVisible({ timeout: 60_000 });
+  await expect(itemLink).toBeVisible({ timeout: 60_000 });
+  await assertNoHorizontalOverflow(page, QUEUE_CONTAINERS);
+  await openReview.click();
+  await expect(page).toHaveURL(new RegExp(`/documents/${docId}\\?review=1`));
+  await expect(page.locator('.review-workbench-row', { hasText: SUGGESTED_VALUE })).toBeVisible({
+    timeout: 60_000,
+  });
 }
 
 test.describe('review wizard field correction', () => {
@@ -153,16 +157,16 @@ test.describe('review wizard field correction', () => {
         .toEqual([SUGGESTED_VALUE]);
 
       await page.setViewportSize({ width, height: 812 });
-      await openWizardAt(page, title);
-      await expect(page.locator('.review-wizard-value-xl')).toHaveText(SUGGESTED_VALUE);
-      await assertNoHorizontalOverflow(page, WIZARD_CONTAINERS);
+      await openSuggestionInWorkbench(page, docId);
+      const row = page.locator('.review-workbench-row', { hasText: SUGGESTED_VALUE });
+      await assertNoHorizontalOverflow(page, WORKBENCH_CONTAINERS);
 
-      await page.getByRole('button', { name: 'Korrigieren', exact: true }).click();
-      const input = page.locator('.review-wizard-correction-label input');
+      await row.getByRole('button', { name: /korrigieren/i }).click();
+      const input = page.getByRole('textbox', { name: /Neuer Wert für/ });
       await expect(input).toHaveValue(SUGGESTED_VALUE);
       await input.fill(CORRECTED_VALUE);
-      await assertNoHorizontalOverflow(page, WIZARD_CONTAINERS);
-      await page.getByRole('button', { name: 'Korrektur speichern', exact: true }).click();
+      await assertNoHorizontalOverflow(page, WORKBENCH_CONTAINERS);
+      await row.getByRole('button', { name: 'Speichern', exact: true }).click();
 
       await expect
         .poll(async () => (await storedFields(request, docId)).find((f) => f.key === 'vendor')?.value, {
@@ -176,9 +180,10 @@ test.describe('review wizard field correction', () => {
       await expect
         .poll(() => queuedFieldSuggestionValues(request, docId), { timeout: 30_000 })
         .toEqual([]);
-      await expect(page.locator('.review-wizard-value-xl').filter({ hasText: CORRECTED_VALUE })).toHaveCount(0);
-      await expect(page.locator('.review-wizard-value-xl').filter({ hasText: SUGGESTED_VALUE })).toHaveCount(0);
-      await assertNoHorizontalOverflow(page, ['.review-page', ...WIZARD_CONTAINERS]);
+      await expect(
+        page.locator('.review-workbench-row[data-row-state="suggested"]', { hasText: SUGGESTED_VALUE })
+      ).toHaveCount(0);
+      await assertNoHorizontalOverflow(page, WORKBENCH_CONTAINERS);
     });
   }
 });

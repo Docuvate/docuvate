@@ -16,19 +16,11 @@ class _$DocumentRegionTableCellDto extends DocumentRegionTableCellDto {
 
   factory _$DocumentRegionTableCellDto(
           [void Function(DocumentRegionTableCellDtoBuilder)? updates]) =>
-      (new DocumentRegionTableCellDtoBuilder()..update(updates))._build();
+      (DocumentRegionTableCellDtoBuilder()..update(updates))._build();
 
   _$DocumentRegionTableCellDto._(
       {required this.row, required this.col, required this.text})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        row, r'DocumentRegionTableCellDto', 'row');
-    BuiltValueNullFieldError.checkNotNull(
-        col, r'DocumentRegionTableCellDto', 'col');
-    BuiltValueNullFieldError.checkNotNull(
-        text, r'DocumentRegionTableCellDto', 'text');
-  }
-
+      : super._();
   @override
   DocumentRegionTableCellDto rebuild(
           void Function(DocumentRegionTableCellDtoBuilder) updates) =>
@@ -36,7 +28,7 @@ class _$DocumentRegionTableCellDto extends DocumentRegionTableCellDto {
 
   @override
   DocumentRegionTableCellDtoBuilder toBuilder() =>
-      new DocumentRegionTableCellDtoBuilder()..replace(this);
+      DocumentRegionTableCellDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -101,7 +93,6 @@ class DocumentRegionTableCellDtoBuilder
 
   @override
   void replace(DocumentRegionTableCellDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$DocumentRegionTableCellDto;
   }
 
@@ -115,13 +106,14 @@ class DocumentRegionTableCellDtoBuilder
 
   _$DocumentRegionTableCellDto _build() {
     final _$result = _$v ??
-        new _$DocumentRegionTableCellDto._(
-            row: BuiltValueNullFieldError.checkNotNull(
-                row, r'DocumentRegionTableCellDto', 'row'),
-            col: BuiltValueNullFieldError.checkNotNull(
-                col, r'DocumentRegionTableCellDto', 'col'),
-            text: BuiltValueNullFieldError.checkNotNull(
-                text, r'DocumentRegionTableCellDto', 'text'));
+        _$DocumentRegionTableCellDto._(
+          row: BuiltValueNullFieldError.checkNotNull(
+              row, r'DocumentRegionTableCellDto', 'row'),
+          col: BuiltValueNullFieldError.checkNotNull(
+              col, r'DocumentRegionTableCellDto', 'col'),
+          text: BuiltValueNullFieldError.checkNotNull(
+              text, r'DocumentRegionTableCellDto', 'text'),
+        );
     replace(_$result);
     return _$result;
   }

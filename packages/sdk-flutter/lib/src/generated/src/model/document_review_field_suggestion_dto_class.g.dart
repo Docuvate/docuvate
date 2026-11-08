@@ -20,7 +20,7 @@ class _$DocumentReviewFieldSuggestionDtoClass
   factory _$DocumentReviewFieldSuggestionDtoClass(
           [void Function(DocumentReviewFieldSuggestionDtoClassBuilder)?
               updates]) =>
-      (new DocumentReviewFieldSuggestionDtoClassBuilder()..update(updates))
+      (DocumentReviewFieldSuggestionDtoClassBuilder()..update(updates))
           ._build();
 
   _$DocumentReviewFieldSuggestionDtoClass._(
@@ -28,15 +28,7 @@ class _$DocumentReviewFieldSuggestionDtoClass
       required this.displayLabel,
       required this.value,
       this.confidence})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        key, r'DocumentReviewFieldSuggestionDtoClass', 'key');
-    BuiltValueNullFieldError.checkNotNull(
-        displayLabel, r'DocumentReviewFieldSuggestionDtoClass', 'displayLabel');
-    BuiltValueNullFieldError.checkNotNull(
-        value, r'DocumentReviewFieldSuggestionDtoClass', 'value');
-  }
-
+      : super._();
   @override
   DocumentReviewFieldSuggestionDtoClass rebuild(
           void Function(DocumentReviewFieldSuggestionDtoClassBuilder)
@@ -45,7 +37,7 @@ class _$DocumentReviewFieldSuggestionDtoClass
 
   @override
   DocumentReviewFieldSuggestionDtoClassBuilder toBuilder() =>
-      new DocumentReviewFieldSuggestionDtoClassBuilder()..replace(this);
+      DocumentReviewFieldSuggestionDtoClassBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -120,7 +112,6 @@ class DocumentReviewFieldSuggestionDtoClassBuilder
 
   @override
   void replace(DocumentReviewFieldSuggestionDtoClass other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$DocumentReviewFieldSuggestionDtoClass;
   }
 
@@ -135,14 +126,15 @@ class DocumentReviewFieldSuggestionDtoClassBuilder
 
   _$DocumentReviewFieldSuggestionDtoClass _build() {
     final _$result = _$v ??
-        new _$DocumentReviewFieldSuggestionDtoClass._(
-            key: BuiltValueNullFieldError.checkNotNull(
-                key, r'DocumentReviewFieldSuggestionDtoClass', 'key'),
-            displayLabel: BuiltValueNullFieldError.checkNotNull(displayLabel,
-                r'DocumentReviewFieldSuggestionDtoClass', 'displayLabel'),
-            value: BuiltValueNullFieldError.checkNotNull(
-                value, r'DocumentReviewFieldSuggestionDtoClass', 'value'),
-            confidence: confidence);
+        _$DocumentReviewFieldSuggestionDtoClass._(
+          key: BuiltValueNullFieldError.checkNotNull(
+              key, r'DocumentReviewFieldSuggestionDtoClass', 'key'),
+          displayLabel: BuiltValueNullFieldError.checkNotNull(displayLabel,
+              r'DocumentReviewFieldSuggestionDtoClass', 'displayLabel'),
+          value: BuiltValueNullFieldError.checkNotNull(
+              value, r'DocumentReviewFieldSuggestionDtoClass', 'value'),
+          confidence: confidence,
+        );
     replace(_$result);
     return _$result;
   }

@@ -79,6 +79,7 @@ interface MenuTriggerProps {
   /** Tooltip, e.g. when the visible label collapses to an icon. */
   title?: string;
   disabled?: boolean;
+  'data-testid'?: string;
 }
 
 export function MenuTrigger({
@@ -87,6 +88,7 @@ export function MenuTrigger({
   'aria-label': ariaLabel,
   title,
   disabled = false,
+  'data-testid': testId,
 }: MenuTriggerProps) {
   const { open, setOpen, menuId, triggerRef } = useMenuContext();
 
@@ -101,6 +103,7 @@ export function MenuTrigger({
       aria-label={ariaLabel}
       title={title}
       disabled={disabled}
+      data-testid={testId}
       onClick={() => {
         setOpen(!open);
       }}
@@ -145,7 +148,9 @@ export function MenuContent({
       const target = event.target;
       if (
         target instanceof Element &&
-        target.closest('[role="menuitem"], [role="menuitemcheckbox"], [role="menuitemradio"]')
+        target.closest(
+          '[role="menuitem"], [role="menuitemcheckbox"], [role="menuitemradio"], [role="option"]'
+        )
       ) {
         // Close after React has run the item's own click handler.
         window.setTimeout(() => {

@@ -18,12 +18,12 @@ DocumentRegionDtoShapeEnum _$documentRegionDtoShapeEnumValueOf(String name) {
     case 'polygon':
       return _$documentRegionDtoShapeEnum_polygon;
     default:
-      throw new ArgumentError(name);
+      throw ArgumentError(name);
   }
 }
 
 final BuiltSet<DocumentRegionDtoShapeEnum> _$documentRegionDtoShapeEnumValues =
-    new BuiltSet<DocumentRegionDtoShapeEnum>(const <DocumentRegionDtoShapeEnum>[
+    BuiltSet<DocumentRegionDtoShapeEnum>(const <DocumentRegionDtoShapeEnum>[
   _$documentRegionDtoShapeEnum_rect,
   _$documentRegionDtoShapeEnum_polygon,
 ]);
@@ -48,12 +48,12 @@ DocumentRegionDtoRoleEnum _$documentRegionDtoRoleEnumValueOf(String name) {
     case 'ignore':
       return _$documentRegionDtoRoleEnum_ignore;
     default:
-      throw new ArgumentError(name);
+      throw ArgumentError(name);
   }
 }
 
 final BuiltSet<DocumentRegionDtoRoleEnum> _$documentRegionDtoRoleEnumValues =
-    new BuiltSet<DocumentRegionDtoRoleEnum>(const <DocumentRegionDtoRoleEnum>[
+    BuiltSet<DocumentRegionDtoRoleEnum>(const <DocumentRegionDtoRoleEnum>[
   _$documentRegionDtoRoleEnum_field,
   _$documentRegionDtoRoleEnum_table,
   _$documentRegionDtoRoleEnum_block,
@@ -61,9 +61,9 @@ final BuiltSet<DocumentRegionDtoRoleEnum> _$documentRegionDtoRoleEnumValues =
 ]);
 
 Serializer<DocumentRegionDtoShapeEnum> _$documentRegionDtoShapeEnumSerializer =
-    new _$DocumentRegionDtoShapeEnumSerializer();
+    _$DocumentRegionDtoShapeEnumSerializer();
 Serializer<DocumentRegionDtoRoleEnum> _$documentRegionDtoRoleEnumSerializer =
-    new _$DocumentRegionDtoRoleEnumSerializer();
+    _$DocumentRegionDtoRoleEnumSerializer();
 
 class _$DocumentRegionDtoShapeEnumSerializer
     implements PrimitiveSerializer<DocumentRegionDtoShapeEnum> {
@@ -161,7 +161,7 @@ class _$DocumentRegionDto extends DocumentRegionDto {
 
   factory _$DocumentRegionDto(
           [void Function(DocumentRegionDtoBuilder)? updates]) =>
-      (new DocumentRegionDtoBuilder()..update(updates))._build();
+      (DocumentRegionDtoBuilder()..update(updates))._build();
 
   _$DocumentRegionDto._(
       {required this.id,
@@ -179,34 +179,14 @@ class _$DocumentRegionDto extends DocumentRegionDto {
       this.field,
       this.table,
       required this.createdAt})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(id, r'DocumentRegionDto', 'id');
-    BuiltValueNullFieldError.checkNotNull(
-        documentId, r'DocumentRegionDto', 'documentId');
-    BuiltValueNullFieldError.checkNotNull(page, r'DocumentRegionDto', 'page');
-    BuiltValueNullFieldError.checkNotNull(shape, r'DocumentRegionDto', 'shape');
-    BuiltValueNullFieldError.checkNotNull(role, r'DocumentRegionDto', 'role');
-    BuiltValueNullFieldError.checkNotNull(x0, r'DocumentRegionDto', 'x0');
-    BuiltValueNullFieldError.checkNotNull(y0, r'DocumentRegionDto', 'y0');
-    BuiltValueNullFieldError.checkNotNull(x1, r'DocumentRegionDto', 'x1');
-    BuiltValueNullFieldError.checkNotNull(y1, r'DocumentRegionDto', 'y1');
-    BuiltValueNullFieldError.checkNotNull(
-        irSha256, r'DocumentRegionDto', 'irSha256');
-    BuiltValueNullFieldError.checkNotNull(
-        needsReview, r'DocumentRegionDto', 'needsReview');
-    BuiltValueNullFieldError.checkNotNull(
-        blockIndexes, r'DocumentRegionDto', 'blockIndexes');
-    BuiltValueNullFieldError.checkNotNull(
-        createdAt, r'DocumentRegionDto', 'createdAt');
-  }
-
+      : super._();
   @override
   DocumentRegionDto rebuild(void Function(DocumentRegionDtoBuilder) updates) =>
       (toBuilder()..update(updates)).build();
 
   @override
   DocumentRegionDtoBuilder toBuilder() =>
-      new DocumentRegionDtoBuilder()..replace(this);
+      DocumentRegionDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -323,18 +303,18 @@ class DocumentRegionDtoBuilder
 
   ListBuilder<num>? _blockIndexes;
   ListBuilder<num> get blockIndexes =>
-      _$this._blockIndexes ??= new ListBuilder<num>();
+      _$this._blockIndexes ??= ListBuilder<num>();
   set blockIndexes(ListBuilder<num>? blockIndexes) =>
       _$this._blockIndexes = blockIndexes;
 
   DocumentRegionFieldDtoBuilder? _field;
   DocumentRegionFieldDtoBuilder get field =>
-      _$this._field ??= new DocumentRegionFieldDtoBuilder();
+      _$this._field ??= DocumentRegionFieldDtoBuilder();
   set field(DocumentRegionFieldDtoBuilder? field) => _$this._field = field;
 
   DocumentRegionTableDtoBuilder? _table;
   DocumentRegionTableDtoBuilder get table =>
-      _$this._table ??= new DocumentRegionTableDtoBuilder();
+      _$this._table ??= DocumentRegionTableDtoBuilder();
   set table(DocumentRegionTableDtoBuilder? table) => _$this._table = table;
 
   String? _createdAt;
@@ -370,7 +350,6 @@ class DocumentRegionDtoBuilder
 
   @override
   void replace(DocumentRegionDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$DocumentRegionDto;
   }
 
@@ -386,31 +365,35 @@ class DocumentRegionDtoBuilder
     _$DocumentRegionDto _$result;
     try {
       _$result = _$v ??
-          new _$DocumentRegionDto._(
-              id: BuiltValueNullFieldError.checkNotNull(
-                  id, r'DocumentRegionDto', 'id'),
-              documentId: BuiltValueNullFieldError.checkNotNull(
-                  documentId, r'DocumentRegionDto', 'documentId'),
-              page: BuiltValueNullFieldError.checkNotNull(
-                  page, r'DocumentRegionDto', 'page'),
-              shape: BuiltValueNullFieldError.checkNotNull(
-                  shape, r'DocumentRegionDto', 'shape'),
-              role: BuiltValueNullFieldError.checkNotNull(
-                  role, r'DocumentRegionDto', 'role'),
-              x0: BuiltValueNullFieldError.checkNotNull(
-                  x0, r'DocumentRegionDto', 'x0'),
-              y0: BuiltValueNullFieldError.checkNotNull(
-                  y0, r'DocumentRegionDto', 'y0'),
-              x1: BuiltValueNullFieldError.checkNotNull(
-                  x1, r'DocumentRegionDto', 'x1'),
-              y1: BuiltValueNullFieldError.checkNotNull(
-                  y1, r'DocumentRegionDto', 'y1'),
-              irSha256: BuiltValueNullFieldError.checkNotNull(irSha256, r'DocumentRegionDto', 'irSha256'),
-              needsReview: BuiltValueNullFieldError.checkNotNull(needsReview, r'DocumentRegionDto', 'needsReview'),
-              blockIndexes: blockIndexes.build(),
-              field: _field?.build(),
-              table: _table?.build(),
-              createdAt: BuiltValueNullFieldError.checkNotNull(createdAt, r'DocumentRegionDto', 'createdAt'));
+          _$DocumentRegionDto._(
+            id: BuiltValueNullFieldError.checkNotNull(
+                id, r'DocumentRegionDto', 'id'),
+            documentId: BuiltValueNullFieldError.checkNotNull(
+                documentId, r'DocumentRegionDto', 'documentId'),
+            page: BuiltValueNullFieldError.checkNotNull(
+                page, r'DocumentRegionDto', 'page'),
+            shape: BuiltValueNullFieldError.checkNotNull(
+                shape, r'DocumentRegionDto', 'shape'),
+            role: BuiltValueNullFieldError.checkNotNull(
+                role, r'DocumentRegionDto', 'role'),
+            x0: BuiltValueNullFieldError.checkNotNull(
+                x0, r'DocumentRegionDto', 'x0'),
+            y0: BuiltValueNullFieldError.checkNotNull(
+                y0, r'DocumentRegionDto', 'y0'),
+            x1: BuiltValueNullFieldError.checkNotNull(
+                x1, r'DocumentRegionDto', 'x1'),
+            y1: BuiltValueNullFieldError.checkNotNull(
+                y1, r'DocumentRegionDto', 'y1'),
+            irSha256: BuiltValueNullFieldError.checkNotNull(
+                irSha256, r'DocumentRegionDto', 'irSha256'),
+            needsReview: BuiltValueNullFieldError.checkNotNull(
+                needsReview, r'DocumentRegionDto', 'needsReview'),
+            blockIndexes: blockIndexes.build(),
+            field: _field?.build(),
+            table: _table?.build(),
+            createdAt: BuiltValueNullFieldError.checkNotNull(
+                createdAt, r'DocumentRegionDto', 'createdAt'),
+          );
     } catch (_) {
       late String _$failedField;
       try {
@@ -421,7 +404,7 @@ class DocumentRegionDtoBuilder
         _$failedField = 'table';
         _table?.build();
       } catch (e) {
-        throw new BuiltValueNestedFieldError(
+        throw BuiltValueNestedFieldError(
             r'DocumentRegionDto', _$failedField, e.toString());
       }
       rethrow;

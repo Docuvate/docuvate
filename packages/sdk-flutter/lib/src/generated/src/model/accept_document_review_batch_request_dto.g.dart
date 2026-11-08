@@ -14,11 +14,9 @@ class _$AcceptDocumentReviewBatchRequestDto
   factory _$AcceptDocumentReviewBatchRequestDto(
           [void Function(AcceptDocumentReviewBatchRequestDtoBuilder)?
               updates]) =>
-      (new AcceptDocumentReviewBatchRequestDtoBuilder()..update(updates))
-          ._build();
+      (AcceptDocumentReviewBatchRequestDtoBuilder()..update(updates))._build();
 
   _$AcceptDocumentReviewBatchRequestDto._({this.minConfidence}) : super._();
-
   @override
   AcceptDocumentReviewBatchRequestDto rebuild(
           void Function(AcceptDocumentReviewBatchRequestDtoBuilder) updates) =>
@@ -26,7 +24,7 @@ class _$AcceptDocumentReviewBatchRequestDto
 
   @override
   AcceptDocumentReviewBatchRequestDtoBuilder toBuilder() =>
-      new AcceptDocumentReviewBatchRequestDtoBuilder()..replace(this);
+      AcceptDocumentReviewBatchRequestDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -77,7 +75,6 @@ class AcceptDocumentReviewBatchRequestDtoBuilder
 
   @override
   void replace(AcceptDocumentReviewBatchRequestDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$AcceptDocumentReviewBatchRequestDto;
   }
 
@@ -92,8 +89,9 @@ class AcceptDocumentReviewBatchRequestDtoBuilder
 
   _$AcceptDocumentReviewBatchRequestDto _build() {
     final _$result = _$v ??
-        new _$AcceptDocumentReviewBatchRequestDto._(
-            minConfidence: minConfidence);
+        _$AcceptDocumentReviewBatchRequestDto._(
+          minConfidence: minConfidence,
+        );
     replace(_$result);
     return _$result;
   }

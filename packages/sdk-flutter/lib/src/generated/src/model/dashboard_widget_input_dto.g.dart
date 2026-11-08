@@ -35,12 +35,12 @@ DashboardWidgetInputDtoTypeEnum _$dashboardWidgetInputDtoTypeEnumValueOf(
     case 'attention':
       return _$dashboardWidgetInputDtoTypeEnum_attention;
     default:
-      throw new ArgumentError(name);
+      throw ArgumentError(name);
   }
 }
 
 final BuiltSet<DashboardWidgetInputDtoTypeEnum>
-    _$dashboardWidgetInputDtoTypeEnumValues = new BuiltSet<
+    _$dashboardWidgetInputDtoTypeEnumValues = BuiltSet<
         DashboardWidgetInputDtoTypeEnum>(const <DashboardWidgetInputDtoTypeEnum>[
   _$dashboardWidgetInputDtoTypeEnum_savedView,
   _$dashboardWidgetInputDtoTypeEnum_upload,
@@ -51,7 +51,7 @@ final BuiltSet<DashboardWidgetInputDtoTypeEnum>
 
 Serializer<DashboardWidgetInputDtoTypeEnum>
     _$dashboardWidgetInputDtoTypeEnumSerializer =
-    new _$DashboardWidgetInputDtoTypeEnumSerializer();
+    _$DashboardWidgetInputDtoTypeEnumSerializer();
 
 class _$DashboardWidgetInputDtoTypeEnumSerializer
     implements PrimitiveSerializer<DashboardWidgetInputDtoTypeEnum> {
@@ -107,7 +107,7 @@ class _$DashboardWidgetInputDto extends DashboardWidgetInputDto {
 
   factory _$DashboardWidgetInputDto(
           [void Function(DashboardWidgetInputDtoBuilder)? updates]) =>
-      (new DashboardWidgetInputDtoBuilder()..update(updates))._build();
+      (DashboardWidgetInputDtoBuilder()..update(updates))._build();
 
   _$DashboardWidgetInputDto._(
       {this.id,
@@ -117,17 +117,7 @@ class _$DashboardWidgetInputDto extends DashboardWidgetInputDto {
       required this.heightRows,
       this.savedViewId,
       this.itemLimit})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        type, r'DashboardWidgetInputDto', 'type');
-    BuiltValueNullFieldError.checkNotNull(
-        position, r'DashboardWidgetInputDto', 'position');
-    BuiltValueNullFieldError.checkNotNull(
-        widthCols, r'DashboardWidgetInputDto', 'widthCols');
-    BuiltValueNullFieldError.checkNotNull(
-        heightRows, r'DashboardWidgetInputDto', 'heightRows');
-  }
-
+      : super._();
   @override
   DashboardWidgetInputDto rebuild(
           void Function(DashboardWidgetInputDtoBuilder) updates) =>
@@ -135,7 +125,7 @@ class _$DashboardWidgetInputDto extends DashboardWidgetInputDto {
 
   @override
   DashboardWidgetInputDtoBuilder toBuilder() =>
-      new DashboardWidgetInputDtoBuilder()..replace(this);
+      DashboardWidgetInputDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -232,7 +222,6 @@ class DashboardWidgetInputDtoBuilder
 
   @override
   void replace(DashboardWidgetInputDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$DashboardWidgetInputDto;
   }
 
@@ -246,18 +235,19 @@ class DashboardWidgetInputDtoBuilder
 
   _$DashboardWidgetInputDto _build() {
     final _$result = _$v ??
-        new _$DashboardWidgetInputDto._(
-            id: id,
-            type: BuiltValueNullFieldError.checkNotNull(
-                type, r'DashboardWidgetInputDto', 'type'),
-            position: BuiltValueNullFieldError.checkNotNull(
-                position, r'DashboardWidgetInputDto', 'position'),
-            widthCols: BuiltValueNullFieldError.checkNotNull(
-                widthCols, r'DashboardWidgetInputDto', 'widthCols'),
-            heightRows: BuiltValueNullFieldError.checkNotNull(
-                heightRows, r'DashboardWidgetInputDto', 'heightRows'),
-            savedViewId: savedViewId,
-            itemLimit: itemLimit);
+        _$DashboardWidgetInputDto._(
+          id: id,
+          type: BuiltValueNullFieldError.checkNotNull(
+              type, r'DashboardWidgetInputDto', 'type'),
+          position: BuiltValueNullFieldError.checkNotNull(
+              position, r'DashboardWidgetInputDto', 'position'),
+          widthCols: BuiltValueNullFieldError.checkNotNull(
+              widthCols, r'DashboardWidgetInputDto', 'widthCols'),
+          heightRows: BuiltValueNullFieldError.checkNotNull(
+              heightRows, r'DashboardWidgetInputDto', 'heightRows'),
+          savedViewId: savedViewId,
+          itemLimit: itemLimit,
+        );
     replace(_$result);
     return _$result;
   }

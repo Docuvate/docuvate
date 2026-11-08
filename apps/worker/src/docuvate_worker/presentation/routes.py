@@ -118,6 +118,7 @@ from docuvate_worker.presentation.schemas import (
     MlResolvedModelResponse,
     MlRetrainRunRequest,
     MlRetrainRunResponse,
+    PageTransformModel,
     RepresentationFromTextRequest,
     SmartDuplicateCandidateModel,
     SmartDuplicatesDetectRequest,
@@ -299,6 +300,10 @@ async def extract(
                 thumbnail_png_base64=base64.b64encode(img.thumbnail_png).decode("ascii"),
             )
             for img in (result.images or [])
+        ],
+        page_transforms=[
+            PageTransformModel(page=page, rotation_quarter_turns=turns)
+            for page, turns in (result.page_transforms or ())
         ],
     )
 

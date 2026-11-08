@@ -14,17 +14,11 @@ class _$DocumentRegionListResponseDto extends DocumentRegionListResponseDto {
 
   factory _$DocumentRegionListResponseDto(
           [void Function(DocumentRegionListResponseDtoBuilder)? updates]) =>
-      (new DocumentRegionListResponseDtoBuilder()..update(updates))._build();
+      (DocumentRegionListResponseDtoBuilder()..update(updates))._build();
 
   _$DocumentRegionListResponseDto._(
       {required this.irSha256, required this.items})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        irSha256, r'DocumentRegionListResponseDto', 'irSha256');
-    BuiltValueNullFieldError.checkNotNull(
-        items, r'DocumentRegionListResponseDto', 'items');
-  }
-
+      : super._();
   @override
   DocumentRegionListResponseDto rebuild(
           void Function(DocumentRegionListResponseDtoBuilder) updates) =>
@@ -32,7 +26,7 @@ class _$DocumentRegionListResponseDto extends DocumentRegionListResponseDto {
 
   @override
   DocumentRegionListResponseDtoBuilder toBuilder() =>
-      new DocumentRegionListResponseDtoBuilder()..replace(this);
+      DocumentRegionListResponseDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -72,7 +66,7 @@ class DocumentRegionListResponseDtoBuilder
 
   ListBuilder<DocumentRegionDto>? _items;
   ListBuilder<DocumentRegionDto> get items =>
-      _$this._items ??= new ListBuilder<DocumentRegionDto>();
+      _$this._items ??= ListBuilder<DocumentRegionDto>();
   set items(ListBuilder<DocumentRegionDto>? items) => _$this._items = items;
 
   DocumentRegionListResponseDtoBuilder() {
@@ -91,7 +85,6 @@ class DocumentRegionListResponseDtoBuilder
 
   @override
   void replace(DocumentRegionListResponseDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$DocumentRegionListResponseDto;
   }
 
@@ -107,17 +100,18 @@ class DocumentRegionListResponseDtoBuilder
     _$DocumentRegionListResponseDto _$result;
     try {
       _$result = _$v ??
-          new _$DocumentRegionListResponseDto._(
-              irSha256: BuiltValueNullFieldError.checkNotNull(
-                  irSha256, r'DocumentRegionListResponseDto', 'irSha256'),
-              items: items.build());
+          _$DocumentRegionListResponseDto._(
+            irSha256: BuiltValueNullFieldError.checkNotNull(
+                irSha256, r'DocumentRegionListResponseDto', 'irSha256'),
+            items: items.build(),
+          );
     } catch (_) {
       late String _$failedField;
       try {
         _$failedField = 'items';
         items.build();
       } catch (e) {
-        throw new BuiltValueNestedFieldError(
+        throw BuiltValueNestedFieldError(
             r'DocumentRegionListResponseDto', _$failedField, e.toString());
       }
       rethrow;

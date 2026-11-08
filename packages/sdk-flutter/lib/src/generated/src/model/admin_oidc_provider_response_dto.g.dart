@@ -21,12 +21,12 @@ AdminOidcProviderResponseDtoSource_Enum
     case 'env':
       return _$adminOidcProviderResponseDtoSourceEnum_env;
     default:
-      throw new ArgumentError(name);
+      throw ArgumentError(name);
   }
 }
 
 final BuiltSet<AdminOidcProviderResponseDtoSource_Enum>
-    _$adminOidcProviderResponseDtoSourceEnumValues = new BuiltSet<
+    _$adminOidcProviderResponseDtoSourceEnumValues = BuiltSet<
         AdminOidcProviderResponseDtoSource_Enum>(const <AdminOidcProviderResponseDtoSource_Enum>[
   _$adminOidcProviderResponseDtoSourceEnum_admin,
   _$adminOidcProviderResponseDtoSourceEnum_env,
@@ -34,7 +34,7 @@ final BuiltSet<AdminOidcProviderResponseDtoSource_Enum>
 
 Serializer<AdminOidcProviderResponseDtoSource_Enum>
     _$adminOidcProviderResponseDtoSourceEnumSerializer =
-    new _$AdminOidcProviderResponseDtoSource_EnumSerializer();
+    _$AdminOidcProviderResponseDtoSource_EnumSerializer();
 
 class _$AdminOidcProviderResponseDtoSource_EnumSerializer
     implements PrimitiveSerializer<AdminOidcProviderResponseDtoSource_Enum> {
@@ -90,7 +90,7 @@ class _$AdminOidcProviderResponseDto extends AdminOidcProviderResponseDto {
 
   factory _$AdminOidcProviderResponseDto(
           [void Function(AdminOidcProviderResponseDtoBuilder)? updates]) =>
-      (new AdminOidcProviderResponseDtoBuilder()..update(updates))._build();
+      (AdminOidcProviderResponseDtoBuilder()..update(updates))._build();
 
   _$AdminOidcProviderResponseDto._(
       {required this.id,
@@ -102,27 +102,7 @@ class _$AdminOidcProviderResponseDto extends AdminOidcProviderResponseDto {
       required this.enabled,
       required this.source_,
       required this.hasClientSecret})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        id, r'AdminOidcProviderResponseDto', 'id');
-    BuiltValueNullFieldError.checkNotNull(
-        providerId, r'AdminOidcProviderResponseDto', 'providerId');
-    BuiltValueNullFieldError.checkNotNull(
-        displayName, r'AdminOidcProviderResponseDto', 'displayName');
-    BuiltValueNullFieldError.checkNotNull(
-        issuer, r'AdminOidcProviderResponseDto', 'issuer');
-    BuiltValueNullFieldError.checkNotNull(
-        clientId, r'AdminOidcProviderResponseDto', 'clientId');
-    BuiltValueNullFieldError.checkNotNull(
-        scopes, r'AdminOidcProviderResponseDto', 'scopes');
-    BuiltValueNullFieldError.checkNotNull(
-        enabled, r'AdminOidcProviderResponseDto', 'enabled');
-    BuiltValueNullFieldError.checkNotNull(
-        source_, r'AdminOidcProviderResponseDto', 'source_');
-    BuiltValueNullFieldError.checkNotNull(
-        hasClientSecret, r'AdminOidcProviderResponseDto', 'hasClientSecret');
-  }
-
+      : super._();
   @override
   AdminOidcProviderResponseDto rebuild(
           void Function(AdminOidcProviderResponseDtoBuilder) updates) =>
@@ -130,7 +110,7 @@ class _$AdminOidcProviderResponseDto extends AdminOidcProviderResponseDto {
 
   @override
   AdminOidcProviderResponseDtoBuilder toBuilder() =>
-      new AdminOidcProviderResponseDtoBuilder()..replace(this);
+      AdminOidcProviderResponseDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -246,7 +226,6 @@ class AdminOidcProviderResponseDtoBuilder
 
   @override
   void replace(AdminOidcProviderResponseDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$AdminOidcProviderResponseDto;
   }
 
@@ -260,24 +239,28 @@ class AdminOidcProviderResponseDtoBuilder
 
   _$AdminOidcProviderResponseDto _build() {
     final _$result = _$v ??
-        new _$AdminOidcProviderResponseDto._(
-            id: BuiltValueNullFieldError.checkNotNull(
-                id, r'AdminOidcProviderResponseDto', 'id'),
-            providerId: BuiltValueNullFieldError.checkNotNull(
-                providerId, r'AdminOidcProviderResponseDto', 'providerId'),
-            displayName: BuiltValueNullFieldError.checkNotNull(
-                displayName, r'AdminOidcProviderResponseDto', 'displayName'),
-            issuer: BuiltValueNullFieldError.checkNotNull(
-                issuer, r'AdminOidcProviderResponseDto', 'issuer'),
-            clientId: BuiltValueNullFieldError.checkNotNull(
-                clientId, r'AdminOidcProviderResponseDto', 'clientId'),
-            scopes: BuiltValueNullFieldError.checkNotNull(
-                scopes, r'AdminOidcProviderResponseDto', 'scopes'),
-            enabled: BuiltValueNullFieldError.checkNotNull(
-                enabled, r'AdminOidcProviderResponseDto', 'enabled'),
-            source_: BuiltValueNullFieldError.checkNotNull(
-                source_, r'AdminOidcProviderResponseDto', 'source_'),
-            hasClientSecret: BuiltValueNullFieldError.checkNotNull(hasClientSecret, r'AdminOidcProviderResponseDto', 'hasClientSecret'));
+        _$AdminOidcProviderResponseDto._(
+          id: BuiltValueNullFieldError.checkNotNull(
+              id, r'AdminOidcProviderResponseDto', 'id'),
+          providerId: BuiltValueNullFieldError.checkNotNull(
+              providerId, r'AdminOidcProviderResponseDto', 'providerId'),
+          displayName: BuiltValueNullFieldError.checkNotNull(
+              displayName, r'AdminOidcProviderResponseDto', 'displayName'),
+          issuer: BuiltValueNullFieldError.checkNotNull(
+              issuer, r'AdminOidcProviderResponseDto', 'issuer'),
+          clientId: BuiltValueNullFieldError.checkNotNull(
+              clientId, r'AdminOidcProviderResponseDto', 'clientId'),
+          scopes: BuiltValueNullFieldError.checkNotNull(
+              scopes, r'AdminOidcProviderResponseDto', 'scopes'),
+          enabled: BuiltValueNullFieldError.checkNotNull(
+              enabled, r'AdminOidcProviderResponseDto', 'enabled'),
+          source_: BuiltValueNullFieldError.checkNotNull(
+              source_, r'AdminOidcProviderResponseDto', 'source_'),
+          hasClientSecret: BuiltValueNullFieldError.checkNotNull(
+              hasClientSecret,
+              r'AdminOidcProviderResponseDto',
+              'hasClientSecret'),
+        );
     replace(_$result);
     return _$result;
   }

@@ -18,24 +18,14 @@ class _$DocumentRegionTableMergeDto extends DocumentRegionTableMergeDto {
 
   factory _$DocumentRegionTableMergeDto(
           [void Function(DocumentRegionTableMergeDtoBuilder)? updates]) =>
-      (new DocumentRegionTableMergeDtoBuilder()..update(updates))._build();
+      (DocumentRegionTableMergeDtoBuilder()..update(updates))._build();
 
   _$DocumentRegionTableMergeDto._(
       {required this.row0,
       required this.col0,
       required this.rowSpan,
       required this.colSpan})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        row0, r'DocumentRegionTableMergeDto', 'row0');
-    BuiltValueNullFieldError.checkNotNull(
-        col0, r'DocumentRegionTableMergeDto', 'col0');
-    BuiltValueNullFieldError.checkNotNull(
-        rowSpan, r'DocumentRegionTableMergeDto', 'rowSpan');
-    BuiltValueNullFieldError.checkNotNull(
-        colSpan, r'DocumentRegionTableMergeDto', 'colSpan');
-  }
-
+      : super._();
   @override
   DocumentRegionTableMergeDto rebuild(
           void Function(DocumentRegionTableMergeDtoBuilder) updates) =>
@@ -43,7 +33,7 @@ class _$DocumentRegionTableMergeDto extends DocumentRegionTableMergeDto {
 
   @override
   DocumentRegionTableMergeDtoBuilder toBuilder() =>
-      new DocumentRegionTableMergeDtoBuilder()..replace(this);
+      DocumentRegionTableMergeDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -117,7 +107,6 @@ class DocumentRegionTableMergeDtoBuilder
 
   @override
   void replace(DocumentRegionTableMergeDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$DocumentRegionTableMergeDto;
   }
 
@@ -131,15 +120,16 @@ class DocumentRegionTableMergeDtoBuilder
 
   _$DocumentRegionTableMergeDto _build() {
     final _$result = _$v ??
-        new _$DocumentRegionTableMergeDto._(
-            row0: BuiltValueNullFieldError.checkNotNull(
-                row0, r'DocumentRegionTableMergeDto', 'row0'),
-            col0: BuiltValueNullFieldError.checkNotNull(
-                col0, r'DocumentRegionTableMergeDto', 'col0'),
-            rowSpan: BuiltValueNullFieldError.checkNotNull(
-                rowSpan, r'DocumentRegionTableMergeDto', 'rowSpan'),
-            colSpan: BuiltValueNullFieldError.checkNotNull(
-                colSpan, r'DocumentRegionTableMergeDto', 'colSpan'));
+        _$DocumentRegionTableMergeDto._(
+          row0: BuiltValueNullFieldError.checkNotNull(
+              row0, r'DocumentRegionTableMergeDto', 'row0'),
+          col0: BuiltValueNullFieldError.checkNotNull(
+              col0, r'DocumentRegionTableMergeDto', 'col0'),
+          rowSpan: BuiltValueNullFieldError.checkNotNull(
+              rowSpan, r'DocumentRegionTableMergeDto', 'rowSpan'),
+          colSpan: BuiltValueNullFieldError.checkNotNull(
+              colSpan, r'DocumentRegionTableMergeDto', 'colSpan'),
+        );
     replace(_$result);
     return _$result;
   }

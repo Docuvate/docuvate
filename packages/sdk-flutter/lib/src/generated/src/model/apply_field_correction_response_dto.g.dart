@@ -17,19 +17,11 @@ class _$ApplyFieldCorrectionResponseDto
 
   factory _$ApplyFieldCorrectionResponseDto(
           [void Function(ApplyFieldCorrectionResponseDtoBuilder)? updates]) =>
-      (new ApplyFieldCorrectionResponseDtoBuilder()..update(updates))._build();
+      (ApplyFieldCorrectionResponseDtoBuilder()..update(updates))._build();
 
   _$ApplyFieldCorrectionResponseDto._(
       {required this.noChange, required this.correction, required this.region})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        noChange, r'ApplyFieldCorrectionResponseDto', 'noChange');
-    BuiltValueNullFieldError.checkNotNull(
-        correction, r'ApplyFieldCorrectionResponseDto', 'correction');
-    BuiltValueNullFieldError.checkNotNull(
-        region, r'ApplyFieldCorrectionResponseDto', 'region');
-  }
-
+      : super._();
   @override
   ApplyFieldCorrectionResponseDto rebuild(
           void Function(ApplyFieldCorrectionResponseDtoBuilder) updates) =>
@@ -37,7 +29,7 @@ class _$ApplyFieldCorrectionResponseDto
 
   @override
   ApplyFieldCorrectionResponseDtoBuilder toBuilder() =>
-      new ApplyFieldCorrectionResponseDtoBuilder()..replace(this);
+      ApplyFieldCorrectionResponseDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -80,13 +72,13 @@ class ApplyFieldCorrectionResponseDtoBuilder
 
   DocumentCorrectionDtoBuilder? _correction;
   DocumentCorrectionDtoBuilder get correction =>
-      _$this._correction ??= new DocumentCorrectionDtoBuilder();
+      _$this._correction ??= DocumentCorrectionDtoBuilder();
   set correction(DocumentCorrectionDtoBuilder? correction) =>
       _$this._correction = correction;
 
   DocumentRegionDtoBuilder? _region;
   DocumentRegionDtoBuilder get region =>
-      _$this._region ??= new DocumentRegionDtoBuilder();
+      _$this._region ??= DocumentRegionDtoBuilder();
   set region(DocumentRegionDtoBuilder? region) => _$this._region = region;
 
   ApplyFieldCorrectionResponseDtoBuilder() {
@@ -106,7 +98,6 @@ class ApplyFieldCorrectionResponseDtoBuilder
 
   @override
   void replace(ApplyFieldCorrectionResponseDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$ApplyFieldCorrectionResponseDto;
   }
 
@@ -122,11 +113,12 @@ class ApplyFieldCorrectionResponseDtoBuilder
     _$ApplyFieldCorrectionResponseDto _$result;
     try {
       _$result = _$v ??
-          new _$ApplyFieldCorrectionResponseDto._(
-              noChange: BuiltValueNullFieldError.checkNotNull(
-                  noChange, r'ApplyFieldCorrectionResponseDto', 'noChange'),
-              correction: correction.build(),
-              region: region.build());
+          _$ApplyFieldCorrectionResponseDto._(
+            noChange: BuiltValueNullFieldError.checkNotNull(
+                noChange, r'ApplyFieldCorrectionResponseDto', 'noChange'),
+            correction: correction.build(),
+            region: region.build(),
+          );
     } catch (_) {
       late String _$failedField;
       try {
@@ -135,7 +127,7 @@ class ApplyFieldCorrectionResponseDtoBuilder
         _$failedField = 'region';
         region.build();
       } catch (e) {
-        throw new BuiltValueNestedFieldError(
+        throw BuiltValueNestedFieldError(
             r'ApplyFieldCorrectionResponseDto', _$failedField, e.toString());
       }
       rethrow;

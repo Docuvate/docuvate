@@ -149,19 +149,20 @@ def _ocr_pil_image(
     return "\n".join(page_lines), blocks
 
 
-def ocr_image_bytes(content: bytes) -> tuple[str, list[ExtractionBlock]]:
+def ocr_image_bytes(content: bytes) -> tuple[str, list[ExtractionBlock], tuple[int, ...]]:
     with open_image_bounded(content, raster_max_pixels_per_page()) as image:
         text, blocks = _ocr_pil_image(image, page=1, block_offset=0)
-    return text.strip(), blocks
+    return text.strip(), blocks, (0,)
 
 
 def ocr_pdf_bytes(
     content: bytes, *, max_pages: int | None = None
-) -> tuple[str, list[ExtractionBlock]]:
+) -> tuple[str, list[ExtractionBlock], tuple[int, ...]]:
     logger.info("Rasterizing PDF for PaddleOCR one page at a time; large files may take a while.")
     page_texts: list[str] = []
     all_blocks: list[ExtractionBlock] = []
     block_index = 0
+    page_turns: list[int] = []
     try:
         for page_num, image in iter_pdf_page_images(content, max_pages=max_pages):
             try:
@@ -170,10 +171,11 @@ def ocr_pdf_bytes(
                     page_texts.append(page_text)
                 all_blocks.extend(blocks)
                 block_index += len(blocks)
+                page_turns.append(0)
             finally:
                 image.close()
                 reclaim_python_heap()
     finally:
         reclaim_python_heap()
 
-    return "\n\n".join(page_texts).strip(), all_blocks
+    return "\n\n".join(page_texts).strip(), all_blocks, tuple(page_turns)

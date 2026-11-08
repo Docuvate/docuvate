@@ -31,12 +31,12 @@ DocumentResponseDtoStatusEnum _$documentResponseDtoStatusEnumValueOf(
     case 'failed':
       return _$documentResponseDtoStatusEnum_failed;
     default:
-      throw new ArgumentError(name);
+      throw ArgumentError(name);
   }
 }
 
 final BuiltSet<DocumentResponseDtoStatusEnum>
-    _$documentResponseDtoStatusEnumValues = new BuiltSet<
+    _$documentResponseDtoStatusEnumValues = BuiltSet<
         DocumentResponseDtoStatusEnum>(const <DocumentResponseDtoStatusEnum>[
   _$documentResponseDtoStatusEnum_uploaded,
   _$documentResponseDtoStatusEnum_queued,
@@ -47,7 +47,7 @@ final BuiltSet<DocumentResponseDtoStatusEnum>
 
 Serializer<DocumentResponseDtoStatusEnum>
     _$documentResponseDtoStatusEnumSerializer =
-    new _$DocumentResponseDtoStatusEnumSerializer();
+    _$DocumentResponseDtoStatusEnumSerializer();
 
 class _$DocumentResponseDtoStatusEnumSerializer
     implements PrimitiveSerializer<DocumentResponseDtoStatusEnum> {
@@ -107,11 +107,13 @@ class _$DocumentResponseDto extends DocumentResponseDto {
   @override
   final String updatedAt;
   @override
+  final bool? layoutIrAvailable;
+  @override
   final DocumentExtractionSummaryDto? extraction;
 
   factory _$DocumentResponseDto(
           [void Function(DocumentResponseDtoBuilder)? updates]) =>
-      (new DocumentResponseDtoBuilder()..update(updates))._build();
+      (DocumentResponseDtoBuilder()..update(updates))._build();
 
   _$DocumentResponseDto._(
       {required this.id,
@@ -124,26 +126,9 @@ class _$DocumentResponseDto extends DocumentResponseDto {
       required this.tags,
       required this.createdAt,
       required this.updatedAt,
+      this.layoutIrAvailable,
       this.extraction})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(id, r'DocumentResponseDto', 'id');
-    BuiltValueNullFieldError.checkNotNull(
-        filename, r'DocumentResponseDto', 'filename');
-    BuiltValueNullFieldError.checkNotNull(
-        title, r'DocumentResponseDto', 'title');
-    BuiltValueNullFieldError.checkNotNull(
-        status, r'DocumentResponseDto', 'status');
-    BuiltValueNullFieldError.checkNotNull(
-        mimeType, r'DocumentResponseDto', 'mimeType');
-    BuiltValueNullFieldError.checkNotNull(
-        fileSizeBytes, r'DocumentResponseDto', 'fileSizeBytes');
-    BuiltValueNullFieldError.checkNotNull(tags, r'DocumentResponseDto', 'tags');
-    BuiltValueNullFieldError.checkNotNull(
-        createdAt, r'DocumentResponseDto', 'createdAt');
-    BuiltValueNullFieldError.checkNotNull(
-        updatedAt, r'DocumentResponseDto', 'updatedAt');
-  }
-
+      : super._();
   @override
   DocumentResponseDto rebuild(
           void Function(DocumentResponseDtoBuilder) updates) =>
@@ -151,7 +136,7 @@ class _$DocumentResponseDto extends DocumentResponseDto {
 
   @override
   DocumentResponseDtoBuilder toBuilder() =>
-      new DocumentResponseDtoBuilder()..replace(this);
+      DocumentResponseDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -167,6 +152,7 @@ class _$DocumentResponseDto extends DocumentResponseDto {
         tags == other.tags &&
         createdAt == other.createdAt &&
         updatedAt == other.updatedAt &&
+        layoutIrAvailable == other.layoutIrAvailable &&
         extraction == other.extraction;
   }
 
@@ -183,6 +169,7 @@ class _$DocumentResponseDto extends DocumentResponseDto {
     _$hash = $jc(_$hash, tags.hashCode);
     _$hash = $jc(_$hash, createdAt.hashCode);
     _$hash = $jc(_$hash, updatedAt.hashCode);
+    _$hash = $jc(_$hash, layoutIrAvailable.hashCode);
     _$hash = $jc(_$hash, extraction.hashCode);
     _$hash = $jf(_$hash);
     return _$hash;
@@ -201,6 +188,7 @@ class _$DocumentResponseDto extends DocumentResponseDto {
           ..add('tags', tags)
           ..add('createdAt', createdAt)
           ..add('updatedAt', updatedAt)
+          ..add('layoutIrAvailable', layoutIrAvailable)
           ..add('extraction', extraction))
         .toString();
   }
@@ -242,7 +230,7 @@ class DocumentResponseDtoBuilder
 
   ListBuilder<JsonObject>? _tags;
   ListBuilder<JsonObject> get tags =>
-      _$this._tags ??= new ListBuilder<JsonObject>();
+      _$this._tags ??= ListBuilder<JsonObject>();
   set tags(ListBuilder<JsonObject>? tags) => _$this._tags = tags;
 
   String? _createdAt;
@@ -253,9 +241,14 @@ class DocumentResponseDtoBuilder
   String? get updatedAt => _$this._updatedAt;
   set updatedAt(String? updatedAt) => _$this._updatedAt = updatedAt;
 
+  bool? _layoutIrAvailable;
+  bool? get layoutIrAvailable => _$this._layoutIrAvailable;
+  set layoutIrAvailable(bool? layoutIrAvailable) =>
+      _$this._layoutIrAvailable = layoutIrAvailable;
+
   DocumentExtractionSummaryDtoBuilder? _extraction;
   DocumentExtractionSummaryDtoBuilder get extraction =>
-      _$this._extraction ??= new DocumentExtractionSummaryDtoBuilder();
+      _$this._extraction ??= DocumentExtractionSummaryDtoBuilder();
   set extraction(DocumentExtractionSummaryDtoBuilder? extraction) =>
       _$this._extraction = extraction;
 
@@ -276,6 +269,7 @@ class DocumentResponseDtoBuilder
       _tags = $v.tags.toBuilder();
       _createdAt = $v.createdAt;
       _updatedAt = $v.updatedAt;
+      _layoutIrAvailable = $v.layoutIrAvailable;
       _extraction = $v.extraction?.toBuilder();
       _$v = null;
     }
@@ -284,7 +278,6 @@ class DocumentResponseDtoBuilder
 
   @override
   void replace(DocumentResponseDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$DocumentResponseDto;
   }
 
@@ -300,26 +293,28 @@ class DocumentResponseDtoBuilder
     _$DocumentResponseDto _$result;
     try {
       _$result = _$v ??
-          new _$DocumentResponseDto._(
-              id: BuiltValueNullFieldError.checkNotNull(
-                  id, r'DocumentResponseDto', 'id'),
-              filename: BuiltValueNullFieldError.checkNotNull(
-                  filename, r'DocumentResponseDto', 'filename'),
-              title: BuiltValueNullFieldError.checkNotNull(
-                  title, r'DocumentResponseDto', 'title'),
-              status: BuiltValueNullFieldError.checkNotNull(
-                  status, r'DocumentResponseDto', 'status'),
-              extractionFailureReason: extractionFailureReason,
-              mimeType: BuiltValueNullFieldError.checkNotNull(
-                  mimeType, r'DocumentResponseDto', 'mimeType'),
-              fileSizeBytes: BuiltValueNullFieldError.checkNotNull(
-                  fileSizeBytes, r'DocumentResponseDto', 'fileSizeBytes'),
-              tags: tags.build(),
-              createdAt: BuiltValueNullFieldError.checkNotNull(
-                  createdAt, r'DocumentResponseDto', 'createdAt'),
-              updatedAt: BuiltValueNullFieldError.checkNotNull(
-                  updatedAt, r'DocumentResponseDto', 'updatedAt'),
-              extraction: _extraction?.build());
+          _$DocumentResponseDto._(
+            id: BuiltValueNullFieldError.checkNotNull(
+                id, r'DocumentResponseDto', 'id'),
+            filename: BuiltValueNullFieldError.checkNotNull(
+                filename, r'DocumentResponseDto', 'filename'),
+            title: BuiltValueNullFieldError.checkNotNull(
+                title, r'DocumentResponseDto', 'title'),
+            status: BuiltValueNullFieldError.checkNotNull(
+                status, r'DocumentResponseDto', 'status'),
+            extractionFailureReason: extractionFailureReason,
+            mimeType: BuiltValueNullFieldError.checkNotNull(
+                mimeType, r'DocumentResponseDto', 'mimeType'),
+            fileSizeBytes: BuiltValueNullFieldError.checkNotNull(
+                fileSizeBytes, r'DocumentResponseDto', 'fileSizeBytes'),
+            tags: tags.build(),
+            createdAt: BuiltValueNullFieldError.checkNotNull(
+                createdAt, r'DocumentResponseDto', 'createdAt'),
+            updatedAt: BuiltValueNullFieldError.checkNotNull(
+                updatedAt, r'DocumentResponseDto', 'updatedAt'),
+            layoutIrAvailable: layoutIrAvailable,
+            extraction: _extraction?.build(),
+          );
     } catch (_) {
       late String _$failedField;
       try {
@@ -329,7 +324,7 @@ class DocumentResponseDtoBuilder
         _$failedField = 'extraction';
         _extraction?.build();
       } catch (e) {
-        throw new BuiltValueNestedFieldError(
+        throw BuiltValueNestedFieldError(
             r'DocumentResponseDto', _$failedField, e.toString());
       }
       rethrow;

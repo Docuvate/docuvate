@@ -18,6 +18,9 @@ const ApplyFieldCorrectionRequestDtoOpEnum
 const ApplyFieldCorrectionRequestDtoOpEnum
     _$applyFieldCorrectionRequestDtoOpEnum_remove =
     const ApplyFieldCorrectionRequestDtoOpEnum._('remove');
+const ApplyFieldCorrectionRequestDtoOpEnum
+    _$applyFieldCorrectionRequestDtoOpEnum_rejectSuggestion =
+    const ApplyFieldCorrectionRequestDtoOpEnum._('rejectSuggestion');
 
 ApplyFieldCorrectionRequestDtoOpEnum
     _$applyFieldCorrectionRequestDtoOpEnumValueOf(String name) {
@@ -30,18 +33,21 @@ ApplyFieldCorrectionRequestDtoOpEnum
       return _$applyFieldCorrectionRequestDtoOpEnum_editValue;
     case 'remove':
       return _$applyFieldCorrectionRequestDtoOpEnum_remove;
+    case 'rejectSuggestion':
+      return _$applyFieldCorrectionRequestDtoOpEnum_rejectSuggestion;
     default:
-      throw new ArgumentError(name);
+      throw ArgumentError(name);
   }
 }
 
 final BuiltSet<ApplyFieldCorrectionRequestDtoOpEnum>
-    _$applyFieldCorrectionRequestDtoOpEnumValues = new BuiltSet<
+    _$applyFieldCorrectionRequestDtoOpEnumValues = BuiltSet<
         ApplyFieldCorrectionRequestDtoOpEnum>(const <ApplyFieldCorrectionRequestDtoOpEnum>[
   _$applyFieldCorrectionRequestDtoOpEnum_create,
   _$applyFieldCorrectionRequestDtoOpEnum_reanchor,
   _$applyFieldCorrectionRequestDtoOpEnum_editValue,
   _$applyFieldCorrectionRequestDtoOpEnum_remove,
+  _$applyFieldCorrectionRequestDtoOpEnum_rejectSuggestion,
 ]);
 
 const ApplyFieldCorrectionRequestDtoShapeEnum
@@ -59,12 +65,12 @@ ApplyFieldCorrectionRequestDtoShapeEnum
     case 'polygon':
       return _$applyFieldCorrectionRequestDtoShapeEnum_polygon;
     default:
-      throw new ArgumentError(name);
+      throw ArgumentError(name);
   }
 }
 
 final BuiltSet<ApplyFieldCorrectionRequestDtoShapeEnum>
-    _$applyFieldCorrectionRequestDtoShapeEnumValues = new BuiltSet<
+    _$applyFieldCorrectionRequestDtoShapeEnumValues = BuiltSet<
         ApplyFieldCorrectionRequestDtoShapeEnum>(const <ApplyFieldCorrectionRequestDtoShapeEnum>[
   _$applyFieldCorrectionRequestDtoShapeEnum_rect,
   _$applyFieldCorrectionRequestDtoShapeEnum_polygon,
@@ -90,12 +96,12 @@ ApplyFieldCorrectionRequestDtoScopeEnum
     case 'always':
       return _$applyFieldCorrectionRequestDtoScopeEnum_always;
     default:
-      throw new ArgumentError(name);
+      throw ArgumentError(name);
   }
 }
 
 final BuiltSet<ApplyFieldCorrectionRequestDtoScopeEnum>
-    _$applyFieldCorrectionRequestDtoScopeEnumValues = new BuiltSet<
+    _$applyFieldCorrectionRequestDtoScopeEnumValues = BuiltSet<
         ApplyFieldCorrectionRequestDtoScopeEnum>(const <ApplyFieldCorrectionRequestDtoScopeEnum>[
   _$applyFieldCorrectionRequestDtoScopeEnum_document,
   _$applyFieldCorrectionRequestDtoScopeEnum_label,
@@ -104,13 +110,13 @@ final BuiltSet<ApplyFieldCorrectionRequestDtoScopeEnum>
 
 Serializer<ApplyFieldCorrectionRequestDtoOpEnum>
     _$applyFieldCorrectionRequestDtoOpEnumSerializer =
-    new _$ApplyFieldCorrectionRequestDtoOpEnumSerializer();
+    _$ApplyFieldCorrectionRequestDtoOpEnumSerializer();
 Serializer<ApplyFieldCorrectionRequestDtoShapeEnum>
     _$applyFieldCorrectionRequestDtoShapeEnumSerializer =
-    new _$ApplyFieldCorrectionRequestDtoShapeEnumSerializer();
+    _$ApplyFieldCorrectionRequestDtoShapeEnumSerializer();
 Serializer<ApplyFieldCorrectionRequestDtoScopeEnum>
     _$applyFieldCorrectionRequestDtoScopeEnumSerializer =
-    new _$ApplyFieldCorrectionRequestDtoScopeEnumSerializer();
+    _$ApplyFieldCorrectionRequestDtoScopeEnumSerializer();
 
 class _$ApplyFieldCorrectionRequestDtoOpEnumSerializer
     implements PrimitiveSerializer<ApplyFieldCorrectionRequestDtoOpEnum> {
@@ -119,12 +125,14 @@ class _$ApplyFieldCorrectionRequestDtoOpEnumSerializer
     'reanchor': 'reanchor',
     'editValue': 'edit_value',
     'remove': 'remove',
+    'rejectSuggestion': 'reject_suggestion',
   };
   static const Map<Object, String> _fromWire = const <Object, String>{
     'create': 'create',
     'reanchor': 'reanchor',
     'edit_value': 'editValue',
     'remove': 'remove',
+    'reject_suggestion': 'rejectSuggestion',
   };
 
   @override
@@ -246,7 +254,7 @@ class _$ApplyFieldCorrectionRequestDto extends ApplyFieldCorrectionRequestDto {
 
   factory _$ApplyFieldCorrectionRequestDto(
           [void Function(ApplyFieldCorrectionRequestDtoBuilder)? updates]) =>
-      (new ApplyFieldCorrectionRequestDtoBuilder()..update(updates))._build();
+      (ApplyFieldCorrectionRequestDtoBuilder()..update(updates))._build();
 
   _$ApplyFieldCorrectionRequestDto._(
       {required this.id,
@@ -263,15 +271,7 @@ class _$ApplyFieldCorrectionRequestDto extends ApplyFieldCorrectionRequestDto {
       this.scope,
       this.tagId,
       this.beforeRegionId})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        id, r'ApplyFieldCorrectionRequestDto', 'id');
-    BuiltValueNullFieldError.checkNotNull(
-        op, r'ApplyFieldCorrectionRequestDto', 'op');
-    BuiltValueNullFieldError.checkNotNull(
-        fieldKey, r'ApplyFieldCorrectionRequestDto', 'fieldKey');
-  }
-
+      : super._();
   @override
   ApplyFieldCorrectionRequestDto rebuild(
           void Function(ApplyFieldCorrectionRequestDtoBuilder) updates) =>
@@ -279,7 +279,7 @@ class _$ApplyFieldCorrectionRequestDto extends ApplyFieldCorrectionRequestDto {
 
   @override
   ApplyFieldCorrectionRequestDtoBuilder toBuilder() =>
-      new ApplyFieldCorrectionRequestDtoBuilder()..replace(this);
+      ApplyFieldCorrectionRequestDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -388,7 +388,7 @@ class ApplyFieldCorrectionRequestDtoBuilder
 
   ListBuilder<num>? _blockIndexes;
   ListBuilder<num> get blockIndexes =>
-      _$this._blockIndexes ??= new ListBuilder<num>();
+      _$this._blockIndexes ??= ListBuilder<num>();
   set blockIndexes(ListBuilder<num>? blockIndexes) =>
       _$this._blockIndexes = blockIndexes;
 
@@ -439,7 +439,6 @@ class ApplyFieldCorrectionRequestDtoBuilder
 
   @override
   void replace(ApplyFieldCorrectionRequestDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$ApplyFieldCorrectionRequestDto;
   }
 
@@ -455,31 +454,32 @@ class ApplyFieldCorrectionRequestDtoBuilder
     _$ApplyFieldCorrectionRequestDto _$result;
     try {
       _$result = _$v ??
-          new _$ApplyFieldCorrectionRequestDto._(
-              id: BuiltValueNullFieldError.checkNotNull(
-                  id, r'ApplyFieldCorrectionRequestDto', 'id'),
-              op: BuiltValueNullFieldError.checkNotNull(
-                  op, r'ApplyFieldCorrectionRequestDto', 'op'),
-              fieldKey: BuiltValueNullFieldError.checkNotNull(
-                  fieldKey, r'ApplyFieldCorrectionRequestDto', 'fieldKey'),
-              page: page,
-              shape: shape,
-              x0: x0,
-              y0: y0,
-              x1: x1,
-              y1: y1,
-              blockIndexes: _blockIndexes?.build(),
-              valueOverride: valueOverride,
-              scope: scope,
-              tagId: tagId,
-              beforeRegionId: beforeRegionId);
+          _$ApplyFieldCorrectionRequestDto._(
+            id: BuiltValueNullFieldError.checkNotNull(
+                id, r'ApplyFieldCorrectionRequestDto', 'id'),
+            op: BuiltValueNullFieldError.checkNotNull(
+                op, r'ApplyFieldCorrectionRequestDto', 'op'),
+            fieldKey: BuiltValueNullFieldError.checkNotNull(
+                fieldKey, r'ApplyFieldCorrectionRequestDto', 'fieldKey'),
+            page: page,
+            shape: shape,
+            x0: x0,
+            y0: y0,
+            x1: x1,
+            y1: y1,
+            blockIndexes: _blockIndexes?.build(),
+            valueOverride: valueOverride,
+            scope: scope,
+            tagId: tagId,
+            beforeRegionId: beforeRegionId,
+          );
     } catch (_) {
       late String _$failedField;
       try {
         _$failedField = 'blockIndexes';
         _blockIndexes?.build();
       } catch (e) {
-        throw new BuiltValueNestedFieldError(
+        throw BuiltValueNestedFieldError(
             r'ApplyFieldCorrectionRequestDto', _$failedField, e.toString());
       }
       rethrow;

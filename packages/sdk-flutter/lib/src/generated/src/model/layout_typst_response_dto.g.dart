@@ -21,12 +21,12 @@ LayoutTypstResponseDtoExportModeEnum
     case 'semantisch':
       return _$layoutTypstResponseDtoExportModeEnum_semantisch;
     default:
-      throw new ArgumentError(name);
+      throw ArgumentError(name);
   }
 }
 
 final BuiltSet<LayoutTypstResponseDtoExportModeEnum>
-    _$layoutTypstResponseDtoExportModeEnumValues = new BuiltSet<
+    _$layoutTypstResponseDtoExportModeEnumValues = BuiltSet<
         LayoutTypstResponseDtoExportModeEnum>(const <LayoutTypstResponseDtoExportModeEnum>[
   _$layoutTypstResponseDtoExportModeEnum_exakt,
   _$layoutTypstResponseDtoExportModeEnum_semantisch,
@@ -34,7 +34,7 @@ final BuiltSet<LayoutTypstResponseDtoExportModeEnum>
 
 Serializer<LayoutTypstResponseDtoExportModeEnum>
     _$layoutTypstResponseDtoExportModeEnumSerializer =
-    new _$LayoutTypstResponseDtoExportModeEnumSerializer();
+    _$LayoutTypstResponseDtoExportModeEnumSerializer();
 
 class _$LayoutTypstResponseDtoExportModeEnumSerializer
     implements PrimitiveSerializer<LayoutTypstResponseDtoExportModeEnum> {
@@ -80,22 +80,14 @@ class _$LayoutTypstResponseDto extends LayoutTypstResponseDto {
 
   factory _$LayoutTypstResponseDto(
           [void Function(LayoutTypstResponseDtoBuilder)? updates]) =>
-      (new LayoutTypstResponseDtoBuilder()..update(updates))._build();
+      (LayoutTypstResponseDtoBuilder()..update(updates))._build();
 
   _$LayoutTypstResponseDto._(
       {required this.typst,
       required this.exportMode,
       required this.reconstructionReliable,
       this.unreliableReason})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        typst, r'LayoutTypstResponseDto', 'typst');
-    BuiltValueNullFieldError.checkNotNull(
-        exportMode, r'LayoutTypstResponseDto', 'exportMode');
-    BuiltValueNullFieldError.checkNotNull(reconstructionReliable,
-        r'LayoutTypstResponseDto', 'reconstructionReliable');
-  }
-
+      : super._();
   @override
   LayoutTypstResponseDto rebuild(
           void Function(LayoutTypstResponseDtoBuilder) updates) =>
@@ -103,7 +95,7 @@ class _$LayoutTypstResponseDto extends LayoutTypstResponseDto {
 
   @override
   LayoutTypstResponseDtoBuilder toBuilder() =>
-      new LayoutTypstResponseDtoBuilder()..replace(this);
+      LayoutTypstResponseDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -178,7 +170,6 @@ class LayoutTypstResponseDtoBuilder
 
   @override
   void replace(LayoutTypstResponseDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$LayoutTypstResponseDto;
   }
 
@@ -192,16 +183,17 @@ class LayoutTypstResponseDtoBuilder
 
   _$LayoutTypstResponseDto _build() {
     final _$result = _$v ??
-        new _$LayoutTypstResponseDto._(
-            typst: BuiltValueNullFieldError.checkNotNull(
-                typst, r'LayoutTypstResponseDto', 'typst'),
-            exportMode: BuiltValueNullFieldError.checkNotNull(
-                exportMode, r'LayoutTypstResponseDto', 'exportMode'),
-            reconstructionReliable: BuiltValueNullFieldError.checkNotNull(
-                reconstructionReliable,
-                r'LayoutTypstResponseDto',
-                'reconstructionReliable'),
-            unreliableReason: unreliableReason);
+        _$LayoutTypstResponseDto._(
+          typst: BuiltValueNullFieldError.checkNotNull(
+              typst, r'LayoutTypstResponseDto', 'typst'),
+          exportMode: BuiltValueNullFieldError.checkNotNull(
+              exportMode, r'LayoutTypstResponseDto', 'exportMode'),
+          reconstructionReliable: BuiltValueNullFieldError.checkNotNull(
+              reconstructionReliable,
+              r'LayoutTypstResponseDto',
+              'reconstructionReliable'),
+          unreliableReason: unreliableReason,
+        );
     replace(_$result);
     return _$result;
   }

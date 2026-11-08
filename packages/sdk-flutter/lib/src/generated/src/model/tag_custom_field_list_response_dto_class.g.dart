@@ -16,16 +16,11 @@ class _$TagCustomFieldListResponseDtoClass
   factory _$TagCustomFieldListResponseDtoClass(
           [void Function(TagCustomFieldListResponseDtoClassBuilder)?
               updates]) =>
-      (new TagCustomFieldListResponseDtoClassBuilder()..update(updates))
-          ._build();
+      (TagCustomFieldListResponseDtoClassBuilder()..update(updates))._build();
 
   _$TagCustomFieldListResponseDtoClass._(
       {required this.items, this.suggestions})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        items, r'TagCustomFieldListResponseDtoClass', 'items');
-  }
-
+      : super._();
   @override
   TagCustomFieldListResponseDtoClass rebuild(
           void Function(TagCustomFieldListResponseDtoClassBuilder) updates) =>
@@ -33,7 +28,7 @@ class _$TagCustomFieldListResponseDtoClass
 
   @override
   TagCustomFieldListResponseDtoClassBuilder toBuilder() =>
-      new TagCustomFieldListResponseDtoClassBuilder()..replace(this);
+      TagCustomFieldListResponseDtoClassBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -69,12 +64,12 @@ class TagCustomFieldListResponseDtoClassBuilder
 
   ListBuilder<JsonObject>? _items;
   ListBuilder<JsonObject> get items =>
-      _$this._items ??= new ListBuilder<JsonObject>();
+      _$this._items ??= ListBuilder<JsonObject>();
   set items(ListBuilder<JsonObject>? items) => _$this._items = items;
 
   ListBuilder<JsonObject>? _suggestions;
   ListBuilder<JsonObject> get suggestions =>
-      _$this._suggestions ??= new ListBuilder<JsonObject>();
+      _$this._suggestions ??= ListBuilder<JsonObject>();
   set suggestions(ListBuilder<JsonObject>? suggestions) =>
       _$this._suggestions = suggestions;
 
@@ -94,7 +89,6 @@ class TagCustomFieldListResponseDtoClassBuilder
 
   @override
   void replace(TagCustomFieldListResponseDtoClass other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$TagCustomFieldListResponseDtoClass;
   }
 
@@ -111,8 +105,10 @@ class TagCustomFieldListResponseDtoClassBuilder
     _$TagCustomFieldListResponseDtoClass _$result;
     try {
       _$result = _$v ??
-          new _$TagCustomFieldListResponseDtoClass._(
-              items: items.build(), suggestions: _suggestions?.build());
+          _$TagCustomFieldListResponseDtoClass._(
+            items: items.build(),
+            suggestions: _suggestions?.build(),
+          );
     } catch (_) {
       late String _$failedField;
       try {
@@ -121,7 +117,7 @@ class TagCustomFieldListResponseDtoClassBuilder
         _$failedField = 'suggestions';
         _suggestions?.build();
       } catch (e) {
-        throw new BuiltValueNestedFieldError(
+        throw BuiltValueNestedFieldError(
             r'TagCustomFieldListResponseDtoClass', _$failedField, e.toString());
       }
       rethrow;

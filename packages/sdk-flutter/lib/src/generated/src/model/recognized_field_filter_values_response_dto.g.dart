@@ -20,7 +20,7 @@ class _$RecognizedFieldFilterValuesResponseDto
   factory _$RecognizedFieldFilterValuesResponseDto(
           [void Function(RecognizedFieldFilterValuesResponseDtoBuilder)?
               updates]) =>
-      (new RecognizedFieldFilterValuesResponseDtoBuilder()..update(updates))
+      (RecognizedFieldFilterValuesResponseDtoBuilder()..update(updates))
           ._build();
 
   _$RecognizedFieldFilterValuesResponseDto._(
@@ -28,17 +28,7 @@ class _$RecognizedFieldFilterValuesResponseDto
       required this.nextCursor,
       required this.hasMore,
       required this.total})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        items, r'RecognizedFieldFilterValuesResponseDto', 'items');
-    BuiltValueNullFieldError.checkNotNull(
-        nextCursor, r'RecognizedFieldFilterValuesResponseDto', 'nextCursor');
-    BuiltValueNullFieldError.checkNotNull(
-        hasMore, r'RecognizedFieldFilterValuesResponseDto', 'hasMore');
-    BuiltValueNullFieldError.checkNotNull(
-        total, r'RecognizedFieldFilterValuesResponseDto', 'total');
-  }
-
+      : super._();
   @override
   RecognizedFieldFilterValuesResponseDto rebuild(
           void Function(RecognizedFieldFilterValuesResponseDtoBuilder)
@@ -47,7 +37,7 @@ class _$RecognizedFieldFilterValuesResponseDto
 
   @override
   RecognizedFieldFilterValuesResponseDtoBuilder toBuilder() =>
-      new RecognizedFieldFilterValuesResponseDtoBuilder()..replace(this);
+      RecognizedFieldFilterValuesResponseDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -89,7 +79,7 @@ class RecognizedFieldFilterValuesResponseDtoBuilder
   _$RecognizedFieldFilterValuesResponseDto? _$v;
 
   ListBuilder<String>? _items;
-  ListBuilder<String> get items => _$this._items ??= new ListBuilder<String>();
+  ListBuilder<String> get items => _$this._items ??= ListBuilder<String>();
   set items(ListBuilder<String>? items) => _$this._items = items;
 
   String? _nextCursor;
@@ -122,7 +112,6 @@ class RecognizedFieldFilterValuesResponseDtoBuilder
 
   @override
   void replace(RecognizedFieldFilterValuesResponseDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$RecognizedFieldFilterValuesResponseDto;
   }
 
@@ -139,21 +128,22 @@ class RecognizedFieldFilterValuesResponseDtoBuilder
     _$RecognizedFieldFilterValuesResponseDto _$result;
     try {
       _$result = _$v ??
-          new _$RecognizedFieldFilterValuesResponseDto._(
-              items: items.build(),
-              nextCursor: BuiltValueNullFieldError.checkNotNull(nextCursor,
-                  r'RecognizedFieldFilterValuesResponseDto', 'nextCursor'),
-              hasMore: BuiltValueNullFieldError.checkNotNull(hasMore,
-                  r'RecognizedFieldFilterValuesResponseDto', 'hasMore'),
-              total: BuiltValueNullFieldError.checkNotNull(
-                  total, r'RecognizedFieldFilterValuesResponseDto', 'total'));
+          _$RecognizedFieldFilterValuesResponseDto._(
+            items: items.build(),
+            nextCursor: BuiltValueNullFieldError.checkNotNull(nextCursor,
+                r'RecognizedFieldFilterValuesResponseDto', 'nextCursor'),
+            hasMore: BuiltValueNullFieldError.checkNotNull(
+                hasMore, r'RecognizedFieldFilterValuesResponseDto', 'hasMore'),
+            total: BuiltValueNullFieldError.checkNotNull(
+                total, r'RecognizedFieldFilterValuesResponseDto', 'total'),
+          );
     } catch (_) {
       late String _$failedField;
       try {
         _$failedField = 'items';
         items.build();
       } catch (e) {
-        throw new BuiltValueNestedFieldError(
+        throw BuiltValueNestedFieldError(
             r'RecognizedFieldFilterValuesResponseDto',
             _$failedField,
             e.toString());

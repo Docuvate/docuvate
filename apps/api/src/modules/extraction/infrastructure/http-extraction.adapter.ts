@@ -87,6 +87,27 @@ function parseExtractionBlock(value: unknown): ExtractionBlock | null {
   return block;
 }
 
+
+function parsePageTransforms(
+  value: unknown
+): { page: number; rotationQuarterTurns: 0 | 1 | 2 | 3 }[] | undefined {
+  if (!Array.isArray(value)) {
+    return undefined;
+  }
+  const out: { page: number; rotationQuarterTurns: 0 | 1 | 2 | 3 }[] = [];
+  for (const item of value) {
+    if (!isRecord(item)) continue;
+    const page = Number(item.page);
+    const turnsRaw = item.rotationQuarterTurns ?? item.rotation_quarter_turns;
+    const turns = Number(turnsRaw);
+    if (!Number.isInteger(page) || page < 1) continue;
+    if (turns !== 0 && turns !== 1 && turns !== 2 && turns !== 3) continue;
+    if (turns === 0) continue;
+    out.push({ page, rotationQuarterTurns: turns });
+  }
+  return out.length > 0 ? out : undefined;
+}
+
 /** Worker OCR/text-layer blocks (page-relative boxes) — persisted for text view and click-linking. */
 function parseExtractionBlocks(value: unknown): ExtractionBlock[] | undefined {
   if (!Array.isArray(value)) {
@@ -323,6 +344,7 @@ function parseExtractionResultBody(value: unknown): ExtractionResult {
   const extractedFacts: ExtractedFactDto[] | undefined =
     row.extractedFacts !== undefined ? parseExtractedFacts(row.extractedFacts) : undefined;
   const blocks = parseExtractionBlocks(row.blocks);
+  const pageTransforms = parsePageTransforms(row.pageTransforms ?? row.page_transforms);
   const result: ExtractionResult = {
     text,
     fields: parseExtractedFields(row.fields),
@@ -345,6 +367,9 @@ function parseExtractionResultBody(value: unknown): ExtractionResult {
   }
   if (images) {
     result.imageIngest = images;
+  }
+  if (pageTransforms) {
+    result.pageTransforms = pageTransforms;
   }
   return result;
 }

@@ -23,7 +23,7 @@ class _$LayoutTokenDto extends LayoutTokenDto {
   final String text;
 
   factory _$LayoutTokenDto([void Function(LayoutTokenDtoBuilder)? updates]) =>
-      (new LayoutTokenDtoBuilder()..update(updates))._build();
+      (LayoutTokenDtoBuilder()..update(updates))._build();
 
   _$LayoutTokenDto._(
       {required this.blockIndex,
@@ -33,24 +33,13 @@ class _$LayoutTokenDto extends LayoutTokenDto {
       required this.x1,
       required this.y1,
       required this.text})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        blockIndex, r'LayoutTokenDto', 'blockIndex');
-    BuiltValueNullFieldError.checkNotNull(page, r'LayoutTokenDto', 'page');
-    BuiltValueNullFieldError.checkNotNull(x0, r'LayoutTokenDto', 'x0');
-    BuiltValueNullFieldError.checkNotNull(y0, r'LayoutTokenDto', 'y0');
-    BuiltValueNullFieldError.checkNotNull(x1, r'LayoutTokenDto', 'x1');
-    BuiltValueNullFieldError.checkNotNull(y1, r'LayoutTokenDto', 'y1');
-    BuiltValueNullFieldError.checkNotNull(text, r'LayoutTokenDto', 'text');
-  }
-
+      : super._();
   @override
   LayoutTokenDto rebuild(void Function(LayoutTokenDtoBuilder) updates) =>
       (toBuilder()..update(updates)).build();
 
   @override
-  LayoutTokenDtoBuilder toBuilder() =>
-      new LayoutTokenDtoBuilder()..replace(this);
+  LayoutTokenDtoBuilder toBuilder() => LayoutTokenDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -146,7 +135,6 @@ class LayoutTokenDtoBuilder
 
   @override
   void replace(LayoutTokenDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$LayoutTokenDto;
   }
 
@@ -160,21 +148,22 @@ class LayoutTokenDtoBuilder
 
   _$LayoutTokenDto _build() {
     final _$result = _$v ??
-        new _$LayoutTokenDto._(
-            blockIndex: BuiltValueNullFieldError.checkNotNull(
-                blockIndex, r'LayoutTokenDto', 'blockIndex'),
-            page: BuiltValueNullFieldError.checkNotNull(
-                page, r'LayoutTokenDto', 'page'),
-            x0: BuiltValueNullFieldError.checkNotNull(
-                x0, r'LayoutTokenDto', 'x0'),
-            y0: BuiltValueNullFieldError.checkNotNull(
-                y0, r'LayoutTokenDto', 'y0'),
-            x1: BuiltValueNullFieldError.checkNotNull(
-                x1, r'LayoutTokenDto', 'x1'),
-            y1: BuiltValueNullFieldError.checkNotNull(
-                y1, r'LayoutTokenDto', 'y1'),
-            text: BuiltValueNullFieldError.checkNotNull(
-                text, r'LayoutTokenDto', 'text'));
+        _$LayoutTokenDto._(
+          blockIndex: BuiltValueNullFieldError.checkNotNull(
+              blockIndex, r'LayoutTokenDto', 'blockIndex'),
+          page: BuiltValueNullFieldError.checkNotNull(
+              page, r'LayoutTokenDto', 'page'),
+          x0: BuiltValueNullFieldError.checkNotNull(
+              x0, r'LayoutTokenDto', 'x0'),
+          y0: BuiltValueNullFieldError.checkNotNull(
+              y0, r'LayoutTokenDto', 'y0'),
+          x1: BuiltValueNullFieldError.checkNotNull(
+              x1, r'LayoutTokenDto', 'x1'),
+          y1: BuiltValueNullFieldError.checkNotNull(
+              y1, r'LayoutTokenDto', 'y1'),
+          text: BuiltValueNullFieldError.checkNotNull(
+              text, r'LayoutTokenDto', 'text'),
+        );
     replace(_$result);
     return _$result;
   }

@@ -19,24 +19,14 @@ class _$DuplicateSetListResponseDtoClass
 
   factory _$DuplicateSetListResponseDtoClass(
           [void Function(DuplicateSetListResponseDtoClassBuilder)? updates]) =>
-      (new DuplicateSetListResponseDtoClassBuilder()..update(updates))._build();
+      (DuplicateSetListResponseDtoClassBuilder()..update(updates))._build();
 
   _$DuplicateSetListResponseDtoClass._(
       {required this.items,
       required this.nextCursor,
       required this.hasMore,
       required this.total})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        items, r'DuplicateSetListResponseDtoClass', 'items');
-    BuiltValueNullFieldError.checkNotNull(
-        nextCursor, r'DuplicateSetListResponseDtoClass', 'nextCursor');
-    BuiltValueNullFieldError.checkNotNull(
-        hasMore, r'DuplicateSetListResponseDtoClass', 'hasMore');
-    BuiltValueNullFieldError.checkNotNull(
-        total, r'DuplicateSetListResponseDtoClass', 'total');
-  }
-
+      : super._();
   @override
   DuplicateSetListResponseDtoClass rebuild(
           void Function(DuplicateSetListResponseDtoClassBuilder) updates) =>
@@ -44,7 +34,7 @@ class _$DuplicateSetListResponseDtoClass
 
   @override
   DuplicateSetListResponseDtoClassBuilder toBuilder() =>
-      new DuplicateSetListResponseDtoClassBuilder()..replace(this);
+      DuplicateSetListResponseDtoClassBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -86,7 +76,7 @@ class DuplicateSetListResponseDtoClassBuilder
 
   ListBuilder<JsonObject>? _items;
   ListBuilder<JsonObject> get items =>
-      _$this._items ??= new ListBuilder<JsonObject>();
+      _$this._items ??= ListBuilder<JsonObject>();
   set items(ListBuilder<JsonObject>? items) => _$this._items = items;
 
   String? _nextCursor;
@@ -119,7 +109,6 @@ class DuplicateSetListResponseDtoClassBuilder
 
   @override
   void replace(DuplicateSetListResponseDtoClass other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$DuplicateSetListResponseDtoClass;
   }
 
@@ -135,21 +124,22 @@ class DuplicateSetListResponseDtoClassBuilder
     _$DuplicateSetListResponseDtoClass _$result;
     try {
       _$result = _$v ??
-          new _$DuplicateSetListResponseDtoClass._(
-              items: items.build(),
-              nextCursor: BuiltValueNullFieldError.checkNotNull(nextCursor,
-                  r'DuplicateSetListResponseDtoClass', 'nextCursor'),
-              hasMore: BuiltValueNullFieldError.checkNotNull(
-                  hasMore, r'DuplicateSetListResponseDtoClass', 'hasMore'),
-              total: BuiltValueNullFieldError.checkNotNull(
-                  total, r'DuplicateSetListResponseDtoClass', 'total'));
+          _$DuplicateSetListResponseDtoClass._(
+            items: items.build(),
+            nextCursor: BuiltValueNullFieldError.checkNotNull(
+                nextCursor, r'DuplicateSetListResponseDtoClass', 'nextCursor'),
+            hasMore: BuiltValueNullFieldError.checkNotNull(
+                hasMore, r'DuplicateSetListResponseDtoClass', 'hasMore'),
+            total: BuiltValueNullFieldError.checkNotNull(
+                total, r'DuplicateSetListResponseDtoClass', 'total'),
+          );
     } catch (_) {
       late String _$failedField;
       try {
         _$failedField = 'items';
         items.build();
       } catch (e) {
-        throw new BuiltValueNestedFieldError(
+        throw BuiltValueNestedFieldError(
             r'DuplicateSetListResponseDtoClass', _$failedField, e.toString());
       }
       rethrow;
