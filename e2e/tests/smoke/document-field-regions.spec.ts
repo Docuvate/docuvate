@@ -38,6 +38,21 @@ async function showLayoutSelectionTools(page: Page): Promise<void> {
 }
 
 /**
+ * Scroll the Übersicht tab into the document scroller and activate it.
+ * The page chip for a corrected field is rendered on this tab.
+ */
+async function activateOverviewTab(page: Page): Promise<void> {
+  const overview = page
+    .locator('.layout-side-tabs')
+    .getByRole('tab', { name: /Übersicht|Overview/i });
+  await expect(overview).toBeVisible();
+  await overview.evaluate((tab) => {
+    tab.scrollIntoView({ block: 'center', inline: 'nearest' });
+  });
+  await overview.click({ timeout: 15_000 });
+}
+
+/**
  * Press Area or Mark text, then wait until that tool is the one the page will draw with.
  * The rectangle and text regressions both start from this armed tool.
  */
@@ -398,10 +413,7 @@ test.describe('document field regions', () => {
           await dismissOverlaySheets(page);
           await expect(page.locator('[data-testid="field-correction-sheet"]')).toHaveCount(0);
         } else {
-          await page
-            .locator('.layout-side-tabs')
-            .getByRole('tab', { name: /Übersicht|Overview/i })
-            .click({ force: true });
+          await activateOverviewTab(page);
           await expect(page.locator('.source-chip')).toContainText('Seite 1');
           await assertFieldNameStackedAboveValue(page);
           await assertNoHorizontalOverflow(page);
