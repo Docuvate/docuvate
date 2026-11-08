@@ -1001,6 +1001,12 @@
   .document-detail-page[data-correction-sheet-open='1'] .pipeline-doc-header {
     display: none;
   }
+
+  /* The tool row lives in the shell header, above the scroller, so it cannot scroll away.
+     Hiding it while the sheet is open keeps a strip of the page visible above the sheet. */
+  .app-shell:has(.document-detail-page[data-correction-sheet-open='1']) .app-ribbon-context {
+    display: none;
+  }
 }
 
 /* The floating inspector owns the right edge, so the preview keeps one column. */
