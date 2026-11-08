@@ -88,6 +88,38 @@ A separate browser script on the same stack, not the official spec, checked the 
 - Layout primary opened `app-ribbon-context` / `structuring-context` with `data-primary=layout`. `document-selection-tools` had three radios and sat in that row. `layout-viewer-toolbar` did not contain it. Area could be selected. Fields and Labels hid the context row.
 - Text primary opened `structuring-edit-text` pressed and `structuring-save-text` disabled. The stage rendered one reading paragraph, `NORTH 1842 INVOICE TOTAL`, and no `.extracted-text-segment`. Save was not clicked. The edited text was not reloaded.
 
+## Disposable combined stack after the text-edit commit
+
+Local worktree only, not pushed. The web image was rebuilt from that worktree (`sha256:6c46966b82f5ea03cd0e6216323a458cf564211b216b1507085eae700c2880f7`) and the web container was recreated. The API image (`sha256:b70c7882b4006d216d56cb15988692bb6ee494259f12092cd389974eaf3c087e`) and the worker image (`sha256:2eae8304f35299a91438234910c3fda0664f733b59686a88b0f392555d4b7860`) stayed up: those trees did not change in `37544c8..e4ee4f7` or on PR 119/120 after those images were built. `/health` was only a precondition.
+
+Tuple fetched immediately before the official spec, again before the text-save run, and still the branch tips afterwards:
+
+- PR 121 `e4ee4f795d76a062bd46805d699bc74da77132b9` (includes PR 118 `4f1f5dc52d2b22aeae36fb8718b217c5071fa2ff`)
+- PR 119 `980d0a58d3ddb4d9b49c8888383ac1aa0904f5e8`
+- PR 120 `6432c968ca753f59480a80194bdc63dab8cdc8dc`
+
+Official spec `e2e/real-stack/viewer-review-persist.spec.ts` with `e2e/playwright.real-stack.config.ts`, Chromium, `E2E_WEB_URL=http://localhost:5173`, `E2E_API_URL=http://localhost:3001`, Postgres on host port 5433. Document `c3703b84-7f78-448f-8c5f-873637233c3b`. The spec failed at `page.keyboard.press('r')` (`viewer-review-persist.spec.ts:226`): the Area radio was absent and Layout was not pressed. The assertion was left in place.
+
+Passed before that failure, and present in Postgres:
+
+- The API corpus contained `NORTH 1842` and `INVOICE TOTAL`. No `suggestion:` fields before the seed. Outbox row `done`, `attempts` 1. Status `ready`.
+- The workbench had no reject control, so the spec inserted `suggestion:vendor` = `ACME GmbH` at confidence 0.55. That row is seeded. It is separate from the OCR text.
+- Reject, reload, decision readback, `pendingCount` decrease, undo, reload, empty decision list, and `pendingCount` restore passed. The stored decision is `vendor` / `rejected` with `withdrawn_at` set.
+- Clockwise rotate stored `rotation_quarter_turns` 1.
+- Correct, then `field-position-correct`, then the page drag. Field region `x0` 0.200, `y0` 0.45, `x1` 0.573, `y1` 0.80. The API assertion passed.
+- Table create, table readback, and a text edit were not reached.
+
+A second Chromium script on the same stack, `e2e/real-stack/viewer-text-save-noloss.spec.ts`, stays in the local worktree. It uses the same API, worker, and Postgres. Document `d48114b4-1058-4afc-8538-fc50030542b0`.
+
+- OCR text was `NORTH 1842` and `INVOICE TOTAL`. Suggestion keys were empty. Outbox `done`, `attempts` 1.
+- Seeded `suggestion:vendor` at 0.55. `pendingCount` moved 1 → 0 on reject and back to 1 on undo. The script rejected again, so one decision stays active. Postgres holds two `vendor` / `rejected` rows: one withdrawn, one active.
+- Label `audit-label-d48114b4` is attached. Page 1 is one quarter turn.
+- Layout + Area, a drag, and creating field `auditbox` stored a field region `x0` 0.200, `y0` 0.450, `x1` 0.450, `y1` 0.800.
+- Page fraction 0.55 on that quarter-turned page hits the Area radio. The page box starts above the viewport and the sticky ribbon covers the point (`elementFromPoint` returned the ribbon control). A drag on the empty page posted a table and the API answered 422 `documents.tableRegionEmpty`. Dragging the visible `INVOICE` span posted a table and the API answered 201. Cells are `NORTH 1842` and `INVOICE TOTAL`. Region `x0` 0.121, `y0` 0.128, `x1` 0.351, `y1` 0.197. Playwright's action click on `selection-mark-table` waited on a navigation and did not finish. The DOM `click()` on that same button sent the POST.
+- Before the text save the API reported `layoutIrAvailable` true, one layout page, and `document_layout_ir` count 1. The field, the table, turn `[1]`, decision `vendor:rejected:` (withdrawn time empty), and the label were present. Both extraction blocks kept their boxes.
+- Segment `NORTH 1842` was edited to `NORTH 1842 REVISED` and `structuring-save-text` PATCHed the document. After reload the API text is `NORTH 1842 REVISED` and `INVOICE TOTAL`. The `INVOICE TOTAL` box is unchanged (`0.12073863468527866`, `0.17389113029489767`, `0.22940340405583598`, `0.021169361572787516`). The revised block keeps the previous `NORTH 1842` box.
+- After that save, `layoutIrAvailable` is false, layout pages are 0, and `document_layout_ir` count is 0. `document_layout_ir_pages` goes with that row. The field region, table region, quarter turn, both decision rows, the label, and the two extraction blocks read back equal. `PgDocumentRepository.updateForUser` deletes `document_layout_ir` when `extractionBlocks` is set. That is the derived layout IR. The manual rows above stayed.
+
 ## Code inventory (not a live probe)
 
 Upload allow-list in `packages/contracts/src/upload-formats.ts`: PDF, JPEG, PNG, WebP, GIF, TIFF, DOC/DOCX, XLS/XLSX, PPT/PPTX, ODT/ODS/ODP, RTF, CSV, plain text, Markdown, HTML, EML, MSG.
@@ -156,4 +188,4 @@ Jobs that arrive without an outbox id still use `planProcessorFailure` and BullM
 
 ## Not claimed
 
-These tests do not prove the Mac stack, a rotated scan, label/NER/table quality, or connector import. They do not prove that no other regression exists. The later disposable run stored one field box on an upright PDF after a quarter turn. It did not save a table overlay, did not save an edited OCR string, and did not exercise 180° OCR.
+These tests do not prove the Mac stack, a rotated scan, label/NER/table quality, or connector import. They do not prove that no other regression exists. The `37544c8` disposable run stored one field box on an upright PDF after a quarter turn and did not save a table or an edited OCR string. The `e4ee4f7` run saved both, and it dropped `document_layout_ir` on that text save while the manual rows stayed. Neither run exercised 180° OCR.
