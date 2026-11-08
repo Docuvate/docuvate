@@ -554,7 +554,9 @@ export function DocumentReviewWorkbench({
                     variant="ghost"
                     disabled={saving}
                     onClick={() => {
-                      onUndoReject(item.correctionId!);
+                      const correctionId = item.correctionId;
+                      if (!correctionId) return;
+                      onUndoReject(correctionId);
                     }}
                   >
                     {t('pipeline.workbench.rejectUndo')}

@@ -910,7 +910,7 @@ export interface DocumentPageTransformRepository {
   listForDocument(documentId: string): Promise<import('@docuvate/contracts').DocumentPageTransformDto[]>;
   replacePipelineTransforms(
     documentId: string,
-    transforms: Array<{ page: number; rotationQuarterTurns: 0 | 1 | 2 | 3 }>
+    transforms: { page: number; rotationQuarterTurns: 0 | 1 | 2 | 3 }[]
   ): Promise<void>;
   upsertUserTransform(input: {
     documentId: string;

@@ -41,13 +41,13 @@ import { DocumentPipelineHeader, DocumentReviewWorkbench } from '../components/p
 import { PageFormSaveKit } from '../components/save/PageFormSaveKit';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import {
+  applyDocumentFieldCorrection,
   deleteDocument,
   fetchDocumentContentBlob,
   fetchDocumentPreviewBlob,
   getDocument,
   getUserSettings,
   getWorkspaceMlSettings,
-  applyDocumentFieldCorrection,
   listDocumentFieldSuggestionDecisions,
   listFolders,
   listRecognizedFields,
@@ -101,8 +101,8 @@ import {
   confirmFieldKeys,
   nextReviewDocumentId,
   reassignFieldValue,
-  type SuggestionRejectRef,
   suggestionRejectIdentity,
+  type SuggestionRejectRef,
 } from '../lib/reviewWorkbench';
 import { routes } from '../lib/routes';
 import { notifySaved, notifySaveError } from '../lib/saveNotify';
@@ -715,14 +715,12 @@ export function DocumentDetailPage() {
       fieldKey: key,
       valueOverride: value,
     }).then((result) => {
-      if (result?.noChange && result.correction) {
+      const correction = result?.correction;
+      if (result?.noChange && correction) {
         setSuggestionRejects((prev) =>
           prev.map((item) =>
             item.correctionId === correctionId
-              ? {
-                  ...item,
-                  correctionId: result.correction!.id,
-                }
+              ? { ...item, correctionId: correction.id }
               : item
           )
         );

@@ -4,6 +4,7 @@ import type { LayoutToken, NormalizedRect } from '@docuvate/contracts';
 import {
   inferTableBands,
   inferTableGrid,
+  ocrRectToUnrotatedPage,
   padTextSelectionRect,
   remapRegionTokens,
   selectionRectForTokenSpace,
@@ -14,11 +15,10 @@ import {
   tokenCoverageRatio,
   tokensInsideRect,
   tokensMatchingSelectedText,
-  viewerPointToUnrotatedPage,
   unrotatedPointToViewerPage,
   unrotatedRectToViewerPage,
+  viewerPointToUnrotatedPage,
   viewerRectToUnrotatedPage,
-  ocrRectToUnrotatedPage,
 } from '@docuvate/contracts';
 import { describe, expect, it } from 'vitest';
 
@@ -271,10 +271,11 @@ describe('page rotation remapping', () => {
   it('maps an OCR box from a 90° CW page back to the MediaBox', () => {
     const mapped = ocrRectToUnrotatedPage({ x0: 0, y0: 0, x1: 0.1, y1: 0.2 }, 1);
     expect(mapped).not.toBeNull();
-    expect(mapped!.x0).toBeCloseTo(0.8);
-    expect(mapped!.y0).toBeCloseTo(0);
-    expect(mapped!.x1).toBeCloseTo(1);
-    expect(mapped!.y1).toBeCloseTo(0.1);
+    if (!mapped) return;
+    expect(mapped.x0).toBeCloseTo(0.8);
+    expect(mapped.y0).toBeCloseTo(0);
+    expect(mapped.x1).toBeCloseTo(1);
+    expect(mapped.y1).toBeCloseTo(0.1);
   });
 
   it('round-trips field bbox rectangles for every quarter turn', () => {
@@ -282,12 +283,14 @@ describe('page rotation remapping', () => {
     for (const deg of [0, 90, 180, 270] as const) {
       const viewer = unrotatedRectToViewerPage(box, deg);
       expect(viewer).not.toBeNull();
-      const back = viewerRectToUnrotatedPage(viewer!, deg);
+      if (!viewer) return;
+      const back = viewerRectToUnrotatedPage(viewer, deg);
       expect(back).not.toBeNull();
-      expect(back!.x0).toBeCloseTo(box.x0, 5);
-      expect(back!.y0).toBeCloseTo(box.y0, 5);
-      expect(back!.x1).toBeCloseTo(box.x1, 5);
-      expect(back!.y1).toBeCloseTo(box.y1, 5);
+      if (!back) return;
+      expect(back.x0).toBeCloseTo(box.x0, 5);
+      expect(back.y0).toBeCloseTo(box.y0, 5);
+      expect(back.x1).toBeCloseTo(box.x1, 5);
+      expect(back.y1).toBeCloseTo(box.y1, 5);
     }
   });
 
@@ -295,11 +298,13 @@ describe('page rotation remapping', () => {
     const ocrOnRotated = { x0: 0.1, y0: 0.2, x1: 0.4, y1: 0.35 };
     const media = ocrRectToUnrotatedPage(ocrOnRotated, 1);
     expect(media).not.toBeNull();
-    const viewer = unrotatedRectToViewerPage(media!, 90);
+    if (!media) return;
+    const viewer = unrotatedRectToViewerPage(media, 90);
     expect(viewer).not.toBeNull();
-    expect(viewer!.x0).toBeCloseTo(ocrOnRotated.x0, 5);
-    expect(viewer!.y0).toBeCloseTo(ocrOnRotated.y0, 5);
-    expect(viewer!.x1).toBeCloseTo(ocrOnRotated.x1, 5);
-    expect(viewer!.y1).toBeCloseTo(ocrOnRotated.y1, 5);
+    if (!viewer) return;
+    expect(viewer.x0).toBeCloseTo(ocrOnRotated.x0, 5);
+    expect(viewer.y0).toBeCloseTo(ocrOnRotated.y0, 5);
+    expect(viewer.x1).toBeCloseTo(ocrOnRotated.x1, 5);
+    expect(viewer.y1).toBeCloseTo(ocrOnRotated.y1, 5);
   });
 });

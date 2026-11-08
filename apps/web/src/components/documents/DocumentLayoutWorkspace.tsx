@@ -25,9 +25,7 @@ import { findBlockIndexAtPoint } from '../../lib/extractionLayout';
 import { findFieldRegion } from '../../lib/findFieldRegion';
 import { layoutIrDocumentFromPageSummaries } from '../../lib/layoutIrPages';
 import {
-  buildLayoutOverlays,
   hitTestLayoutOverlay,
-  type LayoutOverlayRegion,
   overlayForExtractionBlock,
 } from '../../lib/layoutOverlayModel';
 import {
@@ -39,9 +37,14 @@ import { segmentedToolbarClass } from '../../lib/segmentedControlClasses';
 import { sourceChipPageLabel } from '../../lib/sourceChipLabel';
 import type { TableStructureChoice } from '../../lib/tableLayouts';
 import { useDocumentLayoutIr } from '../../lib/useDocumentLayoutIr';
+import { useDocumentPageTransforms } from '../../lib/useDocumentPageTransforms';
 import { useDocumentRegionLayers } from '../../lib/useDocumentRegionLayers';
 import { useLayoutCompare } from '../../lib/useLayoutCompare';
 import { useViewportMaxWidth } from '../../lib/useViewportMaxWidth';
+import {
+  buildWorkspaceLayoutOverlays,
+  buildWorkspacePdfOverlays,
+} from '../../lib/workspacePdfOverlays';
 import { useToast } from '../save';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
@@ -67,7 +70,6 @@ import { ExtractedTextPanel } from './ExtractedTextPanel';
 import { FieldBoundingBoxEditor } from './FieldBoundingBoxEditor';
 import { type PdfLayoutOverlay, PdfViewer } from './PdfViewer';
 import { TablePdfOverlay } from './table/TablePdfOverlay';
-import { useDocumentPageTransforms } from '../../lib/useDocumentPageTransforms';
 
 type AdvancedViewerMode = 'reconstruction' | 'compare';
 
@@ -95,6 +97,78 @@ function regionIdFromTableOverlay(overlayId: string): string | null {
     return null;
   }
   return overlayId.slice(REGION_TABLE_OVERLAY_PREFIX.length);
+}
+
+interface WorkspaceSelectionKeyBindings {
+  selectionDraft: DocumentSelectionDraft | null;
+  reanchorFieldKey: string | null;
+  fieldLabelForKey: (key: string) => string;
+  runFieldCorrection: (
+    body: ApplyFieldCorrectionRequest,
+    successMessage: string
+  ) => Promise<unknown>;
+  translateSaved: (fieldName: string) => string;
+  reportError: (err: unknown) => void;
+  clearSelection: () => void;
+  selectTextTool: () => void;
+  selectRectTool: () => void;
+}
+
+/** Keyboard shortcuts for the page stage. Kept beside the workspace so the component stays within the line ceiling. */
+function installWorkspaceSelectionKeys(bindings: WorkspaceSelectionKeyBindings): () => void {
+  const onKey = (event: KeyboardEvent) => {
+    const target = event.target;
+    if (target instanceof HTMLElement) {
+      const tag = target.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || target.isContentEditable) {
+        return;
+      }
+    }
+    if (event.key === 'Escape') {
+      bindings.clearSelection();
+      return;
+    }
+    if (event.key === 't' || event.key === 'T') {
+      bindings.selectTextTool();
+      return;
+    }
+    if (event.key === 'r' || event.key === 'R') {
+      bindings.selectRectTool();
+      return;
+    }
+    const draft = bindings.selectionDraft;
+    const fieldKey = bindings.reanchorFieldKey;
+    if (event.key !== 'Enter' || !draft || !fieldKey) {
+      return;
+    }
+    // Free-form create/assign goes through DocumentFieldContextBar so the user
+    // picks the target field explicitly (and confirms overwrites).
+    event.preventDefault();
+    void bindings
+      .runFieldCorrection(
+        {
+          id: crypto.randomUUID(),
+          op: 'reanchor',
+          fieldKey,
+          page: draft.page,
+          shape: 'rect',
+          x0: draft.rect.x0,
+          y0: draft.rect.y0,
+          x1: draft.rect.x1,
+          y1: draft.rect.y1,
+          blockIndexes: draft.tokens.map((token) => token.blockIndex),
+          ...(draft.text.trim().length > 0 ? { valueOverride: draft.text } : {}),
+        },
+        bindings.translateSaved(bindings.fieldLabelForKey(fieldKey))
+      )
+      .catch((err: unknown) => {
+        bindings.reportError(err);
+      });
+  };
+  window.addEventListener('keydown', onKey);
+  return () => {
+    window.removeEventListener('keydown', onKey);
+  };
 }
 
 interface DocumentLayoutWorkspaceProps {
@@ -470,60 +544,23 @@ export function DocumentLayoutWorkspace({
   const frameLayoutIr =
     layoutIr ?? (layoutIrPages?.length ? layoutIrDocumentFromPageSummaries(layoutIrPages) : null);
 
-  const overlays = useMemo(() => {
-    const base = layoutIr ? buildLayoutOverlays(layoutIr) : [];
-    const corrected: LayoutOverlayRegion[] = tableRegions.map((region, index) => ({
-      id: `region-table-${region.id}`,
-      page: region.page,
-      x: region.x0,
-      y: region.y0,
-      width: Math.max(0, region.x1 - region.x0),
-      height: Math.max(0, region.y1 - region.y0),
-      kind: 'table',
-      label: String(index + 1),
-      tableIndex: 1000 + index,
-    }));
-    return [...base, ...corrected];
-  }, [layoutIr, tableRegions]);
-
-  const pdfOverlays: PdfLayoutOverlay[] = useMemo(() => {
-    const fromIr = overlays.map((o) => {
-      let label = o.label;
-      if (o.id.startsWith('region-table-')) {
-        label = t('documents.layoutCorrectedTableLabel', { n: o.label });
-      } else if (o.kind === 'table' && o.tableIndex != null) {
-        label = t('documents.layoutTableLabel', { n: o.tableIndex + 1 });
-      } else if (o.kind === 'field' && o.label) {
-        label = fieldLabelForKey(o.label);
-      }
-      return {
-        id: o.id,
-        page: o.page,
-        x: o.x,
-        y: o.y,
-        width: o.width,
-        height: o.height,
-        kind: o.kind,
-        label,
-        value: o.value,
-      };
-    });
-    const fromRegions: PdfLayoutOverlay[] = fieldRegions.map((region) => {
-      const fieldKey = region.field?.fieldKey ?? '';
-      return {
-        id: regionFieldOverlayId(region.id),
-        page: region.page,
-        x: region.x0,
-        y: region.y0,
-        width: Math.max(0, region.x1 - region.x0),
-        height: Math.max(0, region.y1 - region.y0),
-        kind: 'field',
-        label: fieldKey ? fieldLabelForKey(fieldKey) : t('documents.layoutOverlayKind.field'),
-        value: region.field?.valueOverride ?? undefined,
-      };
-    });
-    return [...fromIr, ...fromRegions];
-  }, [fieldLabelForKey, fieldRegions, overlays, t]);
+  const overlays = useMemo(
+    () => buildWorkspaceLayoutOverlays(layoutIr, tableRegions),
+    [layoutIr, tableRegions]
+  );
+  const overlayLabels = useMemo(
+    () => ({
+      correctedTable: (ordinal: string) => t('documents.layoutCorrectedTableLabel', { n: ordinal }),
+      detectedTable: (index: number) => t('documents.layoutTableLabel', { n: index }),
+      field: fieldLabelForKey,
+      unnamedField: t('documents.layoutOverlayKind.field'),
+    }),
+    [fieldLabelForKey, t]
+  );
+  const pdfOverlays: PdfLayoutOverlay[] = useMemo(
+    () => buildWorkspacePdfOverlays(overlays, fieldRegions, overlayLabels),
+    [fieldRegions, overlayLabels, overlays]
+  );
 
   const onOverlaySelect = useCallback(
     (overlayId: string, page?: number) => {
@@ -580,71 +617,34 @@ export function DocumentLayoutWorkspace({
     ]
   );
 
-  useEffect(() => {
-    const onKey = (event: KeyboardEvent) => {
-      const target = event.target;
-      if (target instanceof HTMLElement) {
-        const tag = target.tagName;
-        if (tag === 'INPUT' || tag === 'TEXTAREA' || target.isContentEditable) {
-          return;
-        }
-      }
-      if (event.key === 'Escape') {
-        setActiveOverlayId(null);
-        setSelectionDraft(null);
-        setSelectionTool('none');
-        setReanchorFieldKey(null);
-        setSelectedFieldKey(null);
-        setSelectedTableId(null);
-        return;
-      }
-      if (event.key === 't' || event.key === 'T') {
-        setSelectionTool('text');
-        return;
-      }
-      if (event.key === 'r' || event.key === 'R') {
-        setSelectionTool('rect');
-        return;
-      }
-      if (event.key === 'Enter' && selectionDraft && reanchorFieldKey) {
-        // Free-form create/assign goes through DocumentFieldContextBar so the user
-        // picks the target field explicitly (and confirms overwrites).
-        event.preventDefault();
-        void runFieldCorrection(
-          {
-            id: crypto.randomUUID(),
-            op: 'reanchor',
-            fieldKey: reanchorFieldKey,
-            page: selectionDraft.page,
-            shape: 'rect',
-            x0: selectionDraft.rect.x0,
-            y0: selectionDraft.rect.y0,
-            x1: selectionDraft.rect.x1,
-            y1: selectionDraft.rect.y1,
-            blockIndexes: selectionDraft.tokens.map((token) => token.blockIndex),
-            ...(selectionDraft.text.trim().length > 0
-              ? { valueOverride: selectionDraft.text }
-              : {}),
-          },
-          t('documents.fieldCorrectionSaved', { name: fieldLabelForKey(reanchorFieldKey) })
-        ).catch((err: unknown) => {
+  useEffect(
+    () =>
+      installWorkspaceSelectionKeys({
+        selectionDraft,
+        reanchorFieldKey,
+        fieldLabelForKey,
+        runFieldCorrection,
+        translateSaved: (fieldName) => t('documents.fieldCorrectionSaved', { name: fieldName }),
+        reportError: (err) => {
           toast.error(formatUserFacingError(err, 'errors.generic'));
-        });
-      }
-    };
-    window.addEventListener('keydown', onKey);
-    return () => {
-      window.removeEventListener('keydown', onKey);
-    };
-  }, [
-    activeOverlayId,
-    fieldLabelForKey,
-    reanchorFieldKey,
-    runFieldCorrection,
-    selectionDraft,
-    t,
-    toast,
-  ]);
+        },
+        clearSelection: () => {
+          setActiveOverlayId(null);
+          setSelectionDraft(null);
+          setSelectionTool('none');
+          setReanchorFieldKey(null);
+          setSelectedFieldKey(null);
+          setSelectedTableId(null);
+        },
+        selectTextTool: () => {
+          setSelectionTool('text');
+        },
+        selectRectTool: () => {
+          setSelectionTool('rect');
+        },
+      }),
+    [fieldLabelForKey, reanchorFieldKey, runFieldCorrection, selectionDraft, t, toast]
+  );
 
   const onPdfPageClick = useCallback(
     (page: number, nx: number, ny: number) => {
@@ -851,7 +851,7 @@ export function DocumentLayoutWorkspace({
                     onDraftChange={setSelectionDraft}
                   />
                 ) : null}
-                {bboxEditRect && bboxEditRect.page === viewerPage ? (
+                {bboxEditRect?.page === viewerPage ? (
                   <FieldBoundingBoxEditor
                     page={bboxEditRect.page}
                     rect={bboxEditRect}
