@@ -119,10 +119,14 @@ async function openSuggestionInWorkbench(page: Page, docId: string): Promise<voi
   await applyDocuvateLocale(page, 'de');
   await expect(page.getByTestId('review-next-work')).toBeVisible({ timeout: 60_000 });
   await expect(page.locator('.review-wizard')).toHaveCount(0);
-  const link = page.locator(`a[href*="${docId}"]`);
-  await expect(link).toBeVisible({ timeout: 60_000 });
+  const openReview = page.locator(
+    `a[data-testid="review-open-structuring"][href*="${docId}"]`
+  );
+  const itemLink = page.locator(`a.review-next-item-link[href*="${docId}"]`);
+  await expect(openReview).toBeVisible({ timeout: 60_000 });
+  await expect(itemLink).toBeVisible({ timeout: 60_000 });
   await assertNoHorizontalOverflow(page, QUEUE_CONTAINERS);
-  await link.click();
+  await openReview.click();
   await expect(page).toHaveURL(new RegExp(`/documents/${docId}\\?review=1`));
   await expect(page.locator('.review-workbench-row', { hasText: SUGGESTED_VALUE })).toBeVisible({
     timeout: 60_000,

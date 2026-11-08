@@ -55,6 +55,13 @@ function parseReactScore(output) {
   return m ? Number(m[1]) : NaN;
 }
 
+/** Last stdout line when it is a non-negative integer. Empty output is not 0. */
+function parseScoreLine(stdout) {
+  const line = stdout.trim().split('\n').pop() ?? '';
+  if (!/^\d+$/.test(line)) return Number.NaN;
+  return Number(line);
+}
+
 /** React Doctor prints `Bugs: N errors` and share URLs with `e=N`. */
 function parseReactErrorCount(output) {
   const bugs = output.match(/Bugs:\s*(\d+)\s*errors/i);
@@ -66,7 +73,7 @@ function parseReactErrorCount(output) {
 
 function run(name, cfg) {
   const cwd = name === 'fastapi' ? resolve(process.cwd(), cfg.path) : process.cwd();
-  const res = runCommand(cfg.command, cwd);
+  let res = runCommand(cfg.command, cwd);
   const out = res.output;
   let score;
   if (name === 'nestjs') {
@@ -84,9 +91,24 @@ function run(name, cfg) {
   } else {
     // `--score` prints only the number on stdout; uvx writes install progress
     // ("Installed 1 package in 4ms") to stderr on a cold cache, so read stdout.
-    score = Number(res.stdout.trim().split('\n').pop());
+    // An empty stdout is not a score: Number('') is 0, which would look like a
+    // regression under the baseline. A failed download (HTTP 504) is the same.
+    score = parseScoreLine(res.stdout);
+    if (!Number.isInteger(score) || res.status !== 0) {
+      const retry = runCommand(cfg.command, cwd);
+      const retryScore = parseScoreLine(retry.stdout);
+      if (Number.isInteger(retryScore) && retry.status === 0) {
+        res = retry;
+        score = retryScore;
+      } else {
+        console.error(`Could not parse ${name} doctor score`);
+        printDiagnostics(name, cfg.command, cwd, res);
+        printDiagnostics(name, cfg.command, cwd, retry);
+        process.exit(1);
+      }
+    }
   }
-  if (Number.isNaN(score)) {
+  if (!Number.isInteger(score)) {
     console.error(`Could not parse ${name} doctor score`);
     printDiagnostics(name, cfg.command, cwd, res);
     process.exit(1);
@@ -95,6 +117,7 @@ function run(name, cfg) {
     console.error(
       `${name} doctor regressed: ${score} < baseline ${cfg.baselineScore} (target ${baseline.targetMinScore})`
     );
+    if (score === 0) printDiagnostics(name, cfg.command, cwd, res);
     process.exit(1);
   }
   console.log(`${name} doctor OK: ${score} (baseline ${cfg.baselineScore}, target ${baseline.targetMinScore})`);
