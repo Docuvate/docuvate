@@ -32,6 +32,7 @@ import {
 import { useFeatureFlags } from '../../lib/remoteConfig';
 import { segmentedToolbarClass } from '../../lib/segmentedControlClasses';
 import { sourceChipPageLabel } from '../../lib/sourceChipLabel';
+import type { StructuringPrimary } from '../../lib/structuringRibbon';
 import type { TableStructureChoice } from '../../lib/tableLayouts';
 import { useDocumentLayoutIr } from '../../lib/useDocumentLayoutIr';
 import { useDocumentPageTransforms } from '../../lib/useDocumentPageTransforms';
@@ -69,6 +70,7 @@ import { DocumentTableCorrectionSheet } from './DocumentTableCorrectionSheet';
 import { ExtractedLayoutHtmlFrame, type LayoutIrZoomStep } from './ExtractedLayoutHtmlFrame';
 import { ExtractedTextPanel } from './ExtractedTextPanel';
 import { type PdfLayoutOverlay } from './PdfViewer';
+import { StructuringContextRibbon } from './StructuringContextRibbon';
 
 type AdvancedViewerMode = 'reconstruction' | 'compare';
 
@@ -111,6 +113,9 @@ interface DocumentLayoutWorkspaceProps {
   layoutSideTab: LayoutSideTab;
   onLayoutSideTabChange: (tab: LayoutSideTab) => void;
   onCorrectionSheetOpenChange?: (open: boolean) => void;
+  /** Primary structuring mode. Text shows the text stage; layout shows region tools. */
+  structuringPrimary?: StructuringPrimary | null;
+  onStructuringPrimaryChange?: (primary: StructuringPrimary) => void;
   /** When set, open the field bounding-box editor for this key. */
   positionEditFieldKey?: string | null;
   onPositionEditHandled?: () => void;
@@ -152,6 +157,8 @@ export function DocumentLayoutWorkspace({
   layoutSideTab,
   onLayoutSideTabChange,
   onCorrectionSheetOpenChange,
+  structuringPrimary = null,
+  onStructuringPrimaryChange,
   positionEditFieldKey = null,
   onPositionEditHandled,
 }: DocumentLayoutWorkspaceProps) {
@@ -431,18 +438,20 @@ export function DocumentLayoutWorkspace({
   const qualityReviewPage = firstPageBelowSsimFloor(metricsByPage, ssimFloor);
 
   useEffect(() => {
-    const nextTextOpen = leftMode === 'text';
-    if (textEditOpen !== nextTextOpen) {
-      onTextEditOpenChange(nextTextOpen);
-    }
-  }, [leftMode, onTextEditOpenChange, textEditOpen]);
+    if (textEditOpen === (leftMode === 'text')) return;
+    setLeftMode(textEditOpen ? 'text' : 'original');
+    if (textEditOpen) setAdvancedOpen(false);
+  }, [leftMode, textEditOpen]);
 
-  const setLeftDocumentMode = useCallback((mode: LeftDocumentMode) => {
-    setLeftMode(mode);
-    if (mode === 'text') {
-      setAdvancedOpen(false);
-    }
-  }, []);
+  const setLeftDocumentMode = useCallback(
+    (mode: LeftDocumentMode) => {
+      setLeftMode(mode);
+      if (mode === 'text') setAdvancedOpen(false);
+      onTextEditOpenChange(mode === 'text');
+      if (mode === 'text') onStructuringPrimaryChange?.('text');
+    },
+    [onStructuringPrimaryChange, onTextEditOpenChange]
+  );
 
   const frameLayoutIr =
     layoutIr ?? (layoutIrPages?.length ? layoutIrDocumentFromPageSummaries(layoutIrPages) : null);
@@ -539,10 +548,12 @@ export function DocumentLayoutWorkspace({
         return;
       }
       if (event.key === 't' || event.key === 'T') {
+        onStructuringPrimaryChange?.('layout');
         setSelectionTool('text');
         return;
       }
       if (event.key === 'r' || event.key === 'R') {
+        onStructuringPrimaryChange?.('layout');
         setSelectionTool('rect');
         return;
       }
@@ -581,6 +592,7 @@ export function DocumentLayoutWorkspace({
     fieldLabelForKey,
     reanchorFieldKey,
     runFieldCorrection,
+    onStructuringPrimaryChange,
     selectionDraft,
     t,
     toast,
@@ -645,6 +657,7 @@ export function DocumentLayoutWorkspace({
           : 'layout-workspace'
       }
       data-correction-sheet-viewport={correctionSheetViewport ? '1' : '0'}
+      data-structuring-primary={structuringPrimary ?? ''}
       data-selected-field={selectedFieldKey ?? ''}
       data-selected-table={selectedTableId ?? ''}
       data-mobile-pane={mobilePane.narrow ? mobilePane.pane : undefined}
@@ -663,19 +676,28 @@ export function DocumentLayoutWorkspace({
             />
           ) : null}
 
+          <StructuringContextRibbon
+            primary={structuringPrimary}
+            textDirty={blocksDirty}
+            saving={saving}
+            editMode={editMode}
+            onEditModeChange={onEditModeChange}
+            onSaveText={onSaveBlocks}
+            selectionTool={selectionTool}
+            onSelectionToolChange={setSelectionTool}
+            hasOverlays={pdfOverlays.length > 0}
+            overlayEnabled={overlayEnabled}
+            onOverlayChange={setOverlayEnabled}
+          />
           <DocumentLayoutViewerToolbar
             leftMode={leftMode}
             onLeftModeChange={setLeftDocumentMode}
             showAdvancedStage={showAdvancedStage}
-            selectionTool={selectionTool}
-            onSelectionToolChange={setSelectionTool}
             zoom={layoutZoom}
             onZoomChange={setLayoutZoom}
             showTechnicalDetails={showTechnicalDetails}
             qualityTone={qualityTone}
             qualityPage={qualityReviewPage ?? viewerPage}
-            editMode={editMode}
-            onEditModeChange={onEditModeChange}
             overlay={
               pdfOverlays.length > 0 && leftMode === 'original'
                 ? { enabled: overlayEnabled, onChange: setOverlayEnabled }
@@ -777,7 +799,7 @@ export function DocumentLayoutWorkspace({
                 displayRotationDeg={displayRotationDeg}
                 pageRotations={byPage}
                 showSelectionLayer={!showAdvancedStage}
-                selectionTool={selectionTool}
+                selectionTool={structuringPrimary === 'layout' ? selectionTool : 'none'}
                 layoutTokens={layoutTokens}
                 onSelectionDraft={setSelectionDraft}
                 bboxEdit={bboxEditRect}

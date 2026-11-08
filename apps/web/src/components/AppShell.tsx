@@ -16,7 +16,7 @@ import { useNarrowTopbar } from '../lib/useNarrowTopbar';
 import { ConnectionStatusBanners } from './errors/ConnectionStatusBanners';
 import { AppPrimaryNav } from './layout/AppPrimaryNav';
 import { AppSectionRibbon } from './layout/AppRibbon';
-import { AppRibbonSlotContext } from './layout/appRibbonContext';
+import { AppRibbonContextSlotContext, AppRibbonSlotContext } from './layout/appRibbonContext';
 import { AppSidebar } from './layout/AppSidebar';
 import { UserAccountMenu } from './layout/UserAccountMenu';
 import { SaveBarLayoutSync } from './save/SaveBarLayoutSync';
@@ -28,6 +28,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const { t } = useTranslation();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [ribbonSlot, setRibbonSlot] = useState<HTMLDivElement | null>(null);
+  const [ribbonContextSlot, setRibbonContextSlot] = useState<HTMLDivElement | null>(null);
   const menuTriggerRef = useRef<HTMLButtonElement>(null);
   const closeMobileNav = () => {
     setMobileNavOpen(false);
@@ -92,6 +93,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <ToastGlobalBridge />
       <SaveBarLayoutSync />
       <AppRibbonSlotContext.Provider value={ribbonSlot}>
+      <AppRibbonContextSlotContext.Provider value={ribbonContextSlot}>
         <div className={`app-shell${mobileNavOpen ? ' app-shell-mobile-nav-open' : ''}`}>
           <a className="skip-link" href="#app-main-content">
             {t('shell.skipToMain')}
@@ -144,8 +146,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               </div>
             </header>
             <div className="app-ribbon" data-testid="app-ribbon">
-              <AppSectionRibbon />
-              <div className="app-ribbon-actions" ref={setRibbonSlot} />
+              <div className="app-ribbon-primary">
+                <AppSectionRibbon />
+                <div className="app-ribbon-actions" ref={setRibbonSlot} />
+              </div>
+              <div className="app-ribbon-context" ref={setRibbonContextSlot} data-testid="app-ribbon-context" />
             </div>
           </div>
           {mobileNavOpen ? (
@@ -164,6 +169,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </main>
           </div>
         </div>
+      </AppRibbonContextSlotContext.Provider>
       </AppRibbonSlotContext.Provider>
     </ToastProvider>
   );

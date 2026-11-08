@@ -16961,11 +16961,42 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 
 .app-ribbon {
   display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  gap: var(--dv-space-2xs) 0;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
   padding: var(--dv-space-2xs) var(--dv-space-lg) var(--dv-space-xs);
   background: color-mix(in srgb, var(--dv-color-bg-raised) 55%, transparent);
+}
+
+.app-ribbon-primary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  width: 100%;
+  min-width: 0;
+}
+
+.app-ribbon-context:empty {
+  display: none;
+}
+
+.app-ribbon-context {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+  margin-top: var(--dv-space-2xs);
+  padding-top: var(--dv-space-2xs);
+  border-top: var(--dv-border-width-hairline) solid
+    color-mix(in srgb, var(--dv-color-border) 70%, transparent);
+}
+
+.app-ribbon-context > .ribbon-group {
+  width: 100%;
+  box-sizing: border-box;
+  border-inline-start: 0;
+  padding-inline: 0;
 }
 
 .app-ribbon:not(:has(.ribbon-group)) {
@@ -16990,7 +17021,8 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 }
 
 /* The first group of the row starts flush; the right-aligned part needs no rule, space separates it. */
-.app-ribbon > :first-child > .ribbon-group:first-child {
+.app-ribbon-nav > .ribbon-group:first-child,
+.app-ribbon-primary > .app-ribbon-actions:first-child > .ribbon-group:first-child {
   padding-inline-start: 0;
   border-inline-start: 0;
 }
@@ -17000,7 +17032,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   border-inline-start: 0;
 }
 
-.app-ribbon > :last-child > .ribbon-group:last-child {
+.app-ribbon-actions > .ribbon-group:last-child {
   padding-inline-end: 0;
 }
 
@@ -17221,6 +17253,14 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 .app-ribbon button.aspect-strip-btn:hover {
   border-color: color-mix(in srgb, var(--dv-color-border) 70%, transparent);
   background: var(--dv-color-bg-raised);
+  box-shadow: var(--dv-surface-highlight), var(--dv-elevation-1);
+}
+
+.app-ribbon .aspect-strip-btn[aria-pressed='true'] {
+  border-color: transparent;
+  background: var(--dv-color-bg-raised);
+  color: var(--dv-color-text);
+  font-weight: var(--dv-font-weight-semibold);
   box-shadow: var(--dv-surface-highlight), var(--dv-elevation-1);
 }
 
@@ -17486,8 +17526,30 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   color: var(--dv-color-text-muted);
 }
 
+.structuring-context {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--dv-ribbon-item-gap);
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.structuring-context-hint {
+  flex: 1 1 12rem;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  color: var(--dv-color-text-muted);
+  font-size: var(--dv-font-size-sm);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 @media (max-width: 1023px) {
   .layout-viewer-toolbar-hint,
+  .structuring-context-hint,
   .document-selection-tool-key {
     display: none;
   }
@@ -17495,7 +17557,9 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 
 @media (max-width: 768px) {
   .layout-viewer-toolbar .document-selection-tools .segmented-control__option,
-  .layout-viewer-toolbar .layout-view-menu-trigger {
+  .layout-viewer-toolbar .layout-view-menu-trigger,
+  .app-ribbon-context .document-selection-tools .segmented-control__option,
+  .app-ribbon-context .ribbon-action {
     height: auto;
     min-height: var(--dv-touch-target-min);
   }

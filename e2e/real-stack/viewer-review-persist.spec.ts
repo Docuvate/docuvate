@@ -51,6 +51,32 @@ function assertUuid(value: string): string {
   return value;
 }
 
+function extractionCorpus(detail: Record<string, unknown>): string {
+  const extraction = detail['extraction'];
+  if (!isRecord(extraction)) return '';
+  const parts: string[] = [];
+  const text = readString(extraction, 'text');
+  if (text) parts.push(text);
+  for (const block of readArray(extraction, 'blocks')) {
+    if (!isRecord(block)) continue;
+    const blockText = readString(block, 'text');
+    if (blockText) parts.push(blockText);
+  }
+  return parts.join('\n');
+}
+
+function suggestionFieldKeys(detail: Record<string, unknown>): string[] {
+  const extraction = detail['extraction'];
+  if (!isRecord(extraction)) return [];
+  const keys: string[] = [];
+  for (const field of readArray(extraction, 'fields')) {
+    if (!isRecord(field)) continue;
+    const key = readString(field, 'key');
+    if (key?.startsWith('suggestion:')) keys.push(key);
+  }
+  return keys;
+}
+
 function seedSuggestion(documentId: string): void {
   const databaseUrl = process.env['DATABASE_URL'];
   if (!databaseUrl) {
@@ -127,6 +153,12 @@ test('reject, undo, rotated bbox, and table overlay persist through the API', as
   await page.waitForURL('**/documents**');
 
   const documentId = await uploadPdf(page);
+  const extracted = await apiGet(page, `/v1/documents/${documentId}`);
+  const corpus = extractionCorpus(extracted);
+  expect(corpus).toContain('NORTH 1842');
+  expect(corpus).toContain('INVOICE TOTAL');
+  expect(suggestionFieldKeys(extracted)).toEqual([]);
+
   await page.goto(`/documents/${documentId}`);
   const reject = page.getByTestId('review-workbench-reject');
   if ((await reject.count()) === 0) {
@@ -172,8 +204,13 @@ test('reject, undo, rotated bbox, and table overlay persist through the API', as
     .map((row) => readNumber(row, 'rotationQuarterTurns'));
   expect(afterTurns).toContain((beforeTurns + 1) % 4);
 
-  await page.getByTestId('field-position-correct').first().click();
+  const workbench = page.locator('.review-workbench');
+  await workbench.getByRole('button', { name: /korrigieren|correct/i }).click();
+  await expect(page.getByTestId('field-position-correct')).toBeVisible();
+  await page.getByTestId('field-position-correct').click();
+  await expect(page.getByRole('radio', { name: /Bereich|Area/ })).toBeChecked();
   await dragOnPage(page, 0.2, 0.2, 0.55, 0.45);
+  await expect(page.getByTestId('field-context-bar')).toBeVisible();
   const correction = page.waitForResponse(
     (response) => response.url().includes('/corrections') && response.request().method() === 'POST' && response.ok()
   );
@@ -195,7 +232,9 @@ test('reject, undo, rotated bbox, and table overlay persist through the API', as
   expect(y1).toBeGreaterThan(y0 ?? 0);
 
   await page.keyboard.press('r');
+  await expect(page.getByRole('radio', { name: /Bereich|Area/ })).toBeChecked();
   await dragOnPage(page, 0.15, 0.55, 0.7, 0.85);
+  await expect(page.getByTestId('selection-mark-table')).toBeVisible();
   const created = page.waitForResponse(
     (response) =>
       response.url().includes('/table-corrections') && response.request().method() === 'POST' && response.ok()

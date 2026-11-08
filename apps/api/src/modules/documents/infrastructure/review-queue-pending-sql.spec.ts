@@ -5,7 +5,22 @@ import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
-import { suggestionRowStillOpenSql } from './review-queue-pending-sql.js';
+import {
+  openFieldSuggestionExistsSql,
+  suggestionRowStillOpenSql,
+} from './review-queue-pending-sql.js';
+
+describe('open field suggestion', () => {
+  it('counts every non-empty open suggestion, including confidence below 0.85', () => {
+    const sql = openFieldSuggestionExistsSql('d.id');
+    expect(sql).toContain('v.document_id = d.id');
+    expect(sql).toContain("v.field_storage_key LIKE 'suggestion:%'");
+    expect(sql).toContain('length(trim(v.value_text)) > 0');
+    expect(sql).toContain('document_field_suggestion_decisions');
+    expect(sql).not.toContain('confidence');
+    expect(sql).not.toContain('0.85');
+  });
+});
 
 describe('suggestion row still open', () => {
   it('excludes an active reject of the review-row key and the legacy global: spelling', () => {

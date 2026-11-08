@@ -65,6 +65,29 @@ describe('review queue keyset pagination', () => {
     expect(new Set(ids).size).toBe(4);
   });
 
+  it('counts an open suggestion below 0.85', async () => {
+    const client = await pool.connect();
+    const lowId = randomUUID();
+    try {
+      const createdAt = new Date();
+      await client.query(
+        `INSERT INTO documents (id, user_id, filename, title, status, storage_key, mime_type, updated_at, created_at)
+         VALUES ($1, $2, 'low.pdf', 'Low', 'ready', $3, 'application/pdf', $4, $4)`,
+        [lowId, userId, `storage/${lowId}`, createdAt]
+      );
+      await client.query(
+        `INSERT INTO document_field_values (document_id, field_storage_key, value_text, confidence)
+         VALUES ($1, 'suggestion:vendor', 'ACME GmbH', 0.55)`,
+        [lowId]
+      );
+      expect(await repo.countPendingDocuments(userId)).toBe(5);
+      const ids = (await repo.listPendingDocumentPage(userId, 20)).rows.map((row) => row.id);
+      expect(ids).toContain(lowId);
+    } finally {
+      client.release();
+    }
+  });
+
   it('defaults to CURSOR_LIST_DEFAULT_LIMIT when callers pass that limit', async () => {
     const page = await repo.listPendingDocumentPage(userId, CURSOR_LIST_DEFAULT_LIMIT);
     expect(page.rows.length).toBeLessThanOrEqual(CURSOR_LIST_DEFAULT_LIMIT);

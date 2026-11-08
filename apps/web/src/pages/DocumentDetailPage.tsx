@@ -108,12 +108,23 @@ import {
 import { routes } from '../lib/routes';
 import { notifySaved, notifySaveError } from '../lib/saveNotify';
 import { pushRecentDocument } from '../lib/search/searchRecent';
+import { primaryForAspect, type StructuringCommand } from '../lib/structuringRibbon';
+import { useStructuringPrimary } from '../lib/useStructuringPrimary';
 
 interface DocumentMetadataBaseline {
   title: string;
   documentDate: string;
   notes: string;
   folderId: string;
+}
+
+function applyStructuringChrome(
+  command: StructuringCommand,
+  setLayoutSideTab: (tab: LayoutSideTab) => void,
+  openInspector: (panel: InspectorPanel) => void
+): void {
+  if (command.layoutTab) setLayoutSideTab(command.layoutTab);
+  if (command.inspector) openInspector(command.inspector);
 }
 
 function metadataFromDocument(doc: DocumentDto): DocumentMetadataBaseline {
@@ -182,8 +193,7 @@ export function DocumentDetailPage() {
     folderId: '',
   });
   const [metadataSaveError, setMetadataSaveError] = useState<string | null>(null);
-  const [layoutTextEditOpen, setLayoutTextEditOpen] = useState(false);
-  const [layoutEditMode, setLayoutEditMode] = useState(false);
+  const structuring = useStructuringPrimary();
   const [showTechnicalDetails, setShowTechnicalDetails] = useState(false);
   const [recognizedCatalog, setRecognizedCatalog] = useState<RecognizedFieldDefinitionDto[]>([]);
   const [fieldGateSettings, setFieldGateSettings] = useState<CatalogFieldGateSettings>({
@@ -884,10 +894,14 @@ export function DocumentDetailPage() {
               rejectedSuggestionIdentities={rejectedSuggestionIdentities}
               requeueBusy={requeueBusy}
               onRequeueExtraction={() => void onRequeueExtraction()}
-              textEditOpen={layoutTextEditOpen}
-              onTextEditOpenChange={setLayoutTextEditOpen}
-              editMode={layoutEditMode}
-              onEditModeChange={setLayoutEditMode}
+              textEditOpen={structuring.textOpen}
+              onTextEditOpenChange={structuring.onTextOpenChange}
+              structuringPrimary={structuring.primary}
+              onStructuringPrimaryChange={(primary) => {
+                applyStructuringChrome(structuring.select(primary), setLayoutSideTab, openInspector);
+              }}
+              editMode={structuring.textEditing}
+              onEditModeChange={structuring.setTextEditing}
               blocksDirty={blocksDirty}
               saving={saving}
               onSaveBlocks={() => void persist({ extractionBlocks: blocks })}
@@ -929,6 +943,7 @@ export function DocumentDetailPage() {
                 onActiveBlockIndexChange={setActiveBlockIndex}
                 onBlocksChange={setBlocks}
                 onHighlightBlocks={onHighlightBlocks}
+                textCorrection={structuring.primary === 'text'}
                 onSaveBlocks={() => void persist({ extractionBlocks: blocks })}
                 onExtractionRefresh={load}
               />
@@ -1001,21 +1016,17 @@ export function DocumentDetailPage() {
                   onLocate={locateValue}
                   onCorrectPosition={(fieldKey) => {
                     setPositionEditFieldKey(fieldKey);
+                    applyStructuringChrome(structuring.select('layout'), setLayoutSideTab, openInspector);
                     setInspectorChoice('fields');
                   }}
                   onLabelsUpdated={refreshDocumentLabels}
+                  activeAspect={structuring.activeAspect}
                   onOpenAspect={(aspect) => {
-                    if (aspect === 'labels') {
-                      openInspector('labels');
-                      return;
-                    }
-                    if (aspect === 'layout' && layoutWorkspace) setLayoutSideTab('outline');
-                    if (aspect === 'ocr' && layoutWorkspace) setLayoutTextEditOpen(true);
-                    window.requestAnimationFrame(() => {
-                      document
-                        .querySelector('.document-workbench-main')
-                        ?.scrollIntoView({ block: 'start', behavior: 'smooth' });
-                    });
+                    applyStructuringChrome(
+                      structuring.select(primaryForAspect(aspect)),
+                      setLayoutSideTab,
+                      openInspector
+                    );
                   }}
                 />
               </div>

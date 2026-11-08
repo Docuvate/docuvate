@@ -15,7 +15,7 @@ import {
   decodeIdTiebreakerCursor,
   encodeIdTiebreakerCursor,
 } from '../../../shared/infrastructure/pagination/id-tiebreaker-cursor.js';
-import { suggestionRowStillOpenSql } from './review-queue-pending-sql.js';
+import { openFieldSuggestionExistsSql } from './review-queue-pending-sql.js';
 
 interface PendingReviewDocumentRow {
   id: string;
@@ -133,22 +133,7 @@ export class PgDocumentReviewQueueRepository {
             WHERE dt.document_id = ${docAlias}.id AND dt.tag_id = s.tag_id
           )
       )
-      OR EXISTS (
-        SELECT 1
-        FROM document_field_values v
-        WHERE v.document_id = ${docAlias}.id
-          AND v.field_storage_key LIKE 'suggestion:%'
-          AND length(trim(v.value_text)) > 0
-          AND COALESCE(v.confidence, 0) >= 0.85
-          AND ${suggestionRowStillOpenSql('v.document_id', 'v.field_storage_key', 'v.value_text')}
-          AND NOT (
-            v.field_storage_key IN ('suggestion:vendor', 'suggestion:sender', 'suggestion:correspondent')
-            AND (
-              v.value_text ~ '^[0-9]{1,2}[./][0-9]{1,2}[./]'
-              OR v.value_text ~ '\\m[0-9]{5}\\M'
-            )
-          )
-      )
+      OR ${openFieldSuggestionExistsSql(`${docAlias}.id`)}
       OR EXISTS (
         SELECT 1
         FROM document_stack_members m_primary

@@ -16,6 +16,8 @@ interface StructuringAspectStripProps {
   statuses: readonly AspectStatus[];
   /** Opens the correction mode for an aspect; omit for a read-only strip. */
   onOpen?: (aspect: StructuringAspect) => void;
+  /** Primary mode currently driving the document. */
+  active?: StructuringAspect | null;
   className?: string;
 }
 
@@ -23,6 +25,7 @@ interface StructuringAspectStripProps {
 export function StructuringAspectStrip({
   statuses,
   onOpen,
+  active = null,
   className = '',
 }: StructuringAspectStripProps) {
   const { t } = useTranslation();
@@ -64,6 +67,8 @@ export function StructuringAspectStrip({
                   type="button"
                   className="aspect-strip-btn"
                   aria-label={label}
+                  aria-pressed={active === status.aspect}
+                  data-testid={`structuring-primary-${status.aspect}`}
                   onClick={() => {
                     onOpen(status.aspect);
                   }}

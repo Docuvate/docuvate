@@ -1,28 +1,30 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 /**
- * The viewer leads with the structuring task: how a click on the page behaves, with a hint that
- * says what happens next. How the page is shown sits in one "Ansicht" menu.
+ * Page chrome keeps rotation and the Ansicht menu. Region tools appear on the layout
+ * row of the ribbon, not as a permanent bar above the page.
  */
 import { expect, test } from '@playwright/test';
 
 import { installStructuringMocks, LAYOUT_DOCUMENT_ID } from './structuringMocks';
 
-test('viewer: marking tools first, page view in one menu', async ({ page }) => {
+test('viewer: marking tools follow Layout, page view stays in one menu', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   const log = await installStructuringMocks(page);
   await page.goto(`/documents/${LAYOUT_DOCUMENT_ID}`);
   const toolbar = page.getByTestId('layout-viewer-toolbar');
-  const tools = toolbar.getByRole('radiogroup', { name: 'Auf der Seite markieren' });
+  await expect(toolbar.getByRole('radiogroup')).toHaveCount(0);
+  await page.getByTestId('structuring-primary-layout').click();
+  const tools = page
+    .getByTestId('app-ribbon-context')
+    .getByRole('radiogroup', { name: 'Auf der Seite markieren' });
   await expect(tools.getByRole('radio')).toHaveCount(3);
   await expect(tools.getByRole('radio', { name: /^Zeiger/ })).toBeChecked();
-  // Only one radio group in the bar: original/text is no longer a competing mode switch.
-  await expect(toolbar.getByRole('radiogroup')).toHaveCount(1);
 
   await tools.getByRole('radio', { name: /^Bereich/ }).click();
-  await expect(toolbar.getByText(/Bereich aufziehen/)).toBeVisible();
+  await expect(page.getByTestId('structuring-context')).toContainText(/Bereich aufziehen/);
   await tools.getByRole('radio', { name: /^Text markieren/ }).click();
-  await expect(toolbar.getByText(/Text auf der Seite überstreichen/)).toBeVisible();
+  await expect(page.getByTestId('structuring-context')).toContainText(/Text auf der Seite überstreichen/);
 
   await toolbar.getByRole('button', { name: 'Ansicht: Original' }).click();
   const menu = page.getByRole('menu');
@@ -44,7 +46,8 @@ for (const width of [390, 1024, 1280, 1440]) {
     await page.setViewportSize({ width, height: 900 });
     const log = await installStructuringMocks(page);
     await page.goto(`/documents/${LAYOUT_DOCUMENT_ID}`);
-    const toolbar = page.getByTestId('layout-viewer-toolbar');
+    await page.getByTestId('structuring-primary-layout').click();
+    const toolbar = page.getByTestId('app-ribbon-context');
     await expect(toolbar.getByRole('radio')).toHaveCount(3);
     const clipped = await toolbar.evaluate((bar) => {
       const barBox = bar.getBoundingClientRect();
@@ -60,10 +63,22 @@ for (const width of [390, 1024, 1280, 1440]) {
       return hits;
     });
     expect(clipped).toEqual([]);
+    const outside = await page.evaluate(() => {
+      const hits: string[] = [];
+      const row = document.querySelector('[data-testid="app-ribbon-context"]');
+      if (!row) return hits;
+      for (const node of row.querySelectorAll('[role="radio"], button')) {
+        const box = node.getBoundingClientRect();
+        if (box.right > window.innerWidth + 1 || box.left < -1) {
+          hits.push(node.textContent ?? '');
+        }
+      }
+      return hits;
+    });
+    expect(outside).toEqual([]);
     if (width < 769) {
-      // Touch: every control in the bar is at least 44px tall.
       const heights = await toolbar.evaluate((bar) =>
-        Array.from(bar.querySelectorAll('[role="radio"], button[aria-haspopup]')).map(
+        Array.from(bar.querySelectorAll('[role="radio"], button')).map(
           (node) => node.getBoundingClientRect().height
         )
       );
