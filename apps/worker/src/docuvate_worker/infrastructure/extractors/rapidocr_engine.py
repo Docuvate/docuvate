@@ -160,7 +160,9 @@ def _ocr_oriented_page(
         oriented = orient_page_for_ocr(array, forced_quarter_turns_cw=0)
     page_h, page_w = oriented.image.shape[:2]
     page_size = PageDimensions(width=float(page_w), height=float(page_h))
-    result, _ = ocr(oriented.image, use_cls=True)
+    # The angle classifier is not part of the committed FUNSD measurement. Orientation
+    # is chosen above; the recognizer then reads the oriented page as-is.
+    result, _ = ocr(oriented.image, use_cls=False)
     text, blocks = _blocks_from_ocr_result(
         result,
         page=page,
