@@ -31,7 +31,7 @@ export function planProcessorFailure(input: {
   return { kind: 'retry' };
 }
 
-export interface ExtractionAttemptFailurePlan {
+interface ExtractionAttemptFailurePlan {
   allowRetry: boolean;
   delayMs: number;
 }
