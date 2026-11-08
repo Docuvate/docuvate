@@ -10,8 +10,7 @@ import {
   tokensInsideRect,
   tokensMatchingSelectedText,
 } from '@docuvate/contracts';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
+import { useCallback, useEffect, useRef } from 'react';
 
 import {
   clientPointToLocalRatio,
@@ -188,25 +187,45 @@ function draftFromViewerRect(
   };
 }
 
+function paintMark(wrap: HTMLElement, rect: NormalizedRect): void {
+  const existing = wrap.querySelector('[data-testid="document-selection-rect"]');
+  const mark = existing instanceof HTMLElement ? existing : document.createElement('div');
+  if (!(existing instanceof HTMLElement)) {
+    mark.className = 'document-selection-live-box';
+    mark.setAttribute('data-testid', 'document-selection-rect');
+    wrap.appendChild(mark);
+  }
+  mark.style.left = `${String(rect.x0 * 100)}%`;
+  mark.style.top = `${String(rect.y0 * 100)}%`;
+  mark.style.width = `${String((rect.x1 - rect.x0) * 100)}%`;
+  mark.style.height = `${String((rect.y1 - rect.y0) * 100)}%`;
+}
+
+function clearMark(): void {
+  document.querySelector('[data-testid="document-selection-rect"]')?.remove();
+}
+
 export function DocumentSelectionLayer({
   tool,
   page,
   tokens,
   onDraftChange,
 }: DocumentSelectionLayerProps) {
-  const [liveRect, setLiveRect] = useState<NormalizedRect | null>(null);
-  const [paintHost, setPaintHost] = useState<HTMLElement | null>(null);
+  const drawnRectRef = useRef<NormalizedRect | null>(null);
   const drawWrapRef = useRef<HTMLElement | null>(null);
   const originRef = useRef<{ x: number; y: number } | null>(null);
   const activeWrapRef = useRef<HTMLElement | null>(null);
 
   const commitViewerRect = useCallback(
     (next: NormalizedRect | null, wrap: HTMLElement | null) => {
-      setLiveRect(next);
       if (!next || !wrap) {
+        drawnRectRef.current = null;
+        clearMark();
         onDraftChange(null);
         return;
       }
+      drawnRectRef.current = next;
+      paintMark(wrap, next);
       onDraftChange(
         draftFromViewerRect(
           page,
@@ -224,7 +243,8 @@ export function DocumentSelectionLayer({
     if (tool !== 'rect') {
       originRef.current = null;
       activeWrapRef.current = null;
-      setLiveRect(null);
+      drawnRectRef.current = null;
+      clearMark();
       return;
     }
     function wrapForGesture(event: MouseEvent): HTMLElement | null {
@@ -240,6 +260,11 @@ export function DocumentSelectionLayer({
       return wrapUnderPoint(event.clientX, event.clientY, page);
     }
     function onPointerDown(event: MouseEvent) {
+      // Pointer and compatibility mouse events both arrive for one press.
+      // A second down must not collapse the rectangle back to a point.
+      if (originRef.current) {
+        return;
+      }
       const wrap = wrapForGesture(event);
       if (!wrap) {
         return;
@@ -277,21 +302,19 @@ export function DocumentSelectionLayer({
       originRef.current = null;
       activeWrapRef.current = null;
     }
-    // Capture so a page control that stops the bubble still starts the drag.
-    // Mouse events cover a drag that only produces compatibility mouse input.
-    document.addEventListener('pointerdown', onPointerDown, true);
-    document.addEventListener('pointermove', onPointerMove, true);
-    document.addEventListener('pointerup', onPointerUp, true);
-    document.addEventListener('mousedown', onPointerDown, true);
-    document.addEventListener('mousemove', onPointerMove, true);
-    document.addEventListener('mouseup', onPointerUp, true);
+    document.addEventListener('pointerdown', onPointerDown);
+    document.addEventListener('pointermove', onPointerMove);
+    document.addEventListener('pointerup', onPointerUp);
+    document.addEventListener('mousedown', onPointerDown);
+    document.addEventListener('mousemove', onPointerMove);
+    document.addEventListener('mouseup', onPointerUp);
     return () => {
-      document.removeEventListener('pointerdown', onPointerDown, true);
-      document.removeEventListener('pointermove', onPointerMove, true);
-      document.removeEventListener('pointerup', onPointerUp, true);
-      document.removeEventListener('mousedown', onPointerDown, true);
-      document.removeEventListener('mousemove', onPointerMove, true);
-      document.removeEventListener('mouseup', onPointerUp, true);
+      document.removeEventListener('pointerdown', onPointerDown);
+      document.removeEventListener('pointermove', onPointerMove);
+      document.removeEventListener('pointerup', onPointerUp);
+      document.removeEventListener('mousedown', onPointerDown);
+      document.removeEventListener('mousemove', onPointerMove);
+      document.removeEventListener('mouseup', onPointerUp);
     };
   }, [commitViewerRect, page, tool]);
 
@@ -336,48 +359,39 @@ export function DocumentSelectionLayer({
 
   useEffect(() => {
     if (tool !== 'rect') {
-      setPaintHost(null);
       return;
     }
-    const sync = () => {
-      const next = pageWrapForPage(page, drawWrapRef.current);
-      setPaintHost((current) => (current === next ? current : next));
+    // A page render replaces the wrap and drops the rectangle with it.
+    // Put the same rectangle on the new wrap. Style updates are not observed.
+    const restore = () => {
+      const rect = drawnRectRef.current;
+      if (!rect) {
+        return;
+      }
+      const existing = document.querySelector('[data-testid="document-selection-rect"]');
+      if (existing?.isConnected) {
+        return;
+      }
+      const wrap = pageWrapForPage(page, drawWrapRef.current);
+      if (!wrap) {
+        return;
+      }
+      drawWrapRef.current = wrap;
+      paintMark(wrap, rect);
     };
-    sync();
-    // A page render replaces the wrap. Follow the new one so the rectangle stays on the page.
-    const observer = new MutationObserver(sync);
+    const observer = new MutationObserver(restore);
     observer.observe(document.body, { childList: true, subtree: true });
     return () => {
       observer.disconnect();
     };
   }, [page, tool]);
 
-  const liveMark =
-    tool === 'rect' && liveRect && paintHost
-      ? createPortal(
-          <div
-            className="document-selection-live-box"
-            data-testid="document-selection-rect"
-            style={{
-              left: `${String(liveRect.x0 * 100)}%`,
-              top: `${String(liveRect.y0 * 100)}%`,
-              width: `${String((liveRect.x1 - liveRect.x0) * 100)}%`,
-              height: `${String((liveRect.y1 - liveRect.y0) * 100)}%`,
-            }}
-          />,
-          paintHost
-        )
-      : null;
-
   return (
-    <>
-      <span
-        hidden
-        data-testid="document-selection-layer"
-        data-token-count={String(tokens.length)}
-        data-page={String(page)}
-      />
-      {liveMark}
-    </>
+    <span
+      hidden
+      data-testid="document-selection-layer"
+      data-token-count={String(tokens.length)}
+      data-page={String(page)}
+    />
   );
 }
