@@ -121,7 +121,8 @@ test.describe('Workstream A3 visual artifacts', () => {
 
       await page.goto('/review');
       await page.locator('.review-queue-page').waitFor({ state: 'visible', timeout: 60_000 });
-      await page.locator('.review-wizard').waitFor({ state: 'visible', timeout: 120_000 });
+      // The queue opens the next document in the workbench. The hero is that loaded surface.
+      await page.locator('.review-next-hero').waitFor({ state: 'visible', timeout: 120_000 });
       await shot(page, `review-queue-${viewport.label}-initial.png`, viewport.width);
       await page.evaluate(() => {
         window.scrollBy(0, Math.min(480, document.documentElement.scrollHeight));
