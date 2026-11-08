@@ -7,7 +7,7 @@ import {
   openLayoutDocumentPage,
   uploadLayoutTableDocument,
 } from '../../helpers/layout-document-fixture';
-import { showLayoutPane } from '../../helpers/layout-pane';
+import { showLayoutPane, showLayoutSelectionTools } from '../../helpers/layout-pane';
 import {
   assertNoHorizontalOverflow,
   assertTableCorrectionSheet,
@@ -124,6 +124,7 @@ test.describe('document table regions', () => {
       /^(?!0$)\d+$/,
       { timeout: 60_000 }
     );
+    await showLayoutSelectionTools(page);
     await page.getByRole('radio', { name: /^(Bereich|Area)/ }).click();
     await drawTableRectangle(page);
     const bar = page.getByTestId('field-context-bar');

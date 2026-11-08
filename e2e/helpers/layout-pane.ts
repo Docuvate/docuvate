@@ -5,6 +5,19 @@ import { expect, type Page } from '@playwright/test';
 /** Matches the web app's pane-tabs breakpoint (viewer and side panel share the screen below it). */
 export const LAYOUT_PANE_TABS_MAX_WIDTH = 767;
 
+/**
+ * The area and text tools live on the Layout ribbon row.
+ * Pages that still show those tools without the row skip this.
+ */
+export async function showLayoutSelectionTools(page: Page): Promise<void> {
+  const layout = page.getByTestId('structuring-primary-layout');
+  if ((await layout.count()) === 0) {
+    return;
+  }
+  await layout.click();
+  await expect(layout).toHaveAttribute('aria-pressed', 'true');
+}
+
 /** On small screens, switch the document workspace to the viewer or the fields panel; no-op on wide screens. */
 export async function showLayoutPane(page: Page, pane: 'document' | 'panel'): Promise<void> {
   const width = page.viewportSize()?.width ?? Number.POSITIVE_INFINITY;

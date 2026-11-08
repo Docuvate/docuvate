@@ -3,6 +3,7 @@
 import { expect, test, type Page } from '@playwright/test';
 
 import { applyDocuvateLocale } from '../../helpers/docuvate-theme';
+import { showLayoutSelectionTools } from '../../helpers/layout-pane';
 import {
   openRotatedDocumentPage,
   uploadRotatedLayoutDocument,
@@ -81,6 +82,7 @@ test.describe('rotated page bounding-box selection', () => {
         { timeout: 60_000 }
       );
 
+      await showLayoutSelectionTools(page);
       await page
         .getByTestId('document-selection-tools')
         .getByRole('radio', { name: /^(Bereich|Area)/ })
@@ -107,6 +109,7 @@ test.describe('rotated page bounding-box selection', () => {
       { timeout: 60_000 }
     );
 
+    await showLayoutSelectionTools(page);
     await page
       .getByTestId('document-selection-tools')
       .getByRole('radio', { name: /^(Text markieren|Mark text)/ })
