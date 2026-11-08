@@ -1017,6 +1017,14 @@
   }
 }
 
+/* Below 1200px the inspector is in normal flow above the page. Keep the
+   workspace one column so the Übersicht tabs stay in the document scroller. */
+@media (max-width: 1199px) {
+  .document-workbench-main .layout-workspace {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 .review-workbench {
   display: grid;
   gap: var(--dv-density-group-gap);

@@ -286,21 +286,28 @@ export async function assertOverflowMissesHeader(page: Page): Promise<void> {
   expect(overlap.ok, overlap.reason).toBe(true);
 }
 
+const CORRECTION_SAVED_TOAST = 'Korrektur gespeichert · nachzahlung';
+
+/** The save toast leaves the page after a few seconds. The overlap sample needs one that is still mounted. */
+async function ensureCorrectionSavedToast(page: Page): Promise<void> {
+  const toast = page.locator('.toast').first();
+  if ((await toast.count()) === 0 || !(await toast.isVisible())) {
+    await page.evaluate((message) => {
+      window.dispatchEvent(
+        new CustomEvent('docuvate-notify-saved', {
+          detail: { message },
+        })
+      );
+    }, CORRECTION_SAVED_TOAST);
+  }
+  await expect(toast).toBeVisible({ timeout: 5_000 });
+}
+
 export async function assertToastMissesSheetActions(
   page: Page,
   actionsSelector = '[data-testid="field-correction-sheet"] .document-field-correction-actions'
 ): Promise<void> {
-  const toast = page.locator('.toast').first();
-  if ((await toast.count()) === 0 || !(await toast.isVisible())) {
-    await page.evaluate(() => {
-      window.dispatchEvent(
-        new CustomEvent('docuvate-notify-saved', {
-          detail: { message: 'Korrektur gespeichert · nachzahlung' },
-        })
-      );
-    });
-  }
-  await expect(toast).toBeVisible({ timeout: 5_000 });
+  await ensureCorrectionSavedToast(page);
   await expect(page.locator('[data-testid="toast-region"]')).not.toHaveAttribute(
     'data-sheet-offset',
     '0'
@@ -308,11 +315,20 @@ export async function assertToastMissesSheetActions(
   await expect
     .poll(
       async () => {
+        if (!(await page.locator('.toast').first().isVisible())) {
+          await ensureCorrectionSavedToast(page);
+        }
+        if ((await page.locator(actionsSelector).count()) === 0) {
+          return 'missing sheet actions';
+        }
         return page.evaluate((selector) => {
           const toastEl = document.querySelector('.toast');
           const actions = document.querySelector(selector);
-          if (!(toastEl instanceof HTMLElement) || !(actions instanceof HTMLElement)) {
-            return 'missing toast or sheet actions';
+          if (!(toastEl instanceof HTMLElement)) {
+            return 'waiting for toast';
+          }
+          if (!(actions instanceof HTMLElement)) {
+            return 'missing sheet actions';
           }
           const a = toastEl.getBoundingClientRect();
           const b = actions.getBoundingClientRect();
