@@ -242,7 +242,7 @@
       "finding": "defect: document date filters were dropped by the filter query",
       "severity": "medium",
       "regressionTest": "documentFilterQuery.spec.ts",
-      "fixCommit": null,
+      "fixCommit": "f137dd6bd9e61ffe1fa67675a8a49beb51fcf05b",
       "localMachine": "not-tested"
     },
     {
@@ -524,7 +524,7 @@
     "tenant": "synthetic lib.audit@fixture.docuvate.test only",
     "command": "pnpm exec playwright test --config=e2e/playwright.library-admin.config.ts",
     "result": "34 passed",
-    "fixCommit": "4205664de223c67b357fd926b1e055ab4e3008da",
+    "fixCommit": "f137dd6bd9e61ffe1fa67675a8a49beb51fcf05b",
     "mac": "not-tested"
   }
 }
