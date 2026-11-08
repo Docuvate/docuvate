@@ -148,7 +148,9 @@ export function MenuContent({
       const target = event.target;
       if (
         target instanceof Element &&
-        target.closest('[role="menuitem"], [role="menuitemcheckbox"], [role="menuitemradio"]')
+        target.closest(
+          '[role="menuitem"], [role="menuitemcheckbox"], [role="menuitemradio"], [role="option"]'
+        )
       ) {
         // Close after React has run the item's own click handler.
         window.setTimeout(() => {

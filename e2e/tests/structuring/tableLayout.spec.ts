@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { expect, type Page, test } from '@playwright/test';
 
+import { chooseTableFamily } from './chooseTableFamily';
 import { installStructuringMocks, LAYOUT_DOCUMENT_ID } from './structuringMocks';
 
 async function openTools(page: Page) {
@@ -23,7 +24,7 @@ test.describe('table structure tools', () => {
     await page.setViewportSize({ width: 1440, height: 900 });
     const log = await installStructuringMocks(page);
     const tools = await openTools(page);
-    await tools.getByRole('combobox', { name: 'Vorlage' }).selectOption('financial');
+    await chooseTableFamily(tools, /Finanzlayout/);
     await tools
       .getByRole('group', { name: 'Ergebniszeilen' })
       .getByRole('button', { name: 'Mehr' })
@@ -64,7 +65,7 @@ test.describe('table structure tools', () => {
     await page.setViewportSize({ width: 1440, height: 900 });
     const log = await installStructuringMocks(page);
     const tools = await openTools(page);
-    await tools.getByRole('combobox', { name: 'Vorlage' }).selectOption('matrix');
+    await chooseTableFamily(tools, /Matrix/);
     await tools.getByRole('button', { name: 'Darstellung' }).click();
     await tools.getByRole('combobox', { name: 'Indexspalte' }).selectOption('both');
     await tools.getByRole('combobox', { name: 'Linien' }).selectOption('none');
