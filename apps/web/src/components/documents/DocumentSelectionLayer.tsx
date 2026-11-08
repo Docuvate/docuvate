@@ -10,7 +10,7 @@ import {
   tokensInsideRect,
   tokensMatchingSelectedText,
 } from '@docuvate/contracts';
-import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import type { DocumentSelectionTool } from './DocumentSelectionTools';
 
@@ -189,7 +189,7 @@ export function DocumentSelectionLayer({
     [onDraftChange, page, tokens]
   );
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (tool !== 'rect') {
       setLiveRect(null);
       return;
@@ -278,39 +278,26 @@ export function DocumentSelectionLayer({
     };
   }, [onDraftChange, page, tokens, tool]);
 
-  useLayoutEffect(() => {
-    if (!liveRect || tool !== 'rect') {
-      document.querySelector('[data-testid="document-selection-rect"]')?.remove();
+  useEffect(() => {
+    const wrap = pageWrapForPage(page);
+    if (!(wrap instanceof HTMLElement) || !liveRect || tool !== 'rect') {
+      const stale = document.querySelector('[data-testid="document-selection-rect"]');
+      stale?.remove();
       return;
     }
-    let mark: HTMLElement | null = null;
-    const paint = () => {
-      const wrap = pageWrapForPage(page);
-      if (!(wrap instanceof HTMLElement)) {
-        mark?.remove();
-        mark = null;
-        return;
-      }
-      if (mark == null || !wrap.contains(mark)) {
-        mark?.remove();
-        mark = document.createElement('div');
-        mark.className = 'document-selection-live-box';
-        mark.setAttribute('data-testid', 'document-selection-rect');
-        wrap.appendChild(mark);
-      }
-      mark.style.left = `${String(liveRect.x0 * 100)}%`;
-      mark.style.top = `${String(liveRect.y0 * 100)}%`;
-      mark.style.width = `${String((liveRect.x1 - liveRect.x0) * 100)}%`;
-      mark.style.height = `${String((liveRect.y1 - liveRect.y0) * 100)}%`;
-    };
-    paint();
-    const observer = new MutationObserver(() => {
-      paint();
-    });
-    observer.observe(document.body, { childList: true, subtree: true });
+    const existing = wrap.querySelector('[data-testid="document-selection-rect"]');
+    const mark = existing instanceof HTMLElement ? existing : document.createElement('div');
+    if (!(existing instanceof HTMLElement)) {
+      mark.className = 'document-selection-live-box';
+      mark.setAttribute('data-testid', 'document-selection-rect');
+      wrap.appendChild(mark);
+    }
+    mark.style.left = `${String(liveRect.x0 * 100)}%`;
+    mark.style.top = `${String(liveRect.y0 * 100)}%`;
+    mark.style.width = `${String((liveRect.x1 - liveRect.x0) * 100)}%`;
+    mark.style.height = `${String((liveRect.y1 - liveRect.y0) * 100)}%`;
     return () => {
-      observer.disconnect();
-      mark?.remove();
+      mark.remove();
     };
   }, [liveRect, page, tool]);
 
