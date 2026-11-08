@@ -127,6 +127,19 @@ function applyStructuringChrome(
   if (command.inspector) openInspector(command.inspector);
 }
 
+/**
+ * Store a field correction and show it on the overview.
+ * Layout mode opens the tables tab, and that tab unmounts the field rows that carry the page chip.
+ */
+function showCorrectedFieldsOnOverview(
+  nextFields: ExtractedField[],
+  setFields: (fields: ExtractedField[]) => void,
+  setLayoutSideTab: (tab: LayoutSideTab) => void
+): void {
+  setFields(nextFields);
+  setLayoutSideTab('fields');
+}
+
 function metadataFromDocument(doc: DocumentDto): DocumentMetadataBaseline {
   return {
     title: doc.title,
@@ -878,7 +891,9 @@ export function DocumentDetailPage() {
                 setFields(nextFields);
                 void persist({ extractionFields: nextFields });
               }}
-              onFieldsChange={setFields}
+              onFieldsChange={(nextFields) => {
+                showCorrectedFieldsOnOverview(nextFields, setFields, setLayoutSideTab);
+              }}
               heuristicSuggestions={heuristicSuggestions}
               highlightBlocks={highlightBlocks}
               viewerPage={viewerPage}
