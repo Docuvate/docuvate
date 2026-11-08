@@ -180,9 +180,7 @@ class PageTransformModel(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
     page: int = Field(ge=1)
-    rotation_quarter_turns: int = Field(
-        ge=0, le=3, serialization_alias="rotationQuarterTurns"
-    )
+    rotation_quarter_turns: int = Field(ge=0, le=3, serialization_alias="rotationQuarterTurns")
 
 
 class CpuPipelineExtractModel(BaseModel):
