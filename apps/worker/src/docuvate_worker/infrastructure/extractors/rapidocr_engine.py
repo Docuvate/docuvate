@@ -155,9 +155,7 @@ def _ocr_oriented_page(
     source_h, source_w = array.shape[:2]
     source_size = PageDimensions(width=float(source_w), height=float(source_h))
     if _orientation_enabled():
-        oriented = orient_page_for_ocr(
-            array, lambda img: _ocr_orientation_score(ocr, img)
-        )
+        oriented = orient_page_for_ocr(array, lambda img: _ocr_orientation_score(ocr, img))
     else:
         oriented = orient_page_for_ocr(array, forced_quarter_turns_cw=0)
     page_h, page_w = oriented.image.shape[:2]
