@@ -153,10 +153,13 @@ def _ocr_oriented_page(
     *,
     page: int,
     block_offset: int,
+    forced_quarter_turns_cw: int | None = None,
 ) -> tuple[str, list[ExtractionBlock], int]:
     source_h, source_w = array.shape[:2]
     source_size = PageDimensions(width=float(source_w), height=float(source_h))
-    if _orientation_enabled():
+    if forced_quarter_turns_cw is not None:
+        oriented = orient_page_for_ocr(array, forced_quarter_turns_cw=forced_quarter_turns_cw)
+    elif _orientation_enabled():
         oriented = orient_page_for_ocr(array, lambda img: _ocr_orientation_score(ocr, img))
     else:
         oriented = orient_page_for_ocr(array, forced_quarter_turns_cw=0)
@@ -176,11 +179,20 @@ def _ocr_oriented_page(
 
 def ocr_image_bytes(
     content: bytes,
+    *,
+    forced_quarter_turns_cw: int | None = None,
 ) -> tuple[str, list[ExtractionBlock], tuple[int, ...]]:
+    """Recognize one image. ``forced_quarter_turns_cw`` is a persisted manual turn."""
     with open_image_bounded(content, raster_max_pixels_per_page()) as decoded:
         array = np.asarray(decoded.convert("RGB"))
     ocr = _get_rapidocr()
-    text, blocks, turns = _ocr_oriented_page(ocr, array, page=1, block_offset=0)
+    text, blocks, turns = _ocr_oriented_page(
+        ocr,
+        array,
+        page=1,
+        block_offset=0,
+        forced_quarter_turns_cw=forced_quarter_turns_cw,
+    )
     return text, blocks, (turns,)
 
 

@@ -136,3 +136,45 @@ def test_orient_page_scores_sideways_hint() -> None:
     oriented = orient_page_for_ocr(image, score)
     assert oriented.quarter_turns_cw in (1, 3)
     assert oriented.image.shape[0] > oriented.image.shape[1]
+
+
+def _vertical_bars() -> np.ndarray:
+    image = np.zeros((40, 80, 3), dtype=np.uint8)
+    image[:, 10:14] = 255
+    image[:, 40:44] = 255
+    image[:, 70:74] = 255
+    return image
+
+
+def test_sideways_page_rotates_when_the_native_score_is_under_the_floor() -> None:
+    """A sideways winner above 2.0 is kept even when the unrotated score is under 2.0."""
+    image = _vertical_bars()
+
+    def score(arr: np.ndarray) -> float:
+        height, width = arr.shape[:2]
+        return 4.0 if height > width else 0.4
+
+    assert score(image) < 2.0
+    assert score_ocr_orientation(image, score) in (1, 3)
+
+
+def test_sideways_page_under_the_floor_stays_upright() -> None:
+    image = _vertical_bars()
+
+    def score(arr: np.ndarray) -> float:
+        height, width = arr.shape[:2]
+        return 1.4 if height > width else 0.2
+
+    assert score_ocr_orientation(image, score) == 0
+
+
+def test_ambiguous_no_text_under_the_floor_stays_upright() -> None:
+    image = np.zeros((48, 64, 3), dtype=np.uint8)
+
+    def score(arr: np.ndarray) -> float:
+        height, width = arr.shape[:2]
+        if height == image.shape[0] and width == image.shape[1]:
+            return 1.2
+        return 0.3
+
+    assert score_ocr_orientation(image, score) == 0

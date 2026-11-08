@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "test": "playwright test",
+    "test:real-stack": "playwright test --config=playwright.real-stack.config.ts",
     "test:ui": "playwright test --ui"
   },
   "devDependencies": {

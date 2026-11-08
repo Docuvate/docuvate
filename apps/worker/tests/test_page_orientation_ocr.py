@@ -7,13 +7,19 @@ from __future__ import annotations
 
 import io
 import os
+import shutil
 
 import numpy as np
 import pytest
 from PIL import Image, ImageDraw, ImageFont
+from pypdf import PdfReader, PdfWriter
 
 from docuvate_worker.domain.cpu_pipeline.page_orientation import orient_page_for_ocr
 from docuvate_worker.domain.models import ExtractionBlock
+from docuvate_worker.infrastructure.extract_memory.bounded_raster import (
+    pdf_page_size_pt,
+    render_pdf_page_bounded,
+)
 from docuvate_worker.infrastructure.extractors.rapidocr_engine import ocr_image_bytes
 
 _FONT = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
@@ -70,6 +76,26 @@ def _overlaps(
     return lx < rx + rw + pad and rx < lx + lw + pad and ly < ry + rh + pad and ry < ly + lh + pad
 
 
+def _assert_every_block_on_ink(
+    page: Image.Image,
+    text: str,
+    blocks: list[ExtractionBlock],
+    evidence: str,
+) -> None:
+    assert "1842" in text, evidence
+    assert "INVOICE" in text, evidence
+    assert len(blocks) >= 2, evidence
+    ink = _ink_box(page)
+    centers: list[tuple[float, float]] = []
+    for block in blocks:
+        assert block.width > 0, evidence
+        assert block.height > 0, evidence
+        box = (block.x, block.y, block.width, block.height)
+        assert _overlaps(ink, box), (evidence, ink, box)
+        centers.append((block.x + block.width / 2, block.y + block.height / 2))
+    assert len(set(centers)) == len(centers), evidence
+
+
 def _evidence(text: str, blocks: list[ExtractionBlock], turns: tuple[int, ...]) -> str:
     rows = [
         f"{block.text} x={block.x:.3f} y={block.y:.3f} w={block.width:.3f} h={block.height:.3f}"
@@ -85,12 +111,42 @@ def test_synthetic_page_orientation_matches_ink(content_cw: int) -> None:
     text, blocks, turns = ocr_image_bytes(_png(page))
     evidence = _evidence(text, blocks, turns)
     assert turns == (_CORRECTION[content_cw],), evidence
-    assert "1842" in text, evidence
-    ink = _ink_box(page)
-    assert any(_overlaps(ink, (block.x, block.y, block.width, block.height)) for block in blocks), (
-        evidence,
-        ink,
-    )
+    _assert_every_block_on_ink(page, text, blocks, evidence)
+
+
+def test_persisted_turn_maps_every_block_onto_the_ink() -> None:
+    pytest.importorskip("rapidocr_onnxruntime")
+    page = _rotate_cw(_upright_page(), 180)
+    text, blocks, turns = ocr_image_bytes(_png(page), forced_quarter_turns_cw=2)
+    evidence = _evidence(text, blocks, turns)
+    assert turns == (2,), evidence
+    _assert_every_block_on_ink(page, text, blocks, evidence)
+
+
+def test_native_pdf_rotate_matches_emitted_raster_and_every_ocr_box() -> None:
+    pytest.importorskip("rapidocr_onnxruntime")
+    if shutil.which("pdftoppm") is None:
+        pytest.skip("poppler required")
+    upright = _upright_page()
+    raw = io.BytesIO()
+    upright.save(raw, format="PDF", resolution=72.0)
+    reader = PdfReader(io.BytesIO(raw.getvalue()))
+    writer = PdfWriter()
+    pdf_page = reader.pages[0]
+    pdf_page.rotate(90)
+    writer.add_page(pdf_page)
+    out = io.BytesIO()
+    writer.write(out)
+    pdf = out.getvalue()
+    size = pdf_page_size_pt(pdf, 1)
+    assert size == (1200.0, 900.0)
+    rendered = render_pdf_page_bounded(pdf, 1, dpi=72, max_pixels=2_000_000)
+    assert rendered is not None
+    assert rendered.size == (round(size[0]), round(size[1]))
+    text, blocks, turns = ocr_image_bytes(_png(rendered))
+    evidence = _evidence(text, blocks, turns)
+    assert turns == (3,), evidence
+    _assert_every_block_on_ink(rendered, text, blocks, evidence)
 
 
 def test_blank_page_is_not_rotated() -> None:

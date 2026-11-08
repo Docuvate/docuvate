@@ -24,12 +24,7 @@ import { withSavedFieldValue } from '../../lib/documentFieldValueRowState';
 import { findBlockIndexAtPoint } from '../../lib/extractionLayout';
 import { findFieldRegion } from '../../lib/findFieldRegion';
 import { layoutIrDocumentFromPageSummaries } from '../../lib/layoutIrPages';
-import {
-  buildLayoutOverlays,
-  hitTestLayoutOverlay,
-  type LayoutOverlayRegion,
-  overlayForExtractionBlock,
-} from '../../lib/layoutOverlayModel';
+import { hitTestLayoutOverlay, overlayForExtractionBlock } from '../../lib/layoutOverlayModel';
 import {
   firstPageBelowSsimFloor,
   reconstructionQualityTone,
@@ -43,16 +38,24 @@ import { useDocumentPageTransforms } from '../../lib/useDocumentPageTransforms';
 import { useDocumentRegionLayers } from '../../lib/useDocumentRegionLayers';
 import { useLayoutCompare } from '../../lib/useLayoutCompare';
 import { useViewportMaxWidth } from '../../lib/useViewportMaxWidth';
+import {
+  buildWorkspaceLayoutOverlays,
+  buildWorkspacePdfOverlays,
+  regionFieldOverlayId,
+  regionIdFromFieldOverlay,
+  regionIdFromTableOverlay,
+  regionTableOverlayId,
+} from '../../lib/workspacePdfOverlays';
 import { useToast } from '../save';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
 import { SegmentedControl } from '../ui/SegmentedControl';
 import { DocumentExtractionRecovery } from './DocumentExtractionRecovery';
-import { DocumentFieldContextBar } from './DocumentFieldContextBar';
 import { DocumentFieldCorrectionSheet } from './DocumentFieldCorrectionSheet';
 import { DocumentFieldMarkHint, useDocumentFieldMarking } from './DocumentFieldMarkHint';
 import { DocumentLayoutCompareView } from './DocumentLayoutCompareView';
 import { DocumentLayoutExportTab } from './DocumentLayoutExportTab';
+import { DocumentLayoutOriginalStage } from './DocumentLayoutOriginalStage';
 import { DocumentLayoutPaneTabs, useLayoutMobilePane } from './DocumentLayoutPaneTabs';
 import {
   DocumentLayoutSidePanel,
@@ -60,42 +63,16 @@ import {
   overlayRegionById,
 } from './DocumentLayoutSidePanel';
 import { DocumentLayoutViewerToolbar, type LeftDocumentMode } from './DocumentLayoutViewerToolbar';
-import { type DocumentSelectionDraft, DocumentSelectionLayer } from './DocumentSelectionLayer';
+import { type DocumentSelectionDraft } from './DocumentSelectionLayer';
 import type { DocumentSelectionTool } from './DocumentSelectionTools';
 import { DocumentTableCorrectionSheet } from './DocumentTableCorrectionSheet';
 import { ExtractedLayoutHtmlFrame, type LayoutIrZoomStep } from './ExtractedLayoutHtmlFrame';
 import { ExtractedTextPanel } from './ExtractedTextPanel';
-import { FieldBoundingBoxEditor } from './FieldBoundingBoxEditor';
-import { type PdfLayoutOverlay, PdfViewer } from './PdfViewer';
-import { TablePdfOverlay } from './table/TablePdfOverlay';
+import { type PdfLayoutOverlay } from './PdfViewer';
 
 type AdvancedViewerMode = 'reconstruction' | 'compare';
 
-const REGION_FIELD_OVERLAY_PREFIX = 'region-field-';
-const REGION_TABLE_OVERLAY_PREFIX = 'region-table-';
 const CORRECTION_SHEET_MAX_WIDTH_PX = 1023;
-
-function regionFieldOverlayId(regionId: string): string {
-  return `${REGION_FIELD_OVERLAY_PREFIX}${regionId}`;
-}
-
-function regionIdFromFieldOverlay(overlayId: string): string | null {
-  if (!overlayId.startsWith(REGION_FIELD_OVERLAY_PREFIX)) {
-    return null;
-  }
-  return overlayId.slice(REGION_FIELD_OVERLAY_PREFIX.length);
-}
-
-function regionTableOverlayId(regionId: string): string {
-  return `${REGION_TABLE_OVERLAY_PREFIX}${regionId}`;
-}
-
-function regionIdFromTableOverlay(overlayId: string): string | null {
-  if (!overlayId.startsWith(REGION_TABLE_OVERLAY_PREFIX)) {
-    return null;
-  }
-  return overlayId.slice(REGION_TABLE_OVERLAY_PREFIX.length);
-}
 
 interface DocumentLayoutWorkspaceProps {
   doc: DocumentDto;
@@ -470,60 +447,23 @@ export function DocumentLayoutWorkspace({
   const frameLayoutIr =
     layoutIr ?? (layoutIrPages?.length ? layoutIrDocumentFromPageSummaries(layoutIrPages) : null);
 
-  const overlays = useMemo(() => {
-    const base = layoutIr ? buildLayoutOverlays(layoutIr) : [];
-    const corrected: LayoutOverlayRegion[] = tableRegions.map((region, index) => ({
-      id: `region-table-${region.id}`,
-      page: region.page,
-      x: region.x0,
-      y: region.y0,
-      width: Math.max(0, region.x1 - region.x0),
-      height: Math.max(0, region.y1 - region.y0),
-      kind: 'table',
-      label: String(index + 1),
-      tableIndex: 1000 + index,
-    }));
-    return [...base, ...corrected];
-  }, [layoutIr, tableRegions]);
-
-  const pdfOverlays: PdfLayoutOverlay[] = useMemo(() => {
-    const fromIr = overlays.map((o) => {
-      let label = o.label;
-      if (o.id.startsWith('region-table-')) {
-        label = t('documents.layoutCorrectedTableLabel', { n: o.label });
-      } else if (o.kind === 'table' && o.tableIndex != null) {
-        label = t('documents.layoutTableLabel', { n: o.tableIndex + 1 });
-      } else if (o.kind === 'field' && o.label) {
-        label = fieldLabelForKey(o.label);
-      }
-      return {
-        id: o.id,
-        page: o.page,
-        x: o.x,
-        y: o.y,
-        width: o.width,
-        height: o.height,
-        kind: o.kind,
-        label,
-        value: o.value,
-      };
-    });
-    const fromRegions: PdfLayoutOverlay[] = fieldRegions.map((region) => {
-      const fieldKey = region.field?.fieldKey ?? '';
-      return {
-        id: regionFieldOverlayId(region.id),
-        page: region.page,
-        x: region.x0,
-        y: region.y0,
-        width: Math.max(0, region.x1 - region.x0),
-        height: Math.max(0, region.y1 - region.y0),
-        kind: 'field',
-        label: fieldKey ? fieldLabelForKey(fieldKey) : t('documents.layoutOverlayKind.field'),
-        value: region.field?.valueOverride ?? undefined,
-      };
-    });
-    return [...fromIr, ...fromRegions];
-  }, [fieldLabelForKey, fieldRegions, overlays, t]);
+  const overlays = useMemo(
+    () => buildWorkspaceLayoutOverlays(layoutIr, tableRegions),
+    [layoutIr, tableRegions]
+  );
+  const overlayLabels = useMemo(
+    () => ({
+      correctedTable: (ordinal: string) => t('documents.layoutCorrectedTableLabel', { n: ordinal }),
+      detectedTable: (index: number) => t('documents.layoutTableLabel', { n: index }),
+      field: fieldLabelForKey,
+      unnamedField: t('documents.layoutOverlayKind.field'),
+    }),
+    [fieldLabelForKey, t]
+  );
+  const pdfOverlays = useMemo(
+    () => buildWorkspacePdfOverlays(overlays, fieldRegions, overlayLabels),
+    [fieldRegions, overlayLabels, overlays]
+  );
 
   const onOverlaySelect = useCallback(
     (overlayId: string, page?: number) => {
@@ -816,152 +756,98 @@ export function DocumentLayoutWorkspace({
                 suspendHtmlFetch={pending}
               />
             ) : (
-              <>
-                {previewUnavailable ? (
-                  <p className="muted">{t('documents.previewUnavailable')}</p>
-                ) : previewLoading || !previewData ? (
-                  <p className="muted">{t('documents.previewLoading')}</p>
-                ) : (
-                  <PdfViewer
-                    data={previewData}
-                    highlightBlocks={highlights}
-                    layoutOverlays={pdfOverlays}
-                    layoutOverlayEnabled={overlayEnabled && pdfOverlays.length > 0}
-                    activeLayoutOverlayId={activeOverlayId}
-                    onLayoutOverlaySelect={(id) => {
-                      onOverlaySelect(id);
-                    }}
-                    onLayoutOverlayHover={setHoverOverlay}
-                    onLayoutOverlayClear={() => {
-                      setActiveOverlayId(null);
-                    }}
-                    page={viewerPage}
-                    onPageChange={onViewerPageChange}
-                    paginated
-                    fitWidth
-                    onPageClick={selectionTool === 'none' ? onPdfPageClick : undefined}
-                    displayRotationDeg={displayRotationDeg} pageRotations={byPage}
-                  />
-                )}
-                {!showAdvancedStage ? (
-                  <DocumentSelectionLayer
-                    tool={selectionTool}
-                    page={viewerPage}
-                    tokens={layoutTokens}
-                    onDraftChange={setSelectionDraft}
-                  />
-                ) : null}
-                {bboxEditRect?.page === viewerPage ? (
-                  <FieldBoundingBoxEditor
-                    page={bboxEditRect.page}
-                    rect={bboxEditRect}
-                    active
-                    pageRotationDeg={displayRotationDeg}
-                    onCancel={() => {
+              <DocumentLayoutOriginalStage
+                previewUnavailable={previewUnavailable}
+                previewLoading={previewLoading}
+                previewData={previewData}
+                highlights={highlights}
+                pdfOverlays={pdfOverlays}
+                overlayEnabled={overlayEnabled}
+                activeOverlayId={activeOverlayId}
+                onOverlaySelect={(id) => {
+                  onOverlaySelect(id);
+                }}
+                onOverlayHover={setHoverOverlay}
+                onOverlayClear={() => {
+                  setActiveOverlayId(null);
+                }}
+                viewerPage={viewerPage}
+                onViewerPageChange={onViewerPageChange}
+                onPageClick={selectionTool === 'none' ? onPdfPageClick : undefined}
+                displayRotationDeg={displayRotationDeg}
+                pageRotations={byPage}
+                showSelectionLayer={!showAdvancedStage}
+                selectionTool={selectionTool}
+                layoutTokens={layoutTokens}
+                onSelectionDraft={setSelectionDraft}
+                bboxEdit={bboxEditRect}
+                onBboxCancel={() => {
+                  setBboxEditRect(null);
+                }}
+                onBboxCommit={(rect) => {
+                  const fieldKey = selectedFieldKey ?? reanchorFieldKey;
+                  if (!fieldKey || !bboxEditRect) {
+                    setBboxEditRect(null);
+                    return;
+                  }
+                  void runFieldCorrection(
+                    {
+                      id: crypto.randomUUID(),
+                      op: 'reanchor',
+                      fieldKey,
+                      page: bboxEditRect.page,
+                      shape: 'rect',
+                      x0: rect.x0,
+                      y0: rect.y0,
+                      x1: rect.x1,
+                      y1: rect.y1,
+                    },
+                    t('documents.fieldCorrectionSaved', { name: fieldLabelForKey(fieldKey) })
+                  )
+                    .then(() => {
                       setBboxEditRect(null);
-                    }}
-                    onCommit={(rect) => {
-                      const fieldKey = selectedFieldKey ?? reanchorFieldKey;
-                      if (!fieldKey) {
-                        setBboxEditRect(null);
-                        return;
-                      }
-                      void runFieldCorrection(
-                        {
+                    })
+                    .catch((err: unknown) => {
+                      toast.error(formatUserFacingError(err, 'errors.generic'));
+                    });
+                }}
+                tableOverlayOpen={tableOverlayOpen}
+                tableRegions={tableRegions}
+                selectedTableId={selectedTableId}
+                tableSelectedCell={tableOverlayCell}
+                onTableSelectCell={setTableOverlayCell}
+                onTableClose={() => {
+                  setTableOverlayOpen(false);
+                }}
+                onTableBoundsCommit={(region, rect) => {
+                  submitTableCorrection(
+                    {
+                      id: crypto.randomUUID(),
+                      op: 'set_headers',
+                      beforeRegionId: region.id,
+                      page: region.page,
+                      x0: rect.x0,
+                      y0: rect.y0,
+                      x1: rect.x1,
+                      y1: rect.y1,
+                    },
+                    t('tableLayouts.saveBounds')
+                  );
+                }}
+                selectionDraft={selectionDraft}
+                fieldOptions={
+                  reanchorFieldKey
+                    ? [{ value: reanchorFieldKey, label: fieldLabelForKey(reanchorFieldKey) }]
+                    : fieldOptions
+                }
+                existingFieldValues={existingFieldValues}
+                onMarkTable={
+                  reanchorFieldKey || !selectionDraft
+                    ? undefined
+                    : () => {
+                        submitTableCorrection({
                           id: crypto.randomUUID(),
-                          op: 'reanchor',
-                          fieldKey,
-                          page: bboxEditRect.page,
-                          shape: 'rect',
-                          x0: rect.x0,
-                          y0: rect.y0,
-                          x1: rect.x1,
-                          y1: rect.y1,
-                        },
-                        t('documents.fieldCorrectionSaved', { name: fieldLabelForKey(fieldKey) })
-                      )
-                        .then(() => {
-                          setBboxEditRect(null);
-                        })
-                        .catch((err: unknown) => {
-                          toast.error(formatUserFacingError(err, 'errors.generic'));
-                        });
-                    }}
-                  />
-                ) : null}
-                {tableOverlayOpen && selectedTableId
-                  ? (() => {
-                      const region = tableRegions.find((item) => item.id === selectedTableId);
-                      if (!region?.table || region.page !== viewerPage) return null;
-                      return (
-                        <TablePdfOverlay
-                          region={region}
-                          table={region.table}
-                          active
-                          pageRotationDeg={displayRotationDeg}
-                          selectedCell={tableOverlayCell}
-                          onSelectCell={(row, col) => {
-                            setTableOverlayCell({ row, col });
-                          }}
-                          onClose={() => {
-                            setTableOverlayOpen(false);
-                          }}
-                          onBoundsCommit={(rect) => {
-                            submitTableCorrection(
-                              {
-                                id: crypto.randomUUID(),
-                                op: 'set_headers',
-                                beforeRegionId: region.id,
-                                page: region.page,
-                                x0: rect.x0,
-                                y0: rect.y0,
-                                x1: rect.x1,
-                                y1: rect.y1,
-                              },
-                              t('tableLayouts.saveBounds')
-                            );
-                          }}
-                        />
-                      );
-                    })()
-                  : null}
-                {selectionDraft ? (
-                  <DocumentFieldContextBar
-                    draft={selectionDraft}
-                    fieldOptions={
-                      reanchorFieldKey
-                        ? [
-                            {
-                              value: reanchorFieldKey,
-                              label: fieldLabelForKey(reanchorFieldKey),
-                            },
-                          ]
-                        : fieldOptions
-                    }
-                    existingFieldValues={existingFieldValues}
-                    onMarkTable={
-                      reanchorFieldKey
-                        ? undefined
-                        : () => {
-                            submitTableCorrection({
-                              id: crypto.randomUUID(),
-                              op: 'create',
-                              page: selectionDraft.page,
-                              shape: 'rect',
-                              x0: selectionDraft.rect.x0,
-                              y0: selectionDraft.rect.y0,
-                              x1: selectionDraft.rect.x1,
-                              y1: selectionDraft.rect.y1,
-                              blockIndexes: selectionDraft.tokens.map((token) => token.blockIndex),
-                            });
-                          }
-                    }
-                    onConfirm={(fieldKey) => {
-                      void runFieldCorrection(
-                        {
-                          id: crypto.randomUUID(),
-                          op: reanchorFieldKey ? 'reanchor' : 'create',
-                          fieldKey,
+                          op: 'create',
                           page: selectionDraft.page,
                           shape: 'rect',
                           x0: selectionDraft.rect.x0,
@@ -969,35 +855,39 @@ export function DocumentLayoutWorkspace({
                           x1: selectionDraft.rect.x1,
                           y1: selectionDraft.rect.y1,
                           blockIndexes: selectionDraft.tokens.map((token) => token.blockIndex),
-                          ...(selectionDraft.text.trim().length > 0
-                            ? { valueOverride: selectionDraft.text }
-                            : {}),
-                        },
-                        t('documents.fieldCorrectionSaved', { name: fieldLabelForKey(fieldKey) })
-                      ).catch((err: unknown) => {
-                        toast.error(formatUserFacingError(err, 'errors.generic'));
-                      });
-                    }}
-                    onCancel={() => {
-                      setSelectionDraft(null);
-                      setReanchorFieldKey(null);
-                    }}
-                  />
-                ) : null}
-                {hoverOverlay && overlayEnabled ? (
-                  <div className="layout-overlay-popover" role="tooltip">
-                    <span
-                      className={`layout-overlay-kind layout-overlay-kind-${hoverOverlay.kind}`}
-                    >
-                      {t(`documents.layoutOverlayKind.${hoverOverlay.kind}`)}
-                    </span>
-                    <p className="layout-overlay-popover-label">{hoverOverlay.label}</p>
-                    {hoverOverlay.value ? (
-                      <p className="layout-overlay-popover-value">{hoverOverlay.value}</p>
-                    ) : null}
-                  </div>
-                ) : null}
-              </>
+                        });
+                      }
+                }
+                onConfirmField={(fieldKey) => {
+                  if (!selectionDraft) return;
+                  void runFieldCorrection(
+                    {
+                      id: crypto.randomUUID(),
+                      op: reanchorFieldKey ? 'reanchor' : 'create',
+                      fieldKey,
+                      page: selectionDraft.page,
+                      shape: 'rect',
+                      x0: selectionDraft.rect.x0,
+                      y0: selectionDraft.rect.y0,
+                      x1: selectionDraft.rect.x1,
+                      y1: selectionDraft.rect.y1,
+                      blockIndexes: selectionDraft.tokens.map((token) => token.blockIndex),
+                      ...(selectionDraft.text.trim().length > 0
+                        ? { valueOverride: selectionDraft.text }
+                        : {}),
+                    },
+                    t('documents.fieldCorrectionSaved', { name: fieldLabelForKey(fieldKey) })
+                  ).catch((err: unknown) => {
+                    toast.error(formatUserFacingError(err, 'errors.generic'));
+                  });
+                }}
+                onCancelDraft={() => {
+                  setSelectionDraft(null);
+                  setReanchorFieldKey(null);
+                }}
+                hoverOverlay={hoverOverlay}
+                showHover={Boolean(hoverOverlay && overlayEnabled)}
+              />
             )}
           </div>
 
