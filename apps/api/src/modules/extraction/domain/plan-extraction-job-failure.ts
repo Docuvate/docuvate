@@ -58,7 +58,7 @@ export function planExtractionAttemptFailure(input: {
 /**
  * The BullMQ `failed` event fires for an outbox retry that was deliberately finished
  * as unrecoverable in the queue. Only a terminal outbox row may persist document failure.
- * `null` means the job has no outbox row (legacy path).
+ * `null` means the job has no outbox row.
  */
 export function shouldPersistTerminalExtractionFailure(
   outboxStatus: JobOutboxStatus | null

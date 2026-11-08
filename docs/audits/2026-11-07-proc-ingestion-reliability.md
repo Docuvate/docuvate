@@ -94,7 +94,7 @@ The missing key is the queue ack for a hash that no longer exists. Postgres alre
 
 Failure policy stays in `planExtractionAttemptFailure` and `shouldPersistTerminalExtractionFailure`. The repository transaction owns the tenant check, the document update, and the reclaim. The relay claims and enqueues. `claimForRelay` fails a spent attempt and returns the rest in the same commit, so a crash cannot requeue it. That stays one method.
 
-Jobs that arrive without an outbox id still use `planProcessorFailure` and BullMQ `attemptsMade`. Current enqueue paths write an outbox id. That legacy branch was not changed.
+Jobs that arrive without an outbox id still use `planProcessorFailure` and BullMQ `attemptsMade`. Current enqueue paths write an outbox id. That branch was not changed.
 
 ## Not claimed
 
