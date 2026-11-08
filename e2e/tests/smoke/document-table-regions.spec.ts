@@ -161,8 +161,10 @@ test.describe('document table regions', () => {
     await assertNoHorizontalOverflow(page);
 
     // Table family: header band, result footer, lines and merged cells saved as one correction.
+    // The template control is the family menu, not a native select.
     const tools = card.first().getByTestId('table-structure-tools');
-    await tools.getByRole('combobox', { name: /Vorlage|Template/i }).selectOption('financial');
+    await tools.getByTestId('table-family-menu').click();
+    await page.getByRole('option', { name: /Finanzlayout|Financial/i }).click();
     await Promise.all([
       waitForTableCorrectionSave(page),
       tools.getByRole('button', { name: /^(Übernehmen|Apply)$/ }).click(),
