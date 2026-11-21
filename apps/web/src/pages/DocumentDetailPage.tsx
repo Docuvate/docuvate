@@ -173,6 +173,7 @@ export function DocumentDetailPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [previewData, setPreviewData] = useState<ArrayBuffer | null>(null);
+  const [plainTextFallback, setPlainTextFallback] = useState<string | null>(null);
   const [previewFetchState, setPreviewFetchState] = useState<
     'idle' | 'loading' | 'ready' | 'missing'
   >('idle');
@@ -350,6 +351,35 @@ export function DocumentDetailPage() {
 
   const previewMime = doc?.mimeType;
   const docPreviewAvailable = doc?.previewAvailable === true;
+
+  useEffect(() => {
+    setPlainTextFallback(null);
+  }, [id]);
+
+  useEffect(() => {
+    if (!id || !isPlainText) {
+      return undefined;
+    }
+    if (doc?.extraction?.text?.trim()) {
+      return undefined;
+    }
+    let cancelled = false;
+    void fetchDocumentContentBlob(id)
+      .then(async (blob) => {
+        const text = await blob.text();
+        if (!cancelled) {
+          setPlainTextFallback(text.charCodeAt(0) === 0xfeff ? text.slice(1) : text);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setPlainTextFallback(null);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [doc?.extraction?.text, id, isPlainText]);
 
   useEffect(() => {
     if (!id || !previewMime) {
@@ -936,7 +966,7 @@ export function DocumentDetailPage() {
                 isPdf={isPdf}
                 isImage={isImage}
                 isPlainText={isPlainText}
-                plainTextPreview={doc.extraction?.text ?? null}
+                plainTextPreview={doc.extraction?.text?.trim() ? doc.extraction.text : plainTextFallback}
                 highlightBlocks={highlightBlocks}
                 viewerPage={viewerPage}
                 onViewerPageChange={setViewerPage}

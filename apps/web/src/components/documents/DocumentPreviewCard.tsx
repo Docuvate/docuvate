@@ -85,12 +85,12 @@ export function DocumentPreviewCard({
       {showProcessingHint ? (
         <p className="muted preview-card-hint">{t('documents.extractionRunning')}</p>
       ) : null}
-      {previewUnavailable ? (
+      {previewUnavailable && !isPlainText ? (
         <div className="doc-preview-unavailable">
           <p className="muted">{t('documents.previewUnavailable')}</p>
         </div>
       ) : null}
-      {previewPending && !previewUnavailable ? (
+      {previewPending && !previewUnavailable && !isPlainText ? (
         <DocumentPreviewPlaceholder pipelinePending={pipelinePending} />
       ) : null}
       {!previewUnavailable && isImage && imageSrc ? (
@@ -110,7 +110,9 @@ export function DocumentPreviewCard({
       ) : null}
       {isPlainText ? (
         plainTextPreview?.trim() ? (
-          <pre className="doc-preview-text">{plainTextPreview}</pre>
+          <pre className="doc-preview-text" data-testid="doc-preview-text">
+            {plainTextPreview}
+          </pre>
         ) : (
           <p className="muted">{t('documents.previewTextEmpty')}</p>
         )
