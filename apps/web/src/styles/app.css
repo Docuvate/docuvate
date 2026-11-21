@@ -18002,7 +18002,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   height: 10px;
   padding: 0;
   border: 1px solid var(--dv-color-bg-raised);
-  border-radius: 1px;
+  border-radius: var(--dv-radius-control);
   background: var(--dv-color-accent);
 }
 .table-bounds-handle--n { left: 50%; top: -5px; transform: translateX(-50%); cursor: ns-resize; }
