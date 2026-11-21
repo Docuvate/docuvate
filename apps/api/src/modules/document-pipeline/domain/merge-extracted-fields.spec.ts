@@ -1,7 +1,11 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { ExtractedField } from '@docuvate/contracts';
-import { dedupeExtractedFields, isPlausibleExtractedDateValue } from '@docuvate/contracts';
+import {
+  dedupeExtractedFields,
+  isPlausibleExtractedDateValue,
+  partitionRecognizedAndHeuristicSuggestions,
+} from '@docuvate/contracts';
 import { describe, expect, it } from 'vitest';
 
 import { mergeExtractedFields } from './merge-extracted-fields.js';
@@ -16,8 +20,21 @@ describe('isPlausibleExtractedDateValue', () => {
 
   it('rejects label bleed-through and empty values', () => {
     expect(isPlausibleExtractedDateValue('Ist-Technologie:')).toBe(false);
+    expect(isPlausibleExtractedDateValue('NW-2026-0042')).toBe(false);
     expect(isPlausibleExtractedDateValue('')).toBe(false);
     expect(isPlausibleExtractedDateValue('   ')).toBe(false);
+  });
+
+  it('partition drops invoice-number date suggestions', () => {
+    const { suggestions } = partitionRecognizedAndHeuristicSuggestions(
+      [
+        { key: 'suggestion:date', value: 'NW-2026-0042', confidence: 0.9 },
+        { key: 'suggestion:amount', value: '1234.56', confidence: 0.9 },
+      ],
+      new Set()
+    );
+    expect(suggestions.find((row) => row.key === 'date')).toBeUndefined();
+    expect(suggestions.find((row) => row.key === 'amount')?.value).toBe('1234.56');
   });
 });
 

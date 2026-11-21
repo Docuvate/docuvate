@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+import calendar
+import re
 from dataclasses import dataclass
 
 from docuvate_worker.domain.models import ExtractedField
@@ -31,6 +33,43 @@ from docuvate_worker.infrastructure.ml.value_types.vendor_role_line_e5 import (
 _HEADER_DATE_STRONG_TOP_LINE = 2
 _HEADER_DATE_WEAK_TOP_LINE = 5
 _MIN_HEADER_TITLE_TOKEN_LEN = 2
+
+# Structural calendar dates only — rejects invoice ids like NW-2026-0042.
+_DATE_DE_FULL = re.compile(r"^(\d{1,2})\.(\d{1,2})\.(\d{4})$")
+_DATE_DE_SHORT = re.compile(r"^(\d{1,2})\.(\d{1,2})\.(\d{2})$")
+_DATE_ISO = re.compile(r"^(\d{4})-(\d{2})-(\d{2})$")
+_DATE_SLASH = re.compile(r"^(\d{1,2})/(\d{1,2})/(\d{4})$")
+
+
+def _is_valid_calendar_date(year: int, month: int, day: int) -> bool:
+    if year < 1000 or year > 9999 or month < 1 or month > 12 or day < 1:
+        return False
+    last_day = calendar.monthrange(year, month)[1]
+    return day <= last_day
+
+
+def looks_like_calendar_date(raw: str) -> bool:
+    """True for DE/ISO/slash calendar dates; false for identifiers like NW-2026-0042."""
+    value = raw.strip()
+    if not value:
+        return False
+    de_full = _DATE_DE_FULL.fullmatch(value)
+    if de_full:
+        return _is_valid_calendar_date(
+            int(de_full.group(3)), int(de_full.group(2)), int(de_full.group(1))
+        )
+    de_short = _DATE_DE_SHORT.fullmatch(value)
+    if de_short:
+        yy = int(de_short.group(3))
+        year = 1900 + yy if yy >= 70 else 2000 + yy
+        return _is_valid_calendar_date(year, int(de_short.group(2)), int(de_short.group(1)))
+    iso = _DATE_ISO.fullmatch(value)
+    if iso:
+        return _is_valid_calendar_date(int(iso.group(1)), int(iso.group(2)), int(iso.group(3)))
+    slash = _DATE_SLASH.fullmatch(value)
+    if slash:
+        return _is_valid_calendar_date(int(slash.group(3)), int(slash.group(2)), int(slash.group(1)))
+    return False
 
 
 def _normalize_amount(raw: str) -> str:
@@ -203,11 +242,16 @@ def _strong_title_header_period_date(
         return None
     for line in lines[1:4]:
         for token in _tokenize_value_candidates(line):
+            if not looks_like_calendar_date(token):
+                continue
             if len(token) < 8 or _separator_count(token) < 2:  # noqa: PLR2004
                 continue
             date_score = bundle.log_likelihood(token, "date")
             money_score = bundle.log_likelihood(token, "money")
+            id_score = bundle.log_likelihood(token, "identifier")
             if date_score <= money_score + 4:
+                continue
+            if date_score <= id_score:
                 continue
             if date_score < 48:  # noqa: PLR2004
                 continue
@@ -223,6 +267,8 @@ def _pick_best_date(text: str, bundle: ValueTypeModelBundle) -> tuple[str, float
     best: tuple[str, float, int] | None = None
     for line_index, line in enumerate(lines):
         for token in _tokenize_value_candidates(line):
+            if not looks_like_calendar_date(token):
+                continue
             if len(token) < 8 or _separator_count(token) < 2:  # noqa: PLR2004
                 continue
             if _digits_ratio(token) < 0.3:  # noqa: PLR2004
@@ -231,7 +277,10 @@ def _pick_best_date(text: str, bundle: ValueTypeModelBundle) -> tuple[str, float
                 line_index, line, title_line
             )
             money_score = bundle.log_likelihood(token, "money")
+            id_score = bundle.log_likelihood(token, "identifier")
             if date_score <= money_score:
+                continue
+            if date_score <= id_score:
                 continue
             length = len(token)
             if best is None or date_score > best[1] or (date_score == best[1] and length > best[2]):
