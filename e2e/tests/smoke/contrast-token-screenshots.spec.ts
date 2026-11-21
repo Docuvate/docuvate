@@ -119,36 +119,15 @@ test.describe('Contrast workstream screenshots', () => {
     locale: ContrastLocale,
     theme: ContrastTheme,
     viewportLabel: string,
-    documentDetailPath: string
+    documentDetailPath: string,
+    setCaptureLocale: (next: ContrastLocale) => void
   ): Promise<string> {
     const routePath = routePathForSlug(slug, documentDetailPath);
+    setCaptureLocale(locale);
 
     await page.goto(`${webOrigin}/`, { waitUntil: 'domcontentloaded' });
     await applyContrastLocale(page, locale);
     await applyContrastTheme(page, theme);
-    // Keep account settings from overwriting the capture locale (null/en defaults in CI).
-    await page.unroute('**/v1/settings');
-    await page.route('**/v1/settings', async (route) => {
-      if (route.request().method() !== 'GET') {
-        await route.continue();
-        return;
-      }
-      const response = await route.fetch();
-      const body: unknown = await response.json().catch(() => null);
-      if (body && typeof body === 'object' && !Array.isArray(body)) {
-        await route.fulfill({
-          status: response.status(),
-          headers: response.headers(),
-          body: JSON.stringify({ ...body, locale }),
-        });
-        return;
-      }
-      await route.fulfill({
-        status: response.status(),
-        headers: response.headers(),
-        body: await response.text(),
-      });
-    });
 
     await page.goto(`${webOrigin}${routePath}`, { waitUntil: 'domcontentloaded' });
     await applyContrastLocale(page, locale);
@@ -211,6 +190,35 @@ test.describe('Contrast workstream screenshots', () => {
       const documentDetailPath = await resolveSmokeReadyDocumentPath(request, apiBase, webOrigin);
       const reviewOnly = process.env['CONTRAST_SCREENSHOT_REVIEW_ONLY'] === '1';
       const captures = capturesForRun();
+      let captureLocale: ContrastLocale = 'en';
+      // Pin GET /v1/settings locale once so account defaults cannot flatten de/en screenshots.
+      await page.route((url) => {
+        try {
+          return new URL(url).pathname === '/v1/settings';
+        } catch {
+          return false;
+        }
+      }, async (route) => {
+        if (route.request().method() !== 'GET') {
+          await route.continue();
+          return;
+        }
+        const response = await route.fetch();
+        const body: unknown = await response.json().catch(() => null);
+        if (body && typeof body === 'object' && !Array.isArray(body)) {
+          await route.fulfill({
+            status: response.status(),
+            headers: response.headers(),
+            body: JSON.stringify({ ...body, locale: captureLocale }),
+          });
+          return;
+        }
+        await route.fulfill({
+          status: response.status(),
+          headers: response.headers(),
+          body: await response.text(),
+        });
+      });
 
       for (const viewport of viewportsForRun()) {
         await page.setViewportSize({ width: viewport.width, height: viewport.height });
@@ -222,7 +230,10 @@ test.describe('Contrast workstream screenshots', () => {
               capture.locale,
               theme,
               viewport.label,
-              documentDetailPath
+              documentDetailPath,
+              (next) => {
+                captureLocale = next;
+              }
             );
             expect(filePath).toBeTruthy();
           }
