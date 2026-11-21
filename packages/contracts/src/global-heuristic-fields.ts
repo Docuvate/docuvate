@@ -1,5 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import { isPlausibleExtractedDateValue } from './extracted-field-date.js';
 import { semanticFieldKey, type ExtractedFieldRow } from './extracted-field-dedupe.js';
 
 /** Plain keys produced by worker regex heuristics (not user catalog definitions). */
@@ -110,8 +111,18 @@ export function partitionRecognizedAndHeuristicSuggestions<T extends ExtractedFi
     recognized.push(field);
   }
 
-  const suggestions = [...suggestionMap.values()].filter(
-    (suggestion) => !confirmedNames.has(canonicalFieldName(suggestion.key))
-  );
+  const suggestions = [...suggestionMap.values()].filter((suggestion) => {
+    if (confirmedNames.has(canonicalFieldName(suggestion.key))) {
+      return false;
+    }
+    // Drop date suggestions that are invoice numbers / IDs (e.g. NW-2026-0042).
+    if (
+      (suggestion.key === 'date' || suggestion.key === 'datum') &&
+      !isPlausibleExtractedDateValue(suggestion.value)
+    ) {
+      return false;
+    }
+    return true;
+  });
   return { recognized, suggestions };
 }
