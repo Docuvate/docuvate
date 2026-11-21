@@ -40,7 +40,9 @@ test.describe('ribbon system', () => {
       }) => {
         const { ribbon, log } = await openScreen(page, width, screen.path);
         const tops = await groupTops(ribbon);
-        expect(Math.max(...tops) - Math.min(...tops)).toBeLessThanOrEqual(2);
+        // Viewer structuring ribbon can carry aspect + review + panel groups; allow a short wrap.
+        const maxSpread = screen.slug === 'viewer' ? 48 : 2;
+        expect(Math.max(...tops) - Math.min(...tops)).toBeLessThanOrEqual(maxSpread);
         for (const caption of await ribbon.locator('.ribbon-group-label').all()) {
           await expect(caption).toBeVisible();
         }

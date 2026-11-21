@@ -17978,6 +17978,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   background: transparent;
   padding: 0;
   cursor: pointer;
+  pointer-events: auto;
 }
 .table-pdf-cell-selected {
   outline: 2px solid var(--dv-color-accent);
@@ -17990,8 +17991,9 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   pointer-events: none;
 }
 
+/* Box frame must not intercept cell hits; cells/guides/handles keep pointer-events:auto. */
 .table-pdf-bounds-editor .table-pdf-overlay-box {
-  pointer-events: auto;
+  pointer-events: none;
 }
 
 .table-pdf-bounds-editor .table-bounds-handle {
