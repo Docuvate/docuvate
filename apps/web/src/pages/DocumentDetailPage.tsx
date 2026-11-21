@@ -875,6 +875,8 @@ export function DocumentDetailPage() {
         <DocumentPipelineHeader
           doc={doc}
           fields={recognizedFields}
+          heuristicSuggestions={heuristicSuggestions}
+          rejects={suggestionRejects}
           requeueBusy={requeueBusy}
           onRequeue={() => void onRequeueExtraction()}
           onOpenPanel={openInspector}

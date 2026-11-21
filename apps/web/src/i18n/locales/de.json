@@ -2508,7 +2508,7 @@
       "title": "Strukturieren",
       "open_one": "{{count}} offen",
       "open_other": "{{count}} offen",
-      "done": "Nichts offen",
+      "done": "Fertig — nichts offen",
       "progressAria": "Geprüfte Werte",
       "acceptSafe_one": "{{count}} sicheren Wert übernehmen",
       "acceptSafe_other": "{{count}} sichere Werte übernehmen",
