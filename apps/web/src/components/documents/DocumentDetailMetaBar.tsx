@@ -121,7 +121,7 @@ export function DocumentDetailPanelMenu({
   );
 }
 
-/** @deprecated Prefer DocumentDetailPanelMenu — kept for loading shell layout. */
+/** Loading-shell tab strip; prefer DocumentDetailPanelMenu in the live inspector. */
 export function DocumentDetailTabStrip({
   panels,
   activeTab,
