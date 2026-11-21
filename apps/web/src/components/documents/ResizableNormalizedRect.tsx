@@ -28,6 +28,8 @@ interface ResizableNormalizedRectProps {
   pageRotationDeg: number;
   className?: string;
   boxClassName?: string;
+  /** Handle base class; default keeps field-bbox e2e selectors unique. */
+  handleClassName?: string;
   testId?: string;
   /** When false, only paints the box (e.g. mid-draw). */
   interactive?: boolean;
@@ -41,6 +43,7 @@ export function ResizableNormalizedRect({
   pageRotationDeg,
   className = 'resizable-norm-rect',
   boxClassName = 'resizable-norm-rect-box',
+  handleClassName = 'field-bbox-handle',
   testId = 'resizable-norm-rect',
   interactive = true,
   children,
@@ -147,12 +150,8 @@ export function ResizableNormalizedRect({
               <button
                 key={handle}
                 type="button"
-                className={`field-bbox-handle field-bbox-handle--${handle}`}
-                data-testid={
-                  handle === 'se' && testId === 'table-bounds'
-                    ? 'table-bounds-handle'
-                    : `${testId}-handle-${handle}`
-                }
+                className={`${handleClassName} ${handleClassName}--${handle}`}
+                data-testid={`${testId}-handle-${handle}`}
                 aria-label={t('documents.fieldBboxHandle', { handle })}
                 onPointerDown={(event) => {
                   onPointerDown(handle, event);

@@ -280,6 +280,7 @@ export function TablePdfOverlay({
         pageRotationDeg={pageRotationDeg}
         className="table-pdf-bounds-editor"
         boxClassName="table-pdf-overlay-box"
+        handleClassName="table-bounds-handle"
         testId="table-bounds"
         interactive
         onChange={setDraftBounds}

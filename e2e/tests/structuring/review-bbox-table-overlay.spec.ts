@@ -60,7 +60,7 @@ test.describe('review queue, field bbox and table overlay', () => {
     const box = page.locator('.table-pdf-overlay-box');
     const before = await box.boundingBox();
     expect(before).toBeTruthy();
-    const handle = page.getByTestId('table-bounds-handle');
+    const handle = page.getByTestId('table-bounds-handle-se');
     const handleBox = await handle.boundingBox();
     expect(handleBox).toBeTruthy();
     await page.mouse.move(handleBox!.x + handleBox!.width / 2, handleBox!.y + handleBox!.height / 2);
