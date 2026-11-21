@@ -307,7 +307,7 @@ export function coalesceCellsForMerge(
   const parts: string[] = [];
   for (let row = merge.row0; row < merge.row0 + merge.rowSpan; row += 1) {
     for (let col = merge.col0; col < merge.col0 + merge.colSpan; col += 1) {
-      const text = cells.find((item) => item.row === row && item.col === col)?.text?.trim() ?? '';
+      const text = cells.find((item) => item.row === row && item.col === col)?.text.trim() ?? '';
       if (text) parts.push(text);
     }
   }

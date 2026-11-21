@@ -70,8 +70,9 @@ describe('tableGridOps', () => {
     const choice = tableStructureOf(table);
     const next = splitTableBandAtPos(table, choice, 'col', 0.25);
     expect(next).not.toBeNull();
-    expect(tableGridSize({ rules: next!.rules, cells: next!.cells }).cols).toBe(3);
-    expect(next!.cells.find((cell) => cell.row === 0 && cell.col === 0)?.text).toBe('A');
-    expect(next!.cells.find((cell) => cell.row === 0 && cell.col === 2)?.text).toBe('B');
+    if (!next) return;
+    expect(tableGridSize({ rules: next.rules, cells: next.cells }).cols).toBe(3);
+    expect(next.cells.find((cell) => cell.row === 0 && cell.col === 0)?.text).toBe('A');
+    expect(next.cells.find((cell) => cell.row === 0 && cell.col === 2)?.text).toBe('B');
   });
 });

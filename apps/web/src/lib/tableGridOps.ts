@@ -4,8 +4,8 @@ import type {
   DocumentRegionTableCellDto,
   DocumentRegionTableDto,
   DocumentRegionTableMergeDto,
-  DocumentRegionTableRuleDto,
   DocumentRegionTableRowRoleDto,
+  DocumentRegionTableRuleDto,
 } from '@docuvate/contracts';
 import { tableGridSize } from '@docuvate/contracts';
 
@@ -106,11 +106,11 @@ export function insertTableRow(
   const rules = cloneRules(choice.rules ?? table.rules);
   const rowAxis = axisRules(rules, 'row');
   const band = Math.max(0, Math.min(at, Math.max(0, rowAxis.length - 1)));
-  const before = rowAxis[band] ?? rowAxis[0];
-  const after = rowAxis[band + 1] ?? rowAxis[rowAxis.length - 1];
-  if (!before || !after) {
+  if (rowAxis.length < 2) {
     return { choice, rules: table.rules, cells: table.cells };
   }
+  const before = rowAxis[band] ?? rowAxis[0];
+  const after = rowAxis[band + 1] ?? rowAxis[rowAxis.length - 1];
   const pos = (before.pos + after.pos) / 2;
   const nextRules = reindexAxis(
     [...rules, { axis: 'row', ord: rowAxis.length, pos, line: 'thin' as const }],
@@ -148,10 +148,7 @@ export function deleteTableRow(
     return { choice, rules: table.rules, cells: table.cells };
   }
   const dropOrd = at + 1 < rowAxis.length ? at + 1 : at;
-  const drop = rowAxis[dropOrd];
-  if (!drop) {
-    return { choice, rules: table.rules, cells: table.cells };
-  }
+  const drop = rowAxis[dropOrd] ?? rowAxis[0];
   const nextRules = reindexAxis(
     rules.filter((rule) => !(rule.axis === 'row' && rule.ord === drop.ord)),
     'row'
@@ -197,11 +194,11 @@ export function insertTableCol(
   const rules = cloneRules(choice.rules ?? table.rules);
   const colAxis = axisRules(rules, 'col');
   const band = Math.max(0, Math.min(at, Math.max(0, colAxis.length - 1)));
-  const before = colAxis[band] ?? colAxis[0];
-  const after = colAxis[band + 1] ?? colAxis[colAxis.length - 1];
-  if (!before || !after) {
+  if (colAxis.length < 2) {
     return { choice, rules: table.rules, cells: table.cells };
   }
+  const before = colAxis[band] ?? colAxis[0];
+  const after = colAxis[band + 1] ?? colAxis[colAxis.length - 1];
   const pos = (before.pos + after.pos) / 2;
   const nextRules = reindexAxis(
     [...rules, { axis: 'col', ord: colAxis.length, pos, line: 'thin' as const }],
@@ -236,10 +233,7 @@ export function deleteTableCol(
     return { choice, rules: table.rules, cells: table.cells };
   }
   const dropOrd = at + 1 < colAxis.length ? at + 1 : at;
-  const drop = colAxis[dropOrd];
-  if (!drop) {
-    return { choice, rules: table.rules, cells: table.cells };
-  }
+  const drop = colAxis[dropOrd] ?? colAxis[0];
   const nextRules = reindexAxis(
     rules.filter((rule) => !(rule.axis === 'col' && rule.ord === drop.ord)),
     'col'
@@ -290,9 +284,8 @@ export function splitTableBandAtPos(
   const axisList = axisRules(rules, axis);
   let band = -1;
   for (let i = 0; i < axisList.length - 1; i += 1) {
-    const before = axisList[i];
-    const after = axisList[i + 1];
-    if (!before || !after) continue;
+    const before = axisList[i] ?? axisList[0];
+    const after = axisList[i + 1] ?? axisList[axisList.length - 1];
     if (pos > before.pos + minGap && pos < after.pos - minGap) {
       band = i;
       break;
@@ -341,11 +334,8 @@ export function distributeTableAxis(
   if (axisList.length < 3) {
     return { choice, rules: table.rules, cells: choice.cells ?? table.cells };
   }
-  const first = axisList[0];
-  const last = axisList[axisList.length - 1];
-  if (!first || !last) {
-    return { choice, rules: table.rules, cells: choice.cells ?? table.cells };
-  }
+  const first = axisList[0] ?? axisList[axisList.length - 1];
+  const last = axisList[axisList.length - 1] ?? first;
   const span = last.pos - first.pos;
   const step = span / (axisList.length - 1);
   const nextAxis = axisList.map((rule, index) => ({

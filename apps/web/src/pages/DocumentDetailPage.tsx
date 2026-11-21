@@ -74,12 +74,6 @@ import {
   type CatalogFieldGateSettings,
   mergeCatalogFieldsForDocument,
 } from '../lib/documentRecognizedCatalogFields';
-import {
-  draftsFromRecognizedDefinitions,
-  emptyRecognizedFieldDraft,
-  type RecognizedFieldGateDraft,
-} from '../lib/recognizedFieldDraft';
-import { persistRecognizedFieldCatalog } from '../lib/recognizedFieldsPersist';
 import { areBlocksDirty, areFieldsDirty, extractionBlocksForUpdate } from '../lib/extractionDirty';
 import { extractionFieldLabel } from '../lib/extractionFieldLabels';
 import {
@@ -99,6 +93,12 @@ import {
 } from '../lib/labelFieldDisplay';
 import { flattenCursorPages } from '../lib/pagination/useCursorInfiniteQuery';
 import { splitRecognizedFieldsAndSuggestions } from '../lib/recognizedFieldDisplay';
+import {
+  draftsFromRecognizedDefinitions,
+  emptyRecognizedFieldDraft,
+  type RecognizedFieldGateDraft,
+} from '../lib/recognizedFieldDraft';
+import { persistRecognizedFieldCatalog } from '../lib/recognizedFieldsPersist';
 import { useDocumentReviewQueueInfiniteQuery } from '../lib/review/useDocumentReviewQueueInfiniteQuery';
 import {
   acceptSuggestedField,

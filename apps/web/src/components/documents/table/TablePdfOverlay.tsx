@@ -20,12 +20,12 @@ import { Button } from '../../ui/Button';
 import { ResizableNormalizedRect } from '../ResizableNormalizedRect';
 
 /** Full structure patch from the PDF overlay (drag moves rules only; split adds cells/merges). */
-export type TableOverlayStructureCommit = {
+export interface TableOverlayStructureCommit {
   rules: DocumentRegionTableRuleDto[];
   cells?: DocumentRegionTableCellDto[];
   merges?: DocumentRegionTableMergeDto[];
   rowRoles?: DocumentRegionTableRowRoleDto[];
-};
+}
 
 interface TablePdfOverlayProps {
   region: DocumentRegionDto;
@@ -43,11 +43,11 @@ interface TablePdfOverlayProps {
   onRedetect?: () => void;
 }
 
-type GuideDrag = {
+interface GuideDrag {
   axis: 'row' | 'col';
   ord: number;
   pointerId: number;
-};
+}
 
 function sortedAxis(
   rules: readonly DocumentRegionTableRuleDto[],
@@ -65,9 +65,8 @@ function clampGuidePos(
   const axisRules = sortedAxis(rules, axis);
   const index = axisRules.findIndex((rule) => rule.ord === ord);
   if (index <= 0 || index >= axisRules.length - 1) return nextPos;
-  const prev = axisRules[index - 1];
-  const following = axisRules[index + 1];
-  if (!prev || !following) return nextPos;
+  const prev = axisRules[index - 1] ?? axisRules[0];
+  const following = axisRules[index + 1] ?? axisRules[axisRules.length - 1];
   const minGap = 0.004;
   return Math.min(following.pos - minGap, Math.max(prev.pos + minGap, nextPos));
 }
@@ -175,13 +174,13 @@ export function TablePdfOverlay({
 
   function onGuidePointerMove(event: React.PointerEvent<HTMLButtonElement>) {
     const drag = dragRef.current;
-    if (!drag || drag.pointerId !== event.pointerId) return;
+    if (drag?.pointerId !== event.pointerId) return;
     moveGuide(drag.axis, drag.ord, event.clientX, event.clientY);
   }
 
   function onGuidePointerUp(event: React.PointerEvent<HTMLButtonElement>) {
     const drag = dragRef.current;
-    if (!drag || drag.pointerId !== event.pointerId) return;
+    if (drag?.pointerId !== event.pointerId) return;
     dragRef.current = null;
     try {
       event.currentTarget.releasePointerCapture(event.pointerId);
