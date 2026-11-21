@@ -1834,7 +1834,7 @@ mark.global-search-mark {
 
 .app-build-footer {
   flex: 0 0 auto;
-  padding: 0.15rem 0.75rem 0.25rem;
+  padding: var(--dv-space-2xs) var(--dv-space-sm) var(--dv-space-xs);
   text-align: end;
   pointer-events: none;
   line-height: 1.2;
