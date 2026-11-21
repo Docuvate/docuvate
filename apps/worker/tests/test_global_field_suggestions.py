@@ -8,6 +8,7 @@ from pathlib import Path
 import pytest
 
 from docuvate_worker.infrastructure.extractors.heuristic_fields import heuristic_field_suggestions
+from docuvate_worker.infrastructure.ml.value_types.field_suggestions import looks_like_calendar_date
 
 
 def test_regex_heuristic_module_removed() -> None:
@@ -60,10 +61,6 @@ def test_nordwind_invoice_number_is_not_suggested_as_date() -> None:
         f.value for f in heuristic_field_suggestions(text) if f.key == "date"
     }
     if "date" in fields:
-        from docuvate_worker.infrastructure.ml.value_types.field_suggestions import (
-            looks_like_calendar_date,
-        )
-
         assert looks_like_calendar_date(fields["date"])
 
 

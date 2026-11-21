@@ -41,8 +41,20 @@ _DATE_ISO = re.compile(r"^(\d{4})-(\d{2})-(\d{2})$")
 _DATE_SLASH = re.compile(r"^(\d{1,2})/(\d{1,2})/(\d{4})$")
 
 
+_MIN_FOUR_DIGIT_YEAR = 1000
+_MAX_FOUR_DIGIT_YEAR = 9999
+_MONTHS_IN_YEAR = 12
+_TWO_DIGIT_YEAR_PIVOT = 70
+
+
 def _is_valid_calendar_date(year: int, month: int, day: int) -> bool:
-    if year < 1000 or year > 9999 or month < 1 or month > 12 or day < 1:
+    if (
+        year < _MIN_FOUR_DIGIT_YEAR
+        or year > _MAX_FOUR_DIGIT_YEAR
+        or month < 1
+        or month > _MONTHS_IN_YEAR
+        or day < 1
+    ):
         return False
     last_day = calendar.monthrange(year, month)[1]
     return day <= last_day
@@ -61,14 +73,16 @@ def looks_like_calendar_date(raw: str) -> bool:
     de_short = _DATE_DE_SHORT.fullmatch(value)
     if de_short:
         yy = int(de_short.group(3))
-        year = 1900 + yy if yy >= 70 else 2000 + yy
+        year = 1900 + yy if yy >= _TWO_DIGIT_YEAR_PIVOT else 2000 + yy
         return _is_valid_calendar_date(year, int(de_short.group(2)), int(de_short.group(1)))
     iso = _DATE_ISO.fullmatch(value)
     if iso:
         return _is_valid_calendar_date(int(iso.group(1)), int(iso.group(2)), int(iso.group(3)))
     slash = _DATE_SLASH.fullmatch(value)
     if slash:
-        return _is_valid_calendar_date(int(slash.group(3)), int(slash.group(2)), int(slash.group(1)))
+        return _is_valid_calendar_date(
+            int(slash.group(3)), int(slash.group(2)), int(slash.group(1))
+        )
     return False
 
 
