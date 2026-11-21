@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { Link, NavLink } from 'react-router-dom';
 
 import { writeAdvancedFeaturesEnabled } from '../lib/advancedFeatures';
-import { getUserSettings, updateUserSettings } from '../lib/api';
+import { getUserSettings } from '../lib/api';
 import { authClient, authSessionUserId } from '../lib/auth-client';
 import { markAuthenticatedSessionHint } from '../lib/authSessionHint';
 import { ensureRemoteConfigLoaded } from '../lib/remoteConfig';
@@ -59,12 +59,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     void getUserSettings()
       .then((settings) => {
         writeAdvancedFeaturesEnabled(settings.advancedFeaturesEnabled === true);
-        const locale = applyUserSettingsUiPreferences(settings);
-        if (settings.locale !== 'de' && settings.locale !== 'en') {
-          void updateUserSettings({ locale }).catch(() => {
-            /* keep browser locale locally */
-          });
-        }
+        applyUserSettingsUiPreferences(settings);
       })
       .catch(() => {
         /* keep local cache */
