@@ -15,10 +15,10 @@ import {
 import { ribbonActionClass } from '../../lib/ribbonAction';
 import { routes } from '../../lib/routes';
 import { type StructuringAspect, structuringAspects } from '../../lib/structuringAspects';
-import { StructuringAspectStrip } from '../pipeline/StructuringAspectStrip';
 import { AppRibbon, RibbonGroup } from '../layout/AppRibbon';
 import { Button } from '../ui/Button';
 import { DocumentDetailPanelMenu, type InspectorPanel } from './DocumentDetailMetaBar';
+import { StructuringAspectStrip } from './StructuringAspectStrip';
 
 function reviewDocumentHref(documentId: string): string {
   return `${routes.documents}/${documentId}?review=1`;
