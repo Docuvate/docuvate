@@ -27,7 +27,7 @@ describe('resolveUiLocale', () => {
     expect(resolveUiLocale({ locale: null })).toBe('de');
   });
 
-  it('seeds from the browser language when the account has no locale yet', () => {
+  it('seeds from the browser language when nothing is stored yet', () => {
     vi.stubGlobal('navigator', { language: 'de-AT', languages: ['de-AT'] });
     expect(resolveUiLocale({ locale: null })).toBe('de');
     vi.stubGlobal('navigator', { language: 'en-GB', languages: ['en-GB'] });

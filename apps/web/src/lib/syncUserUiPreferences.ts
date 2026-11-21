@@ -6,7 +6,11 @@ import i18n, { LOCALE_STORAGE_KEY } from '../i18n';
 import { documentLanguageForLocale } from './documentLanguage';
 import { applyThemePreference } from './docuvateTheme';
 
-/** Prefer account locale, then localStorage, else seed from the browser language (de/en). */
+/**
+ * Prefer account locale; otherwise keep localStorage; otherwise seed from the browser.
+ * Seeding only writes storage so the next load / i18n init picks it up — it does not
+ * force changeLanguage over an explicit capture/test locale already in localStorage.
+ */
 export function resolveUiLocale(settings: Pick<UserSettingsDto, 'locale'>): 'de' | 'en' {
   if (settings.locale === 'de' || settings.locale === 'en') {
     return settings.locale;
@@ -30,9 +34,12 @@ export function applyUserSettingsUiPreferences(settings: UserSettingsDto): 'de' 
 
   const locale = resolveUiLocale(settings);
   window.localStorage.setItem(LOCALE_STORAGE_KEY, locale);
-  const current = i18n.resolvedLanguage?.startsWith('en') ? 'en' : 'de';
-  if (current !== locale) {
-    void i18n.changeLanguage(locale);
+
+  if (settings.locale === 'de' || settings.locale === 'en') {
+    const current = i18n.resolvedLanguage?.startsWith('en') ? 'en' : 'de';
+    if (current !== locale) {
+      void i18n.changeLanguage(locale);
+    }
   }
   return locale;
 }
