@@ -121,28 +121,6 @@ export function DocumentDetailPanelMenu({
   );
 }
 
-/** Loading-shell tab strip; prefer DocumentDetailPanelMenu in the live inspector. */
-export function DocumentDetailTabStrip({
-  panels,
-  activeTab,
-  labelCount,
-  onTabChange,
-}: {
-  panels: readonly InspectorPanel[];
-  activeTab: InspectorPanel | null;
-  labelCount: number;
-  onTabChange: (tab: InspectorPanel | null) => void;
-}) {
-  return (
-    <DocumentDetailPanelMenu
-      panels={panels}
-      activeTab={activeTab}
-      labelCount={labelCount}
-      onTabChange={onTabChange}
-    />
-  );
-}
-
 export function DocumentDetailMetaBar({
   doc,
   onDelete,

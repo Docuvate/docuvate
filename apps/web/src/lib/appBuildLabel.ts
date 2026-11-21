@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 
 /** Semver from package.json, injected at Vite build/dev time. */
-export function appSemver(): string {
+function appSemver(): string {
   return __DOCUVATE_APP_VERSION__;
 }
 
@@ -16,7 +16,7 @@ export function shortBuildSha(raw: string): string {
 }
 
 /** Short git SHA (or `dev` / env override). */
-export function appBuildShaShort(): string {
+function appBuildShaShort(): string {
   const raw =
     (typeof window !== 'undefined' ? window.__DOCUVATE_BUILD_SHA__ : undefined) ??
     __DOCUVATE_BUILD_SHA__;

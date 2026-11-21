@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next';
 
 import { clientPointToLocalRatio } from '../../lib/viewerGeometry';
 
-export type RectHandle = 'move' | 'n' | 's' | 'e' | 'w' | 'ne' | 'nw' | 'se' | 'sw';
+type RectHandle = 'move' | 'n' | 's' | 'e' | 'w' | 'ne' | 'nw' | 'se' | 'sw';
 
 const HANDLES: Exclude<RectHandle, 'move'>[] = ['n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw'];
 

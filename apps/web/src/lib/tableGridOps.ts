@@ -11,7 +11,7 @@ import { tableGridSize } from '@docuvate/contracts';
 
 import type { TableStructureChoice } from './tableLayouts';
 
-export interface TableGridDraft {
+interface TableGridDraft {
   choice: TableStructureChoice;
   rules: DocumentRegionTableRuleDto[];
   cells: DocumentRegionTableCellDto[];
