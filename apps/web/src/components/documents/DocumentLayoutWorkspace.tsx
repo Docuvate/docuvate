@@ -697,7 +697,6 @@ export function DocumentLayoutWorkspace({
           <DocumentLayoutViewerToolbar
             leftMode={leftMode}
             onLeftModeChange={setLeftDocumentMode}
-            showAdvancedStage={showAdvancedStage}
             zoom={layoutZoom}
             onZoomChange={setLayoutZoom}
             showTechnicalDetails={showTechnicalDetails}
@@ -799,6 +798,7 @@ export function DocumentLayoutWorkspace({
                 onOverlayClear={() => {
                   setActiveOverlayId(null);
                 }}
+                zoomPercent={layoutZoom}
                 viewerPage={viewerPage}
                 onViewerPageChange={onViewerPageChange}
                 onPageClick={selectionTool === 'none' ? onPdfPageClick : undefined}

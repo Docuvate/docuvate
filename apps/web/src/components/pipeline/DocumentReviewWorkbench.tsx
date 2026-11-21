@@ -113,6 +113,8 @@ export function DocumentReviewWorkbench({
     () => summarizeDocumentOpenWork(doc, fields, suggestions, rejects),
     [doc, fields, suggestions, rejects]
   );
+  const assigned = useMemo(() => new Set(doc.tags.map((tag) => tag.id)), [doc.tags]);
+  const labelSuggestions = doc.tagSuggestions ?? [];
   const open = openWork.openFields;
   const openLabels = openWork.openLabels;
   const openTotal = openWork.openTotal;
@@ -190,16 +192,12 @@ export function DocumentReviewWorkbench({
     if (!requestEditFieldKey) {
       return;
     }
-    const index = rows.findIndex((row) => row.key === requestEditFieldKey);
-    if (index < 0) {
-      onRequestEditFieldHandled?.();
-      return;
-    }
-    const row = rows[index];
+    const row = rows.find((candidate) => candidate.key === requestEditFieldKey);
     if (!row) {
       onRequestEditFieldHandled?.();
       return;
     }
+    const index = rows.indexOf(row);
     startEdit(row, index);
     window.requestAnimationFrame(() => {
       rowRefs.current[index]?.scrollIntoView({ block: 'nearest' });

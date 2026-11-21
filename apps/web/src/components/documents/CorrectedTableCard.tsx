@@ -87,7 +87,7 @@ function Stepper({ label, value, max, onChange }: StepperProps) {
       <span className="table-tool-stepper-box">
         <button
           type="button"
-          aria-label={t('tableLayouts.less')}
+          aria-label={`${label}: ${t('tableLayouts.less')}`}
           disabled={value <= 0}
           onClick={() => {
             set(value - 1);
@@ -107,7 +107,7 @@ function Stepper({ label, value, max, onChange }: StepperProps) {
         />
         <button
           type="button"
-          aria-label={t('tableLayouts.more')}
+          aria-label={`${label}: ${t('tableLayouts.more')}`}
           disabled={value >= max}
           onClick={() => {
             set(value + 1);

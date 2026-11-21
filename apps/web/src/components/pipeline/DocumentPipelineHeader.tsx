@@ -103,7 +103,9 @@ export function DocumentPipelineHeader({
           <div className="pipeline-next-actions">
             <Button
               type="button"
-              variant={lowConfidence > 0 || labelSuggestions === 0 ? 'primary' : 'secondary'}
+              variant={
+                openWork.openFields > 0 || openWork.openLabels === 0 ? 'primary' : 'secondary'
+              }
               onClick={() => {
                 onOpenPanel('details');
               }}
@@ -113,7 +115,9 @@ export function DocumentPipelineHeader({
             </Button>
             <Button
               type="button"
-              variant={lowConfidence === 0 && labelSuggestions > 0 ? 'primary' : 'secondary'}
+              variant={
+                openWork.openFields === 0 && openWork.openLabels > 0 ? 'primary' : 'secondary'
+              }
               onClick={() => {
                 onOpenPanel('labels');
               }}

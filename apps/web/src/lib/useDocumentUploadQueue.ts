@@ -60,11 +60,15 @@ async function uploadOneItem(
   try {
     const placement = uploadPlacementFromAssignment(item.assignment);
     const doc = await uploadDocument(item.file, placement);
-    if (!placement) {
-      await applyDocumentUploadAssignment(doc.id, item.assignment);
-    }
+    // Mark done as soon as bytes are stored so the queue feels finished;
+    // folder/label assignment continues in the background.
     updateItem(item.id, { status: 'done' });
     onUploaded?.();
+    if (!placement) {
+      void applyDocumentUploadAssignment(doc.id, item.assignment).catch(() => {
+        /* assignment failure is recoverable from the library */
+      });
+    }
   } catch (err) {
     updateItem(item.id, {
       status: 'error',

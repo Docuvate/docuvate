@@ -13,7 +13,7 @@ import {
  * Used by the Strukturieren workbench, aspect strip, and pipeline header so
  * counts stay identical after confirm / reject / Fertig.
  */
-export interface DocumentOpenWorkSummary {
+interface DocumentOpenWorkSummary {
   openLabels: number;
   openFields: number;
   openTotal: number;

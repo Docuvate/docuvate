@@ -9,14 +9,14 @@ import en from './locales/en.json';
 /** Single-brace `{name}` that is not part of i18next `{{name}}`. */
 const UNRESOLVED_PLACEHOLDER = /(?<!\{)\{([a-zA-Z_][a-zA-Z0-9_]*)\}(?!\})/g;
 
-function collectLeafPaths(value: unknown, prefix = ''): Array<{ path: string; text: string }> {
+function collectLeafPaths(value: unknown, prefix = ''): { path: string; text: string }[] {
   if (typeof value === 'string') {
     return prefix ? [{ path: prefix, text: value }] : [];
   }
   if (!isRecord(value)) {
     return [];
   }
-  const out: Array<{ path: string; text: string }> = [];
+  const out: { path: string; text: string }[] = [];
   for (const key of Object.keys(value).sort()) {
     const path = prefix ? `${prefix}.${key}` : key;
     out.push(...collectLeafPaths(value[key], path));
@@ -27,11 +27,11 @@ function collectLeafPaths(value: unknown, prefix = ''): Array<{ path: string; te
 function findUnresolved(
   localeName: string,
   root: unknown
-): Array<{ locale: string; path: string; match: string }> {
-  const offenders: Array<{ locale: string; path: string; match: string }> = [];
+): { locale: string; path: string; match: string }[] {
+  const offenders: { locale: string; path: string; match: string }[] = [];
   for (const { path, text } of collectLeafPaths(root)) {
     for (const match of text.matchAll(UNRESOLVED_PLACEHOLDER)) {
-      offenders.push({ locale: localeName, path, match: match[0] ?? '' });
+      offenders.push({ locale: localeName, path, match: match[0] });
     }
   }
   return offenders;

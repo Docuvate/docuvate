@@ -6,6 +6,7 @@ import { normalizeMimeType } from '@docuvate/contracts';
 import { Inject, Injectable } from '@nestjs/common';
 
 import { NotFoundError, ValidationError } from '../../../shared/domain/errors.js';
+import { isStructurallyValidPdf } from '../../../shared/domain/pdf-structure.js';
 import {
   CLOCK,
   type Clock,
@@ -20,7 +21,6 @@ import {
   TAXONOMY_REPOSITORY,
   type TaxonomyRepository,
 } from '../../../shared/domain/ports.js';
-import { isStructurallyValidPdf } from '../../../shared/domain/pdf-structure.js';
 import { resolveAllowedUploadMime } from '../../../shared/domain/upload-mime-resolve.js';
 import { ScheduleDuplicateDetectionUseCase } from '../../duplicates/application/schedule-duplicate-detection.use-case.js';
 import { SyncDocumentSearchIndexUseCase } from '../../search/application/sync-document-search-index.use-case.js';

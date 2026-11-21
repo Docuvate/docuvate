@@ -55,7 +55,25 @@ export function UploadDropzone({ compact = false, showBar = true }: UploadDropzo
   const showFullDropzone = !compact || expanded || active || uploadBusy;
 
   return (
-    <div className={`upload-section${compact ? ' upload-section-compact' : ''}`}>
+    <div
+      className={`upload-section${compact ? ' upload-section-compact' : ''}`}
+      onDragEnter={(e) => {
+        if (!compact || showFullDropzone) {
+          return;
+        }
+        e.preventDefault();
+        setDragOver(true);
+        setExpanded(true);
+      }}
+      onDragOver={(e) => {
+        if (!compact) {
+          return;
+        }
+        e.preventDefault();
+        setDragOver(true);
+      }}
+      onDrop={onDrop}
+    >
       {compact && showBar && !showFullDropzone ? (
         <UploadCompactBar
           onExpand={() => {

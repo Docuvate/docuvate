@@ -95,7 +95,7 @@ describe('Global search field values (Testcontainers Postgres)', () => {
     const docs = res.groups.find((g) => g.type === 'documents')?.items ?? [];
     const hit = docs.find((item) => item.type === 'document' && item.id === amountDocId);
     expect(hit).toBeDefined();
-    expect(hit && hit.type === 'document' ? hit.snippet : '').toMatch(/1\.234,56/);
+    expect(hit?.type === 'document' ? hit.snippet : '').toMatch(/1\.234,56/);
   });
 
   it('field typo corpus recall@5 via GlobalSearchUseCase (HTTP-equivalent path)', async () => {
