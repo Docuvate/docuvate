@@ -20,7 +20,8 @@ export function resolveUiLocale(settings: Pick<UserSettingsDto, 'locale'>): 'de'
   if (typeof navigator === 'undefined') {
     return 'en';
   }
-  return documentLanguageForLocale(navigator.language || navigator.languages?.[0] || 'en');
+  const browserLanguage = navigator.language || navigator.languages[0] || 'en';
+  return documentLanguageForLocale(browserLanguage);
 }
 
 export function applyUserSettingsUiPreferences(settings: UserSettingsDto): 'de' | 'en' {

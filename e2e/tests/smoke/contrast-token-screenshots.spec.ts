@@ -126,8 +126,22 @@ test.describe('Contrast workstream screenshots', () => {
     await page.goto(`${webOrigin}/`, { waitUntil: 'domcontentloaded' });
     await applyContrastLocale(page, locale);
     await applyContrastTheme(page, theme);
+    // Keep account settings from overwriting the capture locale (null/en defaults in CI).
+    await page.route('**/v1/settings**', async (route) => {
+      const response = await route.fetch();
+      const body: unknown = await response.json().catch(() => null);
+      if (body && typeof body === 'object' && !Array.isArray(body)) {
+        await route.fulfill({
+          response,
+          json: { ...body, locale },
+        });
+        return;
+      }
+      await route.fulfill({ response });
+    });
 
     await page.goto(`${webOrigin}${routePath}`, { waitUntil: 'domcontentloaded' });
+    await applyContrastLocale(page, locale);
     await waitForContrastPageReady(page, slug, documentDetailPath, webOrigin);
     await applyContrastTheme(page, theme);
     await assertContrastTheme(page, theme);

@@ -71,6 +71,12 @@ export async function waitForContrastPageReady(
     await page
       .getByTestId('library-doc-virtual-scroll')
       .waitFor({ state: 'visible', timeout: 60_000 });
+    // Locale must be visible in chrome so de/en screenshots cannot share a PNG hash.
+    const localeProbe =
+      slug === 'documents-de'
+        ? page.getByText('Dokumente', { exact: true }).first()
+        : page.getByText('Documents', { exact: true }).first();
+    await expect(localeProbe).toBeVisible({ timeout: 30_000 });
     return;
   }
 
