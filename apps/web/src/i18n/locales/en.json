@@ -636,7 +636,9 @@
     "feedbackFailed": "{{count}} upload(s) failed.",
     "feedbackPartial": "{{done}} uploaded, {{failed}} failed.",
     "errorFileTooLarge": "File is larger than 25 MB",
-    "errorUnsupportedType": "Unsupported file type (PDF or image only)"
+    "errorUnsupportedType": "Unsupported file type (PDF or image only)",
+    "errorCorruptPdf": "This PDF is damaged or incomplete and cannot be processed. Try another file or export the PDF again.",
+    "retryItem": "Try again"
   },
   "extraction": {
     "stage": {

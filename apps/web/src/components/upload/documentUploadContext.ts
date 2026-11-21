@@ -11,6 +11,7 @@ interface DocumentUploadContextValue {
   enqueueFiles: ReturnType<typeof useDocumentUploadQueue>['enqueueFiles'];
   clearTerminalItems: ReturnType<typeof useDocumentUploadQueue>['clearTerminalItems'];
   removeUploadItem: ReturnType<typeof useDocumentUploadQueue>['removeUploadItem'];
+  retryUploadItem: ReturnType<typeof useDocumentUploadQueue>['retryUploadItem'];
 }
 
 export const DocumentUploadContext = createContext<DocumentUploadContextValue | null>(null);

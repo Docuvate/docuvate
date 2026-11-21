@@ -22,9 +22,11 @@ interface UploadQueueListProps {
 function UploadQueueRow({
   item,
   onDismiss,
+  onRetry,
 }: {
   item: ReturnType<typeof useDocumentUploadContext>['queue'][number];
   onDismiss: () => void;
+  onRetry: () => void;
 }) {
   const { t } = useTranslation();
   return (
@@ -63,6 +65,16 @@ function UploadQueueRow({
           {item.status === 'done' && t('upload.statusDone')}
           {item.status === 'error' && (item.error ?? t('upload.statusError'))}
         </span>
+        {item.status === 'error' ? (
+          <Button
+            type="button"
+            variant="ghost"
+            className="upload-queue-retry"
+            onClick={onRetry}
+          >
+            {t('upload.retryItem')}
+          </Button>
+        ) : null}
       </div>
       {item.status === 'done' || item.status === 'error' ? (
         <button
@@ -80,7 +92,8 @@ function UploadQueueRow({
 
 export function UploadQueueList({ className }: UploadQueueListProps) {
   const { t } = useTranslation();
-  const { queue, clearTerminalItems, removeUploadItem } = useDocumentUploadContext();
+  const { queue, clearTerminalItems, removeUploadItem, retryUploadItem } =
+    useDocumentUploadContext();
   const overflowButtonRef = useRef<HTMLButtonElement>(null);
   const [overflowOpen, setOverflowOpen] = useState(false);
   const popoverId = useId();
@@ -115,6 +128,9 @@ export function UploadQueueList({ className }: UploadQueueListProps) {
             item={item}
             onDismiss={() => {
               removeUploadItem(item.id);
+            }}
+            onRetry={() => {
+              retryUploadItem(item.id);
             }}
           />
         ))}
@@ -154,6 +170,9 @@ export function UploadQueueList({ className }: UploadQueueListProps) {
                     item={item}
                     onDismiss={() => {
                       removeUploadItem(item.id);
+                    }}
+                    onRetry={() => {
+                      retryUploadItem(item.id);
                     }}
                   />
                 ))}
