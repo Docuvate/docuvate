@@ -1840,7 +1840,7 @@ mark.global-search-mark {
   line-height: 1.2;
   background: transparent;
   border-top: 0;
-  z-index: 1;
+  z-index: calc(var(--dv-z-base) + 1);
 }
 
 .app-build-footer-label {
@@ -17996,7 +17996,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 
 .table-pdf-bounds-editor .field-bbox-handle {
   pointer-events: auto;
-  z-index: 2;
+  z-index: calc(var(--dv-z-base) + 2);
 }
 .table-pdf-overlay-actions,
 .table-pdf-minibar {
