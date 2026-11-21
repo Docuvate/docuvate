@@ -1,6 +1,6 @@
 {
   "name": "docuvate",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "Docuvate — Document management with structured extraction",
   "license": "LicenseRef-Docuvate-SUL-1.0",
