@@ -7,11 +7,13 @@
  */
 /* eslint-disable @typescript-eslint/consistent-type-assertions */
 export function addWindowKeydownListener(
-  listener: (event: globalThis.KeyboardEvent) => void
+  listener: (event: globalThis.KeyboardEvent) => void,
+  options?: { capture?: boolean }
 ): () => void {
   const onKeyDown = listener;
-  window.addEventListener('keydown', onKeyDown as unknown as EventListener);
+  const capture = options?.capture === true;
+  window.addEventListener('keydown', onKeyDown as unknown as EventListener, capture);
   return () => {
-    window.removeEventListener('keydown', onKeyDown as unknown as EventListener);
+    window.removeEventListener('keydown', onKeyDown as unknown as EventListener, capture);
   };
 }
