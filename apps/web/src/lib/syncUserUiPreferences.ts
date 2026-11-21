@@ -6,10 +6,16 @@ import i18n, { LOCALE_STORAGE_KEY } from '../i18n';
 import { documentLanguageForLocale } from './documentLanguage';
 import { applyThemePreference } from './docuvateTheme';
 
-/** Prefer stored locale; otherwise seed from the browser language (de/en). */
+/** Prefer account locale, then localStorage, else seed from the browser language (de/en). */
 export function resolveUiLocale(settings: Pick<UserSettingsDto, 'locale'>): 'de' | 'en' {
   if (settings.locale === 'de' || settings.locale === 'en') {
     return settings.locale;
+  }
+  if (typeof window !== 'undefined') {
+    const stored = window.localStorage.getItem(LOCALE_STORAGE_KEY);
+    if (stored === 'de' || stored === 'en') {
+      return stored;
+    }
   }
   if (typeof navigator === 'undefined') {
     return 'en';
