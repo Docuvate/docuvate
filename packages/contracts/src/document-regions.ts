@@ -8,7 +8,8 @@ export type DocumentRegionShape = 'rect' | 'polygon';
 export type DocumentRegionRole = 'field' | 'table' | 'block' | 'ignore';
 export type DocumentCorrectionKind = 'label' | 'field' | 'table' | 'block' | 'page';
 export type DocumentCorrectionStatus = 'active' | 'withdrawn';
-export type FieldCorrectionOp = 'create' | 'reanchor' | 'edit_value' | 'remove' | 'reject_suggestion';
+export type FieldCorrectionOp =
+  'create' | 'reanchor' | 'edit_value' | 'remove' | 'reject_suggestion';
 export type FieldCorrectionScope = 'document' | 'label' | 'always';
 export type TableCorrectionOp = 'create' | 'set_headers' | 'edit_cell' | 'remove';
 export type DocumentRegionTableType = 'line_items' | 'key_value' | 'other';
@@ -131,7 +132,6 @@ export interface DocumentCorrectionDto {
   createdAt: string;
 }
 
-
 /** Normalize a suggested/extracted value for durable reject identity (field + value). */
 export function normalizeSuggestionDecisionValue(value: string): string {
   return value.replace(/\s+/g, ' ').trim().toLowerCase();
@@ -180,6 +180,13 @@ export interface ApplyTableCorrectionRequest {
   rowRoles?: DocumentRegionTableRowRoleDto[];
   /** Line evidence for the listed rules on `create` and `set_headers`; other rules keep theirs. */
   ruleLines?: DocumentRegionTableRuleLineDto[];
+  /**
+   * Replaces the full divider geometry on `create` and `set_headers` (insert/delete/distribute).
+   * When omitted, existing rule positions stay; `ruleLines` may still retouch line styles.
+   */
+  rules?: DocumentRegionTableRuleDto[];
+  /** Optional cell text snapshot when geometry ops shifted the grid. */
+  cells?: DocumentRegionTableCellDto[];
   /** Merged cells (rowSpan/colSpan); replaces all merges on `create` and `set_headers`. */
   merges?: DocumentRegionTableMergeDto[];
   cell?: DocumentRegionTableCellDto;

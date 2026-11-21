@@ -63,6 +63,8 @@ interface DocumentLayoutSidePanelProps {
   activeTab: LayoutSideTab;
   onTabChange: (tab: LayoutSideTab) => void;
   activeOverlayId: string | null;
+  /** Table region currently owned by the workspace (drives ribbon tools). */
+  selectedTableId?: string | null;
   onOverlaySelect: (overlayId: string, page: number) => void;
   onAcceptSuggestion: (key: string, value: string) => void;
   onDismissSuggestion: (key: string, value: string) => void;
@@ -75,6 +77,7 @@ interface DocumentLayoutSidePanelProps {
   onTableLayoutApply?: (regionId: string, choice: TableStructureChoice) => void;
   onTableCellChange?: (regionId: string, row: number, col: number, text: string) => void;
   onTableEditInDocument?: (regionId: string) => void;
+  onTableRedetect?: (regionId: string) => void;
   onConfirmField?: (key: string, value: string) => void;
   onCorrectField?: (key: string) => void;
   /** Saves a typed value for a field (recorded as a correction). */
@@ -94,6 +97,7 @@ export function DocumentLayoutSidePanel({
   activeTab,
   onTabChange,
   activeOverlayId,
+  selectedTableId = null,
   onOverlaySelect,
   onAcceptSuggestion,
   onDismissSuggestion,
@@ -105,6 +109,7 @@ export function DocumentLayoutSidePanel({
   onTableLayoutApply,
   onTableCellChange,
   onTableEditInDocument,
+  onTableRedetect,
   onConfirmField,
   onCorrectField,
   onSaveFieldValue,
@@ -198,9 +203,8 @@ export function DocumentLayoutSidePanel({
     });
     return unique.filter(
       (s) =>
-        !dismissedSuggestions.has(
-          `${s.key}\0${normalizeSuggestionDecisionValue(s.value)}`
-        ) && !isDuplicateSuggestion(s.key, s.value)
+        !dismissedSuggestions.has(`${s.key}\0${normalizeSuggestionDecisionValue(s.value)}`) &&
+        !isDuplicateSuggestion(s.key, s.value)
     );
   }, [
     layoutIr,
@@ -511,7 +515,10 @@ export function DocumentLayoutSidePanel({
                     key={region.id}
                     region={region}
                     index={index}
-                    active={activeOverlayId === `region-table-${region.id}`}
+                    active={
+                      selectedTableId === region.id ||
+                      activeOverlayId === `region-table-${region.id}`
+                    }
                     onSelect={() => {
                       onOverlaySelect(`region-table-${region.id}`, region.page);
                     }}
@@ -529,6 +536,13 @@ export function DocumentLayoutSidePanel({
                       onTableEditInDocument
                         ? () => {
                             onTableEditInDocument(region.id);
+                          }
+                        : undefined
+                    }
+                    onRedetect={
+                      onTableRedetect
+                        ? () => {
+                            onTableRedetect(region.id);
                           }
                         : undefined
                     }

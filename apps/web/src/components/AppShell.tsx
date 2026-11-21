@@ -168,13 +168,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             ) : null}
             <div className="app-body">
               {narrowTopbar ? <AppSidebar open={mobileNavOpen} onClose={closeMobileNav} /> : null}
-              <main id="app-main-content" className="app-main" tabIndex={-1}>
-                <ConnectionStatusBanners />
-                {children}
+              <div className="app-content">
+                <main id="app-main-content" className="app-main" tabIndex={-1}>
+                  <ConnectionStatusBanners />
+                  {children}
+                </main>
                 <footer className="app-build-footer" data-testid="app-build-footer">
                   <span className="app-build-footer-label">{appBuildLabel()}</span>
                 </footer>
-              </main>
+              </div>
             </div>
           </div>
         </AppRibbonContextSlotContext.Provider>

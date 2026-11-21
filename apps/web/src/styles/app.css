@@ -1814,6 +1814,15 @@ mark.global-search-mark {
   border: 0;
 }
 
+.app-content {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
 .app-main {
   flex: 1;
   min-width: 0;
@@ -1825,17 +1834,21 @@ mark.global-search-mark {
 
 .app-build-footer {
   flex: 0 0 auto;
-  margin-top: auto;
-  padding: 0.5rem 1rem 0.75rem;
+  padding: 0.15rem 0.75rem 0.25rem;
   text-align: end;
   pointer-events: none;
+  line-height: 1.2;
+  background: transparent;
+  border-top: 0;
+  z-index: 1;
 }
 
 .app-build-footer-label {
   font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
-  font-size: 0.6875rem;
+  font-size: 0.625rem;
   letter-spacing: 0.02em;
   color: var(--color-text-muted, #6b645c);
+  opacity: 0.75;
   user-select: text;
   pointer-events: auto;
 }
@@ -16158,13 +16171,30 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   list-style: none;
 }
 
+.document-selection-live-editor {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: var(--dv-z-sticky);
+}
+
 .document-selection-live-box {
   position: absolute;
   box-sizing: border-box;
   border: 1px dashed var(--dv-color-accent-text);
   background: color-mix(in srgb, var(--dv-color-accent) 16%, transparent);
-  pointer-events: none;
+  pointer-events: auto;
+  cursor: move;
   z-index: var(--dv-z-sticky);
+}
+
+.document-selection-live-editor[data-interactive='0'] .document-selection-live-box {
+  pointer-events: none;
+  cursor: default;
+}
+
+.document-selection-live-editor .field-bbox-handle {
+  pointer-events: auto;
 }
 
 .document-field-context-bar {
@@ -16769,6 +16799,55 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   border-bottom: var(--dv-border-width-hairline) solid
     color-mix(in srgb, var(--dv-color-border) 70%, transparent);
   background: color-mix(in srgb, var(--dv-color-bg-muted) 55%, var(--dv-color-bg-raised));
+}
+
+.app-ribbon-context .table-tools--ribbon,
+.table-tools--ribbon {
+  padding: 0;
+  border-bottom: none;
+  background: transparent;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.layout-table-card--ribbon-tools .layout-table-card-state {
+  margin: 0;
+  padding: var(--dv-space-xs) var(--dv-density-panel-inset);
+  border-bottom: var(--dv-border-width-hairline) solid
+    color-mix(in srgb, var(--dv-color-border) 70%, transparent);
+  font-size: var(--dv-font-size-xs);
+}
+
+.detail-panel-menu {
+  display: inline-flex;
+  align-items: center;
+}
+
+.detail-panel-menu-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--dv-space-xs);
+  min-height: var(--dv-control-height-sm);
+}
+
+.detail-panel-menu-label {
+  max-width: 8rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.detail-panel-menu-panel .document-detail-overflow-item.is-active {
+  background: var(--dv-color-accent-soft);
+  color: var(--dv-color-accent-text);
+}
+
+.detail-panel-menu-panel .document-detail-overflow-item {
+  display: flex;
+  align-items: center;
+  gap: var(--dv-space-xs);
+  width: 100%;
 }
 
 .table-tools-row {
@@ -17839,13 +17918,60 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   pointer-events: auto;
   box-sizing: border-box;
 }
-.table-pdf-guide {
+.table-pdf-guide-layer {
   position: absolute;
-  background: color-mix(in srgb, var(--dv-color-accent) 45%, transparent);
+  inset: 0;
   pointer-events: none;
 }
-.table-pdf-guide-row { left: 0; right: 0; height: 1px; }
-.table-pdf-guide-col { top: 0; bottom: 0; width: 1px; }
+.table-pdf-guide {
+  position: absolute;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: color-mix(in srgb, var(--dv-color-accent) 55%, transparent);
+  pointer-events: none;
+}
+.table-pdf-guide-row {
+  left: 0;
+  right: 0;
+  height: 1px;
+  transform: translateY(-0.5px);
+}
+.table-pdf-guide-col {
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  transform: translateX(-0.5px);
+}
+.table-pdf-guide--drag {
+  pointer-events: auto;
+  z-index: calc(var(--dv-z-base) + 4);
+}
+.table-pdf-guide-row.table-pdf-guide--drag {
+  height: 12px;
+  margin-top: -6px;
+  background: color-mix(in srgb, var(--dv-color-accent) 35%, transparent);
+  cursor: row-resize;
+}
+.table-pdf-guide-col.table-pdf-guide--drag {
+  width: 12px;
+  margin-left: -6px;
+  background: color-mix(in srgb, var(--dv-color-accent) 35%, transparent);
+  cursor: col-resize;
+}
+.table-pdf-guide-hint {
+  position: absolute;
+  left: var(--dv-space-sm);
+  top: var(--dv-space-sm);
+  margin: 0;
+  padding: var(--dv-space-2xs) var(--dv-space-xs);
+  border-radius: var(--dv-radius-control);
+  background: color-mix(in srgb, var(--dv-color-bg-raised) 92%, transparent);
+  color: var(--dv-color-text-muted);
+  font-size: var(--dv-font-size-xs);
+  pointer-events: none;
+  z-index: calc(var(--dv-z-base) + 5);
+}
 .table-pdf-cell {
   position: absolute;
   border: 0;
@@ -17858,24 +17984,33 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   outline-offset: -2px;
   background: color-mix(in srgb, var(--dv-color-accent) 18%, transparent);
 }
-.table-pdf-bounds-handle {
+.table-pdf-bounds-editor {
   position: absolute;
-  right: -6px;
-  bottom: -6px;
-  width: 12px;
-  height: 12px;
-  border-radius: var(--dv-radius-xs);
-  border: 0;
-  background: var(--dv-color-accent);
-  cursor: nwse-resize;
-  padding: 0;
+  inset: 0;
+  pointer-events: none;
 }
-.table-pdf-overlay-actions {
+
+.table-pdf-bounds-editor .table-pdf-overlay-box {
+  pointer-events: auto;
+}
+
+.table-pdf-bounds-editor .field-bbox-handle {
+  pointer-events: auto;
+  z-index: 2;
+}
+.table-pdf-overlay-actions,
+.table-pdf-minibar {
   position: absolute;
   left: var(--dv-space-sm);
   bottom: var(--dv-space-sm);
   display: flex;
+  flex-wrap: wrap;
   gap: var(--dv-space-xs);
   pointer-events: auto;
   z-index: calc(var(--dv-z-base) + 5);
+  max-width: calc(100% - 2 * var(--dv-space-sm));
+  padding: var(--dv-space-2xs);
+  border-radius: var(--dv-radius-control);
+  background: color-mix(in srgb, var(--dv-color-bg-raised) 92%, transparent);
+  box-shadow: var(--dv-elevation-2);
 }

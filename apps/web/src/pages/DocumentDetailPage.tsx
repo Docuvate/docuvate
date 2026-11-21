@@ -24,7 +24,6 @@ import { DocumentDetailLoadingShell } from '../components/documents/DocumentDeta
 import {
   DOCUMENT_DETAIL_TAB_PANEL_IDS,
   DocumentDetailMetaBar,
-  DocumentDetailTabStrip,
   type InspectorPanel,
 } from '../components/documents/DocumentDetailMetaBar';
 import { DocumentDetailNotFound } from '../components/documents/DocumentDetailNotFound';
@@ -33,13 +32,15 @@ import type { LayoutSideTab } from '../components/documents/DocumentLayoutSidePa
 import { DocumentLayoutWorkspace } from '../components/documents/DocumentLayoutWorkspace';
 import { DocumentMetadataForm } from '../components/documents/DocumentMetadataForm';
 import { DocumentPreviewCard } from '../components/documents/DocumentPreviewCard';
+import { DocumentStructuringRibbon } from '../components/documents/DocumentStructuringRibbon';
 import { DuplicateCandidatesPanel } from '../components/documents/DuplicateCandidatesPanel';
 import { ExtractedFieldsPanel } from '../components/documents/ExtractedFieldsPanel';
 import { LabelPanel } from '../components/documents/LabelPanel';
 import { LabelPlacementHints } from '../components/documents/LabelPlacementHints';
-import { AppRibbon, RibbonGroup } from '../components/layout/AppRibbon';
 import { DocumentPipelineHeader, DocumentReviewWorkbench } from '../components/pipeline';
 import { PageFormSaveKit } from '../components/save/PageFormSaveKit';
+import { useToastNotify } from '../components/save/ToastProvider';
+import { RecognizedFieldEditDialog } from '../components/settings/RecognizedFieldEditDialog';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import {
   applyDocumentFieldCorrection,
@@ -73,6 +74,12 @@ import {
   type CatalogFieldGateSettings,
   mergeCatalogFieldsForDocument,
 } from '../lib/documentRecognizedCatalogFields';
+import {
+  draftsFromRecognizedDefinitions,
+  emptyRecognizedFieldDraft,
+  type RecognizedFieldGateDraft,
+} from '../lib/recognizedFieldDraft';
+import { persistRecognizedFieldCatalog } from '../lib/recognizedFieldsPersist';
 import { areBlocksDirty, areFieldsDirty, extractionBlocksForUpdate } from '../lib/extractionDirty';
 import { extractionFieldLabel } from '../lib/extractionFieldLabels';
 import {
@@ -195,6 +202,9 @@ export function DocumentDetailPage() {
   const [fieldFeedback, setFieldFeedback] = useState<FieldExtractionFeedbackCounts | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteBusy, setDeleteBusy] = useState(false);
+  const [createFieldOpen, setCreateFieldOpen] = useState(false);
+  const [createFieldBusy, setCreateFieldBusy] = useState(false);
+  const { pushSuccess } = useToastNotify();
   const [metadataBaseline, setMetadataBaseline] = useState<DocumentMetadataBaseline>({
     title: '',
     documentDate: '',
@@ -203,6 +213,7 @@ export function DocumentDetailPage() {
   });
   const [metadataSaveError, setMetadataSaveError] = useState<string | null>(null);
   const structuring = useStructuringPrimary();
+  const layoutPrimaryBootstrapped = useRef(false);
   const [showTechnicalDetails, setShowTechnicalDetails] = useState(false);
   const [recognizedCatalog, setRecognizedCatalog] = useState<RecognizedFieldDefinitionDto[]>([]);
   const [fieldGateSettings, setFieldGateSettings] = useState<CatalogFieldGateSettings>({
@@ -210,6 +221,13 @@ export function DocumentDetailPage() {
     labelFieldConfidenceThreshold: FIELD_ACCEPTANCE_LABEL_CONFIDENCE.normal,
     fieldExtractionRequiredLabelIds: [],
   });
+  const gateDefaults: RecognizedFieldGateDraft = useMemo(
+    () => ({
+      confidenceGateEnabled: fieldGateSettings.fieldExtractionConfidenceGateEnabled !== false,
+      labelFieldConfidenceThreshold: fieldGateSettings.labelFieldConfidenceThreshold,
+    }),
+    [fieldGateSettings]
+  );
   const [documentDateAuto, setDocumentDateAuto] = useState(false);
   const docRef = useRef<DocumentDto | null>(null);
   const reviewQueue = useDocumentReviewQueueInfiniteQuery();
@@ -249,6 +267,18 @@ export function DocumentDetailPage() {
   const mimeType = doc?.mimeType;
   const isPdf = mimeType === 'application/pdf' || doc?.previewAvailable === true;
   const isImage = mimeType?.startsWith('image/') ?? false;
+
+  useEffect(() => {
+    if (layoutPrimaryBootstrapped.current || !doc) return;
+    if (!(isPdf && doc.extraction?.layoutIrAvailable === true)) return;
+    if (structuring.primary !== null) {
+      layoutPrimaryBootstrapped.current = true;
+      return;
+    }
+    layoutPrimaryBootstrapped.current = true;
+    const command = structuring.select('layout');
+    if (command.layoutTab) setLayoutSideTab(command.layoutTab);
+  }, [doc, isPdf, structuring]);
   const isPlainText = mimeType === 'text/plain' || (mimeType?.startsWith('text/plain;') ?? false);
   const plainTextFallback = useDocumentDetailPlainTextFallback(
     id,
@@ -831,16 +861,36 @@ export function DocumentDetailPage() {
         </p>
       ) : null}
 
-      <AppRibbon>
-        <RibbonGroup label={t('ribbon.inspector')} kind="view" align="end" order={3}>
-          <DocumentDetailTabStrip
-            panels={inspectorPanels}
-            activeTab={inspector}
-            labelCount={doc.tags.length}
-            onTabChange={setInspectorChoice}
-          />
-        </RibbonGroup>
-      </AppRibbon>
+      <DocumentStructuringRibbon
+        doc={doc}
+        fields={recognizedFields}
+        suggestions={heuristicSuggestions}
+        rejects={suggestionRejects}
+        reviewable={reviewable}
+        saving={saving}
+        nextDocumentId={nextDocumentId}
+        activeAspect={structuring.activeAspect}
+        onOpenAspect={(aspect) => {
+          applyStructuringChrome(
+            structuring.select(primaryForAspect(aspect)),
+            setLayoutSideTab,
+            openInspector
+          );
+        }}
+        onConfirmMany={(keys) => {
+          saveFieldsWithUndo(
+            confirmFieldKeys(fields, new Set(keys)),
+            t('pipeline.workbench.acceptedToast', { count: keys.length })
+          );
+        }}
+        inspectorPanels={inspectorPanels}
+        inspector={inspector}
+        onInspectorChange={setInspectorChoice}
+        onAddField={() => {
+          setCreateFieldOpen(true);
+        }}
+        showAspects={layoutWorkspace || reviewable}
+      />
 
       <div
         className="document-workbench"
@@ -1138,6 +1188,36 @@ export function DocumentDetailPage() {
           setDeleteDialogOpen(false);
         }}
         onConfirm={() => void confirmDelete()}
+      />
+
+      <RecognizedFieldEditDialog
+        open={createFieldOpen}
+        mode="create"
+        initialRow={emptyRecognizedFieldDraft(gateDefaults)}
+        tags={tags}
+        gateDefaults={gateDefaults}
+        busy={createFieldBusy}
+        onCancel={() => {
+          setCreateFieldOpen(false);
+        }}
+        onSave={(row) => {
+          void (async () => {
+            setCreateFieldBusy(true);
+            try {
+              const current = draftsFromRecognizedDefinitions(recognizedCatalog, gateDefaults);
+              await persistRecognizedFieldCatalog([...current, row], gateDefaults);
+              const refreshed = await listRecognizedFields();
+              setRecognizedCatalog(refreshed);
+              setCreateFieldOpen(false);
+              pushSuccess();
+              openInspector('fields');
+            } catch (err) {
+              notifySaveError(formatUserFacingError(err, 'recognizedFields.saveFailed'));
+            } finally {
+              setCreateFieldBusy(false);
+            }
+          })();
+        }}
       />
 
       <PageFormSaveKit

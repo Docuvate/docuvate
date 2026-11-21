@@ -2605,6 +2605,21 @@
     "mergeCells": "Merge cells",
     "splitCells": "Split cells",
     "directHint": "Pick a row's kind at its left edge. To merge, click a cell, then Shift+click (or Shift+Alt+Arrow) a second one.",
+    "toolsInRibbonHint": "Structure tools are in the ribbon above — grid and values stay here.",
+    "insertRow": "Insert row",
+    "insertCol": "Insert column",
+    "deleteRow": "Delete row",
+    "deleteCol": "Delete column",
+    "distributeRows": "Distribute rows",
+    "distributeCols": "Distribute columns",
+    "exportCsv": "Export CSV",
+    "csvSeparator": ",",
+    "miniBarAria": "Table mini toolbar",
+    "rowGuideAria": "Drag row divider {{n}}",
+    "colGuideAria": "Drag column divider {{n}}",
+    "dragGuidesHint": "Drag lines to move them. Double-click a cell to add a row or column through that point.",
+    "splitCellHint": "Double-click to split this cell (add a row or column line)",
+    "guidesSaved": "Grid lines saved",
     "rowKinds": {
       "header": "Header",
       "data": "Data",
@@ -2621,10 +2636,11 @@
       "grouped": "Sections with subtotals in the body.",
       "key_value": "Label on the left, value on the right  -  no grid."
     },
-    "editInDocument": "Edit on document",
+    "editInDocument": "Adjust frame",
     "exitDocumentEdit": "Close overlay",
     "saveBounds": "Save table frame",
     "resizeBounds": "Resize table frame",
+    "redetectGrid": "Re-detect grid",
     "cellAria": "Cell row {{row}}, column {{col}}"
   },
   "ribbon": {
@@ -2641,6 +2657,10 @@
     "inspector": "Inspector",
     "toolsText": "Text",
     "toolsLayout": "Layout",
+    "tableTools": "Table",
+    "panel": "Panel",
+    "panelAria": "Open inspector panel",
+    "panelClose": "Close panel",
     "autoImport": "Auto-import",
     "autoImportHint": "Set up connections that import documents automatically: mailbox, scanner/SFTP or Paperless-ngx"
   }

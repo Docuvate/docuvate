@@ -190,10 +190,17 @@ export function DocumentLayoutWorkspace({
       // toast is optional; keep UI snappy
     });
   }, [rotatePageClockwise, viewerPage]);
-  const [bboxEditRect, setBboxEditRect] = useState<{ page: number; x0: number; y0: number; x1: number; y1: number } | null>(null);
+  const [bboxEditRect, setBboxEditRect] = useState<{
+    page: number;
+    x0: number;
+    y0: number;
+    x1: number;
+    y1: number;
+  } | null>(null);
   const [tableOverlayOpen, setTableOverlayOpen] = useState(false);
-  const [tableOverlayCell, setTableOverlayCell] = useState<{ row: number; col: number } | null>(null);
-
+  const [tableOverlayCell, setTableOverlayCell] = useState<{ row: number; col: number } | null>(
+    null
+  );
 
   const [activeOverlayId, setActiveOverlayId] = useState<string | null>(null);
   const [hoverOverlay, setHoverOverlay] = useState<PdfLayoutOverlay | null>(null);
@@ -235,7 +242,6 @@ export function DocumentLayoutWorkspace({
     onViewerPageChange(region.page);
     onPositionEditHandled?.();
   }, [positionEditFieldKey, fieldRegions, onViewerPageChange, onPositionEditHandled]);
-
 
   const fieldOptions = useMemo(() => {
     const keys = new Set<string>(knownFieldKeys);
@@ -446,6 +452,29 @@ export function DocumentLayoutWorkspace({
     if (textEditOpen) setAdvancedOpen(false);
   }, [leftMode, textEditOpen]);
 
+  useEffect(() => {
+    if (structuringPrimary === 'layout') {
+      if (selectedTableId || tableRegions.length === 0) return;
+      const first = tableRegions[0];
+      setSelectedTableId(first.id);
+      setActiveOverlayId(regionTableOverlayId(first.id));
+      setTableOverlayOpen(true);
+      onLayoutSideTabChange('tables');
+      return;
+    }
+    if (structuringPrimary === 'fields') {
+      setSelectedTableId(null);
+      setTableOverlayOpen(false);
+      setActiveOverlayId(null);
+      onLayoutSideTabChange('fields');
+      return;
+    }
+    if (structuringPrimary === 'labels' || structuringPrimary === 'text') {
+      setSelectedTableId(null);
+      setTableOverlayOpen(false);
+    }
+  }, [structuringPrimary, selectedTableId, tableRegions, onLayoutSideTabChange]);
+
   const setLeftDocumentMode = useCallback(
     (mode: LeftDocumentMode) => {
       setLeftMode(mode);
@@ -495,9 +524,17 @@ export function DocumentLayoutWorkspace({
       }
       const tableId = regionIdFromTableOverlay(overlayId);
       if (tableId) {
-        setSelectedTableId(tableId);
         setSelectedFieldKey(null);
-        onLayoutSideTabChange('tables');
+        if (structuringPrimary === 'fields') {
+          // Werte prüfen: fields panel stays primary; table geometry waits for Layout.
+          setSelectedTableId(null);
+          setTableOverlayOpen(false);
+          onLayoutSideTabChange('fields');
+        } else {
+          setSelectedTableId(tableId);
+          setTableOverlayOpen(true);
+          onLayoutSideTabChange('tables');
+        }
         const tableRegion = tableRegions.find((item) => item.id === tableId);
         if (tableRegion) {
           onViewerPageChange(tableRegion.page);
@@ -523,6 +560,7 @@ export function DocumentLayoutWorkspace({
       blocks,
       fieldRegions,
       tableRegions,
+      structuringPrimary,
       onActiveBlockIndexChange,
       onHighlightBlocks,
       onLayoutSideTabChange,
@@ -693,6 +731,7 @@ export function DocumentLayoutWorkspace({
             hasOverlays={pdfOverlays.length > 0}
             overlayEnabled={overlayEnabled}
             onOverlayChange={setOverlayEnabled}
+            paused={structuringPrimary === 'layout' && Boolean(selectedTableId)}
           />
           <DocumentLayoutViewerToolbar
             leftMode={leftMode}
@@ -848,20 +887,60 @@ export function DocumentLayoutWorkspace({
                   setTableOverlayOpen(false);
                 }}
                 onTableBoundsCommit={(region, rect) => {
+                  // Re-create from the drawn frame so row/col rules are inferred again.
+                  submitTableCorrection(
+                    {
+                      id: crypto.randomUUID(),
+                      op: 'create',
+                      beforeRegionId: region.id,
+                      page: region.page,
+                      shape: 'rect',
+                      x0: rect.x0,
+                      y0: rect.y0,
+                      x1: rect.x1,
+                      y1: rect.y1,
+                      blockIndexes: region.blockIndexes,
+                    },
+                    t('tableLayouts.saveBounds')
+                  );
+                }}
+                onTableRulesCommit={(region, commit) => {
                   submitTableCorrection(
                     {
                       id: crypto.randomUUID(),
                       op: 'set_headers',
                       beforeRegionId: region.id,
-                      page: region.page,
-                      x0: rect.x0,
-                      y0: rect.y0,
-                      x1: rect.x1,
-                      y1: rect.y1,
+                      rules: commit.rules,
+                      ...(commit.cells ? { cells: commit.cells } : {}),
+                      ...(commit.merges ? { merges: commit.merges } : {}),
+                      ...(commit.rowRoles ? { rowRoles: commit.rowRoles } : {}),
                     },
-                    t('tableLayouts.saveBounds')
+                    t('tableLayouts.guidesSaved')
                   );
                 }}
+                onTableRedetect={
+                  selectedTableId
+                    ? () => {
+                        const region = tableRegions.find((item) => item.id === selectedTableId);
+                        if (!region) return;
+                        submitTableCorrection(
+                          {
+                            id: crypto.randomUUID(),
+                            op: 'create',
+                            beforeRegionId: region.id,
+                            page: region.page,
+                            shape: 'rect',
+                            x0: region.x0,
+                            y0: region.y0,
+                            x1: region.x1,
+                            y1: region.y1,
+                            blockIndexes: region.blockIndexes,
+                          },
+                          t('tableLayouts.redetectGrid')
+                        );
+                      }
+                    : undefined
+                }
                 selectionDraft={selectionDraft}
                 fieldOptions={
                   reanchorFieldKey
@@ -968,17 +1047,15 @@ export function DocumentLayoutWorkspace({
           activeTab={layoutSideTab}
           onTabChange={(tab) => {
             onLayoutSideTabChange(tab);
-            if (
-              tab === 'tables' &&
-              correctionSheetViewport &&
-              tableRegions.length > 0 &&
-              !selectedTableId
-            ) {
-              setSelectedTableId(tableRegions[0].id);
+            if (tab === 'tables' && tableRegions.length > 0 && !selectedTableId) {
+              const first = tableRegions[0];
+              setSelectedTableId(first.id);
               setSelectedFieldKey(null);
+              setActiveOverlayId(regionTableOverlayId(first.id));
             }
           }}
           activeOverlayId={activeOverlayId}
+          selectedTableId={selectedTableId}
           onOverlaySelect={onOverlaySelect}
           onAcceptSuggestion={(key, value) => {
             onAcceptFieldSuggestion(key, value);
@@ -997,6 +1074,28 @@ export function DocumentLayoutWorkspace({
             const region = tableRegions.find((item) => item.id === regionId);
             if (region) onViewerPageChange(region.page);
           }}
+          onTableRedetect={(regionId) => {
+            const region = tableRegions.find((item) => item.id === regionId);
+            if (!region) return;
+            setSelectedTableId(regionId);
+            setTableOverlayOpen(true);
+            onViewerPageChange(region.page);
+            submitTableCorrection(
+              {
+                id: crypto.randomUUID(),
+                op: 'create',
+                beforeRegionId: region.id,
+                page: region.page,
+                shape: 'rect',
+                x0: region.x0,
+                y0: region.y0,
+                x1: region.x1,
+                y1: region.y1,
+                blockIndexes: region.blockIndexes,
+              },
+              t('tableLayouts.redetectGrid')
+            );
+          }}
           onTableLayoutApply={applyTableLayoutChoice}
           onTableCellChange={(regionId, row, col, text) => {
             submitTableCorrection({
@@ -1007,9 +1106,7 @@ export function DocumentLayoutWorkspace({
             });
           }}
           onConfirmField={confirmField}
-          onCorrectField={
-            onRequestFieldValueEdit ?? fieldMarking.startMarkingField
-          }
+          onCorrectField={onRequestFieldValueEdit ?? fieldMarking.startMarkingField}
           onSaveFieldValue={onSaveFieldValue}
           onHighlightField={highlightRegion}
           onSelectField={selectField}

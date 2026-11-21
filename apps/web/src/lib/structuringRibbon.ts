@@ -19,7 +19,7 @@ export interface StructuringCommand {
   /** Third-row tools. Null means the row stays hidden. */
   context: StructuringContext | null;
   /** Layout side tab to open with the mode. */
-  layoutTab: 'tables' | null;
+  layoutTab: 'tables' | 'fields' | null;
   /** Inspector tab to open with the mode. Null leaves the inspector as it is. */
   inspector: 'labels' | 'fields' | null;
 }
@@ -77,7 +77,7 @@ export function commandForPrimary(primary: StructuringPrimary): StructuringComma
     case 'labels':
       return { primary, stage: 'page', context: null, layoutTab: null, inspector: 'labels' };
     case 'fields':
-      return { primary, stage: 'page', context: null, layoutTab: null, inspector: 'fields' };
+      return { primary, stage: 'page', context: null, layoutTab: 'fields', inspector: 'fields' };
     default: {
       const never: never = primary;
       return never;

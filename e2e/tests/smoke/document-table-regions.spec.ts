@@ -163,7 +163,8 @@ test.describe('document table regions', () => {
 
     // Table family: header band, result footer, lines and merged cells saved as one correction.
     // The template control is the family menu, not a native select.
-    const tools = card.first().getByTestId('table-structure-tools');
+    const tools = page.getByTestId('app-ribbon-context').getByTestId('table-structure-tools');
+    await expect(tools).toBeVisible();
     await tools.getByTestId('table-family-menu').click();
     await page.getByRole('option', { name: /Finanzlayout|Financial/i }).click();
     await Promise.all([
@@ -219,10 +220,7 @@ test.describe('document table regions', () => {
       await captureViewportScreenshot(page, testInfo, `table-regions-${viewport.name}-light.png`);
       if (viewport.width < 1024) {
         await assertTableCorrectionSheet(page);
-        await assertToastMissesSheetActions(
-          page,
-          '[data-testid="table-correction-sheet"] [data-testid="table-structure-tools"]'
-        );
+        await assertToastMissesSheetActions(page, '[data-testid="table-structure-tools"]');
       } else {
         await expect(page.locator('[data-testid="table-correction-sheet"]')).toHaveCount(0);
       }

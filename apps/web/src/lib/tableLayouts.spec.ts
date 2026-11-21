@@ -5,6 +5,7 @@ import { tableRuling, tableRulingLines, validTableStructure } from '@docuvate/co
 import { describe, expect, it } from 'vitest';
 
 import {
+  coalesceCellsForMerge,
   designTable,
   familyDesign,
   mergeAt,
@@ -183,5 +184,23 @@ describe('composable table layouts', () => {
     expect(toggleTableMerge(one, { row: 1, col: 0 }, { row: 1, col: 2 })).toEqual([
       { row0: 1, col0: 0, rowSpan: 1, colSpan: 3 },
     ]);
+  });
+
+  it('coalesces covered cell text into the merge anchor', () => {
+    const cells = [
+      { row: 0, col: 0, text: '' },
+      { row: 0, col: 1, text: 'Betrag' },
+      { row: 1, col: 0, text: '100' },
+    ];
+    const next = coalesceCellsForMerge(cells, { row0: 0, col0: 0, rowSpan: 2, colSpan: 2 });
+    expect(next).toEqual([{ row: 0, col: 0, text: 'Betrag 100' }]);
+    const duped = coalesceCellsForMerge(
+      [
+        { row: 0, col: 0, text: 'x' },
+        { row: 0, col: 1, text: 'x' },
+      ],
+      { row0: 0, col0: 0, rowSpan: 1, colSpan: 2 }
+    );
+    expect(duped).toEqual([{ row: 0, col: 0, text: 'x x' }]);
   });
 });

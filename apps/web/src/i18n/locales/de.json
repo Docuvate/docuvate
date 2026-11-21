@@ -2605,6 +2605,21 @@
     "mergeCells": "Zellen verbinden",
     "splitCells": "Verbindung lösen",
     "directHint": "Zeilenart links an der Zeile wählen. Zellen verbinden: Zelle anklicken, zweite mit Umschalt+Klick (oder Umschalt+Alt+Pfeil) wählen.",
+    "toolsInRibbonHint": "Strukturwerkzeuge oben im Ribbon — Raster und Werte hier.",
+    "insertRow": "Zeile +",
+    "insertCol": "Spalte +",
+    "deleteRow": "Zeile −",
+    "deleteCol": "Spalte −",
+    "distributeRows": "Zeilen verteilen",
+    "distributeCols": "Spalten verteilen",
+    "exportCsv": "Als CSV",
+    "csvSeparator": ";",
+    "miniBarAria": "Tabellen-Kurzleiste",
+    "rowGuideAria": "Zeilentrenner {{n}} ziehen",
+    "colGuideAria": "Spaltentrenner {{n}} ziehen",
+    "dragGuidesHint": "Linien ziehen zum Verschieben. Doppelklick in eine Zelle setzt eine neue Zeilen- oder Spaltenlinie.",
+    "splitCellHint": "Doppelklick teilt diese Zelle (neue Zeilen- oder Spaltenlinie)",
+    "guidesSaved": "Rasterlinien gespeichert",
     "rowKinds": {
       "header": "Kopf",
       "data": "Daten",
@@ -2621,10 +2636,11 @@
       "grouped": "Abschnitte mit Zwischensummen im Körper.",
       "key_value": "Links Bezeichnung, rechts Wert  -  ohne Raster."
     },
-    "editInDocument": "Im Dokument bearbeiten",
+    "editInDocument": "Rahmen anpassen",
     "exitDocumentEdit": "Overlay schließen",
     "saveBounds": "Tabellenrahmen speichern",
     "resizeBounds": "Tabellenrahmen ändern",
+    "redetectGrid": "Raster neu erkennen",
     "cellAria": "Zelle Zeile {{row}}, Spalte {{col}}"
   },
   "ribbon": {
@@ -2641,6 +2657,10 @@
     "inspector": "Inspektor",
     "toolsText": "Text",
     "toolsLayout": "Layout",
+    "tableTools": "Tabelle",
+    "panel": "Panel",
+    "panelAria": "Inspektor-Panel öffnen",
+    "panelClose": "Panel schließen",
     "autoImport": "Automatisch importieren",
     "autoImportHint": "Verbindungen einrichten, die Dokumente automatisch importieren: Postfach, Scanner/SFTP oder Paperless-ngx"
   }

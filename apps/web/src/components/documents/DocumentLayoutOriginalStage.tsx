@@ -9,7 +9,7 @@ import { DocumentSelectionLayer } from './DocumentSelectionLayer';
 import type { DocumentSelectionTool } from './DocumentSelectionTools';
 import { FieldBoundingBoxEditor } from './FieldBoundingBoxEditor';
 import { type PdfLayoutOverlay, PdfViewer } from './PdfViewer';
-import { TablePdfOverlay } from './table/TablePdfOverlay';
+import { type TableOverlayStructureCommit, TablePdfOverlay } from './table/TablePdfOverlay';
 
 interface LayoutBBoxEdit {
   page: number;
@@ -62,6 +62,8 @@ interface DocumentLayoutOriginalStageProps {
   onTableSelectCell: (cell: { row: number; col: number }) => void;
   onTableClose: () => void;
   onTableBoundsCommit: (region: DocumentRegionDto, rect: NormalizedRect) => void;
+  onTableRulesCommit?: (region: DocumentRegionDto, commit: TableOverlayStructureCommit) => void;
+  onTableRedetect?: () => void;
   selectionDraft: DocumentSelectionDraft | null;
   fieldOptions: LayoutFieldOption[];
   existingFieldValues: ReadonlyMap<string, string>;
@@ -107,6 +109,8 @@ export function DocumentLayoutOriginalStage({
   onTableSelectCell,
   onTableClose,
   onTableBoundsCommit,
+  onTableRulesCommit,
+  onTableRedetect,
   selectionDraft,
   fieldOptions,
   existingFieldValues,
@@ -182,6 +186,14 @@ export function DocumentLayoutOriginalStage({
           onBoundsCommit={(rect) => {
             onTableBoundsCommit(tableOnPage, rect);
           }}
+          onRulesCommit={
+            onTableRulesCommit
+              ? (commit) => {
+                  onTableRulesCommit(tableOnPage, commit);
+                }
+              : undefined
+          }
+          onRedetect={onTableRedetect}
         />
       ) : null}
       {selectionDraft ? (

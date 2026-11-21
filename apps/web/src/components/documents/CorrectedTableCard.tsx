@@ -13,11 +13,23 @@ import {
   tableRowBand,
   validTableStructure,
 } from '@docuvate/contracts';
-import { Combine, SlidersHorizontal, Split } from 'lucide-react';
-import { type KeyboardEvent, useId, useState } from 'react';
+import { Combine, RefreshCw, SlidersHorizontal, Split } from 'lucide-react';
+import { type KeyboardEvent, type ReactNode, useId, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 
 import {
+  deleteTableCol,
+  deleteTableRow,
+  distributeTableAxis,
+  downloadTableCsv,
+  insertTableCol,
+  insertTableRow,
+  tableDraftToCsv,
+} from '../../lib/tableGridOps';
+import {
+  addedMerges,
+  coalesceCellsForMerge,
   designTable,
   familyDesign,
   type GridSize,
@@ -33,8 +45,11 @@ import {
   type TableStructureChoice,
   tableStructureOf,
   toggleTableMerge,
+  upsertTableCell,
   withRowKind,
 } from '../../lib/tableLayouts';
+import { RibbonGroup } from '../layout/AppRibbon';
+import { useAppRibbonContextSlot } from '../layout/appRibbonContext';
 import { Button } from '../ui/Button';
 import { TableFamilyMenu } from './table/TableFamilyMenu';
 
@@ -125,8 +140,10 @@ interface CorrectedTableCardProps {
   index: number;
   active: boolean;
   onSelect: () => void;
-  /** Open the spatial table overlay on the PDF. */
+  /** Open the spatial table overlay on the PDF (resize frame + cell pick). */
   onEditInDocument?: () => void;
+  /** Re-infer row/col rules from the current frame on the document. */
+  onRedetect?: () => void;
   onCellChange?: (row: number, col: number, text: string) => void;
   /** Bands, index columns, row roles, spans and lines in one correction. */
   onLayoutApply?: (choice: TableStructureChoice) => void;
@@ -143,6 +160,7 @@ export function CorrectedTableCard({
   active,
   onSelect,
   onEditInDocument,
+  onRedetect,
   onCellChange,
   onLayoutApply,
 }: CorrectedTableCardProps) {
@@ -159,6 +177,7 @@ export function CorrectedTableCard({
       active={active}
       onSelect={onSelect}
       onEditInDocument={onEditInDocument}
+      onRedetect={onRedetect}
       onCellChange={onCellChange}
       onLayoutApply={onLayoutApply}
     />
@@ -172,12 +191,13 @@ function TableEditor({
   active,
   onSelect,
   onEditInDocument,
+  onRedetect,
   onCellChange,
   onLayoutApply,
 }: CorrectedTableCardProps & { table: DocumentRegionTableDto }) {
   const { t } = useTranslation();
   const toolsId = useId();
-  const grid: GridSize = tableGridSize(table);
+  const ribbonSlot = useAppRibbonContextSlot();
   const saved = tableStructureOf(table);
   const [draft, setDraft] = useState<TableStructureChoice>(saved);
   const [design, setDesign] = useState<TableDesign>(() => tableDesignOf(table));
@@ -185,10 +205,30 @@ function TableEditor({
   const [anchor, setAnchor] = useState<Cell | null>(null);
   const [extent, setExtent] = useState<Cell | null>(null);
   const editable = onLayoutApply !== undefined;
-  const dirty = !sameStructure(draft, saved) || draft.ruleLines !== undefined;
+  /** Prefer the context ribbon so verbs sit with the document chrome; fall back inline for tests/sheets without a slot. */
+  const toolsInRibbon = Boolean(editable && active && ribbonSlot);
+  const showInlineTools = editable && !toolsInRibbon;
+  const workingTable = {
+    ...table,
+    rules: draft.rules ?? table.rules,
+    cells: draft.cells ?? table.cells,
+  };
+  const grid: GridSize = tableGridSize(workingTable);
+  const dirty =
+    !sameStructure(draft, saved) ||
+    draft.ruleLines !== undefined ||
+    draft.rules !== undefined ||
+    draft.cells !== undefined;
   const shape = { ...grid, ...draft };
+
+  function applyGridDraft(next: ReturnType<typeof insertTableRow>) {
+    setDraft(next.choice);
+    setAnchor(null);
+    setExtent(null);
+  }
   const valid = validTableStructure(shape);
-  const lines = draft.ruleLines ?? table.rules.map(({ axis, ord, line }) => ({ axis, ord, line }));
+  const lines =
+    draft.ruleLines ?? workingTable.rules.map(({ axis, ord, line }) => ({ axis, ord, line }));
   const rangeEnd = extent ?? anchor;
   const anchorMerge = anchor ? mergeAt(draft.merges, anchor.row, anchor.col) : null;
   const multi =
@@ -222,7 +262,11 @@ function TableEditor({
       : anchorMerge
         ? draft.merges.filter((merge) => merge !== anchorMerge)
         : draft.merges;
-    setDraft({ ...draft, merges });
+    let cells = draft.cells ?? table.cells;
+    for (const merge of addedMerges(draft.merges, merges)) {
+      cells = coalesceCellsForMerge(cells, merge);
+    }
+    setDraft({ ...draft, merges, cells });
     setExtent(null);
   }
 
@@ -244,12 +288,280 @@ function TableEditor({
 
   const kindLabel = (kind: TableRowKind) => t(`tableLayouts.rowKinds.${kind}`);
 
+  const tools: ReactNode = editable ? (
+    <div
+      className={`table-tools${toolsInRibbon ? ' table-tools--ribbon' : ''}`}
+      role="toolbar"
+      aria-label={t('tableLayouts.toolbarAria', { n: index + 1 })}
+      data-testid="table-structure-tools"
+      data-placement={toolsInRibbon ? 'ribbon' : 'card'}
+    >
+      <div className="table-tools-row">
+        <div className="table-tool-field">
+          <span className="table-tool-label">{t('tableLayouts.template')}</span>
+          <TableFamilyMenu
+            value={design.family}
+            onChange={(family) => {
+              applyDesign(familyDesign(family));
+            }}
+          />
+        </div>
+        {onEditInDocument ? (
+          <Button
+            type="button"
+            size="sm"
+            variant="primary"
+            data-testid="table-edit-in-document"
+            onClick={onEditInDocument}
+          >
+            {t('tableLayouts.editInDocument')}
+          </Button>
+        ) : null}
+        {onRedetect ? (
+          <Button
+            type="button"
+            size="sm"
+            variant="secondary"
+            data-testid="table-redetect-grid"
+            onClick={onRedetect}
+          >
+            <RefreshCw size={14} aria-hidden />
+            {t('tableLayouts.redetectGrid')}
+          </Button>
+        ) : null}
+        <Stepper
+          label={t('documents.tableHeaderRows')}
+          value={draft.headerRows}
+          max={Math.min(MAX_BAND_ROWS, Math.max(0, grid.rows - 1))}
+          onChange={(headerLevels) => {
+            applyDesign({ ...design, headerLevels });
+          }}
+        />
+        <Stepper
+          label={t('documents.tableHeaderCols')}
+          value={draft.headerCols}
+          max={Math.min(MAX_BAND_ROWS, Math.max(0, grid.cols - 1))}
+          onChange={(headerCols) => {
+            setDraft((prev) => ({ ...prev, headerCols }));
+            setDesign((prev) => ({
+              ...prev,
+              index: headerCols > 0 ? (prev.index === 'none' ? 'left' : prev.index) : 'none',
+            }));
+          }}
+        />
+        <Stepper
+          label={t('tableLayouts.footerRows')}
+          value={draft.footerRows}
+          max={Math.min(MAX_BAND_ROWS, Math.max(0, grid.rows - 1))}
+          onChange={(footerRows) => {
+            applyDesign({ ...design, footerRows });
+          }}
+        />
+        <button
+          type="button"
+          className="table-tool-btn"
+          aria-expanded={moreOpen}
+          aria-controls={toolsId}
+          onClick={() => {
+            setMoreOpen((open) => !open);
+          }}
+        >
+          <SlidersHorizontal size={14} aria-hidden />
+          {t('tableLayouts.appearance')}
+        </button>
+        <button
+          type="button"
+          className="table-tool-btn"
+          disabled={!anchor || (!multi && !anchorMerge)}
+          onClick={toggleMerge}
+        >
+          {multi || !anchorMerge ? (
+            <Combine size={14} aria-hidden />
+          ) : (
+            <Split size={14} aria-hidden />
+          )}
+          {multi || !anchorMerge ? t('tableLayouts.mergeCells') : t('tableLayouts.splitCells')}
+        </button>
+        <button
+          type="button"
+          className="table-tool-btn"
+          data-testid="table-insert-row"
+          onClick={() => {
+            applyGridDraft(insertTableRow(table, draft, anchor?.row ?? grid.rows));
+          }}
+        >
+          {t('tableLayouts.insertRow')}
+        </button>
+        <button
+          type="button"
+          className="table-tool-btn"
+          data-testid="table-insert-col"
+          onClick={() => {
+            applyGridDraft(insertTableCol(table, draft, anchor?.col ?? grid.cols));
+          }}
+        >
+          {t('tableLayouts.insertCol')}
+        </button>
+        <button
+          type="button"
+          className="table-tool-btn"
+          data-testid="table-delete-row"
+          disabled={grid.rows <= 1 || anchor === null}
+          onClick={() => {
+            if (anchor) applyGridDraft(deleteTableRow(table, draft, anchor.row));
+          }}
+        >
+          {t('tableLayouts.deleteRow')}
+        </button>
+        <button
+          type="button"
+          className="table-tool-btn"
+          data-testid="table-delete-col"
+          disabled={grid.cols <= 1 || anchor === null}
+          onClick={() => {
+            if (anchor) applyGridDraft(deleteTableCol(table, draft, anchor.col));
+          }}
+        >
+          {t('tableLayouts.deleteCol')}
+        </button>
+        <button
+          type="button"
+          className="table-tool-btn"
+          data-testid="table-distribute-rows"
+          onClick={() => {
+            applyGridDraft(distributeTableAxis(table, draft, 'row'));
+          }}
+        >
+          {t('tableLayouts.distributeRows')}
+        </button>
+        <button
+          type="button"
+          className="table-tool-btn"
+          data-testid="table-distribute-cols"
+          onClick={() => {
+            applyGridDraft(distributeTableAxis(table, draft, 'col'));
+          }}
+        >
+          {t('tableLayouts.distributeCols')}
+        </button>
+        <button
+          type="button"
+          className="table-tool-btn"
+          data-testid="table-export-csv"
+          onClick={() => {
+            const sep = t('tableLayouts.csvSeparator');
+            downloadTableCsv(
+              `table-${String(index + 1)}.csv`,
+              tableDraftToCsv(table, draft, sep === ',' ? ',' : ';')
+            );
+          }}
+        >
+          {t('tableLayouts.exportCsv')}
+        </button>
+        {dirty ? (
+          <span className="table-tools-commit">
+            <Button
+              type="button"
+              size="sm"
+              disabled={!valid}
+              onClick={() => {
+                onLayoutApply(draft);
+              }}
+            >
+              {t('tableLayouts.apply')}
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              onClick={() => {
+                setDraft(saved);
+                setDesign(tableDesignOf(table));
+                setAnchor(null);
+                setExtent(null);
+              }}
+            >
+              {t('tableLayouts.discard')}
+            </Button>
+          </span>
+        ) : null}
+      </div>
+      <div className="table-tools-row table-tools-row--more" id={toolsId} hidden={!moreOpen}>
+        <label className="table-tool-field">
+          <span className="table-tool-label">{t('tableLayouts.index')}</span>
+          <select
+            className="table-tool-select"
+            value={design.index}
+            onChange={(event) => {
+              const position = TABLE_INDEX_POSITIONS.find((item) => item === event.target.value);
+              if (position) applyDesign({ ...design, index: position });
+            }}
+          >
+            {TABLE_INDEX_POSITIONS.map((position) => (
+              <option key={position} value={position}>
+                {t(`tableLayouts.indexOptions.${position}`)}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="table-tool-field">
+          <span className="table-tool-label">{t('tableLayouts.ruling')}</span>
+          <select
+            className="table-tool-select"
+            value={design.ruling}
+            onChange={(event) => {
+              const ruling = TABLE_RULING_CHOICES.find((item) => item === event.target.value);
+              if (ruling) applyDesign({ ...design, ruling });
+            }}
+          >
+            {TABLE_RULING_CHOICES.map((ruling) => (
+              <option key={ruling} value={ruling}>
+                {t(`tableLayouts.rulingOptions.${ruling}`)}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="table-tool-check">
+          <input
+            type="checkbox"
+            checked={design.grouped}
+            onChange={(event) => {
+              applyDesign({ ...design, grouped: event.target.checked });
+            }}
+          />
+          {t('tableLayouts.grouped')}
+        </label>
+        <label className="table-tool-check">
+          <input
+            type="checkbox"
+            checked={draft.banded}
+            onChange={(event) => {
+              setDesign({ ...design, banded: event.target.checked });
+              setDraft({ ...draft, banded: event.target.checked });
+            }}
+          />
+          {t('tableLayouts.banded')}
+        </label>
+      </div>
+      {toolsInRibbon ? null : <p className="table-tools-hint">{t('tableLayouts.directHint')}</p>}
+    </div>
+  ) : null;
+
   return (
     <section
-      className={`layout-table-card${active ? ' layout-table-card-active' : ''}${dirty ? ' layout-table-card--draft' : ''}`}
+      className={`layout-table-card${active ? ' layout-table-card-active' : ''}${dirty ? ' layout-table-card--draft' : ''}${toolsInRibbon ? ' layout-table-card--ribbon-tools' : ''}`}
       data-testid="corrected-table-card"
       data-layout-overlay-target={`region-table-${region.id}`}
     >
+      {toolsInRibbon && ribbonSlot
+        ? createPortal(
+            <RibbonGroup label={t('ribbon.tableTools')} kind="act" showCaption>
+              {tools}
+            </RibbonGroup>,
+            ribbonSlot
+          )
+        : null}
+
       <div className="layout-table-card-bar">
         <button type="button" className="layout-table-card-head" onClick={onSelect}>
           <span className="layout-table-card-title">
@@ -262,165 +574,13 @@ function TableEditor({
         {dirty ? <span className="layout-table-draft-badge">{t('tableLayouts.draft')}</span> : null}
       </div>
 
-      {editable ? (
-        <div
-          className="table-tools"
-          role="toolbar"
-          aria-label={t('tableLayouts.toolbarAria', { n: index + 1 })}
-          data-testid="table-structure-tools"
-        >
-          <div className="table-tools-row">
-            <div className="table-tool-field">
-              <span className="table-tool-label">{t('tableLayouts.template')}</span>
-              <TableFamilyMenu
-                value={design.family}
-                onChange={(family) => {
-                  applyDesign(familyDesign(family));
-                }}
-              />
-            </div>
-            {onEditInDocument ? (
-              <Button
-                type="button"
-                size="sm"
-                variant="secondary"
-                data-testid="table-edit-in-document"
-                onClick={onEditInDocument}
-              >
-                {t('tableLayouts.editInDocument')}
-              </Button>
-            ) : null}
-            <Stepper
-              label={t('documents.tableHeaderRows')}
-              value={draft.headerRows}
-              max={Math.min(MAX_BAND_ROWS, Math.max(0, grid.rows - 1))}
-              onChange={(headerLevels) => {
-                applyDesign({ ...design, headerLevels });
-              }}
-            />
-            <Stepper
-              label={t('tableLayouts.footerRows')}
-              value={draft.footerRows}
-              max={Math.min(MAX_BAND_ROWS, Math.max(0, grid.rows - 1))}
-              onChange={(footerRows) => {
-                applyDesign({ ...design, footerRows });
-              }}
-            />
-            <button
-              type="button"
-              className="table-tool-btn"
-              aria-expanded={moreOpen}
-              aria-controls={toolsId}
-              onClick={() => {
-                setMoreOpen((open) => !open);
-              }}
-            >
-              <SlidersHorizontal size={14} aria-hidden />
-              {t('tableLayouts.appearance')}
-            </button>
-            <button
-              type="button"
-              className="table-tool-btn"
-              disabled={!anchor || (!multi && !anchorMerge)}
-              onClick={toggleMerge}
-            >
-              {multi || !anchorMerge ? (
-                <Combine size={14} aria-hidden />
-              ) : (
-                <Split size={14} aria-hidden />
-              )}
-              {multi || !anchorMerge ? t('tableLayouts.mergeCells') : t('tableLayouts.splitCells')}
-            </button>
-            {dirty ? (
-              <span className="table-tools-commit">
-                <Button
-                  type="button"
-                  size="sm"
-                  disabled={!valid}
-                  onClick={() => {
-                    onLayoutApply(draft);
-                  }}
-                >
-                  {t('tableLayouts.apply')}
-                </Button>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => {
-                    setDraft(saved);
-                    setDesign(tableDesignOf(table));
-                    setAnchor(null);
-                    setExtent(null);
-                  }}
-                >
-                  {t('tableLayouts.discard')}
-                </Button>
-              </span>
-            ) : null}
-          </div>
-          <div className="table-tools-row table-tools-row--more" id={toolsId} hidden={!moreOpen}>
-            <label className="table-tool-field">
-              <span className="table-tool-label">{t('tableLayouts.index')}</span>
-              <select
-                className="table-tool-select"
-                value={design.index}
-                onChange={(event) => {
-                  const position = TABLE_INDEX_POSITIONS.find(
-                    (item) => item === event.target.value
-                  );
-                  if (position) applyDesign({ ...design, index: position });
-                }}
-              >
-                {TABLE_INDEX_POSITIONS.map((position) => (
-                  <option key={position} value={position}>
-                    {t(`tableLayouts.indexOptions.${position}`)}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="table-tool-field">
-              <span className="table-tool-label">{t('tableLayouts.ruling')}</span>
-              <select
-                className="table-tool-select"
-                value={design.ruling}
-                onChange={(event) => {
-                  const ruling = TABLE_RULING_CHOICES.find((item) => item === event.target.value);
-                  if (ruling) applyDesign({ ...design, ruling });
-                }}
-              >
-                {TABLE_RULING_CHOICES.map((ruling) => (
-                  <option key={ruling} value={ruling}>
-                    {t(`tableLayouts.rulingOptions.${ruling}`)}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="table-tool-check">
-              <input
-                type="checkbox"
-                checked={design.grouped}
-                onChange={(event) => {
-                  applyDesign({ ...design, grouped: event.target.checked });
-                }}
-              />
-              {t('tableLayouts.grouped')}
-            </label>
-            <label className="table-tool-check">
-              <input
-                type="checkbox"
-                checked={draft.banded}
-                onChange={(event) => {
-                  setDesign({ ...design, banded: event.target.checked });
-                  setDraft({ ...draft, banded: event.target.checked });
-                }}
-              />
-              {t('tableLayouts.banded')}
-            </label>
-          </div>
-          <p className="table-tools-hint">{t('tableLayouts.directHint')}</p>
-        </div>
+      {toolsInRibbon ? (
+        <p className="layout-table-card-state muted" data-testid="table-card-state-hint">
+          {t('tableLayouts.toolsInRibbonHint')}
+        </p>
       ) : null}
+
+      {showInlineTools ? tools : null}
 
       <div className="layout-table-scroll">
         <table
@@ -467,7 +627,7 @@ function TableEditor({
                         if (merge && (merge.row0 !== row || merge.col0 !== col)) {
                           return null;
                         }
-                        const cell = table.cells.find(
+                        const cell = workingTable.cells.find(
                           (item) => item.row === row && item.col === col
                         );
                         const rowSpan = merge?.rowSpan ?? 1;
@@ -517,6 +677,10 @@ function TableEditor({
                                 if (next === (cell?.text ?? '')) {
                                   return;
                                 }
+                                setDraft((prev) => ({
+                                  ...prev,
+                                  cells: upsertTableCell(prev.cells ?? table.cells, row, col, next),
+                                }));
                                 onCellChange?.(row, col, next);
                               }}
                             />

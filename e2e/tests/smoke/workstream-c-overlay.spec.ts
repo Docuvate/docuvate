@@ -141,7 +141,7 @@ test.describe('Workstream C overlay regressions', () => {
     await overflow.click();
     const menu = page.getByRole('menu');
     await expect(menu).toBeVisible();
-    const tabs = page.locator('.detail-tabs-bar');
+    const panel = page.getByTestId('document-detail-panel-menu');
     const menuOnTop = await page.evaluate(() => {
       const menuEl = document.querySelector('[role="menu"]');
       if (!(menuEl instanceof HTMLElement)) {
@@ -154,7 +154,7 @@ test.describe('Workstream C overlay regressions', () => {
       return hit instanceof Node && menuEl.contains(hit);
     });
     expect(menuOnTop).toBe(true);
-    await expect(tabs).toBeVisible();
+    await expect(panel).toBeVisible();
     const shot = path.join(artifactRoot, 'overflow-menu-1440.png');
     await page.screenshot({ path: shot });
     expect(md5File(shot).length).toBe(32);

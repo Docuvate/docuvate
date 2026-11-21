@@ -66,7 +66,8 @@ for (const theme of ['light', 'dark'] as const) {
       .getByRole('tab', { name: /Tabellen/ })
       .click();
     const card = page.getByTestId('corrected-table-card').first();
-    const tools = card.getByTestId('table-structure-tools');
+    const tools = page.getByTestId('app-ribbon-context').getByTestId('table-structure-tools');
+    await expect(tools).toBeVisible();
     await chooseTableFamily(tools, /Finanzlayout/);
     await card.getByLabel('Zelle Zeile 2 Spalte 1', { exact: true }).click();
     await card

@@ -10,7 +10,8 @@ import {
   tokensInsideRect,
   tokensMatchingSelectedText,
 } from '@docuvate/contracts';
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 import {
   clientPointToLocalRatio,
@@ -19,6 +20,7 @@ import {
   readDatasetRotation,
 } from '../../lib/viewerGeometry';
 import type { DocumentSelectionTool } from './DocumentSelectionTools';
+import { ResizableNormalizedRect } from './ResizableNormalizedRect';
 
 export interface DocumentSelectionDraft {
   page: number;
@@ -190,24 +192,6 @@ function draftFromViewerRect(
   };
 }
 
-function paintMark(wrap: HTMLElement, rect: NormalizedRect): void {
-  const existing = wrap.querySelector('[data-testid="document-selection-rect"]');
-  const mark = existing instanceof HTMLElement ? existing : document.createElement('div');
-  if (!(existing instanceof HTMLElement)) {
-    mark.className = 'document-selection-live-box';
-    mark.setAttribute('data-testid', 'document-selection-rect');
-    wrap.appendChild(mark);
-  }
-  mark.style.left = `${String(rect.x0 * 100)}%`;
-  mark.style.top = `${String(rect.y0 * 100)}%`;
-  mark.style.width = `${String((rect.x1 - rect.x0) * 100)}%`;
-  mark.style.height = `${String((rect.y1 - rect.y0) * 100)}%`;
-}
-
-function clearMark(): void {
-  document.querySelector('[data-testid="document-selection-rect"]')?.remove();
-}
-
 function scrollableAncestor(node: HTMLElement): HTMLElement | null {
   let current: HTMLElement | null = node.parentElement;
   let found: HTMLElement | null = null;
@@ -254,22 +238,28 @@ export function DocumentSelectionLayer({
   tokens,
   onDraftChange,
 }: DocumentSelectionLayerProps) {
-  const drawnRectRef = useRef<NormalizedRect | null>(null);
+  const [liveRect, setLiveRect] = useState<NormalizedRect | null>(null);
+  const [drawing, setDrawing] = useState(false);
+  const [host, setHost] = useState<HTMLElement | null>(null);
   const drawWrapRef = useRef<HTMLElement | null>(null);
   const originRef = useRef<{ x: number; y: number } | null>(null);
   const activeWrapRef = useRef<HTMLElement | null>(null);
   const revealedRef = useRef(false);
+  const liveRectRef = useRef<NormalizedRect | null>(null);
 
   const commitViewerRect = useCallback(
     (next: NormalizedRect | null, wrap: HTMLElement | null) => {
       if (!next || !wrap) {
-        drawnRectRef.current = null;
-        clearMark();
+        liveRectRef.current = null;
+        setLiveRect(null);
+        setHost(null);
         onDraftChange(null);
         return;
       }
-      drawnRectRef.current = next;
-      paintMark(wrap, next);
+      liveRectRef.current = next;
+      setLiveRect(next);
+      setHost(wrap);
+      drawWrapRef.current = wrap;
       onDraftChange(
         draftFromViewerRect(
           page,
@@ -288,9 +278,11 @@ export function DocumentSelectionLayer({
     if (tool !== 'rect') {
       originRef.current = null;
       activeWrapRef.current = null;
-      drawnRectRef.current = null;
+      liveRectRef.current = null;
       revealedRef.current = false;
-      clearMark();
+      setLiveRect(null);
+      setDrawing(false);
+      setHost(null);
       return;
     }
     revealedRef.current = revealPageWrap(page);
@@ -312,6 +304,13 @@ export function DocumentSelectionLayer({
       if (originRef.current) {
         return;
       }
+      // Resize handles own their pointer stream; do not start a new draw.
+      if (
+        event.target instanceof Element &&
+        event.target.closest('[data-testid="document-selection-rect"]')
+      ) {
+        return;
+      }
       const wrap = wrapForGesture(event);
       if (!wrap) {
         return;
@@ -322,6 +321,7 @@ export function DocumentSelectionLayer({
       originRef.current = start;
       activeWrapRef.current = wrap;
       drawWrapRef.current = wrap;
+      setDrawing(true);
       commitViewerRect(rect, wrap);
     }
     function onPointerMove(event: MouseEvent) {
@@ -348,6 +348,7 @@ export function DocumentSelectionLayer({
     function onPointerUp() {
       originRef.current = null;
       activeWrapRef.current = null;
+      setDrawing(false);
     }
     document.addEventListener('pointerdown', onPointerDown);
     document.addEventListener('pointermove', onPointerMove);
@@ -405,43 +406,63 @@ export function DocumentSelectionLayer({
   }, [onDraftChange, page, tokens, tool]);
 
   useEffect(() => {
-    if (tool !== 'rect') {
+    if (tool !== 'rect' || !liveRect) {
       return;
     }
-    // A page render replaces the wrap and drops the rectangle with it.
-    // Put the same rectangle on the new wrap. Style updates are not observed.
+    // A page render replaces the wrap; re-attach the portal host.
     const restore = () => {
       if (!revealedRef.current) {
         revealedRef.current = revealPageWrap(page);
-      }
-      const rect = drawnRectRef.current;
-      if (!rect) {
-        return;
-      }
-      const existing = document.querySelector('[data-testid="document-selection-rect"]');
-      if (existing?.isConnected) {
-        return;
       }
       const wrap = pageWrapForPage(page, drawWrapRef.current);
       if (!wrap) {
         return;
       }
       drawWrapRef.current = wrap;
-      paintMark(wrap, rect);
+      setHost(wrap);
     };
+    restore();
     const observer = new MutationObserver(restore);
     observer.observe(document.body, { childList: true, subtree: true });
     return () => {
       observer.disconnect();
     };
-  }, [page, tool]);
+  }, [liveRect, page, tool]);
+
+  const onResize = useCallback(
+    (next: NormalizedRect) => {
+      const wrap = host ?? drawWrapRef.current;
+      if (!wrap) return;
+      commitViewerRect(next, wrap);
+    },
+    [commitViewerRect, host]
+  );
+
+  const portal =
+    tool === 'rect' && liveRect && host
+      ? createPortal(
+          <ResizableNormalizedRect
+            rect={liveRect}
+            pageRotationDeg={readDisplayRotationDeg(host)}
+            className="document-selection-live-editor"
+            boxClassName="document-selection-live-box"
+            testId="document-selection-rect"
+            interactive={!drawing}
+            onChange={onResize}
+          />,
+          host
+        )
+      : null;
 
   return (
-    <span
-      hidden
-      data-testid="document-selection-layer"
-      data-token-count={String(tokens.length)}
-      data-page={String(page)}
-    />
+    <>
+      <span
+        hidden
+        data-testid="document-selection-layer"
+        data-token-count={String(tokens.length)}
+        data-page={String(page)}
+      />
+      {portal}
+    </>
   );
 }

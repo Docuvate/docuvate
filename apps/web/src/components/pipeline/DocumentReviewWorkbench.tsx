@@ -1,29 +1,25 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { DocumentDto, ExtractedField, FieldSuggestionRow } from '@docuvate/contracts';
-import { ArrowLeftRight, ArrowRight, Check, CheckCheck, CircleSlash, Pencil } from 'lucide-react';
+import { ArrowLeftRight, Check, CircleSlash, Pencil } from 'lucide-react';
 import { type FormEvent, type KeyboardEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import { confidenceLevelFromRatio } from '../../lib/confidenceLevel';
 import { summarizeDocumentOpenWork } from '../../lib/documentOpenWork';
 import {
-  safeConfirmKeys,
   type SuggestionRejectRef,
   type WorkbenchRow,
   workbenchRows,
 } from '../../lib/reviewWorkbench';
-import { ribbonActionClass } from '../../lib/ribbonAction';
 import { routes } from '../../lib/routes';
-import { type StructuringAspect, structuringAspects } from '../../lib/structuringAspects';
+import { type StructuringAspect } from '../../lib/structuringAspects';
 import { DocumentLabelSuggestionChips } from '../documents';
-import { AppRibbon, RibbonGroup } from '../layout/AppRibbon';
 import { Button } from '../ui/Button';
 import { IconButton } from '../ui/IconButton';
 import { Input } from '../ui/Input';
 import { Select } from '../ui/Select';
-import { StructuringAspectStrip } from './StructuringAspectStrip';
 
 interface FieldTarget {
   key: string;
@@ -87,7 +83,6 @@ export function DocumentReviewWorkbench({
   saving,
   nextDocumentId,
   onConfirm,
-  onConfirmMany,
   onSaveValue,
   onAcceptSuggestion,
   onRejectSuggestion,
@@ -97,8 +92,6 @@ export function DocumentReviewWorkbench({
   onLocate,
   onCorrectPosition,
   onLabelsUpdated,
-  onOpenAspect,
-  activeAspect = null,
   autoFocusFirst = false,
   requestEditFieldKey = null,
   onRequestEditFieldHandled,
@@ -118,24 +111,22 @@ export function DocumentReviewWorkbench({
   const open = openWork.openFields;
   const openLabels = openWork.openLabels;
   const openTotal = openWork.openTotal;
-  const safeKeys = safeConfirmKeys(rows);
   const [activeIndex, setActiveIndex] = useState(0);
   const [mode, setMode] = useState<RowMode>(null);
   const [draft, setDraft] = useState('');
   const rowRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const editRef = useRef<HTMLInputElement>(null);
   const refocus = useRef(false);
-  const nextRef = useRef<HTMLAnchorElement>(null);
-  const aspects = structuringAspects(doc, { fields, suggestions, rejects });
   const reviewedPercent =
     rows.length === 0 ? 100 : Math.round(((rows.length - open) / rows.length) * 100);
 
   useEffect(() => {
     if (!refocus.current) return;
     refocus.current = false;
-    // Everything reviewed: hand focus to "next document" so Enter keeps the loop going.
-    if (openTotal === 0 && nextRef.current) {
-      nextRef.current.focus();
+    // Everything reviewed: hand focus to ribbon "next document" so Enter keeps the loop going.
+    if (openTotal === 0) {
+      const next = document.querySelector<HTMLElement>('.review-workbench-next');
+      next?.focus();
       return;
     }
     const firstOpen = rows.findIndex((row) => row.state !== 'confirmed');
@@ -277,60 +268,6 @@ export function DocumentReviewWorkbench({
       data-open-labels={openLabels}
       data-workbench-done={openWork.isDone ? 'true' : 'false'}
     >
-      <AppRibbon>
-        <RibbonGroup label={t('ribbon.structure')} kind="navigate" order={1} showCaption={false}>
-          <StructuringAspectStrip
-            statuses={aspects}
-            className="review-workbench-aspects"
-            active={activeAspect}
-            onOpen={(aspect) => {
-              onOpenAspect(aspect);
-              if (aspect !== 'fields') return;
-              const firstOpen = rows.findIndex((row) => row.state !== 'confirmed');
-              focusRow(firstOpen >= 0 ? firstOpen : 0);
-              window.requestAnimationFrame(() => {
-                document
-                  .querySelector('.review-workbench')
-                  ?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-              });
-            }}
-          />
-        </RibbonGroup>
-        <RibbonGroup label={t('ribbon.review')} kind="act" order={2}>
-          <div className="review-workbench-actions">
-            <Button
-              type="button"
-              size="sm"
-              variant={safeKeys.length > 0 ? 'primary' : 'secondary'}
-              className={`ribbon-action ribbon-action--${safeKeys.length > 0 ? 'primary' : 'secondary'}`}
-              disabled={saving || safeKeys.length === 0}
-              onClick={() => {
-                onConfirmMany(safeKeys);
-              }}
-            >
-              <CheckCheck size={16} strokeWidth={2} aria-hidden />
-              {t('pipeline.workbench.acceptSafe', { count: safeKeys.length })}
-            </Button>
-            {nextDocumentId ? (
-              <Link
-                ref={nextRef}
-                to={reviewDocumentHref(nextDocumentId)}
-                className={ribbonActionClass(openWork.isDone ? 'primary' : 'secondary', {
-                  className: 'review-workbench-next',
-                })}
-                aria-keyshortcuts="N"
-              >
-                {t('pipeline.workbench.next')}
-                <ArrowRight size={16} strokeWidth={2} aria-hidden />
-              </Link>
-            ) : (
-              <Link to={routes.reviewQueue} className={ribbonActionClass('tertiary')}>
-                {t('pipeline.viewer.review.queueAction')}
-              </Link>
-            )}
-          </div>
-        </RibbonGroup>
-      </AppRibbon>
       <header className="review-workbench-head">
         <div className="review-workbench-title-row">
           <h2 id="review-workbench-heading" className="review-workbench-title">

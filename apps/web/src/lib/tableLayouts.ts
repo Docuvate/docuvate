@@ -5,6 +5,7 @@ import type {
   DocumentRegionTableDto,
   DocumentRegionTableMergeDto,
   DocumentRegionTableRowRoleDto,
+  DocumentRegionTableRuleDto,
   DocumentRegionTableRuleLineDto,
   DocumentRegionTableType,
   TableIndexPosition,
@@ -117,6 +118,10 @@ export interface TableStructureChoice {
   merges: DocumentRegionTableMergeDto[];
   /** Absent when the ruling is kept as recorded. */
   ruleLines?: DocumentRegionTableRuleLineDto[];
+  /** Full geometry when insert/delete/distribute rewrote dividers. */
+  rules?: DocumentRegionTableRuleDto[];
+  /** Cell texts when geometry ops shifted the grid. */
+  cells?: DocumentRegionTableCellDto[];
 }
 
 function indexCols(index: TableIndexPosition, cols: number): { lead: number; trail: number } {
@@ -289,6 +294,62 @@ export function toggleTableMerge(
     next.col0 < m.col0 + m.colSpan;
   const kept = merges.filter((m) => !overlaps(m));
   return next.rowSpan === 1 && next.colSpan === 1 ? kept : [...kept, next];
+}
+
+/**
+ * Join text from every cell in a new merge into the top-left anchor and clear the covered
+ * cells so the visible merged input keeps the content (Word-style hide of non-anchors).
+ */
+export function coalesceCellsForMerge(
+  cells: readonly DocumentRegionTableCellDto[],
+  merge: DocumentRegionTableMergeDto
+): DocumentRegionTableCellDto[] {
+  const parts: string[] = [];
+  for (let row = merge.row0; row < merge.row0 + merge.rowSpan; row += 1) {
+    for (let col = merge.col0; col < merge.col0 + merge.colSpan; col += 1) {
+      const text = cells.find((item) => item.row === row && item.col === col)?.text?.trim() ?? '';
+      if (text) parts.push(text);
+    }
+  }
+  const joined = parts.join(' ');
+  const withoutCovered = cells.filter(
+    (item) =>
+      item.row < merge.row0 ||
+      item.row >= merge.row0 + merge.rowSpan ||
+      item.col < merge.col0 ||
+      item.col >= merge.col0 + merge.colSpan
+  );
+  if (!joined) return withoutCovered;
+  return [...withoutCovered, { row: merge.row0, col: merge.col0, text: joined }];
+}
+
+/** Newly added merge rectangles after a toggle (empty when the toggle was a split). */
+export function addedMerges(
+  before: readonly DocumentRegionTableMergeDto[],
+  after: readonly DocumentRegionTableMergeDto[]
+): DocumentRegionTableMergeDto[] {
+  return after.filter(
+    (next) =>
+      !before.some(
+        (prev) =>
+          prev.row0 === next.row0 &&
+          prev.col0 === next.col0 &&
+          prev.rowSpan === next.rowSpan &&
+          prev.colSpan === next.colSpan
+      )
+  );
+}
+
+/** Upsert one sparse cell entry (used when typing in the grid draft). */
+export function upsertTableCell(
+  cells: readonly DocumentRegionTableCellDto[],
+  row: number,
+  col: number,
+  text: string
+): DocumentRegionTableCellDto[] {
+  const without = cells.filter((item) => !(item.row === row && item.col === col));
+  if (!text) return without;
+  return [...without, { row, col, text }];
 }
 
 /** The structure stored on a table, as an editable draft. */

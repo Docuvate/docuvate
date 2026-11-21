@@ -1,11 +1,12 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { DocumentDto } from '@docuvate/contracts';
-import { MoreHorizontal } from 'lucide-react';
+import { ChevronDown, MoreHorizontal, Plus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { documentContentUrl } from '../../lib/api';
 import { documentStageState } from '../../lib/documentPipeline';
+import { ribbonActionClass } from '../../lib/ribbonAction';
 import { StagePill, useDocumentFieldExport } from '../pipeline';
 import { Menu, MenuContent, MenuTrigger } from '../ui/overlay/Menu';
 
@@ -27,7 +28,100 @@ export const DOCUMENT_DETAIL_TAB_PANEL_IDS: Record<InspectorPanel, string> = {
   labels: 'document-detail-panel-labels',
 };
 
-/** Ribbon tabs that choose what the floating inspector shows; the active tab closes it again. */
+/**
+ * One Actions control for the floating inspector: open a panel, close it again, or add a field.
+ * Keeps act-row peers from competing with Apply / review commands.
+ */
+export function DocumentDetailPanelMenu({
+  panels,
+  activeTab,
+  labelCount,
+  onTabChange,
+  onAddField,
+}: {
+  panels: readonly InspectorPanel[];
+  activeTab: InspectorPanel | null;
+  labelCount: number;
+  onTabChange: (tab: InspectorPanel | null) => void;
+  onAddField?: () => void;
+}) {
+  const { t } = useTranslation();
+  const label: Record<InspectorPanel, string> = {
+    fields: t('documents.tabFields'),
+    details: t('documents.tabDetails'),
+    labels: t('documents.tabLabels'),
+  };
+  const count: Record<InspectorPanel, number> = { fields: 0, details: 0, labels: labelCount };
+  const triggerLabel = activeTab ? label[activeTab] : t('ribbon.panel');
+
+  return (
+    <div className="detail-panel-menu detail-tabs-bar" data-testid="document-detail-panel-menu">
+      <Menu>
+        <MenuTrigger
+          className={`detail-panel-menu-trigger ${ribbonActionClass(activeTab ? 'secondary' : 'tertiary')}`}
+          aria-label={t('ribbon.panelAria')}
+          title={t('ribbon.panel')}
+        >
+          <span className="detail-panel-menu-label">{triggerLabel}</span>
+          {activeTab === 'labels' && labelCount > 0 ? (
+            <span className="document-detail-tab-count" aria-hidden>
+              {labelCount}
+            </span>
+          ) : null}
+          <ChevronDown size={14} aria-hidden />
+        </MenuTrigger>
+        <MenuContent className="detail-panel-menu-panel popover-surface" align="end">
+          {panels.map((tab) => (
+            <button
+              key={tab}
+              type="button"
+              role="menuitem"
+              id={`document-detail-tab-${tab}`}
+              className={`document-detail-overflow-item${activeTab === tab ? ' is-active' : ''}`}
+              aria-controls={DOCUMENT_DETAIL_TAB_PANEL_IDS[tab]}
+              onClick={() => {
+                onTabChange(activeTab === tab ? null : tab);
+              }}
+            >
+              {label[tab]}
+              {count[tab] > 0 ? (
+                <span className="document-detail-tab-count" aria-label={`(${String(count[tab])})`}>
+                  {count[tab]}
+                </span>
+              ) : null}
+            </button>
+          ))}
+          {onAddField ? (
+            <button
+              type="button"
+              role="menuitem"
+              className="document-detail-overflow-item"
+              data-testid="document-add-recognized-field"
+              onClick={onAddField}
+            >
+              <Plus size={14} aria-hidden />
+              {t('recognizedFields.addField')}
+            </button>
+          ) : null}
+          {activeTab ? (
+            <button
+              type="button"
+              role="menuitem"
+              className="document-detail-overflow-item"
+              onClick={() => {
+                onTabChange(null);
+              }}
+            >
+              {t('ribbon.panelClose')}
+            </button>
+          ) : null}
+        </MenuContent>
+      </Menu>
+    </div>
+  );
+}
+
+/** @deprecated Prefer DocumentDetailPanelMenu — kept for loading shell layout. */
 export function DocumentDetailTabStrip({
   panels,
   activeTab,
@@ -39,38 +133,13 @@ export function DocumentDetailTabStrip({
   labelCount: number;
   onTabChange: (tab: InspectorPanel | null) => void;
 }) {
-  const { t } = useTranslation();
-  const label: Record<InspectorPanel, string> = {
-    fields: t('documents.tabFields'),
-    details: t('documents.tabDetails'),
-    labels: t('documents.tabLabels'),
-  };
-  const count: Record<InspectorPanel, number> = { fields: 0, details: 0, labels: labelCount };
-
   return (
-    <div className="detail-tabs-bar" role="tablist" aria-label={t('documents.tabsAria')}>
-      {panels.map((tab) => (
-        <button
-          key={tab}
-          id={`document-detail-tab-${tab}`}
-          type="button"
-          role="tab"
-          aria-selected={activeTab === tab}
-          aria-controls={DOCUMENT_DETAIL_TAB_PANEL_IDS[tab]}
-          className={`detail-tab${activeTab === tab ? ' active' : ''}`}
-          onClick={() => {
-            onTabChange(activeTab === tab ? null : tab);
-          }}
-        >
-          {label[tab]}
-          {count[tab] > 0 ? (
-            <span className="document-detail-tab-count" aria-label={`(${String(count[tab])})`}>
-              {count[tab]}
-            </span>
-          ) : null}
-        </button>
-      ))}
-    </div>
+    <DocumentDetailPanelMenu
+      panels={panels}
+      activeTab={activeTab}
+      labelCount={labelCount}
+      onTabChange={onTabChange}
+    />
   );
 }
 
@@ -107,10 +176,7 @@ export function DocumentDetailMetaBar({
             >
               <MoreHorizontal size={18} strokeWidth={2} aria-hidden />
             </MenuTrigger>
-            <MenuContent
-              className="document-detail-overflow-panel popover-surface"
-              align="end"
-            >
+            <MenuContent className="document-detail-overflow-panel popover-surface" align="end">
               <a
                 className="document-detail-overflow-item"
                 role="menuitem"
@@ -159,7 +225,9 @@ export function DocumentDetailMetaBar({
                   className="document-detail-overflow-item"
                   role="menuitemcheckbox"
                   aria-checked={showTechnicalDetails}
-                  onClick={() => { onShowTechnicalDetailsChange(!showTechnicalDetails); }}
+                  onClick={() => {
+                    onShowTechnicalDetailsChange(!showTechnicalDetails);
+                  }}
                 >
                   {showTechnicalDetails
                     ? t('documents.technicalDetailsHide')
