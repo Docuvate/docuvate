@@ -1847,7 +1847,7 @@ mark.global-search-mark {
   font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
   font-size: 0.625rem;
   letter-spacing: 0.02em;
-  color: var(--color-text-muted, #6b645c);
+  color: var(--dv-color-text-muted);
   opacity: 0.75;
   user-select: text;
   pointer-events: auto;
