@@ -2605,7 +2605,7 @@
     "mergeCells": "Merge cells",
     "splitCells": "Split cells",
     "directHint": "Pick a row's kind at its left edge. To merge, click a cell, then Shift+click (or Shift+Alt+Arrow) a second one.",
-    "toolsInRibbonHint": "Structure tools are in the ribbon above — grid and values stay here.",
+    "toolsInRibbonHint": "Structure tools are in the ribbon above. Grid and values stay here.",
     "insertRow": "Insert row",
     "insertCol": "Insert column",
     "deleteRow": "Delete row",

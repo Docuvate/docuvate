@@ -2605,7 +2605,7 @@
     "mergeCells": "Zellen verbinden",
     "splitCells": "Verbindung lösen",
     "directHint": "Zeilenart links an der Zeile wählen. Zellen verbinden: Zelle anklicken, zweite mit Umschalt+Klick (oder Umschalt+Alt+Pfeil) wählen.",
-    "toolsInRibbonHint": "Strukturwerkzeuge oben im Ribbon — Raster und Werte hier.",
+    "toolsInRibbonHint": "Strukturwerkzeuge oben im Ribbon. Raster und Werte hier.",
     "insertRow": "Zeile +",
     "insertCol": "Spalte +",
     "deleteRow": "Zeile −",
