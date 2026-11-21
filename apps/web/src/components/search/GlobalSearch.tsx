@@ -197,25 +197,30 @@ export function GlobalSearch({ narrowTopbar = false }: { narrowTopbar?: boolean 
   }, []);
 
   useEffect(() => {
-    return addWindowKeydownListener((e) => {
-      const target = e.target;
-      const typing =
-        target instanceof HTMLElement &&
-        (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable);
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
-        e.preventDefault();
-        openPalette();
-        return;
-      }
-      if (e.key === '/' && !typing && !paletteOpen) {
-        e.preventDefault();
-        openPalette();
-      }
-      if (e.key === 'Escape' && paletteOpen) {
-        e.preventDefault();
-        closePalette();
-      }
-    });
+    // Capture phase so Mod+K wins over focused search/filter inputs (e.g. library label filter).
+    return addWindowKeydownListener(
+      (e) => {
+        const target = e.target;
+        const typing =
+          target instanceof HTMLElement &&
+          (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable);
+        if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+          e.preventDefault();
+          e.stopPropagation();
+          openPalette();
+          return;
+        }
+        if (e.key === '/' && !typing && !paletteOpen) {
+          e.preventDefault();
+          openPalette();
+        }
+        if (e.key === 'Escape' && paletteOpen) {
+          e.preventDefault();
+          closePalette();
+        }
+      },
+      { capture: true }
+    );
   }, [closePalette, openPalette, paletteOpen]);
 
   useEffect(() => {
