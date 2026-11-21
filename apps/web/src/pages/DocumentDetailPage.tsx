@@ -182,6 +182,7 @@ export function DocumentDetailPage() {
   );
   const [layoutSideTab, setLayoutSideTab] = useState<LayoutSideTab>('fields');
   const [positionEditFieldKey, setPositionEditFieldKey] = useState<string | null>(null);
+  const [workbenchEditFieldKey, setWorkbenchEditFieldKey] = useState<string | null>(null);
   const [correctionSheetOpen, setCorrectionSheetOpen] = useState(false);
   const [viewerPage, setViewerPage] = useState(1);
   const [activeBlockIndex, setActiveBlockIndex] = useState<number | null>(null);
@@ -925,6 +926,14 @@ export function DocumentDetailPage() {
               onPositionEditHandled={() => {
                 setPositionEditFieldKey(null);
               }}
+              onRequestFieldValueEdit={(fieldKey) => {
+                applyStructuringChrome(
+                  structuring.select('fields'),
+                  setLayoutSideTab,
+                  openInspector
+                );
+                setWorkbenchEditFieldKey(fieldKey);
+              }}
             />
           ) : (
             <div className="detail-workspace">
@@ -1043,6 +1052,10 @@ export function DocumentDetailPage() {
                       openInspector
                     );
                   }}
+                  requestEditFieldKey={workbenchEditFieldKey}
+                  onRequestEditFieldHandled={() => {
+                    setWorkbenchEditFieldKey(null);
+                  }}
                 />
               </div>
             ) : null}
@@ -1101,6 +1114,14 @@ export function DocumentDetailPage() {
                     notifySaved(t('documents.fieldDiscardedToast'));
                   }}
                   onConfirmField={confirmField}
+                  onRequestCorrectField={(field) => {
+                    applyStructuringChrome(
+                      structuring.select('fields'),
+                      setLayoutSideTab,
+                      openInspector
+                    );
+                    setWorkbenchEditFieldKey(field.key);
+                  }}
                   onSave={() => void persist({ extractionFields: fields })}
                 />
                 <DuplicateCandidatesPanel documentId={doc.id} />

@@ -119,6 +119,8 @@ interface DocumentLayoutWorkspaceProps {
   /** When set, open the field bounding-box editor for this key. */
   positionEditFieldKey?: string | null;
   onPositionEditHandled?: () => void;
+  /** Value correction belongs in the Strukturieren workbench — redirect from Layout Felder. */
+  onRequestFieldValueEdit?: (fieldKey: string) => void;
 }
 
 export function DocumentLayoutWorkspace({
@@ -161,6 +163,7 @@ export function DocumentLayoutWorkspace({
   onStructuringPrimaryChange,
   positionEditFieldKey = null,
   onPositionEditHandled,
+  onRequestFieldValueEdit,
 }: DocumentLayoutWorkspaceProps) {
   const { t, i18n } = useTranslation();
   const toast = useToast();
@@ -1004,7 +1007,9 @@ export function DocumentLayoutWorkspace({
             });
           }}
           onConfirmField={confirmField}
-          onCorrectField={fieldMarking.startMarkingField}
+          onCorrectField={
+            onRequestFieldValueEdit ?? fieldMarking.startMarkingField
+          }
           onSaveFieldValue={onSaveFieldValue}
           onHighlightField={highlightRegion}
           onSelectField={selectField}

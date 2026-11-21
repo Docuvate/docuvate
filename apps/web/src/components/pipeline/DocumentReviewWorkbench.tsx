@@ -59,6 +59,9 @@ interface DocumentReviewWorkbenchProps {
   activeAspect?: StructuringAspect | null;
   /** Focus the first open value when the document opens (arriving from "next document"). */
   autoFocusFirst?: boolean;
+  /** External entry points (Details / Layout) open value edit here — one primary path. */
+  requestEditFieldKey?: string | null;
+  onRequestEditFieldHandled?: () => void;
 }
 
 type RowMode =
@@ -97,6 +100,8 @@ export function DocumentReviewWorkbench({
   onOpenAspect,
   activeAspect = null,
   autoFocusFirst = false,
+  requestEditFieldKey = null,
+  onRequestEditFieldHandled,
 }: DocumentReviewWorkbenchProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -177,6 +182,27 @@ export function DocumentReviewWorkbench({
     setDraft(row.value);
     setMode({ key: row.key, kind: 'edit' });
   }
+
+  useEffect(() => {
+    if (!requestEditFieldKey) {
+      return;
+    }
+    const index = rows.findIndex((row) => row.key === requestEditFieldKey);
+    if (index < 0) {
+      onRequestEditFieldHandled?.();
+      return;
+    }
+    const row = rows[index];
+    if (!row) {
+      onRequestEditFieldHandled?.();
+      return;
+    }
+    startEdit(row, index);
+    window.requestAnimationFrame(() => {
+      rowRefs.current[index]?.scrollIntoView({ block: 'nearest' });
+    });
+    onRequestEditFieldHandled?.();
+  }, [onRequestEditFieldHandled, requestEditFieldKey, rows]);
 
   function closeMode() {
     refocus.current = true;
