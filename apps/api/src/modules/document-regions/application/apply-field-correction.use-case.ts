@@ -43,7 +43,13 @@ import {
   withdrawSuggestionRejectsForValue,
 } from '../domain/withdraw-suggestion-reject.js';
 
-const FIELD_OPS = new Set<FieldCorrectionOp>(['create', 'reanchor', 'edit_value', 'remove', 'reject_suggestion']);
+const FIELD_OPS = new Set<FieldCorrectionOp>([
+  'create',
+  'reanchor',
+  'edit_value',
+  'remove',
+  'reject_suggestion',
+]);
 const SCOPES = new Set<FieldCorrectionScope>(['document', 'label', 'always']);
 
 function normalizeFieldKey(raw: string): string {
@@ -219,8 +225,7 @@ export class ApplyFieldCorrectionUseCase {
       body.op === 'remove' ||
       (existing != null &&
         (existing.page !== resolved.page ||
-          existing.blockIndexes.join(',') !==
-            uniqueBlockIndexes(resolved.tokens).join(',')));
+          existing.blockIndexes.join(',') !== uniqueBlockIndexes(resolved.tokens).join(',')));
 
     let afterRegion: DocumentRegionRecord | null = null;
     if (body.op !== 'remove' && (geometryChanged || !existing)) {
@@ -362,8 +367,8 @@ export class ApplyFieldCorrectionUseCase {
     });
     if (drawn) {
       const selected = tokensInsideRect(pageTokens, drawn);
-      const snapped = snapRectToTokenHull(selected) ?? drawn;
-      return { page, rect: snapped, tokens: selected };
+      // Keep the user-drawn bounds; only tokens are inferred from coverage inside it.
+      return { page, rect: drawn, tokens: selected };
     }
     if (body.blockIndexes && body.blockIndexes.length > 0) {
       const selected = pageTokens.filter((token) => body.blockIndexes?.includes(token.blockIndex));

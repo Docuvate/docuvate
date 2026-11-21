@@ -7,6 +7,7 @@ import { Link, NavLink } from 'react-router-dom';
 
 import { writeAdvancedFeaturesEnabled } from '../lib/advancedFeatures';
 import { getUserSettings } from '../lib/api';
+import { appBuildLabel } from '../lib/appBuildLabel';
 import { authClient, authSessionUserId } from '../lib/auth-client';
 import { markAuthenticatedSessionHint } from '../lib/authSessionHint';
 import { ensureRemoteConfigLoaded } from '../lib/remoteConfig';
@@ -93,83 +94,90 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <ToastGlobalBridge />
       <SaveBarLayoutSync />
       <AppRibbonSlotContext.Provider value={ribbonSlot}>
-      <AppRibbonContextSlotContext.Provider value={ribbonContextSlot}>
-        <div className={`app-shell${mobileNavOpen ? ' app-shell-mobile-nav-open' : ''}`}>
-          <a className="skip-link" href="#app-main-content">
-            {t('shell.skipToMain')}
-          </a>
-          <div className="app-header">
-            <header className="app-topbar">
-              <div className="topbar-brand">
+        <AppRibbonContextSlotContext.Provider value={ribbonContextSlot}>
+          <div className={`app-shell${mobileNavOpen ? ' app-shell-mobile-nav-open' : ''}`}>
+            <a className="skip-link" href="#app-main-content">
+              {t('shell.skipToMain')}
+            </a>
+            <div className="app-header">
+              <header className="app-topbar">
+                <div className="topbar-brand">
+                  {narrowTopbar ? (
+                    <button
+                      ref={menuTriggerRef}
+                      type="button"
+                      className="topbar-icon-btn topbar-menu-trigger"
+                      aria-expanded={mobileNavOpen}
+                      aria-label={t('nav.main')}
+                      onClick={() => {
+                        setMobileNavOpen((open) => !open);
+                      }}
+                    >
+                      <Menu size={20} strokeWidth={2} aria-hidden />
+                    </button>
+                  ) : null}
+                  <Link to={routes.home} className="topbar-brand-link">
+                    <Logo type="full" />
+                  </Link>
+                </div>
+                {!narrowTopbar ? <AppPrimaryNav /> : null}
                 {narrowTopbar ? (
-                  <button
-                    ref={menuTriggerRef}
-                    type="button"
-                    className="topbar-icon-btn topbar-menu-trigger"
-                    aria-expanded={mobileNavOpen}
-                    aria-label={t('nav.main')}
-                    onClick={() => {
-                      setMobileNavOpen((open) => !open);
-                    }}
-                  >
-                    <Menu size={20} strokeWidth={2} aria-hidden />
-                  </button>
-                ) : null}
-                <Link to={routes.home} className="topbar-brand-link">
-                  <Logo type="full" />
-                </Link>
-              </div>
-              {!narrowTopbar ? <AppPrimaryNav /> : null}
-              {narrowTopbar ? (
-                <div className="topbar-search-slot">
-                  <GlobalSearch narrowTopbar />
+                  <div className="topbar-search-slot">
+                    <GlobalSearch narrowTopbar />
+                  </div>
+                ) : (
+                  <div className="global-search-desktop-host">
+                    <GlobalSearch narrowTopbar={false} />
+                  </div>
+                )}
+                <div className="topbar-user">
+                  {!narrowTopbar ? (
+                    <NavLink
+                      to={routes.settings}
+                      className={({ isActive }) =>
+                        `topbar-icon-btn topbar-settings-link${isActive ? ' active' : ''}`
+                      }
+                      aria-label={t('nav.settings')}
+                      title={t('nav.settings')}
+                    >
+                      <Settings size={18} strokeWidth={1.75} aria-hidden />
+                    </NavLink>
+                  ) : null}
+                  <UserAccountMenu />
                 </div>
-              ) : (
-                <div className="global-search-desktop-host">
-                  <GlobalSearch narrowTopbar={false} />
+              </header>
+              <div className="app-ribbon" data-testid="app-ribbon">
+                <div className="app-ribbon-primary">
+                  <AppSectionRibbon />
+                  <div className="app-ribbon-actions" ref={setRibbonSlot} />
                 </div>
-              )}
-              <div className="topbar-user">
-                {!narrowTopbar ? (
-                  <NavLink
-                    to={routes.settings}
-                    className={({ isActive }) =>
-                      `topbar-icon-btn topbar-settings-link${isActive ? ' active' : ''}`
-                    }
-                    aria-label={t('nav.settings')}
-                    title={t('nav.settings')}
-                  >
-                    <Settings size={18} strokeWidth={1.75} aria-hidden />
-                  </NavLink>
-                ) : null}
-                <UserAccountMenu />
+                <div
+                  className="app-ribbon-context"
+                  ref={setRibbonContextSlot}
+                  data-testid="app-ribbon-context"
+                />
               </div>
-            </header>
-            <div className="app-ribbon" data-testid="app-ribbon">
-              <div className="app-ribbon-primary">
-                <AppSectionRibbon />
-                <div className="app-ribbon-actions" ref={setRibbonSlot} />
-              </div>
-              <div className="app-ribbon-context" ref={setRibbonContextSlot} data-testid="app-ribbon-context" />
+            </div>
+            {mobileNavOpen ? (
+              <button
+                type="button"
+                className="app-sidebar-backdrop"
+                aria-label={t('common.close')}
+                onClick={closeMobileNav}
+              />
+            ) : null}
+            <div className="app-body">
+              {narrowTopbar ? <AppSidebar open={mobileNavOpen} onClose={closeMobileNav} /> : null}
+              <main id="app-main-content" className="app-main" tabIndex={-1}>
+                <ConnectionStatusBanners />
+                {children}
+                <footer className="app-build-footer" data-testid="app-build-footer">
+                  <span className="app-build-footer-label">{appBuildLabel()}</span>
+                </footer>
+              </main>
             </div>
           </div>
-          {mobileNavOpen ? (
-            <button
-              type="button"
-              className="app-sidebar-backdrop"
-              aria-label={t('common.close')}
-              onClick={closeMobileNav}
-            />
-          ) : null}
-          <div className="app-body">
-            {narrowTopbar ? <AppSidebar open={mobileNavOpen} onClose={closeMobileNav} /> : null}
-            <main id="app-main-content" className="app-main" tabIndex={-1}>
-              <ConnectionStatusBanners />
-              {children}
-            </main>
-          </div>
-        </div>
-      </AppRibbonContextSlotContext.Provider>
+        </AppRibbonContextSlotContext.Provider>
       </AppRibbonSlotContext.Provider>
     </ToastProvider>
   );

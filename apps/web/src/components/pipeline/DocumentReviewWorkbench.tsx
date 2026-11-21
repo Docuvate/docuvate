@@ -288,6 +288,11 @@ export function DocumentReviewWorkbench({
               if (aspect !== 'fields') return;
               const firstOpen = rows.findIndex((row) => row.state !== 'confirmed');
               focusRow(firstOpen >= 0 ? firstOpen : 0);
+              window.requestAnimationFrame(() => {
+                document
+                  .querySelector('.review-workbench')
+                  ?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+              });
             }}
           />
         </RibbonGroup>
@@ -580,9 +585,15 @@ export function DocumentReviewWorkbench({
           <ul className="review-workbench-rejected-list">
             {rejects.map((item) => (
               <li key={`${item.fieldKey}:${item.valueNormalized}:${item.correctionId ?? ''}`}>
-                <span className="review-workbench-row-label">{fieldLabelForKey(item.fieldKey)}</span>
-                <span className="review-workbench-row-value">{item.value ?? item.valueNormalized}</span>
-                <span className="review-workbench-row-state">{t('pipeline.workbench.state.rejected')}</span>
+                <span className="review-workbench-row-label">
+                  {fieldLabelForKey(item.fieldKey)}
+                </span>
+                <span className="review-workbench-row-value">
+                  {item.value ?? item.valueNormalized}
+                </span>
+                <span className="review-workbench-row-state">
+                  {t('pipeline.workbench.state.rejected')}
+                </span>
                 {onUndoReject && item.correctionId ? (
                   <Button
                     type="button"

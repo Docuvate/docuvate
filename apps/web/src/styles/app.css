@@ -1823,6 +1823,23 @@ mark.global-search-mark {
   -webkit-overflow-scrolling: touch;
 }
 
+.app-build-footer {
+  flex: 0 0 auto;
+  margin-top: auto;
+  padding: 0.5rem 1rem 0.75rem;
+  text-align: end;
+  pointer-events: none;
+}
+
+.app-build-footer-label {
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+  font-size: 0.6875rem;
+  letter-spacing: 0.02em;
+  color: var(--color-text-muted, #6b645c);
+  user-select: text;
+  pointer-events: auto;
+}
+
 .app-main:has(.page--with-save-bar) {
   scroll-padding-bottom: var(--save-bar-reserve-height, 5.5rem);
 }

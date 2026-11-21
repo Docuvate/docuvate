@@ -584,7 +584,6 @@ export function DocumentDetailPage() {
     return set;
   }, [suggestionRejects]);
 
-
   const fieldLabelForKey = useCallback(
     (key: string) => {
       const globalKey = parseGlobalFieldKey(key);
@@ -687,7 +686,9 @@ export function DocumentDetailPage() {
     if (!id) return;
     const valueNormalized = normalizeSuggestionDecisionValue(value);
     const identity = `${key}\0${valueNormalized}`;
-    if (suggestionRejects.some((item) => `${item.fieldKey}\0${item.valueNormalized}` === identity)) {
+    if (
+      suggestionRejects.some((item) => `${item.fieldKey}\0${item.valueNormalized}` === identity)
+    ) {
       return;
     }
     const correctionId = crypto.randomUUID();
@@ -703,21 +704,21 @@ export function DocumentDetailPage() {
       op: 'reject_suggestion',
       fieldKey: key,
       valueOverride: value,
-    }).then((result) => {
-      const correction = result?.correction;
-      if (result?.noChange && correction) {
-        setSuggestionRejects((prev) =>
-          prev.map((item) =>
-            item.correctionId === correctionId
-              ? { ...item, correctionId: correction.id }
-              : item
-          )
-        );
-      }
-      void refetchReviewQueue();
-    }).catch(() => {
-      setSuggestionRejects((prev) => prev.filter((item) => item.correctionId !== correctionId));
-    });
+    })
+      .then((result) => {
+        const correction = result?.correction;
+        if (result?.noChange && correction) {
+          setSuggestionRejects((prev) =>
+            prev.map((item) =>
+              item.correctionId === correctionId ? { ...item, correctionId: correction.id } : item
+            )
+          );
+        }
+        void refetchReviewQueue();
+      })
+      .catch(() => {
+        setSuggestionRejects((prev) => prev.filter((item) => item.correctionId !== correctionId));
+      });
   }
 
   function undoRejectSuggestion(correctionId: string) {
@@ -771,6 +772,13 @@ export function DocumentDetailPage() {
   const openInspector = (panel: InspectorPanel) => {
     setInspectorChoice(panel);
     window.requestAnimationFrame(() => {
+      // Re-clicking Felder while Strukturieren is already open must still focus the workbench.
+      if (panel === 'fields') {
+        document
+          .querySelector('.review-workbench')
+          ?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        return;
+      }
       document
         .getElementById(DOCUMENT_DETAIL_TAB_PANEL_IDS[panel])
         ?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
@@ -880,7 +888,11 @@ export function DocumentDetailPage() {
               onTextEditOpenChange={structuring.onTextOpenChange}
               structuringPrimary={structuring.primary}
               onStructuringPrimaryChange={(primary) => {
-                applyStructuringChrome(structuring.select(primary), setLayoutSideTab, openInspector);
+                applyStructuringChrome(
+                  structuring.select(primary),
+                  setLayoutSideTab,
+                  openInspector
+                );
               }}
               editMode={structuring.textEditing}
               onEditModeChange={structuring.setTextEditing}
@@ -1008,7 +1020,11 @@ export function DocumentDetailPage() {
                   onLocate={locateValue}
                   onCorrectPosition={(fieldKey) => {
                     setPositionEditFieldKey(fieldKey);
-                    applyStructuringChrome(structuring.select('layout'), setLayoutSideTab, openInspector);
+                    applyStructuringChrome(
+                      structuring.select('layout'),
+                      setLayoutSideTab,
+                      openInspector
+                    );
                     setInspectorChoice('fields');
                   }}
                   onLabelsUpdated={refreshDocumentLabels}

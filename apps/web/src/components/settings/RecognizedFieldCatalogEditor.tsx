@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { TagDto } from '@docuvate/contracts';
 import { Trash2 } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import type { RecognizedFieldGateDraft } from '../../lib/recognizedFieldDraft';
@@ -28,6 +28,9 @@ interface RecognizedFieldCatalogEditorProps {
   gateDefaults: RecognizedFieldGateDraft;
   catalogBusy: boolean;
   onPersistFields: (fields: RecognizedFieldDraft[]) => Promise<boolean>;
+  /** When true, opens the create dialog once (e.g. ribbon `?create=1`). */
+  openCreateRequest?: boolean;
+  onOpenCreateRequestHandled?: () => void;
 }
 
 function formatRuleSummary(
@@ -59,6 +62,8 @@ export function RecognizedFieldCatalogEditor({
   gateDefaults,
   catalogBusy,
   onPersistFields,
+  openCreateRequest = false,
+  onOpenCreateRequestHandled,
 }: RecognizedFieldCatalogEditorProps) {
   const { t } = useTranslation();
   const tagNameById = useMemo(() => new Map(tags.map((tag) => [tag.id, tag.name])), [tags]);
@@ -71,6 +76,14 @@ export function RecognizedFieldCatalogEditor({
     setDialogMode('create');
     setEditingRow(null);
   }
+
+  useEffect(() => {
+    if (!openCreateRequest) {
+      return;
+    }
+    openCreate();
+    onOpenCreateRequestHandled?.();
+  }, [onOpenCreateRequestHandled, openCreateRequest]);
 
   function openEdit(row: RecognizedFieldDraft) {
     setDialogMode('edit');

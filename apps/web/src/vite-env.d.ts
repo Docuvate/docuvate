@@ -3,6 +3,7 @@
 /// <reference types="vite/client" />
 
 declare const __DOCUVATE_BUILD_SHA__: string;
+declare const __DOCUVATE_APP_VERSION__: string;
 
 interface ImportMetaEnv {
   readonly VITE_API_URL?: string;
