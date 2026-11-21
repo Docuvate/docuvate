@@ -1025,7 +1025,7 @@
     "layoutViewMenuAria": "Ansicht: {{view}}",
     "fieldPositionCorrect": "Position korrigieren",
     "fieldBboxSave": "Position speichern",
-    "fieldBboxHandle": "Griff {handle}",
+    "fieldBboxHandle": "Griff {{handle}}",
     "pageRotationSaved": "Seitendrehung gespeichert",
     "layoutSuggestionDismissTitle": "Vorschlag verwerfen",
     "rejectedSuggestionsTitle": "Verworfene Vorschläge"
@@ -2106,7 +2106,7 @@
     "nextWorkLead": "Öffne das nächste Dokument und strukturiere Werte direkt im Viewer  -  ohne zweiten Wizard.",
     "nextDocument": "Als Nächstes strukturieren",
     "openStructuring": "Dokument strukturieren",
-    "openFieldsHint": "{fields} Felder · {labels} Labels offen",
+    "openFieldsHint": "{{fields}} Felder · {{labels}} Labels offen",
     "queueListAria": "Weitere Dokumente in der Warteschlange",
     "structureAction": "Strukturieren"
   },
@@ -2623,7 +2623,7 @@
     "exitDocumentEdit": "Overlay schließen",
     "saveBounds": "Tabellenrahmen speichern",
     "resizeBounds": "Tabellenrahmen ändern",
-    "cellAria": "Zelle Zeile {row}, Spalte {col}"
+    "cellAria": "Zelle Zeile {{row}}, Spalte {{col}}"
   },
   "ribbon": {
     "stock": "Bestand",

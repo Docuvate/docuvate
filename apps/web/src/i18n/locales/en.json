@@ -1025,7 +1025,7 @@
     "layoutViewMenuAria": "View: {{view}}",
     "fieldPositionCorrect": "Fix position",
     "fieldBboxSave": "Save position",
-    "fieldBboxHandle": "Handle {handle}",
+    "fieldBboxHandle": "Handle {{handle}}",
     "pageRotationSaved": "Page rotation saved",
     "layoutSuggestionDismissTitle": "Dismiss suggestion",
     "rejectedSuggestionsTitle": "Rejected suggestions"
@@ -2106,7 +2106,7 @@
     "nextWorkLead": "Open the next document and structure values in the viewer  -  no second wizard.",
     "nextDocument": "Structure next",
     "openStructuring": "Structure document",
-    "openFieldsHint": "{fields} fields · {labels} labels open",
+    "openFieldsHint": "{{fields}} fields · {{labels}} labels open",
     "queueListAria": "More documents in the queue",
     "structureAction": "Structure"
   },
@@ -2623,7 +2623,7 @@
     "exitDocumentEdit": "Close overlay",
     "saveBounds": "Save table frame",
     "resizeBounds": "Resize table frame",
-    "cellAria": "Cell row {row}, column {col}"
+    "cellAria": "Cell row {{row}}, column {{col}}"
   },
   "ribbon": {
     "stock": "Records",
