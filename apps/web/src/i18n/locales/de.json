@@ -2546,10 +2546,10 @@
     "aspects": {
       "aria": "Stand der Strukturierung",
       "name": {
-        "ocr": "Text",
-        "labels": "Labels",
+        "ocr": "Text prüfen",
+        "labels": "Labels zuweisen",
         "layout": "Layout",
-        "fields": "Felder"
+        "fields": "Werte prüfen"
       },
       "state": {
         "pending": "nicht verarbeitet",
@@ -2569,7 +2569,7 @@
   "tableLayouts": {
     "apply": "Übernehmen",
     "families": {
-      "simple": "Einfache Tabelle",
+      "simple": "Einfache Tabelle / Beleg",
       "matrix": "Matrix",
       "nested": "Mehrstufiger Kopf",
       "financial": "Finanzlayout",
@@ -2614,7 +2614,7 @@
     },
     "rowKindAria": "Zeilenart von Zeile {{row}}",
     "familyHints": {
-      "simple": "Normale Zeilen und Spalten, eine Kopfzeile.",
+      "simple": "Normale Zeilen und Spalten (z. B. Wiegeschein), eine Kopfzeile. Raster folgt Ihrer Auswahl.",
       "matrix": "Erste Spalte als Zeilenbeschriftung.",
       "nested": "Zwei Kopfzeilen, z. B. gruppierte Spalten.",
       "financial": "Fußzeilen für Summen und Steuern.",
@@ -2632,6 +2632,7 @@
     "views": "Angeheftet",
     "area": "Bereich",
     "structure": "Struktur",
+    "structureActions": "Aktionen",
     "capture": "Erfassen",
     "display": "Darstellung",
     "output": "Ausgabe",

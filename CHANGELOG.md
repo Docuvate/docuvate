@@ -4,6 +4,21 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+## [0.1.1] — 2026-11-21
+
+UX-audit pass for Upload → OCR → Strukturieren → Prüfen → Suche (#134).
+
+### Fixed
+
+- Review-queue open-fields hint i18n interpolation (`{{count}}`) and locale placeholder guard.
+- Library and global search share field-value matching (digit-prefix amounts, e.g. `1234` ↔ `1.234,56`).
+- Ctrl/Cmd+K opens global search (capture-phase shortcut) instead of the label filter.
+- Upload supports `.txt` preview; corrupt PDFs fail early with retry.
+- Heuristic date suggestions reject invoice IDs like `NW-2026-0042`.
+- Field correction routes into the Strukturieren workbench as the primary path.
+- Open field/label counts use one source of truth; Fertig copy when nothing is open.
+- Viewer polish: sticky table mark, zoom, DnD dropzone, locale seed (local only), upload queue done-before-assignment.
+
 ## [0.1.0-beta] — 2026-10-14
 
 Community Edition beta focused on CPU-friendly ML productization and operator documentation.

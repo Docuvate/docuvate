@@ -165,8 +165,10 @@ function draftFromViewerRect(
   viewerRect: NormalizedRect,
   pageRotationDeg: number,
   unrotatedMediaBox: boolean,
-  selectedText?: string
+  options?: { selectedText?: string; keepDrawnRect?: boolean }
 ): DocumentSelectionDraft {
+  const selectedText = options?.selectedText;
+  const keepDrawnRect = options?.keepDrawnRect === true;
   const mapped =
     selectionRectForTokenSpace(viewerRect, pageRotationDeg, unrotatedMediaBox) ?? viewerRect;
   const pageTokens = tokens.filter((token) => token.page === page);
@@ -181,7 +183,8 @@ function draftFromViewerRect(
   }
   return {
     page,
-    rect: snapRectToTokenHull(selected) ?? mapped,
+    // Bereich / table draws keep the user rectangle; text picks snap to token hull.
+    rect: keepDrawnRect ? mapped : (snapRectToTokenHull(selected) ?? mapped),
     tokens: selected,
     text: joinedTokenText(selected),
   };
@@ -273,7 +276,8 @@ export function DocumentSelectionLayer({
           tokens,
           next,
           readPageRotationDeg(wrap),
-          tokensUseUnrotatedMediaBox(wrap)
+          tokensUseUnrotatedMediaBox(wrap),
+          { keepDrawnRect: true }
         )
       );
     },
@@ -390,7 +394,7 @@ export function DocumentSelectionLayer({
           viewerRect,
           readPageRotationDeg(wrap),
           tokensUseUnrotatedMediaBox(wrap),
-          selection.toString()
+          { selectedText: selection.toString() }
         )
       );
     }

@@ -2546,10 +2546,10 @@
     "aspects": {
       "aria": "Structuring status",
       "name": {
-        "ocr": "Text",
-        "labels": "Labels",
+        "ocr": "Review text",
+        "labels": "Assign labels",
         "layout": "Layout",
-        "fields": "Fields"
+        "fields": "Review values"
       },
       "state": {
         "pending": "not processed",
@@ -2569,7 +2569,7 @@
   "tableLayouts": {
     "apply": "Apply",
     "families": {
-      "simple": "Simple table",
+      "simple": "Simple table / ticket",
       "matrix": "Matrix",
       "nested": "Multi-level header",
       "financial": "Financial layout",
@@ -2614,7 +2614,7 @@
     },
     "rowKindAria": "Kind of row {{row}}",
     "familyHints": {
-      "simple": "Plain rows and columns with one header row.",
+      "simple": "Plain rows and columns (e.g. weigh ticket), one header row. Grid follows your selection.",
       "matrix": "First column as row labels.",
       "nested": "Two header rows, e.g. grouped columns.",
       "financial": "Footer rows for totals and tax.",
@@ -2632,6 +2632,7 @@
     "views": "Pinned",
     "area": "Area",
     "structure": "Structure",
+    "structureActions": "Actions",
     "capture": "Capture",
     "display": "Display",
     "output": "Output",

@@ -332,8 +332,8 @@ export class ApplyTableCorrectionUseCase {
     });
     if (drawn) {
       const selected = tokensInsideRect(pageTokens, drawn);
-      const snapped = snapRectToTokenHull(selected) ?? drawn;
-      return { page, rect: snapped, tokens: selected };
+      // Keep the user-drawn bounds; only tokens are inferred from coverage inside it.
+      return { page, rect: drawn, tokens: selected };
     }
     if (body.blockIndexes && body.blockIndexes.length > 0) {
       const selected = pageTokens.filter((token) => body.blockIndexes?.includes(token.blockIndex));
