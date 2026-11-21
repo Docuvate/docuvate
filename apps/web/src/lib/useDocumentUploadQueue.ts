@@ -74,11 +74,15 @@ export function useDocumentUploadQueue(onUploaded?: () => void) {
         try {
           const placement = uploadPlacementFromAssignment(assignment);
           const doc = await uploadDocument(item.file, placement);
-          if (!placement) {
-            await applyDocumentUploadAssignment(doc.id, assignment);
-          }
+          // Mark done as soon as bytes are stored so the queue feels finished;
+          // folder/label assignment continues in the background.
           updateItem(item.id, { status: 'done' });
           onUploaded?.();
+          if (!placement) {
+            void applyDocumentUploadAssignment(doc.id, assignment).catch(() => {
+              /* assignment failure is recoverable from the library */
+            });
+          }
         } catch (err) {
           updateItem(item.id, {
             status: 'error',

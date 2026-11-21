@@ -70,6 +70,7 @@ interface DocumentLayoutOriginalStageProps {
   onCancelDraft: () => void;
   hoverOverlay: PdfLayoutOverlay | null;
   showHover: boolean;
+  zoomPercent?: number;
 }
 
 /**
@@ -114,6 +115,7 @@ export function DocumentLayoutOriginalStage({
   onCancelDraft,
   hoverOverlay,
   showHover,
+  zoomPercent = 100,
 }: DocumentLayoutOriginalStageProps) {
   const { t } = useTranslation();
   const tableRegion =
@@ -142,6 +144,7 @@ export function DocumentLayoutOriginalStage({
           onPageChange={onViewerPageChange}
           paginated
           fitWidth
+          zoomPercent={zoomPercent}
           onPageClick={onPageClick}
           displayRotationDeg={displayRotationDeg}
           pageRotations={pageRotations}

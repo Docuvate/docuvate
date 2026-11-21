@@ -796,6 +796,7 @@ export function DocumentLayoutWorkspace({
                 onOverlayClear={() => {
                   setActiveOverlayId(null);
                 }}
+                zoomPercent={layoutZoom}
                 viewerPage={viewerPage}
                 onViewerPageChange={onViewerPageChange}
                 onPageClick={selectionTool === 'none' ? onPdfPageClick : undefined}

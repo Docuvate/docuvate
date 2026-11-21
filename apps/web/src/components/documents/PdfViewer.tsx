@@ -42,6 +42,8 @@ interface PdfViewerProps {
   paginated?: boolean;
   /** Scale pages to fit the scroll container width (embedded compare panes). */
   fitWidth?: boolean;
+  /** Extra zoom percent from the layout toolbar (100 = no extra zoom). */
+  zoomPercent?: number;
   /** 1-based page; controlled when onPageChange is set. */
   page?: number;
   onPageChange?: (page: number) => void;
@@ -273,6 +275,7 @@ export function PdfViewer({
   onLayoutOverlayClear,
   paginated = true,
   fitWidth = false,
+  zoomPercent = 100,
   page: controlledPage,
   onPageChange,
   onPageClick,
@@ -281,6 +284,7 @@ export function PdfViewer({
   pageRotations,
   onRotateClockwise,
 }: PdfViewerProps) {
+  const zoomFactor = Number.isFinite(zoomPercent) && zoomPercent > 0 ? zoomPercent / 100 : 1;
   const { t } = useTranslation();
   const pagesRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -447,9 +451,11 @@ export function PdfViewer({
           displayRotationDeg,
           pageRotations
         );
-        const scale = await resolveRenderScale(pdf, currentPage, fitWidth, containerWidth, pageRotation);
+        const scale =
+          (await resolveRenderScale(pdf, currentPage, fitWidth, containerWidth, pageRotation)) *
+          zoomFactor;
 
-        const renderKey = `${String(docToken)}:${String(currentPage)}:${String(pageRotation)}:${String(Math.round(scale * 1000))}:${String(containerWidth ?? 0)}:${highlightKey}:${overlayKey}:paginated`;
+        const renderKey = `${String(docToken)}:${String(currentPage)}:${String(pageRotation)}:${String(Math.round(scale * 1000))}:${String(containerWidth ?? 0)}:${highlightKey}:${overlayKey}:paginated:${String(Math.round(zoomFactor * 100))}`;
         if (lastPageRenderKeyRef.current === renderKey && pagesHost.childElementCount > 0) {
           return;
         }
@@ -501,6 +507,7 @@ export function PdfViewer({
     layoutOverlayEnabled,
     activeLayoutOverlayId,
     fitWidth,
+    zoomFactor,
     containerWidth,
     displayRotationDeg,
     pageRotations,
@@ -519,7 +526,8 @@ export function PdfViewer({
     void (async () => {
       try {
         const pageOneRotation = rotationForRenderedPage(1, currentPage, displayRotationDeg, pageRotations);
-        const scale = await resolveRenderScale(pdf, 1, fitWidth, containerWidth, pageOneRotation);
+        const scale =
+          (await resolveRenderScale(pdf, 1, fitWidth, containerWidth, pageOneRotation)) * zoomFactor;
         const layoutKey = `${String(docToken)}:${String(pageOneRotation)}:${String(Math.round(scale * 1000))}:${String(containerWidth ?? 0)}:${String(pageCount)}`;
         if (lastVirtualLayoutKeyRef.current === layoutKey && virtualSlotsBuiltRef.current) {
           return;
@@ -585,7 +593,8 @@ export function PdfViewer({
       try {
         const highlights = highlightBlocks;
         const pageOneRotation = rotationForRenderedPage(1, currentPage, displayRotationDeg, pageRotations);
-        const scale = await resolveRenderScale(pdf, 1, fitWidth, containerWidth, pageOneRotation);
+        const scale =
+          (await resolveRenderScale(pdf, 1, fitWidth, containerWidth, pageOneRotation)) * zoomFactor;
         const rotationKey = `${String(displayRotationDeg)}:${JSON.stringify(pageRotations ?? {})}`;
         const renderStamp = `${String(Math.round(scale * 1000))}:${overlayKey}:${highlightKey}:${rotationKey}`;
 
@@ -656,6 +665,7 @@ export function PdfViewer({
     layoutOverlayEnabled,
     activeLayoutOverlayId,
     fitWidth,
+    zoomFactor,
     containerWidth,
     displayRotationDeg,
     pageRotations,
