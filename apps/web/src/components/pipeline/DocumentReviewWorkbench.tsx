@@ -7,8 +7,8 @@ import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
 
 import { confidenceLevelFromRatio } from '../../lib/confidenceLevel';
+import { summarizeDocumentOpenWork } from '../../lib/documentOpenWork';
 import {
-  openWorkbenchRowCount,
   safeConfirmKeys,
   type SuggestionRejectRef,
   type WorkbenchRow,
@@ -104,7 +104,13 @@ export function DocumentReviewWorkbench({
     () => workbenchRows(fields, suggestions, rejects),
     [fields, suggestions, rejects]
   );
-  const open = openWorkbenchRowCount(rows);
+  const openWork = useMemo(
+    () => summarizeDocumentOpenWork(doc, fields, suggestions, rejects),
+    [doc, fields, suggestions, rejects]
+  );
+  const open = openWork.openFields;
+  const openLabels = openWork.openLabels;
+  const openTotal = openWork.openTotal;
   const safeKeys = safeConfirmKeys(rows);
   const [activeIndex, setActiveIndex] = useState(0);
   const [mode, setMode] = useState<RowMode>(null);
@@ -113,9 +119,6 @@ export function DocumentReviewWorkbench({
   const editRef = useRef<HTMLInputElement>(null);
   const refocus = useRef(false);
   const nextRef = useRef<HTMLAnchorElement>(null);
-  const assigned = useMemo(() => new Set(doc.tags.map((tag) => tag.id)), [doc.tags]);
-  const labelSuggestions = doc.tagSuggestions ?? [];
-  const openLabels = labelSuggestions.filter((item) => !assigned.has(item.tag.id)).length;
   const aspects = structuringAspects(doc, { fields, suggestions, rejects });
   const reviewedPercent =
     rows.length === 0 ? 100 : Math.round(((rows.length - open) / rows.length) * 100);
@@ -124,7 +127,7 @@ export function DocumentReviewWorkbench({
     if (!refocus.current) return;
     refocus.current = false;
     // Everything reviewed: hand focus to "next document" so Enter keeps the loop going.
-    if (open + openLabels === 0 && nextRef.current) {
+    if (openTotal === 0 && nextRef.current) {
       nextRef.current.focus();
       return;
     }
@@ -133,7 +136,7 @@ export function DocumentReviewWorkbench({
     const target = rows[index]?.state === 'confirmed' && firstOpen >= 0 ? firstOpen : index;
     setActiveIndex(target);
     rowRefs.current[target]?.focus();
-  }, [rows, activeIndex, mode, open, openLabels]);
+  }, [rows, activeIndex, mode, open, openTotal]);
 
   useEffect(() => {
     if (!autoFocusFirst) return;
@@ -245,7 +248,10 @@ export function DocumentReviewWorkbench({
     <section
       className="review-workbench"
       aria-labelledby="review-workbench-heading"
-      data-open-count={open}
+      data-open-count={openTotal}
+      data-open-fields={open}
+      data-open-labels={openLabels}
+      data-workbench-done={openWork.isDone ? 'true' : 'false'}
     >
       <AppRibbon>
         <RibbonGroup label={t('ribbon.structure')} kind="navigate" order={1} showCaption={false}>
@@ -280,7 +286,7 @@ export function DocumentReviewWorkbench({
               <Link
                 ref={nextRef}
                 to={reviewDocumentHref(nextDocumentId)}
-                className={ribbonActionClass(open + openLabels === 0 ? 'primary' : 'secondary', {
+                className={ribbonActionClass(openWork.isDone ? 'primary' : 'secondary', {
                   className: 'review-workbench-next',
                 })}
                 aria-keyshortcuts="N"
@@ -301,9 +307,13 @@ export function DocumentReviewWorkbench({
           <h2 id="review-workbench-heading" className="review-workbench-title">
             {t('pipeline.workbench.title')}
           </h2>
-          <span className="review-workbench-count" aria-live="polite">
-            {open + openLabels > 0
-              ? t('pipeline.workbench.open', { count: open + openLabels })
+          <span
+            className="review-workbench-count"
+            aria-live="polite"
+            data-testid={openWork.isDone ? 'review-workbench-done' : 'review-workbench-open'}
+          >
+            {openTotal > 0
+              ? t('pipeline.workbench.open', { count: openTotal })
               : t('pipeline.workbench.done')}
           </span>
         </div>

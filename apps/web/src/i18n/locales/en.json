@@ -2506,7 +2506,7 @@
       "title": "Structure",
       "open_one": "{{count}} open",
       "open_other": "{{count}} open",
-      "done": "Nothing open",
+      "done": "Done — nothing open",
       "progressAria": "Reviewed values",
       "acceptSafe_one": "Accept {{count}} safe value",
       "acceptSafe_other": "Accept {{count}} safe values",
