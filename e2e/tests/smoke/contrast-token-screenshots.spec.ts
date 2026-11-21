@@ -127,17 +127,27 @@ test.describe('Contrast workstream screenshots', () => {
     await applyContrastLocale(page, locale);
     await applyContrastTheme(page, theme);
     // Keep account settings from overwriting the capture locale (null/en defaults in CI).
-    await page.route('**/v1/settings**', async (route) => {
+    await page.unroute('**/v1/settings');
+    await page.route('**/v1/settings', async (route) => {
+      if (route.request().method() !== 'GET') {
+        await route.continue();
+        return;
+      }
       const response = await route.fetch();
       const body: unknown = await response.json().catch(() => null);
       if (body && typeof body === 'object' && !Array.isArray(body)) {
         await route.fulfill({
-          response,
-          json: { ...body, locale },
+          status: response.status(),
+          headers: response.headers(),
+          body: JSON.stringify({ ...body, locale }),
         });
         return;
       }
-      await route.fulfill({ response });
+      await route.fulfill({
+        status: response.status(),
+        headers: response.headers(),
+        body: await response.text(),
+      });
     });
 
     await page.goto(`${webOrigin}${routePath}`, { waitUntil: 'domcontentloaded' });
