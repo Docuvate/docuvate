@@ -16163,6 +16163,10 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   background: var(--dv-color-bg-raised);
   scroll-margin-top: 12rem;
   scroll-margin-bottom: 2rem;
+  /* Keep “Als Tabelle markieren” / Feld zuweisen visible above the fold. */
+  position: sticky;
+  bottom: 0;
+  z-index: var(--dv-z-sticky);
 }
 
 .document-field-context-bar-text,

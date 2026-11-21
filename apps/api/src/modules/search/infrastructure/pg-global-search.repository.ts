@@ -643,6 +643,20 @@ export class PgGlobalSearchRepository {
         )
       );
     }
+    // Digit-prefix on amount/number fields: query "1234" matches stored "1.234,56".
+    if (freeScalar && freeScalar.digits.length >= 3) {
+      textQueries.push(
+        this.pool.query(
+          `SELECT v.document_id, v.field_storage_key, v.value_text, 0.95::float8 AS score
+           FROM document_field_values v
+           JOIN documents fd ON fd.id = v.document_id
+           WHERE fd.user_id = $1
+             AND v.value_numeric IS NOT NULL
+             AND regexp_replace(v.value_text, '[^0-9]', '', 'g') LIKE $2 || '%'`,
+          [userId, freeScalar.digits]
+        )
+      );
+    }
     if (freeScalar?.dateIso) {
       textQueries.push(
         this.pool.query(
@@ -672,7 +686,22 @@ export class PgGlobalSearchRepository {
             [userId, scalar.numeric, filter.storageKeys]
           )
         );
-      } else if (scalar.dateIso) {
+      }
+      if (scalar.digits.length >= 3) {
+        textQueries.push(
+          this.pool.query(
+            `SELECT v.document_id, v.field_storage_key, v.value_text, 0.95::float8 AS score
+             FROM document_field_values v
+             JOIN documents fd ON fd.id = v.document_id
+             WHERE fd.user_id = $1
+               AND v.value_numeric IS NOT NULL
+               AND v.field_storage_key = ANY($3::text[])
+               AND regexp_replace(v.value_text, '[^0-9]', '', 'g') LIKE $2 || '%'`,
+            [userId, scalar.digits, filter.storageKeys]
+          )
+        );
+      }
+      if (scalar.dateIso) {
         textQueries.push(
           this.pool.query(
             `SELECT v.document_id, v.field_storage_key, v.value_text, 1::float8 AS score
@@ -685,7 +714,7 @@ export class PgGlobalSearchRepository {
             [userId, scalar.dateIso, filter.storageKeys]
           )
         );
-      } else if (scalar.textProbe.length >= 2) {
+      } else if (scalar.numeric == null && scalar.textProbe.length >= 2) {
         textQueries.push(
           this.pool.query(
             `SELECT v.document_id, v.field_storage_key, v.value_text,

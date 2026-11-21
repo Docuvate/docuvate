@@ -80,6 +80,24 @@ describe('Global search field values (Testcontainers Postgres)', () => {
     await closeIntegrationPool();
   });
 
+  it('finds currency field by digit-prefix query 1234 for stored 1.234,56', async () => {
+    const amountDocId = uuidv4();
+    await pool.query(
+      `INSERT INTO documents (id, user_id, filename, title, mime_type, storage_key, status, extracted_text, created_at, updated_at)
+       VALUES ($1,$2,'amount.pdf','Amount only field doc','application/pdf','k/amount','ready','no amount in ocr', now(), now())`,
+      [amountDocId, userId]
+    );
+    await replaceDocumentFieldValues(pool, amountDocId, userId, [
+      { key: 'global:betrag', value: '1.234,56' },
+    ]);
+
+    const res = await useCase.execute(userId, { q: '1234', types: 'documents', limit: 10 });
+    const docs = res.groups.find((g) => g.type === 'documents')?.items ?? [];
+    const hit = docs.find((item) => item.type === 'document' && item.id === amountDocId);
+    expect(hit).toBeDefined();
+    expect(hit?.type === 'document' ? hit.snippet : '').toMatch(/1\.234,56/);
+  });
+
   it('field typo corpus recall@5 via GlobalSearchUseCase (HTTP-equivalent path)', async () => {
     let hits = 0;
     for (const c of FIELD_TYPO_SEARCH_CORPUS) {

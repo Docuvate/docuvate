@@ -18,7 +18,6 @@ export type LeftDocumentMode = 'original' | 'text';
 interface DocumentLayoutViewerToolbarProps {
   leftMode: LeftDocumentMode;
   onLeftModeChange: (mode: LeftDocumentMode) => void;
-  showAdvancedStage: boolean;
   zoom: LayoutIrZoomStep;
   onZoomChange: (zoom: LayoutIrZoomStep) => void;
   showTechnicalDetails: boolean;
@@ -37,7 +36,6 @@ interface DocumentLayoutViewerToolbarProps {
 export function DocumentLayoutViewerToolbar({
   leftMode,
   onLeftModeChange,
-  showAdvancedStage,
   zoom,
   onZoomChange,
   showTechnicalDetails,
@@ -56,20 +54,18 @@ export function DocumentLayoutViewerToolbar({
 
   return (
     <div className="layout-viewer-toolbar" data-testid="layout-viewer-toolbar">
-      {showAdvancedStage || leftMode === 'text' ? (
-        <SegmentedControl
-          ariaLabel={t('documents.layoutZoomAria')}
-          className={segmentedToolbarClass('layout-zoom-switch', 'segmented-control--zoom')}
-          value={String(zoom)}
-          options={zoomOptions}
-          onChange={(value) => {
-            const next = LAYOUT_IR_ZOOM_STEPS.find((step) => String(step) === value);
-            if (next !== undefined) {
-              onZoomChange(next);
-            }
-          }}
-        />
-      ) : null}
+      <SegmentedControl
+        ariaLabel={t('documents.layoutZoomAria')}
+        className={segmentedToolbarClass('layout-zoom-switch', 'segmented-control--zoom')}
+        value={String(zoom)}
+        options={zoomOptions}
+        onChange={(value) => {
+          const next = LAYOUT_IR_ZOOM_STEPS.find((step) => String(step) === value);
+          if (next !== undefined) {
+            onZoomChange(next);
+          }
+        }}
+      />
       {showTechnicalDetails && qualityTone !== 'unknown' ? (
         <span
           className={`layout-quality-badge layout-quality-badge-technical layout-quality-badge-${qualityTone}`}

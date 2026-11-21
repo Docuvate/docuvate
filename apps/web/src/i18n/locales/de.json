@@ -636,7 +636,9 @@
     "feedbackFailed": "{{count}} Upload(s) fehlgeschlagen.",
     "feedbackPartial": "{{done}} hochgeladen, {{failed}} fehlgeschlagen.",
     "errorFileTooLarge": "Datei größer als 25 MB",
-    "errorUnsupportedType": "Dateityp nicht unterstützt (PDF oder Bild)"
+    "errorUnsupportedType": "Dateityp nicht unterstützt (PDF oder Bild)",
+    "errorCorruptPdf": "Diese PDF-Datei ist beschädigt oder unvollständig und kann nicht verarbeitet werden. Bitte eine andere Datei wählen oder die PDF erneut exportieren.",
+    "retryItem": "Erneut versuchen"
   },
   "extraction": {
     "stage": {
@@ -1025,7 +1027,7 @@
     "layoutViewMenuAria": "Ansicht: {{view}}",
     "fieldPositionCorrect": "Position korrigieren",
     "fieldBboxSave": "Position speichern",
-    "fieldBboxHandle": "Griff {handle}",
+    "fieldBboxHandle": "Griff {{handle}}",
     "pageRotationSaved": "Seitendrehung gespeichert",
     "layoutSuggestionDismissTitle": "Vorschlag verwerfen",
     "rejectedSuggestionsTitle": "Verworfene Vorschläge"
@@ -2106,7 +2108,7 @@
     "nextWorkLead": "Öffne das nächste Dokument und strukturiere Werte direkt im Viewer  -  ohne zweiten Wizard.",
     "nextDocument": "Als Nächstes strukturieren",
     "openStructuring": "Dokument strukturieren",
-    "openFieldsHint": "{fields} Felder · {labels} Labels offen",
+    "openFieldsHint": "{{fields}} Felder · {{labels}} Labels offen",
     "queueListAria": "Weitere Dokumente in der Warteschlange",
     "structureAction": "Strukturieren"
   },
@@ -2506,7 +2508,7 @@
       "title": "Strukturieren",
       "open_one": "{{count}} offen",
       "open_other": "{{count}} offen",
-      "done": "Nichts offen",
+      "done": "Fertig - nichts offen",
       "progressAria": "Geprüfte Werte",
       "acceptSafe_one": "{{count}} sicheren Wert übernehmen",
       "acceptSafe_other": "{{count}} sichere Werte übernehmen",
@@ -2623,7 +2625,7 @@
     "exitDocumentEdit": "Overlay schließen",
     "saveBounds": "Tabellenrahmen speichern",
     "resizeBounds": "Tabellenrahmen ändern",
-    "cellAria": "Zelle Zeile {row}, Spalte {col}"
+    "cellAria": "Zelle Zeile {{row}}, Spalte {{col}}"
   },
   "ribbon": {
     "stock": "Bestand",

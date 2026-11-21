@@ -142,11 +142,11 @@ test.describe('document table regions', () => {
     const headerGroup = card.getByRole('group', { name: /Kopfzeilen|Header rows/i });
     const headerRows = headerGroup.getByRole('spinbutton');
     const detectedHeaderRows = await headerRows.inputValue();
-    const moreHeaderRows = headerGroup.getByRole('button', { name: /^(Mehr|More)$/ });
+    const moreHeaderRows = headerGroup.getByRole('button', { name: /(Mehr|More)$/ });
     await (
       (await moreHeaderRows.isEnabled())
         ? moreHeaderRows
-        : headerGroup.getByRole('button', { name: /^(Weniger|Fewer)$/ })
+        : headerGroup.getByRole('button', { name: /(Weniger|Fewer)$/ })
     ).click();
     await expect(headerRows).not.toHaveValue(detectedHeaderRows);
     await expect(card.getByRole('button', { name: /^(Übernehmen|Apply)$/ })).toBeVisible();

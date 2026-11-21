@@ -6,6 +6,7 @@ import { normalizeMimeType } from '@docuvate/contracts';
 import { Inject, Injectable } from '@nestjs/common';
 
 import { NotFoundError, ValidationError } from '../../../shared/domain/errors.js';
+import { isStructurallyValidPdf } from '../../../shared/domain/pdf-structure.js';
 import {
   CLOCK,
   type Clock,
@@ -26,6 +27,11 @@ import { SyncDocumentSearchIndexUseCase } from '../../search/application/sync-do
 import type { DocumentEntity } from '../domain/document.entity.js';
 import { resolveDocumentPlacement } from '../domain/document-placement.js';
 import { QueueExtractionUseCase } from './queue-extraction.use-case.js';
+
+function plainTextFromUploadBuffer(buffer: Buffer): string {
+  const raw = buffer.toString('utf8');
+  return raw.charCodeAt(0) === 0xfeff ? raw.slice(1) : raw;
+}
 
 interface UploadDocumentInput {
   userId: string;
@@ -71,6 +77,9 @@ export class UploadDocumentUseCase {
       );
     }
     const mimeType = normalizeMimeType(resolvedMime);
+    if (mimeType === 'application/pdf' && !isStructurallyValidPdf(input.buffer)) {
+      throw new ValidationError('upload.errorCorruptPdf');
+    }
 
     const placement = resolveDocumentPlacement({
       folderId: input.folderId ?? null,
@@ -123,7 +132,7 @@ export class UploadDocumentUseCase {
     await this.documents.setContentHash(saved.id, contentHash);
     await this.scheduleDuplicateDetection.execute(saved.id, input.userId, contentHash);
     if (isPlainTextUploadMime(mimeType)) {
-      const text = input.buffer.toString('utf8');
+      const text = plainTextFromUploadBuffer(input.buffer);
       await this.documents.saveExtraction(saved.id, { text, fields: [], blocks: [] });
       await this.syncSearchIndex.execute(input.userId, saved.id, {
         text,

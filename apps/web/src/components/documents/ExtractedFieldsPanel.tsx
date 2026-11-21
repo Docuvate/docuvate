@@ -40,6 +40,8 @@ interface ExtractedFieldsPanelProps {
   onFieldsChange: (fields: ExtractedField[]) => void;
   onDiscardField?: (key: string) => void;
   onConfirmField?: (field: ExtractedField) => void;
+  /** Prefer opening the Strukturieren workbench over the bulk edit grid. */
+  onRequestCorrectField?: (field: ExtractedField) => void;
   onSave: () => void;
   /** When the correction bottom sheet is open, the sheet replaces this list. */
   replacedBySheet?: boolean;
@@ -59,6 +61,7 @@ export function ExtractedFieldsPanel({
   onFieldsChange,
   onDiscardField,
   onConfirmField,
+  onRequestCorrectField,
   onSave,
   replacedBySheet = false,
 }: ExtractedFieldsPanelProps) {
@@ -109,7 +112,11 @@ export function ExtractedFieldsPanel({
           onConfirmField={(field) => {
             onConfirmField?.(field);
           }}
-          onCorrectField={() => {
+          onCorrectField={(field) => {
+            if (onRequestCorrectField) {
+              onRequestCorrectField(field);
+              return;
+            }
             setEditOpen(true);
           }}
         />

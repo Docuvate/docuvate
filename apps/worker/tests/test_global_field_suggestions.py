@@ -8,6 +8,7 @@ from pathlib import Path
 import pytest
 
 from docuvate_worker.infrastructure.extractors.heuristic_fields import heuristic_field_suggestions
+from docuvate_worker.infrastructure.ml.value_types.field_suggestions import looks_like_calendar_date
 
 
 def test_regex_heuristic_module_removed() -> None:
@@ -49,6 +50,18 @@ def test_acme_invoice_amount_date_and_vendor() -> None:
     assert fields.get("amount") == "99.00"
     assert fields.get("date") == "01.02.2024"
     assert fields.get("vendor") == "Acme GmbH"
+
+
+def test_nordwind_invoice_number_is_not_suggested_as_date() -> None:
+    """Regression: Rechnungsnummer NW-2026-0042 must not become Rechnungsdatum."""
+    text = "Nordwind GmbH\nRechnung\nRechnungsnummer NW-2026-0042\nBetrag: 1.234,56 EUR\n"
+    fields = {f.key: f.value for f in heuristic_field_suggestions(text)}
+    assert fields.get("date") != "NW-2026-0042"
+    assert "NW-2026-0042" not in {
+        f.value for f in heuristic_field_suggestions(text) if f.key == "date"
+    }
+    if "date" in fields:
+        assert looks_like_calendar_date(fields["date"])
 
 
 def test_holdout_eval_report_meets_precision_gates() -> None:

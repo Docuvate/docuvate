@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import type { DocumentDto, ExtractedField } from '@docuvate/contracts';
+import type { DocumentDto, ExtractedField, FieldSuggestionRow } from '@docuvate/contracts';
 import {
   AlertTriangle,
   ListChecks,
@@ -13,11 +13,9 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
 import { presentExtractionFailure } from '../../lib/documentExtractionState';
-import {
-  documentStageState,
-  fieldsNeedingReview,
-  nextDocumentAction,
-} from '../../lib/documentPipeline';
+import { summarizeDocumentOpenWork } from '../../lib/documentOpenWork';
+import { documentStageState, nextDocumentAction } from '../../lib/documentPipeline';
+import type { SuggestionRejectRef } from '../../lib/reviewWorkbench';
 import { routes } from '../../lib/routes';
 import { Button } from '../ui/Button';
 import { DocumentStageTrack } from './DocumentStageTrack';
@@ -26,6 +24,8 @@ interface DocumentPipelineHeaderProps {
   doc: DocumentDto;
   /** Recognized fields as currently shown (includes unsaved confirmations). */
   fields: readonly ExtractedField[];
+  heuristicSuggestions?: readonly FieldSuggestionRow[];
+  rejects?: readonly SuggestionRejectRef[];
   requeueBusy: boolean;
   onRequeue: () => void;
   /** Open the details (fields) or labels panel of the viewer. */
@@ -39,6 +39,8 @@ interface DocumentPipelineHeaderProps {
 export function DocumentPipelineHeader({
   doc,
   fields,
+  heuristicSuggestions = [],
+  rejects = [],
   requeueBusy,
   onRequeue,
   onOpenPanel,
@@ -46,8 +48,7 @@ export function DocumentPipelineHeader({
   const { t } = useTranslation();
   const state = documentStageState(doc);
   const action = nextDocumentAction(state);
-  const lowConfidence = fieldsNeedingReview(fields);
-  const labelSuggestions = doc.tagSuggestions?.length ?? 0;
+  const openWork = summarizeDocumentOpenWork(doc, fields, heuristicSuggestions, rejects);
   const inInbox = doc.tags.some((tag) => tag.isInbox);
 
   let body: ReactNode;
@@ -84,11 +85,13 @@ export function DocumentPipelineHeader({
       break;
     case 'review': {
       const hints = [
-        lowConfidence > 0 ? t('pipeline.viewer.review.fields', { count: lowConfidence }) : null,
-        labelSuggestions > 0
-          ? t('pipeline.viewer.review.labels', { count: labelSuggestions })
+        openWork.openFields > 0
+          ? t('pipeline.viewer.review.fields', { count: openWork.openFields })
           : null,
-        inInbox && labelSuggestions === 0 ? t('pipeline.viewer.review.inbox') : null,
+        openWork.openLabels > 0
+          ? t('pipeline.viewer.review.labels', { count: openWork.openLabels })
+          : null,
+        inInbox && openWork.openLabels === 0 ? t('pipeline.viewer.review.inbox') : null,
       ].filter((hint): hint is string => hint != null);
       body = (
         <>
@@ -100,7 +103,9 @@ export function DocumentPipelineHeader({
           <div className="pipeline-next-actions">
             <Button
               type="button"
-              variant={lowConfidence > 0 || labelSuggestions === 0 ? 'primary' : 'secondary'}
+              variant={
+                openWork.openFields > 0 || openWork.openLabels === 0 ? 'primary' : 'secondary'
+              }
               onClick={() => {
                 onOpenPanel('details');
               }}
@@ -110,7 +115,9 @@ export function DocumentPipelineHeader({
             </Button>
             <Button
               type="button"
-              variant={lowConfidence === 0 && labelSuggestions > 0 ? 'primary' : 'secondary'}
+              variant={
+                openWork.openFields === 0 && openWork.openLabels > 0 ? 'primary' : 'secondary'
+              }
               onClick={() => {
                 onOpenPanel('labels');
               }}

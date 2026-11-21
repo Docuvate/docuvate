@@ -44,8 +44,6 @@ import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import {
   applyDocumentFieldCorrection,
   deleteDocument,
-  fetchDocumentContentBlob,
-  fetchDocumentPreviewBlob,
   getDocument,
   getUserSettings,
   getWorkspaceMlSettings,
@@ -70,7 +68,6 @@ import {
 import { isExtractionPending } from '../lib/documentExtractionState';
 import { withSavedFieldValue } from '../lib/documentFieldValueRowState';
 import { documentStageState } from '../lib/documentPipeline';
-import { fetchDocumentPreviewBuffer } from '../lib/documentPreviewCache';
 import {
   catalogFieldGateContextFromDocument,
   type CatalogFieldGateSettings,
@@ -110,6 +107,8 @@ import { notifySaved, notifySaveError } from '../lib/saveNotify';
 import { pushRecentDocument } from '../lib/search/searchRecent';
 import { primaryForAspect, type StructuringCommand } from '../lib/structuringRibbon';
 import { useStructuringPrimary } from '../lib/useStructuringPrimary';
+import { useDocumentDetailPlainTextFallback } from './useDocumentDetailPlainTextFallback';
+import { useDocumentDetailPreviewBuffer } from './useDocumentDetailPreviewBuffer';
 
 interface DocumentMetadataBaseline {
   title: string;
@@ -172,16 +171,13 @@ export function DocumentDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [previewData, setPreviewData] = useState<ArrayBuffer | null>(null);
-  const [previewFetchState, setPreviewFetchState] = useState<
-    'idle' | 'loading' | 'ready' | 'missing'
-  >('idle');
   // undefined = default for the document's stage (field review open when there is one).
   const [inspectorChoice, setInspectorChoice] = useState<InspectorPanel | null | undefined>(
     undefined
   );
   const [layoutSideTab, setLayoutSideTab] = useState<LayoutSideTab>('fields');
   const [positionEditFieldKey, setPositionEditFieldKey] = useState<string | null>(null);
+  const [workbenchEditFieldKey, setWorkbenchEditFieldKey] = useState<string | null>(null);
   const [correctionSheetOpen, setCorrectionSheetOpen] = useState(false);
   const [viewerPage, setViewerPage] = useState(1);
   const [activeBlockIndex, setActiveBlockIndex] = useState<number | null>(null);
@@ -254,6 +250,11 @@ export function DocumentDetailPage() {
   const isPdf = mimeType === 'application/pdf' || doc?.previewAvailable === true;
   const isImage = mimeType?.startsWith('image/') ?? false;
   const isPlainText = mimeType === 'text/plain' || (mimeType?.startsWith('text/plain;') ?? false);
+  const plainTextFallback = useDocumentDetailPlainTextFallback(
+    id,
+    isPlainText,
+    doc?.extraction?.text
+  );
 
   const load = useCallback(async () => {
     if (!id) return;
@@ -350,47 +351,11 @@ export function DocumentDetailPage() {
 
   const previewMime = doc?.mimeType;
   const docPreviewAvailable = doc?.previewAvailable === true;
-
-  useEffect(() => {
-    if (!id || !previewMime) {
-      setPreviewFetchState('idle');
-      return undefined;
-    }
-    const wantsStoredPdf = docPreviewAvailable;
-    const wantsPdf = previewMime === 'application/pdf' || wantsStoredPdf;
-    const wantsImage = previewMime.startsWith('image/');
-    if (!wantsPdf && !wantsImage) {
-      setPreviewFetchState('idle');
-      return undefined;
-    }
-
-    let cancelled = false;
-    setPreviewFetchState('loading');
-    setPreviewData(null);
-    const fetchBlob = () =>
-      wantsStoredPdf ? fetchDocumentPreviewBlob(id) : fetchDocumentContentBlob(id);
-    void fetchDocumentPreviewBuffer(id, fetchBlob)
-      .then((buffer) => {
-        if (cancelled) return;
-        if (buffer.byteLength > 0) {
-          setPreviewData(buffer);
-          setPreviewFetchState('ready');
-        } else {
-          setPreviewData(null);
-          setPreviewFetchState('missing');
-        }
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setPreviewData(null);
-          setPreviewFetchState('missing');
-        }
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [docPreviewAvailable, id, previewMime]);
+  const { previewData, previewFetchState } = useDocumentDetailPreviewBuffer(
+    id,
+    previewMime,
+    docPreviewAvailable
+  );
 
   useEffect(() => {
     if (!id || !doc) return undefined;
@@ -844,6 +809,8 @@ export function DocumentDetailPage() {
         <DocumentPipelineHeader
           doc={doc}
           fields={recognizedFields}
+          heuristicSuggestions={heuristicSuggestions}
+          rejects={suggestionRejects}
           requeueBusy={requeueBusy}
           onRequeue={() => void onRequeueExtraction()}
           onOpenPanel={openInspector}
@@ -925,6 +892,14 @@ export function DocumentDetailPage() {
               onPositionEditHandled={() => {
                 setPositionEditFieldKey(null);
               }}
+              onRequestFieldValueEdit={(fieldKey) => {
+                applyStructuringChrome(
+                  structuring.select('fields'),
+                  setLayoutSideTab,
+                  openInspector
+                );
+                setWorkbenchEditFieldKey(fieldKey);
+              }}
             />
           ) : (
             <div className="detail-workspace">
@@ -936,7 +911,9 @@ export function DocumentDetailPage() {
                 isPdf={isPdf}
                 isImage={isImage}
                 isPlainText={isPlainText}
-                plainTextPreview={doc.extraction?.text ?? null}
+                plainTextPreview={
+                  doc.extraction?.text.trim() ? doc.extraction.text : plainTextFallback
+                }
                 highlightBlocks={highlightBlocks}
                 viewerPage={viewerPage}
                 onViewerPageChange={setViewerPage}
@@ -1043,6 +1020,10 @@ export function DocumentDetailPage() {
                       openInspector
                     );
                   }}
+                  requestEditFieldKey={workbenchEditFieldKey}
+                  onRequestEditFieldHandled={() => {
+                    setWorkbenchEditFieldKey(null);
+                  }}
                 />
               </div>
             ) : null}
@@ -1101,6 +1082,14 @@ export function DocumentDetailPage() {
                     notifySaved(t('documents.fieldDiscardedToast'));
                   }}
                   onConfirmField={confirmField}
+                  onRequestCorrectField={(field) => {
+                    applyStructuringChrome(
+                      structuring.select('fields'),
+                      setLayoutSideTab,
+                      openInspector
+                    );
+                    setWorkbenchEditFieldKey(field.key);
+                  }}
                   onSave={() => void persist({ extractionFields: fields })}
                 />
                 <DuplicateCandidatesPanel documentId={doc.id} />

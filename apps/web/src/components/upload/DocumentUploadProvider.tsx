@@ -16,11 +16,18 @@ export function DocumentUploadProvider({
   onUploaded?: () => void;
   children: ReactNode;
 }) {
-  const { queue, enqueueFiles, clearTerminalItems, removeUploadItem } =
+  const { queue, enqueueFiles, clearTerminalItems, removeUploadItem, retryUploadItem } =
     useDocumentUploadQueue(onUploaded);
   const value = useMemo(
-    () => ({ dropTarget, queue, enqueueFiles, clearTerminalItems, removeUploadItem }),
-    [dropTarget, queue, enqueueFiles, clearTerminalItems, removeUploadItem]
+    () => ({
+      dropTarget,
+      queue,
+      enqueueFiles,
+      clearTerminalItems,
+      removeUploadItem,
+      retryUploadItem,
+    }),
+    [dropTarget, queue, enqueueFiles, clearTerminalItems, removeUploadItem, retryUploadItem]
   );
 
   return (

@@ -2,7 +2,11 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it } from 'vitest';
 
-import { normalizeFieldValue, parseQueryScalarProbe } from './normalize-field-value.js';
+import {
+  digitsOnlyForSearch,
+  normalizeFieldValue,
+  parseQueryScalarProbe,
+} from './normalize-field-value.js';
 
 describe('normalizeFieldValue', () => {
   it('normalizes currency amounts', () => {
@@ -26,5 +30,11 @@ describe('parseQueryScalarProbe', () => {
   it('detects query amount and date probes', () => {
     expect(parseQueryScalarProbe('12,50').numeric).toBe(12.5);
     expect(parseQueryScalarProbe('15.03.2024').dateIso).toBe('2024-03-15');
+  });
+
+  it('exposes digit probe so 1234 can match 1.234,56', () => {
+    expect(digitsOnlyForSearch('1.234,56')).toBe('123456');
+    expect(parseQueryScalarProbe('1234').digits).toBe('1234');
+    expect(parseQueryScalarProbe('1.234,56').digits).toBe('123456');
   });
 });

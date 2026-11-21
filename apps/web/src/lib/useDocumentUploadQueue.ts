@@ -19,6 +19,7 @@ export interface UploadItem {
   id: string;
   file: File;
   status: UploadItemStatus;
+  assignment: DocumentUploadAssignment;
   error?: string;
 }
 
@@ -34,6 +35,46 @@ async function runPool<T>(items: T[], concurrency: number, fn: (item: T) => Prom
     return worker();
   };
   await Promise.all(Array.from({ length: limit }, () => worker()));
+}
+
+async function uploadOneItem(
+  item: UploadItem,
+  updateItem: (id: string, patch: Partial<UploadItem>) => void,
+  onUploaded?: () => void
+): Promise<void> {
+  if (item.file.size > UPLOAD_MAX_BYTES) {
+    updateItem(item.id, { status: 'error', error: i18n.t('upload.errorFileTooLarge') });
+    return;
+  }
+  const declared = item.file.type ? normalizeMimeType(item.file.type) : '';
+  const fromName = mimeFromFilename(item.file.name);
+  const mime = declared && isAllowedUploadMime(declared) ? declared : fromName ?? '';
+  if (!mime || !isAllowedUploadMime(mime)) {
+    updateItem(item.id, {
+      status: 'error',
+      error: i18n.t('upload.errorUnsupportedType'),
+    });
+    return;
+  }
+  updateItem(item.id, { status: 'uploading', error: undefined });
+  try {
+    const placement = uploadPlacementFromAssignment(item.assignment);
+    const doc = await uploadDocument(item.file, placement);
+    // Mark done as soon as bytes are stored so the queue feels finished;
+    // folder/label assignment continues in the background.
+    updateItem(item.id, { status: 'done' });
+    onUploaded?.();
+    if (!placement) {
+      void applyDocumentUploadAssignment(doc.id, item.assignment).catch(() => {
+        /* assignment failure is recoverable from the library */
+      });
+    }
+  } catch (err) {
+    updateItem(item.id, {
+      status: 'error',
+      error: formatUserFacingError(err, 'errors.uploadFailed'),
+    });
+  }
 }
 
 export function useDocumentUploadQueue(onUploaded?: () => void) {
@@ -52,39 +93,12 @@ export function useDocumentUploadQueue(onUploaded?: () => void) {
         id: `${file.name}-${String(file.size)}-${String(file.lastModified)}-${String(Math.random())}`,
         file,
         status: 'pending',
+        assignment,
       }));
       setQueue((prev) => [...items, ...prev].slice(0, 120));
 
       void runPool(items, 6, async (item) => {
-        if (item.file.size > UPLOAD_MAX_BYTES) {
-          updateItem(item.id, { status: 'error', error: i18n.t('upload.errorFileTooLarge') });
-          return;
-        }
-        const declared = item.file.type ? normalizeMimeType(item.file.type) : '';
-        const fromName = mimeFromFilename(item.file.name);
-        const mime = declared && isAllowedUploadMime(declared) ? declared : fromName ?? '';
-        if (!mime || !isAllowedUploadMime(mime)) {
-          updateItem(item.id, {
-            status: 'error',
-            error: i18n.t('upload.errorUnsupportedType'),
-          });
-          return;
-        }
-        updateItem(item.id, { status: 'uploading' });
-        try {
-          const placement = uploadPlacementFromAssignment(assignment);
-          const doc = await uploadDocument(item.file, placement);
-          if (!placement) {
-            await applyDocumentUploadAssignment(doc.id, assignment);
-          }
-          updateItem(item.id, { status: 'done' });
-          onUploaded?.();
-        } catch (err) {
-          updateItem(item.id, {
-            status: 'error',
-            error: formatUserFacingError(err, 'errors.uploadFailed'),
-          });
-        }
+        await uploadOneItem(item, updateItem, onUploaded);
       });
     },
     [onUploaded, updateItem]
@@ -100,5 +114,20 @@ export function useDocumentUploadQueue(onUploaded?: () => void) {
     setQueue((prev) => prev.filter((item) => item.id !== id));
   }, []);
 
-  return { queue, enqueueFiles, clearTerminalItems, removeUploadItem };
+  const retryUploadItem = useCallback(
+    (id: string) => {
+      setQueue((prev) => {
+        const target = prev.find((item) => item.id === id && item.status === 'error');
+        if (!target) {
+          return prev;
+        }
+        const next: UploadItem = { ...target, status: 'pending', error: undefined };
+        void uploadOneItem(next, updateItem, onUploaded);
+        return prev.map((item) => (item.id === id ? next : item));
+      });
+    },
+    [onUploaded, updateItem]
+  );
+
+  return { queue, enqueueFiles, clearTerminalItems, removeUploadItem, retryUploadItem };
 }

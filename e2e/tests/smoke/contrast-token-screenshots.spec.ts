@@ -119,15 +119,18 @@ test.describe('Contrast workstream screenshots', () => {
     locale: ContrastLocale,
     theme: ContrastTheme,
     viewportLabel: string,
-    documentDetailPath: string
+    documentDetailPath: string,
+    setCaptureLocale: (next: ContrastLocale) => void
   ): Promise<string> {
     const routePath = routePathForSlug(slug, documentDetailPath);
+    setCaptureLocale(locale);
 
     await page.goto(`${webOrigin}/`, { waitUntil: 'domcontentloaded' });
     await applyContrastLocale(page, locale);
     await applyContrastTheme(page, theme);
 
     await page.goto(`${webOrigin}${routePath}`, { waitUntil: 'domcontentloaded' });
+    await applyContrastLocale(page, locale);
     await waitForContrastPageReady(page, slug, documentDetailPath, webOrigin);
     await applyContrastTheme(page, theme);
     await assertContrastTheme(page, theme);
@@ -187,6 +190,27 @@ test.describe('Contrast workstream screenshots', () => {
       const documentDetailPath = await resolveSmokeReadyDocumentPath(request, apiBase, webOrigin);
       const reviewOnly = process.env['CONTRAST_SCREENSHOT_REVIEW_ONLY'] === '1';
       const captures = capturesForRun();
+      let captureLocale: ContrastLocale = 'en';
+      await page.route(
+        (url) => url.pathname === '/v1/settings',
+        async (route) => {
+          if (route.request().method() !== 'GET') {
+            await route.continue();
+            return;
+          }
+          const response = await route.fetch();
+          const body: unknown = await response.json().catch(() => null);
+          if (body && typeof body === 'object' && !Array.isArray(body)) {
+            await route.fulfill({
+              status: response.status(),
+              headers: response.headers(),
+              body: JSON.stringify({ ...body, locale: captureLocale }),
+            });
+            return;
+          }
+          await route.continue();
+        }
+      );
 
       for (const viewport of viewportsForRun()) {
         await page.setViewportSize({ width: viewport.width, height: viewport.height });
@@ -198,7 +222,10 @@ test.describe('Contrast workstream screenshots', () => {
               capture.locale,
               theme,
               viewport.label,
-              documentDetailPath
+              documentDetailPath,
+              (next) => {
+                captureLocale = next;
+              }
             );
             expect(filePath).toBeTruthy();
           }
