@@ -144,11 +144,17 @@ export function normalizeFieldValue(
   };
 }
 
+/** Digits only — used so query `1234` matches stored `1.234,56` on amount fields. */
+export function digitsOnlyForSearch(raw: string): string {
+  return raw.replace(/\D/g, '');
+}
+
 /** Parse a user query token as amount or date for field-scoped / free-text legs. */
 export function parseQueryScalarProbe(raw: string): {
   numeric: number | null;
   dateIso: string | null;
   textProbe: string;
+  digits: string;
 } {
   const trimmed = raw.trim();
   const dateIso = parseGermanDate(trimmed);
@@ -157,5 +163,6 @@ export function parseQueryScalarProbe(raw: string): {
     numeric,
     dateIso,
     textProbe: normalizeSearchText(trimmed),
+    digits: digitsOnlyForSearch(trimmed),
   };
 }
