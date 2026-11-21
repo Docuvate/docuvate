@@ -161,13 +161,15 @@ function StructureSectionNav({ section }: { section: AppSection }) {
   if (section === 'labels') {
     return (
       <RibbonGroup label={t('ribbon.structureActions')} kind="act">
-        <RibbonLink to={`${routes.structureLabels}?create=1`}>{t('labels.newLabel')}</RibbonLink>
+        <RibbonLink to={`${routes.structureLabels}?create=1`} active={false}>
+          {t('labels.newLabel')}
+        </RibbonLink>
       </RibbonGroup>
     );
   }
   return (
     <RibbonGroup label={t('ribbon.structureActions')} kind="act">
-      <RibbonLink to={`${routes.structureRecognizedFields}?create=1`}>
+      <RibbonLink to={`${routes.structureRecognizedFields}?create=1`} active={false}>
         {t('recognizedFields.addField')}
       </RibbonLink>
     </RibbonGroup>
