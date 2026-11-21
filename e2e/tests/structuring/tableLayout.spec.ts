@@ -27,7 +27,7 @@ test.describe('table structure tools', () => {
     await chooseTableFamily(tools, /Finanzlayout/);
     await tools
       .getByRole('group', { name: 'Ergebniszeilen' })
-      .getByRole('button', { name: 'Mehr' })
+      .getByRole('button', { name: /Mehr$/ })
       .click();
     await expect(tools.getByRole('spinbutton', { name: 'Ergebniszeilen' })).toHaveValue('3');
     await tools.getByRole('button', { name: 'Übernehmen' }).click();
