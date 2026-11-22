@@ -15,8 +15,8 @@ interface DocumentLayoutCorrectionSheetsProps {
   sourceLabel: string | undefined;
   onCloseField: () => void;
   onConfirmField: (() => void) | undefined;
-  onCorrectField: () => void;
-  onSaveFieldValue: (value: string) => void;
+  onCorrectField?: () => void;
+  onSaveFieldValue?: (value: string) => void;
   onSourceClick: (() => void) | undefined;
   selectedTableId: string | null;
   tableRegions: readonly DocumentRegionDto[];

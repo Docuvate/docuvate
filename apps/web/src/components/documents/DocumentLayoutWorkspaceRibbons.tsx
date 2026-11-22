@@ -5,6 +5,7 @@ import type { DocumentRegionDto } from '@docuvate/contracts';
 import type { StructuringPrimary } from '../../lib/structuringRibbon';
 import type { TableStructureChoice } from '../../lib/tableLayouts';
 import { regionTableOverlayId } from '../../lib/workspacePdfOverlays';
+import type { ComboboxOption } from '../ui/Combobox';
 import type { LayoutSideTab } from './DocumentLayoutSidePanel';
 import type { DocumentSelectionDraft } from './DocumentSelectionLayer';
 import type { DocumentSelectionTool } from './DocumentSelectionTools';
@@ -30,8 +31,8 @@ interface DocumentLayoutWorkspaceRibbonsProps {
   layoutSideTab: LayoutSideTab;
   layoutPanelOpen: boolean;
   selectionDraft: DocumentSelectionDraft | null;
-  selectionFieldOptions: { key: string; label: string }[];
-  existingFieldValues: Record<string, string>;
+  selectionFieldOptions: ComboboxOption[];
+  existingFieldValues: ReadonlyMap<string, string>;
   onConfirmSelection: (key: string) => void;
   onMarkTableFromSelection: (() => void) | undefined;
   onCancelSelection: () => void;
