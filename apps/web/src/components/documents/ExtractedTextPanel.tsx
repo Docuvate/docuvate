@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { fetchDocumentLayoutTypst } from '../../lib/api';
 import { extractedTextDisplayPages, extractedTextPageNumbers } from '../../lib/extractedTextPages';
 import {
+  blockHasLayoutGeometry,
   blocksHaveLayoutGeometry,
   findBlockIndex,
   groupBlocksIntoLines,
@@ -389,7 +390,9 @@ export function ExtractedTextPanel({
     })
   ) : layoutCanvas ? (
     displayPages.map((page) => {
-      const pageBlocks = blocks.filter((block) => block.page === page);
+      const pageBlocks = blocks.filter(
+        (block) => block.page === page && blockHasLayoutGeometry(block)
+      );
       return (
         <section
           key={page}
@@ -503,7 +506,7 @@ export function ExtractedTextPanel({
 
   return (
     <div className={`extracted-text-panel${textOnly ? ' extracted-text-panel-d7' : ''}`}>
-      {textOnly && !editMode ? (
+      {textOnly ? (
         <div className="extracted-text-d7-head">
           <span className="extracted-text-d7-title">
             {t('documents.extractedTextRecognizedTitle')}
