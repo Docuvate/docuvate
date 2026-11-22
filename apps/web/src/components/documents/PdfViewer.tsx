@@ -224,9 +224,9 @@ async function renderPdfPage(
   wrap.appendChild(canvas);
   bindPageClick(wrap, pageNum, onPageClick);
 
-  const cancelled = { current: false };
+  let enhanceEpoch = 0;
   const cancel = () => {
-    cancelled.current = true;
+    enhanceEpoch += 1;
     try {
       renderTask.cancel();
     } catch {
@@ -235,12 +235,12 @@ async function renderPdfPage(
   };
 
   const enhance = async () => {
-    if (cancelled.current) return;
+    const epoch = enhanceEpoch;
     const textLayer = document.createElement('div');
     textLayer.className = 'textLayer';
     wrap.appendChild(textLayer);
     const textContent = await page.getTextContent();
-    if (cancelled.current) return;
+    if (epoch !== enhanceEpoch) return;
     appendTextLayer(textContent, viewport, textLayer);
 
     const pageHighlights = highlightBlocks.filter((b) => b.page === pageNum);
@@ -385,14 +385,14 @@ export function PdfViewer({
       const clamped = Math.min(Math.max(1, next), Math.max(1, pageCount));
       // Keep chrome responsive while the page tree and canvas catch up.
       startTransition(() => {
-        if (isControlled && onPageChange) {
+        if (onPageChange) {
           onPageChange(clamped);
         } else {
           setInternalPage(clamped);
         }
       });
     },
-    [isControlled, onPageChange, pageCount]
+    [onPageChange, pageCount]
   );
 
   useEffect(() => {
