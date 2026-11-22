@@ -225,7 +225,7 @@ test('reject, undo, rotated bbox, and table overlay persist through the API', as
   const layout = page.getByTestId('structuring-primary-layout');
   await expect(layout).toBeVisible();
   await layout.click();
-  await expect(layout).toHaveAttribute('aria-pressed', 'true');
+  await expect(layout).toHaveAttribute('aria-selected', 'true');
   const area = page.getByRole('radio', { name: /Bereich|Area/ });
   await area.click();
   await expect(area).toBeChecked();

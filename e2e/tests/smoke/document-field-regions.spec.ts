@@ -34,7 +34,7 @@ async function showLayoutSelectionTools(page: Page): Promise<void> {
   const layout = page.getByTestId('structuring-primary-layout');
   if ((await layout.count()) === 0) return;
   await layout.click();
-  await expect(layout).toHaveAttribute('aria-pressed', 'true');
+  await expect(layout).toHaveAttribute('aria-selected', 'true');
   await expect(page.getByTestId('document-selection-tools')).toBeVisible();
 }
 

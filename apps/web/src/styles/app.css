@@ -9478,11 +9478,11 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   outline: 1px solid color-mix(in srgb, var(--dv-color-accent) 70%, transparent);
   outline-offset: 1px;
   background: color-mix(in srgb, var(--dv-color-accent-soft) 55%, transparent);
-  z-index: 1;
+  z-index: calc(var(--dv-z-base) + 1);
 }
 
 .extracted-text-layout-block--editing {
-  z-index: 2;
+  z-index: calc(var(--dv-z-base) + 2);
   overflow: visible;
 }
 
