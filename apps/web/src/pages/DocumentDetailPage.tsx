@@ -16,7 +16,7 @@ import {
   suggestionRejectIdentityKeys,
 } from '@docuvate/contracts';
 import { ArrowLeft, X } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { startTransition, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 
@@ -187,6 +187,11 @@ export function DocumentDetailPage() {
   const [workbenchEditFieldKey, setWorkbenchEditFieldKey] = useState<string | null>(null);
   const [correctionSheetOpen, setCorrectionSheetOpen] = useState(false);
   const [viewerPage, setViewerPage] = useState(1);
+  const onViewerPageChange = useCallback((page: number) => {
+    startTransition(() => {
+      setViewerPage(page);
+    });
+  }, []);
   const [activeBlockIndex, setActiveBlockIndex] = useState<number | null>(null);
   const [title, setTitle] = useState('');
   const [documentDate, setDocumentDate] = useState('');
@@ -535,7 +540,7 @@ export function DocumentDetailPage() {
   function onHighlightBlocks(next: ExtractionBlock[]) {
     setHighlightBlocks(next);
     const page = next[0]?.page;
-    if (page) setViewerPage(page);
+    if (page) onViewerPageChange(page);
   }
 
   function onPdfPageClick(page: number, nx: number, ny: number) {
@@ -925,7 +930,7 @@ export function DocumentDetailPage() {
               activeBlockIndex={activeBlockIndex}
               knownFieldKeys={knownFieldKeys}
               fieldLabelForKey={fieldLabelForKey}
-              onViewerPageChange={setViewerPage}
+              onViewerPageChange={onViewerPageChange}
               onActiveBlockIndexChange={setActiveBlockIndex}
               onHighlightBlocks={onHighlightBlocks}
               onBlocksChange={setBlocks}
@@ -978,7 +983,7 @@ export function DocumentDetailPage() {
                 }
                 highlightBlocks={highlightBlocks}
                 viewerPage={viewerPage}
-                onViewerPageChange={setViewerPage}
+                onViewerPageChange={onViewerPageChange}
                 fitWidth={isPdf}
                 title={t('documents.previewTitle')}
                 onPageClick={isPdf && blocks.length > 0 ? onPdfPageClick : undefined}
@@ -993,7 +998,7 @@ export function DocumentDetailPage() {
                 requeueBusy={requeueBusy}
                 onRequeueExtraction={() => void onRequeueExtraction()}
                 sourceFileMissing={previewUnavailable}
-                onViewerPageChange={setViewerPage}
+                onViewerPageChange={onViewerPageChange}
                 onActiveBlockIndexChange={setActiveBlockIndex}
                 onBlocksChange={setBlocks}
                 onHighlightBlocks={onHighlightBlocks}
