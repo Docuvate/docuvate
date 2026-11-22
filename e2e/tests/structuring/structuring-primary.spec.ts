@@ -24,7 +24,9 @@ async function openViewer(page: Page, width: number, theme: 'light' | 'dark') {
 
 test('text and layout change the document instead of scrolling', async ({ page }) => {
   const log = await openViewer(page, 1280, 'light');
-  await expect(page.getByTestId('structuring-context')).toHaveCount(0);
+  await expect(page.getByTestId('structuring-primary-layout')).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByTestId('structuring-context')).toBeVisible();
+  await expect(page.getByTestId('structuring-context')).toHaveAttribute('data-primary', 'layout');
   await expect(page.locator('.layout-text-stage')).toHaveCount(0);
 
   await page.getByTestId('structuring-primary-ocr').click();

@@ -456,10 +456,10 @@ export function DocumentLayoutWorkspace({
     if (structuringPrimary === 'layout') {
       // Layout owns selection tools in the context row. Clear table selection so table
       // tools do not portal over the mark tools; open overlay only via explicit edit.
+      // Do not force the tables side tab — that auto-activates the first table card.
       setSelectedTableId(null);
       setTableOverlayOpen(false);
       setActiveOverlayId(null);
-      onLayoutSideTabChange('tables');
       return;
     }
     if (structuringPrimary === 'fields') {
