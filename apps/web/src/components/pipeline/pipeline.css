@@ -989,6 +989,44 @@
   transition: inline-size var(--dv-motion-duration-slow) var(--dv-motion-easing-standard);
 }
 
+.review-workbench-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--dv-space-2xs);
+}
+
+.review-workbench-scope {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--dv-space-3xs);
+}
+
+.review-workbench-search {
+  flex: 1 1 10rem;
+  min-inline-size: 8rem;
+  max-inline-size: 18rem;
+}
+
+.review-workbench-showing {
+  font-size: var(--dv-font-size-sm);
+  font-variant-numeric: tabular-nums;
+  margin-inline-start: auto;
+}
+
+.review-workbench-list--scroll {
+  max-block-size: min(32vh, 20rem);
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+.review-workbench-list--scroll .review-workbench-row-main {
+  min-block-size: max(2.75rem, 44px);
+  grid-template-columns: minmax(5.5rem, 8.5rem) minmax(0, 1fr) auto;
+  grid-template-areas: 'label value state';
+  padding-block: var(--dv-space-3xs);
+}
+
 .review-workbench-actions {
   display: flex;
   flex-wrap: wrap;
@@ -1048,7 +1086,7 @@
     'value state';
   align-items: center;
   column-gap: var(--dv-space-xs);
-  min-block-size: var(--dv-control-touch-target);
+  min-block-size: max(var(--dv-control-touch-target), 44px);
   padding: var(--dv-space-3xs) var(--dv-space-xs);
   border: 0;
   background: transparent;

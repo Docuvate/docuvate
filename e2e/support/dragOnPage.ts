@@ -21,12 +21,68 @@ export async function dragOnPdfPage(
   const wrap = page.locator('.pdf-page-wrap').first();
   await wrap.waitFor({ state: 'visible' });
   await revealPagePoint(page, x0, y0);
-  const start = await clientPointForLocalRatio(wrap, x0, y0);
-  const end = await clientPointForLocalRatio(wrap, x1, y1);
-  await page.mouse.move(start.x, start.y);
-  await page.mouse.down();
-  await page.mouse.move(end.x, end.y, { steps: 8 });
-  await page.mouse.up();
+  // Dispatch on `.pdf-page-wrap` so `DocumentSelectionLayer` hears the gesture even
+  // when Playwright's global mouse misses the rotated/transformed hit target.
+  await wrap.evaluate(
+    (pageWrap, ratios) => {
+      function quarterTurns(rotationDeg: number): number {
+        return ((Math.round(rotationDeg / 90) % 4) + 4) % 4;
+      }
+      function rotationDeg(el: HTMLElement): number {
+        const raw = el.dataset.displayRotation;
+        if (raw == null || raw === '') return 0;
+        const parsed = Number(raw);
+        return Number.isFinite(parsed) ? parsed : 0;
+      }
+      function clientFor(xRatio: number, yRatio: number): { x: number; y: number } {
+        const rotatedBounds = pageWrap.getBoundingClientRect();
+        const localWidth = pageWrap.offsetWidth > 0 ? pageWrap.offsetWidth : 1;
+        const localHeight = pageWrap.offsetHeight > 0 ? pageWrap.offsetHeight : 1;
+        const turns = quarterTurns(rotationDeg(pageWrap));
+        if (turns === 0) {
+          const width = rotatedBounds.width > 0 ? rotatedBounds.width : 1;
+          const height = rotatedBounds.height > 0 ? rotatedBounds.height : 1;
+          return {
+            x: rotatedBounds.left + xRatio * width,
+            y: rotatedBounds.top + yRatio * height,
+          };
+        }
+        const centerX = rotatedBounds.left + rotatedBounds.width / 2;
+        const centerY = rotatedBounds.top + rotatedBounds.height / 2;
+        const localDx = xRatio * localWidth - localWidth / 2;
+        const localDy = yRatio * localHeight - localHeight / 2;
+        const theta = (turns * Math.PI) / 2;
+        const cos = Math.cos(theta);
+        const sin = Math.sin(theta);
+        return {
+          x: centerX + localDx * cos - localDy * sin,
+          y: centerY + localDx * sin + localDy * cos,
+        };
+      }
+      const start = clientFor(ratios.x0, ratios.y0);
+      const end = clientFor(ratios.x1, ratios.y1);
+      const mk = (type: 'mousedown' | 'mousemove' | 'mouseup', x: number, y: number, buttons: number) => {
+        const event = new MouseEvent(type, {
+          bubbles: true,
+          composed: true,
+          cancelable: true,
+          clientX: x,
+          clientY: y,
+          buttons,
+        });
+        pageWrap.dispatchEvent(event);
+        document.dispatchEvent(event);
+      };
+      mk('mousedown', start.x, start.y, 1);
+      const steps = 8;
+      for (let step = 1; step <= steps; step += 1) {
+        const t = step / steps;
+        mk('mousemove', start.x + (end.x - start.x) * t, start.y + (end.y - start.y) * t, 1);
+      }
+      mk('mouseup', end.x, end.y, 0);
+    },
+    { x0, y0, x1, y1 }
+  );
 }
 
 /** Drag across a visible text span. The start stays below the sticky ribbon. */

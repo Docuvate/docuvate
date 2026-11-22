@@ -4,6 +4,7 @@
  * Text and Layout are primary modes. Each one changes the document and, only
  * then, shows its tools. Mocks stand in for the API. This is not a real stack.
  */
+import fs from 'node:fs';
 import path from 'node:path';
 
 import { expect, type Page, test } from '@playwright/test';
@@ -11,9 +12,10 @@ import { expect, type Page, test } from '@playwright/test';
 import { dragOnPdfPage } from '../../support/dragOnPage';
 import { installStructuringMocks, LAYOUT_DOCUMENT_ID } from './structuringMocks';
 
-const shots = '/opt/cursor/artifacts';
+const shots = path.join(__dirname, '..', '..', 'test-results', 'ribbon-shots');
 
 async function openViewer(page: Page, width: number, theme: 'light' | 'dark') {
+  fs.mkdirSync(shots, { recursive: true });
   await page.setViewportSize({ width, height: 900 });
   const log = await installStructuringMocks(page, { theme });
   await page.goto(`/documents/${LAYOUT_DOCUMENT_ID}`);
@@ -300,8 +302,8 @@ test('a selected parent flows into the next band', async ({ page }) => {
   const contextBox = await context.boundingBox();
   if (!textBox || !contextBox) throw new Error('text junction has no box');
   const junctionGap = Math.abs(textBox.y + textBox.height - contextBox.y);
-  const hasRibbonIdentity = (await page.locator('.structuring-ribbon-identity').count()) > 0;
-  expect(junctionGap).toBeLessThanOrEqual(hasRibbonIdentity ? 56 : 2);
+  const hasRibbonMeta = (await page.getByTestId('structuring-ribbon-meta').count()) > 0;
+  expect(junctionGap).toBeLessThanOrEqual(hasRibbonMeta ? 28 : 2);
   expect(await bottomRadius(text)).toBe('0px');
   const textPaint = await paint(text);
   const contextPaint = await paint(context);

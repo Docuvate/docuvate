@@ -272,13 +272,22 @@ export function DocumentDetailPage() {
 
   useEffect(() => {
     if (layoutPrimaryBootstrapped.current || !doc) return;
-    if (!(isPdf && doc.extraction?.layoutIrAvailable === true)) return;
+    if (!isPdf) return;
+    const layoutWorkspaceReady = doc.extraction?.layoutIrAvailable === true;
+    const stage = documentStageState(doc);
+    const docReviewable = stage === 'review' || stage === 'structured';
+    if (!layoutWorkspaceReady && !docReviewable) return;
     if (structuring.primary !== null) {
       layoutPrimaryBootstrapped.current = true;
       return;
     }
     layoutPrimaryBootstrapped.current = true;
-    const bootPrimary = arrivedForReview ? 'fields' : 'layout';
+    const bootPrimary: StructuringPrimary =
+      arrivedForReview || (docReviewable && !layoutWorkspaceReady)
+        ? 'fields'
+        : layoutWorkspaceReady
+          ? 'layout'
+          : 'fields';
     const command = structuring.select(bootPrimary);
     if (command.layoutTab) setLayoutSideTab(command.layoutTab);
   }, [arrivedForReview, doc, isPdf, structuring]);

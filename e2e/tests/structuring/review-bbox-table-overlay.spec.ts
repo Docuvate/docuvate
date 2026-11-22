@@ -27,8 +27,8 @@ test.describe('review queue, field bbox and table overlay', () => {
     await installStructuringMocks(page);
     await page.goto(`/documents/${LAYOUT_DOCUMENT_ID}?review=1`);
     await page
-      .locator('.review-workbench')
-      .getByRole('button', { name: /Betrag korrigieren|Correct amount/i })
+      .locator('.review-workbench [data-field-key="total_amount"]')
+      .getByRole('button', { name: /Betrag korrigieren|Correct amount/i, exact: true })
       .click();
     const position = page.getByTestId('field-position-correct');
     await expect(position).toBeVisible();
@@ -152,8 +152,8 @@ test.describe('review queue, field bbox and table overlay', () => {
     const log = await installStructuringMocks(page);
     await page.goto(`/documents/${LAYOUT_DOCUMENT_ID}?review=1`);
     await page
-      .locator('.review-workbench')
-      .getByRole('button', { name: /Betrag korrigieren|Correct amount/i })
+      .locator('.review-workbench [data-field-key="total_amount"]')
+      .getByRole('button', { name: /Betrag korrigieren|Correct amount/i, exact: true })
       .click();
     await page.getByTestId('field-position-correct').click();
     const editor = page.getByTestId('field-bbox-editor');
@@ -200,8 +200,8 @@ test.describe('review queue, field bbox and table overlay', () => {
       '90'
     );
     await page
-      .locator('.review-workbench')
-      .getByRole('button', { name: /Betrag korrigieren|Correct amount/i })
+      .locator('.review-workbench [data-field-key="total_amount"]')
+      .getByRole('button', { name: /Betrag korrigieren|Correct amount/i, exact: true })
       .click();
     await page.getByTestId('field-position-correct').click();
     await expect(page.getByTestId('field-bbox-editor')).toBeVisible({ timeout: 15_000 });
