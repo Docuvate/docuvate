@@ -35,11 +35,6 @@ async function showLayoutSelectionTools(page: Page): Promise<void> {
   if ((await layout.count()) === 0) return;
   await layout.click();
   await expect(layout).toHaveAttribute('aria-pressed', 'true');
-  // Layout auto-opens the first table overlay; close it so selection tools return.
-  const tableClose = page.getByTestId('table-overlay-close');
-  if (await tableClose.isVisible().catch(() => false)) {
-    await tableClose.click();
-  }
   await expect(page.getByTestId('document-selection-tools')).toBeVisible();
 }
 

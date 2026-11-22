@@ -42,11 +42,6 @@ test('text and layout change the document instead of scrolling', async ({ page }
   await expect(page.getByTestId('structuring-primary-layout')).toHaveAttribute('aria-pressed', 'true');
   await expect(page.getByTestId('structuring-primary-ocr')).toHaveAttribute('aria-pressed', 'false');
   await expect(page.locator('.layout-text-stage')).toHaveCount(0);
-  // Layout may auto-open a table overlay (table tools own the context row); close it to use selection tools.
-  const tableClose = page.getByTestId('table-overlay-close');
-  if (await tableClose.isVisible().catch(() => false)) {
-    await tableClose.click();
-  }
   await expect(page.getByTestId('structuring-context')).toHaveAttribute('data-primary', 'layout');
   await expect(page.getByTestId('document-selection-tools').getByRole('radio')).toHaveCount(3);
   await expect(page.getByTestId('structuring-overlay')).toBeVisible();
@@ -70,10 +65,7 @@ test('layout tools at 1280 dark and at a narrow width', async ({ page }) => {
   const log = await openViewer(page, 1280, 'dark');
   await page.getByTestId('structuring-primary-layout').click();
   await expect(page.locator('html')).toHaveAttribute('data-docuvate-theme', 'dark');
-  const tableClose = page.getByTestId('table-overlay-close');
-  if (await tableClose.isVisible().catch(() => false)) {
-    await tableClose.click();
-  }
+  await expect(page.getByTestId('document-selection-tools').getByRole('radio')).toHaveCount(3);
   await page.screenshot({ path: path.join(shots, 'ribbon-layout-1280-dark.png') });
   await page.setViewportSize({ width: 390, height: 800 });
   await expect(page.getByTestId('document-selection-tools').getByRole('radio')).toHaveCount(3);
@@ -146,10 +138,7 @@ test('area drag across a saved field still offers mark as table after rotation',
   await rotate.click();
   await expect(page.getByTestId('pdf-viewer-display-rotation')).toHaveAttribute('data-rotation-deg', '90');
   await page.getByTestId('structuring-primary-layout').click();
-  const tableClose = page.getByTestId('table-overlay-close');
-  if (await tableClose.isVisible().catch(() => false)) {
-    await tableClose.click();
-  }
+  await expect(page.getByTestId('document-selection-tools')).toBeVisible();
   await page.keyboard.press('r');
   await expect(page.getByRole('radio', { name: /Bereich|Area/ })).toBeChecked();
   await expect(page.locator('.pdf-layout-overlay-field').first()).toBeVisible();
@@ -276,13 +265,10 @@ test('a selected parent flows into the next band', async ({ page }) => {
     return getComputedStyle(node).transitionDuration;
   });
   expect(Number.parseFloat(motion)).toBeLessThan(0.05);
-  const darkClose = page.getByTestId('table-overlay-close');
-  if (await darkClose.isVisible().catch(() => false)) {
-    await darkClose.click();
-  }
   await expect(page.getByTestId('structuring-context')).toBeVisible();
   await shootJunction(page, 'ribbon-junction-1280-dark');
   await page.setViewportSize({ width: 390, height: 800 });
+  await expect(page.getByTestId('document-selection-tools')).toBeVisible();
   await expect(page.getByTestId('document-selection-tools').getByRole('radio')).toHaveCount(3);
   await shootJunction(page, 'ribbon-junction-390-dark');
   await openViewer(page, 390, 'light');

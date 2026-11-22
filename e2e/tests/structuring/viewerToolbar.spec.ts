@@ -15,10 +15,6 @@ test('viewer: marking tools follow Layout, page view stays in one menu', async (
   const toolbar = page.getByTestId('layout-viewer-toolbar');
   await expect(toolbar.getByRole('radiogroup')).toHaveCount(0);
   await page.getByTestId('structuring-primary-layout').click();
-  const tableClose = page.getByTestId('table-overlay-close');
-  if (await tableClose.isVisible().catch(() => false)) {
-    await tableClose.click();
-  }
   const tools = page
     .getByTestId('document-selection-tools')
     .getByRole('radiogroup', { name: 'Auf der Seite markieren' });
@@ -51,10 +47,6 @@ for (const width of [390, 1024, 1280, 1440]) {
     const log = await installStructuringMocks(page);
     await page.goto(`/documents/${LAYOUT_DOCUMENT_ID}`);
     await page.getByTestId('structuring-primary-layout').click();
-    const tableClose = page.getByTestId('table-overlay-close');
-    if (await tableClose.isVisible().catch(() => false)) {
-      await tableClose.click();
-    }
     const toolbar = page.getByTestId('app-ribbon-context');
     await expect(page.getByTestId('document-selection-tools').getByRole('radio')).toHaveCount(3);
     const clipped = await toolbar.evaluate((bar) => {
