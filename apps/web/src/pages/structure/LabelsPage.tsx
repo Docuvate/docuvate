@@ -3,7 +3,7 @@
 import type { CreateTagRequest, TagDto } from '@docuvate/contracts';
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 
 import { LabelColorField } from '../../components/labels/LabelColorField';
 import { LabelCoverageHeader } from '../../components/labels/LabelCoverageHeader';
@@ -42,6 +42,7 @@ const emptyForm: CreateTagRequest = {
 export function LabelsPage() {
   const { t } = useTranslation();
   const { pushSuccess, pushError } = useToastNotify();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [tags, setTags] = useState<TagDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [pageError, setPageError] = useState<string | null>(null);
@@ -92,6 +93,16 @@ export function LabelsPage() {
     setForm({ ...emptyForm, name: name ?? '' });
   }
 
+  useEffect(() => {
+    if (searchParams.get('create') !== '1') {
+      return;
+    }
+    startCreate();
+    const next = new URLSearchParams(searchParams);
+    next.delete('create');
+    setSearchParams(next, { replace: true });
+  }, [searchParams, setSearchParams]);
+
   function startEdit(tag: TagDto) {
     setEditingId(tag.id);
     setForm({
@@ -127,7 +138,8 @@ export function LabelsPage() {
     }
   }
 
-  const error = pageError ?? (insights.error && !insights.recommendationsError ? insights.error : null);
+  const error =
+    pageError ?? (insights.error && !insights.recommendationsError ? insights.error : null);
   const tagColorById = useMemo(() => {
     const out: Record<string, string> = {};
     for (const tag of tags) {
@@ -157,7 +169,9 @@ export function LabelsPage() {
             type="button"
             className="labels-page-new-label-btn"
             data-ux="primary-action"
-            onClick={() => { startCreate(); }}
+            onClick={() => {
+              startCreate();
+            }}
           >
             {t('labels.newLabel')}
           </Button>
@@ -220,7 +234,9 @@ export function LabelsPage() {
               <Input
                 required
                 value={form.name}
-                onChange={(e) => { setForm({ ...form, name: e.target.value }); }}
+                onChange={(e) => {
+                  setForm({ ...form, name: e.target.value });
+                }}
                 placeholder={t('labels.namePlaceholder')}
               />
             </label>
@@ -228,7 +244,9 @@ export function LabelsPage() {
               <span className="label-editor-field-label">{t('labels.color')}</span>
               <LabelColorField
                 value={form.color ?? defaultLabelColor}
-                onChange={(color) => { setForm({ ...form, color }); }}
+                onChange={(color) => {
+                  setForm({ ...form, color });
+                }}
               />
             </div>
             <label className="label-editor-field">
@@ -255,7 +273,9 @@ export function LabelsPage() {
                   disabled={!showMatchText}
                   aria-hidden={!showMatchText}
                   tabIndex={showMatchText ? 0 : -1}
-                  onChange={(e) => { setForm({ ...form, match: e.target.value }); }}
+                  onChange={(e) => {
+                    setForm({ ...form, match: e.target.value });
+                  }}
                   placeholder={
                     isLabelMatchAssignmentMode(assignmentMode)
                       ? t(labelMatchPlaceholderKey(assignmentMode))
@@ -268,7 +288,13 @@ export function LabelsPage() {
               </label>
             </div>
             <div className="confirm-dialog-actions label-editor-actions">
-              <Button type="button" variant="secondary" onClick={() => { setEditingId(null); }}>
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => {
+                  setEditingId(null);
+                }}
+              >
                 {t('common.cancel')}
               </Button>
               <Button type="submit" variant="primary" disabled={saving}>

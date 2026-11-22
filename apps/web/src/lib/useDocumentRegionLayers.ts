@@ -16,10 +16,9 @@ interface DocumentRegionLayers {
 /**
  * Loads OCR tokens for the visible page plus saved field/table regions.
  *
- * `layoutIrRevision` must change whenever the persisted layout IR can have changed
- * (reprocess finished, status flip): selection resolves words against these tokens,
- * so tokens fetched before the IR existed must not outlive it. Responses of superseded
- * requests (fast page switches) are dropped instead of overwriting newer state.
+ * Field/table regions are document-scoped and only reload when the document or
+ * layout IR revision changes. Tokens reload on page change. Fast page switches
+ * drop superseded token responses so older pages cannot overwrite newer state.
  */
 export function useDocumentRegionLayers(
   documentId: string,
@@ -29,25 +28,30 @@ export function useDocumentRegionLayers(
   const [layoutTokens, setLayoutTokens] = useState<LayoutToken[]>([]);
   const [fieldRegions, setFieldRegions] = useState<DocumentRegionDto[]>([]);
   const [tableRegions, setTableRegions] = useState<DocumentRegionDto[]>([]);
-  const requestRef = useRef(0);
+  const regionsRequestRef = useRef(0);
+  const tokensRequestRef = useRef(0);
 
   const refreshRegions = useCallback(async () => {
-    const request = ++requestRef.current;
+    const regionsRequest = ++regionsRequestRef.current;
+    const tokensRequest = ++tokensRequestRef.current;
     try {
       const [tokenPage, fields, tables] = await Promise.all([
         listDocumentLayoutTokens(documentId, page),
         listDocumentRegions(documentId, 'field'),
         listDocumentRegions(documentId, 'table'),
       ]);
-      if (request !== requestRef.current) {
-        return;
+      if (tokensRequest === tokensRequestRef.current) {
+        setLayoutTokens(tokenPage.tokens);
       }
-      setLayoutTokens(tokenPage.tokens);
-      setFieldRegions(fields.items);
-      setTableRegions(tables.items);
+      if (regionsRequest === regionsRequestRef.current) {
+        setFieldRegions(fields.items);
+        setTableRegions(tables.items);
+      }
     } catch (error: unknown) {
-      if (request === requestRef.current) {
+      if (tokensRequest === tokensRequestRef.current) {
         setLayoutTokens([]);
+      }
+      if (regionsRequest === regionsRequestRef.current) {
         setFieldRegions([]);
         setTableRegions([]);
       }
@@ -56,8 +60,39 @@ export function useDocumentRegionLayers(
   }, [documentId, page]);
 
   useEffect(() => {
-    void refreshRegions().catch(() => undefined);
-  }, [refreshRegions, layoutIrRevision]);
+    const request = ++regionsRequestRef.current;
+    void (async () => {
+      try {
+        const [fields, tables] = await Promise.all([
+          listDocumentRegions(documentId, 'field'),
+          listDocumentRegions(documentId, 'table'),
+        ]);
+        if (request !== regionsRequestRef.current) return;
+        setFieldRegions(fields.items);
+        setTableRegions(tables.items);
+      } catch {
+        if (request === regionsRequestRef.current) {
+          setFieldRegions([]);
+          setTableRegions([]);
+        }
+      }
+    })();
+  }, [documentId, layoutIrRevision]);
+
+  useEffect(() => {
+    const request = ++tokensRequestRef.current;
+    void (async () => {
+      try {
+        const tokenPage = await listDocumentLayoutTokens(documentId, page);
+        if (request !== tokensRequestRef.current) return;
+        setLayoutTokens(tokenPage.tokens);
+      } catch {
+        if (request === tokensRequestRef.current) {
+          setLayoutTokens([]);
+        }
+      }
+    })();
+  }, [documentId, page, layoutIrRevision]);
 
   return { layoutTokens, fieldRegions, tableRegions, refreshRegions };
 }

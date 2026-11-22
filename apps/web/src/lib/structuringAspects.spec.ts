@@ -72,7 +72,11 @@ describe('structuringAspects', () => {
       fields: [{ value: 'a', userConfirmed: true }, { value: 'b' }],
       suggestions: [{ key: 'iban', value: 'DE00' }],
     });
-    expect(open[3]).toEqual({ aspect: 'fields', state: 'open', open: 2 });
+    expect(open.find((s) => s.aspect === 'fields')).toEqual({
+      aspect: 'fields',
+      state: 'open',
+      open: 2,
+    });
     expect(openAspectItems(open)).toBe(2);
     expect(
       states(doc(), { fields: [{ value: 'a', userConfirmed: true }], suggestions: [] }).fields
@@ -89,7 +93,11 @@ describe('structuringAspects', () => {
       suggestions: [],
       rejects: [{ fieldKey: 'global:vendor', valueNormalized: 'acme' }],
     });
-    expect(open[3]).toEqual({ aspect: 'fields', state: 'open', open: 1 });
+    expect(open.find((s) => s.aspect === 'fields')).toEqual({
+      aspect: 'fields',
+      state: 'open',
+      open: 1,
+    });
   });
 
   it('marks failed and open aspects as needing work', () => {

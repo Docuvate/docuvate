@@ -2519,6 +2519,7 @@
       "state": {
         "confirmed": "Bestätigt",
         "suggested": "Vorschlag",
+        "missing": "Fehlt",
         "review": "Offen",
         "rejected": "Verworfen"
       },
@@ -2546,10 +2547,10 @@
     "aspects": {
       "aria": "Stand der Strukturierung",
       "name": {
-        "ocr": "Text",
-        "labels": "Labels",
+        "ocr": "Text prüfen",
+        "labels": "Labels zuweisen",
         "layout": "Layout",
-        "fields": "Felder"
+        "fields": "Erkannte Felder"
       },
       "state": {
         "pending": "nicht verarbeitet",
@@ -2569,7 +2570,7 @@
   "tableLayouts": {
     "apply": "Übernehmen",
     "families": {
-      "simple": "Einfache Tabelle",
+      "simple": "Einfache Tabelle / Beleg",
       "matrix": "Matrix",
       "nested": "Mehrstufiger Kopf",
       "financial": "Finanzlayout",
@@ -2605,6 +2606,21 @@
     "mergeCells": "Zellen verbinden",
     "splitCells": "Verbindung lösen",
     "directHint": "Zeilenart links an der Zeile wählen. Zellen verbinden: Zelle anklicken, zweite mit Umschalt+Klick (oder Umschalt+Alt+Pfeil) wählen.",
+    "toolsInRibbonHint": "Strukturwerkzeuge oben im Ribbon. Raster und Werte hier.",
+    "insertRow": "Zeile +",
+    "insertCol": "Spalte +",
+    "deleteRow": "Zeile −",
+    "deleteCol": "Spalte −",
+    "distributeRows": "Zeilen verteilen",
+    "distributeCols": "Spalten verteilen",
+    "exportCsv": "Als CSV",
+    "csvSeparator": ";",
+    "miniBarAria": "Tabellen-Kurzleiste",
+    "rowGuideAria": "Zeilentrenner {{n}} ziehen",
+    "colGuideAria": "Spaltentrenner {{n}} ziehen",
+    "dragGuidesHint": "Linien ziehen zum Verschieben. Doppelklick in eine Zelle setzt eine neue Zeilen- oder Spaltenlinie.",
+    "splitCellHint": "Doppelklick teilt diese Zelle (neue Zeilen- oder Spaltenlinie)",
+    "guidesSaved": "Rasterlinien gespeichert",
     "rowKinds": {
       "header": "Kopf",
       "data": "Daten",
@@ -2614,17 +2630,18 @@
     },
     "rowKindAria": "Zeilenart von Zeile {{row}}",
     "familyHints": {
-      "simple": "Normale Zeilen und Spalten, eine Kopfzeile.",
+      "simple": "Normale Zeilen und Spalten (z. B. Wiegeschein), eine Kopfzeile. Raster folgt Ihrer Auswahl.",
       "matrix": "Erste Spalte als Zeilenbeschriftung.",
       "nested": "Zwei Kopfzeilen, z. B. gruppierte Spalten.",
       "financial": "Fußzeilen für Summen und Steuern.",
       "grouped": "Abschnitte mit Zwischensummen im Körper.",
       "key_value": "Links Bezeichnung, rechts Wert  -  ohne Raster."
     },
-    "editInDocument": "Im Dokument bearbeiten",
+    "editInDocument": "Rahmen anpassen",
     "exitDocumentEdit": "Overlay schließen",
     "saveBounds": "Tabellenrahmen speichern",
     "resizeBounds": "Tabellenrahmen ändern",
+    "redetectGrid": "Raster neu erkennen",
     "cellAria": "Zelle Zeile {{row}}, Spalte {{col}}"
   },
   "ribbon": {
@@ -2632,6 +2649,7 @@
     "views": "Angeheftet",
     "area": "Bereich",
     "structure": "Struktur",
+    "structureActions": "Aktionen",
     "capture": "Erfassen",
     "display": "Darstellung",
     "output": "Ausgabe",
@@ -2640,6 +2658,14 @@
     "inspector": "Inspektor",
     "toolsText": "Text",
     "toolsLayout": "Layout",
+    "tableTools": "Tabelle",
+    "layoutPanel": "Dokumentstruktur",
+    "panel": "Panel",
+    "panelAria": "Inspektor-Panel öffnen",
+    "panelClose": "Panel schließen",
+    "identity": "Dokument",
+    "identityBackAria": "Zurück zu Dokumente",
+    "selection": "Auswahl",
     "autoImport": "Automatisch importieren",
     "autoImportHint": "Verbindungen einrichten, die Dokumente automatisch importieren: Postfach, Scanner/SFTP oder Paperless-ngx"
   }

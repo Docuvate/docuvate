@@ -26,7 +26,10 @@ test.describe('review queue, field bbox and table overlay', () => {
   test('correcting a value can open field bounding-box handles', async ({ page }) => {
     await installStructuringMocks(page);
     await page.goto(`/documents/${LAYOUT_DOCUMENT_ID}?review=1`);
-    await page.getByRole('button', { name: /Betrag korrigieren|Correct amount|total_amount/i }).click();
+    await page
+      .locator('.review-workbench [data-field-key="total_amount"]')
+      .getByRole('button', { name: /Betrag korrigieren|Correct amount/i, exact: true })
+      .click();
     const position = page.getByTestId('field-position-correct');
     await expect(position).toBeVisible();
     await position.click();
@@ -39,7 +42,7 @@ test.describe('review queue, field bbox and table overlay', () => {
   }) => {
     await installStructuringMocks(page);
     await page.goto(`/documents/${LAYOUT_DOCUMENT_ID}`);
-    await page.getByRole('tab', { name: /Layout|Tables|Tabellen/i }).first().click();
+    await page.getByTestId('layout-panel-tab-tables').click();
     const family = page.getByTestId('table-family-menu');
     await expect(family).toBeVisible({ timeout: 30_000 });
     await family.click();
@@ -60,7 +63,7 @@ test.describe('review queue, field bbox and table overlay', () => {
     const box = page.locator('.table-pdf-overlay-box');
     const before = await box.boundingBox();
     expect(before).toBeTruthy();
-    const handle = page.getByTestId('table-bounds-handle');
+    const handle = page.getByTestId('table-bounds-handle-se');
     const handleBox = await handle.boundingBox();
     expect(handleBox).toBeTruthy();
     await page.mouse.move(handleBox!.x + handleBox!.width / 2, handleBox!.y + handleBox!.height / 2);
@@ -87,7 +90,7 @@ test.describe('review queue, field bbox and table overlay', () => {
       await installStructuringMocks(page, { theme });
       await page.emulateMedia({ colorScheme: theme });
       await page.goto(`/documents/${LAYOUT_DOCUMENT_ID}`);
-      await page.getByRole('tab', { name: /Layout|Tables|Tabellen/i }).first().click();
+      await page.getByTestId('layout-panel-tab-tables').click();
       const family = page.getByTestId('table-family-menu');
       await expect(family).toBeVisible({ timeout: 30_000 });
       await family.click();
@@ -109,7 +112,7 @@ test.describe('review queue, field bbox and table overlay', () => {
   test('screenshot sideways page rotation with table overlay', async ({ page }) => {
     await installStructuringMocks(page);
     await page.goto(`/documents/${LAYOUT_DOCUMENT_ID}`);
-    await page.getByRole('tab', { name: /Layout|Tables|Tabellen/i }).first().click();
+    await page.getByTestId('layout-panel-tab-tables').click();
     const rotate = page.getByTestId('pdf-viewer-rotate-clockwise');
     await expect(rotate).toBeVisible({ timeout: 30_000 });
     await rotate.click();
@@ -148,7 +151,10 @@ test.describe('review queue, field bbox and table overlay', () => {
   test('field bbox save posts reanchor with MediaBox coordinates', async ({ page }) => {
     const log = await installStructuringMocks(page);
     await page.goto(`/documents/${LAYOUT_DOCUMENT_ID}?review=1`);
-    await page.getByRole('button', { name: /Betrag korrigieren|Correct amount|total_amount/i }).click();
+    await page
+      .locator('.review-workbench [data-field-key="total_amount"]')
+      .getByRole('button', { name: /Betrag korrigieren|Correct amount/i, exact: true })
+      .click();
     await page.getByTestId('field-position-correct').click();
     const editor = page.getByTestId('field-bbox-editor');
     await expect(editor).toBeVisible({ timeout: 15_000 });
@@ -193,7 +199,10 @@ test.describe('review queue, field bbox and table overlay', () => {
       'data-rotation-deg',
       '90'
     );
-    await page.getByRole('button', { name: /Betrag korrigieren|Correct amount|total_amount/i }).click();
+    await page
+      .locator('.review-workbench [data-field-key="total_amount"]')
+      .getByRole('button', { name: /Betrag korrigieren|Correct amount/i, exact: true })
+      .click();
     await page.getByTestId('field-position-correct').click();
     await expect(page.getByTestId('field-bbox-editor')).toBeVisible({ timeout: 15_000 });
     await page.screenshot({

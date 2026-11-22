@@ -3,7 +3,8 @@
 import type { Locator, Page } from '@playwright/test';
 
 /**
- * Drag a rectangle on the first PDF page, in fractions of its border box.
+ * Drag a rectangle on the first PDF page, in fractions of its local MediaBox
+ * (offsetWidth × offsetHeight), matching `clientPointToLocalRatio` in the web app.
  *
  * A quarter-turn makes the page taller than the viewport. Fractions such as
  * 0.55 then sit below the window, and the pointer never hits the page. The
@@ -20,12 +21,68 @@ export async function dragOnPdfPage(
   const wrap = page.locator('.pdf-page-wrap').first();
   await wrap.waitFor({ state: 'visible' });
   await revealPagePoint(page, x0, y0);
-  const box = await wrap.boundingBox();
-  if (!box) throw new Error('pdf page wrap has no box');
-  await page.mouse.move(box.x + box.width * x0, box.y + box.height * y0);
-  await page.mouse.down();
-  await page.mouse.move(box.x + box.width * x1, box.y + box.height * y1, { steps: 8 });
-  await page.mouse.up();
+  // Dispatch on `.pdf-page-wrap` so `DocumentSelectionLayer` hears the gesture even
+  // when Playwright's global mouse misses the rotated/transformed hit target.
+  await wrap.evaluate(
+    (pageWrap, ratios) => {
+      function quarterTurns(rotationDeg: number): number {
+        return ((Math.round(rotationDeg / 90) % 4) + 4) % 4;
+      }
+      function rotationDeg(el: HTMLElement): number {
+        const raw = el.dataset.displayRotation;
+        if (raw == null || raw === '') return 0;
+        const parsed = Number(raw);
+        return Number.isFinite(parsed) ? parsed : 0;
+      }
+      function clientFor(xRatio: number, yRatio: number): { x: number; y: number } {
+        const rotatedBounds = pageWrap.getBoundingClientRect();
+        const localWidth = pageWrap.offsetWidth > 0 ? pageWrap.offsetWidth : 1;
+        const localHeight = pageWrap.offsetHeight > 0 ? pageWrap.offsetHeight : 1;
+        const turns = quarterTurns(rotationDeg(pageWrap));
+        if (turns === 0) {
+          const width = rotatedBounds.width > 0 ? rotatedBounds.width : 1;
+          const height = rotatedBounds.height > 0 ? rotatedBounds.height : 1;
+          return {
+            x: rotatedBounds.left + xRatio * width,
+            y: rotatedBounds.top + yRatio * height,
+          };
+        }
+        const centerX = rotatedBounds.left + rotatedBounds.width / 2;
+        const centerY = rotatedBounds.top + rotatedBounds.height / 2;
+        const localDx = xRatio * localWidth - localWidth / 2;
+        const localDy = yRatio * localHeight - localHeight / 2;
+        const theta = (turns * Math.PI) / 2;
+        const cos = Math.cos(theta);
+        const sin = Math.sin(theta);
+        return {
+          x: centerX + localDx * cos - localDy * sin,
+          y: centerY + localDx * sin + localDy * cos,
+        };
+      }
+      const start = clientFor(ratios.x0, ratios.y0);
+      const end = clientFor(ratios.x1, ratios.y1);
+      const mk = (type: 'mousedown' | 'mousemove' | 'mouseup', x: number, y: number, buttons: number) => {
+        const event = new MouseEvent(type, {
+          bubbles: true,
+          composed: true,
+          cancelable: true,
+          clientX: x,
+          clientY: y,
+          buttons,
+        });
+        pageWrap.dispatchEvent(event);
+        document.dispatchEvent(event);
+      };
+      mk('mousedown', start.x, start.y, 1);
+      const steps = 8;
+      for (let step = 1; step <= steps; step += 1) {
+        const t = step / steps;
+        mk('mousemove', start.x + (end.x - start.x) * t, start.y + (end.y - start.y) * t, 1);
+      }
+      mk('mouseup', end.x, end.y, 0);
+    },
+    { x0, y0, x1, y1 }
+  );
 }
 
 /** Drag across a visible text span. The start stays below the sticky ribbon. */
@@ -46,31 +103,86 @@ export async function dragAcrossText(page: Page, target: Locator): Promise<void>
   await page.mouse.up();
 }
 
+async function clientPointForLocalRatio(
+  wrap: Locator,
+  xRatio: number,
+  yRatio: number
+): Promise<{ x: number; y: number }> {
+  // evaluate serializes this callback into the page — keep helpers inline.
+  return wrap.evaluate((pageWrap, ratios) => {
+    function quarterTurns(rotationDeg: number): number {
+      return ((Math.round(rotationDeg / 90) % 4) + 4) % 4;
+    }
+    function rotationDeg(el: HTMLElement): number {
+      const raw = el.dataset.displayRotation;
+      if (raw == null || raw === '') return 0;
+      const parsed = Number(raw);
+      return Number.isFinite(parsed) ? parsed : 0;
+    }
+    const rotatedBounds = pageWrap.getBoundingClientRect();
+    const localWidth = pageWrap.offsetWidth > 0 ? pageWrap.offsetWidth : 1;
+    const localHeight = pageWrap.offsetHeight > 0 ? pageWrap.offsetHeight : 1;
+    const turns = quarterTurns(rotationDeg(pageWrap));
+    if (turns === 0) {
+      const width = rotatedBounds.width > 0 ? rotatedBounds.width : 1;
+      const height = rotatedBounds.height > 0 ? rotatedBounds.height : 1;
+      return {
+        x: rotatedBounds.left + ratios.x * width,
+        y: rotatedBounds.top + ratios.y * height,
+      };
+    }
+    const centerX = rotatedBounds.left + rotatedBounds.width / 2;
+    const centerY = rotatedBounds.top + rotatedBounds.height / 2;
+    const localDx = ratios.x * localWidth - localWidth / 2;
+    const localDy = ratios.y * localHeight - localHeight / 2;
+    const theta = (turns * Math.PI) / 2;
+    const cos = Math.cos(theta);
+    const sin = Math.sin(theta);
+    return {
+      x: centerX + localDx * cos - localDy * sin,
+      y: centerY + localDx * sin + localDy * cos,
+    };
+  }, { x: xRatio, y: yRatio });
+}
+
 async function revealPagePoint(page: Page, xRatio: number, yRatio: number): Promise<void> {
   await page.evaluate((start) => {
     const pageWrap = document.querySelector('.pdf-page-wrap');
     if (!(pageWrap instanceof HTMLElement)) return;
-    const header = document.querySelector('.app-header');
-    const topLimit = (header instanceof HTMLElement ? header.getBoundingClientRect().bottom : 0) + 12;
+    const topLimit = stickyChromeBottom() + 12;
     const margin = 24;
     for (let attempt = 0; attempt < 8; attempt += 1) {
-      const box = pageWrap.getBoundingClientRect();
-      const x = box.left + box.width * start.x;
-      const y = box.top + box.height * start.y;
-      if (x >= margin && y >= topLimit && x <= window.innerWidth - margin && y <= window.innerHeight - margin) {
+      const point = localRatioToClientPoint(pageWrap, start.x, start.y);
+      if (
+        point.x >= margin &&
+        point.y >= topLimit &&
+        point.x <= window.innerWidth - margin &&
+        point.y <= window.innerHeight - margin
+      ) {
         return;
       }
       const nearest = scrollableAncestor(pageWrap);
       const host = nearest ?? document.documentElement;
       let moved = false;
-      if (y < topLimit) {
-        host.scrollTop -= topLimit - y;
+      if (point.y < topLimit) {
+        host.scrollTop -= topLimit - point.y;
         moved = true;
-      } else if (y > window.innerHeight - margin) {
-        host.scrollTop += y - (window.innerHeight - margin);
+      } else if (point.y > window.innerHeight - margin) {
+        host.scrollTop += point.y - (window.innerHeight - margin);
         moved = true;
       }
       if (!moved) return;
+    }
+
+    function stickyChromeBottom(): number {
+      let bottom = 0;
+      for (const selector of ['.app-header', '.app-ribbon', '.layout-viewer-toolbar']) {
+        const node = document.querySelector(selector);
+        if (node instanceof HTMLElement) {
+          bottom = Math.max(bottom, node.getBoundingClientRect().bottom);
+        }
+      }
+      return bottom;
     }
 
     function scrollableAncestor(node: HTMLElement): HTMLElement | null {
@@ -82,13 +194,62 @@ async function revealPagePoint(page: Page, xRatio: number, yRatio: number): Prom
       }
       return null;
     }
+
+    function quarterTurnDegrees(rotationDeg: number): number {
+      return ((Math.round(rotationDeg / 90) % 4) + 4) % 4;
+    }
+
+    function readDisplayRotationDeg(wrap: HTMLElement): number {
+      const raw = wrap.dataset.displayRotation;
+      if (raw == null || raw === '') return 0;
+      const parsed = Number(raw);
+      return Number.isFinite(parsed) ? parsed : 0;
+    }
+
+    function localRatioToClientPoint(
+      wrap: HTMLElement,
+      lx: number,
+      ly: number
+    ): { x: number; y: number } {
+      const rotatedBounds = wrap.getBoundingClientRect();
+      const localWidth = wrap.offsetWidth > 0 ? wrap.offsetWidth : 1;
+      const localHeight = wrap.offsetHeight > 0 ? wrap.offsetHeight : 1;
+      const turns = quarterTurnDegrees(readDisplayRotationDeg(wrap));
+      if (turns === 0) {
+        const width = rotatedBounds.width > 0 ? rotatedBounds.width : 1;
+        const height = rotatedBounds.height > 0 ? rotatedBounds.height : 1;
+        return {
+          x: rotatedBounds.left + lx * width,
+          y: rotatedBounds.top + ly * height,
+        };
+      }
+      const centerX = rotatedBounds.left + rotatedBounds.width / 2;
+      const centerY = rotatedBounds.top + rotatedBounds.height / 2;
+      const localDx = lx * localWidth - localWidth / 2;
+      const localDy = ly * localHeight - localHeight / 2;
+      const theta = (turns * Math.PI) / 2;
+      const cos = Math.cos(theta);
+      const sin = Math.sin(theta);
+      const dx = localDx * cos - localDy * sin;
+      const dy = localDx * sin + localDy * cos;
+      return { x: centerX + dx, y: centerY + dy };
+    }
   }, { x: xRatio, y: yRatio });
 }
 
 async function revealClientPoint(page: Page, x: number, y: number): Promise<void> {
   await page.evaluate(({ x: clientX, y: clientY }) => {
-    const header = document.querySelector('.app-header');
-    const topLimit = (header instanceof HTMLElement ? header.getBoundingClientRect().bottom : 0) + 12;
+    const topLimit =
+      (() => {
+        let bottom = 0;
+        for (const selector of ['.app-header', '.app-ribbon', '.layout-viewer-toolbar']) {
+          const node = document.querySelector(selector);
+          if (node instanceof HTMLElement) {
+            bottom = Math.max(bottom, node.getBoundingClientRect().bottom);
+          }
+        }
+        return bottom;
+      })() + 12;
     if (clientY >= topLimit) return;
     const pageWrap = document.querySelector('.pdf-page-wrap');
     let current: HTMLElement | null = pageWrap instanceof HTMLElement ? pageWrap.parentElement : null;

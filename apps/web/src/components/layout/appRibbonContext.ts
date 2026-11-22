@@ -8,10 +8,17 @@ export const AppRibbonSlotContext = createContext<HTMLElement | null>(null);
 /** Third ribbon row. Empty unless the current primary mode has tools. */
 export const AppRibbonContextSlotContext = createContext<HTMLElement | null>(null);
 
+/** Optional in-ribbon gallery under the tool band (Felder / Labels). */
+export const AppRibbonGallerySlotContext = createContext<HTMLElement | null>(null);
+
 export function useAppRibbonSlot(): HTMLElement | null {
   return useContext(AppRibbonSlotContext);
 }
 
 export function useAppRibbonContextSlot(): HTMLElement | null {
   return useContext(AppRibbonContextSlotContext);
+}
+
+export function useAppRibbonGallerySlot(): HTMLElement | null {
+  return useContext(AppRibbonGallerySlotContext);
 }

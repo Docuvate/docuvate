@@ -63,6 +63,8 @@ interface DocumentLayoutSidePanelProps {
   activeTab: LayoutSideTab;
   onTabChange: (tab: LayoutSideTab) => void;
   activeOverlayId: string | null;
+  /** Table region currently owned by the workspace (drives ribbon tools). */
+  selectedTableId?: string | null;
   onOverlaySelect: (overlayId: string, page: number) => void;
   onAcceptSuggestion: (key: string, value: string) => void;
   onDismissSuggestion: (key: string, value: string) => void;
@@ -75,6 +77,7 @@ interface DocumentLayoutSidePanelProps {
   onTableLayoutApply?: (regionId: string, choice: TableStructureChoice) => void;
   onTableCellChange?: (regionId: string, row: number, col: number, text: string) => void;
   onTableEditInDocument?: (regionId: string) => void;
+  onTableRedetect?: (regionId: string) => void;
   onConfirmField?: (key: string, value: string) => void;
   onCorrectField?: (key: string) => void;
   /** Saves a typed value for a field (recorded as a correction). */
@@ -84,6 +87,10 @@ interface DocumentLayoutSidePanelProps {
   /** When the correction bottom sheet is open, unmount the inline field list so each field has one source chip. */
   hideInlineFieldList?: boolean;
   hideInlineTableList?: boolean;
+  /** Structure verbs live in the ribbon — cards stay grid/picker only. */
+  preferRibbonTools?: boolean;
+  /** Tab strip moved to the app ribbon; hide the in-panel tablist. */
+  hideTablist?: boolean;
 }
 
 export function DocumentLayoutSidePanel({
@@ -94,6 +101,7 @@ export function DocumentLayoutSidePanel({
   activeTab,
   onTabChange,
   activeOverlayId,
+  selectedTableId = null,
   onOverlaySelect,
   onAcceptSuggestion,
   onDismissSuggestion,
@@ -105,6 +113,7 @@ export function DocumentLayoutSidePanel({
   onTableLayoutApply,
   onTableCellChange,
   onTableEditInDocument,
+  onTableRedetect,
   onConfirmField,
   onCorrectField,
   onSaveFieldValue,
@@ -112,6 +121,8 @@ export function DocumentLayoutSidePanel({
   onSelectField,
   hideInlineFieldList = false,
   hideInlineTableList = false,
+  preferRibbonTools = false,
+  hideTablist = false,
 }: DocumentLayoutSidePanelProps) {
   const { t, i18n } = useTranslation();
   const tabsBaseId = useId();
@@ -198,9 +209,8 @@ export function DocumentLayoutSidePanel({
     });
     return unique.filter(
       (s) =>
-        !dismissedSuggestions.has(
-          `${s.key}\0${normalizeSuggestionDecisionValue(s.value)}`
-        ) && !isDuplicateSuggestion(s.key, s.value)
+        !dismissedSuggestions.has(`${s.key}\0${normalizeSuggestionDecisionValue(s.value)}`) &&
+        !isDuplicateSuggestion(s.key, s.value)
     );
   }, [
     layoutIr,
@@ -358,31 +368,33 @@ export function DocumentLayoutSidePanel({
 
   return (
     <aside className="layout-side-panel" aria-label={t('documents.layoutSidePanelAria')}>
-      <div className="layout-side-tabs" role="tablist" tabIndex={0} onKeyDown={onTabListKeyDown}>
-        {tabs.map((tab) => {
-          const selected = activeTab === tab.id;
-          return (
-            <button
-              key={tab.id}
-              ref={(el) => {
-                tabRefs.current[tab.id] = el;
-              }}
-              id={`${tabsBaseId}-tab-${tab.id}`}
-              type="button"
-              role="tab"
-              aria-selected={selected}
-              aria-controls={`${tabsBaseId}-panel-${tab.id}`}
-              tabIndex={selected ? 0 : -1}
-              className={`layout-side-tab${selected ? ' layout-side-tab-active' : ''}`}
-              onClick={() => {
-                onTabChange(tab.id);
-              }}
-            >
-              {tab.label}
-            </button>
-          );
-        })}
-      </div>
+      {hideTablist ? null : (
+        <div className="layout-side-tabs" role="tablist" tabIndex={0} onKeyDown={onTabListKeyDown}>
+          {tabs.map((tab) => {
+            const selected = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                ref={(el) => {
+                  tabRefs.current[tab.id] = el;
+                }}
+                id={`${tabsBaseId}-tab-${tab.id}`}
+                type="button"
+                role="tab"
+                aria-selected={selected}
+                aria-controls={`${tabsBaseId}-panel-${tab.id}`}
+                tabIndex={selected ? 0 : -1}
+                className={`layout-side-tab${selected ? ' layout-side-tab-active' : ''}`}
+                onClick={() => {
+                  onTabChange(tab.id);
+                }}
+              >
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       <div
         ref={panelBodyRef}
@@ -511,13 +523,21 @@ export function DocumentLayoutSidePanel({
                     key={region.id}
                     region={region}
                     index={index}
-                    active={activeOverlayId === `region-table-${region.id}`}
+                    active={
+                      selectedTableId === region.id ||
+                      activeOverlayId === `region-table-${region.id}`
+                    }
+                    preferRibbonTools={preferRibbonTools}
                     onSelect={() => {
                       onOverlaySelect(`region-table-${region.id}`, region.page);
                     }}
-                    onCellChange={(row, col, text) => {
-                      onTableCellChange?.(region.id, row, col, text);
-                    }}
+                    onCellChange={
+                      preferRibbonTools && selectedTableId !== region.id
+                        ? undefined
+                        : (row, col, text) => {
+                            onTableCellChange?.(region.id, row, col, text);
+                          }
+                    }
                     onLayoutApply={
                       onTableLayoutApply
                         ? (choice) => {
@@ -529,6 +549,13 @@ export function DocumentLayoutSidePanel({
                       onTableEditInDocument
                         ? () => {
                             onTableEditInDocument(region.id);
+                          }
+                        : undefined
+                    }
+                    onRedetect={
+                      onTableRedetect
+                        ? () => {
+                            onTableRedetect(region.id);
                           }
                         : undefined
                     }

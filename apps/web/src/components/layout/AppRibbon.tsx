@@ -158,13 +158,19 @@ function FoldersSectionNav() {
 
 function StructureSectionNav({ section }: { section: AppSection }) {
   const { t } = useTranslation();
+  if (section === 'labels') {
+    return (
+      <RibbonGroup label={t('ribbon.structureActions')} kind="act">
+        <RibbonLink to={`${routes.structureLabels}?create=1`} active={false}>
+          {t('labels.newLabel')}
+        </RibbonLink>
+      </RibbonGroup>
+    );
+  }
   return (
-    <RibbonGroup label={t('ribbon.structure')} kind="navigate">
-      <RibbonLink to={routes.structureLabels} active={section === 'labels'}>
-        {t('nav.labels')}
-      </RibbonLink>
-      <RibbonLink to={routes.structureRecognizedFields} active={section === 'fields'}>
-        {t('nav.recognizedFields')}
+    <RibbonGroup label={t('ribbon.structureActions')} kind="act">
+      <RibbonLink to={`${routes.structureRecognizedFields}?create=1`} active={false}>
+        {t('recognizedFields.addField')}
       </RibbonLink>
     </RibbonGroup>
   );

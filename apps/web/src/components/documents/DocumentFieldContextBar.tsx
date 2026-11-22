@@ -16,6 +16,7 @@ interface DocumentFieldContextBarProps {
   onConfirm: (fieldKey: string) => void;
   onMarkTable?: () => void;
   onCancel: () => void;
+  className?: string;
 }
 
 function optionValues(options: ComboboxOption[]): Set<string> {
@@ -33,6 +34,7 @@ export function DocumentFieldContextBar({
   onConfirm,
   onMarkTable,
   onCancel,
+  className = '',
 }: DocumentFieldContextBarProps) {
   const { t } = useTranslation();
   const options = useMemo(() => fieldOptions, [fieldOptions]);
@@ -78,7 +80,7 @@ export function DocumentFieldContextBar({
 
   return (
     <div
-      className="document-field-context-bar"
+      className={`document-field-context-bar${className ? ` ${className}` : ''}`}
       data-testid="field-context-bar"
       role="region"
       aria-label={t('documents.selectionFieldKeyAria')}

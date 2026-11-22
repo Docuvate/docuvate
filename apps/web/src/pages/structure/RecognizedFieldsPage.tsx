@@ -3,7 +3,7 @@
 import { FIELD_ACCEPTANCE_LABEL_CONFIDENCE, type TagDto } from '@docuvate/contracts';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 
 import { useToastNotify } from '../../components/save/ToastProvider';
 import { RecognizedFieldCatalogEditor } from '../../components/settings/RecognizedFieldCatalogEditor';
@@ -24,6 +24,7 @@ import { notifySaveError } from '../../lib/saveNotify';
 export function RecognizedFieldsPage() {
   const { t } = useTranslation();
   const { pushSuccess } = useToastNotify();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [fields, setFields] = useState<RecognizedFieldDraft[]>([]);
   const [tags, setTags] = useState<TagDto[]>([]);
   const [gateBaseline, setGateBaseline] = useState<RecognizedFieldGateDraft>({
@@ -34,6 +35,17 @@ export function RecognizedFieldsPage() {
   const [catalogBusy, setCatalogBusy] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const [openCreateRequest, setOpenCreateRequest] = useState(false);
+
+  useEffect(() => {
+    if (searchParams.get('create') !== '1' || loading) {
+      return;
+    }
+    setOpenCreateRequest(true);
+    const next = new URLSearchParams(searchParams);
+    next.delete('create');
+    setSearchParams(next, { replace: true });
+  }, [loading, searchParams, setSearchParams]);
 
   useEffect(() => {
     void Promise.all([listRecognizedFields(), listTags(), getWorkspaceMlSettings()])
@@ -51,7 +63,9 @@ export function RecognizedFieldsPage() {
       .catch((err: unknown) => {
         setLoadError(formatUserFacingError(err, 'recognizedFields.loadFailed'));
       })
-      .finally(() => { setLoading(false); });
+      .finally(() => {
+        setLoading(false);
+      });
   }, []);
 
   const validationMessages = useMemo(
@@ -126,6 +140,10 @@ export function RecognizedFieldsPage() {
               gateDefaults={gateBaseline}
               catalogBusy={catalogBusy}
               onPersistFields={persistCatalog}
+              openCreateRequest={openCreateRequest}
+              onOpenCreateRequestHandled={() => {
+                setOpenCreateRequest(false);
+              }}
             />
             <p className="muted settings-hint recognized-fields-labels-link">
               {t('recognizedFields.labelsHint')}{' '}

@@ -43,9 +43,10 @@ export function useStructuringPrimary(): {
   const select = useCallback((next: StructuringPrimary) => {
     const command = commandForPrimary(next);
     setPrimary(command.primary);
-    const editing = command.stage === 'text';
-    setTextOpen(editing);
-    setTextEditing(editing);
+    const textStage = command.stage === 'text';
+    setTextOpen(textStage);
+    // Text prüfen opens as a layout-preserving editor (WYSIWYG); toggle still turns editing off.
+    setTextEditing(textStage);
     return command;
   }, []);
 

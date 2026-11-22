@@ -1,7 +1,15 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import * as pdfjs from 'pdfjs-dist';
-import { type ReactNode, useCallback, useEffect, useRef, useState } from 'react';
+import {
+  type ReactNode,
+  startTransition,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { formatUserFacingError } from '../../lib/apiErrors';
@@ -159,6 +167,22 @@ function appendLayoutOverlays(
   }
 }
 
+function isPdfRenderCancelled(err: unknown): boolean {
+  return (
+    typeof err === 'object' &&
+    err !== null &&
+    'name' in err &&
+    (err.name === 'RenderingCancelledException' || err.name === 'AbortException')
+  );
+}
+
+interface PdfPageRenderResult {
+  wrap: HTMLDivElement;
+  cancel: () => void;
+  /** Text layer + highlights + overlays; safe to await after mounting `wrap`. */
+  enhance: () => Promise<void>;
+}
+
 async function renderPdfPage(
   page: pdfjs.PDFPageProxy,
   pageNum: number,
@@ -170,7 +194,7 @@ async function renderPdfPage(
   onPageClick?: (page: number, nx: number, ny: number) => void,
   onLayoutOverlaySelect?: (id: string) => void,
   onLayoutOverlayHover?: (overlay: PdfLayoutOverlay | null) => void
-): Promise<HTMLDivElement> {
+): Promise<PdfPageRenderResult> {
   const viewport = page.getViewport({ scale });
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
@@ -179,7 +203,15 @@ async function renderPdfPage(
   canvas.height = viewport.height;
   canvas.className = 'pdf-page-canvas';
 
-  await page.render({ canvasContext: ctx, viewport }).promise;
+  const renderTask = page.render({ canvasContext: ctx, viewport });
+  try {
+    await renderTask.promise;
+  } catch (err: unknown) {
+    if (isPdfRenderCancelled(err)) {
+      throw err;
+    }
+    throw err;
+  }
 
   const wrap = document.createElement('div');
   wrap.className = 'pdf-page-wrap';
@@ -190,41 +222,53 @@ async function renderPdfPage(
   wrap.style.width = `${String(viewport.width)}px`;
   wrap.style.height = `${String(viewport.height)}px`;
   wrap.appendChild(canvas);
-
-  const textLayer = document.createElement('div');
-  textLayer.className = 'textLayer';
-  wrap.appendChild(textLayer);
-
-  const textContent = await page.getTextContent();
-  appendTextLayer(textContent, viewport, textLayer);
-
-  const pageHighlights = highlightBlocks.filter((b) => b.page === pageNum);
-  pageHighlights.forEach((block, i) => {
-    const mark = document.createElement('div');
-    mark.className =
-      i === 0 && pageHighlights.length > 0
-        ? 'pdf-block-highlight pdf-block-highlight-active'
-        : 'pdf-block-highlight';
-    mark.style.left = `${String(block.x * 100)}%`;
-    mark.style.top = `${String(block.y * 100)}%`;
-    mark.style.width = `${String(Math.max(block.width * 100, 0.4))}%`;
-    mark.style.height = `${String(Math.max(block.height * 100, 0.35))}%`;
-    wrap.appendChild(mark);
-  });
-
-  appendLayoutOverlays(
-    wrap,
-    pageNum,
-    layoutOverlays,
-    layoutOverlayEnabled,
-    activeLayoutOverlayId,
-    onLayoutOverlaySelect,
-    onLayoutOverlayHover
-  );
-
   bindPageClick(wrap, pageNum, onPageClick);
 
-  return wrap;
+  let enhanceEpoch = 0;
+  const cancel = () => {
+    enhanceEpoch += 1;
+    try {
+      renderTask.cancel();
+    } catch {
+      // already finished or cancelled
+    }
+  };
+
+  const enhance = async () => {
+    const epoch = enhanceEpoch;
+    const textLayer = document.createElement('div');
+    textLayer.className = 'textLayer';
+    wrap.appendChild(textLayer);
+    const textContent = await page.getTextContent();
+    if (epoch !== enhanceEpoch) return;
+    appendTextLayer(textContent, viewport, textLayer);
+
+    const pageHighlights = highlightBlocks.filter((b) => b.page === pageNum);
+    pageHighlights.forEach((block, i) => {
+      const mark = document.createElement('div');
+      mark.className =
+        i === 0 && pageHighlights.length > 0
+          ? 'pdf-block-highlight pdf-block-highlight-active'
+          : 'pdf-block-highlight';
+      mark.style.left = `${String(block.x * 100)}%`;
+      mark.style.top = `${String(block.y * 100)}%`;
+      mark.style.width = `${String(Math.max(block.width * 100, 0.4))}%`;
+      mark.style.height = `${String(Math.max(block.height * 100, 0.35))}%`;
+      wrap.appendChild(mark);
+    });
+
+    appendLayoutOverlays(
+      wrap,
+      pageNum,
+      layoutOverlays,
+      layoutOverlayEnabled,
+      activeLayoutOverlayId,
+      onLayoutOverlaySelect,
+      onLayoutOverlayHover
+    );
+  };
+
+  return { wrap, cancel, enhance };
 }
 
 async function resolveRenderScale(
@@ -323,24 +367,32 @@ export function PdfViewer({
   useEffect(() => {
     currentPageRef.current = currentPage;
   }, [currentPage]);
-  const highlightKey = JSON.stringify(highlightBlocks);
-  const overlayKey = JSON.stringify({
-    overlays: layoutOverlays,
-    enabled: layoutOverlayEnabled,
-    active: activeLayoutOverlayId,
-  });
+  const highlightKey = useMemo(() => JSON.stringify(highlightBlocks), [highlightBlocks]);
+  const overlayKey = useMemo(
+    () =>
+      JSON.stringify({
+        overlays: layoutOverlays,
+        enabled: layoutOverlayEnabled,
+        active: activeLayoutOverlayId,
+      }),
+    [layoutOverlays, layoutOverlayEnabled, activeLayoutOverlayId]
+  );
   const sourceKey = data ? `buf:${String(data.byteLength)}` : (url ?? '');
+  const renderCancelRef = useRef<(() => void) | null>(null);
 
   const setPage = useCallback(
     (next: number) => {
       const clamped = Math.min(Math.max(1, next), Math.max(1, pageCount));
-      if (isControlled) {
-        onPageChange(clamped);
-      } else {
-        setInternalPage(clamped);
-      }
+      // Keep chrome responsive while the page tree and canvas catch up.
+      startTransition(() => {
+        if (onPageChange) {
+          onPageChange(clamped);
+        } else {
+          setInternalPage(clamped);
+        }
+      });
     },
-    [isControlled, onPageChange, pageCount]
+    [onPageChange, pageCount]
   );
 
   useEffect(() => {
@@ -440,6 +492,8 @@ export function PdfViewer({
     if (fitWidth && containerWidth == null) return;
 
     const generation = ++effectGenerationRef.current;
+    renderCancelRef.current?.();
+    renderCancelRef.current = null;
 
     void (async () => {
       try {
@@ -456,10 +510,13 @@ export function PdfViewer({
           zoomFactor;
 
         const renderKey = `${String(docToken)}:${String(currentPage)}:${String(pageRotation)}:${String(Math.round(scale * 1000))}:${String(containerWidth ?? 0)}:${highlightKey}:${overlayKey}:paginated:${String(Math.round(zoomFactor * 100))}`;
-        if (lastPageRenderKeyRef.current === renderKey && pagesHost.childElementCount > 0) {
+        const existingWrap = pagesHost.querySelector('.pdf-page-wrap');
+        if (
+          lastPageRenderKeyRef.current === renderKey &&
+          existingWrap?.querySelector('.textLayer')
+        ) {
           return;
         }
-        lastPageRenderKeyRef.current = renderKey;
 
         if (generation !== effectGenerationRef.current) return;
         const hadPages = pagesHost.childElementCount > 0;
@@ -467,7 +524,7 @@ export function PdfViewer({
 
         const pdfPage = await pdf.getPage(currentPage);
         if (generation !== effectGenerationRef.current) return;
-        const wrap = await renderPdfPage(
+        const rendered = await renderPdfPage(
           pdfPage,
           currentPage,
           highlights,
@@ -479,11 +536,20 @@ export function PdfViewer({
           (id) => onLayoutOverlaySelectRef.current?.(id),
           (o) => onLayoutOverlayHoverRef.current?.(o)
         );
-        applyPageDisplayRotation(wrap, pageRotation);
-        if (generation !== effectGenerationRef.current) return;
-        pagesHost.replaceChildren(wrap);
+        if (generation !== effectGenerationRef.current) {
+          rendered.cancel();
+          return;
+        }
+        renderCancelRef.current = rendered.cancel;
+        applyPageDisplayRotation(rendered.wrap, pageRotation);
+        pagesHost.replaceChildren(rendered.wrap);
         setRenderedPages(1);
+        setLoading(false);
+        await rendered.enhance();
+        if (generation !== effectGenerationRef.current) return;
+        lastPageRenderKeyRef.current = renderKey;
       } catch (err) {
+        if (isPdfRenderCancelled(err)) return;
         if (generation === effectGenerationRef.current) {
           setError(formatUserFacingError(err, 'errors.pdfPageLoadFailed'));
         }
@@ -494,6 +560,8 @@ export function PdfViewer({
 
     return () => {
       effectGenerationRef.current += 1;
+      renderCancelRef.current?.();
+      renderCancelRef.current = null;
     };
   }, [
     docToken,
@@ -608,18 +676,22 @@ export function PdfViewer({
           delete slot.dataset.renderStamp;
         }
 
+        const cancels: (() => void)[] = [];
         await Promise.all(
           [...virtualRenderWindow].map(async (pageNum) => {
             const slot = pagesHost.querySelector<HTMLElement>(
               `.pdf-page-slot[data-page="${String(pageNum)}"]`
             );
             if (!slot) return;
-            if (slot.dataset.renderStamp === renderStamp && slot.childElementCount > 0) {
+            if (
+              slot.dataset.renderStamp === renderStamp &&
+              slot.querySelector('.textLayer')
+            ) {
               return;
             }
             const pdfPage = await pdf.getPage(pageNum);
             if (generation !== effectGenerationRef.current) return;
-            const wrap = await renderPdfPage(
+            const rendered = await renderPdfPage(
               pdfPage,
               pageNum,
               highlights,
@@ -631,19 +703,29 @@ export function PdfViewer({
               (id) => onLayoutOverlaySelectRef.current?.(id),
               (o) => onLayoutOverlayHoverRef.current?.(o)
             );
+            if (generation !== effectGenerationRef.current) {
+              rendered.cancel();
+              return;
+            }
+            cancels.push(rendered.cancel);
             applyPageDisplayRotation(
-              wrap,
+              rendered.wrap,
               rotationForRenderedPage(pageNum, currentPage, displayRotationDeg, pageRotations)
             );
+            slot.replaceChildren(rendered.wrap);
+            await rendered.enhance();
             if (generation !== effectGenerationRef.current) return;
-            slot.replaceChildren(wrap);
             slot.dataset.renderStamp = renderStamp;
           })
         );
         if (generation === effectGenerationRef.current) {
           setRenderedPages(virtualRenderWindow.size);
+          renderCancelRef.current = () => {
+            for (const cancel of cancels) cancel();
+          };
         }
       } catch (err) {
+        if (isPdfRenderCancelled(err)) return;
         if (generation === effectGenerationRef.current) {
           setError(formatUserFacingError(err, 'errors.pdfPageLoadFailed'));
         }
@@ -652,6 +734,8 @@ export function PdfViewer({
 
     return () => {
       effectGenerationRef.current += 1;
+      renderCancelRef.current?.();
+      renderCancelRef.current = null;
     };
   }, [
     paginated,
@@ -756,7 +840,7 @@ export function PdfViewer({
               type="button"
               variant="ghost"
               className="pdf-viewer-pager-btn"
-              disabled={currentPage <= 1 || loading}
+              disabled={currentPage <= 1 || (loading && renderedPages === 0)}
               onClick={() => {
                 setPage(currentPage - 1);
               }}
@@ -771,7 +855,7 @@ export function PdfViewer({
               type="button"
               variant="ghost"
               className="pdf-viewer-pager-btn"
-              disabled={currentPage >= pageCount || loading}
+              disabled={currentPage >= pageCount || (loading && renderedPages === 0)}
               onClick={() => {
                 setPage(currentPage + 1);
               }}

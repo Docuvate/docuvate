@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { Check, ChevronDown, Eye, FileText, Layers, RotateCw, ScanText } from 'lucide-react';
+import { ChevronDown, Eye, FileText, RotateCw, ScanText } from 'lucide-react';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -23,8 +23,6 @@ interface DocumentLayoutViewerToolbarProps {
   showTechnicalDetails: boolean;
   qualityTone: ReturnType<typeof reconstructionQualityTone>;
   qualityPage: number;
-  /** Recognised regions drawn over the page; undefined when there is nothing to show. */
-  overlay?: { enabled: boolean; onChange: (enabled: boolean) => void };
   /** Turn the page view; undefined where the view cannot rotate. */
   onRotate?: () => void;
 }
@@ -41,7 +39,6 @@ export function DocumentLayoutViewerToolbar({
   showTechnicalDetails,
   qualityTone,
   qualityPage,
-  overlay,
   onRotate,
 }: DocumentLayoutViewerToolbarProps) {
   const { t } = useTranslation();
@@ -120,18 +117,7 @@ export function DocumentLayoutViewerToolbar({
                 onLeftModeChange('text');
               }}
             />
-            {overlay || onRotate ? <hr className="document-detail-overflow-divider" /> : null}
-            {overlay ? (
-              <MenuItem
-                role="menuitemcheckbox"
-                aria-checked={overlay.enabled}
-                icon={overlay.enabled ? Check : Layers}
-                label={t('documents.layoutOverlayToggle')}
-                onClick={() => {
-                  overlay.onChange(!overlay.enabled);
-                }}
-              />
-            ) : null}
+            {onRotate ? <hr className="document-detail-overflow-divider" /> : null}
             {onRotate ? (
               <MenuItem
                 role="menuitem"

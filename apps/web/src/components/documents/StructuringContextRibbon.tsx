@@ -4,10 +4,7 @@ import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 
 import { ribbonActionClass } from '../../lib/ribbonAction';
-import {
-  contextToolsFor,
-  type StructuringPrimary,
-} from '../../lib/structuringRibbon';
+import { contextToolsFor, type StructuringPrimary } from '../../lib/structuringRibbon';
 import { RibbonGroup } from '../layout/AppRibbon';
 import { useAppRibbonContextSlot } from '../layout/appRibbonContext';
 import { Button } from '../ui/Button';
@@ -25,6 +22,8 @@ interface StructuringContextRibbonProps {
   hasOverlays: boolean;
   overlayEnabled: boolean;
   onOverlayChange: (enabled: boolean) => void;
+  /** Table structure tools own the context row while the table overlay is open. */
+  paused?: boolean;
 }
 
 /**
@@ -43,11 +42,12 @@ export function StructuringContextRibbon({
   hasOverlays,
   overlayEnabled,
   onOverlayChange,
+  paused = false,
 }: StructuringContextRibbonProps) {
   const slot = useAppRibbonContextSlot();
   const { t } = useTranslation();
   const tools = contextToolsFor(primary, { textDirty, hasOverlays });
-  if (!slot || tools.length === 0 || primary === null) return null;
+  if (paused || !slot || tools.length === 0 || primary === null) return null;
   const textTools = primary === 'text';
   const label = textTools ? t('ribbon.toolsText') : t('ribbon.toolsLayout');
   const hint = textTools
@@ -55,7 +55,7 @@ export function StructuringContextRibbon({
     : t(`documents.selectionToolHint.${selectionTool}`);
 
   return createPortal(
-    <RibbonGroup label={label} showCaption={false}>
+    <RibbonGroup label={label} showCaption>
       <div className="structuring-context" data-testid="structuring-context" data-primary={primary}>
         {textTools ? (
           <>
@@ -95,7 +95,11 @@ export function StructuringContextRibbon({
               className={ribbonActionClass(overlayEnabled ? 'secondary' : 'tertiary')}
               aria-pressed={hasOverlays ? overlayEnabled : undefined}
               disabled={!hasOverlays}
-              title={hasOverlays ? t('documents.layoutOverlayToggle') : t('documents.ribbonOverlayUnavailable')}
+              title={
+                hasOverlays
+                  ? t('documents.layoutOverlayToggle')
+                  : t('documents.ribbonOverlayUnavailable')
+              }
               data-testid="structuring-overlay"
               onClick={() => {
                 onOverlayChange(!overlayEnabled);

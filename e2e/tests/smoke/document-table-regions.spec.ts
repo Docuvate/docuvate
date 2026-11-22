@@ -137,9 +137,11 @@ test.describe('document table regions', () => {
     });
     const card = page.getByTestId('corrected-table-card');
     await expect(card).toBeVisible({ timeout: 30_000 });
-    // Structure edits are a draft on the real table; the header stepper is directly on the card.
+    // Wide layout portals structure tools into the ribbon (not the card).
+    const tools = page.getByTestId('app-ribbon-context').getByTestId('table-structure-tools');
+    await expect(tools).toBeVisible({ timeout: 30_000 });
     // The detected header count may already be right, so step it away from whatever was inferred.
-    const headerGroup = card.getByRole('group', { name: /Kopfzeilen|Header rows/i });
+    const headerGroup = tools.getByRole('group', { name: /Kopfzeilen|Header rows/i });
     const headerRows = headerGroup.getByRole('spinbutton');
     const detectedHeaderRows = await headerRows.inputValue();
     const moreHeaderRows = headerGroup.getByRole('button', { name: /(Mehr|More)$/ });
@@ -149,7 +151,7 @@ test.describe('document table regions', () => {
         : headerGroup.getByRole('button', { name: /(Weniger|Fewer)$/ })
     ).click();
     await expect(headerRows).not.toHaveValue(detectedHeaderRows);
-    await expect(card.getByRole('button', { name: /^(Übernehmen|Apply)$/ })).toBeVisible();
+    await expect(tools.getByRole('button', { name: /^(Übernehmen|Apply)$/ })).toBeVisible();
     const firstCell = card.locator('.layout-table-cell-input').first();
     await firstCell.fill('Position');
     // A pending save re-selects its table when it resolves, which would reopen the narrow sheet
@@ -163,7 +165,6 @@ test.describe('document table regions', () => {
 
     // Table family: header band, result footer, lines and merged cells saved as one correction.
     // The template control is the family menu, not a native select.
-    const tools = card.first().getByTestId('table-structure-tools');
     await tools.getByTestId('table-family-menu').click();
     await page.getByRole('option', { name: /Finanzlayout|Financial/i }).click();
     await Promise.all([
@@ -188,10 +189,7 @@ test.describe('document table regions', () => {
         await expect(openTableSheet).toHaveCount(0);
       }
       await showLayoutPane(page, 'panel');
-      await page
-        .locator('.layout-side-tabs')
-        .getByRole('tab', { name: /Tabellen|Tables/i })
-        .click({ force: true });
+      await page.getByTestId('layout-panel-tab-tables').click({ force: true });
       if (viewport.width < 1024) {
         const sheet = page.getByTestId('table-correction-sheet');
         // Tab change auto-selects the first table when none is selected. If selection
@@ -219,10 +217,7 @@ test.describe('document table regions', () => {
       await captureViewportScreenshot(page, testInfo, `table-regions-${viewport.name}-light.png`);
       if (viewport.width < 1024) {
         await assertTableCorrectionSheet(page);
-        await assertToastMissesSheetActions(
-          page,
-          '[data-testid="table-correction-sheet"] [data-testid="table-structure-tools"]'
-        );
+        await assertToastMissesSheetActions(page, '[data-testid="table-structure-tools"]');
       } else {
         await expect(page.locator('[data-testid="table-correction-sheet"]')).toHaveCount(0);
       }

@@ -2519,6 +2519,7 @@
       "state": {
         "confirmed": "Confirmed",
         "suggested": "Suggestion",
+        "missing": "Missing",
         "review": "Open",
         "rejected": "Rejected"
       },
@@ -2546,10 +2547,10 @@
     "aspects": {
       "aria": "Structuring status",
       "name": {
-        "ocr": "Text",
-        "labels": "Labels",
+        "ocr": "Review text",
+        "labels": "Assign labels",
         "layout": "Layout",
-        "fields": "Fields"
+        "fields": "Recognized fields"
       },
       "state": {
         "pending": "not processed",
@@ -2569,7 +2570,7 @@
   "tableLayouts": {
     "apply": "Apply",
     "families": {
-      "simple": "Simple table",
+      "simple": "Simple table / ticket",
       "matrix": "Matrix",
       "nested": "Multi-level header",
       "financial": "Financial layout",
@@ -2605,6 +2606,21 @@
     "mergeCells": "Merge cells",
     "splitCells": "Split cells",
     "directHint": "Pick a row's kind at its left edge. To merge, click a cell, then Shift+click (or Shift+Alt+Arrow) a second one.",
+    "toolsInRibbonHint": "Structure tools are in the ribbon above. Grid and values stay here.",
+    "insertRow": "Insert row",
+    "insertCol": "Insert column",
+    "deleteRow": "Delete row",
+    "deleteCol": "Delete column",
+    "distributeRows": "Distribute rows",
+    "distributeCols": "Distribute columns",
+    "exportCsv": "Export CSV",
+    "csvSeparator": ",",
+    "miniBarAria": "Table mini toolbar",
+    "rowGuideAria": "Drag row divider {{n}}",
+    "colGuideAria": "Drag column divider {{n}}",
+    "dragGuidesHint": "Drag lines to move them. Double-click a cell to add a row or column through that point.",
+    "splitCellHint": "Double-click to split this cell (add a row or column line)",
+    "guidesSaved": "Grid lines saved",
     "rowKinds": {
       "header": "Header",
       "data": "Data",
@@ -2614,17 +2630,18 @@
     },
     "rowKindAria": "Kind of row {{row}}",
     "familyHints": {
-      "simple": "Plain rows and columns with one header row.",
+      "simple": "Plain rows and columns (e.g. weigh ticket), one header row. Grid follows your selection.",
       "matrix": "First column as row labels.",
       "nested": "Two header rows, e.g. grouped columns.",
       "financial": "Footer rows for totals and tax.",
       "grouped": "Sections with subtotals in the body.",
       "key_value": "Label on the left, value on the right  -  no grid."
     },
-    "editInDocument": "Edit on document",
+    "editInDocument": "Adjust frame",
     "exitDocumentEdit": "Close overlay",
     "saveBounds": "Save table frame",
     "resizeBounds": "Resize table frame",
+    "redetectGrid": "Re-detect grid",
     "cellAria": "Cell row {{row}}, column {{col}}"
   },
   "ribbon": {
@@ -2632,6 +2649,7 @@
     "views": "Pinned",
     "area": "Area",
     "structure": "Structure",
+    "structureActions": "Actions",
     "capture": "Capture",
     "display": "Display",
     "output": "Output",
@@ -2640,6 +2658,14 @@
     "inspector": "Inspector",
     "toolsText": "Text",
     "toolsLayout": "Layout",
+    "tableTools": "Table",
+    "layoutPanel": "Document structure",
+    "panel": "Panel",
+    "panelAria": "Open inspector panel",
+    "panelClose": "Close panel",
+    "identity": "Document",
+    "identityBackAria": "Back to documents",
+    "selection": "Selection",
     "autoImport": "Auto-import",
     "autoImportHint": "Set up connections that import documents automatically: mailbox, scanner/SFTP or Paperless-ngx"
   }

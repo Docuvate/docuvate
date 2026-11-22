@@ -32,7 +32,7 @@ describe('workbenchRows', () => {
     expect(openWorkbenchRowCount(rows)).toBe(3);
   });
 
-  it('skips empty values and suggestions that already are fields', () => {
+  it('keeps empty catalog slots as missing after filled review rows', () => {
     const rows = workbenchRows(
       [
         { key: 'a', value: ' ' },
@@ -40,7 +40,10 @@ describe('workbenchRows', () => {
       ],
       [{ key: 'b', value: 'y' }]
     );
-    expect(rows.map((row) => row.key)).toEqual(['b']);
+    expect(rows.map((row) => [row.key, row.state])).toEqual([
+      ['b', 'review'],
+      ['a', 'missing'],
+    ]);
   });
 });
 

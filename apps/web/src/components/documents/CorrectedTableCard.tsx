@@ -7,36 +7,20 @@ import type {
   TableBand,
   TableRuleLine,
 } from '@docuvate/contracts';
-import {
-  isTableIndexCol,
-  tableGridSize,
-  tableRowBand,
-  validTableStructure,
-} from '@docuvate/contracts';
-import { Combine, SlidersHorizontal, Split } from 'lucide-react';
-import { type KeyboardEvent, useId, useState } from 'react';
+import { isTableIndexCol, tableRowBand } from '@docuvate/contracts';
 import { useTranslation } from 'react-i18next';
 
 import {
-  designTable,
-  familyDesign,
-  type GridSize,
-  MAX_BAND_ROWS,
   mergeAt,
-  TABLE_INDEX_POSITIONS,
   TABLE_ROW_KINDS,
-  TABLE_RULING_CHOICES,
-  type TableDesign,
-  tableDesignOf,
   type TableRowKind,
   tableRowKind,
   type TableStructureChoice,
-  tableStructureOf,
-  toggleTableMerge,
-  withRowKind,
+  upsertTableCell,
 } from '../../lib/tableLayouts';
-import { Button } from '../ui/Button';
-import { TableFamilyMenu } from './table/TableFamilyMenu';
+import { useTableStructureEditorContext } from './table/TableStructureEditorContext';
+import { TableStructureTools } from './table/TableStructureTools';
+import { useTableStructureEditor } from './table/useTableStructureEditor';
 
 const BANDS: readonly TableBand[] = ['header', 'body', 'footer'];
 const BAND_SECTION = { header: 'thead', body: 'tbody', footer: 'tfoot' } as const;
@@ -56,10 +40,6 @@ function lineAt(
   return line === undefined || line === 'unknown' ? undefined : line;
 }
 
-function sameStructure(a: TableStructureChoice, b: TableStructureChoice): boolean {
-  return JSON.stringify(a) === JSON.stringify(b);
-}
-
 function between(value: number, a: number, b: number): boolean {
   return value - Math.min(a, b) >= 0 && Math.max(a, b) - value >= 0;
 }
@@ -68,74 +48,28 @@ function inRange(cell: Cell, a: Cell, b: Cell): boolean {
   return between(cell.row, a.row, b.row) && between(cell.col, a.col, b.col);
 }
 
-interface StepperProps {
-  label: string;
-  value: number;
-  max: number;
-  onChange: (value: number) => void;
-}
-
-/** − n + with a real number input, so the value can also be typed. */
-function Stepper({ label, value, max, onChange }: StepperProps) {
-  const { t } = useTranslation();
-  const set = (next: number) => {
-    onChange(Math.max(0, Math.min(max, next)));
-  };
-  return (
-    <div className="table-tool-stepper" role="group" aria-label={label}>
-      <span className="table-tool-label">{label}</span>
-      <span className="table-tool-stepper-box">
-        <button
-          type="button"
-          aria-label={`${label}: ${t('tableLayouts.less')}`}
-          disabled={value <= 0}
-          onClick={() => {
-            set(value - 1);
-          }}
-        >
-          −
-        </button>
-        <input
-          type="number"
-          min={0}
-          max={max}
-          value={value}
-          aria-label={label}
-          onChange={(event) => {
-            set(Number(event.target.value));
-          }}
-        />
-        <button
-          type="button"
-          aria-label={`${label}: ${t('tableLayouts.more')}`}
-          disabled={value >= max}
-          onClick={() => {
-            set(value + 1);
-          }}
-        >
-          +
-        </button>
-      </span>
-    </div>
-  );
-}
-
 interface CorrectedTableCardProps {
   region: DocumentRegionDto;
   index: number;
   active: boolean;
   onSelect: () => void;
-  /** Open the spatial table overlay on the PDF. */
+  /** Open the spatial table overlay on the PDF (resize frame + cell pick). */
   onEditInDocument?: () => void;
+  /** Re-infer row/col rules from the current frame on the document. */
+  onRedetect?: () => void;
   onCellChange?: (row: number, col: number, text: string) => void;
   /** Bands, index columns, row roles, spans and lines in one correction. */
   onLayoutApply?: (choice: TableStructureChoice) => void;
+  /**
+   * Layout workspace owns structure verbs in the context ribbon — never render a second
+   * toolbar on non-selected (or selected) cards.
+   */
+  preferRibbonTools?: boolean;
 }
 
 /**
  * A recognised table you edit in place: cell text directly, row kinds in the row gutter, spans by
- * selecting cells, and the few global choices (template, header and result rows) in one compact
- * toolbar. Structure changes stay a visible draft on the real table until "Übernehmen".
+ * selecting cells. Structure tools live in the context ribbon when the layout workspace shares draft state.
  */
 export function CorrectedTableCard({
   region,
@@ -143,8 +77,10 @@ export function CorrectedTableCard({
   active,
   onSelect,
   onEditInDocument,
+  onRedetect,
   onCellChange,
   onLayoutApply,
+  preferRibbonTools = false,
 }: CorrectedTableCardProps) {
   const table = region.table;
   if (!table) {
@@ -152,15 +88,17 @@ export function CorrectedTableCard({
   }
   return (
     <TableEditor
-      key={`${region.id}:${JSON.stringify(tableStructureOf(table))}`}
+      key={region.id}
       region={region}
       table={table}
       index={index}
       active={active}
       onSelect={onSelect}
       onEditInDocument={onEditInDocument}
+      onRedetect={onRedetect}
       onCellChange={onCellChange}
       onLayoutApply={onLayoutApply}
+      preferRibbonTools={preferRibbonTools}
     />
   );
 }
@@ -172,81 +110,43 @@ function TableEditor({
   active,
   onSelect,
   onEditInDocument,
+  onRedetect,
   onCellChange,
   onLayoutApply,
+  preferRibbonTools = false,
 }: CorrectedTableCardProps & { table: DocumentRegionTableDto }) {
   const { t } = useTranslation();
-  const toolsId = useId();
-  const grid: GridSize = tableGridSize(table);
-  const saved = tableStructureOf(table);
-  const [draft, setDraft] = useState<TableStructureChoice>(saved);
-  const [design, setDesign] = useState<TableDesign>(() => tableDesignOf(table));
-  const [moreOpen, setMoreOpen] = useState(false);
-  const [anchor, setAnchor] = useState<Cell | null>(null);
-  const [extent, setExtent] = useState<Cell | null>(null);
+  const sharedCtx = useTableStructureEditorContext();
+  // Provider holds the *selected* table only — never apply its draft to other cards.
+  const shared = sharedCtx?.region.id === region.id ? sharedCtx : null;
+  const local = useTableStructureEditor(region, table);
+  const editor = shared ?? local;
+  const structureToolsInRibbon = preferRibbonTools || shared !== null;
   const editable = onLayoutApply !== undefined;
-  const dirty = !sameStructure(draft, saved) || draft.ruleLines !== undefined;
-  const shape = { ...grid, ...draft };
-  const valid = validTableStructure(shape);
-  const lines = draft.ruleLines ?? table.rules.map(({ axis, ord, line }) => ({ axis, ord, line }));
-  const rangeEnd = extent ?? anchor;
-  const anchorMerge = anchor ? mergeAt(draft.merges, anchor.row, anchor.col) : null;
-  const multi =
-    anchor !== null &&
-    rangeEnd !== null &&
-    (anchor.row !== rangeEnd.row || anchor.col !== rangeEnd.col);
 
-  function applyDesign(next: TableDesign) {
-    setDesign(next);
-    setDraft(designTable(next, grid, table.cells));
-    setAnchor(null);
-    setExtent(null);
-  }
+  const {
+    draft,
+    setDraft,
+    workingTable,
+    grid,
+    dirty,
+    shape,
+    lines,
+    anchor,
+    setAnchor,
+    setExtent,
+    rangeEnd,
+    setRowKind,
+    onCellKeyDown,
+  } = editor;
 
-  function setRowKind(row: number, kind: TableRowKind) {
-    const next = withRowKind(draft, grid, row, kind);
-    setDraft(next);
-    setDesign((prev) => ({
-      ...prev,
-      headerLevels: Math.min(next.headerRows, MAX_BAND_ROWS),
-      footerRows: Math.min(next.footerRows, MAX_BAND_ROWS),
-      grouped: next.rowRoles.length > 0,
-    }));
-  }
-
-  function toggleMerge() {
-    if (!anchor || !rangeEnd) return;
-    const target = multi ? rangeEnd : anchor;
-    const merges = multi
-      ? toggleTableMerge(draft.merges, anchor, target)
-      : anchorMerge
-        ? draft.merges.filter((merge) => merge !== anchorMerge)
-        : draft.merges;
-    setDraft({ ...draft, merges });
-    setExtent(null);
-  }
-
-  function onCellKeyDown(event: KeyboardEvent<HTMLInputElement>, cell: Cell) {
-    if (!event.shiftKey || !event.altKey) return;
-    const from = extent ?? cell;
-    const step = new Map<string, Cell>([
-      ['ArrowRight', { row: from.row, col: Math.min(grid.cols - 1, from.col + 1) }],
-      ['ArrowLeft', { row: from.row, col: Math.max(0, from.col - 1) }],
-      ['ArrowDown', { row: Math.min(grid.rows - 1, from.row + 1), col: from.col }],
-      ['ArrowUp', { row: Math.max(0, from.row - 1), col: from.col }],
-    ]);
-    const next = step.get(event.key);
-    if (!next) return;
-    event.preventDefault();
-    if (!anchor) setAnchor(cell);
-    setExtent(next);
-  }
+  const showInlineTools = editable && !structureToolsInRibbon;
 
   const kindLabel = (kind: TableRowKind) => t(`tableLayouts.rowKinds.${kind}`);
 
   return (
     <section
-      className={`layout-table-card${active ? ' layout-table-card-active' : ''}${dirty ? ' layout-table-card--draft' : ''}`}
+      className={`layout-table-card${active ? ' layout-table-card-active' : ''}${dirty ? ' layout-table-card--draft' : ''}${structureToolsInRibbon ? ' layout-table-card--ribbon-tools' : ''}`}
       data-testid="corrected-table-card"
       data-layout-overlay-target={`region-table-${region.id}`}
     >
@@ -262,164 +162,21 @@ function TableEditor({
         {dirty ? <span className="layout-table-draft-badge">{t('tableLayouts.draft')}</span> : null}
       </div>
 
-      {editable ? (
-        <div
-          className="table-tools"
-          role="toolbar"
-          aria-label={t('tableLayouts.toolbarAria', { n: index + 1 })}
-          data-testid="table-structure-tools"
-        >
-          <div className="table-tools-row">
-            <div className="table-tool-field">
-              <span className="table-tool-label">{t('tableLayouts.template')}</span>
-              <TableFamilyMenu
-                value={design.family}
-                onChange={(family) => {
-                  applyDesign(familyDesign(family));
-                }}
-              />
-            </div>
-            {onEditInDocument ? (
-              <Button
-                type="button"
-                size="sm"
-                variant="secondary"
-                data-testid="table-edit-in-document"
-                onClick={onEditInDocument}
-              >
-                {t('tableLayouts.editInDocument')}
-              </Button>
-            ) : null}
-            <Stepper
-              label={t('documents.tableHeaderRows')}
-              value={draft.headerRows}
-              max={Math.min(MAX_BAND_ROWS, Math.max(0, grid.rows - 1))}
-              onChange={(headerLevels) => {
-                applyDesign({ ...design, headerLevels });
-              }}
-            />
-            <Stepper
-              label={t('tableLayouts.footerRows')}
-              value={draft.footerRows}
-              max={Math.min(MAX_BAND_ROWS, Math.max(0, grid.rows - 1))}
-              onChange={(footerRows) => {
-                applyDesign({ ...design, footerRows });
-              }}
-            />
-            <button
-              type="button"
-              className="table-tool-btn"
-              aria-expanded={moreOpen}
-              aria-controls={toolsId}
-              onClick={() => {
-                setMoreOpen((open) => !open);
-              }}
-            >
-              <SlidersHorizontal size={14} aria-hidden />
-              {t('tableLayouts.appearance')}
-            </button>
-            <button
-              type="button"
-              className="table-tool-btn"
-              disabled={!anchor || (!multi && !anchorMerge)}
-              onClick={toggleMerge}
-            >
-              {multi || !anchorMerge ? (
-                <Combine size={14} aria-hidden />
-              ) : (
-                <Split size={14} aria-hidden />
-              )}
-              {multi || !anchorMerge ? t('tableLayouts.mergeCells') : t('tableLayouts.splitCells')}
-            </button>
-            {dirty ? (
-              <span className="table-tools-commit">
-                <Button
-                  type="button"
-                  size="sm"
-                  disabled={!valid}
-                  onClick={() => {
-                    onLayoutApply(draft);
-                  }}
-                >
-                  {t('tableLayouts.apply')}
-                </Button>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => {
-                    setDraft(saved);
-                    setDesign(tableDesignOf(table));
-                    setAnchor(null);
-                    setExtent(null);
-                  }}
-                >
-                  {t('tableLayouts.discard')}
-                </Button>
-              </span>
-            ) : null}
-          </div>
-          <div className="table-tools-row table-tools-row--more" id={toolsId} hidden={!moreOpen}>
-            <label className="table-tool-field">
-              <span className="table-tool-label">{t('tableLayouts.index')}</span>
-              <select
-                className="table-tool-select"
-                value={design.index}
-                onChange={(event) => {
-                  const position = TABLE_INDEX_POSITIONS.find(
-                    (item) => item === event.target.value
-                  );
-                  if (position) applyDesign({ ...design, index: position });
-                }}
-              >
-                {TABLE_INDEX_POSITIONS.map((position) => (
-                  <option key={position} value={position}>
-                    {t(`tableLayouts.indexOptions.${position}`)}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="table-tool-field">
-              <span className="table-tool-label">{t('tableLayouts.ruling')}</span>
-              <select
-                className="table-tool-select"
-                value={design.ruling}
-                onChange={(event) => {
-                  const ruling = TABLE_RULING_CHOICES.find((item) => item === event.target.value);
-                  if (ruling) applyDesign({ ...design, ruling });
-                }}
-              >
-                {TABLE_RULING_CHOICES.map((ruling) => (
-                  <option key={ruling} value={ruling}>
-                    {t(`tableLayouts.rulingOptions.${ruling}`)}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="table-tool-check">
-              <input
-                type="checkbox"
-                checked={design.grouped}
-                onChange={(event) => {
-                  applyDesign({ ...design, grouped: event.target.checked });
-                }}
-              />
-              {t('tableLayouts.grouped')}
-            </label>
-            <label className="table-tool-check">
-              <input
-                type="checkbox"
-                checked={draft.banded}
-                onChange={(event) => {
-                  setDesign({ ...design, banded: event.target.checked });
-                  setDraft({ ...draft, banded: event.target.checked });
-                }}
-              />
-              {t('tableLayouts.banded')}
-            </label>
-          </div>
-          <p className="table-tools-hint">{t('tableLayouts.directHint')}</p>
-        </div>
+      {structureToolsInRibbon ? (
+        <p className="layout-table-card-state muted" data-testid="table-card-state-hint">
+          {t('tableLayouts.toolsInRibbonHint')}
+        </p>
+      ) : null}
+
+      {showInlineTools ? (
+        <TableStructureTools
+          editor={editor}
+          index={index}
+          placement="card"
+          onLayoutApply={onLayoutApply}
+          onEditInDocument={onEditInDocument}
+          onRedetect={onRedetect}
+        />
       ) : null}
 
       <div className="layout-table-scroll">
@@ -467,7 +224,7 @@ function TableEditor({
                         if (merge && (merge.row0 !== row || merge.col0 !== col)) {
                           return null;
                         }
-                        const cell = table.cells.find(
+                        const cell = workingTable.cells.find(
                           (item) => item.row === row && item.col === col
                         );
                         const rowSpan = merge?.rowSpan ?? 1;
@@ -517,6 +274,10 @@ function TableEditor({
                                 if (next === (cell?.text ?? '')) {
                                   return;
                                 }
+                                setDraft((prev) => ({
+                                  ...prev,
+                                  cells: upsertTableCell(prev.cells ?? table.cells, row, col, next),
+                                }));
                                 onCellChange?.(row, col, next);
                               }}
                             />

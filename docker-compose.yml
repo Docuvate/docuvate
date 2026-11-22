@@ -304,7 +304,9 @@ services:
       dockerfile: apps/web/Dockerfile
       args:
         VITE_API_URL: /api
-        VITE_DOCUVATE_BUILD_SHA: ${VITE_DOCUVATE_BUILD_SHA:-unknown}
+        VITE_DOCUVATE_BUILD_SHA: ${DOCUVATE_BUILD_SHA:-${VITE_DOCUVATE_BUILD_SHA:-unknown}}
+        DOCUVATE_BUILD_SHA: ${DOCUVATE_BUILD_SHA:-${VITE_DOCUVATE_BUILD_SHA:-unknown}}
+        DOCUVATE_APP_VERSION: ${DOCUVATE_APP_VERSION:-0.1.1}
     ports:
       - '5173:80'
     healthcheck:

@@ -141,7 +141,6 @@ test.describe('Workstream C overlay regressions', () => {
     await overflow.click();
     const menu = page.getByRole('menu');
     await expect(menu).toBeVisible();
-    const tabs = page.locator('.detail-tabs-bar');
     const menuOnTop = await page.evaluate(() => {
       const menuEl = document.querySelector('[role="menu"]');
       if (!(menuEl instanceof HTMLElement)) {
@@ -154,7 +153,8 @@ test.describe('Workstream C overlay regressions', () => {
       return hit instanceof Node && menuEl.contains(hit);
     });
     expect(menuOnTop).toBe(true);
-    await expect(tabs).toBeVisible();
+    // Aktionen detail-panel menu was removed; ribbon tabs + overflow own structure chrome.
+    await expect(page.getByTestId('structuring-primary-layout').or(page.getByTestId('app-ribbon'))).toBeVisible();
     const shot = path.join(artifactRoot, 'overflow-menu-1440.png');
     await page.screenshot({ path: shot });
     expect(md5File(shot).length).toBe(32);

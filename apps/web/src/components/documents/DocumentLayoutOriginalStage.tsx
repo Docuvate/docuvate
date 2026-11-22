@@ -3,13 +3,15 @@
 import type { DocumentRegionDto, LayoutToken, NormalizedRect } from '@docuvate/contracts';
 import { useTranslation } from 'react-i18next';
 
+import { useViewportMaxWidth } from '../../lib/useViewportMaxWidth';
+import { useAppRibbonContextSlot } from '../layout/appRibbonContext';
 import { DocumentFieldContextBar } from './DocumentFieldContextBar';
 import type { DocumentSelectionDraft } from './DocumentSelectionLayer';
 import { DocumentSelectionLayer } from './DocumentSelectionLayer';
 import type { DocumentSelectionTool } from './DocumentSelectionTools';
 import { FieldBoundingBoxEditor } from './FieldBoundingBoxEditor';
 import { type PdfLayoutOverlay, PdfViewer } from './PdfViewer';
-import { TablePdfOverlay } from './table/TablePdfOverlay';
+import { type TableOverlayStructureCommit, TablePdfOverlay } from './table/TablePdfOverlay';
 
 interface LayoutBBoxEdit {
   page: number;
@@ -62,6 +64,11 @@ interface DocumentLayoutOriginalStageProps {
   onTableSelectCell: (cell: { row: number; col: number }) => void;
   onTableClose: () => void;
   onTableBoundsCommit: (region: DocumentRegionDto, rect: NormalizedRect) => void;
+  onTableRulesCommit?: (region: DocumentRegionDto, commit: TableOverlayStructureCommit) => void;
+  onTableRedetect?: () => void;
+  /** Hide PDF floating minibar; ribbon owns save/close. */
+  tableChromeInRibbon?: boolean;
+  onTableChromeReady?: (chrome: { saveBounds: () => void } | null) => void;
   selectionDraft: DocumentSelectionDraft | null;
   fieldOptions: LayoutFieldOption[];
   existingFieldValues: ReadonlyMap<string, string>;
@@ -107,6 +114,10 @@ export function DocumentLayoutOriginalStage({
   onTableSelectCell,
   onTableClose,
   onTableBoundsCommit,
+  onTableRulesCommit,
+  onTableRedetect,
+  tableChromeInRibbon = false,
+  onTableChromeReady,
   selectionDraft,
   fieldOptions,
   existingFieldValues,
@@ -118,6 +129,9 @@ export function DocumentLayoutOriginalStage({
   zoomPercent = 100,
 }: DocumentLayoutOriginalStageProps) {
   const { t } = useTranslation();
+  const ribbonContextSlot = useAppRibbonContextSlot();
+  const narrowViewport = useViewportMaxWidth(767);
+  const fieldContextInRibbon = Boolean(selectionDraft && ribbonContextSlot && !narrowViewport);
   const tableRegion =
     tableOverlayOpen && selectedTableId
       ? tableRegions.find((item) => item.id === selectedTableId)
@@ -182,9 +196,19 @@ export function DocumentLayoutOriginalStage({
           onBoundsCommit={(rect) => {
             onTableBoundsCommit(tableOnPage, rect);
           }}
+          onRulesCommit={
+            onTableRulesCommit
+              ? (commit) => {
+                  onTableRulesCommit(tableOnPage, commit);
+                }
+              : undefined
+          }
+          onRedetect={onTableRedetect}
+          hideFloatingChrome={tableChromeInRibbon}
+          onChromeReady={onTableChromeReady}
         />
       ) : null}
-      {selectionDraft ? (
+      {selectionDraft && !fieldContextInRibbon ? (
         <DocumentFieldContextBar
           draft={selectionDraft}
           fieldOptions={fieldOptions}

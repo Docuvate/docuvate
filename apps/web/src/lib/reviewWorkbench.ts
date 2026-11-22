@@ -13,8 +13,12 @@ import { isUserConfirmedField, withSavedFieldValue } from './documentFieldValueR
 /** At or above this model confidence a value counts as "safe" for one-click bulk confirmation. */
 const SAFE_CONFIDENCE = 0.9;
 
-/** `review`: extracted, nobody looked yet. `suggested`: heuristic value not yet a field. */
-export type WorkbenchRowState = 'review' | 'suggested' | 'confirmed';
+/**
+ * `review`: extracted value, nobody looked yet.
+ * `suggested`: heuristic value not yet a field.
+ * `missing`: catalog/gated slot with no value yet (keep visible, never steal focus from filled review).
+ */
+export type WorkbenchRowState = 'review' | 'suggested' | 'missing' | 'confirmed';
 
 /** Active reject of a concrete field+value on this document (durable). */
 export interface SuggestionRejectRef {
@@ -61,11 +65,22 @@ export interface WorkbenchRow {
   state: WorkbenchRowState;
 }
 
-const STATE_ORDER: Record<WorkbenchRowState, number> = { review: 0, suggested: 1, confirmed: 2 };
+const STATE_ORDER: Record<WorkbenchRowState, number> = {
+  review: 0,
+  suggested: 1,
+  missing: 2,
+  confirmed: 3,
+};
+
+function fieldRowState(field: ExtractedField): WorkbenchRowState {
+  if (isUserConfirmedField(field)) return 'confirmed';
+  if (field.value.trim() === '') return 'missing';
+  return 'review';
+}
 
 /**
  * One ordered work list for the viewer: open extractions first (least confident first), then
- * heuristic suggestions, then values a person already confirmed.
+ * heuristic suggestions, then empty catalog slots, then confirmed values.
  */
 export function workbenchRows(
   fields: readonly ExtractedField[],
@@ -73,17 +88,18 @@ export function workbenchRows(
   rejects: readonly SuggestionRejectRef[] = []
 ): WorkbenchRow[] {
   const rows: WorkbenchRow[] = fields
-    .filter((field) => field.value.trim() !== '')
     .filter((field) =>
-      isUserConfirmedField(field)
+      field.value.trim() === ''
         ? true
-        : !isRejectedSuggestion(field.key, field.value, rejects)
+        : isUserConfirmedField(field)
+          ? true
+          : !isRejectedSuggestion(field.key, field.value, rejects)
     )
     .map((field) => ({
       key: field.key,
       value: field.value,
       confidence: field.confidence ?? null,
-      state: isUserConfirmedField(field) ? 'confirmed' : 'review',
+      state: fieldRowState(field),
     }));
   for (const suggestion of suggestions) {
     if (rows.some((row) => row.key === suggestion.key)) continue;
@@ -100,7 +116,7 @@ export function workbenchRows(
     .sort((a, b) => {
       const byState = STATE_ORDER[a.row.state] - STATE_ORDER[b.row.state];
       if (byState !== 0) return byState;
-      if (a.row.state !== 'confirmed') {
+      if (a.row.state === 'review' || a.row.state === 'suggested') {
         const byConfidence = (a.row.confidence ?? 0) - (b.row.confidence ?? 0);
         if (byConfidence !== 0) return byConfidence;
       }

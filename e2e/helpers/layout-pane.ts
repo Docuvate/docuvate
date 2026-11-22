@@ -15,7 +15,7 @@ export async function showLayoutSelectionTools(page: Page): Promise<void> {
     return;
   }
   await layout.click();
-  await expect(layout).toHaveAttribute('aria-pressed', 'true');
+  await expect(layout).toHaveAttribute('aria-selected', 'true');
 }
 
 /** On small screens, switch the document workspace to the viewer or the fields panel; no-op on wide screens. */

@@ -58,7 +58,7 @@ test.describe('rapid review workbench', () => {
     // N opens the next queued document, again focused for keyboard review.
     await page.locator('.review-workbench-row-main').first().focus();
     await page.keyboard.press('n');
-    await expect(page).toHaveURL(/\/documents\/synthetic-doc-0002\?review=1$/);
+    await expect(page).toHaveURL(/\/documents\/synthetic-doc-0002\?review=1(?:&aspect=fields)?$/);
     await expect.poll(() => focusedFieldKey(page)).toBe('total_amount');
   });
 

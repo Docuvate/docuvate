@@ -34,7 +34,8 @@ async function showLayoutSelectionTools(page: Page): Promise<void> {
   const layout = page.getByTestId('structuring-primary-layout');
   if ((await layout.count()) === 0) return;
   await layout.click();
-  await expect(layout).toHaveAttribute('aria-pressed', 'true');
+  await expect(layout).toHaveAttribute('aria-selected', 'true');
+  await expect(page.getByTestId('document-selection-tools')).toBeVisible();
 }
 
 /**
@@ -42,13 +43,8 @@ async function showLayoutSelectionTools(page: Page): Promise<void> {
  * The page chip for a corrected field is rendered on this tab.
  */
 async function activateOverviewTab(page: Page): Promise<void> {
-  const overview = page
-    .locator('.layout-side-tabs')
-    .getByRole('tab', { name: /Übersicht|Overview/i });
+  const overview = page.getByTestId('layout-panel-tab-fields');
   await expect(overview).toBeVisible();
-  await overview.evaluate((tab) => {
-    tab.scrollIntoView({ block: 'center', inline: 'nearest' });
-  });
   await overview.click({ timeout: 15_000 });
 }
 
@@ -109,17 +105,48 @@ async function applyGermanLocale(page: Page): Promise<void> {
   await applyDocuvateLocale(page, 'de');
 }
 
+async function labelsInspectorOpen(page: Page): Promise<boolean> {
+  const ribbonLabels = page.getByTestId('structuring-primary-labels');
+  if ((await ribbonLabels.count()) > 0) {
+    const selected = await ribbonLabels.getAttribute('aria-selected');
+    if (selected != null) return selected === 'true';
+    return (await ribbonLabels.getAttribute('aria-pressed')) === 'true';
+  }
+  const gallery = page.getByTestId('document-ribbon-gallery');
+  if ((await gallery.count()) > 0) {
+    return (await gallery.getAttribute('data-gallery')) === 'labels';
+  }
+  return false;
+}
+
+async function assertLabelsTabState(page: Page, open: boolean): Promise<void> {
+  await expect.poll(() => labelsInspectorOpen(page), { timeout: 15_000 }).toBe(open);
+}
+
+/** Labels inspector opens from the structure aspect strip (not the removed Aktionen menu). */
 async function setLabelsTabOpen(page: Page, open: boolean): Promise<void> {
-  const labels = page.getByRole('tab', { name: /^Labels/i });
-  const target = open ? labels : page.getByRole('tab', { name: /^Details/i });
-  // Activate by keyboard: a toast or the bottom sheet can sit over the tab strip on phones,
-  // and a forced pointer click would land on that overlay instead.
   await expect(async () => {
-    if ((await target.getAttribute('aria-selected')) !== 'true') {
-      await target.focus();
-      await page.keyboard.press('Enter');
+    const onLabels = await labelsInspectorOpen(page);
+    if (open === onLabels) {
+      return;
     }
-    await expect(target).toHaveAttribute('aria-selected', 'true', { timeout: 2_000 });
+
+    // Ribbon tabs are exclusive — leave Labels by selecting Layout, not by clicking Labels again.
+    if (!open) {
+      await showLayoutSelectionTools(page);
+      await assertLabelsTabState(page, false);
+      return;
+    }
+
+    const ribbonLabels = page.getByTestId('structuring-primary-labels');
+    const aspect =
+      (await ribbonLabels.count()) > 0
+        ? ribbonLabels
+        : page.getByRole('button', { name: /Labels zuweisen|Assign labels/i }).first();
+    await expect(aspect).toBeVisible({ timeout: 10_000 });
+    await aspect.scrollIntoViewIfNeeded();
+    await aspect.click();
+    await assertLabelsTabState(page, open);
   }).toPass({ timeout: 30_000 });
 }
 
@@ -130,9 +157,7 @@ async function openFieldCorrectionSheet(page: Page): Promise<void> {
   }
   await setLabelsTabOpen(page, false);
   await showLayoutPane(page, 'panel');
-  await page
-    .locator('.layout-side-tabs')
-    .getByRole('tab', { name: /Übersicht|Overview/i })
+  await page.getByTestId('layout-panel-tab-fields')
     .click({ force: true });
   // Confirmed fields without a region (e.g. Betrag) can sort first; open a row that
   // has a page source chip so the sheet carries "Seite N" for the assertion below.
@@ -340,9 +365,7 @@ test.describe('document field regions', () => {
     await applyGermanLocale(page);
     await openLayoutDocumentPage(page, layoutDocId);
 
-    await page
-      .locator('.layout-side-tabs')
-      .getByRole('tab', { name: /Übersicht|Overview/i })
+    await page.getByTestId('layout-panel-tab-fields')
       .click();
     await expect(page.getByTestId('document-selection-layer')).toHaveAttribute(
       'data-token-count',

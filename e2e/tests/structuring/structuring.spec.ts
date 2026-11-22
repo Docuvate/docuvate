@@ -108,7 +108,7 @@ test.describe('structuring journey', () => {
     // The aspects live in the contextual ribbon, not in a side panel.
     const aspects = page
       .getByTestId('app-ribbon')
-      .getByRole('list', { name: 'Stand der Strukturierung' });
+      .getByRole('tablist', { name: 'Stand der Strukturierung' });
     await expect(aspects.locator('[data-aspect="labels"]')).toHaveAttribute(
       'data-aspect-state',
       'open'
@@ -121,7 +121,7 @@ test.describe('structuring journey', () => {
     // Review state: the split workbench replaces the header band and lists the worst value first.
     await expect(page.locator('.pipeline-doc-header')).toHaveCount(0);
     const workbench = page.locator('.review-workbench');
-    await expect(workbench).toContainText('Strukturieren');
+    await expect(workbench).toContainText('Erkannte Felder');
     await expect(workbench.locator('.review-workbench-row').first()).toHaveAttribute(
       'data-field-key',
       'total_amount'
@@ -162,7 +162,7 @@ test.describe('structuring journey', () => {
     await expect(page.locator('.review-wizard')).toHaveCount(0);
     const before = log.calls.length;
     await page.getByTestId('review-open-structuring').click();
-    await expect(page).toHaveURL(/\/documents\/synthetic-doc-0001\?review=1$/);
+    await expect(page).toHaveURL(/\/documents\/synthetic-doc-0001\?review=1(?:&aspect=fields)?$/);
     await page.getByRole('button', { name: 'Betrag übernehmen' }).click();
     await expect
       .poll(() => log.calls.slice(before).some((call) => !call.startsWith('GET ')))

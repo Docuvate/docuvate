@@ -271,7 +271,7 @@ export function LabelPicker(props: LabelPickerProps) {
         returnFocusRef={inputRef}
         matchReferenceWidth
         maxHeightPx={LIST_MAX_HEIGHT_PX}
-        className="label-picker-combobox-popover popover-surface popover-surface-scroll"
+        className="label-picker-combobox-popover popover-surface"
         role="presentation"
         testId={props.popoverTestId}
         onEscape={close}

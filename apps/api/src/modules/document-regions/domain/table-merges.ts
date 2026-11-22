@@ -26,7 +26,14 @@ export function withTableMerges(
 
 type StructureInput = Pick<
   ApplyTableCorrectionRequest,
-  'footerRows' | 'trailingHeaderCols' | 'banded' | 'rowRoles' | 'ruleLines' | 'merges'
+  | 'footerRows'
+  | 'trailingHeaderCols'
+  | 'banded'
+  | 'rowRoles'
+  | 'ruleLines'
+  | 'rules'
+  | 'cells'
+  | 'merges'
 >;
 
 /**
@@ -37,7 +44,16 @@ export function withTableStructure(
   table: DocumentRegionTableDto,
   input: StructureInput
 ): DocumentRegionTableDto {
-  const merged = input.merges !== undefined ? withTableMerges(table, input.merges) : table;
+  const withGeometry: DocumentRegionTableDto =
+    input.rules !== undefined || input.cells !== undefined
+      ? {
+          ...table,
+          rules: (input.rules ?? table.rules).map((rule) => ({ ...rule })),
+          cells: (input.cells ?? table.cells).map((cell) => ({ ...cell })),
+        }
+      : table;
+  const merged =
+    input.merges !== undefined ? withTableMerges(withGeometry, input.merges) : withGeometry;
   const next: DocumentRegionTableDto = {
     ...merged,
     footerRows: input.footerRows ?? merged.footerRows,

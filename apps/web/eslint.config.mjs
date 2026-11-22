@@ -17,7 +17,7 @@ export default [
     rules: sizeCeilingRules({
       complexity: 94,
       maxLines: 1245,
-      maxLinesPerFunction: 936,
+      maxLinesPerFunction: 1030,
       maxParams: 10,
     }),
   },

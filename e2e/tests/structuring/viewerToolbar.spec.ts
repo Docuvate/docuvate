@@ -16,10 +16,10 @@ test('viewer: marking tools follow Layout, page view stays in one menu', async (
   await expect(toolbar.getByRole('radiogroup')).toHaveCount(0);
   await page.getByTestId('structuring-primary-layout').click();
   const tools = page
-    .getByTestId('app-ribbon-context')
+    .getByTestId('document-selection-tools')
     .getByRole('radiogroup', { name: 'Auf der Seite markieren' });
   await expect(tools.getByRole('radio')).toHaveCount(3);
-  await expect(tools.getByRole('radio', { name: /^Zeiger/ })).toBeChecked();
+  await expect(tools.getByRole('radio', { name: /^Bereich|Area/ })).toBeChecked();
 
   await tools.getByRole('radio', { name: /^Bereich/ }).click();
   await expect(page.getByTestId('structuring-context')).toContainText(/Bereich aufziehen/);
@@ -48,7 +48,7 @@ for (const width of [390, 1024, 1280, 1440]) {
     await page.goto(`/documents/${LAYOUT_DOCUMENT_ID}`);
     await page.getByTestId('structuring-primary-layout').click();
     const toolbar = page.getByTestId('app-ribbon-context');
-    await expect(toolbar.getByRole('radio')).toHaveCount(3);
+    await expect(page.getByTestId('document-selection-tools').getByRole('radio')).toHaveCount(3);
     const clipped = await toolbar.evaluate((bar) => {
       const barBox = bar.getBoundingClientRect();
       const hits: string[] = [];

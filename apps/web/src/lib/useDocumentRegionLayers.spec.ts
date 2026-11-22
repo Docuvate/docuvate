@@ -68,4 +68,23 @@ describe('useDocumentRegionLayers', () => {
     await new Promise((resolve) => setTimeout(resolve, 0));
     expect(result.current.layoutTokens).toEqual([token('page-two')]);
   });
+
+  it('does not refetch field/table regions when only the page changes', async () => {
+    vi.mocked(api.listDocumentLayoutTokens).mockImplementation((_id: string, page?: number) =>
+      Promise.resolve(tokenPage(page ?? 1, [token(`p${String(page ?? 1)}`)]))
+    );
+    const { rerender } = renderHook(
+      ({ page }: { page: number }) => useDocumentRegionLayers('doc-1', page, 'ready:t1:ir'),
+      { initialProps: { page: 1 } }
+    );
+    await waitFor(() => {
+      expect(api.listDocumentRegions).toHaveBeenCalled();
+    });
+    const regionCallsAfterMount = vi.mocked(api.listDocumentRegions).mock.calls.length;
+    rerender({ page: 2 });
+    await waitFor(() => {
+      expect(api.listDocumentLayoutTokens).toHaveBeenCalledWith('doc-1', 2);
+    });
+    expect(vi.mocked(api.listDocumentRegions).mock.calls.length).toBe(regionCallsAfterMount);
+  });
 });
