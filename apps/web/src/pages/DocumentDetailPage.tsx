@@ -824,29 +824,37 @@ export function DocumentDetailPage() {
     .map((key) => ({ key, label: fieldLabelForKey(key) }))
     .sort((a, b) => a.label.localeCompare(b.label));
 
+  const ribbonIdentity = layoutWorkspace;
+
   return (
     <div
-      className="page document-detail-page page--with-save-bar"
+      className={`page document-detail-page page--with-save-bar${
+        ribbonIdentity ? ' document-detail-page--ribbon-identity' : ''
+      }`}
       data-ux="page"
       data-correction-sheet-open={correctionSheetOpen ? '1' : '0'}
     >
-      <p className="document-detail-back">
-        <Link to={routes.documents} className="document-detail-back-link">
-          <ArrowLeft size={16} strokeWidth={2} aria-hidden />
-          {t('documents.breadcrumbDocuments')}
-        </Link>
-      </p>
+      {ribbonIdentity ? null : (
+        <p className="document-detail-back">
+          <Link to={routes.documents} className="document-detail-back-link">
+            <ArrowLeft size={16} strokeWidth={2} aria-hidden />
+            {t('documents.breadcrumbDocuments')}
+          </Link>
+        </p>
+      )}
 
-      <DocumentDetailMetaBar
-        doc={doc}
-        onDelete={() => {
-          setDeleteDialogOpen(true);
-        }}
-        onRequeueExtraction={layoutWorkspace ? () => void onRequeueExtraction() : undefined}
-        requeueBusy={requeueBusy}
-        showTechnicalDetails={showTechnicalDetails}
-        onShowTechnicalDetailsChange={layoutWorkspace ? setShowTechnicalDetails : undefined}
-      />
+      {ribbonIdentity ? null : (
+        <DocumentDetailMetaBar
+          doc={doc}
+          onDelete={() => {
+            setDeleteDialogOpen(true);
+          }}
+          onRequeueExtraction={layoutWorkspace ? () => void onRequeueExtraction() : undefined}
+          requeueBusy={requeueBusy}
+          showTechnicalDetails={showTechnicalDetails}
+          onShowTechnicalDetailsChange={layoutWorkspace ? setShowTechnicalDetails : undefined}
+        />
+      )}
 
       {stageState === 'review' || stageState === 'structured' ? null : (
         <DocumentPipelineHeader
@@ -895,6 +903,18 @@ export function DocumentDetailPage() {
           setCreateFieldOpen(true);
         }}
         showAspects={layoutWorkspace || reviewable}
+        ribbonIdentity={ribbonIdentity}
+        onDelete={
+          ribbonIdentity
+            ? () => {
+                setDeleteDialogOpen(true);
+              }
+            : undefined
+        }
+        onRequeueExtraction={ribbonIdentity ? () => void onRequeueExtraction() : undefined}
+        requeueBusy={requeueBusy}
+        showTechnicalDetails={showTechnicalDetails}
+        onShowTechnicalDetailsChange={ribbonIdentity ? setShowTechnicalDetails : undefined}
       />
 
       <div

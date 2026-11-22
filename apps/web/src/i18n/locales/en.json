@@ -2661,6 +2661,9 @@
     "panel": "Panel",
     "panelAria": "Open inspector panel",
     "panelClose": "Close panel",
+    "identity": "Document",
+    "identityBackAria": "Back to documents",
+    "selection": "Selection",
     "autoImport": "Auto-import",
     "autoImportHint": "Set up connections that import documents automatically: mailbox, scanner/SFTP or Paperless-ngx"
   }

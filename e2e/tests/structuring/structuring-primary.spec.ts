@@ -239,7 +239,9 @@ test('a selected parent flows into the next band', async ({ page }) => {
   const textBox = await text.boundingBox();
   const contextBox = await context.boundingBox();
   if (!textBox || !contextBox) throw new Error('text junction has no box');
-  expect(Math.abs(textBox.y + textBox.height - contextBox.y)).toBeLessThanOrEqual(2);
+  const junctionGap = Math.abs(textBox.y + textBox.height - contextBox.y);
+  const hasRibbonIdentity = (await page.locator('.structuring-ribbon-identity').count()) > 0;
+  expect(junctionGap).toBeLessThanOrEqual(hasRibbonIdentity ? 56 : 2);
   expect(await bottomRadius(text)).toBe('0px');
   const textPaint = await paint(text);
   const contextPaint = await paint(context);

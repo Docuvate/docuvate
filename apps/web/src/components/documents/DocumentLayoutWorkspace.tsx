@@ -70,6 +70,7 @@ import { DocumentTableCorrectionSheet } from './DocumentTableCorrectionSheet';
 import { ExtractedLayoutHtmlFrame, type LayoutIrZoomStep } from './ExtractedLayoutHtmlFrame';
 import { ExtractedTextPanel } from './ExtractedTextPanel';
 import { type PdfLayoutOverlay } from './PdfViewer';
+import { SelectionContextRibbon } from './SelectionContextRibbon';
 import { StructuringContextRibbon } from './StructuringContextRibbon';
 import { TableContextRibbon } from './TableContextRibbon';
 import { TableStructureEditorProvider } from './table/TableStructureEditorContext';
@@ -455,8 +456,71 @@ export function DocumentLayoutWorkspace({
     if (textEditOpen) setAdvancedOpen(false);
   }, [leftMode, textEditOpen]);
 
+  const markTableFromSelection = useCallback(() => {
+    if (reanchorFieldKey || !selectionDraft) {
+      return;
+    }
+    submitTableCorrection({
+      id: crypto.randomUUID(),
+      op: 'create',
+      page: selectionDraft.page,
+      shape: 'rect',
+      x0: selectionDraft.rect.x0,
+      y0: selectionDraft.rect.y0,
+      x1: selectionDraft.rect.x1,
+      y1: selectionDraft.rect.y1,
+      blockIndexes: selectionDraft.tokens.map((token) => token.blockIndex),
+    });
+  }, [reanchorFieldKey, selectionDraft, submitTableCorrection]);
+
+  const confirmFieldFromSelection = useCallback(
+    (fieldKey: string) => {
+      if (!selectionDraft) {
+        return;
+      }
+      void runFieldCorrection(
+        {
+          id: crypto.randomUUID(),
+          op: reanchorFieldKey ? 'reanchor' : 'create',
+          fieldKey,
+          page: selectionDraft.page,
+          shape: 'rect',
+          x0: selectionDraft.rect.x0,
+          y0: selectionDraft.rect.y0,
+          x1: selectionDraft.rect.x1,
+          y1: selectionDraft.rect.y1,
+          blockIndexes: selectionDraft.tokens.map((token) => token.blockIndex),
+          ...(selectionDraft.text.trim().length > 0 ? { valueOverride: selectionDraft.text } : {}),
+        },
+        t('documents.fieldCorrectionSaved', { name: fieldLabelForKey(fieldKey) })
+      ).catch((err: unknown) => {
+        toast.error(formatUserFacingError(err, 'errors.generic'));
+      });
+    },
+    [
+      fieldLabelForKey,
+      reanchorFieldKey,
+      runFieldCorrection,
+      selectionDraft,
+      t,
+      toast,
+    ]
+  );
+
+  const selectionFieldOptions = useMemo(
+    () =>
+      reanchorFieldKey
+        ? [{ value: reanchorFieldKey, label: fieldLabelForKey(reanchorFieldKey) }]
+        : fieldOptions,
+    [fieldLabelForKey, fieldOptions, reanchorFieldKey]
+  );
+
+  const selectionMarkTableEnabled = !reanchorFieldKey && selectionDraft != null;
+
   useEffect(() => {
     if (structuringPrimary === 'layout') {
+      setSelectionTool('rect');
+      setOverlayEnabled(true);
       // Layout owns selection tools in the context row. Clear table selection so table
       // tools do not portal over the mark tools; open overlay only via explicit edit.
       // Do not force the tables side tab — that auto-activates the first table card.
@@ -465,6 +529,9 @@ export function DocumentLayoutWorkspace({
       setActiveOverlayId(null);
       return;
     }
+    // Leaving Layout drops an unfinished spatial draft so ribbon/bottom assign UI cannot diverge.
+    setSelectionDraft(null);
+    setReanchorFieldKey(null);
     if (structuringPrimary === 'fields') {
       setSelectedTableId(null);
       setTableOverlayOpen(false);
@@ -603,6 +670,26 @@ export function DocumentLayoutWorkspace({
         setSelectionTool('rect');
         return;
       }
+      if (
+        (event.key === 'o' || event.key === 'O') &&
+        structuringPrimary === 'layout' &&
+        pdfOverlays.length > 0
+      ) {
+        event.preventDefault();
+        setOverlayEnabled((enabled) => !enabled);
+        return;
+      }
+      if (
+        (event.key === 'm' || event.key === 'M') &&
+        structuringPrimary === 'layout' &&
+        selectionDraft &&
+        !reanchorFieldKey &&
+        selectionMarkTableEnabled
+      ) {
+        event.preventDefault();
+        markTableFromSelection();
+        return;
+      }
       if (event.key === 'Enter' && selectionDraft && reanchorFieldKey) {
         // Free-form create/assign goes through DocumentFieldContextBar so the user
         // picks the target field explicitly (and confirms overwrites).
@@ -636,11 +723,15 @@ export function DocumentLayoutWorkspace({
   }, [
     activeOverlayId,
     fieldLabelForKey,
+    markTableFromSelection,
+    pdfOverlays.length,
     reanchorFieldKey,
     runFieldCorrection,
     onStructuringPrimaryChange,
     selectionDraft,
+    selectionMarkTableEnabled,
     setReanchorFieldKey,
+    structuringPrimary,
     t,
     toast,
   ]);
@@ -703,6 +794,8 @@ export function DocumentLayoutWorkspace({
     tableRegions.findIndex((item) => item.id === selectedTableId)
   );
   const tableStructureRibbonActive = structuringPrimary === 'layout' && selectedTableRegion != null;
+  const selectionContextActive = structuringPrimary === 'layout' && selectionDraft != null;
+  const tableContextActive = tableStructureRibbonActive && !selectionContextActive;
 
   return (
     <TableStructureEditorProvider region={selectedTableRegion} active={tableStructureRibbonActive}>
@@ -744,12 +837,28 @@ export function DocumentLayoutWorkspace({
             hasOverlays={pdfOverlays.length > 0}
             overlayEnabled={overlayEnabled}
             onOverlayChange={setOverlayEnabled}
-            paused={structuringPrimary === 'layout' && selectedTableId != null}
+            paused={selectionContextActive || tableContextActive}
           />
-          {tableStructureRibbonActive && selectedTableRegion?.table ? (
+          {selectionContextActive && selectionDraft ? (
+            <SelectionContextRibbon
+              draft={selectionDraft}
+              fieldOptions={selectionFieldOptions}
+              existingFieldValues={existingFieldValues}
+              onConfirm={confirmFieldFromSelection}
+              onMarkTable={selectionMarkTableEnabled ? markTableFromSelection : undefined}
+              onCancel={() => {
+                setSelectionDraft(null);
+                setReanchorFieldKey(null);
+              }}
+            />
+          ) : null}
+          {tableContextActive && selectedTableRegion?.table ? (
             <TableContextRibbon
               region={selectedTableRegion}
               index={selectedTableIndex}
+              hasOverlays={pdfOverlays.length > 0}
+              overlayEnabled={overlayEnabled}
+              onOverlayChange={setOverlayEnabled}
               onLayoutApply={(choice) => {
                 applyTableLayoutChoice(selectedTableRegion.id, choice);
               }}
@@ -791,11 +900,6 @@ export function DocumentLayoutWorkspace({
             showTechnicalDetails={showTechnicalDetails}
             qualityTone={qualityTone}
             qualityPage={qualityReviewPage ?? viewerPage}
-            overlay={
-              pdfOverlays.length > 0 && leftMode === 'original'
-                ? { enabled: overlayEnabled, onChange: setOverlayEnabled }
-                : undefined
-            }
             onRotate={leftMode === 'original' && !showAdvancedStage ? rotateClockwise : undefined}
           />
 
@@ -996,52 +1100,10 @@ export function DocumentLayoutWorkspace({
                   tableOverlaySaveRef.current = chrome?.saveBounds ?? null;
                 }}
                 selectionDraft={selectionDraft}
-                fieldOptions={
-                  reanchorFieldKey
-                    ? [{ value: reanchorFieldKey, label: fieldLabelForKey(reanchorFieldKey) }]
-                    : fieldOptions
-                }
+                fieldOptions={selectionFieldOptions}
                 existingFieldValues={existingFieldValues}
-                onMarkTable={
-                  reanchorFieldKey || !selectionDraft
-                    ? undefined
-                    : () => {
-                        submitTableCorrection({
-                          id: crypto.randomUUID(),
-                          op: 'create',
-                          page: selectionDraft.page,
-                          shape: 'rect',
-                          x0: selectionDraft.rect.x0,
-                          y0: selectionDraft.rect.y0,
-                          x1: selectionDraft.rect.x1,
-                          y1: selectionDraft.rect.y1,
-                          blockIndexes: selectionDraft.tokens.map((token) => token.blockIndex),
-                        });
-                      }
-                }
-                onConfirmField={(fieldKey) => {
-                  if (!selectionDraft) return;
-                  void runFieldCorrection(
-                    {
-                      id: crypto.randomUUID(),
-                      op: reanchorFieldKey ? 'reanchor' : 'create',
-                      fieldKey,
-                      page: selectionDraft.page,
-                      shape: 'rect',
-                      x0: selectionDraft.rect.x0,
-                      y0: selectionDraft.rect.y0,
-                      x1: selectionDraft.rect.x1,
-                      y1: selectionDraft.rect.y1,
-                      blockIndexes: selectionDraft.tokens.map((token) => token.blockIndex),
-                      ...(selectionDraft.text.trim().length > 0
-                        ? { valueOverride: selectionDraft.text }
-                        : {}),
-                    },
-                    t('documents.fieldCorrectionSaved', { name: fieldLabelForKey(fieldKey) })
-                  ).catch((err: unknown) => {
-                    toast.error(formatUserFacingError(err, 'errors.generic'));
-                  });
-                }}
+                onMarkTable={selectionMarkTableEnabled ? markTableFromSelection : undefined}
+                onConfirmField={confirmFieldFromSelection}
                 onCancelDraft={() => {
                   setSelectionDraft(null);
                   setReanchorFieldKey(null);

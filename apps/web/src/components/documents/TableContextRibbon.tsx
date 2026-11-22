@@ -4,9 +4,11 @@ import type { DocumentRegionDto } from '@docuvate/contracts';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 
+import { ribbonActionClass } from '../../lib/ribbonAction';
 import type { TableStructureChoice } from '../../lib/tableLayouts';
 import { RibbonGroup } from '../layout/AppRibbon';
 import { useAppRibbonContextSlot } from '../layout/appRibbonContext';
+import { Button } from '../ui/Button';
 import { useTableStructureEditorContext } from './table/TableStructureEditorContext';
 import { TableStructureTools } from './table/TableStructureTools';
 
@@ -19,6 +21,9 @@ interface TableContextRibbonProps {
   documentEditOpen?: boolean;
   onSaveDocumentBounds?: () => void;
   onExitDocumentEdit?: () => void;
+  hasOverlays?: boolean;
+  overlayEnabled?: boolean;
+  onOverlayChange?: (enabled: boolean) => void;
 }
 
 /**
@@ -33,6 +38,9 @@ export function TableContextRibbon({
   documentEditOpen = false,
   onSaveDocumentBounds,
   onExitDocumentEdit,
+  hasOverlays = false,
+  overlayEnabled = false,
+  onOverlayChange,
 }: TableContextRibbonProps) {
   const slot = useAppRibbonContextSlot();
   const { t } = useTranslation();
@@ -43,6 +51,7 @@ export function TableContextRibbon({
 
   return createPortal(
     <RibbonGroup label={t('ribbon.tableTools')} kind="act" showCaption>
+      <div className="table-context-ribbon">
       <TableStructureTools
         editor={editor}
         index={index}
@@ -54,6 +63,26 @@ export function TableContextRibbon({
         onSaveDocumentBounds={onSaveDocumentBounds}
         onExitDocumentEdit={onExitDocumentEdit}
       />
+      {onOverlayChange ? (
+        <Button
+          type="button"
+          size="sm"
+          variant={overlayEnabled ? 'secondary' : 'ghost'}
+          className={ribbonActionClass(overlayEnabled ? 'secondary' : 'tertiary')}
+          aria-pressed={hasOverlays ? overlayEnabled : undefined}
+          disabled={!hasOverlays}
+          title={
+            hasOverlays ? t('documents.layoutOverlayToggle') : t('documents.ribbonOverlayUnavailable')
+          }
+          data-testid="structuring-overlay"
+          onClick={() => {
+            onOverlayChange(!overlayEnabled);
+          }}
+        >
+          {t('documents.layoutOverlayToggle')}
+        </Button>
+      ) : null}
+      </div>
     </RibbonGroup>,
     slot
   );

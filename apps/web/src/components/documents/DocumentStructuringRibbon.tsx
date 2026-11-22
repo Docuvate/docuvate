@@ -1,11 +1,12 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { DocumentDto, ExtractedField, FieldSuggestionRow } from '@docuvate/contracts';
-import { ArrowRight, CheckCheck } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCheck } from 'lucide-react';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
+import { documentStageState } from '../../lib/documentPipeline';
 import { summarizeDocumentOpenWork } from '../../lib/documentOpenWork';
 import {
   safeConfirmKeys,
@@ -16,7 +17,9 @@ import { ribbonActionClass } from '../../lib/ribbonAction';
 import { routes } from '../../lib/routes';
 import { type StructuringAspect, structuringAspects } from '../../lib/structuringAspects';
 import { AppRibbon, RibbonGroup } from '../layout/AppRibbon';
+import { StagePill } from '../pipeline';
 import { Button } from '../ui/Button';
+import { DocumentDetailOverflowMenu } from './DocumentDetailOverflowMenu';
 import { DocumentDetailPanelMenu, type InspectorPanel } from './DocumentDetailMetaBar';
 import { StructuringAspectStrip } from './StructuringAspectStrip';
 
@@ -41,6 +44,13 @@ interface DocumentStructuringRibbonProps {
   onAddField: () => void;
   /** Show aspect strip (layout workspace and/or reviewable). */
   showAspects: boolean;
+  /** Document identity (back link, stage, title, overflow) in the primary ribbon row. */
+  ribbonIdentity?: boolean;
+  onDelete?: () => void;
+  onRequeueExtraction?: () => void;
+  requeueBusy?: boolean;
+  showTechnicalDetails?: boolean;
+  onShowTechnicalDetailsChange?: (open: boolean) => void;
 }
 
 /**
@@ -63,8 +73,15 @@ export function DocumentStructuringRibbon({
   onInspectorChange,
   onAddField,
   showAspects,
+  ribbonIdentity = false,
+  onDelete,
+  onRequeueExtraction,
+  requeueBusy = false,
+  showTechnicalDetails = false,
+  onShowTechnicalDetailsChange,
 }: DocumentStructuringRibbonProps) {
   const { t } = useTranslation();
+  const title = doc.title.trim() || doc.filename;
   const aspects = useMemo(
     () => structuringAspects(doc, { fields, suggestions, rejects }),
     [doc, fields, suggestions, rejects]
@@ -79,7 +96,7 @@ export function DocumentStructuringRibbon({
   );
   const safeKeys = safeConfirmKeys(rows);
 
-  if (!showAspects && !reviewable) {
+  if (!showAspects && !reviewable && !ribbonIdentity) {
     return (
       <AppRibbon>
         <RibbonGroup label={t('ribbon.structureActions')} kind="act" align="end" order={3}>
@@ -97,6 +114,38 @@ export function DocumentStructuringRibbon({
 
   return (
     <AppRibbon>
+      {ribbonIdentity ? (
+        <RibbonGroup label={t('ribbon.identity')} kind="navigate" order={0} showCaption={false}>
+          <div className="structuring-ribbon-identity">
+            <Link
+              to={routes.documents}
+              className={ribbonActionClass('tertiary', { className: 'structuring-ribbon-back' })}
+              aria-label={t('ribbon.identityBackAria')}
+            >
+              <ArrowLeft size={16} strokeWidth={2} aria-hidden />
+              <span className="structuring-ribbon-back-label">{t('documents.breadcrumbDocuments')}</span>
+            </Link>
+            <StagePill state={documentStageState(doc)} status={doc.status} />
+            <span
+              className="structuring-ribbon-title"
+              title={`${title}${doc.filename !== title ? ` · ${doc.filename}` : ''}`}
+            >
+              {title}
+            </span>
+            {onDelete ? (
+              <DocumentDetailOverflowMenu
+                variant="ribbon"
+                doc={doc}
+                onDelete={onDelete}
+                onRequeueExtraction={onRequeueExtraction}
+                requeueBusy={requeueBusy}
+                showTechnicalDetails={showTechnicalDetails}
+                onShowTechnicalDetailsChange={onShowTechnicalDetailsChange}
+              />
+            ) : null}
+          </div>
+        </RibbonGroup>
+      ) : null}
       {showAspects ? (
         <RibbonGroup label={t('ribbon.structure')} kind="navigate" order={1} showCaption={false}>
           <StructuringAspectStrip

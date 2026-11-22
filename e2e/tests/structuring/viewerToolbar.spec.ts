@@ -19,7 +19,7 @@ test('viewer: marking tools follow Layout, page view stays in one menu', async (
     .getByTestId('document-selection-tools')
     .getByRole('radiogroup', { name: 'Auf der Seite markieren' });
   await expect(tools.getByRole('radio')).toHaveCount(3);
-  await expect(tools.getByRole('radio', { name: /^Zeiger/ })).toBeChecked();
+  await expect(tools.getByRole('radio', { name: /^Bereich|Area/ })).toBeChecked();
 
   await tools.getByRole('radio', { name: /^Bereich/ }).click();
   await expect(page.getByTestId('structuring-context')).toContainText(/Bereich aufziehen/);

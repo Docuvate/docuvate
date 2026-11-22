@@ -2661,6 +2661,9 @@
     "panel": "Panel",
     "panelAria": "Inspektor-Panel öffnen",
     "panelClose": "Panel schließen",
+    "identity": "Dokument",
+    "identityBackAria": "Zurück zu Dokumente",
+    "selection": "Auswahl",
     "autoImport": "Automatisch importieren",
     "autoImportHint": "Verbindungen einrichten, die Dokumente automatisch importieren: Postfach, Scanner/SFTP oder Paperless-ngx"
   }

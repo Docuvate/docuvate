@@ -3,6 +3,8 @@
 import type { DocumentRegionDto, LayoutToken, NormalizedRect } from '@docuvate/contracts';
 import { useTranslation } from 'react-i18next';
 
+import { useViewportMaxWidth } from '../../lib/useViewportMaxWidth';
+import { useAppRibbonContextSlot } from '../layout/appRibbonContext';
 import { DocumentFieldContextBar } from './DocumentFieldContextBar';
 import type { DocumentSelectionDraft } from './DocumentSelectionLayer';
 import { DocumentSelectionLayer } from './DocumentSelectionLayer';
@@ -127,6 +129,9 @@ export function DocumentLayoutOriginalStage({
   zoomPercent = 100,
 }: DocumentLayoutOriginalStageProps) {
   const { t } = useTranslation();
+  const ribbonContextSlot = useAppRibbonContextSlot();
+  const narrowViewport = useViewportMaxWidth(767);
+  const fieldContextInRibbon = Boolean(selectionDraft && ribbonContextSlot && !narrowViewport);
   const tableRegion =
     tableOverlayOpen && selectedTableId
       ? tableRegions.find((item) => item.id === selectedTableId)
@@ -203,7 +208,7 @@ export function DocumentLayoutOriginalStage({
           onChromeReady={onTableChromeReady}
         />
       ) : null}
-      {selectionDraft ? (
+      {selectionDraft && !fieldContextInRibbon ? (
         <DocumentFieldContextBar
           draft={selectionDraft}
           fieldOptions={fieldOptions}

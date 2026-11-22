@@ -2279,6 +2279,15 @@ mark.global-search-mark {
   margin-bottom: var(--dv-space-xs);
 }
 
+.document-detail-page--ribbon-identity {
+  --document-detail-chrome: 8.5rem;
+}
+
+.document-detail-page--ribbon-identity .document-detail-back,
+.document-detail-page--ribbon-identity .document-detail-meta {
+  display: none;
+}
+
 .document-detail-back {
   margin: 0 0 var(--dv-space-xs);
   padding-inline: var(--dv-space-2xs);
@@ -16231,6 +16240,97 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   gap: var(--dv-space-xs);
 }
 
+.app-ribbon-primary .ribbon-group:has(.structuring-ribbon-identity) {
+  flex: 0 1 auto;
+  max-width: min(40vw, 28rem);
+}
+
+.structuring-ribbon-identity {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: var(--dv-space-sm);
+  min-width: 0;
+}
+
+.structuring-ribbon-back {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--dv-space-2xs);
+  max-width: 100%;
+  text-decoration: none;
+}
+
+.structuring-ribbon-back-label {
+  font-weight: 600;
+}
+
+.structuring-ribbon-title {
+  flex: 1 1 6rem;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--detail-title-size, 1rem);
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.document-field-context-bar--ribbon {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--dv-space-sm);
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  position: static;
+  bottom: auto;
+  z-index: auto;
+}
+
+.app-ribbon-context .document-field-context-bar--ribbon .document-field-context-bar-text {
+  flex: 1 1 8rem;
+  max-width: 14rem;
+}
+
+.app-ribbon-context .document-field-context-bar--ribbon .document-field-context-bar-meta {
+  flex: 0 0 auto;
+}
+
+.app-ribbon-context .document-field-context-bar--ribbon .combobox {
+  flex: 1 1 10rem;
+  min-width: 8rem;
+  max-width: 16rem;
+}
+
+.app-ribbon-context .document-field-context-bar--ribbon .document-field-context-bar-actions {
+  flex: 0 0 auto;
+  flex-wrap: nowrap;
+}
+
+.table-context-ribbon {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--dv-space-xs);
+  min-width: 0;
+  width: 100%;
+}
+
+@media (max-width: 767px) {
+  .structuring-ribbon-back-label {
+    display: none;
+  }
+
+  .structuring-ribbon-title {
+    flex-basis: 100%;
+  }
+}
+
 .bottom-sheet-root {
   position: fixed;
   inset: 0;
@@ -17100,7 +17200,8 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 }
 
 .app-ribbon:has(.app-ribbon-context .structuring-context),
-.app-ribbon:has(.app-ribbon-context .table-tools--ribbon) {
+.app-ribbon:has(.app-ribbon-context .table-tools--ribbon),
+.app-ribbon:has(.app-ribbon-context .document-field-context-bar--ribbon) {
   padding-bottom: 0;
 }
 
@@ -17411,6 +17512,8 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
    (portals / leftover nodes make :empty unreliable). */
 .app-ribbon:has(.app-ribbon-context .structuring-context) .aspect-strip-btn[aria-pressed='true'],
 .app-ribbon:has(.app-ribbon-context .structuring-context) .aspect-strip-btn[aria-pressed='true']:hover,
+.app-ribbon:has(.app-ribbon-context .document-field-context-bar--ribbon) .aspect-strip-btn[aria-pressed='true'],
+.app-ribbon:has(.app-ribbon-context .document-field-context-bar--ribbon) .aspect-strip-btn[aria-pressed='true']:hover,
 .app-ribbon:has(.app-ribbon-context .table-tools--ribbon) .aspect-strip-btn[aria-pressed='true'],
 .app-ribbon:has(.app-ribbon-context .table-tools--ribbon) .aspect-strip-btn[aria-pressed='true']:hover {
   position: relative;
