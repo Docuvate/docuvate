@@ -43,6 +43,11 @@ export function normalizeExtractionBlocks(raw: unknown): ExtractionBlock[] {
   return out;
 }
 
+/** True when blocks carry usable page boxes for a layout-preserving text canvas. */
+export function blocksHaveLayoutGeometry(blocks: readonly ExtractionBlock[]): boolean {
+  return blocks.some((block) => block.width > 0.002 && block.height > 0.002);
+}
+
 export function groupBlocksIntoLines(blocks: ExtractionBlock[], page: number): ExtractionBlock[][] {
   const sorted = [...blocks]
     .filter((b) => b.page === page)

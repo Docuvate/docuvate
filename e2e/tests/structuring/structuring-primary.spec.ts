@@ -24,20 +24,24 @@ async function openViewer(page: Page, width: number, theme: 'light' | 'dark') {
 
 test('text and layout change the document instead of scrolling', async ({ page }) => {
   const log = await openViewer(page, 1280, 'light');
-  await expect(page.getByTestId('structuring-primary-layout')).toHaveAttribute('aria-selected', 'true');
+  await expect(page.getByTestId('structuring-primary-layout')).toHaveAttribute(
+    'aria-selected',
+    'true'
+  );
   await expect(page.getByTestId('structuring-context')).toBeVisible();
   await expect(page.getByTestId('structuring-context')).toHaveAttribute('data-primary', 'layout');
   await expect(page.locator('.layout-text-stage')).toHaveCount(0);
 
   await page.getByTestId('structuring-primary-ocr').click();
-  await expect(page.getByTestId('structuring-primary-ocr')).toHaveAttribute('aria-selected', 'true');
+  await expect(page.getByTestId('structuring-primary-ocr')).toHaveAttribute(
+    'aria-selected',
+    'true'
+  );
   await expect(page.locator('.layout-text-stage')).toBeVisible();
   await expect(page.getByTestId('structuring-context')).toHaveAttribute('data-primary', 'text');
-  // Text prüfen opens reading first; Text korrigieren turns editing on.
-  await expect(page.getByTestId('structuring-edit-text')).toHaveAttribute('aria-pressed', 'false');
-  await expect(page.locator('.extracted-text-reading-paragraph').first()).toBeVisible();
-  await page.getByTestId('structuring-edit-text').click();
+  // Text prüfen opens as a layout-preserving WYSIWYG editor.
   await expect(page.getByTestId('structuring-edit-text')).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByTestId('extracted-text-page-canvas').first()).toBeVisible();
   await expect(page.locator('.extracted-text-segment').first()).toBeVisible();
   await expect(page.locator('.extracted-text-reading-paragraph')).toHaveCount(0);
   await expect(page.getByTestId('structuring-save-text')).toBeDisabled();
@@ -45,8 +49,14 @@ test('text and layout change the document instead of scrolling', async ({ page }
   await page.screenshot({ path: path.join(shots, 'ribbon-text-1280-light.png') });
 
   await page.getByTestId('structuring-primary-layout').click();
-  await expect(page.getByTestId('structuring-primary-layout')).toHaveAttribute('aria-selected', 'true');
-  await expect(page.getByTestId('structuring-primary-ocr')).toHaveAttribute('aria-selected', 'false');
+  await expect(page.getByTestId('structuring-primary-layout')).toHaveAttribute(
+    'aria-selected',
+    'true'
+  );
+  await expect(page.getByTestId('structuring-primary-ocr')).toHaveAttribute(
+    'aria-selected',
+    'false'
+  );
   await expect(page.locator('.layout-text-stage')).toHaveCount(0);
   await expect(page.getByTestId('structuring-context')).toHaveAttribute('data-primary', 'layout');
   await expect(page.getByTestId('document-selection-tools').getByRole('radio')).toHaveCount(3);
@@ -58,13 +68,25 @@ test('text and layout change the document instead of scrolling', async ({ page }
   await page.screenshot({ path: path.join(shots, 'ribbon-layout-1280-light.png') });
 
   await page.getByTestId('structuring-primary-fields').click();
-  await expect(page.getByTestId('structuring-primary-fields')).toHaveAttribute('aria-selected', 'true');
-  await expect(page.getByTestId('document-ribbon-gallery')).toHaveAttribute('data-gallery', 'fields');
+  await expect(page.getByTestId('structuring-primary-fields')).toHaveAttribute(
+    'aria-selected',
+    'true'
+  );
+  await expect(page.getByTestId('document-ribbon-gallery')).toHaveAttribute(
+    'data-gallery',
+    'fields'
+  );
   await expect(page.getByTestId('structuring-context')).toHaveCount(0);
 
   await page.getByTestId('structuring-primary-labels').click();
-  await expect(page.getByTestId('structuring-primary-labels')).toHaveAttribute('aria-selected', 'true');
-  await expect(page.getByTestId('document-ribbon-gallery')).toHaveAttribute('data-gallery', 'labels');
+  await expect(page.getByTestId('structuring-primary-labels')).toHaveAttribute(
+    'aria-selected',
+    'true'
+  );
+  await expect(page.getByTestId('document-ribbon-gallery')).toHaveAttribute(
+    'data-gallery',
+    'labels'
+  );
   await expect(page.getByTestId('structuring-context')).toHaveCount(0);
   expect(log.unmatched).toEqual([]);
 });
@@ -81,13 +103,13 @@ test('layout tools at 1280 dark and at a narrow width', async ({ page }) => {
   expect(log.unmatched).toEqual([]);
 });
 
-test('text correction edits an OCR block, saves it, and shows it after reload', async ({ page }) => {
+test('text correction edits an OCR block, saves it, and shows it after reload', async ({
+  page,
+}) => {
   await openViewer(page, 1280, 'light');
   await page.getByTestId('structuring-primary-ocr').click();
-  await expect(page.locator('.extracted-text-reading-paragraph').first()).toBeVisible();
-  await page.getByTestId('structuring-edit-text').click();
   await expect(page.getByTestId('structuring-edit-text')).toHaveAttribute('aria-pressed', 'true');
-  await expect(page.locator('.extracted-text-reading-paragraph')).toHaveCount(0);
+  await expect(page.getByTestId('extracted-text-page-canvas').first()).toBeVisible();
   const segment = page.locator('.extracted-text-segment', { hasText: 'NORTH 1842' });
   await expect(segment).toBeVisible();
   await expect(page.locator('.extracted-text-segment', { hasText: 'INVOICE TOTAL' })).toBeVisible();
@@ -99,13 +121,17 @@ test('text correction edits an OCR block, saves it, and shows it after reload', 
   await expect(save).toBeEnabled();
   const saved = page.waitForResponse(
     (response) =>
-      response.url().includes('/documents/') && response.request().method() === 'PATCH' && response.ok()
+      response.url().includes('/documents/') &&
+      response.request().method() === 'PATCH' &&
+      response.ok()
   );
   await save.click();
   await saved;
   await page.reload();
   await page.getByTestId('structuring-primary-ocr').click();
-  await expect(page.locator('.extracted-text-segment', { hasText: 'NORTH 1842 korrigiert' })).toBeVisible();
+  await expect(
+    page.locator('.extracted-text-segment', { hasText: 'NORTH 1842 korrigiert' })
+  ).toBeVisible();
   await expect(page.locator('.extracted-text-segment', { hasText: 'INVOICE TOTAL' })).toBeVisible();
   const detail: unknown = await page.evaluate(async (documentId) => {
     const response = await fetch(`/api/documents/${documentId}`);
@@ -113,7 +139,9 @@ test('text correction edits an OCR block, saves it, and shows it after reload', 
     return payload;
   }, LAYOUT_DOCUMENT_ID);
   const extraction =
-    typeof detail === 'object' && detail !== null && 'extraction' in detail ? detail.extraction : null;
+    typeof detail === 'object' && detail !== null && 'extraction' in detail
+      ? detail.extraction
+      : null;
   const available =
     typeof extraction === 'object' && extraction !== null && 'layoutIrAvailable' in extraction
       ? extraction.layoutIrAvailable
@@ -125,13 +153,18 @@ test('text correction edits an OCR block, saves it, and shows it after reload', 
     return payload;
   }, LAYOUT_DOCUMENT_ID);
   const pages =
-    typeof layoutIr === 'object' && layoutIr !== null && 'pages' in layoutIr && Array.isArray(layoutIr.pages)
+    typeof layoutIr === 'object' &&
+    layoutIr !== null &&
+    'pages' in layoutIr &&
+    Array.isArray(layoutIr.pages)
       ? layoutIr.pages
       : [];
   expect(pages.length).toBeGreaterThan(0);
 });
 
-function postedTableCreate(value: unknown): { x0: number; x1: number; y0: number; y1: number } | null {
+function postedTableCreate(
+  value: unknown
+): { x0: number; x1: number; y0: number; y1: number } | null {
   if (typeof value !== 'object' || value === null) return null;
   if (!('op' in value) || value.op !== 'create') return null;
   if (!('x0' in value) || typeof value.x0 !== 'number') return null;
@@ -141,13 +174,18 @@ function postedTableCreate(value: unknown): { x0: number; x1: number; y0: number
   return { x0: value.x0, y0: value.y0, x1: value.x1, y1: value.y1 };
 }
 
-test('area drag across a saved field still offers mark as table after rotation', async ({ page }) => {
+test('area drag across a saved field still offers mark as table after rotation', async ({
+  page,
+}) => {
   await openViewer(page, 1280, 'light');
   await page.setViewportSize({ width: 1280, height: 720 });
   const rotate = page.getByTestId('pdf-viewer-rotate-clockwise');
   await expect(rotate).toBeVisible();
   await rotate.click();
-  await expect(page.getByTestId('pdf-viewer-display-rotation')).toHaveAttribute('data-rotation-deg', '90');
+  await expect(page.getByTestId('pdf-viewer-display-rotation')).toHaveAttribute(
+    'data-rotation-deg',
+    '90'
+  );
   await page.getByTestId('structuring-primary-layout').click();
   await expect(page.getByTestId('document-selection-tools')).toBeVisible();
   await page.keyboard.press('r');
@@ -157,7 +195,9 @@ test('area drag across a saved field still offers mark as table after rotation',
   await expect(page.getByTestId('selection-mark-table')).toBeVisible();
   const created = page.waitForResponse(
     (response) =>
-      response.url().includes('/table-corrections') && response.request().method() === 'POST' && response.ok()
+      response.url().includes('/table-corrections') &&
+      response.request().method() === 'POST' &&
+      response.ok()
   );
   await page.getByTestId('selection-mark-table').click();
   const posted = postedTableCreate((await created).request().postDataJSON());
@@ -171,7 +211,10 @@ test('area drag across a saved field still offers mark as table after rotation',
     return payload;
   }, LAYOUT_DOCUMENT_ID);
   const items =
-    typeof listed === 'object' && listed !== null && 'items' in listed && Array.isArray(listed.items)
+    typeof listed === 'object' &&
+    listed !== null &&
+    'items' in listed &&
+    Array.isArray(listed.items)
       ? listed.items
       : [];
   const stored = items.find((item) => {
@@ -218,8 +261,12 @@ async function shootJunction(page: Page, name: string): Promise<void> {
 
 test('a selected parent flows into the next band', async ({ page }) => {
   await openViewer(page, 1280, 'light');
-  const documents = page.getByRole('navigation', { name: 'Hauptnavigation' }).getByRole('link', { name: 'Dokumente' });
-  const start = page.getByRole('navigation', { name: 'Hauptnavigation' }).getByRole('link', { name: 'Start' });
+  const documents = page
+    .getByRole('navigation', { name: 'Hauptnavigation' })
+    .getByRole('link', { name: 'Dokumente' });
+  const start = page
+    .getByRole('navigation', { name: 'Hauptnavigation' })
+    .getByRole('link', { name: 'Start' });
   const ribbon = page.getByTestId('app-ribbon');
   await expect(documents).toHaveAttribute('aria-current', 'page');
   const documentsBox = await documents.boundingBox();
@@ -231,14 +278,18 @@ test('a selected parent flows into the next band', async ({ page }) => {
   const documentsPaint = await paint(documents);
   const ribbonPaint = await paint(ribbon);
   const headerPaint = await paint(page.locator('.app-header'));
-  const topbarBorder = await page.locator('.app-topbar').evaluate((node) => getComputedStyle(node).borderBottomWidth);
+  const topbarBorder = await page
+    .locator('.app-topbar')
+    .evaluate((node) => getComputedStyle(node).borderBottomWidth);
   expect(documentsPaint.borderTop).toBe('0px');
   expect(documentsPaint.shadow).toBe('none');
   expect(documentsPaint.background).toBe(ribbonPaint.background);
   expect(documentsPaint.background).not.toBe(headerPaint.background);
   expect(ribbonPaint.borderTop).toBe('0px');
   expect(topbarBorder).toBe('0px');
-  const bandPad = await ribbon.evaluate((node) => Number.parseFloat(getComputedStyle(node).paddingTop));
+  const bandPad = await ribbon.evaluate((node) =>
+    Number.parseFloat(getComputedStyle(node).paddingTop)
+  );
   expect(bandPad).toBeGreaterThanOrEqual(12);
 
   await page.getByTestId('structuring-primary-ocr').click();
@@ -259,17 +310,24 @@ test('a selected parent flows into the next band', async ({ page }) => {
   expect(textPaint.shadow).toBe('none');
   expect(contextPaint.borderTop).toBe('0px');
   expect(contextPaint.shadow).toBe('none');
-  const panelPad = await context.evaluate((node) => Number.parseFloat(getComputedStyle(node).paddingTop));
+  const panelPad = await context.evaluate((node) =>
+    Number.parseFloat(getComputedStyle(node).paddingTop)
+  );
   expect(panelPad).toBeGreaterThanOrEqual(12);
   expect(textPaint.background).toBe(contextPaint.background);
   expect(textPaint.background).not.toBe(ribbonPaint.background);
   expect(labelsPaint.background).not.toBe(contextPaint.background);
-  await expect(page.getByRole('group', { name: 'Struktur' }).locator('.ribbon-group-label')).toHaveCount(0);
+  await expect(
+    page.getByRole('group', { name: 'Struktur' }).locator('.ribbon-group-label')
+  ).toHaveCount(0);
   await shootJunction(page, 'ribbon-junction-1280-light');
 
   await page.getByTestId('structuring-primary-labels').click();
   await expect(page.getByTestId('structuring-context')).toHaveCount(0);
-  await expect(page.getByTestId('document-ribbon-gallery')).toHaveAttribute('data-gallery', 'labels');
+  await expect(page.getByTestId('document-ribbon-gallery')).toHaveAttribute(
+    'data-gallery',
+    'labels'
+  );
   // Active Fluent tab sits flush on the gallery / panel edge.
   expect(await bottomRadius(page.getByTestId('structuring-primary-labels'))).toBe('0px');
 

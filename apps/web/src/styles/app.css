@@ -9447,6 +9447,66 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   color: var(--dv-color-accent-text);
 }
 
+.extracted-text-layout-page {
+  margin: 0 0 var(--dv-space-md);
+}
+
+.extracted-text-page-canvas {
+  position: relative;
+  width: min(100%, 52rem);
+  margin-inline: auto;
+  container-type: size;
+  border: var(--dv-border-width-hairline) solid
+    color-mix(in srgb, var(--dv-color-border) 70%, transparent);
+  border-radius: var(--dv-radius-surface);
+  background: var(--dv-color-bg-raised);
+  box-shadow: var(--dv-surface-highlight);
+  overflow: hidden;
+}
+
+.extracted-text-layout-block {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  min-height: 0;
+  container-type: size;
+  overflow: hidden;
+}
+
+.extracted-text-layout-block--active {
+  outline: 1px solid color-mix(in srgb, var(--dv-color-accent) 70%, transparent);
+  outline-offset: 1px;
+  background: color-mix(in srgb, var(--dv-color-accent-soft) 55%, transparent);
+  z-index: 1;
+}
+
+.extracted-text-layout-block--editing {
+  z-index: 2;
+  overflow: visible;
+}
+
+.extracted-text-segment--layout {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: clamp(0.55rem, 70cqh, 1.35rem);
+  line-height: 1.15;
+}
+
+.extracted-text-inline-edit--layout {
+  width: 100%;
+  min-height: 100%;
+  padding: 0 0.15em;
+  font-size: clamp(0.55rem, 70cqh, 1.35rem);
+  line-height: 1.15;
+}
+
 .extracted-text-line {
   position: relative;
   margin: 0 0 0.55em;

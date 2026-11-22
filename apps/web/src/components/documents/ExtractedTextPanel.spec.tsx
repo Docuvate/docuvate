@@ -128,9 +128,11 @@ describe('ExtractedTextPanel text view', () => {
         onActiveBlockIndexChange={vi.fn()}
       />
     );
-    expect(container.querySelectorAll('.extracted-text-reading-paragraph')).toHaveLength(1);
-    expect(screen.getByText('NORTH 1842 INVOICE TOTAL')).toBeTruthy();
-    expect(container.querySelector('.extracted-text-segment')).toBeNull();
+    // Layout-preserving canvas places OCR boxes; reading paragraphs are unused when geometry exists.
+    expect(container.querySelector('[data-testid="extracted-text-page-canvas"]')).toBeTruthy();
+    expect(container.querySelector('.extracted-text-reading-paragraph')).toBeNull();
+    expect(screen.getByText('NORTH 1842')).toBeTruthy();
+    expect(screen.getByText('INVOICE TOTAL')).toBeTruthy();
 
     rerender(
       <ExtractedTextPanel

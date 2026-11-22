@@ -45,8 +45,8 @@ export function useStructuringPrimary(): {
     setPrimary(command.primary);
     const textStage = command.stage === 'text';
     setTextOpen(textStage);
-    // Start Text prüfen in layout reading; ribbon "Text korrigieren" turns editing on.
-    setTextEditing(false);
+    // Text prüfen opens as a layout-preserving editor (WYSIWYG); toggle still turns editing off.
+    setTextEditing(textStage);
     return command;
   }, []);
 
