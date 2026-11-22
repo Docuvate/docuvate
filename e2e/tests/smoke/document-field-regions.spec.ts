@@ -43,13 +43,8 @@ async function showLayoutSelectionTools(page: Page): Promise<void> {
  * The page chip for a corrected field is rendered on this tab.
  */
 async function activateOverviewTab(page: Page): Promise<void> {
-  const overview = page
-    .locator('.layout-side-tabs')
-    .getByRole('tab', { name: /Übersicht|Overview/i });
+  const overview = page.getByTestId('layout-panel-tab-fields');
   await expect(overview).toBeVisible();
-  await overview.evaluate((tab) => {
-    tab.scrollIntoView({ block: 'center', inline: 'nearest' });
-  });
   await overview.click({ timeout: 15_000 });
 }
 
@@ -209,9 +204,7 @@ async function openFieldCorrectionSheet(page: Page): Promise<void> {
   }
   await setLabelsTabOpen(page, false);
   await showLayoutPane(page, 'panel');
-  await page
-    .locator('.layout-side-tabs')
-    .getByRole('tab', { name: /Übersicht|Overview/i })
+  await page.getByTestId('layout-panel-tab-fields')
     .click({ force: true });
   // Confirmed fields without a region (e.g. Betrag) can sort first; open a row that
   // has a page source chip so the sheet carries "Seite N" for the assertion below.
@@ -419,9 +412,7 @@ test.describe('document field regions', () => {
     await applyGermanLocale(page);
     await openLayoutDocumentPage(page, layoutDocId);
 
-    await page
-      .locator('.layout-side-tabs')
-      .getByRole('tab', { name: /Übersicht|Overview/i })
+    await page.getByTestId('layout-panel-tab-fields')
       .click();
     await expect(page.getByTestId('document-selection-layer')).toHaveAttribute(
       'data-token-count',

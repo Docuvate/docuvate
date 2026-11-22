@@ -7,10 +7,7 @@ import { installStructuringMocks, LAYOUT_DOCUMENT_ID } from './structuringMocks'
 
 async function openTools(page: Page) {
   await page.goto(`/documents/${LAYOUT_DOCUMENT_ID}`);
-  await page
-    .locator('.layout-side-tabs')
-    .getByRole('tab', { name: /Tabellen/ })
-    .click();
+  await page.getByTestId('layout-panel-tab-tables').click();
   const card = page.getByTestId('corrected-table-card').first();
   await expect(card).toBeVisible();
   // Structure verbs live in the context ribbon while the selected table's card keeps the grid.

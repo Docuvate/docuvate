@@ -109,7 +109,10 @@ export function TablePdfOverlay({
   const draftMergesRef = useRef(table.merges.map((merge) => ({ ...merge })));
   const draftRowRolesRef = useRef(table.rowRoles.map((entry) => ({ ...entry })));
   const dragRef = useRef<GuideDrag | null>(null);
-  draftBoundsRef.current = draftBounds;
+
+  useEffect(() => {
+    draftBoundsRef.current = draftBounds;
+  }, [draftBounds]);
 
   useEffect(() => {
     setDraftBounds({ x0: region.x0, y0: region.y0, x1: region.x1, y1: region.y1 });

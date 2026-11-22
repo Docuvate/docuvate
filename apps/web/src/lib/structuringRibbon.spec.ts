@@ -31,12 +31,12 @@ describe('structuring ribbon contract', () => {
     });
   });
 
-  it('opens layout as the page with region tools and the table tab, not a scroll', () => {
+  it('opens layout as the page with region tools; side panel stays closed until chosen', () => {
     expect(commandForPrimary('layout')).toEqual({
       primary: 'layout',
       stage: 'page',
       context: 'layout',
-      layoutTab: 'tables',
+      layoutTab: null,
       inspector: null,
     });
   });

@@ -19,15 +19,13 @@ interface TableStructureEditorProviderProps {
 
 function TableStructureEditorProviderInner({
   region,
+  table,
   children,
 }: {
   region: DocumentRegionDto;
+  table: NonNullable<DocumentRegionDto['table']>;
   children: ReactNode;
 }) {
-  const table = region.table;
-  if (!table) {
-    return children;
-  }
   const editor = useTableStructureEditor(region, table);
   return (
     <TableStructureEditorContext.Provider value={editor}>
@@ -44,15 +42,17 @@ export function TableStructureEditorProvider({
   active,
   children,
 }: TableStructureEditorProviderProps) {
-  if (!active || !region?.table) {
+  const table = region?.table ?? null;
+  if (!active || !region || !table) {
     return (
       <TableStructureEditorContext.Provider value={null}>{children}</TableStructureEditorContext.Provider>
     );
   }
   return (
     <TableStructureEditorProviderInner
-      key={`${region.id}:${JSON.stringify(tableStructureOf(region.table))}`}
+      key={`${region.id}:${JSON.stringify(tableStructureOf(table))}`}
       region={region}
+      table={table}
     >
       {children}
     </TableStructureEditorProviderInner>

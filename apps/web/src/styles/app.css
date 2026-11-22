@@ -2816,6 +2816,18 @@ mark.global-search-mark {
   max-height: none;
 }
 
+/* Structure panel opens from the ribbon only — PDF keeps the viewport when closed. */
+.layout-workspace[data-layout-panel='0'] {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.layout-side-panel-ribbon {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--dv-space-2xs);
+}
+
 .layout-viewer-toolbar {
   display: flex;
   flex-wrap: nowrap;
@@ -16268,6 +16280,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 .structuring-ribbon-title {
   flex: 1 1 6rem;
   min-width: 0;
+  margin: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

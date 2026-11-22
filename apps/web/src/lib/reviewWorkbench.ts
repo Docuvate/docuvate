@@ -73,11 +73,12 @@ export function workbenchRows(
   rejects: readonly SuggestionRejectRef[] = []
 ): WorkbenchRow[] {
   const rows: WorkbenchRow[] = fields
-    .filter((field) => field.value.trim() !== '')
     .filter((field) =>
-      isUserConfirmedField(field)
+      field.value.trim() === ''
         ? true
-        : !isRejectedSuggestion(field.key, field.value, rejects)
+        : isUserConfirmedField(field)
+          ? true
+          : !isRejectedSuggestion(field.key, field.value, rejects)
     )
     .map((field) => ({
       key: field.key,

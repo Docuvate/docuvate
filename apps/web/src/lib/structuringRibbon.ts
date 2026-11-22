@@ -73,7 +73,8 @@ export function commandForPrimary(primary: StructuringPrimary): StructuringComma
     case 'text':
       return { primary, stage: 'text', context: 'text', layoutTab: null, inspector: null };
     case 'layout':
-      return { primary, stage: 'page', context: 'layout', layoutTab: 'tables', inspector: null };
+      // Area tools on the page; Übersicht/Tabellen/Gliederung open on demand from the ribbon.
+      return { primary, stage: 'page', context: 'layout', layoutTab: null, inspector: null };
     case 'labels':
       return { primary, stage: 'page', context: null, layoutTab: null, inspector: 'labels' };
     case 'fields':

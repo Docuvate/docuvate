@@ -114,9 +114,7 @@ async function openOverview(page: Page, docId: string): Promise<void> {
   await applyDocuvateLocale(page, 'de');
   await page.locator('.layout-workspace').waitFor({ state: 'visible', timeout: 300_000 });
   await showLayoutPane(page, 'panel');
-  await page
-    .locator('.layout-side-tabs')
-    .getByRole('tab', { name: /Übersicht|Overview/i })
+  await page.getByTestId('layout-panel-tab-fields')
     .click({ force: true });
 }
 
@@ -172,9 +170,7 @@ test.describe('recognized fields: confirmed status needs a person', () => {
     await page.reload({ waitUntil: 'domcontentloaded' });
     await page.locator('.layout-workspace').waitFor({ state: 'visible', timeout: 300_000 });
     await showLayoutPane(page, 'panel');
-    await page
-      .locator('.layout-side-tabs')
-      .getByRole('tab', { name: /Übersicht|Overview/i })
+    await page.getByTestId('layout-panel-tab-fields')
       .click({ force: true });
     await expectConfirmed(fieldRow(page, /15\.03\.2024/));
     await expectSuggested(fieldRow(page, /RE-2024-0042/));

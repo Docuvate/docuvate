@@ -39,7 +39,7 @@ test.describe('review queue, field bbox and table overlay', () => {
   }) => {
     await installStructuringMocks(page);
     await page.goto(`/documents/${LAYOUT_DOCUMENT_ID}`);
-    await page.getByRole('tab', { name: /Layout|Tables|Tabellen/i }).first().click();
+    await page.getByTestId('layout-panel-tab-tables').click();
     const family = page.getByTestId('table-family-menu');
     await expect(family).toBeVisible({ timeout: 30_000 });
     await family.click();
@@ -87,7 +87,7 @@ test.describe('review queue, field bbox and table overlay', () => {
       await installStructuringMocks(page, { theme });
       await page.emulateMedia({ colorScheme: theme });
       await page.goto(`/documents/${LAYOUT_DOCUMENT_ID}`);
-      await page.getByRole('tab', { name: /Layout|Tables|Tabellen/i }).first().click();
+      await page.getByTestId('layout-panel-tab-tables').click();
       const family = page.getByTestId('table-family-menu');
       await expect(family).toBeVisible({ timeout: 30_000 });
       await family.click();
@@ -109,7 +109,7 @@ test.describe('review queue, field bbox and table overlay', () => {
   test('screenshot sideways page rotation with table overlay', async ({ page }) => {
     await installStructuringMocks(page);
     await page.goto(`/documents/${LAYOUT_DOCUMENT_ID}`);
-    await page.getByRole('tab', { name: /Layout|Tables|Tabellen/i }).first().click();
+    await page.getByTestId('layout-panel-tab-tables').click();
     const rotate = page.getByTestId('pdf-viewer-rotate-clockwise');
     await expect(rotate).toBeVisible({ timeout: 30_000 });
     await rotate.click();

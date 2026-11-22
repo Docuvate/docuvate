@@ -2549,7 +2549,7 @@
         "ocr": "Review text",
         "labels": "Assign labels",
         "layout": "Layout",
-        "fields": "Review values"
+        "fields": "Recognized fields"
       },
       "state": {
         "pending": "not processed",
@@ -2658,6 +2658,7 @@
     "toolsText": "Text",
     "toolsLayout": "Layout",
     "tableTools": "Table",
+    "layoutPanel": "Document structure",
     "panel": "Panel",
     "panelAria": "Open inspector panel",
     "panelClose": "Close panel",

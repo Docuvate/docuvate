@@ -61,10 +61,7 @@ for (const theme of ['light', 'dark'] as const) {
     await page.setViewportSize({ width: 1440, height: 900 });
     const log = await installStructuringMocks(page, { theme });
     await page.goto(`/documents/${LAYOUT_DOCUMENT_ID}`);
-    await page
-      .locator('.layout-side-tabs')
-      .getByRole('tab', { name: /Tabellen/ })
-      .click();
+    await page.getByTestId('layout-panel-tab-tables').click();
     const card = page.getByTestId('corrected-table-card').first();
     const tools = page.getByTestId('app-ribbon-context').getByTestId('table-structure-tools');
     await expect(tools).toBeVisible();

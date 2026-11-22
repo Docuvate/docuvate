@@ -108,14 +108,17 @@ function fieldStatus(doc: AspectDocument, evidence: FieldEvidence | null): Aspec
     rejects.some((item) =>
       suggestionRejectMatches(item.fieldKey, item.valueNormalized, fieldKey, value)
     );
-  const values = evidence.fields.filter((field) => field.value.trim() !== '');
+  const values = evidence.fields;
+  const filled = values.filter((field) => field.value.trim() !== '');
   const openValues = values.filter(
-    (field) => field.userConfirmed !== true && !rejected(field.key, field.value)
+    (field) =>
+      field.userConfirmed !== true &&
+      (field.value.trim() === '' || !rejected(field.key, field.value))
   );
   const openSuggestions = evidence.suggestions.filter((s) => !rejected(s.key, s.value));
   const open = openValues.length + openSuggestions.length;
   if (open > 0) return { aspect: 'fields', state: 'open', open };
-  if (values.length === 0) return { aspect: 'fields', state: 'no_open_items', open: null };
+  if (filled.length === 0) return { aspect: 'fields', state: 'no_open_items', open: null };
   return { aspect: 'fields', state: 'confirmed', open: null };
 }
 
@@ -124,7 +127,8 @@ export function structuringAspects(
   doc: AspectDocument,
   evidence: FieldEvidence | null = null
 ): AspectStatus[] {
-  return [ocrStatus(doc), labelStatus(doc), layoutStatus(doc), fieldStatus(doc, evidence)];
+  // Fields before Layout so Erkannte Felder is not buried behind region tools.
+  return [ocrStatus(doc), labelStatus(doc), fieldStatus(doc, evidence), layoutStatus(doc)];
 }
 
 export function aspectNeedsWork(status: AspectStatus): boolean {

@@ -30,7 +30,6 @@ import {
   reconstructionQualityTone,
 } from '../../lib/layoutReconstructionQuality';
 import { useFeatureFlags } from '../../lib/remoteConfig';
-import { segmentedToolbarClass } from '../../lib/segmentedControlClasses';
 import { sourceChipPageLabel } from '../../lib/sourceChipLabel';
 import type { StructuringPrimary } from '../../lib/structuringRibbon';
 import type { TableStructureChoice } from '../../lib/tableLayouts';
@@ -48,14 +47,15 @@ import {
   regionTableOverlayId,
 } from '../../lib/workspacePdfOverlays';
 import { useToast } from '../save';
-import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
-import { SegmentedControl } from '../ui/SegmentedControl';
 import { DocumentExtractionRecovery } from './DocumentExtractionRecovery';
-import { DocumentFieldCorrectionSheet } from './DocumentFieldCorrectionSheet';
 import { DocumentFieldMarkHint, useDocumentFieldMarking } from './DocumentFieldMarkHint';
+import {
+  type AdvancedViewerMode,
+  DocumentLayoutAdvancedPanel,
+} from './DocumentLayoutAdvancedPanel';
 import { DocumentLayoutCompareView } from './DocumentLayoutCompareView';
-import { DocumentLayoutExportTab } from './DocumentLayoutExportTab';
+import { DocumentLayoutCorrectionSheets } from './DocumentLayoutCorrectionSheets';
 import { DocumentLayoutOriginalStage } from './DocumentLayoutOriginalStage';
 import { DocumentLayoutPaneTabs, useLayoutMobilePane } from './DocumentLayoutPaneTabs';
 import {
@@ -63,19 +63,16 @@ import {
   type LayoutSideTab,
   overlayRegionById,
 } from './DocumentLayoutSidePanel';
+import { DocumentLayoutTextStage } from './DocumentLayoutTextStage';
 import { DocumentLayoutViewerToolbar, type LeftDocumentMode } from './DocumentLayoutViewerToolbar';
+import { DocumentLayoutWorkspaceRibbons } from './DocumentLayoutWorkspaceRibbons';
 import { type DocumentSelectionDraft } from './DocumentSelectionLayer';
 import type { DocumentSelectionTool } from './DocumentSelectionTools';
-import { DocumentTableCorrectionSheet } from './DocumentTableCorrectionSheet';
 import { ExtractedLayoutHtmlFrame, type LayoutIrZoomStep } from './ExtractedLayoutHtmlFrame';
-import { ExtractedTextPanel } from './ExtractedTextPanel';
 import { type PdfLayoutOverlay } from './PdfViewer';
-import { SelectionContextRibbon } from './SelectionContextRibbon';
-import { StructuringContextRibbon } from './StructuringContextRibbon';
-import { TableContextRibbon } from './TableContextRibbon';
 import { TableStructureEditorProvider } from './table/TableStructureEditorContext';
-
-type AdvancedViewerMode = 'reconstruction' | 'compare';
+import { useDocumentLayoutPositionEdit } from './useDocumentLayoutPositionEdit';
+import { useDocumentLayoutWorkspaceKeyboard } from './useDocumentLayoutWorkspaceKeyboard';
 
 const CORRECTION_SHEET_MAX_WIDTH_PX = 1023;
 
@@ -218,6 +215,7 @@ export function DocumentLayoutWorkspace({
   const [reanchorFieldKey, setReanchorFieldKey] = useState<string | null>(null);
   const [selectedFieldKey, setSelectedFieldKey] = useState<string | null>(null);
   const [selectedTableId, setSelectedTableId] = useState<string | null>(null);
+  const [layoutPanelOpen, setLayoutPanelOpen] = useState(false);
 
   /** Changes whenever the stored layout IR can have changed (reprocess finished, status flip). */
   const layoutIrRevision = `${doc.status}:${doc.updatedAt}:${String(layoutIrAvailable)}`;
@@ -226,26 +224,16 @@ export function DocumentLayoutWorkspace({
     viewerPage,
     layoutIrRevision
   );
-  useEffect(() => {
-    if (!positionEditFieldKey) return;
-    const region = findFieldRegion(positionEditFieldKey, fieldRegions);
-    if (!region) {
-      setReanchorFieldKey(positionEditFieldKey);
-      setSelectionTool('rect');
-      onPositionEditHandled?.();
-      return;
-    }
-    setSelectedFieldKey(positionEditFieldKey);
-    setBboxEditRect({
-      page: region.page,
-      x0: region.x0,
-      y0: region.y0,
-      x1: region.x1,
-      y1: region.y1,
-    });
-    onViewerPageChange(region.page);
-    onPositionEditHandled?.();
-  }, [positionEditFieldKey, fieldRegions, onViewerPageChange, onPositionEditHandled]);
+  useDocumentLayoutPositionEdit(
+    positionEditFieldKey,
+    fieldRegions,
+    onViewerPageChange,
+    onPositionEditHandled,
+    setReanchorFieldKey,
+    setSelectionTool,
+    setSelectedFieldKey,
+    setBboxEditRect
+  );
 
   const fieldOptions = useMemo(() => {
     const keys = new Set<string>(knownFieldKeys);
@@ -521,12 +509,11 @@ export function DocumentLayoutWorkspace({
     if (structuringPrimary === 'layout') {
       setSelectionTool('rect');
       setOverlayEnabled(true);
-      // Layout owns selection tools in the context row. Clear table selection so table
-      // tools do not portal over the mark tools; open overlay only via explicit edit.
-      // Do not force the tables side tab — that auto-activates the first table card.
+      // Area tools own the page; structure panel stays closed until ribbon opens it.
       setSelectedTableId(null);
       setTableOverlayOpen(false);
       setActiveOverlayId(null);
+      setLayoutPanelOpen(false);
       return;
     }
     // Leaving Layout drops an unfinished spatial draft so ribbon/bottom assign UI cannot diverge.
@@ -537,11 +524,13 @@ export function DocumentLayoutWorkspace({
       setTableOverlayOpen(false);
       setActiveOverlayId(null);
       onLayoutSideTabChange('fields');
+      setLayoutPanelOpen(true);
       return;
     }
     if (structuringPrimary === 'labels' || structuringPrimary === 'text') {
       setSelectedTableId(null);
       setTableOverlayOpen(false);
+      setLayoutPanelOpen(false);
     }
   }, [structuringPrimary, onLayoutSideTabChange]);
 
@@ -640,101 +629,43 @@ export function DocumentLayoutWorkspace({
     ]
   );
 
-  useEffect(() => {
-    const onKey = (event: KeyboardEvent) => {
-      const target = event.target;
-      if (target instanceof HTMLElement) {
-        const tag = target.tagName;
-        if (tag === 'INPUT' || tag === 'TEXTAREA' || target.isContentEditable) {
-          return;
-        }
-      }
-      if (event.key === 'Escape') {
-        setActiveOverlayId(null);
-        setSelectionDraft(null);
-        setSelectionTool('none');
-        setReanchorFieldKey(null);
-        setSelectedFieldKey(null);
-        setSelectedTableId(null);
-        return;
-      }
-      if (event.key === 't' || event.key === 'T') {
-        onStructuringPrimaryChange?.('layout');
-        setReanchorFieldKey(null);
-        setSelectionTool('text');
-        return;
-      }
-      if (event.key === 'r' || event.key === 'R') {
-        onStructuringPrimaryChange?.('layout');
-        setReanchorFieldKey(null);
-        setSelectionTool('rect');
-        return;
-      }
-      if (
-        (event.key === 'o' || event.key === 'O') &&
-        structuringPrimary === 'layout' &&
-        pdfOverlays.length > 0
-      ) {
-        event.preventDefault();
-        setOverlayEnabled((enabled) => !enabled);
-        return;
-      }
-      if (
-        (event.key === 'm' || event.key === 'M') &&
-        structuringPrimary === 'layout' &&
-        selectionDraft &&
-        !reanchorFieldKey &&
-        selectionMarkTableEnabled
-      ) {
-        event.preventDefault();
-        markTableFromSelection();
-        return;
-      }
-      if (event.key === 'Enter' && selectionDraft && reanchorFieldKey) {
-        // Free-form create/assign goes through DocumentFieldContextBar so the user
-        // picks the target field explicitly (and confirms overwrites).
-        event.preventDefault();
-        void runFieldCorrection(
-          {
-            id: crypto.randomUUID(),
-            op: 'reanchor',
-            fieldKey: reanchorFieldKey,
-            page: selectionDraft.page,
-            shape: 'rect',
-            x0: selectionDraft.rect.x0,
-            y0: selectionDraft.rect.y0,
-            x1: selectionDraft.rect.x1,
-            y1: selectionDraft.rect.y1,
-            blockIndexes: selectionDraft.tokens.map((token) => token.blockIndex),
-            ...(selectionDraft.text.trim().length > 0
-              ? { valueOverride: selectionDraft.text }
-              : {}),
-          },
-          t('documents.fieldCorrectionSaved', { name: fieldLabelForKey(reanchorFieldKey) })
-        ).catch((err: unknown) => {
-          toast.error(formatUserFacingError(err, 'errors.generic'));
-        });
-      }
-    };
-    window.addEventListener('keydown', onKey, true);
-    return () => {
-      window.removeEventListener('keydown', onKey, true);
-    };
-  }, [
-    activeOverlayId,
-    fieldLabelForKey,
-    markTableFromSelection,
-    pdfOverlays.length,
-    reanchorFieldKey,
-    runFieldCorrection,
-    onStructuringPrimaryChange,
-    selectionDraft,
-    selectionMarkTableEnabled,
-    setReanchorFieldKey,
+  useDocumentLayoutWorkspaceKeyboard({
     structuringPrimary,
-    t,
-    toast,
-  ]);
+    pdfOverlayCount: pdfOverlays.length,
+    selectionDraft,
+    reanchorFieldKey,
+    selectionMarkTableEnabled,
+    onStructuringPrimaryChange,
+    setActiveOverlayId,
+    setSelectionDraft,
+    setSelectionTool,
+    setReanchorFieldKey,
+    setSelectedFieldKey,
+    setSelectedTableId,
+    setOverlayEnabled,
+    markTableFromSelection,
+    onReanchorEnter: () => {
+      if (!selectionDraft || !reanchorFieldKey) return;
+      void runFieldCorrection(
+        {
+          id: crypto.randomUUID(),
+          op: 'reanchor',
+          fieldKey: reanchorFieldKey,
+          page: selectionDraft.page,
+          shape: 'rect',
+          x0: selectionDraft.rect.x0,
+          y0: selectionDraft.rect.y0,
+          x1: selectionDraft.rect.x1,
+          y1: selectionDraft.rect.y1,
+          blockIndexes: selectionDraft.tokens.map((token) => token.blockIndex),
+          ...(selectionDraft.text.trim().length > 0 ? { valueOverride: selectionDraft.text } : {}),
+        },
+        t('documents.fieldCorrectionSaved', { name: fieldLabelForKey(reanchorFieldKey) })
+      ).catch((err: unknown) => {
+        toast.error(formatUserFacingError(err, 'errors.generic'));
+      });
+    },
+  });
 
   const onPdfPageClick = useCallback(
     (page: number, nx: number, ny: number) => {
@@ -766,14 +697,6 @@ export function DocumentLayoutWorkspace({
         height: b.height,
       })),
     [highlightBlocks]
-  );
-
-  const advancedViewOptions = useMemo(
-    () => [
-      { value: 'reconstruction' as const, label: t('documents.layoutViewReconstruction') },
-      { value: 'compare' as const, label: t('documents.layoutViewCompare') },
-    ],
-    [t]
   );
 
   const pending = layoutIrAvailable && layoutIrState === 'loading';
@@ -809,6 +732,7 @@ export function DocumentLayoutWorkspace({
       data-structuring-primary={structuringPrimary ?? ''}
       data-selected-field={selectedFieldKey ?? ''}
       data-selected-table={selectedTableId ?? ''}
+      data-layout-panel={layoutPanelOpen ? '1' : '0'}
       data-mobile-pane={mobilePane.narrow ? mobilePane.pane : undefined}
     >
       {mobilePane.narrow ? (
@@ -825,73 +749,77 @@ export function DocumentLayoutWorkspace({
             />
           ) : null}
 
-          <StructuringContextRibbon
-            primary={structuringPrimary}
-            textDirty={blocksDirty}
+          <DocumentLayoutWorkspaceRibbons
+            structuringPrimary={structuringPrimary}
+            blocksDirty={blocksDirty}
             saving={saving}
             editMode={editMode}
             onEditModeChange={onEditModeChange}
-            onSaveText={onSaveBlocks}
+            onSaveBlocks={onSaveBlocks}
             selectionTool={selectionTool}
             onSelectionToolChange={setSelectionTool}
             hasOverlays={pdfOverlays.length > 0}
             overlayEnabled={overlayEnabled}
             onOverlayChange={setOverlayEnabled}
-            paused={selectionContextActive || tableContextActive}
+            selectionContextActive={selectionContextActive}
+            tableContextActive={tableContextActive}
+            layoutSideTab={layoutSideTab}
+            layoutPanelOpen={layoutPanelOpen}
+            selectionDraft={selectionDraft}
+            selectionFieldOptions={selectionFieldOptions}
+            existingFieldValues={existingFieldValues}
+            onConfirmSelection={confirmFieldFromSelection}
+            onMarkTableFromSelection={
+              selectionMarkTableEnabled ? markTableFromSelection : undefined
+            }
+            onCancelSelection={() => {
+              setSelectionDraft(null);
+              setReanchorFieldKey(null);
+            }}
+            selectedTableRegion={selectedTableRegion}
+            selectedTableIndex={selectedTableIndex}
+            onTableLayoutApply={(choice) => {
+              if (!selectedTableRegion) return;
+              applyTableLayoutChoice(selectedTableRegion.id, choice);
+            }}
+            onEditTableInDocument={() => {
+              if (!selectedTableRegion) return;
+              setTableOverlayOpen(true);
+              onViewerPageChange(selectedTableRegion.page);
+            }}
+            onRedetectTable={() => {
+              if (!selectedTableRegion) return;
+              submitTableCorrection(
+                {
+                  id: crypto.randomUUID(),
+                  op: 'create',
+                  beforeRegionId: selectedTableRegion.id,
+                  page: selectedTableRegion.page,
+                  shape: 'rect',
+                  x0: selectedTableRegion.x0,
+                  y0: selectedTableRegion.y0,
+                  x1: selectedTableRegion.x1,
+                  y1: selectedTableRegion.y1,
+                  blockIndexes: selectedTableRegion.blockIndexes,
+                },
+                t('tableLayouts.redetectGrid')
+              );
+            }}
+            tableOverlayOpen={tableOverlayOpen}
+            onSaveTableBounds={() => {
+              tableOverlaySaveRef.current?.();
+            }}
+            onExitTableDocumentEdit={() => {
+              setTableOverlayOpen(false);
+            }}
+            tableRegions={tableRegions}
+            setSelectedTableId={setSelectedTableId}
+            setSelectedFieldKey={setSelectedFieldKey}
+            setActiveOverlayId={setActiveOverlayId}
+            setTableOverlayOpen={setTableOverlayOpen}
+            onLayoutSideTabChange={onLayoutSideTabChange}
+            setLayoutPanelOpen={setLayoutPanelOpen}
           />
-          {selectionContextActive && selectionDraft ? (
-            <SelectionContextRibbon
-              draft={selectionDraft}
-              fieldOptions={selectionFieldOptions}
-              existingFieldValues={existingFieldValues}
-              onConfirm={confirmFieldFromSelection}
-              onMarkTable={selectionMarkTableEnabled ? markTableFromSelection : undefined}
-              onCancel={() => {
-                setSelectionDraft(null);
-                setReanchorFieldKey(null);
-              }}
-            />
-          ) : null}
-          {tableContextActive && selectedTableRegion?.table ? (
-            <TableContextRibbon
-              region={selectedTableRegion}
-              index={selectedTableIndex}
-              hasOverlays={pdfOverlays.length > 0}
-              overlayEnabled={overlayEnabled}
-              onOverlayChange={setOverlayEnabled}
-              onLayoutApply={(choice) => {
-                applyTableLayoutChoice(selectedTableRegion.id, choice);
-              }}
-              onEditInDocument={() => {
-                setTableOverlayOpen(true);
-                onViewerPageChange(selectedTableRegion.page);
-              }}
-              onRedetect={() => {
-                submitTableCorrection(
-                  {
-                    id: crypto.randomUUID(),
-                    op: 'create',
-                    beforeRegionId: selectedTableRegion.id,
-                    page: selectedTableRegion.page,
-                    shape: 'rect',
-                    x0: selectedTableRegion.x0,
-                    y0: selectedTableRegion.y0,
-                    x1: selectedTableRegion.x1,
-                    y1: selectedTableRegion.y1,
-                    blockIndexes: selectedTableRegion.blockIndexes,
-                  },
-                  t('tableLayouts.redetectGrid')
-                );
-              }}
-              documentEditOpen={tableOverlayOpen}
-              onSaveDocumentBounds={() => {
-                tableOverlaySaveRef.current?.();
-              }}
-              onExitDocumentEdit={() => {
-                setTableOverlayOpen(false);
-              }}
-            />
-          ) : null}
           <DocumentLayoutViewerToolbar
             leftMode={leftMode}
             onLeftModeChange={setLeftDocumentMode}
@@ -919,39 +847,25 @@ export function DocumentLayoutWorkspace({
             ref={fieldMarking.viewerStageRef}
           >
             {leftMode === 'text' ? (
-              <div className="layout-text-stage">
-                <ExtractedTextPanel
-                  documentId={doc.id}
-                  fullText={doc.extraction?.text ?? ''}
-                  layoutIrAvailable={layoutIrAvailable}
-                  layoutIrDocument={layoutIr}
-                  layoutIrPages={layoutIrPages}
-                  blocks={blocks}
-                  activePage={viewerPage}
-                  activeBlockIndex={activeBlockIndex}
-                  pageSynced
-                  editMode={editMode}
-                  allowCopy
-                  onActivePageChange={onViewerPageChange}
-                  onHighlightBlocks={onHighlightBlocks}
-                  onBlocksChange={onBlocksChange}
-                  onActiveBlockIndexChange={onActiveBlockIndexChange}
-                  documentTitle={doc.title || doc.filename}
-                  textOnly
-                />
-                {blocksDirty ? (
-                  <div className="layout-text-edit-save">
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      disabled={saving}
-                      onClick={onSaveBlocks}
-                    >
-                      {saving ? t('documents.saving') : t('documents.save')}
-                    </Button>
-                  </div>
-                ) : null}
-              </div>
+              <DocumentLayoutTextStage
+                documentId={doc.id}
+                fullText={doc.extraction?.text ?? ''}
+                layoutIrAvailable={layoutIrAvailable}
+                layoutIrDocument={layoutIr}
+                layoutIrPages={layoutIrPages}
+                blocks={blocks}
+                viewerPage={viewerPage}
+                activeBlockIndex={activeBlockIndex}
+                editMode={editMode}
+                onViewerPageChange={onViewerPageChange}
+                onHighlightBlocks={onHighlightBlocks}
+                onBlocksChange={onBlocksChange}
+                onActiveBlockIndexChange={onActiveBlockIndexChange}
+                documentTitle={doc.title || doc.filename}
+                blocksDirty={blocksDirty}
+                saving={saving}
+                onSaveBlocks={onSaveBlocks}
+              />
             ) : showAdvancedStage && advancedView === 'compare' && doc.id ? (
               <DocumentLayoutCompareView
                 documentId={doc.id}
@@ -1115,59 +1029,44 @@ export function DocumentLayoutWorkspace({
           </div>
 
           {layoutAdvancedEnabled ? (
-            <details
-              className="layout-advanced-panel"
-              open={advancedOpen}
-              onToggle={(event) => {
-                const open = event.currentTarget.open;
-                setAdvancedOpen(open);
-                if (open) {
-                  setLeftMode('original');
-                }
+            <DocumentLayoutAdvancedPanel
+              advancedOpen={advancedOpen}
+              onAdvancedOpenChange={setAdvancedOpen}
+              advancedView={advancedView}
+              onAdvancedViewChange={setAdvancedView}
+              onRevealOriginalMode={() => {
+                setLeftDocumentMode('original');
               }}
-            >
-              <summary className="layout-advanced-summary">
-                {t('documents.layoutAdvancedSummary')}
-              </summary>
-              <div className="layout-advanced-body">
-                <SegmentedControl<AdvancedViewerMode>
-                  ariaLabel={t('documents.layoutAdvancedViewAria')}
-                  className={segmentedToolbarClass(
-                    'layout-advanced-view-switch',
-                    'segmented-control--text-wide'
-                  )}
-                  value={advancedView}
-                  options={advancedViewOptions}
-                  onChange={setAdvancedView}
-                />
-                <div className="layout-advanced-export">
-                  <DocumentLayoutExportTab
-                    documentId={doc.id}
-                    documentTitle={doc.title || doc.filename}
-                    hasLayoutIr={Boolean(layoutIr?.pages.length)}
-                    blocks={blocks}
-                  />
-                </div>
-              </div>
-            </details>
+              documentId={doc.id}
+              documentTitle={doc.title || doc.filename}
+              hasLayoutIr={Boolean(layoutIr?.pages.length)}
+              blocks={blocks}
+            />
           ) : null}
         </Card>
       </div>
 
-      {layoutIr ? (
+      {layoutPanelOpen && layoutIr ? (
         <DocumentLayoutSidePanel
           layoutIr={layoutIr}
           fields={fields}
           knownFieldKeys={knownFieldKeys}
           fieldLabelForKey={fieldLabelForKey}
           activeTab={layoutSideTab}
+          hideTablist
+          preferRibbonTools
           onTabChange={(tab) => {
             onLayoutSideTabChange(tab);
+            setLayoutPanelOpen(true);
             if (tab === 'tables' && tableRegions.length > 0 && !selectedTableId) {
               const first = tableRegions[0];
               setSelectedTableId(first.id);
               setSelectedFieldKey(null);
               setActiveOverlayId(regionTableOverlayId(first.id));
+            }
+            if (tab !== 'tables') {
+              setSelectedTableId(null);
+              setTableOverlayOpen(false);
             }
           }}
           activeOverlayId={activeOverlayId}
@@ -1230,78 +1129,65 @@ export function DocumentLayoutWorkspace({
           hideInlineFieldList={Boolean(correctionSheetViewport && selectedFieldKey)}
           hideInlineTableList={tableSheetOpen}
         />
-      ) : (
+      ) : layoutPanelOpen ? (
         <aside className="layout-side-panel layout-side-panel-loading">
           <p className="muted">{t('documents.layoutIrLoading')}</p>
         </aside>
-      )}
-      {correctionSheetViewport ? (
-        <DocumentFieldCorrectionSheet
-          open={selectedFieldKey != null}
-          fieldName={selectedFieldKey ? fieldLabelForKey(selectedFieldKey) : ''}
-          value={selectedField?.value ?? ''}
-          sourceLabel={
-            selectedRegion ? sourceChipPageLabel(selectedRegion.page, i18n.language) : undefined
-          }
-          onClose={() => {
-            setSelectedFieldKey(null);
-          }}
-          onConfirm={
-            selectedField
-              ? () => {
-                  confirmField(selectedField.key, selectedField.value);
-                  setSelectedFieldKey(null);
-                }
-              : undefined
-          }
-          onCorrect={fieldMarking.sheetMarkInDocument}
-          onSaveValue={fieldMarking.sheetSaveValue}
-          onSourceClick={
-            selectedFieldKey
-              ? () => {
-                  highlightRegion(selectedFieldKey);
-                }
-              : undefined
-          }
-        />
       ) : null}
-      {correctionSheetViewport ? (
-        <DocumentTableCorrectionSheet
-          open={selectedTableId != null}
-          region={tableRegions.find((item) => item.id === selectedTableId) ?? null}
-          index={Math.max(
-            0,
-            tableRegions.findIndex((item) => item.id === selectedTableId)
-          )}
-          onClose={() => {
-            setSelectedTableId(null);
-          }}
-          onSelect={() => {
-            if (selectedTableId) {
-              setActiveOverlayId(regionTableOverlayId(selectedTableId));
-            }
-          }}
-          onLayoutApply={
-            selectedTableId
-              ? (choice) => {
-                  applyTableLayoutChoice(selectedTableId, choice);
-                }
-              : undefined
-          }
-          onCellChange={
-            selectedTableId
-              ? (row, col, text) => {
-                  submitTableCorrection({
-                    id: crypto.randomUUID(),
-                    op: 'edit_cell',
-                    beforeRegionId: selectedTableId,
-                    cell: { row, col, text },
-                  });
-                }
-              : undefined
-          }
-        />
-      ) : null}
+      <DocumentLayoutCorrectionSheets
+        enabled={correctionSheetViewport}
+        selectedFieldKey={selectedFieldKey}
+        selectedField={selectedField}
+        fieldName={selectedFieldKey ? fieldLabelForKey(selectedFieldKey) : ''}
+        sourceLabel={
+          selectedRegion ? sourceChipPageLabel(selectedRegion.page, i18n.language) : undefined
+        }
+        onCloseField={() => {
+          setSelectedFieldKey(null);
+        }}
+        onConfirmField={
+          selectedField
+            ? () => {
+                confirmField(selectedField.key, selectedField.value);
+                setSelectedFieldKey(null);
+              }
+            : undefined
+        }
+        onCorrectField={fieldMarking.sheetMarkInDocument}
+        onSaveFieldValue={fieldMarking.sheetSaveValue}
+        onSourceClick={
+          selectedFieldKey
+            ? () => {
+                highlightRegion(selectedFieldKey);
+              }
+            : undefined
+        }
+        selectedTableId={selectedTableId}
+        tableRegions={tableRegions}
+        onCloseTable={() => {
+          setSelectedTableId(null);
+        }}
+        onSelectTableOverlay={setActiveOverlayId}
+        onTableLayoutApply={
+          selectedTableId
+            ? (choice) => {
+                applyTableLayoutChoice(selectedTableId, choice);
+              }
+            : undefined
+        }
+        onTableCellChange={
+          selectedTableId
+            ? (row, col, text) => {
+                submitTableCorrection({
+                  id: crypto.randomUUID(),
+                  op: 'edit_cell',
+                  beforeRegionId: selectedTableId,
+                  cell: { row, col, text },
+                });
+              }
+            : undefined
+        }
+      />
     </div>
     </TableStructureEditorProvider>
   );

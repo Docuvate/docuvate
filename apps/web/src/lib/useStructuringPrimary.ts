@@ -43,9 +43,10 @@ export function useStructuringPrimary(): {
   const select = useCallback((next: StructuringPrimary) => {
     const command = commandForPrimary(next);
     setPrimary(command.primary);
-    const editing = command.stage === 'text';
-    setTextOpen(editing);
-    setTextEditing(editing);
+    const textStage = command.stage === 'text';
+    setTextOpen(textStage);
+    // Start Text prüfen in layout reading; ribbon "Text korrigieren" turns editing on.
+    setTextEditing(false);
     return command;
   }, []);
 

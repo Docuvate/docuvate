@@ -15,8 +15,8 @@ import {
   TABLE_ROW_KINDS,
   type TableRowKind,
   tableRowKind,
-  tableStructureOf,
   type TableStructureChoice,
+  tableStructureOf,
   upsertTableCell,
 } from '../../lib/tableLayouts';
 import { useTableStructureEditorContext } from './table/TableStructureEditorContext';
@@ -61,6 +61,11 @@ interface CorrectedTableCardProps {
   onCellChange?: (row: number, col: number, text: string) => void;
   /** Bands, index columns, row roles, spans and lines in one correction. */
   onLayoutApply?: (choice: TableStructureChoice) => void;
+  /**
+   * Layout workspace owns structure verbs in the context ribbon — never render a second
+   * toolbar on non-selected (or selected) cards.
+   */
+  preferRibbonTools?: boolean;
 }
 
 /**
@@ -76,6 +81,7 @@ export function CorrectedTableCard({
   onRedetect,
   onCellChange,
   onLayoutApply,
+  preferRibbonTools = false,
 }: CorrectedTableCardProps) {
   const table = region.table;
   if (!table) {
@@ -93,6 +99,7 @@ export function CorrectedTableCard({
       onRedetect={onRedetect}
       onCellChange={onCellChange}
       onLayoutApply={onLayoutApply}
+      preferRibbonTools={preferRibbonTools}
     />
   );
 }
@@ -107,6 +114,7 @@ function TableEditor({
   onRedetect,
   onCellChange,
   onLayoutApply,
+  preferRibbonTools = false,
 }: CorrectedTableCardProps & { table: DocumentRegionTableDto }) {
   const { t } = useTranslation();
   const sharedCtx = useTableStructureEditorContext();
@@ -114,7 +122,7 @@ function TableEditor({
   const shared = sharedCtx?.region.id === region.id ? sharedCtx : null;
   const local = useTableStructureEditor(region, table);
   const editor = shared ?? local;
-  const structureToolsInRibbon = shared !== null;
+  const structureToolsInRibbon = preferRibbonTools || shared !== null;
   const editable = onLayoutApply !== undefined;
 
   const {

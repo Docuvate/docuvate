@@ -137,9 +137,7 @@ async function openOverview(page: Page, docId: string): Promise<void> {
   await applyDocuvateLocale(page, 'de');
   await page.locator('.layout-workspace').waitFor({ state: 'visible', timeout: 300_000 });
   await showLayoutPane(page, 'panel');
-  await page
-    .locator('.layout-side-tabs')
-    .getByRole('tab', { name: /Übersicht|Overview/i })
+  await page.getByTestId('layout-panel-tab-fields')
     .click({ force: true });
 }
 
@@ -220,9 +218,7 @@ test.describe('field confirm / correct happy path', () => {
     await page.reload({ waitUntil: 'domcontentloaded' });
     await page.locator('.layout-workspace').waitFor({ state: 'visible', timeout: 300_000 });
     await showLayoutPane(page, 'panel');
-    await page
-      .locator('.layout-side-tabs')
-      .getByRole('tab', { name: /Übersicht|Overview/i })
+    await page.getByTestId('layout-panel-tab-fields')
       .click({ force: true });
     await expectConfirmed(fieldRow(page, CORRECTED_VALUE));
     await assertNoHorizontalOverflow(page);

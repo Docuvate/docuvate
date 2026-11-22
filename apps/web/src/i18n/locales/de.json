@@ -2549,7 +2549,7 @@
         "ocr": "Text prüfen",
         "labels": "Labels zuweisen",
         "layout": "Layout",
-        "fields": "Werte prüfen"
+        "fields": "Erkannte Felder"
       },
       "state": {
         "pending": "nicht verarbeitet",
@@ -2658,6 +2658,7 @@
     "toolsText": "Text",
     "toolsLayout": "Layout",
     "tableTools": "Tabelle",
+    "layoutPanel": "Dokumentstruktur",
     "panel": "Panel",
     "panelAria": "Inspektor-Panel öffnen",
     "panelClose": "Panel schließen",

@@ -112,7 +112,8 @@ import {
 import { routes } from '../lib/routes';
 import { notifySaved, notifySaveError } from '../lib/saveNotify';
 import { pushRecentDocument } from '../lib/search/searchRecent';
-import { primaryForAspect, type StructuringCommand } from '../lib/structuringRibbon';
+import type { StructuringAspect } from '../lib/structuringAspects';
+import { primaryForAspect, type StructuringCommand, type StructuringPrimary } from '../lib/structuringRibbon';
 import { useStructuringPrimary } from '../lib/useStructuringPrimary';
 import { useDocumentDetailPlainTextFallback } from './useDocumentDetailPlainTextFallback';
 import { useDocumentDetailPreviewBuffer } from './useDocumentDetailPreviewBuffer';
@@ -819,6 +820,16 @@ export function DocumentDetailPage() {
         ?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     });
   };
+  const applyStructuringSelect = (primary: StructuringPrimary) => {
+    applyStructuringChrome(structuring.select(primary), setLayoutSideTab, openInspector);
+  };
+  const applyStructuringAspect = (aspect: StructuringAspect) => {
+    applyStructuringChrome(
+      structuring.select(primaryForAspect(aspect)),
+      setLayoutSideTab,
+      openInspector
+    );
+  };
   const nextDocumentId = nextReviewDocumentId(reviewQueueItems, doc.id);
   const fieldTargets = [...new Set([...knownFieldKeys, ...recognizedFields.map((f) => f.key)])]
     .map((key) => ({ key, label: fieldLabelForKey(key) }))
@@ -834,27 +845,26 @@ export function DocumentDetailPage() {
       data-ux="page"
       data-correction-sheet-open={correctionSheetOpen ? '1' : '0'}
     >
-      {ribbonIdentity ? null : (
-        <p className="document-detail-back">
-          <Link to={routes.documents} className="document-detail-back-link">
-            <ArrowLeft size={16} strokeWidth={2} aria-hidden />
-            {t('documents.breadcrumbDocuments')}
-          </Link>
-        </p>
-      )}
-
-      {ribbonIdentity ? null : (
-        <DocumentDetailMetaBar
-          doc={doc}
-          onDelete={() => {
-            setDeleteDialogOpen(true);
-          }}
-          onRequeueExtraction={layoutWorkspace ? () => void onRequeueExtraction() : undefined}
-          requeueBusy={requeueBusy}
-          showTechnicalDetails={showTechnicalDetails}
-          onShowTechnicalDetailsChange={layoutWorkspace ? setShowTechnicalDetails : undefined}
-        />
-      )}
+      {!ribbonIdentity ? (
+        <>
+          <p className="document-detail-back">
+            <Link to={routes.documents} className="document-detail-back-link">
+              <ArrowLeft size={16} strokeWidth={2} aria-hidden />
+              {t('documents.breadcrumbDocuments')}
+            </Link>
+          </p>
+          <DocumentDetailMetaBar
+            doc={doc}
+            onDelete={() => {
+              setDeleteDialogOpen(true);
+            }}
+            onRequeueExtraction={() => void onRequeueExtraction()}
+            requeueBusy={requeueBusy}
+            showTechnicalDetails={showTechnicalDetails}
+            onShowTechnicalDetailsChange={setShowTechnicalDetails}
+          />
+        </>
+      ) : null}
 
       {stageState === 'review' || stageState === 'structured' ? null : (
         <DocumentPipelineHeader
@@ -883,13 +893,7 @@ export function DocumentDetailPage() {
         saving={saving}
         nextDocumentId={nextDocumentId}
         activeAspect={structuring.activeAspect}
-        onOpenAspect={(aspect) => {
-          applyStructuringChrome(
-            structuring.select(primaryForAspect(aspect)),
-            setLayoutSideTab,
-            openInspector
-          );
-        }}
+        onOpenAspect={applyStructuringAspect}
         onConfirmMany={(keys) => {
           saveFieldsWithUndo(
             confirmFieldKeys(fields, new Set(keys)),
@@ -962,13 +966,7 @@ export function DocumentDetailPage() {
               textEditOpen={structuring.textOpen}
               onTextEditOpenChange={structuring.onTextOpenChange}
               structuringPrimary={structuring.primary}
-              onStructuringPrimaryChange={(primary) => {
-                applyStructuringChrome(
-                  structuring.select(primary),
-                  setLayoutSideTab,
-                  openInspector
-                );
-              }}
+              onStructuringPrimaryChange={applyStructuringSelect}
               editMode={structuring.textEditing}
               onEditModeChange={structuring.setTextEditing}
               blocksDirty={blocksDirty}
@@ -980,11 +978,7 @@ export function DocumentDetailPage() {
                 setPositionEditFieldKey(null);
               }}
               onRequestFieldValueEdit={(fieldKey) => {
-                applyStructuringChrome(
-                  structuring.select('fields'),
-                  setLayoutSideTab,
-                  openInspector
-                );
+                applyStructuringSelect('fields');
                 setWorkbenchEditFieldKey(fieldKey);
               }}
             />
@@ -1095,22 +1089,12 @@ export function DocumentDetailPage() {
                   onLocate={locateValue}
                   onCorrectPosition={(fieldKey) => {
                     setPositionEditFieldKey(fieldKey);
-                    applyStructuringChrome(
-                      structuring.select('layout'),
-                      setLayoutSideTab,
-                      openInspector
-                    );
+                    applyStructuringSelect('layout');
                     setInspectorChoice('fields');
                   }}
                   onLabelsUpdated={refreshDocumentLabels}
                   activeAspect={structuring.activeAspect}
-                  onOpenAspect={(aspect) => {
-                    applyStructuringChrome(
-                      structuring.select(primaryForAspect(aspect)),
-                      setLayoutSideTab,
-                      openInspector
-                    );
-                  }}
+                  onOpenAspect={applyStructuringAspect}
                   requestEditFieldKey={workbenchEditFieldKey}
                   onRequestEditFieldHandled={() => {
                     setWorkbenchEditFieldKey(null);
@@ -1174,11 +1158,7 @@ export function DocumentDetailPage() {
                   }}
                   onConfirmField={confirmField}
                   onRequestCorrectField={(field) => {
-                    applyStructuringChrome(
-                      structuring.select('fields'),
-                      setLayoutSideTab,
-                      openInspector
-                    );
+                    applyStructuringSelect('fields');
                     setWorkbenchEditFieldKey(field.key);
                   }}
                   onSave={() => void persist({ extractionFields: fields })}

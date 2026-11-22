@@ -6,8 +6,8 @@ import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
-import { documentStageState } from '../../lib/documentPipeline';
 import { summarizeDocumentOpenWork } from '../../lib/documentOpenWork';
+import { documentStageState } from '../../lib/documentPipeline';
 import {
   safeConfirmKeys,
   type SuggestionRejectRef,
@@ -19,8 +19,8 @@ import { type StructuringAspect, structuringAspects } from '../../lib/structurin
 import { AppRibbon, RibbonGroup } from '../layout/AppRibbon';
 import { StagePill } from '../pipeline';
 import { Button } from '../ui/Button';
-import { DocumentDetailOverflowMenu } from './DocumentDetailOverflowMenu';
 import { DocumentDetailPanelMenu, type InspectorPanel } from './DocumentDetailMetaBar';
+import { DocumentDetailOverflowMenu } from './DocumentDetailOverflowMenu';
 import { StructuringAspectStrip } from './StructuringAspectStrip';
 
 function reviewDocumentHref(documentId: string): string {
@@ -97,19 +97,7 @@ export function DocumentStructuringRibbon({
   const safeKeys = safeConfirmKeys(rows);
 
   if (!showAspects && !reviewable && !ribbonIdentity) {
-    return (
-      <AppRibbon>
-        <RibbonGroup label={t('ribbon.structureActions')} kind="act" align="end" order={3}>
-          <DocumentDetailPanelMenu
-            panels={inspectorPanels}
-            activeTab={inspector}
-            labelCount={doc.tags.length}
-            onTabChange={onInspectorChange}
-            onAddField={onAddField}
-          />
-        </RibbonGroup>
-      </AppRibbon>
-    );
+    return null;
   }
 
   return (
@@ -119,19 +107,22 @@ export function DocumentStructuringRibbon({
           <div className="structuring-ribbon-identity">
             <Link
               to={routes.documents}
-              className={ribbonActionClass('tertiary', { className: 'structuring-ribbon-back' })}
+              className={ribbonActionClass('tertiary', {
+                className: 'structuring-ribbon-back document-detail-back-link',
+              })}
               aria-label={t('ribbon.identityBackAria')}
             >
               <ArrowLeft size={16} strokeWidth={2} aria-hidden />
               <span className="structuring-ribbon-back-label">{t('documents.breadcrumbDocuments')}</span>
             </Link>
             <StagePill state={documentStageState(doc)} status={doc.status} />
-            <span
+            <h1
               className="structuring-ribbon-title"
+              data-ux="page-title"
               title={`${title}${doc.filename !== title ? ` · ${doc.filename}` : ''}`}
             >
               {title}
-            </span>
+            </h1>
             {onDelete ? (
               <DocumentDetailOverflowMenu
                 variant="ribbon"
@@ -199,15 +190,17 @@ export function DocumentStructuringRibbon({
           </div>
         </RibbonGroup>
       ) : null}
-      <RibbonGroup label={t('ribbon.structureActions')} kind="act" align="end" order={3}>
-        <DocumentDetailPanelMenu
-          panels={inspectorPanels}
-          activeTab={inspector}
-          labelCount={doc.tags.length}
-          onTabChange={onInspectorChange}
-          onAddField={onAddField}
-        />
-      </RibbonGroup>
+      {showAspects ? null : (
+        <RibbonGroup label={t('ribbon.structureActions')} kind="act" align="end" order={3}>
+          <DocumentDetailPanelMenu
+            panels={inspectorPanels}
+            activeTab={inspector}
+            labelCount={doc.tags.length}
+            onTabChange={onInspectorChange}
+            onAddField={onAddField}
+          />
+        </RibbonGroup>
+      )}
     </AppRibbon>
   );
 }

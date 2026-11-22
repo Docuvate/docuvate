@@ -189,10 +189,7 @@ test.describe('document table regions', () => {
         await expect(openTableSheet).toHaveCount(0);
       }
       await showLayoutPane(page, 'panel');
-      await page
-        .locator('.layout-side-tabs')
-        .getByRole('tab', { name: /Tabellen|Tables/i })
-        .click({ force: true });
+      await page.getByTestId('layout-panel-tab-tables').click({ force: true });
       if (viewport.width < 1024) {
         const sheet = page.getByTestId('table-correction-sheet');
         // Tab change auto-selects the first table when none is selected. If selection
