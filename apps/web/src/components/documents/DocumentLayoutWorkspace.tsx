@@ -390,6 +390,8 @@ export function DocumentLayoutWorkspace({
         setSelectedTableId(result.region.id);
         setSelectedFieldKey(null);
         setActiveOverlayId(regionTableOverlayId(result.region.id));
+        // Cell grid lives in the side panel (wide) / sheet (narrow); open it with the table.
+        setLayoutPanelOpen(true);
         onLayoutSideTabChange('tables');
       }
       if (result?.correction) {
@@ -593,6 +595,7 @@ export function DocumentLayoutWorkspace({
           setSelectedTableId(tableId);
           setTableOverlayOpen(true);
           setOverlayEnabled(true);
+          setLayoutPanelOpen(true);
           onLayoutSideTabChange('tables');
         }
         const tableRegion = tableRegions.find((item) => item.id === tableId);
@@ -1044,9 +1047,9 @@ export function DocumentLayoutWorkspace({
         </Card>
       </div>
 
-      {layoutPanelOpen && layoutIr ? (
+      {layoutPanelOpen && frameLayoutIr ? (
         <DocumentLayoutSidePanel
-          layoutIr={layoutIr}
+          layoutIr={frameLayoutIr}
           fields={fields}
           knownFieldKeys={knownFieldKeys}
           fieldLabelForKey={fieldLabelForKey}
