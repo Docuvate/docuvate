@@ -266,7 +266,7 @@ test('a selected parent flows into the next band', async ({ page }) => {
   await shootJunction(page, 'ribbon-junction-1280-light');
 
   await page.getByTestId('structuring-primary-labels').click();
-  await expect(context).toBeHidden();
+  await expect(page.getByTestId('structuring-context')).toHaveCount(0);
   expect(await bottomRadius(page.getByTestId('structuring-primary-labels'))).not.toBe('0px');
 
   await page.emulateMedia({ colorScheme: 'dark', reducedMotion: 'reduce' });
@@ -276,10 +276,14 @@ test('a selected parent flows into the next band', async ({ page }) => {
     return getComputedStyle(node).transitionDuration;
   });
   expect(Number.parseFloat(motion)).toBeLessThan(0.05);
-  await expect(page.getByTestId('app-ribbon-context')).toBeVisible();
+  const darkClose = page.getByTestId('table-overlay-close');
+  if (await darkClose.isVisible().catch(() => false)) {
+    await darkClose.click();
+  }
+  await expect(page.getByTestId('structuring-context')).toBeVisible();
   await shootJunction(page, 'ribbon-junction-1280-dark');
   await page.setViewportSize({ width: 390, height: 800 });
-  await expect(page.getByTestId('app-ribbon-context').getByRole('radio')).toHaveCount(3);
+  await expect(page.getByTestId('document-selection-tools').getByRole('radio')).toHaveCount(3);
   await shootJunction(page, 'ribbon-junction-390-dark');
   await openViewer(page, 390, 'light');
   await page.getByTestId('structuring-primary-ocr').click();

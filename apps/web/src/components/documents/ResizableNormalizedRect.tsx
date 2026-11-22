@@ -140,6 +140,7 @@ export function ResizableNormalizedRect({
         style={style}
         data-testid={`${testId}-box`}
         onPointerDown={(event) => {
+          if (event.target !== event.currentTarget) return;
           onPointerDown('move', event);
         }}
         role="presentation"

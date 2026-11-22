@@ -731,7 +731,7 @@ export function DocumentLayoutWorkspace({
             hasOverlays={pdfOverlays.length > 0}
             overlayEnabled={overlayEnabled}
             onOverlayChange={setOverlayEnabled}
-            paused={structuringPrimary === 'layout' && Boolean(selectedTableId)}
+            paused={structuringPrimary === 'layout' && tableOverlayOpen}
           />
           <DocumentLayoutViewerToolbar
             leftMode={leftMode}

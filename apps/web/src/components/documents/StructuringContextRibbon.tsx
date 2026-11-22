@@ -22,7 +22,7 @@ interface StructuringContextRibbonProps {
   hasOverlays: boolean;
   overlayEnabled: boolean;
   onOverlayChange: (enabled: boolean) => void;
-  /** Table structure tools own the context row while a table is selected. */
+  /** Table structure tools own the context row while the table overlay is open. */
   paused?: boolean;
 }
 

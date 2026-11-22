@@ -35,6 +35,12 @@ async function showLayoutSelectionTools(page: Page): Promise<void> {
   if ((await layout.count()) === 0) return;
   await layout.click();
   await expect(layout).toHaveAttribute('aria-pressed', 'true');
+  // Layout auto-opens the first table overlay; close it so selection tools return.
+  const tableClose = page.getByTestId('table-overlay-close');
+  if (await tableClose.isVisible().catch(() => false)) {
+    await tableClose.click();
+  }
+  await expect(page.getByTestId('document-selection-tools')).toBeVisible();
 }
 
 /**
@@ -109,17 +115,29 @@ async function applyGermanLocale(page: Page): Promise<void> {
   await applyDocuvateLocale(page, 'de');
 }
 
+/** Inspector panels are a menu now (not a tab strip). */
 async function setLabelsTabOpen(page: Page, open: boolean): Promise<void> {
-  const labels = page.getByRole('tab', { name: /^Labels/i });
-  const target = open ? labels : page.getByRole('tab', { name: /^Details/i });
-  // Activate by keyboard: a toast or the bottom sheet can sit over the tab strip on phones,
-  // and a forced pointer click would land on that overlay instead.
+  const menu = page.getByTestId('document-detail-panel-menu');
+  await expect(menu).toBeVisible({ timeout: 15_000 });
+  const trigger = menu.locator('.detail-panel-menu-trigger');
+  const label = trigger.locator('.detail-panel-menu-label');
   await expect(async () => {
-    if ((await target.getAttribute('aria-selected')) !== 'true') {
-      await target.focus();
-      await page.keyboard.press('Enter');
+    const current = ((await label.textContent()) ?? '').trim();
+    const onLabels = /^Labels$/i.test(current);
+    if (open === onLabels) return;
+    await trigger.click();
+    if (open) {
+      await page.getByRole('menuitem', { name: /^Labels$/i }).click();
+    } else {
+      const close = page.getByRole('menuitem', { name: /Panel schließen|Close panel/i });
+      if ((await close.count()) > 0) {
+        await close.click();
+      } else {
+        await page.getByRole('menuitem', { name: /^Details$/i }).click();
+      }
     }
-    await expect(target).toHaveAttribute('aria-selected', 'true', { timeout: 2_000 });
+    const after = ((await label.textContent()) ?? '').trim();
+    expect(open ? /^Labels$/i.test(after) : !/^Labels$/i.test(after)).toBe(true);
   }).toPass({ timeout: 30_000 });
 }
 
