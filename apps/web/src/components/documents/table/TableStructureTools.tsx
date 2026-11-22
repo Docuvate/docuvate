@@ -75,7 +75,7 @@ function Stepper({ label, value, max, onChange }: StepperProps) {
   );
 }
 
-export type TableStructureToolsPlacement = 'ribbon' | 'card';
+type TableStructureToolsPlacement = 'ribbon' | 'card';
 
 interface TableStructureToolsProps {
   editor: TableStructureEditorState;
