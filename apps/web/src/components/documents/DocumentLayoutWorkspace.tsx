@@ -8,7 +8,7 @@ import type {
   ExtractionBlock,
   RecognizedFieldDefinitionDto,
 } from '@docuvate/contracts';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -71,6 +71,8 @@ import { ExtractedLayoutHtmlFrame, type LayoutIrZoomStep } from './ExtractedLayo
 import { ExtractedTextPanel } from './ExtractedTextPanel';
 import { type PdfLayoutOverlay } from './PdfViewer';
 import { StructuringContextRibbon } from './StructuringContextRibbon';
+import { TableContextRibbon } from './TableContextRibbon';
+import { TableStructureEditorProvider } from './table/TableStructureEditorContext';
 
 type AdvancedViewerMode = 'reconstruction' | 'compare';
 
@@ -201,6 +203,7 @@ export function DocumentLayoutWorkspace({
   const [tableOverlayCell, setTableOverlayCell] = useState<{ row: number; col: number } | null>(
     null
   );
+  const tableOverlaySaveRef = useRef<(() => void) | null>(null);
 
   const [activeOverlayId, setActiveOverlayId] = useState<string | null>(null);
   const [hoverOverlay, setHoverOverlay] = useState<PdfLayoutOverlay | null>(null);
@@ -533,6 +536,7 @@ export function DocumentLayoutWorkspace({
         } else {
           setSelectedTableId(tableId);
           setTableOverlayOpen(true);
+          setOverlayEnabled(true);
           onLayoutSideTabChange('tables');
         }
         const tableRegion = tableRegions.find((item) => item.id === tableId);
@@ -691,8 +695,17 @@ export function DocumentLayoutWorkspace({
   const selectedRegion = selectedFieldKey
     ? findFieldRegion(selectedFieldKey, fieldRegions)
     : undefined;
+  const selectedTableRegion = selectedTableId
+    ? (tableRegions.find((item) => item.id === selectedTableId) ?? null)
+    : null;
+  const selectedTableIndex = Math.max(
+    0,
+    tableRegions.findIndex((item) => item.id === selectedTableId)
+  );
+  const tableStructureRibbonActive = structuringPrimary === 'layout' && selectedTableRegion != null;
 
   return (
+    <TableStructureEditorProvider region={selectedTableRegion} active={tableStructureRibbonActive}>
     <div
       className={
         correctionSheetOpen
@@ -731,8 +744,45 @@ export function DocumentLayoutWorkspace({
             hasOverlays={pdfOverlays.length > 0}
             overlayEnabled={overlayEnabled}
             onOverlayChange={setOverlayEnabled}
-            paused={structuringPrimary === 'layout' && tableOverlayOpen}
+            paused={structuringPrimary === 'layout' && selectedTableId != null}
           />
+          {tableStructureRibbonActive && selectedTableRegion?.table ? (
+            <TableContextRibbon
+              region={selectedTableRegion}
+              index={selectedTableIndex}
+              onLayoutApply={(choice) => {
+                applyTableLayoutChoice(selectedTableRegion.id, choice);
+              }}
+              onEditInDocument={() => {
+                setTableOverlayOpen(true);
+                onViewerPageChange(selectedTableRegion.page);
+              }}
+              onRedetect={() => {
+                submitTableCorrection(
+                  {
+                    id: crypto.randomUUID(),
+                    op: 'create',
+                    beforeRegionId: selectedTableRegion.id,
+                    page: selectedTableRegion.page,
+                    shape: 'rect',
+                    x0: selectedTableRegion.x0,
+                    y0: selectedTableRegion.y0,
+                    x1: selectedTableRegion.x1,
+                    y1: selectedTableRegion.y1,
+                    blockIndexes: selectedTableRegion.blockIndexes,
+                  },
+                  t('tableLayouts.redetectGrid')
+                );
+              }}
+              documentEditOpen={tableOverlayOpen}
+              onSaveDocumentBounds={() => {
+                tableOverlaySaveRef.current?.();
+              }}
+              onExitDocumentEdit={() => {
+                setTableOverlayOpen(false);
+              }}
+            />
+          ) : null}
           <DocumentLayoutViewerToolbar
             leftMode={leftMode}
             onLeftModeChange={setLeftDocumentMode}
@@ -941,6 +991,10 @@ export function DocumentLayoutWorkspace({
                       }
                     : undefined
                 }
+                tableChromeInRibbon={tableOverlayOpen}
+                onTableChromeReady={(chrome) => {
+                  tableOverlaySaveRef.current = chrome?.saveBounds ?? null;
+                }}
                 selectionDraft={selectionDraft}
                 fieldOptions={
                   reanchorFieldKey
@@ -1071,6 +1125,7 @@ export function DocumentLayoutWorkspace({
           onTableEditInDocument={(regionId) => {
             setSelectedTableId(regionId);
             setTableOverlayOpen(true);
+            setOverlayEnabled(true);
             const region = tableRegions.find((item) => item.id === regionId);
             if (region) onViewerPageChange(region.page);
           }}
@@ -1186,5 +1241,6 @@ export function DocumentLayoutWorkspace({
         />
       ) : null}
     </div>
+    </TableStructureEditorProvider>
   );
 }

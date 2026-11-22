@@ -64,6 +64,9 @@ interface DocumentLayoutOriginalStageProps {
   onTableBoundsCommit: (region: DocumentRegionDto, rect: NormalizedRect) => void;
   onTableRulesCommit?: (region: DocumentRegionDto, commit: TableOverlayStructureCommit) => void;
   onTableRedetect?: () => void;
+  /** Hide PDF floating minibar; ribbon owns save/close. */
+  tableChromeInRibbon?: boolean;
+  onTableChromeReady?: (chrome: { saveBounds: () => void } | null) => void;
   selectionDraft: DocumentSelectionDraft | null;
   fieldOptions: LayoutFieldOption[];
   existingFieldValues: ReadonlyMap<string, string>;
@@ -111,6 +114,8 @@ export function DocumentLayoutOriginalStage({
   onTableBoundsCommit,
   onTableRulesCommit,
   onTableRedetect,
+  tableChromeInRibbon = false,
+  onTableChromeReady,
   selectionDraft,
   fieldOptions,
   existingFieldValues,
@@ -194,6 +199,8 @@ export function DocumentLayoutOriginalStage({
               : undefined
           }
           onRedetect={onTableRedetect}
+          hideFloatingChrome={tableChromeInRibbon}
+          onChromeReady={onTableChromeReady}
         />
       ) : null}
       {selectionDraft ? (

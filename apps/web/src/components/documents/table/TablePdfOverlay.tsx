@@ -41,6 +41,13 @@ interface TablePdfOverlayProps {
   onRulesCommit?: (commit: TableOverlayStructureCommit) => void;
   onClose: () => void;
   onRedetect?: () => void;
+  /**
+   * When true, skip the PDF floating minibar — ribbon table tools own save/close/redetect.
+   * Keeps the spatial grid on the page without a second toolbar.
+   */
+  hideFloatingChrome?: boolean;
+  /** Lets the ribbon call save with the latest draft bounds. */
+  onChromeReady?: (chrome: { saveBounds: () => void } | null) => void;
 }
 
 interface GuideDrag {
@@ -83,6 +90,8 @@ export function TablePdfOverlay({
   onRulesCommit,
   onClose,
   onRedetect,
+  hideFloatingChrome = false,
+  onChromeReady,
 }: TablePdfOverlayProps) {
   const { t } = useTranslation();
   const [host, setHost] = useState<HTMLElement | null>(null);
@@ -96,13 +105,30 @@ export function TablePdfOverlay({
   const [draftCells, setDraftCells] = useState(table.cells);
   const draftRulesRef = useRef(draftRules);
   const draftCellsRef = useRef(draftCells);
+  const draftBoundsRef = useRef(draftBounds);
   const draftMergesRef = useRef(table.merges.map((merge) => ({ ...merge })));
   const draftRowRolesRef = useRef(table.rowRoles.map((entry) => ({ ...entry })));
   const dragRef = useRef<GuideDrag | null>(null);
+  draftBoundsRef.current = draftBounds;
 
   useEffect(() => {
     setDraftBounds({ x0: region.x0, y0: region.y0, x1: region.x1, y1: region.y1 });
   }, [region.x0, region.y0, region.x1, region.y1, region.id]);
+
+  useEffect(() => {
+    if (!active || !hideFloatingChrome) {
+      onChromeReady?.(null);
+      return;
+    }
+    onChromeReady?.({
+      saveBounds: () => {
+        onBoundsCommit(draftBoundsRef.current);
+      },
+    });
+    return () => {
+      onChromeReady?.(null);
+    };
+  }, [active, hideFloatingChrome, onBoundsCommit, onChromeReady]);
 
   useEffect(() => {
     const next = table.rules.map((rule) => ({ ...rule }));
@@ -362,44 +388,46 @@ export function TablePdfOverlay({
           )}
         </div>
       </ResizableNormalizedRect>
-      <div
-        className="table-pdf-minibar"
-        role="toolbar"
-        aria-label={t('tableLayouts.miniBarAria')}
-        data-testid="table-pdf-minibar"
-      >
-        <Button
-          type="button"
-          size="sm"
-          variant="primary"
-          data-testid="table-overlay-save-bounds"
-          onClick={() => {
-            onBoundsCommit(draftBounds);
-          }}
+      {hideFloatingChrome ? null : (
+        <div
+          className="table-pdf-minibar"
+          role="toolbar"
+          aria-label={t('tableLayouts.miniBarAria')}
+          data-testid="table-pdf-minibar"
         >
-          {t('tableLayouts.saveBounds')}
-        </Button>
-        {onRedetect ? (
           <Button
             type="button"
             size="sm"
-            variant="secondary"
-            data-testid="table-overlay-redetect"
-            onClick={onRedetect}
+            variant="primary"
+            data-testid="table-overlay-save-bounds"
+            onClick={() => {
+              onBoundsCommit(draftBounds);
+            }}
           >
-            {t('tableLayouts.redetectGrid')}
+            {t('tableLayouts.saveBounds')}
           </Button>
-        ) : null}
-        <Button
-          type="button"
-          size="sm"
-          variant="ghost"
-          data-testid="table-overlay-close"
-          onClick={onClose}
-        >
-          {t('tableLayouts.exitDocumentEdit')}
-        </Button>
-      </div>
+          {onRedetect ? (
+            <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              data-testid="table-overlay-redetect"
+              onClick={onRedetect}
+            >
+              {t('tableLayouts.redetectGrid')}
+            </Button>
+          ) : null}
+          <Button
+            type="button"
+            size="sm"
+            variant="ghost"
+            data-testid="table-overlay-close"
+            onClick={onClose}
+          >
+            {t('tableLayouts.exitDocumentEdit')}
+          </Button>
+        </div>
+      )}
       {guidesEditable ? (
         <p className="table-pdf-guide-hint">{t('tableLayouts.dragGuidesHint')}</p>
       ) : null}
