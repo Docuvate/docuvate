@@ -137,9 +137,11 @@ test.describe('document table regions', () => {
     });
     const card = page.getByTestId('corrected-table-card');
     await expect(card).toBeVisible({ timeout: 30_000 });
-    // Structure edits are a draft on the real table; the header stepper is directly on the card.
+    // Wide layout portals structure tools into the ribbon (not the card).
+    const tools = page.getByTestId('app-ribbon-context').getByTestId('table-structure-tools');
+    await expect(tools).toBeVisible({ timeout: 30_000 });
     // The detected header count may already be right, so step it away from whatever was inferred.
-    const headerGroup = card.getByRole('group', { name: /Kopfzeilen|Header rows/i });
+    const headerGroup = tools.getByRole('group', { name: /Kopfzeilen|Header rows/i });
     const headerRows = headerGroup.getByRole('spinbutton');
     const detectedHeaderRows = await headerRows.inputValue();
     const moreHeaderRows = headerGroup.getByRole('button', { name: /(Mehr|More)$/ });
@@ -149,7 +151,7 @@ test.describe('document table regions', () => {
         : headerGroup.getByRole('button', { name: /(Weniger|Fewer)$/ })
     ).click();
     await expect(headerRows).not.toHaveValue(detectedHeaderRows);
-    await expect(card.getByRole('button', { name: /^(Übernehmen|Apply)$/ })).toBeVisible();
+    await expect(tools.getByRole('button', { name: /^(Übernehmen|Apply)$/ })).toBeVisible();
     const firstCell = card.locator('.layout-table-cell-input').first();
     await firstCell.fill('Position');
     // A pending save re-selects its table when it resolves, which would reopen the narrow sheet
@@ -163,8 +165,6 @@ test.describe('document table regions', () => {
 
     // Table family: header band, result footer, lines and merged cells saved as one correction.
     // The template control is the family menu, not a native select.
-    const tools = page.getByTestId('app-ribbon-context').getByTestId('table-structure-tools');
-    await expect(tools).toBeVisible();
     await tools.getByTestId('table-family-menu').click();
     await page.getByRole('option', { name: /Finanzlayout|Financial/i }).click();
     await Promise.all([
