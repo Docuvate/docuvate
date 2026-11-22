@@ -16,7 +16,6 @@ import {
   type TableRowKind,
   tableRowKind,
   type TableStructureChoice,
-  tableStructureOf,
   upsertTableCell,
 } from '../../lib/tableLayouts';
 import { useTableStructureEditorContext } from './table/TableStructureEditorContext';
@@ -89,7 +88,7 @@ export function CorrectedTableCard({
   }
   return (
     <TableEditor
-      key={`${region.id}:${JSON.stringify(tableStructureOf(table))}`}
+      key={region.id}
       region={region}
       table={table}
       index={index}

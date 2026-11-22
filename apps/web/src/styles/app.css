@@ -17168,6 +17168,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   letter-spacing: -0.015em;
 }
 
+.document-details-inline.detail-tab-panel-surface,
 .document-inspector-card .detail-tab-panel-surface {
   padding: 0;
   border: 0;
@@ -17230,6 +17231,95 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   display: none;
 }
 
+.app-ribbon-gallery:empty {
+  display: none;
+}
+
+.app-ribbon-gallery:not(:empty) {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-block-size: min(40vh, 22rem);
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: var(--dv-space-sm) var(--dv-space-lg);
+  border-top: var(--dv-border-width-hairline) solid
+    color-mix(in srgb, var(--dv-color-border) 55%, transparent);
+  background: var(--dv-ribbon-panel, var(--dv-color-bg-raised));
+}
+
+.document-ribbon-gallery {
+  display: grid;
+  gap: var(--dv-space-sm);
+  min-width: 0;
+}
+
+.document-ribbon-gallery .review-workbench {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.document-ribbon-gallery-labels {
+  display: grid;
+  gap: var(--dv-space-sm);
+  min-width: 0;
+}
+
+/* Fluent document tabs (Word-like) */
+.document-ribbon-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 0;
+  min-width: 0;
+  border-block-end: var(--dv-border-width-hairline) solid
+    color-mix(in srgb, var(--dv-color-border) 65%, transparent);
+}
+
+.document-ribbon-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--dv-space-3xs);
+  min-height: calc(var(--dv-ribbon-control-height) + 0.25rem);
+  padding: var(--dv-space-3xs) var(--dv-space-sm);
+  border: 0;
+  border-block-end: 2px solid transparent;
+  margin-block-end: -1px;
+  border-radius: var(--dv-radius-control) var(--dv-radius-control) 0 0;
+  background: transparent;
+  color: var(--dv-color-text-muted);
+  font: inherit;
+  font-size: var(--dv-font-size-sm);
+  font-weight: 560;
+  cursor: pointer;
+}
+
+.document-ribbon-tab:hover {
+  color: var(--dv-color-text);
+  background: color-mix(in srgb, var(--dv-color-bg-muted) 55%, transparent);
+}
+
+.document-ribbon-tab--active {
+  color: var(--dv-color-text);
+  border-block-end-color: var(--dv-color-accent);
+  background: var(--dv-ribbon-panel, var(--dv-color-bg-raised));
+}
+
+.document-ribbon-tab--settled .document-ribbon-tab-name {
+  color: var(--dv-color-success, var(--dv-color-text));
+}
+
+.document-ribbon-tab-badge {
+  font-size: var(--dv-font-size-xs);
+  font-weight: 500;
+  color: var(--dv-color-text-muted);
+}
+
+.document-ribbon-tab--active .document-ribbon-tab-badge {
+  color: var(--dv-color-text);
+}
+
 .app-ribbon-context {
   display: flex;
   flex-wrap: wrap;
@@ -17242,6 +17332,11 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   border-top: 0;
   background: var(--dv-ribbon-panel, var(--dv-color-bg-raised));
   box-shadow: none;
+}
+
+.app-ribbon:has(.app-ribbon-context .table-tools--ribbon) .app-ribbon-context {
+  min-height: 4.5rem;
+  align-items: flex-start;
 }
 
 .app-ribbon-context > .ribbon-group {

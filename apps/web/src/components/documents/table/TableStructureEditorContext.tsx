@@ -3,7 +3,6 @@
 import type { DocumentRegionDto } from '@docuvate/contracts';
 import { createContext, type ReactNode, useContext } from 'react';
 
-import { tableStructureOf } from '../../../lib/tableLayouts';
 import {
   type TableStructureEditorState,
   useTableStructureEditor,
@@ -48,12 +47,10 @@ export function TableStructureEditorProvider({
       <TableStructureEditorContext.Provider value={null}>{children}</TableStructureEditorContext.Provider>
     );
   }
+  // Key by region id only — remounting on every structure JSON change drops the ribbon
+  // mid-template/family edit and makes table tools look dysfunctional.
   return (
-    <TableStructureEditorProviderInner
-      key={`${region.id}:${JSON.stringify(tableStructureOf(table))}`}
-      region={region}
-      table={table}
-    >
+    <TableStructureEditorProviderInner key={region.id} region={region} table={table}>
       {children}
     </TableStructureEditorProviderInner>
   );

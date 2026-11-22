@@ -105,96 +105,42 @@ async function applyGermanLocale(page: Page): Promise<void> {
   await applyDocuvateLocale(page, 'de');
 }
 
-function labelsPanelActiveFromTriggerLabel(labelText: string): boolean {
-  return /^Labels$/i.test(labelText.trim());
-}
-
-async function readDetailPanelMenuLabel(page: Page): Promise<string> {
-  const menu = page.getByTestId('document-detail-panel-menu');
-  await expect(menu).toBeVisible({ timeout: 15_000 });
-  const label = menu.locator('.detail-panel-menu-trigger .detail-panel-menu-label');
-  return ((await label.textContent()) ?? '').trim();
+async function labelsInspectorOpen(page: Page): Promise<boolean> {
+  const ribbonLabels = page.getByTestId('structuring-primary-labels');
+  if ((await ribbonLabels.count()) > 0) {
+    const selected = await ribbonLabels.getAttribute('aria-selected');
+    if (selected != null) return selected === 'true';
+    return (await ribbonLabels.getAttribute('aria-pressed')) === 'true';
+  }
+  const gallery = page.getByTestId('document-ribbon-gallery');
+  if ((await gallery.count()) > 0) {
+    return (await gallery.getAttribute('data-gallery')) === 'labels';
+  }
+  return false;
 }
 
 async function assertLabelsTabState(page: Page, open: boolean): Promise<void> {
-  const label = await readDetailPanelMenuLabel(page);
-  expect(open ? labelsPanelActiveFromTriggerLabel(label) : !labelsPanelActiveFromTriggerLabel(label)).toBe(
-    true
-  );
+  await expect.poll(() => labelsInspectorOpen(page), { timeout: 15_000 }).toBe(open);
 }
 
-/** Inspector panels are a menu now (not a tab strip). */
+/** Labels inspector opens from the structure aspect strip (not the removed Aktionen menu). */
 async function setLabelsTabOpen(page: Page, open: boolean): Promise<void> {
-  const initial = await readDetailPanelMenuLabel(page);
-  if (open === labelsPanelActiveFromTriggerLabel(initial)) {
-    return;
-  }
-
-  const menu = page.getByTestId('document-detail-panel-menu');
-  const trigger = menu.locator('.detail-panel-menu-trigger');
-
-  const openViaPanelMenu = async (): Promise<void> => {
-    await expect(async () => {
-      const current = await readDetailPanelMenuLabel(page);
-      const onLabels = labelsPanelActiveFromTriggerLabel(current);
-      if (open === onLabels) {
-        return;
-      }
-
-      await expect(trigger).toBeVisible();
-      await trigger.scrollIntoViewIfNeeded();
-      await trigger.click();
-
-      const labelsItem = page.locator('#document-detail-tab-labels');
-      const closeItem = page.getByRole('menuitem', {
-        name: /Panel schließen|Close panel/i,
-      });
-      const detailsItem = page.locator('#document-detail-tab-details');
-
-      if (open) {
-        await expect(labelsItem).toBeVisible({ timeout: 5_000 });
-        // Re-check trigger after the menu opens — class lag on is-active can
-        // still leave Labels selected; clicking again would toggle it closed.
-        const afterOpen = await readDetailPanelMenuLabel(page);
-        if (labelsPanelActiveFromTriggerLabel(afterOpen)) {
-          await page.keyboard.press('Escape');
-          await assertLabelsTabState(page, true);
-          return;
-        }
-        if (await labelsItem.evaluate((el) => el.classList.contains('is-active'))) {
-          await page.keyboard.press('Escape');
-          await assertLabelsTabState(page, true);
-          return;
-        }
-        await labelsItem.click();
-      } else {
-        await expect(page.locator('.detail-panel-menu-panel')).toBeVisible({ timeout: 5_000 });
-        if ((await closeItem.count()) > 0) {
-          await expect(closeItem).toBeVisible({ timeout: 5_000 });
-          await closeItem.click();
-        } else {
-          await expect(detailsItem).toBeVisible({ timeout: 5_000 });
-          await detailsItem.click();
-        }
-      }
-
-      await assertLabelsTabState(page, open);
-    }).toPass({ timeout: 30_000 });
-  };
-
-  try {
-    await openViaPanelMenu();
-  } catch (error) {
-    const ribbonLabels = page.getByTestId('structuring-primary-labels');
-    if (open && (await ribbonLabels.count()) > 0) {
-      await ribbonLabels.scrollIntoViewIfNeeded();
-      await ribbonLabels.click();
-      await expect(ribbonLabels).toHaveAttribute('aria-pressed', 'true', { timeout: 10_000 });
-      await assertLabelsTabState(page, true);
+  await expect(async () => {
+    const onLabels = await labelsInspectorOpen(page);
+    if (open === onLabels) {
       return;
     }
-    throw error;
-  }
+
+    const ribbonLabels = page.getByTestId('structuring-primary-labels');
+    const aspect =
+      (await ribbonLabels.count()) > 0
+        ? ribbonLabels
+        : page.getByRole('button', { name: /Labels zuweisen|Assign labels/i }).first();
+    await expect(aspect).toBeVisible({ timeout: 10_000 });
+    await aspect.scrollIntoViewIfNeeded();
+    await aspect.click();
+    await assertLabelsTabState(page, open);
+  }).toPass({ timeout: 30_000 });
 }
 
 async function openFieldCorrectionSheet(page: Page): Promise<void> {

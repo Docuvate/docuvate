@@ -2519,6 +2519,7 @@
       "state": {
         "confirmed": "Bestätigt",
         "suggested": "Vorschlag",
+        "missing": "Fehlt",
         "review": "Offen",
         "rejected": "Verworfen"
       },

@@ -17,8 +17,6 @@ interface LayoutWorkspaceKeyboardArgs {
   setSelectionDraft: (draft: DocumentSelectionDraft | null) => void;
   setSelectionTool: (tool: DocumentSelectionTool) => void;
   setReanchorFieldKey: (key: string | null) => void;
-  setSelectedFieldKey: (key: string | null) => void;
-  setSelectedTableId: (id: string | null) => void;
   setOverlayEnabled: (update: boolean | ((enabled: boolean) => boolean)) => void;
   markTableFromSelection: () => void;
   onReanchorEnter: () => void;
@@ -37,8 +35,6 @@ export function useDocumentLayoutWorkspaceKeyboard(args: LayoutWorkspaceKeyboard
     setSelectionDraft,
     setSelectionTool,
     setReanchorFieldKey,
-    setSelectedFieldKey,
-    setSelectedTableId,
     setOverlayEnabled,
     markTableFromSelection,
     onReanchorEnter,
@@ -54,12 +50,12 @@ export function useDocumentLayoutWorkspaceKeyboard(args: LayoutWorkspaceKeyboard
         }
       }
       if (event.key === 'Escape') {
+        // Popovers (family menu, combobox) close on Escape first — do not drop the
+        // selected table/field or the ribbon tools vanish under the closed menu.
         setActiveOverlayId(null);
         setSelectionDraft(null);
-        setSelectionTool('none');
+        setSelectionTool(structuringPrimary === 'layout' ? 'rect' : 'none');
         setReanchorFieldKey(null);
-        setSelectedFieldKey(null);
-        setSelectedTableId(null);
         return;
       }
       if (event.key === 't' || event.key === 'T') {
@@ -114,8 +110,6 @@ export function useDocumentLayoutWorkspaceKeyboard(args: LayoutWorkspaceKeyboard
     setActiveOverlayId,
     setOverlayEnabled,
     setReanchorFieldKey,
-    setSelectedFieldKey,
-    setSelectedTableId,
     setSelectionDraft,
     setSelectionTool,
     structuringPrimary,

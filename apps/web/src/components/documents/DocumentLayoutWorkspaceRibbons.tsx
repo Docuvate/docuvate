@@ -116,6 +116,7 @@ export function DocumentLayoutWorkspaceRibbons(props: DocumentLayoutWorkspaceRib
         <LayoutSidePanelRibbon
           activeTab={layoutSideTab}
           open={layoutPanelOpen}
+          paused={tableContextActive || selectionContextActive}
           onOpenTab={(tab) => {
             setLayoutPanelOpen(true);
             onLayoutSideTabChange(tab);

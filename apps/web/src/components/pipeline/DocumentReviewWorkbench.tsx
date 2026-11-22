@@ -129,7 +129,11 @@ export function DocumentReviewWorkbench({
       next?.focus();
       return;
     }
-    const firstOpen = rows.findIndex((row) => row.state !== 'confirmed');
+    const firstFilledOpen = rows.findIndex(
+      (row) => row.state === 'review' || row.state === 'suggested'
+    );
+    const firstOpen =
+      firstFilledOpen >= 0 ? firstFilledOpen : rows.findIndex((row) => row.state !== 'confirmed');
     const index = Math.min(activeIndex, rows.length - 1);
     const target = rows[index]?.state === 'confirmed' && firstOpen >= 0 ? firstOpen : index;
     setActiveIndex(target);
@@ -160,6 +164,10 @@ export function DocumentReviewWorkbench({
       focusRow(index + 1);
       return;
     }
+    if (row.state === 'missing') {
+      startEdit(row, index);
+      return;
+    }
     refocus.current = true;
     setActiveIndex(index);
     if (row.state === 'suggested') onAcceptSuggestion(row.key, row.value);
@@ -167,7 +175,7 @@ export function DocumentReviewWorkbench({
   }
 
   function reject(row: WorkbenchRow, index: number) {
-    if (row.state === 'confirmed') return;
+    if (row.state === 'confirmed' || row.state === 'missing') return;
     refocus.current = true;
     setActiveIndex(index);
     onRejectSuggestion(row.key, row.value);
@@ -238,6 +246,7 @@ export function DocumentReviewWorkbench({
         startEdit(row, index);
         break;
       case 'f':
+        if (row.state === 'missing') return;
         setActiveIndex(index);
         setMode({ key: row.key, kind: 'reassign' });
         break;
@@ -321,11 +330,13 @@ export function DocumentReviewWorkbench({
                 ? t('pipeline.workbench.state.confirmed')
                 : row.state === 'suggested'
                   ? t('pipeline.workbench.state.suggested')
-                  : row.confidence == null
-                    ? t('pipeline.workbench.state.review')
-                    : t('pipeline.workbench.confidence', {
-                        percent: Math.round(row.confidence * 100),
-                      });
+                  : row.state === 'missing'
+                    ? t('pipeline.workbench.state.missing')
+                    : row.confidence == null
+                      ? t('pipeline.workbench.state.review')
+                      : t('pipeline.workbench.confidence', {
+                          percent: Math.round(row.confidence * 100),
+                        });
             return (
               <li
                 key={row.key}
@@ -361,7 +372,7 @@ export function DocumentReviewWorkbench({
                   </span>
                 </button>
                 <div className="review-workbench-row-tools">
-                  {row.state !== 'confirmed' ? (
+                  {row.state === 'review' || row.state === 'suggested' ? (
                     <IconButton
                       icon={Check}
                       size="sm"
@@ -381,7 +392,7 @@ export function DocumentReviewWorkbench({
                       startEdit(row, index);
                     }}
                   />
-                  {fieldTargets.length > 1 ? (
+                  {fieldTargets.length > 1 && row.state !== 'missing' ? (
                     <IconButton
                       icon={ArrowLeftRight}
                       size="sm"
@@ -393,7 +404,7 @@ export function DocumentReviewWorkbench({
                       }}
                     />
                   ) : null}
-                  {row.state !== 'confirmed' ? (
+                  {row.state === 'review' || row.state === 'suggested' ? (
                     <IconButton
                       icon={CircleSlash}
                       size="sm"

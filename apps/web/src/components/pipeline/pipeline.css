@@ -890,126 +890,42 @@
   margin-bottom: var(--dv-space-xs);
 }
 
-/* ---------- Viewer: split review workbench ---------- */
+/* ---------- Viewer: full-bleed canvas; Felder/Labels in ribbon gallery ---------- */
 
 .document-workbench {
-  display: grid;
-  gap: var(--dv-space-sm);
+  display: block;
   min-width: 0;
 }
 
-.document-workbench-main,
-.document-workbench-side {
+.document-workbench-main {
   display: grid;
   align-content: start;
   gap: var(--dv-space-sm);
   min-width: 0;
+  width: 100%;
 }
 
-/* Small screens: decisions first, the document below. */
-.document-workbench-side {
-  order: -1;
+.document-details-inline {
+  margin-bottom: var(--dv-space-md);
+  padding: var(--dv-density-panel-inset);
+  border: var(--dv-border-width-hairline) solid
+    color-mix(in srgb, var(--dv-color-border) 60%, transparent);
+  border-radius: var(--dv-radius-surface);
+  background: var(--dv-color-bg-raised);
 }
 
-/* The inspector is a floating tool surface, not a column: no rail, it can be closed, and the
-   document takes the full width when it is. Its actions live in the ribbon. */
-.document-inspector[hidden] {
-  display: none;
-}
-
-.document-inspector-card {
-  position: relative;
-  display: grid;
-  gap: var(--dv-space-sm);
-  min-width: 0;
-}
-
-.document-inspector-close {
-  position: absolute;
-  inset-block-start: var(--dv-space-xs);
-  inset-inline-end: var(--dv-space-xs);
-  z-index: calc(var(--dv-z-base) + 1);
-}
-
-.document-inspector-card > [role='tabpanel'] > .review-workbench,
-.document-inspector-card > .detail-tab-panel-surface {
-  padding-inline-end: var(--dv-space-xl);
-}
-
-.document-inspector-card .review-workbench {
-  padding: 0;
-  border: 0;
-  background: transparent;
-}
-
-@media (min-width: 1200px) {
-  .document-workbench {
-    position: relative;
-    display: block;
-  }
-
-  .document-workbench[data-inspector]:not([data-inspector='closed']) .document-workbench-main {
-    padding-inline-end: calc(var(--dv-layout-inspector-width) + var(--dv-space-md));
-  }
-
-  .document-workbench-side.document-inspector {
-    position: absolute;
-    inset-block: 0;
-    inset-inline-end: 0;
-    inline-size: var(--dv-layout-inspector-width);
-    pointer-events: none;
-  }
-
-  .document-inspector-card {
-    position: sticky;
-    top: var(--dv-space-sm);
-    max-block-size: calc(100dvh - var(--dv-layout-topbar-height) - 7rem);
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    padding: var(--dv-space-md);
-    border: var(--dv-border-width-hairline) solid
-      color-mix(in srgb, var(--dv-color-border) 55%, transparent);
-    border-radius: var(--dv-radius-surface);
-    background: color-mix(in srgb, var(--dv-color-bg-raised) 90%, transparent);
-    backdrop-filter: blur(var(--dv-space-md)) saturate(1.1);
-    box-shadow: var(--dv-surface-highlight), var(--dv-elevation-float);
-    pointer-events: auto;
-  }
-}
-
-/* Below desktop the inspector sits above the document as a regular raised surface. */
 @media (max-width: 1199px) {
-  .document-inspector-card {
-    padding: var(--dv-density-panel-inset);
-    border: var(--dv-border-width-hairline) solid
-      color-mix(in srgb, var(--dv-color-border) 60%, transparent);
-    border-radius: var(--dv-radius-surface);
-    background: var(--dv-color-bg-raised);
-    box-shadow: var(--dv-surface-highlight), var(--dv-elevation-1);
-  }
-}
-
-/* Narrow screens: while the correction bottom sheet is open it is the decision surface, so the
-   document has to stay visible above it (smoke: overflow-check assertCorrectionsBottomSheet). */
-@media (max-width: 1199px) {
-  /* The decision list steps aside; the detail tabs stay reachable below the document. */
-  .document-detail-page[data-correction-sheet-open='1'] .document-workbench-side {
-    order: 1;
-  }
-
   .document-detail-page[data-correction-sheet-open='1'] .review-workbench,
   .document-detail-page[data-correction-sheet-open='1'] .pipeline-doc-header {
     display: none;
   }
 
-  /* The tool row lives in the shell header, above the scroller, so it cannot scroll away.
-     Hiding it while the sheet is open keeps a strip of the page visible above the sheet. */
-  .app-shell:has(.document-detail-page[data-correction-sheet-open='1']) .app-ribbon-context {
+  .app-shell:has(.document-detail-page[data-correction-sheet-open='1']) .app-ribbon-context,
+  .app-shell:has(.document-detail-page[data-correction-sheet-open='1']) .app-ribbon-gallery {
     display: none;
   }
 }
 
-/* The floating inspector owns the right edge, so the preview keeps one column. */
 @media (min-width: 1200px) {
   .document-workbench-main .detail-workspace,
   .document-workbench-main .layout-workspace {
@@ -1017,8 +933,6 @@
   }
 }
 
-/* Below 1200px the inspector is in normal flow above the page. Keep the
-   workspace one column so the Übersicht tabs stay in the document scroller. */
 @media (max-width: 1199px) {
   .document-workbench-main .layout-workspace {
     grid-template-columns: minmax(0, 1fr);

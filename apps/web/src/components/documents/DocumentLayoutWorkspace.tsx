@@ -640,8 +640,6 @@ export function DocumentLayoutWorkspace({
     setSelectionDraft,
     setSelectionTool,
     setReanchorFieldKey,
-    setSelectedFieldKey,
-    setSelectedTableId,
     setOverlayEnabled,
     markTableFromSelection,
     onReanchorEnter: () => {

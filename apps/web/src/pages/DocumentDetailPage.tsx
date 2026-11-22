@@ -15,14 +15,13 @@ import {
   semanticFieldKey,
   suggestionRejectIdentityKeys,
 } from '@docuvate/contracts';
-import { ArrowLeft, X } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { startTransition, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 
 import { DocumentDetailLoadingShell } from '../components/documents/DocumentDetailLoadingShell';
 import {
-  DOCUMENT_DETAIL_TAB_PANEL_IDS,
   DocumentDetailMetaBar,
   type InspectorPanel,
 } from '../components/documents/DocumentDetailMetaBar';
@@ -32,6 +31,7 @@ import type { LayoutSideTab } from '../components/documents/DocumentLayoutSidePa
 import { DocumentLayoutWorkspace } from '../components/documents/DocumentLayoutWorkspace';
 import { DocumentMetadataForm } from '../components/documents/DocumentMetadataForm';
 import { DocumentPreviewCard } from '../components/documents/DocumentPreviewCard';
+import { DocumentRibbonGallery } from '../components/documents/DocumentRibbonGallery';
 import { DocumentStructuringRibbon } from '../components/documents/DocumentStructuringRibbon';
 import { DuplicateCandidatesPanel } from '../components/documents/DuplicateCandidatesPanel';
 import { ExtractedFieldsPanel } from '../components/documents/ExtractedFieldsPanel';
@@ -127,11 +127,9 @@ interface DocumentMetadataBaseline {
 
 function applyStructuringChrome(
   command: StructuringCommand,
-  setLayoutSideTab: (tab: LayoutSideTab) => void,
-  openInspector: (panel: InspectorPanel) => void
+  setLayoutSideTab: (tab: LayoutSideTab) => void
 ): void {
   if (command.layoutTab) setLayoutSideTab(command.layoutTab);
-  if (command.inspector) openInspector(command.inspector);
 }
 
 /**
@@ -179,10 +177,8 @@ export function DocumentDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  // undefined = default for the document's stage (field review open when there is one).
-  const [inspectorChoice, setInspectorChoice] = useState<InspectorPanel | null | undefined>(
-    undefined
-  );
+  /** Details-only surface (metadata); Felder/Labels live in the ribbon gallery. */
+  const [detailsOpen, setDetailsOpen] = useState(false);
   const [layoutSideTab, setLayoutSideTab] = useState<LayoutSideTab>('fields');
   const [positionEditFieldKey, setPositionEditFieldKey] = useState<string | null>(null);
   const [workbenchEditFieldKey, setWorkbenchEditFieldKey] = useState<string | null>(null);
@@ -282,9 +278,10 @@ export function DocumentDetailPage() {
       return;
     }
     layoutPrimaryBootstrapped.current = true;
-    const command = structuring.select('layout');
+    const bootPrimary = arrivedForReview ? 'fields' : 'layout';
+    const command = structuring.select(bootPrimary);
     if (command.layoutTab) setLayoutSideTab(command.layoutTab);
-  }, [doc, isPdf, structuring]);
+  }, [arrivedForReview, doc, isPdf, structuring]);
   const isPlainText = mimeType === 'text/plain' || (mimeType?.startsWith('text/plain;') ?? false);
   const plainTextFallback = useDocumentDetailPlainTextFallback(
     id,
@@ -334,11 +331,16 @@ export function DocumentDetailPage() {
 
   useEffect(() => {
     const tabParam = new URLSearchParams(window.location.search).get('tab');
-    setInspectorChoice(
-      tabParam === 'details' || tabParam === 'labels' || tabParam === 'fields'
-        ? tabParam
-        : undefined
-    );
+    if (tabParam === 'details') {
+      setDetailsOpen(true);
+      return;
+    }
+    if (tabParam === 'labels' || tabParam === 'fields') {
+      const command = structuring.select(tabParam);
+      if (command.layoutTab) setLayoutSideTab(command.layoutTab);
+    }
+    // Boot from ?tab= once per document id; structuring.select is stable enough for that.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional one-shot per id
   }, [id]);
 
   useEffect(() => {
@@ -794,42 +796,35 @@ export function DocumentDetailPage() {
   const layoutWorkspace = isPdf && doc.extraction?.layoutIrAvailable === true;
   const stageState = documentStageState(doc);
   const reviewable = stageState === 'review' || stageState === 'structured';
-  const inspectorPanels: readonly InspectorPanel[] = reviewable
-    ? ['fields', 'details', 'labels']
-    : ['details', 'labels'];
-  const inspector: InspectorPanel | null =
-    inspectorChoice === undefined
-      ? reviewable
-        ? 'fields'
-        : null
-      : inspectorChoice === 'fields' && !reviewable
-        ? null
-        : inspectorChoice;
-  const openInspector = (panel: InspectorPanel) => {
-    setInspectorChoice(panel);
-    window.requestAnimationFrame(() => {
-      // Re-clicking Felder while Strukturieren is already open must still focus the workbench.
-      if (panel === 'fields') {
+  const applyStructuringSelect = (primary: StructuringPrimary) => {
+    if (primary !== 'fields' && primary !== 'labels') {
+      setDetailsOpen(false);
+    }
+    applyStructuringChrome(structuring.select(primary), setLayoutSideTab);
+  };
+  const applyStructuringAspect = (aspect: StructuringAspect) => {
+    applyStructuringSelect(primaryForAspect(aspect));
+  };
+  const openPanel = (panel: InspectorPanel) => {
+    if (panel === 'details') {
+      setDetailsOpen(true);
+      return;
+    }
+    applyStructuringSelect(panel === 'labels' ? 'labels' : 'fields');
+    if (panel === 'fields') {
+      window.requestAnimationFrame(() => {
         document
           .querySelector('.review-workbench')
           ?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-        return;
-      }
-      document
-        .getElementById(DOCUMENT_DETAIL_TAB_PANEL_IDS[panel])
-        ?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-    });
+      });
+    }
   };
-  const applyStructuringSelect = (primary: StructuringPrimary) => {
-    applyStructuringChrome(structuring.select(primary), setLayoutSideTab, openInspector);
-  };
-  const applyStructuringAspect = (aspect: StructuringAspect) => {
-    applyStructuringChrome(
-      structuring.select(primaryForAspect(aspect)),
-      setLayoutSideTab,
-      openInspector
-    );
-  };
+  const galleryKind =
+    structuring.primary === 'fields'
+      ? 'fields'
+      : structuring.primary === 'labels'
+        ? 'labels'
+        : null;
   const nextDocumentId = nextReviewDocumentId(reviewQueueItems, doc.id);
   const fieldTargets = [...new Set([...knownFieldKeys, ...recognizedFields.map((f) => f.key)])]
     .map((key) => ({ key, label: fieldLabelForKey(key) }))
@@ -874,7 +869,7 @@ export function DocumentDetailPage() {
           rejects={suggestionRejects}
           requeueBusy={requeueBusy}
           onRequeue={() => void onRequeueExtraction()}
-          onOpenPanel={openInspector}
+          onOpenPanel={openPanel}
         />
       )}
 
@@ -900,12 +895,6 @@ export function DocumentDetailPage() {
             t('pipeline.workbench.acceptedToast', { count: keys.length })
           );
         }}
-        inspectorPanels={inspectorPanels}
-        inspector={inspector}
-        onInspectorChange={setInspectorChoice}
-        onAddField={() => {
-          setCreateFieldOpen(true);
-        }}
         showAspects={layoutWorkspace || reviewable}
         ribbonIdentity={ribbonIdentity}
         onDelete={
@@ -921,12 +910,131 @@ export function DocumentDetailPage() {
         onShowTechnicalDetailsChange={ribbonIdentity ? setShowTechnicalDetails : undefined}
       />
 
-      <div
-        className="document-workbench"
-        data-stage-state={stageState}
-        data-inspector={inspector ?? 'closed'}
-      >
+      <DocumentRibbonGallery kind={galleryKind}>
+        {galleryKind === 'fields' && reviewable ? (
+          <DocumentReviewWorkbench
+            doc={doc}
+            fields={recognizedFields}
+            suggestions={heuristicSuggestions}
+            fieldLabelForKey={fieldLabelForKey}
+            fieldTargets={fieldTargets}
+            saving={saving}
+            nextDocumentId={nextDocumentId}
+            autoFocusFirst={arrivedForReview}
+            onConfirm={(key) => {
+              const field = fields.find((row) => row.key === key);
+              if (field) confirmField(field);
+            }}
+            onConfirmMany={(keys) => {
+              saveFieldsWithUndo(
+                confirmFieldKeys(fields, new Set(keys)),
+                t('pipeline.workbench.acceptedToast', { count: keys.length })
+              );
+            }}
+            onSaveValue={(key, value) => {
+              releaseMatchingSuggestionRejects(key, value);
+              saveFieldsWithUndo(
+                withSavedFieldValue(fields, key, value),
+                t('pipeline.workbench.correctedToast')
+              );
+            }}
+            onAcceptSuggestion={acceptSuggestionAndSave}
+            onRejectSuggestion={rejectSuggestionAndSave}
+            rejects={suggestionRejects}
+            onUndoReject={undoRejectSuggestion}
+            onReassign={(fromKey, toKey) => {
+              const source = fields.find((field) => field.key === fromKey);
+              if (source) {
+                releaseMatchingSuggestionRejects(toKey, source.value);
+              }
+              saveFieldsWithUndo(
+                reassignFieldValue(fields, fromKey, toKey),
+                t('pipeline.workbench.reassignedToast', { field: fieldLabelForKey(toKey) })
+              );
+            }}
+            onLocate={locateValue}
+            onCorrectPosition={(fieldKey) => {
+              setPositionEditFieldKey(fieldKey);
+              applyStructuringSelect('layout');
+            }}
+            onLabelsUpdated={refreshDocumentLabels}
+            activeAspect={structuring.activeAspect}
+            onOpenAspect={applyStructuringAspect}
+            requestEditFieldKey={workbenchEditFieldKey}
+            onRequestEditFieldHandled={() => {
+              setWorkbenchEditFieldKey(null);
+            }}
+          />
+        ) : null}
+        {galleryKind === 'labels' ? (
+          <div className="document-ribbon-gallery-labels">
+            <LabelPanel document={doc} onUpdated={setDoc} />
+            <LabelPlacementHints document={doc} />
+          </div>
+        ) : null}
+      </DocumentRibbonGallery>
+
+      <div className="document-workbench" data-stage-state={stageState} data-inspector="closed">
         <div className="document-workbench-main">
+          {detailsOpen ? (
+            <div className="document-details-inline detail-tab-panel-surface">
+              <DocumentMetadataForm
+                doc={doc}
+                title={title}
+                documentDate={documentDate}
+                documentDateAutoFilled={documentDateAuto}
+                notes={notes}
+                folderId={folderId}
+                folders={folders}
+                saving={saving}
+                onTitleChange={setTitle}
+                onDocumentDateChange={(value) => {
+                  setDocumentDate(value);
+                  setDocumentDateAuto(false);
+                }}
+                onClearAutoDocumentDate={() => {
+                  setDocumentDate('');
+                  setDocumentDateAuto(false);
+                }}
+                onNotesChange={setNotes}
+                onFolderIdChange={setFolderId}
+              />
+              <ExtractedFieldsPanel
+                fields={recognizedFields}
+                heuristicSuggestions={heuristicSuggestions}
+                onAcceptSuggestion={onAcceptFieldSuggestion}
+                tags={tags}
+                customFieldDefs={buildCustomFieldDefMap(tags)}
+                globalFieldLabels={globalFieldLabels}
+                saving={saving}
+                fieldsDirty={fieldsDirty}
+                baselineFields={baselineFields}
+                fieldFeedback={fieldFeedback}
+                replacedBySheet={correctionSheetOpen}
+                onFieldsChange={(next) => {
+                  setFieldFeedback(null);
+                  setFields(next);
+                }}
+                onDiscardField={(key) => {
+                  const baseline = baselineFields.find((row) => row.key === key);
+                  if (!baseline) {
+                    return;
+                  }
+                  setFields((prev) =>
+                    prev.map((row) => (row.key === key ? { ...row, value: baseline.value } : row))
+                  );
+                  notifySaved(t('documents.fieldDiscardedToast'));
+                }}
+                onConfirmField={confirmField}
+                onRequestCorrectField={(field) => {
+                  applyStructuringSelect('fields');
+                  setWorkbenchEditFieldKey(field.key);
+                }}
+                onSave={() => void persist({ extractionFields: fields })}
+              />
+              <DuplicateCandidatesPanel documentId={doc.id} />
+            </div>
+          ) : null}
           {layoutWorkspace ? (
             <DocumentLayoutWorkspace
               showTechnicalDetails={showTechnicalDetails}
@@ -1023,163 +1131,6 @@ export function DocumentDetailPage() {
             </div>
           )}
         </div>
-        <aside
-          className="document-workbench-side document-inspector"
-          aria-label={t('pipeline.workbench.sideAria')}
-          hidden={inspector === null}
-        >
-          <div className="document-inspector-card">
-            <button
-              type="button"
-              className="document-inspector-close btn btn-ghost btn-sm"
-              aria-label={t('documents.inspectorClose')}
-              onClick={() => {
-                setInspectorChoice(null);
-              }}
-            >
-              <X size={16} strokeWidth={2} aria-hidden />
-            </button>
-            {reviewable ? (
-              <div
-                id={DOCUMENT_DETAIL_TAB_PANEL_IDS.fields}
-                role="tabpanel"
-                aria-labelledby="document-detail-tab-fields"
-                hidden={inspector !== 'fields'}
-              >
-                <DocumentReviewWorkbench
-                  doc={doc}
-                  fields={recognizedFields}
-                  suggestions={heuristicSuggestions}
-                  fieldLabelForKey={fieldLabelForKey}
-                  fieldTargets={fieldTargets}
-                  saving={saving}
-                  nextDocumentId={nextDocumentId}
-                  autoFocusFirst={arrivedForReview}
-                  onConfirm={(key) => {
-                    const field = fields.find((row) => row.key === key);
-                    if (field) confirmField(field);
-                  }}
-                  onConfirmMany={(keys) => {
-                    saveFieldsWithUndo(
-                      confirmFieldKeys(fields, new Set(keys)),
-                      t('pipeline.workbench.acceptedToast', { count: keys.length })
-                    );
-                  }}
-                  onSaveValue={(key, value) => {
-                    releaseMatchingSuggestionRejects(key, value);
-                    saveFieldsWithUndo(
-                      withSavedFieldValue(fields, key, value),
-                      t('pipeline.workbench.correctedToast')
-                    );
-                  }}
-                  onAcceptSuggestion={acceptSuggestionAndSave}
-                  onRejectSuggestion={rejectSuggestionAndSave}
-                  rejects={suggestionRejects}
-                  onUndoReject={undoRejectSuggestion}
-                  onReassign={(fromKey, toKey) => {
-                    const source = fields.find((field) => field.key === fromKey);
-                    if (source) {
-                      releaseMatchingSuggestionRejects(toKey, source.value);
-                    }
-                    saveFieldsWithUndo(
-                      reassignFieldValue(fields, fromKey, toKey),
-                      t('pipeline.workbench.reassignedToast', { field: fieldLabelForKey(toKey) })
-                    );
-                  }}
-                  onLocate={locateValue}
-                  onCorrectPosition={(fieldKey) => {
-                    setPositionEditFieldKey(fieldKey);
-                    applyStructuringSelect('layout');
-                    setInspectorChoice('fields');
-                  }}
-                  onLabelsUpdated={refreshDocumentLabels}
-                  activeAspect={structuring.activeAspect}
-                  onOpenAspect={applyStructuringAspect}
-                  requestEditFieldKey={workbenchEditFieldKey}
-                  onRequestEditFieldHandled={() => {
-                    setWorkbenchEditFieldKey(null);
-                  }}
-                />
-              </div>
-            ) : null}
-            {inspector === 'details' ? (
-              <div
-                id={DOCUMENT_DETAIL_TAB_PANEL_IDS.details}
-                className="detail-tab-panel-surface"
-                role="tabpanel"
-                aria-labelledby="document-detail-tab-details"
-              >
-                <DocumentMetadataForm
-                  doc={doc}
-                  title={title}
-                  documentDate={documentDate}
-                  documentDateAutoFilled={documentDateAuto}
-                  notes={notes}
-                  folderId={folderId}
-                  folders={folders}
-                  saving={saving}
-                  onTitleChange={setTitle}
-                  onDocumentDateChange={(value) => {
-                    setDocumentDate(value);
-                    setDocumentDateAuto(false);
-                  }}
-                  onClearAutoDocumentDate={() => {
-                    setDocumentDate('');
-                    setDocumentDateAuto(false);
-                  }}
-                  onNotesChange={setNotes}
-                  onFolderIdChange={setFolderId}
-                />
-                <ExtractedFieldsPanel
-                  fields={recognizedFields}
-                  heuristicSuggestions={heuristicSuggestions}
-                  onAcceptSuggestion={onAcceptFieldSuggestion}
-                  tags={tags}
-                  customFieldDefs={buildCustomFieldDefMap(tags)}
-                  globalFieldLabels={globalFieldLabels}
-                  saving={saving}
-                  fieldsDirty={fieldsDirty}
-                  baselineFields={baselineFields}
-                  fieldFeedback={fieldFeedback}
-                  replacedBySheet={correctionSheetOpen}
-                  onFieldsChange={(next) => {
-                    setFieldFeedback(null);
-                    setFields(next);
-                  }}
-                  onDiscardField={(key) => {
-                    const baseline = baselineFields.find((row) => row.key === key);
-                    if (!baseline) {
-                      return;
-                    }
-                    setFields((prev) =>
-                      prev.map((row) => (row.key === key ? { ...row, value: baseline.value } : row))
-                    );
-                    notifySaved(t('documents.fieldDiscardedToast'));
-                  }}
-                  onConfirmField={confirmField}
-                  onRequestCorrectField={(field) => {
-                    applyStructuringSelect('fields');
-                    setWorkbenchEditFieldKey(field.key);
-                  }}
-                  onSave={() => void persist({ extractionFields: fields })}
-                />
-                <DuplicateCandidatesPanel documentId={doc.id} />
-              </div>
-            ) : null}
-
-            {inspector === 'labels' ? (
-              <div
-                id={DOCUMENT_DETAIL_TAB_PANEL_IDS.labels}
-                className="detail-tab-panel-surface"
-                role="tabpanel"
-                aria-labelledby="document-detail-tab-labels"
-              >
-                <LabelPanel document={doc} onUpdated={setDoc} />
-                <LabelPlacementHints document={doc} />
-              </div>
-            ) : null}
-          </div>
-        </aside>
       </div>
 
       <ConfirmDialog
@@ -1215,7 +1166,7 @@ export function DocumentDetailPage() {
               setRecognizedCatalog(refreshed);
               setCreateFieldOpen(false);
               pushSuccess();
-              openInspector('fields');
+              openPanel('fields');
             } catch (err) {
               notifySaveError(formatUserFacingError(err, 'recognizedFields.saveFailed'));
             } finally {

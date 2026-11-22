@@ -24,15 +24,19 @@ async function openViewer(page: Page, width: number, theme: 'light' | 'dark') {
 
 test('text and layout change the document instead of scrolling', async ({ page }) => {
   const log = await openViewer(page, 1280, 'light');
-  await expect(page.getByTestId('structuring-primary-layout')).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByTestId('structuring-primary-layout')).toHaveAttribute('aria-selected', 'true');
   await expect(page.getByTestId('structuring-context')).toBeVisible();
   await expect(page.getByTestId('structuring-context')).toHaveAttribute('data-primary', 'layout');
   await expect(page.locator('.layout-text-stage')).toHaveCount(0);
 
   await page.getByTestId('structuring-primary-ocr').click();
-  await expect(page.getByTestId('structuring-primary-ocr')).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByTestId('structuring-primary-ocr')).toHaveAttribute('aria-selected', 'true');
   await expect(page.locator('.layout-text-stage')).toBeVisible();
   await expect(page.getByTestId('structuring-context')).toHaveAttribute('data-primary', 'text');
+  // Text prüfen opens reading first; Text korrigieren turns editing on.
+  await expect(page.getByTestId('structuring-edit-text')).toHaveAttribute('aria-pressed', 'false');
+  await expect(page.locator('.extracted-text-reading-paragraph').first()).toBeVisible();
+  await page.getByTestId('structuring-edit-text').click();
   await expect(page.getByTestId('structuring-edit-text')).toHaveAttribute('aria-pressed', 'true');
   await expect(page.locator('.extracted-text-segment').first()).toBeVisible();
   await expect(page.locator('.extracted-text-reading-paragraph')).toHaveCount(0);
@@ -41,8 +45,8 @@ test('text and layout change the document instead of scrolling', async ({ page }
   await page.screenshot({ path: path.join(shots, 'ribbon-text-1280-light.png') });
 
   await page.getByTestId('structuring-primary-layout').click();
-  await expect(page.getByTestId('structuring-primary-layout')).toHaveAttribute('aria-pressed', 'true');
-  await expect(page.getByTestId('structuring-primary-ocr')).toHaveAttribute('aria-pressed', 'false');
+  await expect(page.getByTestId('structuring-primary-layout')).toHaveAttribute('aria-selected', 'true');
+  await expect(page.getByTestId('structuring-primary-ocr')).toHaveAttribute('aria-selected', 'false');
   await expect(page.locator('.layout-text-stage')).toHaveCount(0);
   await expect(page.getByTestId('structuring-context')).toHaveAttribute('data-primary', 'layout');
   await expect(page.getByTestId('document-selection-tools').getByRole('radio')).toHaveCount(3);
@@ -54,11 +58,13 @@ test('text and layout change the document instead of scrolling', async ({ page }
   await page.screenshot({ path: path.join(shots, 'ribbon-layout-1280-light.png') });
 
   await page.getByTestId('structuring-primary-fields').click();
-  await expect(page.getByTestId('structuring-primary-fields')).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByTestId('structuring-primary-fields')).toHaveAttribute('aria-selected', 'true');
+  await expect(page.getByTestId('document-ribbon-gallery')).toHaveAttribute('data-gallery', 'fields');
   await expect(page.getByTestId('structuring-context')).toHaveCount(0);
 
   await page.getByTestId('structuring-primary-labels').click();
-  await expect(page.getByTestId('structuring-primary-labels')).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByTestId('structuring-primary-labels')).toHaveAttribute('aria-selected', 'true');
+  await expect(page.getByTestId('document-ribbon-gallery')).toHaveAttribute('data-gallery', 'labels');
   await expect(page.getByTestId('structuring-context')).toHaveCount(0);
   expect(log.unmatched).toEqual([]);
 });
@@ -78,6 +84,9 @@ test('layout tools at 1280 dark and at a narrow width', async ({ page }) => {
 test('text correction edits an OCR block, saves it, and shows it after reload', async ({ page }) => {
   await openViewer(page, 1280, 'light');
   await page.getByTestId('structuring-primary-ocr').click();
+  await expect(page.locator('.extracted-text-reading-paragraph').first()).toBeVisible();
+  await page.getByTestId('structuring-edit-text').click();
+  await expect(page.getByTestId('structuring-edit-text')).toHaveAttribute('aria-pressed', 'true');
   await expect(page.locator('.extracted-text-reading-paragraph')).toHaveCount(0);
   const segment = page.locator('.extracted-text-segment', { hasText: 'NORTH 1842' });
   await expect(segment).toBeVisible();
@@ -260,7 +269,9 @@ test('a selected parent flows into the next band', async ({ page }) => {
 
   await page.getByTestId('structuring-primary-labels').click();
   await expect(page.getByTestId('structuring-context')).toHaveCount(0);
-  expect(await bottomRadius(page.getByTestId('structuring-primary-labels'))).not.toBe('0px');
+  await expect(page.getByTestId('document-ribbon-gallery')).toHaveAttribute('data-gallery', 'labels');
+  // Active Fluent tab sits flush on the gallery / panel edge.
+  expect(await bottomRadius(page.getByTestId('structuring-primary-labels'))).toBe('0px');
 
   await page.emulateMedia({ colorScheme: 'dark', reducedMotion: 'reduce' });
   await openViewer(page, 1280, 'dark');

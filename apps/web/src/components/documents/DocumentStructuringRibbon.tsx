@@ -19,9 +19,8 @@ import { type StructuringAspect, structuringAspects } from '../../lib/structurin
 import { AppRibbon, RibbonGroup } from '../layout/AppRibbon';
 import { StagePill } from '../pipeline';
 import { Button } from '../ui/Button';
-import { DocumentDetailPanelMenu, type InspectorPanel } from './DocumentDetailMetaBar';
 import { DocumentDetailOverflowMenu } from './DocumentDetailOverflowMenu';
-import { StructuringAspectStrip } from './StructuringAspectStrip';
+import { DocumentRibbonTabs } from './DocumentRibbonTabs';
 
 function reviewDocumentHref(documentId: string): string {
   return `${routes.documents}/${documentId}?review=1`;
@@ -38,11 +37,7 @@ interface DocumentStructuringRibbonProps {
   activeAspect: StructuringAspect | null;
   onOpenAspect: (aspect: StructuringAspect) => void;
   onConfirmMany: (keys: string[]) => void;
-  inspectorPanels: readonly InspectorPanel[];
-  inspector: InspectorPanel | null;
-  onInspectorChange: (tab: InspectorPanel | null) => void;
-  onAddField: () => void;
-  /** Show aspect strip (layout workspace and/or reviewable). */
+  /** Show structuring tabs (layout workspace and/or reviewable). */
   showAspects: boolean;
   /** Document identity (back link, stage, title, overflow) in the primary ribbon row. */
   ribbonIdentity?: boolean;
@@ -54,8 +49,8 @@ interface DocumentStructuringRibbonProps {
 }
 
 /**
- * Document-owned primary ribbon: aspects left, review + panel right.
- * Context row (text/layout/table tools) is portaled separately into the shell slot.
+ * Document-owned primary ribbon: identity, Fluent tabs, review actions.
+ * Context tools and Felder/Labels galleries portal into shell slots separately.
  */
 export function DocumentStructuringRibbon({
   doc,
@@ -68,10 +63,6 @@ export function DocumentStructuringRibbon({
   activeAspect,
   onOpenAspect,
   onConfirmMany,
-  inspectorPanels,
-  inspector,
-  onInspectorChange,
-  onAddField,
   showAspects,
   ribbonIdentity = false,
   onDelete,
@@ -139,9 +130,8 @@ export function DocumentStructuringRibbon({
       ) : null}
       {showAspects ? (
         <RibbonGroup label={t('ribbon.structure')} kind="navigate" order={1} showCaption={false}>
-          <StructuringAspectStrip
+          <DocumentRibbonTabs
             statuses={aspects}
-            className="review-workbench-aspects"
             active={activeAspect}
             onOpen={(aspect) => {
               onOpenAspect(aspect);
@@ -190,17 +180,6 @@ export function DocumentStructuringRibbon({
           </div>
         </RibbonGroup>
       ) : null}
-      {showAspects ? null : (
-        <RibbonGroup label={t('ribbon.structureActions')} kind="act" align="end" order={3}>
-          <DocumentDetailPanelMenu
-            panels={inspectorPanels}
-            activeTab={inspector}
-            labelCount={doc.tags.length}
-            onTabChange={onInspectorChange}
-            onAddField={onAddField}
-          />
-        </RibbonGroup>
-      )}
     </AppRibbon>
   );
 }

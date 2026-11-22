@@ -26,7 +26,10 @@ test.describe('review queue, field bbox and table overlay', () => {
   test('correcting a value can open field bounding-box handles', async ({ page }) => {
     await installStructuringMocks(page);
     await page.goto(`/documents/${LAYOUT_DOCUMENT_ID}?review=1`);
-    await page.getByRole('button', { name: /Betrag korrigieren|Correct amount|total_amount/i }).click();
+    await page
+      .locator('.review-workbench')
+      .getByRole('button', { name: /Betrag korrigieren|Correct amount/i })
+      .click();
     const position = page.getByTestId('field-position-correct');
     await expect(position).toBeVisible();
     await position.click();
@@ -148,7 +151,10 @@ test.describe('review queue, field bbox and table overlay', () => {
   test('field bbox save posts reanchor with MediaBox coordinates', async ({ page }) => {
     const log = await installStructuringMocks(page);
     await page.goto(`/documents/${LAYOUT_DOCUMENT_ID}?review=1`);
-    await page.getByRole('button', { name: /Betrag korrigieren|Correct amount|total_amount/i }).click();
+    await page
+      .locator('.review-workbench')
+      .getByRole('button', { name: /Betrag korrigieren|Correct amount/i })
+      .click();
     await page.getByTestId('field-position-correct').click();
     const editor = page.getByTestId('field-bbox-editor');
     await expect(editor).toBeVisible({ timeout: 15_000 });
@@ -193,7 +199,10 @@ test.describe('review queue, field bbox and table overlay', () => {
       'data-rotation-deg',
       '90'
     );
-    await page.getByRole('button', { name: /Betrag korrigieren|Correct amount|total_amount/i }).click();
+    await page
+      .locator('.review-workbench')
+      .getByRole('button', { name: /Betrag korrigieren|Correct amount/i })
+      .click();
     await page.getByTestId('field-position-correct').click();
     await expect(page.getByTestId('field-bbox-editor')).toBeVisible({ timeout: 15_000 });
     await page.screenshot({
