@@ -131,6 +131,13 @@ async function setLabelsTabOpen(page: Page, open: boolean): Promise<void> {
       return;
     }
 
+    // Ribbon tabs are exclusive — leave Labels by selecting Layout, not by clicking Labels again.
+    if (!open) {
+      await showLayoutSelectionTools(page);
+      await assertLabelsTabState(page, false);
+      return;
+    }
+
     const ribbonLabels = page.getByTestId('structuring-primary-labels');
     const aspect =
       (await ribbonLabels.count()) > 0
