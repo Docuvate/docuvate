@@ -224,9 +224,9 @@ async function renderPdfPage(
   wrap.appendChild(canvas);
   bindPageClick(wrap, pageNum, onPageClick);
 
-  let cancelled = false;
+  const cancelled = { current: false };
   const cancel = () => {
-    cancelled = true;
+    cancelled.current = true;
     try {
       renderTask.cancel();
     } catch {
@@ -235,12 +235,12 @@ async function renderPdfPage(
   };
 
   const enhance = async () => {
-    if (cancelled) return;
+    if (cancelled.current) return;
     const textLayer = document.createElement('div');
     textLayer.className = 'textLayer';
     wrap.appendChild(textLayer);
     const textContent = await page.getTextContent();
-    if (cancelled) return;
+    if (cancelled.current) return;
     appendTextLayer(textContent, viewport, textLayer);
 
     const pageHighlights = highlightBlocks.filter((b) => b.page === pageNum);
@@ -385,8 +385,8 @@ export function PdfViewer({
       const clamped = Math.min(Math.max(1, next), Math.max(1, pageCount));
       // Keep chrome responsive while the page tree and canvas catch up.
       startTransition(() => {
-        if (isControlled) {
-          onPageChange?.(clamped);
+        if (isControlled && onPageChange) {
+          onPageChange(clamped);
         } else {
           setInternalPage(clamped);
         }
@@ -676,7 +676,7 @@ export function PdfViewer({
           delete slot.dataset.renderStamp;
         }
 
-        const cancels: Array<() => void> = [];
+        const cancels: (() => void)[] = [];
         await Promise.all(
           [...virtualRenderWindow].map(async (pageNum) => {
             const slot = pagesHost.querySelector<HTMLElement>(
